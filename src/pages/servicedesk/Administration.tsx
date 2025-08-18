@@ -10,14 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { ReusableDropdown } from '@/components/ui/reusable-dropdown';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { ReusableTable } from '@/components/ui/reusable-table';
 import { 
   Users, 
   Settings, 
@@ -120,36 +113,39 @@ const Administration = () => {
                   </div>
                 </div>
                 
-                <div className="border border-gray-200 rounded-lg overflow-hidden bg-white">
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="bg-gray-50/50 hover:bg-gray-50/50">
-                        <TableHead className="font-medium text-gray-900 py-3 text-sm">USERNAME</TableHead>
-                        <TableHead className="font-medium text-gray-900 py-3 text-sm">EMAIL</TableHead>
-                        <TableHead className="font-medium text-gray-900 py-3 text-sm">ROLE</TableHead>
-                        <TableHead className="font-medium text-gray-900 py-3 text-sm">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredUsers.map((user) => (
-                        <TableRow key={user.id} className="hover:bg-gray-50/50 transition-colors border-gray-100">
-                          <TableCell className="py-3 text-sm font-medium">{user.username}</TableCell>
-                          <TableCell className="py-3 text-sm">{user.email}</TableCell>
-                          <TableCell className="py-3 text-sm">{user.role}</TableCell>
-                          <TableCell className="py-3">
-                            <Button 
-                              size="sm" 
-                              className="bg-blue-500 hover:bg-blue-600 text-white h-7 px-2 text-xs"
-                            >
-                              <Edit className="h-3 w-3 mr-0.5" />
-                              Edit
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
+                <ReusableTable
+                  data={filteredUsers}
+                  columns={[
+                    {
+                      accessorKey: 'username',
+                      header: 'USERNAME',
+                      cell: ({ getValue }: any) => (
+                        <span className="font-medium">{getValue()}</span>
+                      )
+                    },
+                    {
+                      accessorKey: 'email',
+                      header: 'EMAIL'
+                    },
+                    {
+                      accessorKey: 'role',
+                      header: 'ROLE'
+                    },
+                    {
+                      id: 'actions',
+                      header: 'Actions',
+                      cell: () => (
+                        <Button 
+                          size="sm" 
+                          className="bg-blue-500 hover:bg-blue-600 text-white h-7 px-2 text-xs"
+                        >
+                          <Edit className="h-3 w-3 mr-0.5" />
+                          Edit
+                        </Button>
+                      )
+                    }
+                  ] as any}
+                />
               </CardContent>
             </Card>
           </TabsContent>
@@ -172,42 +168,48 @@ const Administration = () => {
                 </div>
               </CardHeader>
               <CardContent className="pt-0">
-                <div className="border border-gray-200 rounded-lg overflow-hidden bg-white">
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="bg-gray-50/50 hover:bg-gray-50/50">
-                        <TableHead className="font-medium text-gray-900 py-3 text-sm">Role Name</TableHead>
-                        <TableHead className="font-medium text-gray-900 py-3 text-sm">Permissions</TableHead>
-                        <TableHead className="font-medium text-gray-900 py-3 text-sm">Users Assigned</TableHead>
-                        <TableHead className="font-medium text-gray-900 py-3 text-sm">Status</TableHead>
-                        <TableHead className="font-medium text-gray-900 py-3 text-sm">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {mockRoles.map((role) => (
-                        <TableRow key={role.id} className="hover:bg-gray-50/50 transition-colors border-gray-100">
-                          <TableCell className="py-3 text-sm font-medium">{role.name}</TableCell>
-                          <TableCell className="py-3 text-sm">{role.permissions}</TableCell>
-                          <TableCell className="py-3 text-sm">{role.users}</TableCell>
-                          <TableCell className="py-3">
-                            <Badge className="bg-green-100 text-green-800 border-green-300 text-xs px-2 py-0.5">
-                              {role.status}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="py-3">
-                            <Button 
-                              size="sm" 
-                              className="bg-blue-500 hover:bg-blue-600 text-white h-7 px-2 text-xs"
-                            >
-                              <Edit className="h-3 w-3 mr-0.5" />
-                              Edit
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
+                <ReusableTable
+                  data={mockRoles}
+                  columns={[
+                    {
+                      accessorKey: 'name',
+                      header: 'Role Name',
+                      cell: ({ getValue }: any) => (
+                        <span className="font-medium">{getValue()}</span>
+                      )
+                    },
+                    {
+                      accessorKey: 'permissions',
+                      header: 'Permissions'
+                    },
+                    {
+                      accessorKey: 'users',
+                      header: 'Users Assigned'
+                    },
+                    {
+                      accessorKey: 'status',
+                      header: 'Status',
+                      cell: ({ getValue }: any) => (
+                        <Badge className="bg-green-100 text-green-800 border-green-300 text-xs px-2 py-0.5">
+                          {getValue()}
+                        </Badge>
+                      )
+                    },
+                    {
+                      id: 'actions',
+                      header: 'Actions',
+                      cell: () => (
+                        <Button 
+                          size="sm" 
+                          className="bg-blue-500 hover:bg-blue-600 text-white h-7 px-2 text-xs"
+                        >
+                          <Edit className="h-3 w-3 mr-0.5" />
+                          Edit
+                        </Button>
+                      )
+                    }
+                  ] as any}
+                />
               </CardContent>
             </Card>
           </TabsContent>
@@ -233,7 +235,7 @@ const Administration = () => {
                   <Label className="text-sm font-medium">Default Language</Label>
                   <ReusableDropdown
                     placeholder="English"
-                    size="sm"
+                    size="small"
                     options={[
                       { value: 'en', label: 'English' },
                       { value: 'fr', label: 'French' },
@@ -245,8 +247,8 @@ const Administration = () => {
                   <Label className="text-sm font-medium">Time Zone</Label>
                   <ReusableDropdown
                     placeholder="Select Time Zone"
-                    size="sm"
-                    search
+                    size="small"
+                    showSearch
                     options={[
                       { value: 'UTC', label: 'UTC' },
                       { value: 'America/Los_Angeles', label: 'America/Los_Angeles' },

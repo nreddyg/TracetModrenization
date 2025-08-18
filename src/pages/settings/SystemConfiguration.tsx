@@ -147,7 +147,7 @@ const SystemConfiguration = () => {
                   <Label htmlFor="encryption">Encryption</Label>
                   <ReusableDropdown
                     value={smtpSettings.encryption}
-                    onChange={(value) => setSmtpSettings({...smtpSettings, encryption: value})}
+                    onChange={(value) => setSmtpSettings({...smtpSettings, encryption: value as string})}
                     options={[
                       { value: 'none', label: 'None' },
                       { value: 'tls', label: 'TLS' },

@@ -57,7 +57,6 @@ const Timesheet = () => {
   };
 
   const handleConfirmSubmission = () => {
-    console.log('Timesheet submitted');
     setShowConfirmation(false);
     // Add actual submission logic here
   };

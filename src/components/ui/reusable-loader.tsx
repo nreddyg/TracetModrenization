@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { RootState } from '@/store';
+import { RootState, useAppSelector } from '@/store/reduxStore';
 import { cn } from '@/lib/utils';
 
 export interface ReusableLoaderProps {
@@ -24,7 +24,7 @@ export interface ReusableLoaderProps {
   strokeWidth?: number;
   strokeColor?: string;
   trailColor?: string;
-  type?: 'default' | 'dots' | 'pulse' | 'bars' | 'progress';
+  type?: 'default' | 'dots' | 'pulse' | 'bars' | 'progress' | 'spin';
   direction?: 'horizontal' | 'vertical';
 }
 
@@ -40,7 +40,7 @@ export const ReusableLoader: React.FC<ReusableLoaderProps> = ({
   indicator,
   wrapperClassName,
   theme = 'auto',
-  overlay = true,
+  overlay = false,
   overlayClassName,
   overlayStyle,
   percent,
@@ -48,10 +48,10 @@ export const ReusableLoader: React.FC<ReusableLoaderProps> = ({
   strokeWidth,
   strokeColor = 'hsl(var(--primary))',
   trailColor = 'hsl(var(--muted))',
-  type = 'default',
+  type = 'spin',
   direction = 'vertical'
 }) => {
-  const globalLoading = useSelector((state: RootState) => state.ui.loading);
+  const globalLoading = useAppSelector((state: RootState) => state.projects.loading);
   const [delayedSpinning, setDelayedSpinning] = React.useState(false);
 
   const spinning = propSpinning !== undefined ? propSpinning : globalLoading;
@@ -239,6 +239,78 @@ export const ReusableLoader: React.FC<ReusableLoaderProps> = ({
     );
   };
 
+  const Spinner = () => {
+  return (
+    <>
+      <style>{`
+        @keyframes pulse0112 {
+          0%, 100% {
+            transform: scale(0);
+            opacity: 0.5;
+          }
+          50% {
+            transform: scale(1);
+            opacity: 1;
+          }
+        }
+        .animate-pulse0112 {
+          animation: pulse0112 1s ease-in-out infinite;
+        }
+      `}</style>
+      
+      <div className="relative flex items-center justify-start h-11 w-11">
+        {/* Dot 1 - 0deg */}
+        <div className="absolute top-0 left-0 flex items-center justify-start h-full w-full">
+          <div className="h-[20%] w-[20%] rounded-full bg-[#183153] transform scale-0 opacity-50 animate-pulse0112 shadow-[0_0_20px_rgba(18,31,53,0.3)]" 
+               style={{ animationDelay: '0s' }} />
+        </div>
+        
+        {/* Dot 2 - 45deg */}
+        <div className="absolute top-0 left-0 flex items-center justify-start h-full w-full rotate-45">
+          <div className="h-[20%] w-[20%] rounded-full bg-[#183153] transform scale-0 opacity-50 animate-pulse0112 shadow-[0_0_20px_rgba(18,31,53,0.3)]" 
+               style={{ animationDelay: '-0.7875s' }} />
+        </div>
+        
+        {/* Dot 3 - 90deg */}
+        <div className="absolute top-0 left-0 flex items-center justify-start h-full w-full rotate-90">
+          <div className="h-[20%] w-[20%] rounded-full bg-[#183153] transform scale-0 opacity-50 animate-pulse0112 shadow-[0_0_20px_rgba(18,31,53,0.3)]" 
+               style={{ animationDelay: '-0.675s' }} />
+        </div>
+        
+        {/* Dot 4 - 135deg */}
+        <div className="absolute top-0 left-0 flex items-center justify-start h-full w-full rotate-[135deg]">
+          <div className="h-[20%] w-[20%] rounded-full bg-[#183153] transform scale-0 opacity-50 animate-pulse0112 shadow-[0_0_20px_rgba(18,31,53,0.3)]" 
+               style={{ animationDelay: '-0.5625s' }} />
+        </div>
+        
+        {/* Dot 5 - 180deg */}
+        <div className="absolute top-0 left-0 flex items-center justify-start h-full w-full rotate-180">
+          <div className="h-[20%] w-[20%] rounded-full bg-[#183153] transform scale-0 opacity-50 animate-pulse0112 shadow-[0_0_20px_rgba(18,31,53,0.3)]" 
+               style={{ animationDelay: '-0.45s' }} />
+        </div>
+        
+        {/* Dot 6 - 225deg */}
+        <div className="absolute top-0 left-0 flex items-center justify-start h-full w-full rotate-[225deg]">
+          <div className="h-[20%] w-[20%] rounded-full bg-[#183153] transform scale-0 opacity-50 animate-pulse0112 shadow-[0_0_20px_rgba(18,31,53,0.3)]" 
+               style={{ animationDelay: '-0.3375s' }} />
+        </div>
+        
+        {/* Dot 7 - 270deg */}
+        <div className="absolute top-0 left-0 flex items-center justify-start h-full w-full rotate-[270deg]">
+          <div className="h-[20%] w-[20%] rounded-full bg-[#183153] transform scale-0 opacity-50 animate-pulse0112 shadow-[0_0_20px_rgba(18,31,53,0.3)]" 
+               style={{ animationDelay: '-0.225s' }} />
+        </div>
+        
+        {/* Dot 8 - 315deg */}
+        <div className="absolute top-0 left-0 flex items-center justify-start h-full w-full rotate-[315deg]">
+          <div className="h-[20%] w-[20%] rounded-full bg-[#183153] transform scale-0 opacity-50 animate-pulse0112 shadow-[0_0_20px_rgba(18,31,53,0.3)]" 
+               style={{ animationDelay: '-0.1125s' }} />
+        </div>
+      </div>
+    </>
+  );
+  };
+
   const renderSpinner = () => {
     if (indicator) return indicator;
     
@@ -247,6 +319,7 @@ export const ReusableLoader: React.FC<ReusableLoaderProps> = ({
       case 'pulse': return <PulseSpinner />;
       case 'bars': return <BarsSpinner />;
       case 'progress': return <ProgressSpinner />;
+      case 'spin':return <Spinner/>
       default: return <DefaultSpinner />;
     }
   };

@@ -1,4 +1,3 @@
-
 import React, { forwardRef, useEffect, useState, useImperativeHandle, useRef } from 'react';
 import { Checkbox } from './checkbox';
 import { Label } from './label';
@@ -29,6 +28,7 @@ export interface CheckboxMethods {
   blur: () => void;
   focus: () => void;
   nativeElement: HTMLButtonElement | null;
+  validate: () => boolean;
 }
 
 export interface ReusableCheckboxProps {
@@ -44,6 +44,10 @@ export interface ReusableCheckboxProps {
   containerClassName?: string;
   className?: string;
   
+  // Validation Props
+  isRequired?: boolean;
+  requiredMessage?: string;
+  
   // Ant Design Compatible Props
   autoFocus?: boolean;
   defaultChecked?: boolean;
@@ -55,11 +59,14 @@ export interface ReusableCheckboxProps {
   // Styling Options
   size?: 'small' | 'default' | 'large';
   
-  // Event Handlers (Ant Design Compatible)
-  onChange?: (e: CheckboxChangeEvent) => void;
+  // Event Handlers (Ant Design Compatible + React Hook Form Compatible)
+  onChange?: ((e: CheckboxChangeEvent) => void) | ((value: boolean | (string | number)[]) => void);
   onBlur?: (e: React.FocusEvent<HTMLButtonElement>) => void;
   onFocus?: (e: React.FocusEvent<HTMLButtonElement>) => void;
   onGroupChange?: (checkedValues: (string | number)[]) => void;
+  
+  // React Hook Form Integration
+  onValidationChange?: (isValid: boolean, errorMessage?: string) => void;
 }
 
 export interface CheckboxGroupProps {
@@ -70,7 +77,11 @@ export interface CheckboxGroupProps {
   name?: string;
   className?: string;
   size?: 'small' | 'default' | 'large';
+  isRequired?: boolean;
+  requiredMessage?: string;
+  error?: string;
   onChange?: (checkedValues: (string | number)[]) => void;
+  onValidationChange?: (isValid: boolean, errorMessage?: string) => void;
 }
 
 // Main ReusableCheckbox Component
@@ -87,32 +98,80 @@ export const ReusableCheckbox = forwardRef<CheckboxMethods, ReusableCheckboxProp
     containerClassName,
     className,
     autoFocus = false,
-    defaultChecked = true,
+    defaultChecked = false,
     options,
     defaultValue = [],
     size = 'default',
+    isRequired = false,
+    requiredMessage = 'This field is required',
     onChange,
     onBlur,
     onFocus,
     onGroupChange,
+    onValidationChange,
     ...props 
   }, ref) => {
     // State Management
     const [internalChecked, setInternalChecked] = useState(defaultChecked);
     const [groupValues, setGroupValues] = useState<(string | number)[]>(defaultValue);
     const [isIndeterminate, setIsIndeterminate] = useState(indeterminate);
+    const [validationError, setValidationError] = useState<string>('');
     const checkboxRef = useRef<HTMLButtonElement>(null);
+
+    // Handle react-hook-form value prop for both single checkbox and group
+    useEffect(() => {
+      if (value !== undefined) {
+        if (options) {
+          // For checkbox group, value should be an array
+          const arrayValue = Array.isArray(value) ? value as (string | number)[] : [];
+          setGroupValues(arrayValue);
+        } else {
+          // For single checkbox, value should be boolean
+          const boolValue = Boolean(value);
+          setInternalChecked(boolValue);
+        }
+      }
+    }, [value, options]);
+
+    // Controlled vs Uncontrolled Logic
+    const isControlled = checked !== undefined || value !== undefined;
+    const actualChecked = checked !== undefined ? checked : (value !== undefined ? Boolean(value) : internalChecked);
+    const actualGroupValues = value !== undefined && Array.isArray(value) ? value as (string | number)[] : groupValues;
+
+    // Validation Logic
+    const validateField = (currentValue?: boolean | (string | number)[]) => {
+      if (!isRequired) return true;
+
+      let isValid = false;
+      let errorMessage = '';
+
+      if (options) {
+        // Group validation
+        const valuesToCheck = currentValue as (string | number)[] || actualGroupValues;
+        isValid = valuesToCheck.length > 0;
+      } else {
+        // Single checkbox validation
+        const valueToCheck = currentValue !== undefined ? currentValue as boolean : actualChecked;
+        isValid = valueToCheck === true;
+      }
+
+      if (!isValid) {
+        errorMessage = requiredMessage;
+      }
+
+      setValidationError(errorMessage);
+      onValidationChange?.(isValid, errorMessage);
+      
+      return isValid;
+    };
 
     // Imperative Handle for Methods
     useImperativeHandle(ref, () => ({
       blur: () => checkboxRef.current?.blur(),
       focus: () => checkboxRef.current?.focus(),
-      nativeElement: checkboxRef.current
+      nativeElement: checkboxRef.current,
+      validate: () => validateField()
     }), []);
-
-    // Controlled vs Uncontrolled Logic
-    const isControlled = checked !== undefined;
-    const actualChecked = isControlled ? checked : internalChecked;
 
     // Effects
     useEffect(() => {
@@ -124,6 +183,20 @@ export const ReusableCheckbox = forwardRef<CheckboxMethods, ReusableCheckboxProp
     useEffect(() => {
       setIsIndeterminate(indeterminate);
     }, [indeterminate]);
+
+    // Validate on value changes
+    useEffect(() => {
+      if (isRequired) {
+        validateField();
+      }
+    }, [actualChecked, actualGroupValues, isRequired]);
+
+    // Clear validation error when external error changes
+    useEffect(() => {
+      if (error !== undefined) {
+        setValidationError('');
+      }
+    }, [error]);
 
     // Style Configuration
     const getSizeClasses = () => ({
@@ -152,32 +225,57 @@ export const ReusableCheckbox = forwardRef<CheckboxMethods, ReusableCheckboxProp
         setInternalChecked(newChecked);
       }
       
-      const changeEvent: CheckboxChangeEvent = {
-        target: {
-          checked: newChecked,
-          name,
-          value
-        },
-        nativeEvent: event || new Event('change')
-      };
+      // Validate immediately for react-hook-form integration
+      validateField(newChecked);
       
-      onChange?.(changeEvent);
+      // Handle both event-based onChange and direct value onChange (for react-hook-form)
+      if (onChange) {
+        // If the consumer expects a boolean or array, pass the value directly
+        if (typeof newChecked === "boolean" && (!options || options.length === 0)) {
+          (onChange as (value: boolean) => void)(newChecked);
+        } else {
+          // Event-based onChange (legacy/AntD style)
+          const changeEvent: CheckboxChangeEvent = {
+            target: {
+              checked: newChecked,
+              name,
+              value
+            },
+            nativeEvent: event || new Event('change')
+          };
+          (onChange as (e: CheckboxChangeEvent) => void)(changeEvent);
+        }
+      }
     };
 
     const handleGroupCheckboxChange = (optionValue: string | number, newChecked: boolean) => {
       let newGroupValues: (string | number)[];
       
       if (newChecked) {
-        newGroupValues = [...groupValues, optionValue];
+        newGroupValues = [...actualGroupValues, optionValue];
       } else {
-        newGroupValues = groupValues.filter(v => v !== optionValue);
+        newGroupValues = actualGroupValues.filter(v => v !== optionValue);
       }
       
       setGroupValues(newGroupValues);
-      onGroupChange?.(newGroupValues);
+      
+      // Validate immediately for react-hook-form integration
+      validateField(newGroupValues);
+      
+      // Handle both group change and direct onChange
+      if (onGroupChange) {
+        onGroupChange(newGroupValues);
+      } else if (onChange) {
+        if (onChange.length === 1) {
+          // Direct value onChange (react-hook-form style)
+          (onChange as any)(newGroupValues);
+        }
+      }
     };
 
     const handleBlur = (e: React.FocusEvent<HTMLButtonElement>) => {
+      // Trigger validation on blur for react-hook-form
+      validateField();
       onBlur?.(e);
     };
 
@@ -185,8 +283,12 @@ export const ReusableCheckbox = forwardRef<CheckboxMethods, ReusableCheckboxProp
       onFocus?.(e);
     };
 
+    // Determine current error message
+    const currentError = error || validationError;
+    const hasError = Boolean(currentError);
+
     // Render Methods
-    const renderLabel = (labelText?: string, htmlFor?: string, optionTitle?: string) => {
+    const renderLabel = (labelText?: string, htmlFor?: string, optionTitle?: string, showRequired = false) => {
       if (!labelText) return null;
 
       const labelElement = (
@@ -200,6 +302,9 @@ export const ReusableCheckbox = forwardRef<CheckboxMethods, ReusableCheckboxProp
           )}
         >
           {labelText}
+          {showRequired && isRequired && (
+            <span className="text-red-500 ml-1" aria-label="required">*</span>
+          )}
         </Label>
       );
 
@@ -235,13 +340,16 @@ export const ReusableCheckbox = forwardRef<CheckboxMethods, ReusableCheckboxProp
           onFocus={handleFocus}
           className={cn(
             sizeClasses.checkbox,
-            error && "border-red-500 focus-visible:ring-red-500",
+            hasError && "border-red-500 focus-visible:ring-red-500",
             className
           )}
           data-indeterminate={isIndeterminate}
+          aria-required={isRequired}
+          aria-invalid={hasError}
+          aria-describedby={hasError ? `${name}-error` : undefined}
           {...props}
         />
-        {renderLabel(label, name)}
+        {renderLabel(label, name, undefined, true)}
       </div>
     );
 
@@ -249,16 +357,22 @@ export const ReusableCheckbox = forwardRef<CheckboxMethods, ReusableCheckboxProp
       if (!options || options.length === 0) return null;
 
       return (
-        <div className="space-y-3">
+        <fieldset className="space-y-3">
           {label && (
-            <div className="mb-3">
-              {renderLabel(label)}
-            </div>
+            <legend className="mb-3">
+              {renderLabel(label, undefined, undefined, true)}
+            </legend>
           )}
-          <div className="space-y-2">
+          <div 
+            className="space-y-2" 
+            role="group" 
+            aria-required={isRequired}
+            aria-invalid={hasError}
+            aria-describedby={hasError ? `${name}-group-error` : undefined}
+          >
             {options.map((option, index) => {
               const optionId = `${name || 'checkbox'}-option-${index}`;
-              const isOptionChecked = groupValues.includes(option.value);
+              const isOptionChecked = actualGroupValues.includes(option.value);
               const isOptionDisabled = disabled || option.disabled;
 
               return (
@@ -273,29 +387,36 @@ export const ReusableCheckbox = forwardRef<CheckboxMethods, ReusableCheckboxProp
                     }
                     className={cn(
                       sizeClasses.checkbox,
-                      error && "border-red-500 focus-visible:ring-red-500",
                       option.className
                     )}
                     style={option.style}
+                    aria-describedby={hasError ? `${name}-group-error` : undefined}
                   />
                   {renderLabel(option.label, optionId, option.title)}
                 </div>
               );
             })}
           </div>
-        </div>
+        </fieldset>
       );
     };
 
     const renderErrorMessage = () => {
-      if (!error) return null;
+      if (!currentError) return null;
+      
+      const errorId = options ? `${name}-group-error` : `${name}-error`;
       
       return (
-        <p className={cn(
-          "text-red-500 mt-1",
-          sizeClasses.error
-        )}>
-          {error}
+        <p 
+          id={errorId}
+          className={cn(
+            "text-red-500 mt-1",
+            sizeClasses.error
+          )}
+          role="alert"
+          aria-live="polite"
+        >
+          {currentError}
         </p>
       );
     };
@@ -322,16 +443,35 @@ export const CheckboxGroup = forwardRef<HTMLDivElement, CheckboxGroupProps>(
     name,
     className,
     size = 'default',
+    isRequired = false,
+    requiredMessage = 'Please select at least one option',
+    error,
     onChange,
+    onValidationChange,
     ...props
   }, ref) => {
     // State Management
     const [internalValue, setInternalValue] = useState<(string | number)[]>(
       value as (string | number)[] ?? defaultValue
     );
+    const [validationError, setValidationError] = useState<string>('');
 
     const isControlled = value !== undefined;
     const actualValue = isControlled ? (value as (string | number)[]) : internalValue;
+
+    // Validation Logic
+    const validateField = (currentValue?: (string | number)[]) => {
+      if (!isRequired) return true;
+
+      const valuesToCheck = currentValue || actualValue;
+      const isValid = valuesToCheck.length > 0;
+      const errorMessage = isValid ? '' : requiredMessage;
+
+      setValidationError(errorMessage);
+      onValidationChange?.(isValid, errorMessage);
+      
+      return isValid;
+    };
 
     // Effects
     useEffect(() => {
@@ -339,6 +479,20 @@ export const CheckboxGroup = forwardRef<HTMLDivElement, CheckboxGroupProps>(
         setInternalValue(value as (string | number)[]);
       }
     }, [value, isControlled]);
+
+    // Validate on value changes
+    useEffect(() => {
+      if (isRequired) {
+        validateField();
+      }
+    }, [actualValue, isRequired]);
+
+    // Clear validation error when external error changes
+    useEffect(() => {
+      if (error !== undefined) {
+        setValidationError('');
+      }
+    }, [error]);
 
     // Event Handlers
     const handleChange = (optionValue: string | number, checked: boolean) => {
@@ -353,6 +507,10 @@ export const CheckboxGroup = forwardRef<HTMLDivElement, CheckboxGroupProps>(
       if (!isControlled) {
         setInternalValue(newValues);
       }
+      
+      // Validate immediately
+      validateField(newValues);
+      
       onChange?.(newValues);
     };
 
@@ -383,47 +541,74 @@ export const CheckboxGroup = forwardRef<HTMLDivElement, CheckboxGroupProps>(
       return option;
     });
 
+    // Determine current error message
+    const currentError = error || validationError;
+    const hasError = Boolean(currentError);
+
     // Render
     return (
       <div ref={ref} className={cn("space-y-2", className)} {...props}>
-        {normalizedOptions.map((option, index) => {
-          const optionId = `${name || 'checkbox-group'}-${index}`;
-          const isChecked = actualValue.includes(option.value);
-          const isDisabled = disabled || option.disabled;
+        <fieldset>
+          <div 
+            className="space-y-2"
+            role="group"
+            aria-required={isRequired}
+            aria-invalid={hasError}
+            aria-describedby={hasError ? `${name}-group-error` : undefined}
+          >
+            {normalizedOptions.map((option, index) => {
+              const optionId = `${name || 'checkbox-group'}-${index}`;
+              const isChecked = actualValue.includes(option.value);
+              const isDisabled = disabled || option.disabled;
 
-          return (
-            <div key={option.value} className="flex items-center space-x-2">
-              <Checkbox
-                id={optionId}
-                name={name}
-                checked={isChecked}
-                disabled={isDisabled}
-                onCheckedChange={(checked) => 
-                  handleChange(option.value, checked as boolean)
-                }
-                className={cn(sizeClasses.checkbox, option.className)}
-                style={option.style}
-              />
-              <Label 
-                htmlFor={optionId}
-                title={option.title}
-                className={cn(
-                  "font-medium cursor-pointer select-none",
-                  isDisabled && "cursor-not-allowed opacity-50",
-                  sizeClasses.label
-                )}
-              >
-                {option.label}
-              </Label>
-            </div>
-          );
-        })}
+              return (
+                <div key={option.value} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={optionId}
+                    name={name}
+                    checked={isChecked}
+                    disabled={isDisabled}
+                    onCheckedChange={(checked) => 
+                      handleChange(option.value, checked as boolean)
+                    }
+                    className={cn(
+                      sizeClasses.checkbox, 
+                      hasError && "border-red-500 focus-visible:ring-red-500",
+                      option.className
+                    )}
+                    style={option.style}
+                    aria-describedby={hasError ? `${name}-group-error` : undefined}
+                  />
+                  <Label 
+                    htmlFor={optionId}
+                    title={option.title}
+                    className={cn(
+                      "font-medium cursor-pointer select-none",
+                      isDisabled && "cursor-not-allowed opacity-50",
+                      hasError && "text-red-600",
+                      sizeClasses.label
+                    )}
+                  >
+                    {option.label}
+                  </Label>
+                </div>
+              );
+            })}
+          </div>
+        </fieldset>
+        {hasError && (
+          <p 
+            id={`${name}-group-error`}
+            className="text-red-500 text-xs mt-1"
+            role="alert"
+            aria-live="polite"
+          >
+            {currentError}
+          </p>
+        )}
       </div>
     );
   }
 );
 
 CheckboxGroup.displayName = "CheckboxGroup";
-
-// Export all types for external use
-// export type { CheckboxChangeEvent, CheckboxMethods };

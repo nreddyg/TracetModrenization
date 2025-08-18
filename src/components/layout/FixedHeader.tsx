@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { useAppSelector } from '@/store';
+import { useAppSelector } from '@/store/reduxStore';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -109,20 +109,18 @@ const FixedHeader: React.FC = () => {
                     label="Company"
                     options={companyOptions}
                     value={selectedCompany}
-                    onChange={setSelectedCompany}
+                    onChange={(value) => setSelectedCompany(value as string)}
                     placeholder="Select company"
-                    showValueTooltip={true}
-                    size="md"
+                    size="middle"
                   />
                   
                   <ReusableDropdown
                     label="Location"
                     options={locationOptions}
                     value={selectedLocation}
-                    onChange={setSelectedLocation}
+                    onChange={(value) => setSelectedLocation(value as string)}
                     placeholder="Select location"
-                    showValueTooltip={true}
-                    size="md"
+                    size="middle"
                   />
                 </div>
               </SheetContent>
@@ -134,20 +132,18 @@ const FixedHeader: React.FC = () => {
             <ReusableDropdown
               options={companyOptions}
               value={selectedCompany}
-              onChange={setSelectedCompany}
+              onChange={(value) => setSelectedCompany(value as string)}
               placeholder="Select company"
-              showValueTooltip={true}
-              size="sm"
+              size="small"
               className="min-w-[120px]"
             />
             
             <ReusableDropdown
               options={locationOptions}
               value={selectedLocation}
-              onChange={setSelectedLocation}
+              onChange={(value) => setSelectedLocation(value as string)}
               placeholder="Select location"
-              showValueTooltip={true}
-              size="sm"
+              size="small"
               className="min-w-[120px]"
             />
           </div>

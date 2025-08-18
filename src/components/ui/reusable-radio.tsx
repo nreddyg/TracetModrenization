@@ -18,7 +18,7 @@ export interface ReusableRadioProps {
   label?: string;
   tooltip?: string;
   error?: string;
-  options: RadioOption[];
+  options?: RadioOption[];
   value?: string;
   defaultValue?: string;
   
@@ -302,7 +302,6 @@ export const ReusableRadio = forwardRef<HTMLDivElement, ReusableRadioProps>(
             "text-red-500 flex items-center gap-1",
             size === 'sm' ? 'text-xs' : 'text-sm'
           )}>
-            <span className="inline-block w-3 h-3 rounded-full bg-red-500 text-white text-xs flex items-center justify-center">!</span>
             {error}
           </p>
         )}

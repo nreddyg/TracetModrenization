@@ -97,7 +97,7 @@ const navigation: NavItem[] = [
       {
         label: 'New Service Request',
         icon: AlertCircle,
-        link: '/service-desk/new-request',
+        link: '/service-desk/create-ticket',
       },
       {
         label: 'My Workbench',
@@ -114,6 +114,16 @@ const navigation: NavItem[] = [
         icon: FileText,
         link: '/tickets',
         children: [
+          {
+            label: 'Dashboard',
+            icon: BarChart,
+            link: '/tickets/dashboard',
+          },
+          {
+            label: 'Benchmarking',
+            icon: TrendingUp,
+            link: '/tickets/benchmarking',
+          },
           {
             label: 'SLA Violated',
             icon: AlertCircle,

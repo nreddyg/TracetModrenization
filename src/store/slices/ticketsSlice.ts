@@ -16,13 +16,11 @@ export interface Ticket {
 
 interface TicketsState {
   tickets: Ticket[];
-  loading: boolean;
   error: string | null;
 }
 
 const initialState: TicketsState = {
   tickets: [],
-  loading: false,
   error: null,
 };
 
@@ -45,14 +43,11 @@ const ticketsSlice = createSlice({
     deleteTicket: (state, action: PayloadAction<string>) => {
       state.tickets = state.tickets.filter(ticket => ticket.id !== action.payload);
     },
-    setLoading: (state, action: PayloadAction<boolean>) => {
-      state.loading = action.payload;
-    },
     setError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload;
     },
   },
 });
 
-export const { setTickets, addTicket, updateTicket, deleteTicket, setLoading, setError } = ticketsSlice.actions;
+export const { setTickets, addTicket, updateTicket, deleteTicket, setError } = ticketsSlice.actions;
 export default ticketsSlice.reducer;

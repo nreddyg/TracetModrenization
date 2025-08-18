@@ -9,6 +9,7 @@ export interface ReusableTextareaProps extends Omit<React.TextareaHTMLAttributes
   label?: string;
   tooltip?: string;
   error?: string;
+  isRequired?:boolean;
   numberOfRows?: number;
   numberOfColumns?: number;
   containerClassName?: string;
@@ -60,8 +61,9 @@ export const ReusableTextarea = forwardRef<TextareaRef, ReusableTextareaProps>(
     label, 
     tooltip, 
     error, 
+    isRequired=false,
     numberOfRows = 3,
-    numberOfColumns,
+    numberOfColumns=2,
     containerClassName,
     classNameInput,
     className,
@@ -250,7 +252,7 @@ export const ReusableTextarea = forwardRef<TextareaRef, ReusableTextareaProps>(
     const renderLabel = () => {
       if (!label) return null;
 
-      const labelElement = <Label className="text-sm font-medium">{label}</Label>;
+      const labelElement = <Label className="text-sm font-medium">{label}{isRequired ?<span className='text-red-500'> *</span>:''}</Label>;
 
       if (tooltip) {
         return (

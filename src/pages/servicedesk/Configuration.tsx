@@ -237,7 +237,7 @@ const Configuration = () => {
                     <div className="space-y-2">
                       <Label className="text-sm font-medium">Set Status To Calculate SLA</Label>
                       <ReusableDropdown
-                        size="sm"
+                        size="small"
                         placeholder="Select Status"
                         options={[
                           { value: 'status1', label: 'Status 1' }
@@ -247,7 +247,7 @@ const Configuration = () => {
                     <div className="space-y-2">
                       <Label className="text-sm font-medium">Service Request Type Admin</Label>
                       <ReusableDropdown
-                        size="sm"
+                        size="small"
                         placeholder="Select Service Request Type Admin"
                         options={[
                           { value: 'admin1', label: 'Admin 1' }
@@ -259,7 +259,7 @@ const Configuration = () => {
                     <div className="space-y-2">
                       <Label className="text-sm font-medium">User Group</Label>
                       <ReusableDropdown
-                        size="sm"
+                        size="small"
                         placeholder="Select User Group"
                         options={[
                           { value: 'group1', label: 'Group 1' }
@@ -287,7 +287,7 @@ const Configuration = () => {
                     <div className="space-y-2">
                       <Label className="text-sm font-medium">Level Five Company</Label>
                       <ReusableDropdown
-                        size="sm"
+                        size="small"
                         placeholder="Select Branches"
                         options={[
                           { value: 'branch1', label: 'Branch 1' }
@@ -299,9 +299,9 @@ const Configuration = () => {
                 <div className="space-y-2 mb-6">
                   <Label className="text-sm font-medium">Vendor</Label>
                   <ReusableDropdown
-                    size="sm"
+                    size="small"
                     placeholder="Select Vendors"
-                    search
+                    showSearch
                     options={[
                       { value: 'vendor1', label: 'Vendor 1' }
                     ]}
@@ -310,9 +310,9 @@ const Configuration = () => {
                 <div className="space-y-2 mb-6">
                   <Label className="text-sm font-medium">Escalation To</Label>
                   <ReusableDropdown
-                    size="sm"
+                    size="small"
                     placeholder="Select Escalation Users"
-                    search
+                    showSearch
                     options={[
                       { value: 'user1', label: 'User 1' }
                     ]}

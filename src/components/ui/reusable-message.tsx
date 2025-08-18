@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useRef, createContext, useContext, useCallback } from 'react';
 import { AlertCircle, CheckCircle, Info, XCircle, X, Loader2 } from 'lucide-react';
-
+ 
 // Utility function for class names
 function cn(...classes: (string | undefined | null | boolean)[]): string {
   return classes.filter(Boolean).join(' ');
 }
-
+ 
 // Types
 export type MessageType = 'success' | 'error' | 'warning' | 'info' | 'loading';
-
+ 
 export interface MessageConfig {
   type?: MessageType;
   content: React.ReactNode;
@@ -21,7 +21,7 @@ export interface MessageConfig {
   closable?: boolean;
   onClick?: () => void;
 }
-
+ 
 export interface MessageInstance {
   id: string;
   config: MessageConfig;
@@ -29,11 +29,11 @@ export interface MessageInstance {
   timer?: NodeJS.Timeout;
   createdAt: number;
 }
-
+ 
 export interface MessageMethodReturn {
   (): void;
 }
-
+ 
 // Global Configuration Interface
 interface MessageGlobalConfig {
   top?: number;
@@ -43,32 +43,32 @@ interface MessageGlobalConfig {
   prefixCls?: string;
   getContainer?: () => HTMLElement;
 }
-
+ 
 // Message Item Component
 interface MessageItemProps {
   instance: MessageInstance;
   onRemove: (id: string) => void;
   position: 'top' | 'bottom';
 }
-
+ 
 const MessageItem: React.FC<MessageItemProps> = ({ instance, onRemove, position }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [isLeaving, setIsLeaving] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout>();
-
+ 
   const { config } = instance;
-  const { 
-    type = 'info', 
-    content, 
-    duration = 3, 
-    onClose, 
+  const {
+    type = 'info',
+    content,
+    duration = 3,
+    onClose,
     onClick,
-    icon, 
-    closable = true, 
-    className, 
-    style 
+    icon,
+    closable = true,
+    className,
+    style
   } = config;
-
+ 
   const icons = {
     success: <CheckCircle className="h-4 w-4" />,
     error: <XCircle className="h-4 w-4" />,
@@ -76,7 +76,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ instance, onRemove, position 
     info: <Info className="h-4 w-4" />,
     loading: <Loader2 className="h-4 w-4 animate-spin" />
   };
-
+ 
   const typeClasses = {
     success: 'bg-white border-green-200 text-green-800 shadow-lg',
     error: 'bg-white border-red-200 text-red-800 shadow-lg',
@@ -84,7 +84,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ instance, onRemove, position 
     info: 'bg-white border-blue-200 text-blue-800 shadow-lg',
     loading: 'bg-white border-blue-200 text-blue-800 shadow-lg'
   };
-
+ 
   const iconClasses = {
     success: 'text-green-500',
     error: 'text-red-500',
@@ -92,16 +92,16 @@ const MessageItem: React.FC<MessageItemProps> = ({ instance, onRemove, position 
     info: 'text-blue-500',
     loading: 'text-blue-500'
   };
-
+ 
   useEffect(() => {
     const enterTimer = setTimeout(() => setIsVisible(true), 10);
-
+ 
     if (duration > 0) {
       timeoutRef.current = setTimeout(() => {
         handleClose();
       }, duration * 1000);
     }
-
+ 
     return () => {
       clearTimeout(enterTimer);
       if (timeoutRef.current) {
@@ -109,22 +109,22 @@ const MessageItem: React.FC<MessageItemProps> = ({ instance, onRemove, position 
       }
     };
   }, [duration]);
-
+ 
   const handleClose = useCallback(() => {
     setIsLeaving(true);
     onClose?.();
-    
+   
     setTimeout(() => {
       onRemove(instance.id);
     }, 300);
   }, [instance.id, onClose, onRemove]);
-
+ 
   const handleMouseEnter = () => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
   };
-
+ 
   const handleMouseLeave = () => {
     if (duration > 0) {
       timeoutRef.current = setTimeout(() => {
@@ -132,17 +132,17 @@ const MessageItem: React.FC<MessageItemProps> = ({ instance, onRemove, position 
       }, duration * 1000);
     }
   };
-
+ 
   const handleClick = () => {
     onClick?.();
   };
-
+ 
   return (
     <div
       className={cn(
         "transition-all duration-300 ease-in-out transform",
         "mb-2 max-w-md mx-auto",
-        isVisible && !isLeaving ? "translate-y-0 opacity-100 scale-100" : 
+        isVisible && !isLeaving ? "translate-y-0 opacity-100 scale-100" :
         position === 'top' ? "-translate-y-2 opacity-0 scale-95" : "translate-y-2 opacity-0 scale-95",
         isLeaving && (position === 'top' ? "-translate-y-2 opacity-0 scale-95" : "translate-y-2 opacity-0 scale-95")
       )}
@@ -150,7 +150,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ instance, onRemove, position 
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <div 
+      <div
         className={cn(
           "rounded-lg border px-4 py-3 flex items-center gap-3 min-w-0",
           typeClasses[type],
@@ -162,11 +162,11 @@ const MessageItem: React.FC<MessageItemProps> = ({ instance, onRemove, position 
         <div className={cn("flex-shrink-0", iconClasses[type])}>
           {icon || icons[type]}
         </div>
-        
+       
         <div className="flex-1 min-w-0 text-sm font-medium">
           {content}
         </div>
-        
+       
         {closable && (
           <button
             type="button"
@@ -186,7 +186,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ instance, onRemove, position 
     </div>
   );
 };
-
+ 
 // Message Container Component
 interface MessageContainerProps {
   instances: MessageInstance[];
@@ -195,18 +195,18 @@ interface MessageContainerProps {
   offset?: number;
   maxCount?: number;
 }
-
-const MessageContainer: React.FC<MessageContainerProps> = ({ 
-  instances, 
-  onRemove, 
+ 
+const MessageContainer: React.FC<MessageContainerProps> = ({
+  instances,
+  onRemove,
   position = 'top',
   offset = 24,
   maxCount = 5
 }) => {
   const visibleInstances = instances.slice(0, maxCount);
-
+ 
   if (visibleInstances.length === 0) return null;
-
+ 
   return (
     <div
       className={cn(
@@ -230,7 +230,7 @@ const MessageContainer: React.FC<MessageContainerProps> = ({
     </div>
   );
 };
-
+ 
 // Message Context
 interface MessageContextType {
   instances: MessageInstance[];
@@ -240,9 +240,9 @@ interface MessageContextType {
   config: MessageGlobalConfig;
   updateConfig: (config: Partial<MessageGlobalConfig>) => void;
 }
-
+ 
 const MessageContext = createContext<MessageContextType | null>(null);
-
+ 
 // Message Provider Component - EXACT same props as your original
 interface MessageProviderProps {
   children: React.ReactNode;
@@ -251,7 +251,7 @@ interface MessageProviderProps {
   duration?: number;
   maxCount?: number;
 }
-
+ 
 export const MessageProvider: React.FC<MessageProviderProps> = ({
   children,
   position = 'top',
@@ -265,10 +265,10 @@ export const MessageProvider: React.FC<MessageProviderProps> = ({
     duration,
     maxCount
   });
-
+ 
   const add = useCallback((config: MessageConfig): MessageMethodReturn => {
     const id = config.key?.toString() || `message-${Date.now()}-${Math.random()}`;
-    
+   
     const newInstance: MessageInstance = {
       id,
       config: {
@@ -278,7 +278,7 @@ export const MessageProvider: React.FC<MessageProviderProps> = ({
       visible: true,
       createdAt: Date.now()
     };
-
+ 
     setInstances(prev => {
       // If key exists, replace the existing message
       if (config.key) {
@@ -289,30 +289,30 @@ export const MessageProvider: React.FC<MessageProviderProps> = ({
           return updated;
         }
       }
-      
+     
       // Add new message, respecting maxCount
       const updated = [...prev, newInstance];
       return updated.slice(-globalConfig.maxCount!);
     });
-
+ 
     // Return a function to close this specific message (Ant Design feature)
     return () => {
       setInstances(prev => prev.filter(instance => instance.id !== id));
     };
   }, [globalConfig]);
-
+ 
   const remove = useCallback((id: string) => {
     setInstances(prev => prev.filter(instance => instance.id !== id));
   }, []);
-
+ 
   const clear = useCallback(() => {
     setInstances([]);
   }, []);
-
+ 
   const updateConfig = useCallback((config: Partial<MessageGlobalConfig>) => {
     setGlobalConfig(prev => ({ ...prev, ...config }));
   }, []);
-
+ 
   const contextValue: MessageContextType = {
     instances,
     add,
@@ -321,7 +321,7 @@ export const MessageProvider: React.FC<MessageProviderProps> = ({
     config: globalConfig,
     updateConfig
   };
-
+ 
   return (
     <MessageContext.Provider value={contextValue}>
       {children}
@@ -335,35 +335,35 @@ export const MessageProvider: React.FC<MessageProviderProps> = ({
     </MessageContext.Provider>
   );
 };
-
+ 
 // Hook to use messages - Enhanced with Ant Design features
 export const useMessage = () => {
   const context = useContext(MessageContext);
   if (!context) {
     throw new Error('useMessage must be used within a MessageProvider');
   }
-
+ 
   const { add, remove, clear, updateConfig } = context;
-
+ 
   return {
     // Original API - unchanged
     success: (content: React.ReactNode, config?: Omit<MessageConfig, 'type' | 'content'>): MessageMethodReturn =>
       add({ ...config, type: 'success', content }),
-    
+   
     error: (content: React.ReactNode, config?: Omit<MessageConfig, 'type' | 'content'>): MessageMethodReturn =>
       add({ ...config, type: 'error', content }),
-    
+   
     warning: (content: React.ReactNode, config?: Omit<MessageConfig, 'type' | 'content'>): MessageMethodReturn =>
       add({ ...config, type: 'warning', content }),
-    
+   
     info: (content: React.ReactNode, config?: Omit<MessageConfig, 'type' | 'content'>): MessageMethodReturn =>
       add({ ...config, type: 'info', content }),
-    
+   
     loading: (content: React.ReactNode, config?: Omit<MessageConfig, 'type' | 'content'>): MessageMethodReturn =>
       add({ ...config, type: 'loading', content, duration: 0 }),
-    
+   
     open: (config: MessageConfig): MessageMethodReturn => add(config),
-    
+   
     destroy: (key?: string | number) => {
       if (key) {
         const instance = context.instances.find(i => i.config.key === key);
@@ -374,53 +374,53 @@ export const useMessage = () => {
         clear();
       }
     },
-
+ 
     // New Ant Design features
     config: updateConfig
   };
 };
-
+ 
 // Static Message API
 let messageApi: ReturnType<typeof useMessage> | null = null;
-
+ 
 export const setMessageApi = (api: ReturnType<typeof useMessage>) => {
   messageApi = api;
 };
-
+ 
 // Global message instance - Enhanced with Ant Design API
 export const message = {
   success: (content: React.ReactNode, duration?: number, onClose?: () => void): MessageMethodReturn | undefined => {
     if (!messageApi) return undefined;
     return messageApi.success(content, { duration, onClose });
   },
-  
+ 
   error: (content: React.ReactNode, duration?: number, onClose?: () => void): MessageMethodReturn | undefined => {
     if (!messageApi) return undefined;
     return messageApi.error(content, { duration, onClose });
   },
-  
+ 
   warning: (content: React.ReactNode, duration?: number, onClose?: () => void): MessageMethodReturn | undefined => {
     if (!messageApi) return undefined;
     return messageApi.warning(content, { duration, onClose });
   },
-  
+ 
   info: (content: React.ReactNode, duration?: number, onClose?: () => void): MessageMethodReturn | undefined => {
     if (!messageApi) return undefined;
     return messageApi.info(content, { duration, onClose });
   },
-  
+ 
   loading: (content: React.ReactNode, duration = 0): MessageMethodReturn | undefined => {
     if (!messageApi) return undefined;
     return messageApi.loading(content, { duration });
   },
-  
+ 
   open: (config: MessageConfig): MessageMethodReturn | undefined => messageApi?.open(config),
-  
+ 
   destroy: (key?: string | number) => messageApi?.destroy(key),
-
+ 
   config: (config: MessageGlobalConfig) => messageApi?.config(config)
 };
-
+ 
 // Original ReusableMessage component - EXACT same interface
 export interface ReusableMessageProps {
   type?: MessageType;
@@ -433,7 +433,7 @@ export interface ReusableMessageProps {
   duration?: number;
   visible?: boolean;
 }
-
+ 
 export const ReusableMessage: React.FC<ReusableMessageProps> = ({
   type = 'info',
   title,
@@ -447,7 +447,7 @@ export const ReusableMessage: React.FC<ReusableMessageProps> = ({
 }) => {
   const [isVisible, setIsVisible] = useState(visible);
   const timeoutRef = useRef<NodeJS.Timeout>();
-
+ 
   const icons = {
     success: <CheckCircle className="h-5 w-5" />,
     error: <XCircle className="h-5 w-5" />,
@@ -455,7 +455,7 @@ export const ReusableMessage: React.FC<ReusableMessageProps> = ({
     info: <Info className="h-5 w-5" />,
     loading: <Loader2 className="h-5 w-5 animate-spin" />
   };
-
+ 
   const typeClasses = {
     success: 'bg-green-50 border-green-200 text-green-800',
     error: 'bg-red-50 border-red-200 text-red-800',
@@ -463,7 +463,7 @@ export const ReusableMessage: React.FC<ReusableMessageProps> = ({
     info: 'bg-blue-50 border-blue-200 text-blue-800',
     loading: 'bg-blue-50 border-blue-200 text-blue-800'
   };
-
+ 
   const iconClasses = {
     success: 'text-green-400',
     error: 'text-red-400',
@@ -471,36 +471,36 @@ export const ReusableMessage: React.FC<ReusableMessageProps> = ({
     info: 'text-blue-400',
     loading: 'text-blue-400'
   };
-
+ 
   useEffect(() => {
     setIsVisible(visible);
   }, [visible]);
-
+ 
   useEffect(() => {
     if (duration > 0 && isVisible) {
       timeoutRef.current = setTimeout(() => {
         handleClose();
       }, duration * 1000);
     }
-
+ 
     return () => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
     };
   }, [duration, isVisible]);
-
+ 
   const handleClose = () => {
     setIsVisible(false);
     onClose?.();
   };
-
+ 
   const handleMouseEnter = () => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
   };
-
+ 
   const handleMouseLeave = () => {
     if (duration > 0 && isVisible) {
       timeoutRef.current = setTimeout(() => {
@@ -508,11 +508,11 @@ export const ReusableMessage: React.FC<ReusableMessageProps> = ({
       }, duration * 1000);
     }
   };
-
+ 
   if (!isVisible) return null;
-
+ 
   return (
-    <div 
+    <div
       className={cn(
         "rounded-md border p-4 transition-opacity duration-300",
         typeClasses[type],
@@ -557,3 +557,4 @@ export const ReusableMessage: React.FC<ReusableMessageProps> = ({
     </div>
   );
 };
+ 

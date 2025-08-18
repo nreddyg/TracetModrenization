@@ -397,7 +397,7 @@ const MyWorkbench = () => {
                 label="Status"
                 options={statusOptions}
                 value={statusFilter}
-                onChange={setStatusFilter}
+                onChange={(value) => setStatusFilter(value as string)}
                 placeholder="Select status"
               />
 
@@ -405,7 +405,7 @@ const MyWorkbench = () => {
                 label="Priority"
                 options={priorityOptions}
                 value={priorityFilter}
-                onChange={setPriorityFilter}
+                onChange={(value) => setPriorityFilter(value as string)}
                 placeholder="Select priority"
               />
 
@@ -413,7 +413,7 @@ const MyWorkbench = () => {
                 label="Date Range"
                 options={dateRangeOptions}
                 value={dateRange}
-                onChange={setDateRange}
+                onChange={(value) => setDateRange(value as string)}
                 placeholder="Select date range"
               />
             </div>
@@ -434,7 +434,7 @@ const MyWorkbench = () => {
                 label="Category"
                 options={categoryOptions}
                 value={categoryFilter}
-                onChange={setCategoryFilter}
+                onChange={(value) => setCategoryFilter(value as string)}
                 placeholder="Select category"
               />
             </div>

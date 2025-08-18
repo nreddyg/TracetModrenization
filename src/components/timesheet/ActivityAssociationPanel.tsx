@@ -123,7 +123,7 @@ export const ActivityAssociationPanel: React.FC<ActivityAssociationPanelProps> =
               <Label htmlFor="activityType">Activity Type</Label>
               <ReusableDropdown
                 value={formData.activityType}
-                onChange={(value) => setFormData(prev => ({ ...prev, activityType: value }))}
+                onChange={(value) => setFormData(prev => ({ ...prev, activityType: value as string }))}
                 placeholder="Select activity type"
                 allowClear
                 options={[

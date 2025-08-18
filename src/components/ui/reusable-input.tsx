@@ -17,6 +17,7 @@ export interface ReusableInputProps extends Omit<React.InputHTMLAttributes<HTMLI
   tooltip?: string;
   error?: string;
   warning?: string;
+  isRequired?:boolean;
   
   // Icons and affixes
   prefixIcon?: React.ReactNode;
@@ -82,6 +83,7 @@ export const ReusableInput = forwardRef<ReusableInputRef, ReusableInputProps>(
     tooltip, 
     error, 
     warning,
+    isRequired,
     
     // Icons and affixes
     prefixIcon, 
@@ -131,7 +133,6 @@ export const ReusableInput = forwardRef<ReusableInputRef, ReusableInputProps>(
     value,
     defaultValue,
     placeholder,
-    
     // Callbacks
     onPressEnter,
     onClear,
@@ -304,9 +305,9 @@ export const ReusableInput = forwardRef<ReusableInputRef, ReusableInputProps>(
 
     // Status classes - include validation error
     const statusClasses = useMemo(() => {
-      if (error || status === 'error' || validationError) {
-        return 'border-red-500 focus:border-red-500 focus:ring-red-200';
-      }
+      // if (error || status === 'error' || validationError) {
+      //   return 'border-red-500 focus:border-red-500 focus:ring-red-200';
+      // }
       if (warning || status === 'warning') {
         return 'border-yellow-500 focus:border-yellow-500 focus:ring-yellow-200';
       }
@@ -358,7 +359,7 @@ export const ReusableInput = forwardRef<ReusableInputRef, ReusableInputProps>(
     const renderLabel = () => {
       if (!label) return null;
 
-      const labelElement = <Label className={labelClasses}>{label}</Label>;
+      const labelElement = <Label className={labelClasses}>{label}{isRequired ?<span className='text-red-500'> *</span>:''}</Label>;
 
       if (tooltip) {
         return (
@@ -534,6 +535,7 @@ export const ReusableInput = forwardRef<ReusableInputRef, ReusableInputProps>(
                 addonBefore && "rounded-l-none border-l-0",
                 addonAfter && "rounded-r-none border-r-0",
                 !hasAddon && "rounded-md",
+                "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-backgroun",
                 inputClassName,
                 className
               )}

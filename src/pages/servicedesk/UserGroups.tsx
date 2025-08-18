@@ -1,146 +1,416 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Search, 
-  Edit, 
-  Trash2,
-  Plus,
-  Save,
-  X
-} from 'lucide-react';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { useForm } from 'react-hook-form';
+import { Search, Edit, Trash2, Plus, Save, X } from 'lucide-react';
+import { Form, } from '@/components/ui/form';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, } from '@/components/ui/dialog';
+import { useForm, Controller } from 'react-hook-form';
+import { ColumnDef } from '@tanstack/react-table';
+import { ReusableButton } from '../../components/ui/reusable-button';
+import { ReusableInput } from '../../components/ui/reusable-input';
+import { ReusableDropdown } from '../../components/ui/reusable-dropdown';
+import { ReusableTable, TableAction, TablePermissions } from '../../components/ui//reusable-table';
+import { MessageProvider, useMessage } from '../../components/ui/reusable-message';
+import { ReusableMultiSelect } from '@/components/ui/reusable-multi-select';
+import { ReusableTextarea } from '@/components/ui/reusable-textarea';
+import { BaseField, GenericObject } from '@/Local_DB/types/types';
+import { addUserGroup, deleteUserGroup, getUserGroupById, getUserGroupData, updateUserGroup } from '@/services/usergroupServices';
+import { USER_GROUP_DB } from '@/Local_DB/Form_JSON_Data/UserGroupDB';
+import { GetServiceRequestAssignToLookups } from '@/services/ticketServices';
+import { useAppDispatch } from '@/store/reduxStore';
+import { setLoading } from '@/store/slices/projectsSlice';
+
 
 interface UserGroup {
-  id: string;
-  userGroupName: string;
-  users: string[];
-  description: string;
-  status: 'Active' | 'InActive';
+  UserGroupId: number;
+  UserGroup: string;
+  Users: string;
+  Description: string;
+  Status: string;
+  ActiveStatus?: boolean;
 }
 
-interface UserGroupFormData {
-  userGroupName: string;
-  selectedUsers: string[];
-  description: string;
-}
-
-const mockUserGroups: UserGroup[] = [
-  { 
-    id: '1', 
-    userGroupName: 'Cyber Team', 
-    users: ['Ashok', 'Ganesh', 'Prajwal', 'Pall'], 
-    description: 'Cyber Team', 
-    status: 'InActive' 
-  },
-  { 
-    id: '2', 
-    userGroupName: 'Devops Team', 
-    users: ['Nagendra', 'Prajwal', 'Ganesh'], 
-    description: 'Devops Team', 
-    status: 'Active' 
-  },
-  { 
-    id: '3', 
-    userGroupName: 'Maintenance Team', 
-    users: ['Ganesh', 'Ravi'], 
-    description: 'Maintenance Team', 
-    status: 'Active' 
-  },
-  { 
-    id: '4', 
-    userGroupName: 'Mech Team', 
-    users: ['Ashok', 'Nagendra', 'Ganesh'], 
-    description: 'Mech Team', 
-    status: 'Active' 
-  },
-];
-
-const availableUsers = ['Ashok', 'Ganesh', 'Prajwal', 'Pall', 'Nagendra', 'Ravi'];
-
-const UserGroups = () => {
-  const [userGroups] = useState<UserGroup[]>(mockUserGroups);
+const UserGroupsContent = () => {
+  const message = useMessage();
+  const [userGroups, setUserGroups] = useState([]);
+  const [selectedRecord, setSelectedRecord] = useState<UserGroup | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isFormVisible, setIsFormVisible] = useState(false);
+  const [isDelModalOpen, setIsDelModalOpen] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [fields, setFields] = useState<BaseField[]>(USER_GROUP_DB);
+  const dispatch = useAppDispatch();
   
-  const form = useForm<UserGroupFormData>({
-    defaultValues: {
-      userGroupName: '',
-      selectedUsers: [],
-      description: '',
-    },
+  useEffect(() => {
+    getUserGroupTableData(111, 'All');
+  }, [])
+
+  useEffect(() => {
+    if (selectedRecord !== null) {
+      getUserGroupDataById(111, selectedRecord?.UserGroupId)
+    }
+  }, [selectedRecord])
+
+  //table data api integration
+  async function getUserGroupTableData(compId: number, BranchName: string) {
+     dispatch(setLoading(true));
+    await getUserGroupData(compId, BranchName).then(res => {
+      if (res.success && res.data) {
+        if (res.data.UserGroupDetails?.length > 0) {
+          setUserGroups(res.data.UserGroupDetails?.reverse())
+        }
+      }
+    })
+      .catch(err => {
+        console.error('Error fetching subscription by customer:', err);
+      }).finally(()=>{
+        dispatch(setLoading(false))
+      })
+  }
+
+  //get usergroupby id api integration
+  async function getUserGroupDataById(compId: number, usergroupid: number) {
+     dispatch(setLoading(true))
+    await getUserGroupById(compId, usergroupid).then(res => {
+      if (res.success && res.data) {
+        const details = res.data.UserGroupDetails;
+        if (details) {
+          reset({
+            userGroupName: details.UserGroup,
+            Users: details.Users?.split(",").map(u => u.trim()) || [],
+            description: details.Description || "",
+            status: details.Status ? "Active" : "InActive"
+          });
+        }
+      }
+    })
+      .catch(err => {
+        console.error('Error fetching subscription by customer:', err);
+      }).finally(()=>{
+        dispatch(setLoading(false))
+      })
+  }
+
+  //delete usergroup api integration
+  async function deleteUserGroupData(compId: number, usergroupid: number) {
+     dispatch(setLoading(true));
+    await deleteUserGroup(compId, usergroupid).then(res => {
+      if (res.success && res.data) {
+        if (res.data.status === true) {
+          message.success(res.data.message)
+          getUserGroupTableData(111, 'All')
+        }
+        else {
+          message.error(res.data.message)
+        }
+      }
+    })
+      .catch(err => {
+      }).finally(()=>{
+        dispatch(setLoading(false))
+      })
+  }
+
+  //users lookup integartion 
+
+  async function SelectUsersLookup(compid: number, branchname: string) {
+     dispatch(setLoading(true));
+    await GetServiceRequestAssignToLookups(compid, branchname)
+      .then((res) => {
+        if (res.success && res.data) {
+          const lookup = res.data.ServiceRequestAssignToUsersLookup || [];
+          if (lookup.length > 0) {
+            const options = lookup.map((user: any) => ({
+              label: user.UserName,
+              value: user.UserName,
+            }));
+            setFields((prevFields) =>
+              prevFields.map((f) =>
+                f.name === "Users" ? { ...f, options } : f
+              )
+            );
+          }
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching users lookup:", err);
+      }).finally(()=>{
+        dispatch(setLoading(false))
+      })
+  }
+
+
+  useEffect(() => {
+    SelectUsersLookup(111, 'All')
+  }, [])
+
+
+
+  const form = useForm<GenericObject>({
+    defaultValues: fields.reduce((acc, f) => {
+      acc[f.name!] = f.defaultValue ?? ''
+      return acc;
+    }, {} as GenericObject),
+
   });
+
+  const { control, register, handleSubmit, trigger, watch, setValue, reset, formState: { errors } } = form;
+
+
+  const renderField = (field: BaseField) => {
+    const { name, label, fieldType, isRequired, show = true } = field;
+    if (!name || !show) return null;
+
+    const validationRules = {
+      required: isRequired ? `${label} is required` : false,
+    };
+
+    switch (fieldType) {
+      case 'text':
+        return (
+          <Controller
+            key={name}
+            name={name}
+            control={control}
+            rules={validationRules}
+            render={({ field: ctrl }) => (
+              <ReusableInput
+                {...field}
+                value={ctrl.value}
+                onChange={ctrl.onChange}
+                error={errors[name]?.message as string}
+              />
+            )}
+          />
+        );
+
+      case 'textarea':
+        return (
+          <Controller
+            key={name}
+            name={name}
+            control={control}
+            rules={validationRules}
+            render={({ field: ctrl }) => (
+              <ReusableTextarea
+                {...field}
+                value={ctrl.value}
+                onChange={ctrl.onChange}
+                error={errors[name]?.message as string}
+              />
+            )}
+          />
+        );
+
+      case 'dropdown':
+        return (
+          <Controller
+            key={name}
+            name={name}
+            control={control}
+            rules={validationRules}
+            render={({ field: ctrl }) => (
+              <ReusableDropdown
+                {...field}
+                value={ctrl.value}
+                onChange={ctrl.onChange}
+                error={errors[name]?.message as string}
+              />
+            )}
+          />
+        );
+
+      case 'multiselect':
+        return (
+          <Controller
+            key={name}
+            name={name}
+            control={control}
+            rules={validationRules}
+            render={({ field: ctrl }) => (
+              <ReusableMultiSelect
+                {...field}
+                value={ctrl.value}
+                onChange={ctrl.onChange}
+                error={errors[name]?.message as string}
+              />
+            )}
+          />
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  // Helper function to get fields by names (similar to TicketView)
+  const getFieldsByNames = (names: string[]) => fields.filter(f => names.includes(f.name!));
+
+  const handleSubmitForm = async (data: GenericObject): Promise<void> => {
+    // Validate description length
+    if (data.description && data.description.length > 500) {
+      message.warning("Description maximum length 500 characters only");
+      return;
+    }
+    dispatch(setLoading(true));
+    try {
+     const payload =(isEditMode)?[{
+      UserGroupName: data.userGroupName,
+      Users: data.Users?.join(','),
+      Description: data.description,
+      ActiveStatus:data.Status==='Active'?'true':'false',
+    }]:
+    [{
+      UserGroupName: data.userGroupName,
+      Users: data.Users?.join(','),
+      Description: data.description,
+    }];
+
+ 
+
+    const pay={UserGroupDetails:payload};
+    let res;
+
+      if (!isEditMode) {
+       res=await addUserGroup(111,'All',pay)
+      } else if (selectedRecord) {
+              res = await updateUserGroup(111,'All',selectedRecord?.UserGroupId,pay);
+      }
+
+    
+    if (res?.success && res.data?.status) {
+      message.success(res.data.message || (isEditMode ? 'User group updated' : 'User group created'));
+      getUserGroupTableData(111, 'All');
+      handleCancel();
+    } else {
+      message.error(res?.data?.message || 'Operation failed');
+    }
+  } catch (error) {
+    message.error("Failed to save user group");
+  } finally{
+    dispatch(setLoading(false))
+  }
+  };
+
+  const handleEdit = (group: UserGroup): void => {
+    setSelectedRecord(group);
+    setIsEditMode(true);
+    setIsFormVisible(true);
+  };
+
+  const handleDelete = (group: UserGroup): void => {
+    setSelectedRecord(group);
+    setIsDelModalOpen(true);
+  };
+
+
+
+  const handleCancel = (): void => {
+    setIsFormVisible(false);
+    setIsEditMode(false);
+    setSelectedRecord(null);
+    reset({
+      userGroupName: '',
+      Users: [],
+      description: '',
+      status: '',
+    });
+  };
+
+  const handleAddUserGroup = (): void => {
+    setIsEditMode(false);
+    setSelectedRecord(null);
+    reset();
+    setIsFormVisible(true);
+  };
 
   // Filter data based on search
   const filteredData = useMemo(() => {
-    return userGroups.filter(group => 
-      Object.values(group).some(value => 
+    return userGroups.filter(group =>
+      Object.values(group).some(value =>
         value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
       )
     );
   }, [userGroups, searchTerm]);
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: boolean) => {
     switch (status) {
-      case 'Active': return 'bg-green-100 text-green-800 border-green-300';
-      case 'InActive': return 'bg-red-100 text-red-800 border-red-300';
+      case true: return 'bg-green-100 text-green-800 border-green-300';
+      case false: return 'bg-red-100 text-red-800 border-red-300';
       default: return 'bg-gray-100 text-gray-800 border-gray-300';
     }
   };
 
-  const onSubmit = (data: UserGroupFormData) => {
-    console.log('Form submitted:', data);
-    setIsFormVisible(false);
-    form.reset();
+  // Define table columns
+  const columns: ColumnDef<UserGroup>[] = [
+    {
+      accessorKey: 'UserGroup',
+      header: 'User Group',
+      cell: ({ row }) => (
+        <span className="font-medium text-gray-900 text-sm">{row.getValue('UserGroup')}</span>
+      ),
+    },
+    {
+      accessorKey: 'Users',
+      header: 'Users',
+      cell: ({ row }) => (
+        <span className="text-gray-700 text-sm">{row.getValue('Users')}</span>
+      ),
+    },
+    {
+      accessorKey: 'Description',
+      header: 'Description',
+      cell: ({ row }) => (
+        <span className="text-gray-700 text-sm">{row.getValue('Description')}</span>
+      ),
+    },
+    {
+      accessorKey: 'Status',
+      header: 'Status',
+      cell: ({ row }) => (
+        <Badge className={`${getStatusColor(row.getValue('Status'))} border font-medium text-xs px-2 py-0.5`}>
+          {row.getValue('Status') === true ? `Active` : 'In Active'}
+        </Badge>
+      ),
+    },
+  ];
+
+  // Define table actions
+  const tableActions: TableAction<UserGroup>[] = [
+    {
+      label: 'Edit',
+      icon: Edit,
+      onClick: handleEdit,
+      variant: 'default',
+    },
+    {
+      label: 'Delete',
+      icon: Trash2,
+      onClick: handleDelete,
+      variant: 'destructive',
+    },
+  ];
+
+  // Define table permissions
+  const tablePermissions: TablePermissions = {
+    canEdit: true,
+    canDelete: true,
+    canView: true,
+    canExport: false,
+    canAdd: true,
+    canManageColumns: false,
   };
 
-  const handleCancel = () => {
-    setIsFormVisible(false);
-    form.reset();
+  // Handle refresh
+  const handleRefresh = () => {
+    message.info("Refreshing user groups...");
+    // Add refresh logic here
   };
 
   return (
-    <div className="min-h-screen bg-gray-50/30">
-      <header className="bg-white border-b px-4 py-3 shadow-sm">
-        <div className="flex items-center gap-3">
-          <SidebarTrigger />
-          <Button 
-            size="sm" 
-            className="bg-orange-500 hover:bg-orange-600 text-sm px-3 py-1.5"
-          >
-            New Service Request
-          </Button>
-        </div>
-      </header>
-
+    <div className="h-full overflow-y-scroll bg-gray-50/30">
       <div className="p-4 space-y-4">
         {/* Header Section */}
         <div className="flex items-center justify-between">
@@ -148,103 +418,68 @@ const UserGroups = () => {
             <h1 className="text-lg font-semibold text-gray-900">User Groups</h1>
             <p className="text-sm text-gray-600 mt-0.5">Manage user groups and permissions</p>
           </div>
-          <Button 
-            size="sm" 
-            className="bg-orange-500 hover:bg-orange-600 text-sm px-3 py-1.5"
-            onClick={() => setIsFormVisible(true)}
+          <ReusableButton
+            size="small"
+            variant="primary"
+            icon={<Plus className="h-3 w-3" />}
+            iconPosition="left"
+            onClick={handleAddUserGroup}
           >
-            <Plus className="h-3 w-3 mr-1" />
             Add User Group
-          </Button>
+          </ReusableButton>
         </div>
 
         {/* User Group Form */}
         {isFormVisible && (
           <Card className="border-0 shadow-sm">
             <CardHeader className="pb-3">
-              <CardTitle className="text-base font-semibold">User Group</CardTitle>
+              <CardTitle className="text-base font-semibold">
+                {isEditMode ? 'Edit User Group' : 'User Group'}
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <form onSubmit={form.handleSubmit(handleSubmitForm)} className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="userGroupName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-sm font-medium">
-                            User Group Name <span className="text-red-500">*</span>
-                          </FormLabel>
-                          <FormControl>
-                            <Input {...field} className="border-gray-200 text-sm" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="selectedUsers"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-sm font-medium">
-                            Select Users <span className="text-red-500">*</span>
-                          </FormLabel>
-                          <Select>
-                            <SelectTrigger className="text-sm">
-                              <SelectValue placeholder="Select Users" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {availableUsers.map(user => (
-                                <SelectItem key={user} value={user} className="text-sm">
-                                  {user}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    {getFieldsByNames(['userGroupName', 'Users']).map((field) => (
+                      <div key={field.name}>
+                        {renderField(field)}
+                      </div>
+                    ))}
                   </div>
 
-                  <FormField
-                    control={form.control}
-                    name="description"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-sm font-medium">Description</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            {...field} 
-                            className="border-gray-200 min-h-[80px] text-sm" 
-                            placeholder="Enter description"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  {getFieldsByNames(['description']).map((field) => (
+                    <div key={field.name}>
+                      {renderField(field)}
+                    </div>
+                  ))}
+
+                  {isEditMode && getFieldsByNames(['status']).map((field) => (
+                    <div key={field.name}>
+                      {renderField(field)}
+                    </div>
+                  ))}
 
                   <div className="flex gap-2">
-                    <Button 
-                      type="submit" 
-                      className="bg-orange-500 hover:bg-orange-600 text-sm px-4 py-1.5"
+                    <ReusableButton
+                      htmlType="submit"
+                      variant="primary"
+                      icon={<Save className="h-3 w-3" />}
+                      iconPosition="left"
+                      size="middle"
                     >
-                      <Save className="h-3 w-3 mr-1" />
-                      Save
-                    </Button>
-                    <Button 
-                      type="button" 
-                      variant="outline" 
+                      {isEditMode ? 'Update' : 'Save'}
+                    </ReusableButton>
+                    <ReusableButton
+                      htmlType="button"
+                      variant="default"
                       onClick={handleCancel}
-                      className="text-sm px-4 py-1.5"
+                      icon={<X className="h-3 w-3" />}
+                      iconPosition="left"
+                      size="middle"
                     >
-                      <X className="h-3 w-3 mr-1" />
-                      Clear
-                    </Button>
+                      {isEditMode ? 'Cancel' : 'Clear'}
+                    </ReusableButton>
                   </div>
                 </form>
               </Form>
@@ -252,81 +487,83 @@ const UserGroups = () => {
           </Card>
         )}
 
-        {/* User Group List */}
+        {/* User Group List with ReusableTable */}
         <Card className="border-0 shadow-sm">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base font-semibold">User Group List</CardTitle>
-              <div className="flex items-center gap-2">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-3 w-3" />
-                  <Input
-                    placeholder="Search user groups..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-8 border-gray-200 w-48 text-sm h-8"
-                  />
-                </div>
-              </div>
+              <ReusableInput
+                placeholder="Search user groups..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                prefixIcon={<Search className="h-3 w-3 text-gray-400" />}
+                allowClear={true}
+                onClear={() => setSearchTerm('')}
+                size="small"
+                className="w-50 pl-7"
+              />
             </div>
           </CardHeader>
           <CardContent className="pt-0">
-            <div className="border border-gray-200 rounded-lg overflow-hidden bg-white">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-gray-50/50 hover:bg-gray-50/50">
-                    <TableHead className="font-medium text-gray-900 py-3 text-sm">Actions</TableHead>
-                    <TableHead className="font-medium text-gray-900 py-3 text-sm">User Group</TableHead>
-                    <TableHead className="font-medium text-gray-900 py-3 text-sm">Users</TableHead>
-                    <TableHead className="font-medium text-gray-900 py-3 text-sm">Description</TableHead>
-                    <TableHead className="font-medium text-gray-900 py-3 text-sm">Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredData.map((group) => (
-                    <TableRow key={group.id} className="hover:bg-gray-50/50 transition-colors border-gray-100">
-                      <TableCell className="py-3">
-                        <div className="flex gap-1">
-                          <Button 
-                            size="sm" 
-                            className="bg-orange-500 hover:bg-orange-600 text-white h-7 px-2 text-xs"
-                          >
-                            <Edit className="h-3 w-3 mr-0.5" />
-                            Edit
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            variant="destructive"
-                            className="h-7 px-2 text-xs"
-                          >
-                            <Trash2 className="h-3 w-3 mr-0.5" />
-                            Delete
-                          </Button>
-                        </div>
-                      </TableCell>
-                      <TableCell className="py-3">
-                        <span className="font-medium text-gray-900 text-sm">{group.userGroupName}</span>
-                      </TableCell>
-                      <TableCell className="py-3">
-                        <span className="text-gray-700 text-sm">{group.users.join(', ')}</span>
-                      </TableCell>
-                      <TableCell className="py-3">
-                        <span className="text-gray-700 text-sm">{group.description}</span>
-                      </TableCell>
-                      <TableCell className="py-3">
-                        <Badge className={`${getStatusColor(group.status)} border font-medium text-xs px-2 py-0.5`}>
-                          {group.status}
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+            <ReusableTable
+              data={filteredData}
+              columns={columns}
+              actions={tableActions}
+              permissions={tablePermissions}
+              title=""
+              onRefresh={handleRefresh}
+              enableSearch={false} // We have our own search
+              enableSelection={true}
+              enableExport={true}
+              enableColumnVisibility={true}
+              enablePagination={true}
+              enableSorting={true}
+              enableFiltering={true}
+              pageSize={10}
+              emptyMessage="No user groups found"
+              rowHeight="normal"
+              storageKey="usergroups-table"
+            />
           </CardContent>
         </Card>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Confirm the action</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete {selectedRecord?.UserGroup || "this"} User Group?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <ReusableButton
+              variant="default"
+              onClick={() => setIsDelModalOpen(false)}
+            >
+              Cancel
+            </ReusableButton>
+            <ReusableButton
+              variant="primary"
+              danger={true}
+              onClick={() => { deleteUserGroupData(111, selectedRecord?.UserGroupId); setIsDelModalOpen(false) }}
+            >
+              Delete
+            </ReusableButton>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
+  );
+};
+
+// Main component wrapped with MessageProvider
+const UserGroups = () => {
+  return (
+    <MessageProvider position="top" maxCount={5} duration={3}>
+      <UserGroupsContent />
+    </MessageProvider>
   );
 };
 

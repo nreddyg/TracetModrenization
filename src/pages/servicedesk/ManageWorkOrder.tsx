@@ -46,9 +46,9 @@ const ManageWorkOrder = () => {
               </Label>
               <ReusableDropdown
                 value={filters.serviceRequestNo}
-                onChange={(value) => handleFilterChange('serviceRequestNo', value)}
+                onChange={(value) => handleFilterChange('serviceRequestNo', value as string)}
                 placeholder="SR000002"
-                size="sm"
+                size="small"
                 allowClear
                 options={[
                   { value: 'SR000001', label: 'SR000001' },
@@ -64,9 +64,9 @@ const ManageWorkOrder = () => {
               </Label>
               <ReusableDropdown
                 value={filters.workOrderNo}
-                onChange={(value) => handleFilterChange('workOrderNo', value)}
+                onChange={(value) => handleFilterChange('workOrderNo', value as string)}
                 placeholder="Select Work Order"
-                size="sm"
+                size="small"
                 allowClear
                 options={[
                   { value: 'WO001', label: 'WO001' },
@@ -82,9 +82,9 @@ const ManageWorkOrder = () => {
               </Label>
               <ReusableDropdown
                 value={filters.workOrderType}
-                onChange={(value) => handleFilterChange('workOrderType', value)}
+                onChange={(value) => handleFilterChange('workOrderType', value as string)}
                 placeholder="Select Work Order Type"
-                size="sm"
+                size="small"
                 allowClear
                 options={[
                   { value: 'maintenance', label: 'Maintenance' },
@@ -101,9 +101,9 @@ const ManageWorkOrder = () => {
               </Label>
               <ReusableDropdown
                 value={filters.status}
-                onChange={(value) => handleFilterChange('status', value)}
+                onChange={(value) => handleFilterChange('status', value as string)}
                 placeholder="Select Status"
-                size="sm"
+                size="small"
                 allowClear
                 options={[
                   { value: 'open', label: 'Open' },

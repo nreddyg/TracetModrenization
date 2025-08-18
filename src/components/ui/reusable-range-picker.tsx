@@ -27,7 +27,7 @@ interface DateRangePickerProps {
   disabled?: boolean,
 }
 
-export const ReusableRangePicker: React.FC<DateRangePickerProps> = ({
+const ReusableRangePicker: React.FC<DateRangePickerProps> = ({
   label,
   tooltip,
   value,
@@ -273,3 +273,4 @@ export const ReusableRangePicker: React.FC<DateRangePickerProps> = ({
 
   );
 };
+export default ReusableRangePicker;

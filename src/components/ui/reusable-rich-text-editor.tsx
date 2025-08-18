@@ -25,6 +25,7 @@ export interface ReusableRichTextEditorProps {
   tooltip?: string;
   error?: string;
   value?: string;
+  isRequired?:boolean;
   placeholder?: string;
   disabled?: boolean;
   minHeight?: number;
@@ -52,6 +53,7 @@ export const ReusableRichTextEditor = forwardRef<ReactQuill, ReusableRichTextEdi
     error, 
     value = '',
     placeholder = "Start typing...",
+    isRequired=false,
     disabled = false,
     readOnly = false,
     minHeight = 120,
@@ -287,7 +289,7 @@ export const ReusableRichTextEditor = forwardRef<ReactQuill, ReusableRichTextEdi
       
       return (
         <div className="flex items-center gap-2 mb-2">
-          <Label className="text-sm font-medium">{label}</Label>
+          <Label className="text-sm font-medium">{label}{isRequired ?<span className='text-red-500'> *</span>:''}</Label>
           {tooltip && (
             <TooltipProvider>
               <Tooltip>
@@ -341,3 +343,55 @@ export const ReusableRichTextEditor = forwardRef<ReactQuill, ReusableRichTextEdi
 );
 
 ReusableRichTextEditor.displayName = "ReusableRichTextEditor";
+
+
+// Example usage of the ReusableRichTextEditor component
+// function RichTextEditorExample() {
+//   const [value, setValue] = useState('<p>Hello <strong>world</strong>!</p>');
+
+//   return (
+//     <div className="p-6 space-y-6 max-w-3xl mx-auto">
+//         <ReusableRichTextEditor
+//           label="Description"
+//           tooltip="Use this rich text editor to format your content with styles, media, and lists."
+//           error="" // or "This field is required"
+//           value={value}
+//           placeholder="Type your content here..."
+//           disabled={false}
+//           readOnly={false}
+//           minHeight={150}
+//           maxHeight={300}
+//           showToolbar={true}
+//           containerClassName="my-4"
+//           className="bg-white"
+//           theme="snow"
+//           preserveWhitespace={false}
+//           bounds="self" // or pass a specific DOM element
+//           scrollingContainer={null} // or pass a selector/DOM element
+//           formats={[
+//             'header', 'font', 'size',
+//             'bold', 'italic', 'underline', 'strike',
+//             'color', 'background', 'script',
+//             'list', 'bullet', 'indent', 'align', 'direction',
+//             'blockquote', 'code', 'code-block',
+//             'link', 'image', 'video', 'formula'
+//           ]}
+//           modules={{
+//             // You can override or extend toolbar/modules here
+//             clipboard: {
+//               matchVisual: true,
+//             }
+//           }}
+//           onChange={(content, delta, source, editor) => {
+//             setValue(content);
+//           }}
+//           onFocus={() => {
+//           }}
+//           onBlur={() => {
+//           }}
+//           onSelection={(range, source, editor) => {
+//           }}
+//         />
+//     </div>
+//   );
+// }

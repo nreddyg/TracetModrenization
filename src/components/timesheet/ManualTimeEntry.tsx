@@ -101,7 +101,7 @@ export const ManualTimeEntry: React.FC<ManualTimeEntryProps> = ({
             <Label htmlFor="activityType">Activity Type</Label>
             <ReusableDropdown
               value={formData.activityType}
-              onChange={(value) => setFormData(prev => ({ ...prev, activityType: value }))}
+              onChange={(value) => setFormData(prev => ({ ...prev, activityType: value as string }))}
               placeholder="Select type"
               allowClear
               options={[
@@ -117,10 +117,10 @@ export const ManualTimeEntry: React.FC<ManualTimeEntryProps> = ({
             <Label htmlFor="ticketId">Ticket ID (Optional)</Label>
             <ReusableDropdown
               value={formData.ticketId}
-              onChange={(value) => setFormData(prev => ({ ...prev, ticketId: value }))}
+              onChange={(value) => setFormData(prev => ({ ...prev, ticketId: value as string }))}
               placeholder="Select ticket"
               allowClear
-              search
+              showSearch
               options={mockTickets.map(ticket => ({
                 value: ticket.id,
                 label: `${ticket.id} - ${ticket.title}`

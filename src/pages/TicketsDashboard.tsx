@@ -12,14 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { ReusableTable } from '@/components/ui/reusable-table';
 import { 
   Ticket,
   Plus,
@@ -369,63 +362,77 @@ const TicketsDashboard = () => {
               </Button>
             </CardHeader>
             <CardContent>
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Ticket ID</TableHead>
-                      <TableHead>Title</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Priority</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Assigned To</TableHead>
-                      <TableHead>Created</TableHead>
-                      <TableHead>Project</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {recentTickets.map((ticket) => (
-                      <TableRow key={ticket.id} className="cursor-pointer hover:bg-gray-50" onClick={() => navigate(`/tickets/${ticket.id}`)}>
-                        <TableCell className="font-medium text-blue-600">
-                          {ticket.id}
-                        </TableCell>
-                        <TableCell className="max-w-xs truncate">
-                          {ticket.title}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline">{ticket.type}</Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge className={getPriorityColor(ticket.priority)}>
-                            {ticket.priority}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge className={getStatusColor(ticket.status)}>
-                            {ticket.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>{ticket.assignedTo}</TableCell>
-                        <TableCell>{new Date(ticket.createdOn).toLocaleDateString()}</TableCell>
-                        <TableCell className="text-sm">{ticket.project}</TableCell>
-                        <TableCell>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              navigate(`/tickets/${ticket.id}`);
-                            }}
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+              <ReusableTable
+                data={recentTickets}
+                columns={[
+                  {
+                    accessorKey: 'id',
+                    header: 'Ticket ID',
+                    cell: ({ getValue }: any) => (
+                      <span className="font-medium text-blue-600">{getValue()}</span>
+                    )
+                  },
+                  {
+                    accessorKey: 'title',
+                    header: 'Title',
+                    cell: ({ getValue }: any) => (
+                      <span className="max-w-xs truncate">{getValue()}</span>
+                    )
+                  },
+                  {
+                    accessorKey: 'type',
+                    header: 'Type',
+                    cell: ({ getValue }: any) => (
+                      <Badge variant="outline">{getValue()}</Badge>
+                    )
+                  },
+                  {
+                    accessorKey: 'priority',
+                    header: 'Priority',
+                    cell: ({ getValue }: any) => (
+                      <Badge className={getPriorityColor(getValue())}>{getValue()}</Badge>
+                    )
+                  },
+                  {
+                    accessorKey: 'status',
+                    header: 'Status',
+                    cell: ({ getValue }: any) => (
+                      <Badge className={getStatusColor(getValue())}>{getValue()}</Badge>
+                    )
+                  },
+                  {
+                    accessorKey: 'assignedTo',
+                    header: 'Assigned To'
+                  },
+                  {
+                    accessorKey: 'createdOn',
+                    header: 'Created',
+                    cell: ({ getValue }: any) => (
+                      new Date(getValue()).toLocaleDateString()
+                    )
+                  },
+                  {
+                    accessorKey: 'project',
+                    header: 'Project'
+                  },
+                  {
+                    id: 'actions',
+                    header: 'Actions',
+                    cell: ({ row }: any) => (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/tickets/${row.original.id}`);
+                        }}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    )
+                  }
+                ] as any}
+              />
             </CardContent>
           </Card>
         </div>

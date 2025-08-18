@@ -40,6 +40,7 @@ export interface UploadProps {
   label?: string;
   tooltip?: string;
   error?: string;
+  isRequired?:boolean;
   multiple?: boolean;
   accept?: string;
   maxSize?: number; // in MB
@@ -84,7 +85,7 @@ export const ReusableUpload = forwardRef<HTMLInputElement, UploadProps>(
     label, 
     tooltip, 
     error, 
-    multiple = false,
+    multiple = true,
     accept = "*/*",
     maxSize = 10,
     maxFiles = 5,
@@ -98,6 +99,7 @@ export const ReusableUpload = forwardRef<HTMLInputElement, UploadProps>(
     dragAndDrop = true,
     directory = false,
     listType = 'text',
+    isRequired=false,
     action,
     method = 'POST',
     headers,
@@ -124,7 +126,7 @@ export const ReusableUpload = forwardRef<HTMLInputElement, UploadProps>(
     const renderLabel = () => {
       if (!label) return null;
 
-      const labelElement = <Label className="text-sm font-medium">{label}</Label>;
+      const labelElement = <Label className="text-sm font-medium">{label}{isRequired ?<span className='text-red-500'> *</span>:''}</Label>;
 
       if (tooltip) {
         return (

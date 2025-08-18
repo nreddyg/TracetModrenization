@@ -12,7 +12,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { useAppDispatch } from '@/store';
+import { useAppDispatch } from '@/store/reduxStore';
 import { addTicket } from '@/store/slices/ticketsSlice';
 import { ReusableInput } from '@/components/ui/reusable-input';
 import { ReusableTextarea } from '@/components/ui/reusable-textarea';
@@ -190,7 +190,7 @@ const TicketCreate = () => {
                           placeholder="Select category"
                           options={categoryOptions}
                           value={form.watch('category')}
-                          onChange={(value) => form.setValue('category', value)}
+                          onChange={(value) => form.setValue('category', value as string)}
                           error={form.formState.errors.category?.message}
                         />
                       </div>
@@ -212,7 +212,7 @@ const TicketCreate = () => {
                           placeholder="Select assignee"
                           options={assigneeOptions}
                           value={form.watch('assignee')}
-                          onChange={(value) => form.setValue('assignee', value)}
+                          onChange={(value) => form.setValue('assignee', value as string)}
                           error={form.formState.errors.assignee?.message}
                         />
 
@@ -221,8 +221,9 @@ const TicketCreate = () => {
                           tooltip="Select due date"
                           placeholder="Select due date"
                           value={form.watch('dueDate')}
-                          onChange={(date) => form.setValue('dueDate', date)}
-                          error={form.formState.errors.dueDate?.message}
+                          onChange={(date) => form.setValue('dueDate', date || undefined)}
+                          error={!!form.formState.errors.dueDate}
+                          errorMessage={form.formState.errors.dueDate?.message}
                         />
                       </div>
 
@@ -233,7 +234,7 @@ const TicketCreate = () => {
                           placeholder="Select department"
                           options={departmentOptions}
                           value={form.watch('department')}
-                          onChange={(value) => form.setValue('department', value)}
+                          onChange={(value) => form.setValue('department', value as string)}
                           error={form.formState.errors.department?.message}
                         />
 
@@ -340,7 +341,7 @@ const TicketCreate = () => {
                                       { value: 'other', label: 'Other' }
                                     ]}
                                     value={form.watch('operatingSystem')}
-                                    onChange={(value) => form.setValue('operatingSystem', value)}
+                                    onChange={(value) => form.setValue('operatingSystem', value as string)}
                                     error={form.formState.errors.operatingSystem?.message}
                                   />
 
@@ -355,7 +356,7 @@ const TicketCreate = () => {
                                       { value: 'edge', label: 'Edge' }
                                     ]}
                                     value={form.watch('browser')}
-                                    onChange={(value) => form.setValue('browser', value)}
+                                    onChange={(value) => form.setValue('browser', value as string)}
                                     error={form.formState.errors.browser?.message}
                                   />
                                 </div>
@@ -395,7 +396,7 @@ const TicketCreate = () => {
                   </ReusableButton>
                   <ReusableButton 
                     onClick={form.handleSubmit(saveDraft)} 
-                    variant="outline" 
+                    variant="default"
                     className="w-full"
                     icon={<Save className="h-4 w-4" />}
                   >

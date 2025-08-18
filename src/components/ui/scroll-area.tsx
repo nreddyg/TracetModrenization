@@ -1,12 +1,63 @@
+// import * as React from "react"
+// import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area"
+
+// import { cn } from "@/lib/utils"
+
+// const ScrollArea = React.forwardRef<
+//   React.ElementRef<typeof ScrollAreaPrimitive.Root>,
+//   React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Root>
+// >(({ className, children, ...props }, ref) => (
+//   <ScrollAreaPrimitive.Root
+//     ref={ref}
+//     className={cn("relative overflow-hidden", className)}
+//     {...props}
+//   >
+//     <ScrollAreaPrimitive.Viewport className="h-full w-full rounded-[inherit]">
+//       {children}
+//     </ScrollAreaPrimitive.Viewport>
+//     <ScrollBar />
+//     <ScrollAreaPrimitive.Corner />
+//   </ScrollAreaPrimitive.Root>
+// ))
+// ScrollArea.displayName = ScrollAreaPrimitive.Root.displayName
+
+// const ScrollBar = React.forwardRef<
+//   React.ElementRef<typeof ScrollAreaPrimitive.ScrollAreaScrollbar>,
+//   React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.ScrollAreaScrollbar>
+// >(({ className, orientation = "vertical", ...props }, ref) => (
+//   <ScrollAreaPrimitive.ScrollAreaScrollbar
+//     ref={ref}
+//     orientation={orientation}
+//     className={cn(
+//       "flex touch-none select-none transition-colors",
+//       orientation === "vertical" &&
+//         "h-full w-2.5 border-l border-l-transparent p-[1px]",
+//       orientation === "horizontal" &&
+//         "h-2.5 flex-col border-t border-t-transparent p-[1px]",
+//       className
+//     )}
+//     {...props}
+//   >
+//     <ScrollAreaPrimitive.ScrollAreaThumb className="relative flex-1 rounded-full bg-border" />
+//   </ScrollAreaPrimitive.ScrollAreaScrollbar>
+// ))
+// ScrollBar.displayName = ScrollAreaPrimitive.ScrollAreaScrollbar.displayName
+
+// export { ScrollArea, ScrollBar }
 import * as React from "react"
 import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area"
 
 import { cn } from "@/lib/utils"
 
+interface ScrollAreaProps
+  extends React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Root> {
+  hideScrollbar?: boolean
+}
+
 const ScrollArea = React.forwardRef<
   React.ElementRef<typeof ScrollAreaPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Root>
->(({ className, children, ...props }, ref) => (
+  ScrollAreaProps
+>(({ className, children, hideScrollbar = false, ...props }, ref) => (
   <ScrollAreaPrimitive.Root
     ref={ref}
     className={cn("relative overflow-hidden", className)}
@@ -15,16 +66,21 @@ const ScrollArea = React.forwardRef<
     <ScrollAreaPrimitive.Viewport className="h-full w-full rounded-[inherit]">
       {children}
     </ScrollAreaPrimitive.Viewport>
-    <ScrollBar />
+    <ScrollBar hidden={hideScrollbar} />
     <ScrollAreaPrimitive.Corner />
   </ScrollAreaPrimitive.Root>
 ))
 ScrollArea.displayName = ScrollAreaPrimitive.Root.displayName
 
+interface ScrollBarProps
+  extends React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.ScrollAreaScrollbar> {
+  hidden?: boolean
+}
+
 const ScrollBar = React.forwardRef<
   React.ElementRef<typeof ScrollAreaPrimitive.ScrollAreaScrollbar>,
-  React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.ScrollAreaScrollbar>
->(({ className, orientation = "vertical", ...props }, ref) => (
+  ScrollBarProps
+>(({ className, orientation = "vertical", hidden = false, ...props }, ref) => (
   <ScrollAreaPrimitive.ScrollAreaScrollbar
     ref={ref}
     orientation={orientation}
@@ -34,13 +90,17 @@ const ScrollBar = React.forwardRef<
         "h-full w-2.5 border-l border-l-transparent p-[1px]",
       orientation === "horizontal" &&
         "h-2.5 flex-col border-t border-t-transparent p-[1px]",
+      hidden && "opacity-0 pointer-events-none",
       className
     )}
     {...props}
   >
-    <ScrollAreaPrimitive.ScrollAreaThumb className="relative flex-1 rounded-full bg-border" />
+    <ScrollAreaPrimitive.ScrollAreaThumb
+      className={cn("relative flex-1 rounded-full bg-border", hidden && "bg-transparent")}
+    />
   </ScrollAreaPrimitive.ScrollAreaScrollbar>
 ))
 ScrollBar.displayName = ScrollAreaPrimitive.ScrollAreaScrollbar.displayName
 
 export { ScrollArea, ScrollBar }
+

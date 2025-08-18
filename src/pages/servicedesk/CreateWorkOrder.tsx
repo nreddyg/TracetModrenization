@@ -93,7 +93,6 @@ const CreateWorkOrder = () => {
                             value={field.value}
                             onChange={field.onChange}
                             placeholder="Work Order Type"
-                            required
                             options={[
                               { value: 'maintenance', label: 'Maintenance' },
                               { value: 'repair', label: 'Repair' },
@@ -120,7 +119,7 @@ const CreateWorkOrder = () => {
                             value={field.value}
                             onChange={field.onChange}
                             placeholder="Select Priority"
-                            required
+                            
                             options={[
                               { value: 'low', label: 'Low' },
                               { value: 'medium', label: 'Medium' },
@@ -227,7 +226,7 @@ const CreateWorkOrder = () => {
                             value={field.value}
                             onChange={field.onChange}
                             placeholder="Select Service Request"
-                            search
+                            showSearch
                             options={[
                               { value: 'sr001', label: 'SR001 - Hardware Issue' },
                               { value: 'sr002', label: 'SR002 - Software Problem' },

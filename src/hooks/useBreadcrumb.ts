@@ -1,6 +1,6 @@
 
 import { useEffect } from 'react';
-import { useAppDispatch } from '@/store';
+import { useAppDispatch } from '@/store/reduxStore';
 import { setBreadcrumb } from '@/store/slices/uiSlice';
 
 interface BreadcrumbItem {

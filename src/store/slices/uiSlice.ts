@@ -5,7 +5,6 @@ interface UIState {
   sidebarCollapsed: boolean;
   currentBreadcrumb: { label: string; href?: string; icon?: React.ReactNode }[];
   theme: 'light' | 'dark';
-  loading: boolean;
   notifications: Array<{ id: string; message: string; type: 'success' | 'error' | 'warning' | 'info' }>;
 }
 
@@ -13,7 +12,6 @@ const initialState: UIState = {
   sidebarCollapsed: false,
   currentBreadcrumb: [],
   theme: 'light',
-  loading: false,
   notifications: [],
 };
 
@@ -30,9 +28,6 @@ const uiSlice = createSlice({
     setTheme: (state, action: PayloadAction<'light' | 'dark'>) => {
       state.theme = action.payload;
     },
-    setLoading: (state, action: PayloadAction<boolean>) => {
-      state.loading = action.payload;
-    },
     addNotification: (state, action: PayloadAction<Omit<UIState['notifications'][0], 'id'>>) => {
       state.notifications.push({
         ...action.payload,
@@ -45,5 +40,5 @@ const uiSlice = createSlice({
   },
 });
 
-export const { toggleSidebar, setBreadcrumb, setTheme, setLoading, addNotification, removeNotification } = uiSlice.actions;
+export const { toggleSidebar, setBreadcrumb, setTheme, addNotification, removeNotification } = uiSlice.actions;
 export default uiSlice.reducer;

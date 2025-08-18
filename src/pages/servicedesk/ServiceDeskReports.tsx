@@ -237,7 +237,7 @@ const ServiceDeskReports = () => {
                       <Label className="text-sm font-medium text-gray-700">Service Request Type</Label>
                       <ReusableDropdown
                         value={filters.serviceRequestType}
-                        onChange={(value) => handleFilterChange('serviceRequestType', value)}
+                        onChange={(value) => handleFilterChange('serviceRequestType', value as string)}
                         placeholder="Select type"
                         allowClear
                         options={[
@@ -254,7 +254,7 @@ const ServiceDeskReports = () => {
                       <Label className="text-sm font-medium text-gray-700">Status</Label>
                       <ReusableDropdown
                         value={filters.status}
-                        onChange={(value) => handleFilterChange('status', value)}
+                        onChange={(value) => handleFilterChange('status', value as string)}
                         placeholder="Select status"
                         allowClear
                         options={[
@@ -330,10 +330,10 @@ const ServiceDeskReports = () => {
                       <Label className="text-sm font-medium text-gray-700">Level Five Company</Label>
                       <ReusableDropdown
                         value={filters.levelFiveCompany}
-                        onChange={(value) => handleFilterChange('levelFiveCompany', value)}
+                        onChange={(value) => handleFilterChange('levelFiveCompany', value as string)}
                         placeholder="Select company"
                         allowClear
-                        search
+                        showSearch
                         options={[
                           { value: 'company1', label: 'Company 1' },
                           { value: 'company2', label: 'Company 2' },
@@ -347,10 +347,10 @@ const ServiceDeskReports = () => {
                       <Label className="text-sm font-medium text-gray-700">Requested By</Label>
                       <ReusableDropdown
                         value={filters.requestedBy}
-                        onChange={(value) => handleFilterChange('requestedBy', value)}
+                        onChange={(value) => handleFilterChange('requestedBy', value as string)}
                         placeholder="Select user"
                         allowClear
-                        search
+                        showSearch
                         options={[
                           { value: 'user1', label: 'User 1' },
                           { value: 'user2', label: 'User 2' },
@@ -364,10 +364,10 @@ const ServiceDeskReports = () => {
                       <Label className="text-sm font-medium text-gray-700">Customer</Label>
                       <ReusableDropdown
                         value={filters.customer}
-                        onChange={(value) => handleFilterChange('customer', value)}
+                        onChange={(value) => handleFilterChange('customer', value as string)}
                         placeholder="Select customer"
                         allowClear
-                        search
+                        showSearch
                         options={[
                           { value: 'customer1', label: 'Customer 1' },
                           { value: 'customer2', label: 'Customer 2' },

@@ -1,63 +1,85 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
+
+
+import { useState, useEffect, useCallback, useRef, ReactNode } from 'react';
+import { useParams, useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { ReusableUpload, UploadFile } from '@/components/ui/reusable-upload';
+import { ReusableUpload } from '@/components/ui/reusable-upload';
 import { ReusableRichTextEditor } from '@/components/ui/reusable-rich-text-editor';
-import { ReusableTimePicker } from '@/components/ui/reusable-time-picker';
 import { ReusableButton } from '@/components/ui/reusable-button';
 import { ReusableMultiSelect } from '@/components/ui/reusable-multi-select';
 import { ReusableDropdown } from '@/components/ui/reusable-dropdown';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { ArrowLeft, Edit, Save, X, Clock, User, Calendar, Tag, Paperclip, Link, MoreHorizontal, Copy, Trash2, CheckCircle, Search, ChevronLeft, ChevronRight, Bell, UserCircle } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+import { ArrowLeft, Edit, Save, X, Tag, Link, Search, ChevronLeft, ChevronRight, } from 'lucide-react';
 import { ReusableTextarea } from '@/components/ui/reusable-textarea';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@radix-ui/react-accordion';
-import { Separator } from '@radix-ui/react-separator';
 import { ReusableInput } from '@/components/ui/reusable-input';
 import { ReusableDatePicker } from '@/components/ui/reusable-datepicker';
 import ReusableTable from '@/components/ui/reusable-table';
+import { BaseField, GenericObject, UploadedFileOutput, UploadFileInput } from '@/Local_DB/types/types';
+import { CREATE_TICKET_DB, modules } from '@/Local_DB/Form_JSON_Data/CreateTicketDB';
+import { cn } from '@/lib/utils';
+import { deleteSRUpload, getAllSRDetailsList, getCommentHistoryList, getCommentsAPI, getLinkedServiceRequests, getManageAssetsList, GetServiceRequestAssignToLookups, getServiceRequestDetailsById, getSRAdditionalFieldsByServiceRequestType, getSRBranchList, getSRCCListLookupsList, getSRConfigList, getSRCustomerLookupsList, getSRLinkToLookupsList, getSRRequestByLookupsList, getStatusLookups, getSubscriptionByCustomer, getSubscriptionHistoryByCustomer, getUploadedFilesByServiceRequestId, postCommentAPI, postServiceRequest, saveFileUpload, ServiceRequestTypeLookups, updateServiceRequest } from '@/services/ticketServices';
+import { fileToByteArray, formatDate, byteArrayToFile, formatDateToDDMMYYYY, getActivityStatusColor, getPriorityColor, getStatusColor } from '@/_Helper_Functions/HelperFunctions';
+import axios from 'axios';
+import { useAppDispatch, useAppSelector } from '@/store/reduxStore';
+import { setLoading } from '@/store/slices/projectsSlice';
+import { useMessage } from '@/components/ui/reusable-message';
+import { ColumnDef } from '@tanstack/react-table';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { FaSearch } from 'react-icons/fa';
+import { ReusableRadio } from '@/components/ui/reusable-radio';
+import { ReusableCheckbox } from '@/components/ui/reusable-checkbox';
+import { BsFileEarmarkPdf, BsFiletypeHtml, BsFiletypePptx } from 'react-icons/bs';
+import {PiMicrosoftExcelLogoFill,PiMicrosoftWordLogo,PiImage,} from "react-icons/pi";
+import { RxCross2 } from "react-icons/rx";
 
-interface ChangeHistory {
+interface HistoryRecord {
   id: string;
-  timestamp: string;
+  date: string;
   user: string;
+  action: string;
   field: string;
   oldValue: string;
   newValue: string;
-  changeType: 'field_change' | 'status_change' | 'comment' | 'attachment';
-}
-
-interface Ticket {
-  id: string;
-  title: string;
   description: string;
-  type: 'Bug' | 'Feature' | 'Request' | 'Other';
-  priority: 'Low' | 'Medium' | 'High' | 'Critical';
-  status: 'Open' | 'In Progress' | 'Resolved' | 'Closed';
-  assignedTo: string;
-  createdBy: string;
-  createdOn: string;
-  estimatedTime: string;
-  sprintNo?: string;
-  assetCode?: string;
-  tags: string[];
-  attachments: string[];
-  linkedTickets: string[];
 }
-
+export interface Ticket {
+  CompanyId?: number,
+  UserName?: string,
+  ServiceRequestId?: number,
+  ServiceRequestNo?: string,
+  Title?: string,
+  ServiceRequestType?: string,
+  LinkTo?: string | null,
+  RequestedDate?: string,
+  RequestedBy?: string,
+  BranchId?: number,
+  Branch?: string,
+  Customer?: string | null,
+  SLA?: string,
+  AssetId?: null,
+  FileUploadURLs?: string,
+  IsDraft?: boolean,
+  IsOverDue?: boolean,
+  CreatedDate?: string,
+  Severity?: string,
+  Status?: string,
+  Priority?: string | null,
+  AssigneeSelectedUsers?: string,
+  AssigneeSelectedUserGroups?: string,
+  CCListSelectedUsers?: string,
+  CCListSelectedUserGroups?: string,
+  ChildServiceRequestId?:number,
+   ChildServiceRequestNo?:string,
+  RequestType?: string,
+  AssignedTo?:string,
+  TicketStatus?: string
+}
 interface ActivityLog {
   id: string;
   user: string;
@@ -67,985 +89,1463 @@ interface ActivityLog {
   hoursSpent: string;
   status: 'Linked' | 'Unlinked' | 'Manual Entry';
 }
-
 interface Comment {
+  Comment: ReactNode;
+  RequestedDate: ReactNode;
+  CommenterName: any;
   id: string;
   user: string;
   date: string;
   text: string;
   type: 'comment' | 'status_change' | 'time_logged';
 }
-const mockTickets: Ticket[] = [
-  {
-    id: 'TCK-10245',
-    title: 'Fix UI in Login Form',
-    description: 'The login form has alignment issues on mobile devices. The submit button is not properly aligned and the input fields overlap on smaller screens.',
-    type: 'Bug',
-    priority: 'High',
-    status: 'In Progress',
-    assignedTo: 'John Doe',
-    createdBy: 'Jane Smith',
-    createdOn: '2025-06-10',
-    estimatedTime: '4h',
-    sprintNo: 'Sprint-14',
-    assetCode: 'LAP-0921',
-    tags: ['UI', 'High Impact', 'Mobile'],
-    attachments: ['login-form-screenshot.png', 'mobile-view.jpg'],
-    linkedTickets: ['TCK-10241', 'TCK-10242'],
-  },
-  {
-    id: 'TCK-10246',
-    title: 'Add Dashboard Analytics',
-    description: 'Implement comprehensive analytics dashboard with charts and metrics for user engagement and system performance.',
-    type: 'Feature',
-    priority: 'Medium',
-    status: 'Open',
-    assignedTo: 'Alice Johnson',
-    createdBy: 'Bob Wilson',
-    createdOn: '2025-06-11',
-    estimatedTime: '8h',
-    sprintNo: 'Sprint-15',
-    assetCode: 'LAP-0922',
-    tags: ['Analytics', 'Dashboard', 'Charts'],
-    attachments: ['dashboard-mockup.png'],
-    linkedTickets: ['TCK-10247'],
-  },
-  {
-    id: 'TCK-10247',
-    title: 'Update User Profile Settings',
-    description: 'Enhance user profile page with additional settings and preferences options.',
-    type: 'Request',
-    priority: 'Low',
-    status: 'Resolved',
-    assignedTo: 'Mike Brown',
-    createdBy: 'Sarah Davis',
-    createdOn: '2025-06-09',
-    estimatedTime: '2h',
-    assetCode: 'LAP-0923',
-    tags: ['Profile', 'Settings'],
-    attachments: [],
-    linkedTickets: [],
-  },
-  {
-    id: 'TCK-10248',
-    title: 'Performance Optimization',
-    description: 'Optimize database queries and improve overall application performance.',
-    type: 'Bug',
-    priority: 'Critical',
-    status: 'Open',
-    assignedTo: 'David Lee',
-    createdBy: 'Emma Wilson',
-    createdOn: '2025-06-12',
-    estimatedTime: '6h',
-    sprintNo: 'Sprint-14',
-    assetCode: 'LAP-0924',
-    tags: ['Performance', 'Database', 'Optimization'],
-    attachments: ['performance-report.pdf'],
-    linkedTickets: ['TCK-10245'],
-  },
-];
-
-const mockChangeHistory: ChangeHistory[] = [
-  {
-    id: '1',
-    timestamp: '2025-06-13 10:30:00',
-    user: 'John Doe',
-    field: 'status',
-    oldValue: 'Open',
-    newValue: 'In Progress',
-    changeType: 'status_change'
-  },
-  {
-    id: '2',
-    timestamp: '2025-06-12 14:15:00',
-    user: 'Jane Smith',
-    field: 'priority',
-    oldValue: 'Medium',
-    newValue: 'High',
-    changeType: 'field_change'
-  },
-  {
-    id: '3',
-    timestamp: '2025-06-11 09:00:00',
-    user: 'Jane Smith',
-    field: 'assignedTo',
-    oldValue: 'Unassigned',
-    newValue: 'John Doe',
-    changeType: 'field_change'
-  },
-  {
-    id: '4',
-    timestamp: '2025-06-10 16:45:00',
-    user: 'Jane Smith',
-    field: 'description',
-    oldValue: 'Login form has issues',
-    newValue: 'The login form has alignment issues on mobile devices. The submit button is not properly aligned and the input fields overlap on smaller screens.',
-    changeType: 'field_change'
-  }
-];
-
-const mockActivityLogs: ActivityLog[] = [
-  {
-    id: '1',
-    user: 'John Doe',
-    date: '2025-06-13',
-    app: 'VS Code',
-    description: 'Fixed alignment issues in login component',
-    hoursSpent: '01:30',
-    status: 'Linked',
-  },
-  {
-    id: '2',
-    user: 'John Doe',
-    date: '2025-06-12',
-    app: 'Chrome',
-    description: 'Testing UI changes',
-    hoursSpent: '00:45',
-    status: 'Linked',
-  },
-];
-
-const mockComments: Comment[] = [
-  {
-    id: '1',
-    user: 'Jane Smith',
-    date: '2025-06-10 09:00',
-    text: 'Ticket created',
-    type: 'comment',
-  },
-  {
-    id: '2',
-    user: 'John Doe',
-    date: '2025-06-11 14:30',
-    text: 'Started working on the mobile responsiveness issue',
-    type: 'comment',
-  },
-  {
-    id: '3',
-    user: 'System',
-    date: '2025-06-12 10:15',
-    text: 'Status changed from Open to In Progress',
-    type: 'status_change',
-  },
-];
-
+interface OptionItem {
+  [key: string]: any;
+  label?: string;
+  value?: any;
+}
+interface OptType {
+  data: OptionItem[];
+  label: string;
+  value: string;
+  defaultValues?: string | string[];
+}
+interface allResponsesType {
+  ServiceRequestType: OptType
+  AssigneeSelectedUsers: OptType
+  RequestedBy: OptType
+  Customer: OptType
+  LinkTo: OptType
+  AssetId: OptType
+}
+interface additionalFieldData {
+  AdditionalFieldName: any
+  TextBoxValue: any
+  DateValues: any
+  SelectedValues: any
+}
+const enableInClose = ["CCListSelectedUsers", "Status", "FileUploadURLs", "Title", "Description"]
 const TicketView = () => {
   const { id } = useParams();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
   const navigate = useNavigate();
-
-  const [tickets] = useState<Ticket[]>(mockTickets);
-  const [selectedTicketId, setSelectedTicketId] = useState<string>(id || mockTickets[0].id);
-  const [selectedTicket, setSelectedTicket] = useState<Ticket>(mockTickets.find(t => t.id === selectedTicketId) || mockTickets[0]);
+  const [isCreateMode, setIsCreateMode] = useState(location.pathname === '/service-desk/create-ticket');
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [selectedTicketId, setSelectedTicketId] = useState<string>();
+  const [selectedTicket, setSelectedTicket] = useState<Ticket>({} as Ticket);
   const [originalTicket, setOriginalTicket] = useState<Ticket>(selectedTicket);
   const [hasChanges, setHasChanges] = useState(false);
-  const [changeHistory] = useState<ChangeHistory[]>(mockChangeHistory);
-  const [activityLogs] = useState<ActivityLog[]>(mockActivityLogs);
-  const [comments] = useState<Comment[]>(mockComments);
-  const [newComment, setNewComment] = useState('');
+  const [activityLogs] = useState<ActivityLog[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isInboxCollapsed, setIsInboxCollapsed] = useState(false);
-  const [attachments, setAttachments] = useState<UploadFile[]>([]);
-  const [estimatedTime, setEstimatedTime] = useState('08:00');
-  const[cols,setCols]=useState([{header:"Product Name",dataIndex:"Product Name",id:"1"},{header:"Start date",id:"2"},{header:"End date",id:"3"},{header:"Expiry date",id:"4"},{header:"Subscription Type",id:"5"},{header:"Subscription Status",id:"6"},{header:"Actions"}])
-  const [dataSource,setDataSource]=useState([])
-  const form = useForm()
+  const [isEditing, setIsEditing] = useState(false);
+  const [statusOptions,setStatusOptions]=useState([
+    { value: 'All Status', label: 'All Status' },
+    { value: 'Open', label: 'Open' },
+    { value: 'In Progress', label: 'In Progress' },
+    { value: 'Resolved', label: 'Resolved' },
+    { value: 'Closed', label: 'Closed' }
+  ]);
+  const [statusFilter, setStatusFilter] = useState('All Status');
+  const [cols, setCols] = useState([])
+  const [dataSource, setDataSource] = useState([]);
+  const [accordionOpen, setAccordionOpen] = useState<string | undefined>(undefined);
+  const [showAccordion, setShowAccordion] = useState<boolean>(false);
+  const [attachments, setAttachments] = useState<UploadedFileOutput[]>([]);
+  const [ticketStatus, setTicketStatus] = useState<string>('Open');
+  const [uploadData, setUploadData] = useState([]);
+  // History popup states
+  const [isHistoryPopupOpen, setIsHistoryPopupOpen] = useState(false);
+  const [selectedRowForHistory, setSelectedRowForHistory] = useState<any>(null);
+  const [historyData, setHistoryData] = useState<HistoryRecord[]>([]);
+  const [historyColumns, setHistoryColumns] = useState([]);
+  const [comments, setComments] = useState<Comment[]>();
+  const [commentHistory, setCommentHistory] = useState<any>([])
+  const [childListData, setChildListData] = useState<any>([])
+  const [updatedComments,setUpdatedComments]=useState("")
+  const [notifyValues,setNotifyValues]=useState({"Notify":[]})
+  const selectedAssetCodesData: GenericObject[] = location.state ? location.state?.data : []
+  const msg = useMessage()
+  const dispatch = useAppDispatch();
+  const storeData = useAppSelector(state => state);
 
-  const filteredTickets = tickets.filter(ticket =>
-    ticket.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    ticket.id.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
+  // Add ref to track previous ServiceRequestType to prevent infinite loops
+  const prevServiceRequestTypeRef = useRef<string>('');
+  const filteredTickets = tickets?.filter(ticket => {
+    const matchesSearch = ticket.Title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      ticket.ServiceRequestNo.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === 'All Status' || ticket.Status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+  const [fields, setFields] = useState<BaseField[]>(CREATE_TICKET_DB);
+  const form = useForm<GenericObject>({
+    defaultValues: fields.reduce((acc, f) => {
+      acc[f.name!] = f.defaultValue ?? '';
+      return acc;
+    }, {} as GenericObject),
+    mode: 'onChange'
+  });
+  const commentForm = useForm({
+    defaultValues: {
+      comment: ""
+    }
+  });
+  const { control, register, handleSubmit, trigger, watch, setValue, reset, formState: { errors } } = form;
+  //api calls to be made in edit mode
   useEffect(() => {
-    const ticket = tickets.find(t => t.id === selectedTicketId);
-    if (ticket) {
-      setSelectedTicket(ticket);
-      setOriginalTicket(ticket);
+    if (!isCreateMode) {
+      fetchAllTickets();
+    }
+  }, [isCreateMode])
+  // Function to clear all form values but preserve all field configurations and options
+  const clearAllFormValues = useCallback(() => {
+    const currentFields = fields;
+    currentFields.forEach(field => {
+      setValue(field.name!, '');
+    });
+  }, [setValue]);
+  useEffect(() => {
+    if (selectedTicketId) {
+      fetchSingleTicketRelatedAPIs(Number(selectedTicketId))
       setHasChanges(false);
     }
-  }, [selectedTicketId, tickets]);
+  }, [selectedTicketId])
+  //Will execute on component mounts and respective dependency mutations
+  useEffect(() => {
+    if (selectedAssetCodesData)
+      fetchAllLookUps();
+  }, []);
+  useEffect(() => {
+    if (watch('Customer')) fetchSubscriptionByCustomer(watch('Customer'), 111, 'All');
+  }, [watch('Customer')])
+  useEffect(() => {
+    if (isCreateMode) {
+      const currentServiceRequestType = watch('ServiceRequestType');
+      if (currentServiceRequestType !== prevServiceRequestTypeRef.current) {
+        prevServiceRequestTypeRef.current = currentServiceRequestType;
+        if (currentServiceRequestType) {
+          const additionalFields = fields.filter(f => f.isAdditionalField);
+          additionalFields.forEach(field => {
+            setValue(field.name!, '');
+          });
+          fetchAdditionalFieldsData(currentServiceRequestType, 111);
+        } else {
+          const additionalFields = fields.filter(f => f.isAdditionalField);
+          additionalFields.forEach(field => {
+            setValue(field.name!, '');
+          });
+          setShowAccordion(false);
+          setAccordionOpen(undefined);
+        }
+      }
+    }
+  }, [watch('ServiceRequestType')])
+  useEffect(() => {
+    if (form.watch("FileUploadURLs")) {
+      const process = async () => {
+        const result = await multipleFileUpload(form.watch("FileUploadURLs"));
+      };
+      process();
+    }
+  }, [form.watch("FileUploadURLs")]);
+  useEffect(() => {
+    if (Object.keys(originalTicket).length > 0) {
+      form.reset({ ...originalTicket,...notifyValues })
+    }
+  }, [originalTicket])
+  useEffect(() => {
+    triggerAccordioItemsValidations();
+  }, [accordionOpen])
+  //fetch single ticket related apis
+  async function fetchSingleTicketRelatedAPIs(serviceRequestId: number) {
+    dispatch(setLoading(true));
+    try {
+      const [TicketDetails, childTickets, uploadedFiles, getComments, getCommentsHistory] = await Promise.allSettled([
+        getServiceRequestDetailsById(serviceRequestId, 111, 'All'), getLinkedServiceRequests(serviceRequestId, 111), getUploadedFilesByServiceRequestId(serviceRequestId, 111), getCommentsAPI(serviceRequestId.toString(), 111), getCommentHistoryList(serviceRequestId, 111)
+      ]);
+      if (TicketDetails.status === 'fulfilled' && TicketDetails.value.data && TicketDetails.value.data.ServiceRequestDetails) {
+        let ticketData = TicketDetails.value.data.ServiceRequestDetails
+        setSelectedTicket(ticketData);
+        try {
+          await fetchAdditionalFieldsData(ticketData.ServiceRequestType, 111, ticketData);
+        } catch (err) {}
+      }
+      if (childTickets.status === 'fulfilled' && childTickets.value.data) {
+        if (childTickets.value.data.status == undefined)
+        {
+           setChildListData(childTickets.value.data)
+        }else{
+          setChildListData([])
+        }
+      } else {
+        setChildListData([])
+      }
+      if (uploadedFiles.status === 'fulfilled' && uploadedFiles.value.data) {
+        setUploadData(uploadedFiles.value.data?.FileUploadDetails)
+      } else {
+        setUploadData([]);
+      }
+      if (getComments.status === 'fulfilled' && getComments.value.data) {
+        if (getComments.value.data?.status===undefined ) {
+          if(getComments.value.data.length>0){
+         const commentsArray = getComments.value.data[0]?.Comments || [];
+          setComments(commentsArray);
+          }else{
+            setComments([]);
+          }
+        } else {
+          setComments([]);
+        }
+      }
+      if (getCommentsHistory.status === 'fulfilled' && getCommentsHistory.value.data) {
+        if (getCommentsHistory.value.data?.status===undefined) {
+         if(getCommentsHistory.value.data.length>0){
+          setCommentHistory(getCommentsHistory.value.data[0].Comments)
+         }else{
+          setCommentHistory([]);
+         }
+        } else {
+          setCommentHistory([]);
+        }
+      }
+    } catch (error) {
+      msg.warning(`Error fetching lookups: ${error}`)
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }
+  //fetch all tickets list
+  async function fetchAllTickets() {
+    dispatch(setLoading(true))
+    await getAllSRDetailsList('All', 111, 'All').then(res => {
+      if (res.success && res.data.status === undefined) {
+        if (Array.isArray(res.data)) {
+          setTickets(res.data)
+        } else {
+          setTickets([])
+        }
 
-  const handleTicketSelect = (ticketId: string) => {
+      } else {
+
+      }
+    }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
+  }
+  //fetch uploaded files data based on the service request id 
+  async function fetchUploadedFilesByServiceRequestId(serviceRequestId: number) {
+    await getUploadedFilesByServiceRequestId(serviceRequestId, 111).then(res => {
+      if (res.success && res.data) {
+        setUploadData(res.data?.FileUploadDetails)
+      } else {
+        setUploadData([]);
+      }
+    }).catch(err => {
+    });
+  }
+  //store lookups data in json
+  const setLookupsDataInJson = (lookupsData: allResponsesType, config: GenericObject): void => {
+    const arr = Object.keys(lookupsData)
+    const groupNames: string[] = []
+    const opts: { [key: string]: any } = {}
+    arr.forEach((obj) => {
+      let ret = []
+      if (lookupsData[obj].isGrouping) {
+        groupNames.push(obj)
+        let groupOpts = []
+        ret = lookupsData[obj].groupData.map((element) => {
+          groupOpts = element.data.map((ele) => {
+            let opt = {}
+            opt["label"] = ele[element.label]
+            opt["value"] = ele[element.value]
+            return opt
+          });
+          return {
+            "label": element.groupLabel,
+            "options": groupOpts
+          }
+        })
+
+      } else {
+        ret = lookupsData[obj].data.map((element) => {
+          let opt = {}
+          opt["label"] = element[lookupsData[obj].label]
+          opt["value"] = element[lookupsData[obj].value]
+          return opt
+        });
+      }
+
+      opts[obj] = ret
+
+    })
+    const data = structuredClone(fields);
+    data.forEach((obj) => {
+      if (arr.includes(obj.name)) {
+        if (groupNames.includes(obj.name)) {
+          obj.groupedOptions = opts[obj.name]
+        }
+        obj.options = opts[obj.name]
+      }
+      if (obj.name === 'Customer' || obj.name === 'AssetId') {
+        obj['show'] = config[obj.name];
+        if (obj.name === 'AssetId') {
+          obj['defaultValue'] = lookupsData.AssetId.defaultValues || []
+          form.setValue('AssetId', lookupsData.AssetId.defaultValues);
+        }
+      }
+      if (obj.name !== 'RequestedDate' && !isCreateMode) {
+        obj.disabled = !isEditing;
+      }
+      if ((obj.name === 'Branch' || obj.name === 'ServiceRequestType') && !isCreateMode) {
+        obj.disabled = true;
+      }
+      if ((obj.name === 'AssetId' || obj.name === 'LinkTo') && !isCreateMode) {
+        obj.show = false;
+      } if(obj.name==="RequesterCheckbox"|| obj.name==="CCListCheckbox" || obj.name==="AssignToCheckbox" || obj.name==="Notify"){
+          if(config.IsDefaultNotifyUsers){
+              form.setValue("Notify",config.NotifyUserTypes?.split(","))
+              setNotifyValues({"Notify":config.NotifyUserTypes?.split(",")})
+          }
+      }
+    });
+    setFields(data);
+  }
+  //add comments api
+  const postComment = async () => {
+    console.log("payload");
+    const payload = {
+      "ServiceRequestComments": [
+        {
+          "ServiceRequestNo": originalTicket.ServiceRequestNo,
+          "Comment": commentForm.watch("comment"),
+        }
+      ]
+    }
+   
+    dispatch(setLoading(true))
+    await postCommentAPI(111, 'All', payload).then(res => {
+        let commentList=`${updatedComments} Comment:${payload["ServiceRequestComments"][0].Comment}`
+      if (res.data.status) {
+        msg.success(res.data.message)
+        setUpdatedComments(commentList)
+        commentForm.setValue("comment","")
+        getCommentApi(originalTicket.ServiceRequestId.toString(), 111);
+      } else {
+        msg.warning(res?.data?.ErrorDetails[0]['Error Message'] || 'Please Fill All The Required Fields')
+      }
+    }).catch(err => { }).finally(() => dispatch(setLoading(false)))
+  }
+  // Handle history button click
+  const handleHistoryClick = (row: any) => {
+    setSelectedRowForHistory(row);
+    const recordId = row.id || row.ID || Object.values(row)[0] || 'Unknown';
+    fetchSubscriptionHistoryByCustomer(watch("Customer"), 111, "All", row.ProductId)
+    setIsHistoryPopupOpen(true);
+  };
+  //method for generating columns based on data
+  function generateColumnsFromData<T extends Record<string, any>>(
+    data: T[],
+    includeActions: boolean = true
+  ): ColumnDef<T>[] {
+    if (!data || data.length === 0) return [];
+    const sample = data[0];
+    const columns: ColumnDef<T>[] = Object.keys(sample).map((key) => {
+      const value = sample[key];
+
+      let editType: 'text' | 'number' | 'date' | 'select' = 'text';
+      if (typeof value === 'number') {
+        editType = 'number';
+      } else if (typeof value === 'string' && value.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+        editType = 'date';
+      }
+
+      return {
+        accessorKey: key,
+        header: key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()),
+        meta: {
+          editable: true,
+          editType,
+        },
+      } as ColumnDef<T>;
+    });
+
+    if (includeActions) {
+      columns.push({
+        id: 'actions',
+        header: 'Actions',
+        cell: ({ row }) => (
+          <Button
+            size="sm"
+            onClick={() => handleHistoryClick(row.original)}
+            className="flex items-center gap-1"
+            style={{ backgroundColor: "#fb8420" }}
+          >
+            History
+          </Button>
+        ),
+        enableSorting: false,
+        enableHiding: false,
+      });
+    }
+
+    return columns;
+  }
+  async function getCommentApi(ServiceRequestId: string, compId: number) {
+    try {
+      const res = await getCommentsAPI(ServiceRequestId, compId);
+      if (res.success && res.data) {
+        const commentsArray = res.data[0]?.Comments || [];
+        setComments(commentsArray);
+      }
+    } catch (err) {
+      console.error('Error fetching subscription by customer:', err);
+    }
+  }
+  //subscription table api call
+  async function fetchSubscriptionByCustomer(CustomerName: string, compId: number, BranchName: string) {
+    await getSubscriptionByCustomer(CustomerName, compId, BranchName).then(res => {
+      if (res.success && res.data.status === undefined) {
+        setDataSource(res.data);
+        const newCols = generateColumnsFromData(res.data)
+        setCols(newCols)
+      } else {
+        setDataSource([]);
+      }
+    })
+      .catch(err => {
+        console.error('Error fetching subscription by customer:', err);
+      });
+  }
+  //fetching all lookups data
+  async function fetchAllLookUps() {
+    dispatch(setLoading(true));
+    try {
+      const [SRTLookUp, SRTAssignToLookup, SRTRequestedByLookup, SRTLinkToLookup, SRTCCListLookup, SRTBranchListLookup, ConfigData, StatusLookup] = await Promise.allSettled([
+        ServiceRequestTypeLookups(111), GetServiceRequestAssignToLookups(111, 'All'),
+        getSRRequestByLookupsList(111, 'All'), getSRLinkToLookupsList(111, 'All'),
+        getSRCCListLookupsList(111, 'All'), getSRBranchList(111), getSRConfigList(111, 'All'),
+        getStatusLookups(111)
+      ]);
+      let configuration = ConfigData.status === 'fulfilled' && ConfigData.value.data && ConfigData.value.data.ServiceRequestConfiguration ? ConfigData.value.data.ServiceRequestConfiguration : { CustomerFieldinMyRequest: true, AssetFieldinCreateEditServiceRequest: true }
+      let fetchCustomerAndAssetCodesLookup = { Customer: configuration.CustomerFieldinMyRequest, AssetId: configuration.AssetFieldinCreateEditServiceRequest,...configuration };
+      let SRTCustomerLookup: [] = [], Assets: [] = [];
+      if (fetchCustomerAndAssetCodesLookup.Customer) {
+        await getSRCustomerLookupsList(111, 'All').then(res => {
+          SRTCustomerLookup = res.success ? res.data.ServiceRequestCustomerLookup ? res.data.ServiceRequestCustomerLookup : [] : []
+        }).catch(err => { }).finally(() => { })
+      }
+      if (fetchCustomerAndAssetCodesLookup.AssetId) {
+        await getManageAssetsList('All', 111).then(res => {
+          Assets = res.success ? res.data.AssetsListDetails ? res.data.AssetsListDetails : [] : []
+        }).catch(err => { }).finally(() => { })
+      }
+      let AssetsData: GenericObject[] = [...selectedAssetCodesData, ...Assets.filter((item: any) => item.EmpId == 'AIPL1693')]
+      const allResponses = {
+        ServiceRequestType: { data: SRTLookUp.status === 'fulfilled' && SRTLookUp.value.success && SRTLookUp.value.data.ServiceRequestTypesLookup ? SRTLookUp.value.data.ServiceRequestTypesLookup : [], label: 'ServiceRequestTypeName', value: 'ServiceRequestTypeName' },
+        AssigneeSelectedUsers: {
+          data: [], label: 'UserName', value: 'UserName', isGrouping: true, groupData: [{ label: "UserGroupName", value: "UserGroupName", data: SRTAssignToLookup.status === 'fulfilled' && SRTAssignToLookup.value.success && SRTAssignToLookup.value.data.ServiceRequestAssignToUserGroupLookup ? SRTAssignToLookup.value.data.ServiceRequestAssignToUserGroupLookup : [], groupLabel: "User Group" },
+          { label: "UserName", value: "UserName", data: SRTAssignToLookup.status === 'fulfilled' && SRTAssignToLookup.value.success && SRTAssignToLookup.value.data.ServiceRequestAssignToUsersLookup ? SRTAssignToLookup.value.data.ServiceRequestAssignToUsersLookup : [], groupLabel: "Users" },]
+        }
+        , RequestedBy: { data: SRTRequestedByLookup.status === 'fulfilled' && SRTRequestedByLookup.value.success && SRTRequestedByLookup.value.data.ServiceRequestRequestedByLookup ? SRTRequestedByLookup.value.data.ServiceRequestRequestedByLookup : [], label: 'UserName', value: 'UserName' }
+        , Customer: fetchCustomerAndAssetCodesLookup.Customer ? { data: SRTCustomerLookup, label: 'CustomerName', value: 'CustomerName' } : { data: [], label: '', value: '' }
+        , LinkTo: { data: SRTLinkToLookup.status === 'fulfilled' && SRTLinkToLookup.value.success && SRTLinkToLookup.value.data.ServiceRequestLinkToLookup ? SRTLinkToLookup.value.data.ServiceRequestLinkToLookup : [], label: 'ServiceRequestName', value: 'ServiceRequestName' }
+        , CCListSelectedUsers: {
+          data: [], label: 'UserName', value: 'UserName', isGrouping: true, groupData: [
+            { label: "UserGroupName", value: "UserGroupName", data: SRTCCListLookup.status === 'fulfilled' && SRTCCListLookup.value.success && SRTCCListLookup.value.data.ServiceRequestCCListUserGroupsLookup ? SRTCCListLookup.value.data.ServiceRequestCCListUserGroupsLookup : [], groupLabel: "User Group" },
+            { label: "UserName", value: "UserName", data: SRTCCListLookup.status === 'fulfilled' && SRTCCListLookup.value.success && SRTCCListLookup.value.data.ServiceRequestCCListUsersLookup ? SRTCCListLookup.value.data.ServiceRequestCCListUsersLookup : [], groupLabel: "Users" },]
+        }
+        , Branch: { data: SRTBranchListLookup.status === 'fulfilled' && SRTBranchListLookup.value.success && SRTBranchListLookup.value.data ? SRTBranchListLookup.value.data.filter((ele: any) => ele.id !== 0 && ele.parent !== '#' && ele.type !== '99') : [], label: 'Name', value: 'Name' }
+        , AssetId: fetchCustomerAndAssetCodesLookup.AssetId ? { data: AssetsData, label: 'AssetCode', value: 'AssetID', defaultValues: selectedAssetCodesData.map(asset => asset['AssetID']) } : { data: [], label: '', value: '' }
+        , Status: { data: StatusLookup.status === 'fulfilled' && StatusLookup.value.success && StatusLookup.value.data.ServiceRequestStatusLookup ? StatusLookup.value.data.ServiceRequestStatusLookup : [], label: 'ServiceRequestStatusName', value: 'ServiceRequestStatusName' }
+      };
+      if(StatusLookup.status === 'fulfilled' && StatusLookup.value.success && StatusLookup.value.data.ServiceRequestStatusLookup){
+        let statusArr=StatusLookup.value.data.ServiceRequestStatusLookup.map((status: any) => ({ value: status?.ServiceRequestStatusName, label: status?.ServiceRequestStatusName }));
+        setStatusOptions([{ value: 'All Status', label: 'All Status' },...statusArr]);
+      }else{
+        setStatusOptions([])
+      }
+      setLookupsDataInJson(allResponses, fetchCustomerAndAssetCodesLookup);
+    } catch (error) {
+      msg.warning(`Error fetching lookups: ${error}`)
+    } finally {
+      setSelectedTicketId(id)
+      dispatch(setLoading(false));
+    }
+  }
+  //function to navigate asset table
+  function navigateToAssetTable() {
+    navigate("/service-desk/new-request/assetcode-table", { state: { flag: "goBack" } })
+  }
+  //history table api call
+  async function fetchSubscriptionHistoryByCustomer(CustomerName: string, compId: number, BranchName: string, ProductId: number) {
+    dispatch(setLoading(true));
+    await getSubscriptionHistoryByCustomer(CustomerName, compId, BranchName, ProductId).then(res => {
+      if (res.success && res.data) {
+        setHistoryData(res.data);
+        const newCols1 = generateColumnsFromData(res.data, false)
+        setHistoryColumns(newCols1)
+      }
+    }).catch(err => {
+        console.error('Error fetching subscription by customer:', err);
+      }).finally(()=>{
+        dispatch(setLoading(false));
+      })
+  }
+  // Fetch additional fields - only clear values, preserve all field configs and options
+  async function fetchAdditionalFieldsData(name: string, compId: number, fieldData?: any) {
+    dispatch(setLoading(true));
+    let additionalCheckBoxNames = []
+    let updatedFields=[]
+    try {
+      const res = await getSRAdditionalFieldsByServiceRequestType(name, compId);
+      if (res.success && res.data && res.data.AdditionalFields) {
+        const baseFieldsOnly = fields.filter(f => !f.isAdditionalField);
+        if (res.data.AdditionalFields.length === 0) {
+          setShowAccordion(false);
+          setAccordionOpen(undefined);
+        } else {
+          const newAdditionalFields = res.data.AdditionalFields.map((field: any) => {
+            if (field.FieldType.toLowerCase() === "checkbox") {
+              additionalCheckBoxNames.push(field.FieldName)
+            }
+
+            return ({
+              name: field.FieldName,
+              isAdditionalField: true,
+              label: field.FieldName,
+              fieldType: field.FieldType.toLowerCase(),
+              placeholder: '',
+              isRequired: field.IsMandatory,
+              disabled: !isCreateMode,
+              allowClear: true,
+              defaultValue: '',
+
+              options: field.FieldType === 'Dropdown' || field.FieldType === 'CheckBox' || field.FieldType === 'RadioButton'
+                ? field.FieldValues?.split(",")?.map((opt: any) => ({
+                  label: opt,
+                  value: opt,
+                }))
+                : [],
+            })
+          }
+
+          );
+          updatedFields = [...baseFieldsOnly, ...newAdditionalFields];
+          setShowAccordion(true);
+          newAdditionalFields.forEach((field: any) => {
+            setValue(field.name!, '');
+          });
+        }
+
+      } else {
+        msg.open({
+          content: 'No Additional Fields Found!',
+          key: 'NoAdditionalFields',
+          type: 'warning'
+        });
+        const additionalFields = fields.filter(f => f.isAdditionalField);
+        additionalFields.forEach(field => {
+          setValue(field.name!, '');
+        });
+        setShowAccordion(false);
+        setAccordionOpen(undefined);
+      }
+    } catch (err) {
+      const additionalFields = fields.filter(f => f.isAdditionalField);
+      additionalFields.forEach(field => {
+        setValue(field.name!, '');
+      });
+      setShowAccordion(false);
+      setAccordionOpen(undefined);
+    } finally {
+
+      if (fieldData) {
+        let additionalFields: any = {};
+        if (fieldData.AdditionalFields && fieldData.AdditionalFields.length > 0) {
+          fieldData.AdditionalFields.forEach((field: any) => {
+            additionalFields[field.FieldName] = field.FieldValue || '';
+            if (additionalCheckBoxNames.includes(field.FieldName))
+              additionalFields[field.FieldName] = field.FieldValue.split(",");
+          });
+        }
+       fieldData["AssigneeSelectedUsers"] = {  "Users":fieldData["AssigneeSelectedUsers"].split(","),"User Group": fieldData["AssigneeSelectedUserGroups"].split(",")};
+        fieldData["CCListSelectedUsers"] = {  "Users":fieldData["CCListSelectedUsers"].split(","),"User Group": fieldData["CCListSelectedUserGroups"].split(",")};
+        fieldData['RequestedBy'] = fieldData['RequestedBy']?.replace(/\s*\(/g, " (");
+        fieldData['RequestedDate'] = formatDateToDDMMYYYY(fieldData['RequestedDate']);
+        form.reset({ ...fieldData, ...additionalFields,...notifyValues });
+        setOriginalTicket({ ...fieldData, ...additionalFields,...notifyValues });
+        setSelectedTicket({ ...fieldData, ...additionalFields,...notifyValues });
+        resetValue(updatedFields)
+      }else{
+        setFields(updatedFields)
+      }
+      dispatch(setLoading(false));
+    }
+  }
+  //trigger additional fields validations which are required 
+  async function triggerAccordioItemsValidations() {
+    if (accordionOpen === 'additional-fields') {
+      await trigger(fields.filter(f => f.isAdditionalField).map(f => f.name));
+    }
+  }
+  //upload Functionality and API Integration
+  const multipleFileUpload = async (
+    filelist: UploadFileInput[]): Promise<void> => {
+    const files: (UploadedFileOutput | null)[] = await Promise.all(
+      filelist?.map(async (file) => {
+        try {
+          if (!file.url) throw new Error("Missing file URL");
+          const response = await axios.get<Blob>(file.url, { responseType: "blob" });
+          const byteArray = await fileToByteArray(response.data);
+          const byteArrayAsArray = Array.from(byteArray);
+          const jsonArrayString = JSON.stringify(byteArrayAsArray);
+          const fileType = file.name.split(".").pop() || "";
+          return {
+            FileName: file.name,
+            ServiceDocumentFile: jsonArrayString,
+            FileType: fileType,
+            FileConversionType: file.type,
+          };
+        } catch (error) {
+          console.error(`Failed to process file ${file.name}:`, error);
+          return null;
+        }
+      })
+    );
+
+    const validFiles = files.filter(
+      (file): file is UploadedFileOutput => file !== null
+    );
+    setAttachments(validFiles);
+  };
+  //handling uploaded files
+  const handleSubmitUploadedFiles = async (id: string) => {
+    dispatch(setLoading(true));
+    const uploadPayload = { ServiceReqFileUploadDetails: attachments }
+    await saveFileUpload(111, id, uploadPayload).then(res => {
+      if (res.data.status) {
+        msg.success(res.data.message)
+        setAttachments([]);
+      }
+    }).catch(err => { }).finally(() => {
+      if (!isCreateMode) {
+        fetchSingleTicketRelatedAPIs(Number(selectedTicketId))
+      }else{
+        form.reset();
+        setAttachments([]);
+      }
+      dispatch(setLoading(false));
+    })
+  }
+  //to render re usable components based on the json data from db
+  const renderField = (field: BaseField) => {
+    let fieldsToShowInEdit:string[]=['Priority','Status','Notify']
+    const { name, label, fieldType, isRequired, show = true } = field;
+    const overrideShow = !show && fieldsToShowInEdit.includes(name) && !isCreateMode;
+    if (!name || (!overrideShow && (!show || (fieldsToShowInEdit.includes(name) && !isCreateMode)))) {
+      return null;
+    }
+    const validationRules = {
+      required: isRequired ? `${label} is Required` : false,
+    };
+
+    switch (fieldType) {
+      case 'text':
+        return (
+          <Controller
+            key={name}
+            name={name}
+            control={control}
+            rules={validationRules}
+            render={({ field: ctrl }) => (
+              <ReusableInput
+                {...field}
+                value={ctrl.value}
+                onChange={ctrl.onChange}
+                error={errors[name]?.message as string}
+              />
+            )}
+          />
+        );
+      case 'textarea':
+        return (
+          <Controller
+            key={name}
+            name={name}
+            control={control}
+            rules={validationRules}
+            render={({ field: ctrl }) => (
+              <ReusableTextarea
+                {...field}
+                value={ctrl.value}
+                onChange={ctrl.onChange}
+                error={errors[name]?.message as string}
+              />
+            )}
+          />
+        );
+      case 'richtext':
+        return (
+          <Controller
+            key={name}
+            name={name}
+            control={control}
+            rules={validationRules}
+            render={({ field: ctrl }) => (
+              <ReusableRichTextEditor
+                {...field}
+                value={ctrl.value}
+                onChange={ctrl.onChange}
+                error={errors[name]?.message as string}
+              />
+            )}
+          />
+        );
+      case 'dropdown':
+        return (
+          <Controller
+            key={name}
+            name={name}
+            control={control}
+            rules={validationRules}
+            render={({ field: ctrl }) => (
+              <ReusableDropdown
+                {...field}
+                value={ctrl.value}
+                onChange={ctrl.onChange}
+                error={errors[name]?.message as string}
+              />
+            )}
+          />
+        );
+      case 'date':
+        return (
+          <Controller
+            key={name}
+            name={name}
+            control={control}
+            rules={validationRules}
+            render={({ field: ctrl }) => (
+              <ReusableDatePicker
+                {...field}
+                value={ctrl.value}
+                onChange={ctrl.onChange}
+                error={errors[name]?.message as string}
+              />
+            )}
+          />
+        );
+      case 'multiselect':
+        return (
+          <div>
+            <Controller
+              key={name}
+              name={name}
+              control={control}
+              rules={validationRules}
+              render={({ field: ctrl }) => (
+                <ReusableMultiSelect
+                  label={label!}
+                  {...field}
+                  value={ctrl.value}
+                  onChange={ctrl.onChange}
+                  error={errors[name]?.message as string}
+                  {...(name === 'AssetId' ? { suffixIcon: <FaSearch onClick={() => navigateToAssetTable()} style={{ fontSize: "16px", color: "#617ce7", cursor: 'pointer' }} color="white" /> } : {})}
+                />
+              )}
+            />
+          </div>
+        );
+
+      case 'upload':
+        return (
+          <Controller
+            key={name}
+            name={name}
+            control={control}
+            rules={validationRules}
+            render={({ field: ctrl }) => (
+              <ReusableUpload
+                {...field}
+                value={ctrl.value}
+                onChange={ctrl.onChange}
+                error={errors[name]?.message as string}
+              />
+            )}
+          />
+        );
+      case 'numeric':
+        return (
+          <Controller
+            key={name}
+            name={name}
+            control={control}
+            rules={validationRules}
+            render={({ field: ctrl }) => (
+              <ReusableInput
+                {...field}
+                type="number"
+                value={ctrl.value}
+                onChange={ctrl.onChange}
+                error={errors[name]?.message as string}
+              />
+            )}
+          />
+        );
+
+      case 'checkbox':
+        return (
+          <Controller
+            key={name}
+            name={name}
+            control={control}
+            rules={validationRules}
+            render={({ field: ctrl }) => (
+              <ReusableCheckbox
+                {...field}
+                value={ctrl.value}
+                onChange={ctrl.onChange}
+                error={errors[name]?.message as string}
+              />
+            )}
+          />
+        );
+      case 'radiobutton': return (
+        <Controller
+          key={name}
+          name={name}
+          control={control}
+          rules={validationRules}
+          render={({ field: ctrl }) => (
+            <ReusableRadio
+              {...field}
+              value={ctrl.value}
+              onChange={ctrl.onChange}
+              error={errors[name]?.message as string}
+            />
+          )}
+        />
+      );
+      default:
+        return null;
+    }
+  };
+  // Grouping logic: You may customize based on field.name or custom metadata
+  const getFieldsByNames = (names: string[]) => fields.filter(f => names.includes(f.name!));
+  const getAdditionalFields = () => fields.filter(f => f.isAdditionalField);
+  //get additional fields data
+  function getAdditionalFieldsData(): additionalFieldData[] {
+    return fields.filter(field => field.isAdditionalField).map(field => {
+      const val = watch(field.name);
+      return {
+        AdditionalFieldName: field.name,
+        TextBoxValue: field.fieldType === 'text' || field.fieldType === 'numeric' ? val : '',
+        DateValues: field.fieldType === 'date' ? formatDate(val, 'DD/MM/YYYY') : '',
+        SelectedValues: field.fieldType === 'dropdown' || field.fieldType === 'radiobutton' ? val : field.fieldType === 'checkbox' ? Array.isArray(val) ? val.join(',') : '' : ''
+      };
+    });
+  }
+  //handle submit for creating tickets
+  const handleSave = async () => {
+    const isValidationFailed = fields.filter(field => field.isRequired && field.isAdditionalField).map(ele => form.getValues()[ele.name]).some(e => !e);
+    if (isValidationFailed) {
+      setAccordionOpen('additional-fields');
+      msg.warning('Please Fill The Required Additional Fields!!')
+      return;
+    }
+    const payload = {
+      "ServiceRequestDetails": [
+        {
+          "Title": watch('Title'),
+          "ServiceRequestType": watch('ServiceRequestType'),
+          "AssigneeSelectedUserGroups": watch('AssigneeSelectedUsers')["User Group"] ? watch('AssigneeSelectedUsers')["User Group"].join(',') : "",
+          "CCListSelectedUserGroups": watch('CCListSelectedUsers')["User Group"] ? watch('CCListSelectedUsers')["User Group"].join(',') : "",
+          "AssigneeSelectedUsers": watch('AssigneeSelectedUsers')["Users"] ? watch('AssigneeSelectedUsers')["Users"].join(',') : "",
+          "CCListSelectedUsers": watch('CCListSelectedUsers')["Users"] ? watch('CCListSelectedUsers')["Users"].join(',') : "",
+          "Severity": watch('Severity'),
+          "AssetIds": watch('AssetId').join(','),
+          "IsDraft": false,
+          "RequestedDate": formatDate(watch('RequestedDate'), 'DD-MM-YYYY'),
+          "RequestedBy": 659,
+          "BranchName": watch('Branch'),
+          "LinkTo": watch('LinkTo'),
+          "Customer": watch('Customer'),
+          "Description": watch('Description'),
+          "FileUploadURLs": "",
+          "AdditionalFields": getAdditionalFieldsData()
+        }
+      ]
+    }
+    dispatch(setLoading(true));
+    await postServiceRequest(111, 'All', payload).then(res => {
+      if (res.data.status) {
+        handleSubmitUploadedFiles(res.data.ServiceRequestId);
+        msg.success(res.data.message)
+        setHasChanges(false);
+      } else {
+        msg.warning(res?.data?.ErrorDetails[0]['Error Message'] || 'Please Fille All The Required Fields')
+      }
+    }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
+  };
+
+  //handle Edit Save
+  const handleUpdate = async () => {
+    const isValidationFailed = fields.filter(field => field.isRequired && field.isAdditionalField).map(ele => form.getValues()[ele.name]).some(e => !e);
+    if (isValidationFailed) {
+      setAccordionOpen('additional-fields');
+      msg.warning('Please Fill The Required Additional Fields!!')
+      return;
+    }
+    updateServiceRequestDetails()
+  }
+  async function updateServiceRequestDetails() {
+
+    let commentlist=commentForm.watch("comment")  && commentForm.watch("comment")!= "<p><br></p>"?`${updatedComments} Comment:${commentForm.watch("comment")}`:updatedComments
+    const updatedData = {
+      "ServiceRequestNo": originalTicket.ServiceRequestNo,
+      "NotifyRequester": watch('Notify').includes("100") ? true : false,
+      "NotifyAssignee": watch('Notify').includes("102") ? true : false,
+      "NotifyCCList": watch('Notify').includes("101") ? true : false,
+      "Status": watch('Status'),
+      "Severity": watch('Severity'),
+      "Priority": watch('Priority') ? watch('Priority') : "",
+      "SaveAndSend": true,
+       "Comment":commentForm.watch("comment") && commentForm.watch("comment")!= "<p><br></p>"?commentForm.watch("comment"):"",
+      "CommentList":commentlist,
+      "AsignedUserGroups":watch('AssigneeSelectedUsers')["User Group"] ? watch('AssigneeSelectedUsers')["User Group"].join(',') : "",
+      "AsignedUsers":watch('AssigneeSelectedUsers')["Users"] ? watch('AssigneeSelectedUsers')["Users"].join(',') : "",
+      "Customer": watch('Customer'),
+      "CCListUsers": watch('CCListSelectedUsers')["Users"] ? watch('CCListSelectedUsers')["Users"].join(',') : "",
+      "CCListUserGroups": watch('CCListSelectedUsers')["User Group"] ? watch('CCListSelectedUsers')["User Group"].join(',') : "",
+      "FileUploadURLs": "",
+      "Title": watch('Title'),
+      "Description": watch('Description'),
+      "AdditionalFields": selectedTicket.Status === "Closed" ? [] : getAdditionalFieldsData()
+ ,
+ 
+          
+    }
+
+    let payload = {
+      "ServiceRequestDetails": [updatedData]
+    }
+    dispatch(setLoading(true));
+    await updateServiceRequest(111, 'All', payload).then(res => {
+      if (res.data.status) {
+        if (attachments?.length > 0) {
+          handleSubmitUploadedFiles(originalTicket.ServiceRequestId.toString())
+        }else{
+        fetchSingleTicketRelatedAPIs(Number(selectedTicketId))
+        // resetValue()
+        }
+        msg.success(res.data.message);
+
+
+      }
+    }).catch(err => {
+      msg.error(err.message);
+    }).finally(() => {
+
+      dispatch(setLoading(false));
+    });
+  }
+  //handle Attachment delete
+  const handleAttachmentDelete = async (fileId: number) => {
+    dispatch(setLoading(true))
+    await deleteSRUpload(fileId, 111).then((res) => {
+      if (res.data.status !== undefined) {
+        if (res.data.status === true) {
+          msg.success(res.data.message)
+          fetchUploadedFilesByServiceRequestId(selectedTicket.ServiceRequestId)
+        } else {
+          msg.success(res.data.message)
+        }
+      } else {
+        msg.success(res.data?.ErrorDetails[0]["Error Message"])
+      }
+    }).catch(() => { }).finally(() => {
+      dispatch(setLoading(false))
+    })
+
+  }
+  //reset values
+  const resetValue=(fieldsCopy)=>{
+    commentForm.reset({comment:""})
+      setAttachments([])
+      setUpdatedComments("")
+      setHasChanges(false);
+      setIsEditing(false);
+      
+      fieldsCopy.forEach(field => { field.disabled = true; });
+      setFields(fieldsCopy);
+  }
+
+  // Handle cancel edit - only clear form values, preserve all field configs and options
+  const handleEdit = (type: string) => {
+  let fieldsCopy = structuredClone(fields);
+    if (type === 'cancel') {
+      msg.warning('All unsaved changes have been discarded.');
+      form.reset({ ...originalTicket,...notifyValues });
+      setSelectedTicket(originalTicket);
+      resetValue(fieldsCopy)
+     
+    } else if (type === 'clear' || type === 'save') {
+      form.reset({...notifyValues});
+      setHasChanges(false);
+      setIsEditing(false);
+      clearAllFormValues();
+      setAttachments([]);
+      setDataSource([]);
+      setCols([]);
+    } else if (type === 'edit') {
+    
+      setIsEditing(true);
+      setHasChanges(true);
+      let isClosed = selectedTicket.Status !== "Closed"
+      fieldsCopy.forEach(field => {
+        if (isClosed) {
+          if (!field.isAlwaysOnDisabled && (field.name !== 'Branch' && field.name !== 'ServiceRequestType')) {
+            field.disabled = false;
+          }
+        } else {
+          field.disabled = !enableInClose.includes(field.name)
+        }
+      });
+      setFields(fieldsCopy);
+    }
+  };
+  //handle discard changes
+  const handleDiscardChanges = () => {
+    setSelectedTicket(originalTicket);
+    setHasChanges(false);
+  };
+  const handleTicketSelect = (ticket: Ticket,isLink:boolean) => {
     if (hasChanges) {
       const confirmDiscard = window.confirm('You have unsaved changes. Do you want to discard them?');
       if (!confirmDiscard) return;
     }
-    setSelectedTicketId(ticketId);
-    window.history.replaceState(null, '', `/tickets/${ticketId}`);
-  };
+    form.reset({...notifyValues})
+    if(!isLink){
+    setSelectedTicketId(ticket.ServiceRequestId.toString())
+    if (isEditing) {
+      handleEdit("cancel")
+    }
+    commentForm.reset({comment:""})
+    window.history.replaceState(null, '', `/tickets/${ticket.ServiceRequestId}`);
+    }else{
+      
+          setSelectedTicketId(ticket.ChildServiceRequestId.toString())
+    if (isEditing) {
+      handleEdit("cancel")
+    }
+    commentForm.reset({comment:""})
+    window.history.replaceState(null, '', `/tickets/${ticket.ChildServiceRequestId}`);
+    }
 
+  };
   const handleFieldChange = (field: string, value: string | string[]) => {
     const newTicket = { ...selectedTicket, [field]: value };
     setSelectedTicket(newTicket);
-
     const hasChangesNow = JSON.stringify(newTicket) !== JSON.stringify(originalTicket);
     setHasChanges(hasChangesNow);
   };
-
   const handleSaveAll = () => {
-    const changes = [];
-    Object.keys(selectedTicket).forEach(key => {
-      if (selectedTicket[key as keyof Ticket] !== originalTicket[key as keyof Ticket]) {
-        changes.push({
-          field: key,
-          oldValue: String(originalTicket[key as keyof Ticket]),
-          newValue: String(selectedTicket[key as keyof Ticket])
-        });
-      }
-    });
-
-    setOriginalTicket(selectedTicket);
-    setHasChanges(false);
-    toast({
-      title: "Changes Saved",
-      description: `All ticket changes have been saved successfully. ${changes.length} field(s) updated.`,
-    });
+    // Implementation for saving all changes
   };
-
-  const handleDiscardChanges = () => {
-    setSelectedTicket(originalTicket);
-    setHasChanges(false);
-    toast({
-      title: "Changes Discarded",
-      description: "All unsaved changes have been discarded.",
-    });
-  };
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'Critical': return 'bg-red-600 text-white';
-      case 'High': return 'bg-red-100 text-red-800';
-      case 'Medium': return 'bg-yellow-100 text-yellow-800';
-      case 'Low': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Open': return 'bg-blue-100 text-blue-800';
-      case 'In Progress': return 'bg-orange-100 text-orange-800';
-      case 'Resolved': return 'bg-green-100 text-green-800';
-      case 'Closed': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getActivityStatusColor = (status: string) => {
-    switch (status) {
-      case 'Linked': return 'text-green-600';
-      case 'Unlinked': return 'text-red-600';
-      case 'Manual Entry': return 'text-yellow-600';
-      default: return 'text-gray-600';
-    }
-  };
-
-  const InlineEditField = ({ field, value, multiline = false, type = 'text' }: { field: string; value: string; multiline?: boolean; type?: string }) => {
-    if (multiline) {
-      return (
-        <Textarea
-          value={value}
-          onChange={(e) => handleFieldChange(field, e.target.value)}
-          className="min-h-[100px] resize-none"
-          rows={4}
-        />
-      );
-    }
-
-    if (type === 'select' && (field === 'status' || field === 'priority' || field === 'type')) {
-      let options: { value: string; label: string }[] = [];
-      if (field === 'status') options = [
-        { value: 'Open', label: 'Open' },
-        { value: 'In Progress', label: 'In Progress' },
-        { value: 'Resolved', label: 'Resolved' },
-        { value: 'Closed', label: 'Closed' }
-      ];
-      if (field === 'priority') options = [
-        { value: 'Low', label: 'Low' },
-        { value: 'Medium', label: 'Medium' },
-        { value: 'High', label: 'High' },
-        { value: 'Critical', label: 'Critical' }
-      ];
-      if (field === 'type') options = [
-        { value: 'Bug', label: 'Bug' },
-        { value: 'Feature', label: 'Feature' },
-        { value: 'Request', label: 'Request' },
-        { value: 'Other', label: 'Other' }
-      ];
-
-      return (
-        <ReusableDropdown
-          options={options}
-          value={value}
-          onChange={(newValue) => handleFieldChange(field, newValue.toString())}
-          placeholder={`Select ${field}...`}
-          className="w-full"
-          showSearch={true}
-          allowClear={true}
-        
-          
-          
-        />
-      );
-    }
-
-    // Handle assignee field with multi-select
-    if (field === 'assignedTo') {
-      const assigneeOptions = [
-        { label: 'John Doe', value: 'john-doe' },
-        { label: 'Jane Smith', value: 'jane-smith' },
-        { label: 'Mike Johnson', value: 'mike-johnson' },
-        { label: 'Sarah Wilson', value: 'sarah-wilson' },
-        { label: 'David Brown', value: 'david-brown' },
-        { label: 'Lisa Anderson', value: 'lisa-anderson' },
-        { label: 'Tom Davis', value: 'tom-davis' },
-        { label: 'Emma Taylor', value: 'emma-taylor' }
-      ];
-
-      // Convert current value to array if it's a string
-      const currentValues = Array.isArray(value) ? value : (typeof value === 'string' && value ? [value] : []);
-
-      return (
-        <ReusableMultiSelect
-          options={assigneeOptions}
-          value={currentValues}
-          onChange={(newValues) => handleFieldChange(field, newValues)}
-          placeholder="Select assignees..."
-          searchable={true}
-          allowClear={true}
-        />
-      );
-    }
-
-    return (
-      <Input
-        value={value}
-        onChange={(e) => handleFieldChange(field, e.target.value)}
-        className="w-full"
-        type={type}
-      />
-    );
-  };
-
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Top Company Bar */}
-      {/* <div className="bg-white border-b shadow-sm px-4 lg:px-6 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-4 lg:gap-6">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-orange-500 rounded flex items-center justify-center">
-              <span className="text-white font-bold text-xs">Z</span>
-            </div>
-            <span className="text-sm text-gray-700">Zoho Corp.</span>
-          </div>
-          <div className="hidden lg:block h-6 w-px bg-gray-300"></div>
-          <span className="hidden lg:block text-sm text-gray-600">Hyderabad</span>
-        </div>
-        
-        <div className="flex items-center gap-2 lg:gap-4">
-          <Button variant="ghost" size="sm">
-            <Bell className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" size="sm">
-            <UserCircle className="h-4 w-4" />
-          </Button>
-          <SidebarTrigger />
-        </div>
-      </div> */}
-
-      <div className="flex flex-1 overflow-hidden">
+    <div className="h-full   bg-gray-50 flex flex-col ">
+      <div className="flex flex-1 overflow-hidden   ">
         {/* Left Sidebar - Ticket Inbox */}
-        <div className={`${isInboxCollapsed ? 'w-12' : 'w-80'} bg-white border-r flex flex-col transition-all duration-300 shrink-0 hidden lg:flex`}>
-          <div className="p-4 border-b">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className={`font-semibold text-gray-900 ${isInboxCollapsed ? 'hidden' : ''}`}>
-                Tickets ({filteredTickets.length})
-              </h3>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsInboxCollapsed(!isInboxCollapsed)}
-                className="p-1"
-              >
-                {isInboxCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-              </Button>
-            </div>
-            {!isInboxCollapsed && (
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  placeholder="Search tickets..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
+        {!isCreateMode &&
+          <div className={`${isInboxCollapsed ? 'w-6 p-1' : 'w-34 p-2 mb-2 rounded-b-[5px]'} bg-white border-r    border-0 shadow-lg flex pb-3 flex-col transition-all duration-300 shrink-0 hidden lg:flex`}>
+            <div className="pt-1 shrink-0">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className={`font-semibold text-gray-900 ${isInboxCollapsed ? 'hidden' : ''}`}>
+                  Tickets ({filteredTickets.length})
+                </h3>
+                <div onClick={() => setIsInboxCollapsed(!isInboxCollapsed)} className={`cursor-pointer transition-colors hover:bg-accent hover:text-accent-foreground  ${isInboxCollapsed ? 'me-2  py-1 ' : 'p-1'}`}>
+                  {isInboxCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+                </div>
               </div>
-            )}
-          </div>
+              {!isInboxCollapsed && (
+                <div className="space-y-2 pb-1">
+                  {/* Status Filter */}
+                  <ReusableDropdown
+                    options={statusOptions}
+                    value={statusFilter}
+                    onChange={(value) => setStatusFilter(value as string)}
+                    placeholder="Filter by status..."
+                    className=" min-h-[10px] rounded-md"
+                    containerClassName="w-full h-8 rounded-md"
 
-          {!isInboxCollapsed && (
-            <ScrollArea className="flex-1">
-              <div className="p-2">
-                {filteredTickets.map((ticket) => (
-                  <div
-                    key={ticket.id}
-                    className={`p-3 rounded-lg mb-2 cursor-pointer transition-all hover:bg-gray-50 ${selectedTicketId === ticket.id ? 'bg-blue-50 border-l-4 border-blue-500' : 'border border-gray-200'
-                      }`}
-                    onClick={() => handleTicketSelect(ticket.id)}
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-blue-600">{ticket.id}</span>
-                      <Badge className={getPriorityColor(ticket.priority)} variant="secondary">
-                        {ticket.priority}
-                      </Badge>
-                    </div>
-                    <h3 className="text-sm font-medium text-gray-900 mb-1 line-clamp-2">
-                      {ticket.title}
-                    </h3>
-                    <div className="flex items-center gap-2 text-xs text-gray-500">
-                      <Badge className={getStatusColor(ticket.status)} variant="outline">
-                        {ticket.status}
-                      </Badge>
-                      <span>•</span>
-                      <span>{ticket.assignedTo}</span>
-                    </div>
+                    showSearch={false}
+                  />
+                  {/* Search */}
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Input
+                      placeholder="Search tickets..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10"
+                    />
                   </div>
-                ))}
-              </div>
-            </ScrollArea>
-          )}
-        </div>
+                </div>
+              )}
+            </div>
 
+            {!isInboxCollapsed && (
+              <ScrollArea hideScrollbar={true} className="flex-1 min-h-0  mb-2 truncate max-w-[250px] block">
+                <div className="py-2">
+                  {filteredTickets.map((ticket) => (
+                    <div
+                      key={ticket.ServiceRequestId}
+                      className={`p-3 py-2 rounded-lg mb-2 cursor-pointer transition-all hover:bg-gray-50 ${selectedTicket?.ServiceRequestNo === ticket.ServiceRequestNo ? 'bg-blue-50 border-l-4 border-blue-500' : 'border border-gray-200'}`}
+                      onClick={() => handleTicketSelect(ticket,false)}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium text-blue-600">{ticket.ServiceRequestNo}</span>
+                        <Badge className={getPriorityColor(ticket.Severity || '')} variant="secondary">
+                          {ticket.Severity}
+                        </Badge>
+                      </div>
+                      <h3 className="text-sm font-medium text-gray-900 mb-1 line-clamp-2">
+                        {ticket.Title}
+                      </h3>
+                      <div className="flex items-center gap-2 text-xs text-gray-500">
+                        <Badge className={getStatusColor(ticket.Status)} variant="outline">
+                          {ticket.Status}
+                        </Badge>
+                        <span>•</span>
+                        <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={ticket.AssigneeSelectedUsers}>{ticket.AssigneeSelectedUsers}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            )}
+          </div>}
+        
         {/* Main Content Area */}
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex-1 flex flex-col min-w-0 ">
           {/* Navigation and Action Bar */}
-          <div className="bg-white border-b shadow-sm px-4 lg:px-6 py-3 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="bg-white border-b  shadow-sm px-4 lg:px-6 py-3 flex flex-col lg:flex-row lg:items-center justify-between gap-4 shrink-0">
             <div className="flex items-center gap-4 lg:gap-6 flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <ReusableButton
-                  variant="primary"
-                  size="small"
-                  onClick={() => navigate('/tickets')}
-                  icon={<ArrowLeft className="h-4 w-4" />}
-                  className="text-gray-600 hover:text-gray-900 p-1"
-                />
+                <div className=' text-gray-400 hover:text-blue-900 p-1 cursor-pointer' onClick={() => navigate('/tickets')}>
+                  <ArrowLeft className="h-4 w-4 text-current stroke-[3]" />
+                </div>
                 <span className="text-gray-600 text-sm">All Tickets</span>
                 <span className="text-gray-400">|</span>
-                <span className="text-blue-600 font-medium">{selectedTicket.id}</span>
-                <Badge className={getPriorityColor(selectedTicket.priority)}>{selectedTicket.priority}</Badge>
-                <Badge className={getStatusColor(selectedTicket.status)}>{selectedTicket.status}</Badge>
+                {!isCreateMode && <span className="text-blue-600 font-medium">{selectedTicket?.Title || ''}</span>}
+                <Badge className={getPriorityColor(watch('Severity'))}>{watch('Severity')}</Badge>
+                {!isCreateMode && <Badge className={getStatusColor(selectedTicket?.Status)}>{selectedTicket?.Status || ''}</Badge>}
               </div>
 
-              <div className="flex-1 min-w-0">
-                <h1 className="text-lg font-bold text-gray-900 truncate">{selectedTicket.title}</h1>
-              </div>
+              {isCreateMode && (
+                <div className="flex-1 min-w-0">
+                  <h1 className="text-lg font-bold text-gray-900 truncate">{watch('Title')}</h1>
+                </div>
+              )}
             </div>
 
             <div className="flex items-center gap-2">
-              {hasChanges && (
+              {!isEditing && !isCreateMode ? (
                 <ReusableButton
                   variant="primary"
                   size="small"
-                  onClick={handleDiscardChanges}
-                  icon={<X className="h-4 w-4" />}
-                />
+                  onClick={() => handleEdit('edit')}
+                  icon={<Edit className="h-4 w-4" />}
+                >
+                  Edit
+                </ReusableButton>
+              ) : (
+                <>
+                  <ReusableButton
+                    variant="text"
+                    size="small"
+                    onClick={() => handleEdit('cancel')}
+                    icon={<X className="h-4 w-4" />}
+                  >
+                    Cancel
+                  </ReusableButton>
+                  <ReusableButton
+                    size="small"
+                    variant="primary"
+                    onClick={isCreateMode ? form.handleSubmit(handleSave) : form.handleSubmit(handleUpdate)}
+                    icon={<Save className="h-4 w-4" />}
+                  >
+                    Save
+                  </ReusableButton>
+                </>
               )}
-              <ReusableButton
-                size="small"
-                onClick={handleSaveAll}
-                disabled={!hasChanges}
-                className={hasChanges ? 'bg-green-600 hover:bg-green-700' : ''}
-                icon={<Save className="h-4 w-4" />}
-              >
-                Save
-              </ReusableButton>
             </div>
           </div>
-
+          
           {/* Content Grid with Individual Scroll Areas */}
-          <div className="flex-1 p-4 lg:p-6 overflow-hidden">
-            <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 h-full">
+          <div className="flex-1 p-3 overflow-hidden min-h-0  ">
+            <div className="grid grid-cols-1 xl:grid-cols-12 gap-1 h-full">
               {/* Left Column - Main Content */}
-              <div className="xl:col-span-8 flex flex-col min-h-0">
-                <ScrollArea className="flex-1">
-                  <div className="space-y-6 pr-4">
-                    {/* Removed duplicate Quick Info Fields section - fields are available in Details Grid */}
-
-                    {/* Ticket Details */}
+              <div className="xl:col-span-8 flex flex-col  min-h-0 ">
+                <ScrollArea className="flex-1  ">
+                  <div className="space-y-6 pr-3">
                     <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
                       <CardContent className="pt-6">
                         <div className="space-y-6">
-                          {/* <div>
-                            <label className="text-sm font-medium text-gray-700 mb-2 block">Title</label>
-                            <InlineEditField field="title" value={selectedTicket.title} />
-                          </div> */}
-                          <div className='flex space-x-3 space-y-1'>
-                          <ReusableInput
-                            label='Title'
-                            className='flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base'
-                          />
-                             <ReusableDropdown
-                              label='Service Request Type'
-                              options={[]}
-                            />
-                            </div>
-                        
-                          {/* <ReusableInput
-                          label='Title'
-                          />
-                          <ReusableInput
-                          label='Title'
-                          />
-                          <ReusableInput
-                          label='Title'
-                          /> */}
-                          <ReusableRichTextEditor
-                            label="Description"
-                            placeholder="Write your Description here..."
-                            value={newComment}
-                            onChange={setNewComment}
-                            minHeight={120}
-                            maxHeight={300}
-                            showToolbar={true}
-                          />
-                          {/* <div>
-                            <label className="text-sm font-medium text-gray-700 mb-2 block">Description</label>
-                            <InlineEditField field="description" value={selectedTicket.description} multiline />
-                          </div> */}
-                          <ReusableDropdown
-                            label='Customer'
-                            options={[
-                              { value: "Nagendra1", label: "Nagendra1" },
-                              { value: "Nagendra2", label: "Nagendra2" },
-                              { value: "Nagendra3", label: "Nagendra3" },
-                              { value: "Nagendra4", label: "Nagendra4" }
-                            ]}
-                          />
-                          <div>
+                          <div className='grid md:grid-cols-[2.2fr_1.8fr] sm:grid-cols-1 space-x-3 space-y-1'>
+                            {getFieldsByNames(['Title', 'ServiceRequestType']).map((field) => (
+                              <div key={field.name}>
+                                {renderField(field)}
+                              </div>
+                            ))}
+                          </div>
+                          <div className='grid grid-cols-1 space-y-3'>
+                            {getFieldsByNames(['Description', 'FileUploadURLs']).map(renderField)}
+                            {
+                              !isCreateMode && <div>
+                                <div className="text-sm font-semibold mb-2 text-gray-700">Attachment:</div>
+
+                                {uploadData && uploadData.length > 0 ? (
+                                  <div className="my-2 flex flex-wrap gap-3">
+                                    {uploadData.map((x) => (
+                                      <div
+                                        key={x.FileUploadId}
+                                        className="flex items-center bg-gray-100 px-2 py-1 rounded-md space-x-2 max-w-xs"
+                                      >
+                                        {/* Icon + File Name */}
+                                        <div
+                                          className="flex items-center space-x-2 cursor-pointer"
+                                          onClick={() => {
+                                            const fileData = JSON.parse(x.ServiceDocumentFile);
+                                            byteArrayToFile(
+                                              fileData,
+                                              x.FileUploadName.split(".")[0],
+                                              x.FileConversionType,
+                                              x.FileType
+                                            );
+                                          }}
+                                        >
+                                          {x.FileType === "pdf" && <BsFileEarmarkPdf size={22} />}
+                                          {["xls", "xlsx"].includes(x.FileType) && (
+                                            <PiMicrosoftExcelLogoFill size={23} />
+                                          )}
+                                          {["doc", "docx"].includes(x.FileType) && (
+                                            <PiMicrosoftWordLogo size={23} />
+                                          )}
+                                          {["png", "jpg", "jpeg", "img"].includes(x.FileType) && (
+                                            <PiImage size={23} />
+                                          )}
+                                          {["ppt", "pptx"].includes(x.FileType) && (
+                                            <BsFiletypePptx size={23} />
+                                          )}
+                                          {["tex", "txt", "rtf", "odt"].includes(x.FileType) && (
+                                            <BsFiletypeHtml size={23} />
+                                          )}
+
+                                          <span
+                                            className="text-xs text-gray-800 truncate max-w-[120px]"
+                                            title={x.FileUploadName}
+                                          >
+                                            {x.FileUploadName}
+                                          </span>
+                                        </div>
+
+                                        {/* Delete Icon */}
+                                        {isEditing &&
+                                          <button
+                                            onClick={() => {
+                                              handleAttachmentDelete(x.FileUploadId)
+                                            }}
+                                            className="text-gray-600 hover:text-red-500 transition-colors"
+                                          >
+                                            <RxCross2 size={15} />
+                                          </button>
+                                        }
+                                      </div>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <p className="text-sm text-gray-500">No Attachments</p>
+                                )}
+                              </div>
+                            }
+                            {getFieldsByNames(['Customer']).map(renderField)}
+                          </div>
+                          {watch('Customer') && <div>
                             <ReusableTable
-                              data={[]}
+                              data={dataSource}
                               columns={cols}
                             />
-                          </div>
-                          <div>
-                            <ReusableUpload
-                              label="Attachments"
-                              multiple={true}
-                              accept="image/*,application/pdf,.doc,.docx,.txt"
-                              maxSize={10}
-                              maxFiles={5}
-                              value={attachments}
-                              onChange={setAttachments}
-                              showPreview={true}
-                              dragAndDrop={true}
-                            />
-                          </div>
-
-
+                          </div>}
                         </div>
                       </CardContent>
                     </Card>
-                    <Card className='shadow-lg'>
-                      <CardContent className="p-0">
-                        <Accordion type="single" collapsible >
-                          <AccordionItem value="additional-fields" className="border-none">
-                            <AccordionTrigger className="px-6 py-4 hover:no-underline">
-                              <div className="flex items-center gap-2">
-                                <Tag className="h-5 w-5" />
-                                <span className="font-semibold">Additional Fields</span>
-                              </div>
-                            </AccordionTrigger>
-                            <AccordionContent className="px-6 pb-6">
-                              <div className="space-y-4">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                  <ReusableDropdown
-                                    label="Urgency Level"
-                                    tooltip="Select urgency"
-                                    placeholder="Select urgency"
-                                    options={[
-                                      { value: 'Low', label: 'Low' },
-                                      { value: 'Medium', label: 'Medium' },
-                                      { value: 'High', label: 'High' },
-                                      { value: 'Critical', label: 'Critical' }
-                                    ]}
-                                    value={form.watch('urgency')}
-                                    onChange={(value) => form.setValue('urgency', value as any)}
-                                  // error={form.formState.errors.urgency?.message}
-                                  />
-
-                                  <ReusableDropdown
-                                    label="Business Impact"
-                                    tooltip="Select impact level"
-                                    placeholder="Select impact level"
-                                    options={[
-                                      { value: 'Low', label: 'Low Impact' },
-                                      { value: 'Medium', label: 'Medium Impact' },
-                                      { value: 'High', label: 'High Impact' }
-                                    ]}
-                                    value={form.watch('businessImpact')}
-                                    onChange={(value) => form.setValue('businessImpact', value as any)}
-                                  // error={form.formState.errors.businessImpact?.message}
-                                  />
+                    {(showAccordion && ticketStatus !== 'Closed') &&
+                      <Card className='shadow-lg'>
+                        <CardContent className="p-0">
+                          <Accordion type="single" collapsible value={accordionOpen} onValueChange={setAccordionOpen}>
+                            <AccordionItem value="additional-fields" className="border-none">
+                              <AccordionTrigger className="px-6 py-4 hover:no-underline">
+                                <div className="flex items-center gap-2">
+                                  <Tag className="h-5 w-5" />
+                                  <span className="font-semibold">Additional Fields</span>
                                 </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                  <ReusableDropdown
-                                    label="Service Category"
-                                    tooltip="Select service category"
-                                    placeholder="Select service category"
-                                    options={[
-                                      { value: 'Incident', label: 'Incident' },
-                                      { value: 'Service Request', label: 'Service Request' },
-                                      { value: 'Change Request', label: 'Change Request' },
-                                      { value: 'Problem', label: 'Problem' }
-                                    ]}
-                                    value={form.watch('serviceCategory')}
-                                    onChange={(value) => form.setValue('serviceCategory', value as any)}
-                                  // error={form.formState.errors.serviceCategory?.message}
-                                  />
-
-                                  <ReusableDropdown
-                                    label="Customer Impact"
-                                    tooltip="Select customer impact"
-                                    placeholder="Select customer impact"
-                                    options={[
-                                      { value: 'None', label: 'No Impact' },
-                                      { value: 'Low', label: 'Low Impact' },
-                                      { value: 'Medium', label: 'Medium Impact' },
-                                      { value: 'High', label: 'High Impact' }
-                                    ]}
-                                    value={form.watch('customerImpact')}
-                                    onChange={(value) => form.setValue('customerImpact', value as any)}
-                                  // error={form.formState.errors.customerImpact?.message}
-                                  />
-                                </div>
-
-                                <Separator />
-
+                              </AccordionTrigger>
+                              <AccordionContent className="px-6 pb-6">
                                 <div className="space-y-4">
-                                  <h4 className="font-medium">Environment Information</h4>
                                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <ReusableDropdown
-                                      label="Operating System"
-                                      tooltip="Select OS"
-                                      placeholder="Select OS"
-                                      options={[
-                                        { value: 'windows', label: 'Windows' },
-                                        { value: 'macos', label: 'macOS' },
-                                        { value: 'linux', label: 'Linux' },
-                                        { value: 'other', label: 'Other' }
-                                      ]}
-                                      value={form.watch('operatingSystem')}
-                                      onChange={(value) => form.setValue('operatingSystem', value)}
-                                    // error={form.formState.errors.operatingSystem?.message}
-                                    />
-
-                                    <ReusableDropdown
-                                      label="Browser"
-                                      tooltip="Select browser"
-                                      placeholder="Select browser"
-                                      options={[
-                                        { value: 'chrome', label: 'Chrome' },
-                                        { value: 'firefox', label: 'Firefox' },
-                                        { value: 'safari', label: 'Safari' },
-                                        { value: 'edge', label: 'Edge' }
-                                      ]}
-                                      value={form.watch('browser')}
-                                      onChange={(value) => form.setValue('browser', value)}
-                                    // error={form.formState.errors.browser?.message}
-                                    />
+                                    {getAdditionalFields().map(renderField)}
                                   </div>
                                 </div>
-
-                                <ReusableTextarea
-                                  label="Expected Resolution"
-                                  tooltip="Describe the expected outcome or resolution"
-                                  placeholder="Describe the expected outcome or resolution"
-                                  value={form.watch('expectedResolution')}
-                                  onChange={(e) => form.setValue('expectedResolution', e.target.value)}
-                                  // error={form.formState.errors.expectedResolution?.message}
-                                  numberOfRows={3}
-                                />
-                              </div>
-                            </AccordionContent>
-                          </AccordionItem>
-                        </Accordion>
-                      </CardContent>
-                    </Card>
-
+                              </AccordionContent>
+                            </AccordionItem>
+                          </Accordion>
+                        </CardContent>
+                      </Card>
+                    }
                     {/* Activity & Comments */}
-                    <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-                      <CardHeader>
-                        <CardTitle>Activity</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <Tabs defaultValue="comments" className="space-y-4">
-                          <TabsList className="grid w-full grid-cols-3 h-auto">
-                            <TabsTrigger value="comments" className="text-xs sm:text-sm px-2 sm:px-4 py-2">Comments</TabsTrigger>
-                            <TabsTrigger value="history" className="text-xs sm:text-sm px-2 sm:px-4 py-2">History</TabsTrigger>
-                            <TabsTrigger value="worklog" className="text-xs sm:text-sm px-2 sm:px-4 py-2">Work Log</TabsTrigger>
-                          </TabsList>
+                    {!isCreateMode && (
+                      <Card className=" bg-white border-b  shadow-sm   mb-2  shadow-lg">
+                        <CardHeader>
+                          <CardTitle>Activity</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <Tabs defaultValue="comments" className="space-y-4">
+                            <TabsList className="grid w-full grid-cols-3 h-auto">
+                              <TabsTrigger value="comments" className="text-xs sm:text-sm px-2 sm:px-4 py-2">Comments</TabsTrigger>
+                              <TabsTrigger value="history" className="text-xs sm:text-sm px-2 sm:px-4 py-2">History</TabsTrigger>
+                              <TabsTrigger value="worklog" className="text-xs sm:text-sm px-2 sm:px-4 py-2">Work Log</TabsTrigger>
+                            </TabsList>
 
-                          <TabsContent value="comments" className="space-y-4">
-                            <div className="space-y-4">
-                              <ReusableRichTextEditor
-                                label="Add Comment"
-                                placeholder="Write your comment here..."
-                                value={newComment}
-                                onChange={setNewComment}
-                                minHeight={120}
-                                maxHeight={300}
-                                showToolbar={true}
-                              />
-                              <div className="flex justify-end">
-                                <ReusableButton size="small">
-                                  Post Comment
-                                </ReusableButton>
+                            <TabsContent value="comments" className="space-y-4">
+                              <div className="space-y-4">
+                                <form>
+                                  <Controller
+                                    name="comment"
+                                    control={commentForm.control}
+                                    render={({ field: ctrl }) => (
+                                      <ReusableRichTextEditor
+                                        value={ctrl.value}
+                                        formats={['bold', 'italic', 'underline', 'strike']}
+                                        onChange={ctrl.onChange}
+                                        isRequired={false}
+                                        modules={modules}
+                                        showToolbar={true}
+                                        minHeight={120}
+                                        maxHeight={300}
+                                      />
+                                    )}
+                                  />
+                                  <div className="flex justify-end my-4">
+                                    <ReusableButton
+                                      size="small"
+                                      onClick={commentForm.handleSubmit(postComment)}
+                                    >
+                                      Post Comment
+                                    </ReusableButton>
+                                  </div>
+                                </form>
                               </div>
-                            </div>
 
-                            {comments.map((comment) => (
-                              <div key={comment.id} className="flex gap-3 p-4 border rounded">
-                                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-sm font-medium shrink-0">
-                                  {comment.user.charAt(0)}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <span className="font-medium">{comment.user}</span>
-                                    <span className="text-sm text-gray-500">{comment.date}</span>
+                              {comments?.map((comment) => (
+                                <div key={comment.id} className="flex gap-3 p-4 border rounded">
+                                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-sm font-medium shrink-0">
+                                    {comment?.CommenterName?.charAt(0)}
                                   </div>
-                                  <div className="text-sm text-gray-700">
-                                    {comment.text}
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <span className="font-medium">{comment?.CommenterName}</span>
+                                      <span className="text-sm text-gray-500">{comment?.RequestedDate}</span>
+                                    </div>
+                                    <div className="ql-editor sd-edit-comments">
+                                      <div className='commentHistory ' dangerouslySetInnerHTML={{ __html: comment.Comment.toString() }} />
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                            ))}
-                          </TabsContent>
+                              ))}
+                            </TabsContent>
 
-                          <TabsContent value="history" className="space-y-4">
-                            {changeHistory.map((change) => (
-                              <div key={change.id} className="flex gap-3 p-4 border rounded">
-                                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-sm font-medium shrink-0">
-                                  {change.user.charAt(0)}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <span className="font-medium">{change.user}</span>
-                                    <span className="text-sm text-gray-500">{change.timestamp}</span>
-                                    <Badge variant="outline" className="text-xs">
-                                      {change.changeType.replace('_', ' ')}
-                                    </Badge>
+                            <TabsContent value="history" className="space-y-4">
+                              {commentHistory?.map((change, ind) => (
+                                <div key={ind} className="flex gap-3 p-4 border rounded">
+                                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-sm font-medium shrink-0">
+                                    {change.CommenterName.charAt(0)}
                                   </div>
-                                  <div className="text-sm">
-                                    <span className="text-gray-700">Changed </span>
-                                    <span className="font-medium">{change.field}</span>
-                                    <span className="text-gray-700"> from </span>
-                                    <span className="bg-red-100 text-red-800 px-2 py-1 rounded text-xs">{change.oldValue}</span>
-                                    <span className="text-gray-700"> to </span>
-                                    <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">{change.newValue}</span>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <span className="font-medium">{change.CommenterName}</span>
+                                      <span className="text-sm text-gray-500">{change.RequestedDate}</span>
+                                      <Badge variant="outline" className="text-xs">
+                                      </Badge>
+                                    </div>
+                                    <div className="text-sm">
+                                      <div className='commentHistory ' dangerouslySetInnerHTML={{ __html: change.Comment }} />
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                            ))}
-                          </TabsContent>
+                              ))}
+                            </TabsContent>
 
-                          <TabsContent value="worklog" className="space-y-4">
-                            {activityLogs.length === 0 && (
-                              <p className="text-sm text-gray-500 text-center py-8">No work log entries found</p>
-                            )}
-                            {activityLogs.map((log) => (
-                              <div key={log.id} className="flex justify-between items-center p-4 border rounded">
-                                <div className="space-y-1 flex-1 min-w-0">
-                                  <div className="flex items-center gap-2">
-                                    <span className="font-medium">{log.user}</span>
-                                    <span className="text-sm text-gray-500">{log.date}</span>
-                                    <Badge variant="outline">{log.app}</Badge>
+                            {/* <TabsContent value="worklog" className="space-y-4">
+                              {activityLogs.length === 0 && (
+                                <p className="text-sm text-gray-500 text-center py-8">No work log entries found</p>
+                              )}
+                              {activityLogs.map((log) => (
+                                <div key={log.id} className="flex justify-between items-center p-4 border rounded">
+                                  <div className="space-y-1 flex-1 min-w-0">
+                                    <div className="flex items-center gap-2">
+                                      <span className="font-medium">{log.user}</span>
+                                      <span className="text-sm text-gray-500">{log.date}</span>
+                                      <Badge variant="outline">{log.app}</Badge>
+                                    </div>
+                                    <p className="text-gray-700 truncate">{log.description}</p>
                                   </div>
-                                  <p className="text-gray-700 truncate">{log.description}</p>
+                                  <div className="text-right shrink-0 ml-4">
+                                    <p className="font-semibold">{log.hoursSpent}</p>
+                                    <p className={`text-sm ${getActivityStatusColor(log.status)}`}>
+                                      {log.status}
+                                    </p>
+                                  </div>
                                 </div>
-                                <div className="text-right shrink-0 ml-4">
-                                  <p className="font-semibold">{log.hoursSpent}</p>
-                                  <p className={`text-sm ${getActivityStatusColor(log.status)}`}>
-                                    {log.status}
-                                  </p>
-                                </div>
-                              </div>
-                            ))}
-                          </TabsContent>
-                        </Tabs>
-                      </CardContent>
-                    </Card>
+                              ))}
+                            </TabsContent> */}
+                          </Tabs>
+                        </CardContent>
+                      </Card>)}
                   </div>
                 </ScrollArea>
               </div>
 
               {/* Right Column - Details Panel */}
               <div className="xl:col-span-4 flex flex-col min-h-0">
-                <ScrollArea className="flex-1">
-                  <div className="pr-4">
+                <ScrollArea className="flex-1 h-full">
+                  <div className="pr-1">
                     <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
                       <CardContent className="p-0">
                         <Tabs defaultValue="details" className="w-full">
                           <TabsList className="grid w-full grid-cols-3 rounded-t-lg">
-                            <TabsTrigger value="details" className="text-xs">Details</TabsTrigger>
-                            {/* <TabsTrigger value="timetracking" className="text-xs">Time</TabsTrigger> */}
-                            <TabsTrigger value="linkedissues" className="text-xs">Links</TabsTrigger>
+                            <TabsTrigger value="details" className="text-xs data-[state=active]:shadow-lg data-[state=active]:shadow-gray-300">Details</TabsTrigger>
+                            {!isCreateMode && <TabsTrigger value="linkedissues" className="text-xs data-[state=active]:shadow-lg data-[state=active]:shadow-gray-300">Links</TabsTrigger>}
                           </TabsList>
 
                           <TabsContent value="details" className="p-6 space-y-4">
-                            {/* <div>
-                              <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Type</label>
-                              <InlineEditField field="type" value={selectedTicket.type} type="select" />
-                            </div> */}
-                           
-                            <ReusableMultiSelect
-                              label='Assign To'
-                              options={[]} />
-                            <ReusableDropdown
-                              label='Severity'
-                              options={[]}
-                            />
-                            <ReusableMultiSelect
-                              label='Asset Codes'
-                              options={[]} />
-                            <ReusableDatePicker
-                              label='Requested Date'
-                            />
-
-                            <ReusableDropdown
-                              label='Requested By'
-                              options={[]}
-                            />
-                            <ReusableDropdown
-                              label='Branch'
-                              options={[]}
-                            />
-
-                            <ReusableMultiSelect
-                              label='CC List'
-                              options={[]} />
-
-                            <ReusableDropdown
-                              label='Link To'
-                              options={[]}
-                            />
-                            {/* <div>
-                              <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Status</label>
-                              <InlineEditField field="status" value={selectedTicket.status} type="select" />
-                            </div> */}
-
-                            {/* <div>
-                              <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Priority</label>
-                              <InlineEditField field="priority" value={selectedTicket.priority} type="select" />
-                            </div>
-
-                            <div>
-                              <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Assignee</label>
-                              <InlineEditField field="assignedTo" value={selectedTicket.assignedTo} />
-                            </div>
-
-                            <div>
-                              <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Reporter</label>
-                              <p className="mt-1 text-sm">{selectedTicket.createdBy}</p>
-                            </div>
-
-                            <div>
-                              <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Created</label>
-                              <InlineEditField field="createdOn" value={selectedTicket.createdOn} type="date" />
-                            </div>
-
-                            {selectedTicket.sprintNo && (
-                              <div>
-                                <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Sprint</label>
-                                <InlineEditField field="sprintNo" value={selectedTicket.sprintNo} />
-                              </div>
-                            )}
-
-                            {selectedTicket.assetCode && (
-                              <div>
-                                <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Asset Code</label>
-                                <InlineEditField field="assetCode" value={selectedTicket.assetCode} />
-                              </div>
-                            )} */}
-
-                            {/* <div>
-                              <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Labels</label>
-                              <div className="mt-1 flex gap-1 flex-wrap">
-                                {selectedTicket.tags.map((tag, index) => (
-                                  <Badge key={index} variant="secondary" className="text-xs">{tag}</Badge>
-                                ))}
-                              </div>
-                            </div> */}
+                            {getFieldsByNames(['Status', 'AssigneeSelectedUsers', 'Severity', 'Priority', 'AssetId', 'RequestedDate', 'RequestedBy', 'Branch', 'CCListSelectedUsers', 'LinkTo','Notify']).map(renderField)}
+                          
                           </TabsContent>
-
-                          {/* <TabsContent value="timetracking" className="p-6 space-y-4">
-                            <div className="grid grid-cols-2 gap-4 text-center">
-                              <div>
-                                <p className="text-xs text-gray-500">Estimated</p>
-                                <p className="text-lg font-semibold">{selectedTicket.estimatedTime}</p>
-                              </div>
-                              <div>
-                                <p className="text-xs text-gray-500">Logged</p>
-                                <p className="text-lg font-semibold">
-                                  {activityLogs.reduce((total, log) => {
-                                    const [hours, minutes] = log.hoursSpent.split(':').map(Number);
-                                    return total + hours + minutes / 60;
-                                  }, 0).toFixed(1)}h
-                                </p>
-                              </div>
-                            </div>
-                            
-                            <div>
-                              <div className="flex justify-between text-xs mb-1">
-                                <span>Progress</span>
-                                <span>
-                                  {(() => {
-                                    const totalLoggedHours = activityLogs.reduce((total, log) => {
-                                      const [hours, minutes] = log.hoursSpent.split(':').map(Number);
-                                      return total + hours + minutes / 60;
-                                    }, 0);
-                                    const estimatedHours = parseFloat(selectedTicket.estimatedTime.replace('h', ''));
-                                    const percentageLogged = (totalLoggedHours / estimatedHours) * 100;
-                                    return percentageLogged.toFixed(0);
-                                  })()}%
-                                </span>
-                              </div>
-                              <div className="w-full bg-gray-200 rounded-full h-2">
-                                <div 
-                                  className="bg-blue-600 h-2 rounded-full transition-all"
-                                  style={{ 
-                                    width: `${(() => {
-                                      const totalLoggedHours = activityLogs.reduce((total, log) => {
-                                        const [hours, minutes] = log.hoursSpent.split(':').map(Number);
-                                        return total + hours + minutes / 60;
-                                      }, 0);
-                                      const estimatedHours = parseFloat(selectedTicket.estimatedTime.replace('h', ''));
-                                      const percentageLogged = (totalLoggedHours / estimatedHours) * 100;
-                                      return Math.min(percentageLogged, 100);
-                                    })()}%` 
-                                  }}
-                                ></div>
-                              </div>
-                            </div>
-
-                            <Button variant="outline" className="w-full text-sm">
-                              Log Work
-                            </Button>
-                          </TabsContent> */}
-
                           <TabsContent value="linkedissues" className="p-6 space-y-3">
-                            {selectedTicket.linkedTickets.map((linkedId) => (
-                              <div key={linkedId} className="flex items-center gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 cursor-pointer transition-colors">
-                                <Link className="h-4 w-4 text-blue-600" />
-                                <div className="flex-1">
-                                  <span className="text-blue-600 font-medium text-sm">{linkedId}</span>
-                                  <p className="text-xs text-gray-600">Click to view details</p>
-                                </div>
-                              </div>
-                            ))}
-                            {selectedTicket.linkedTickets.length === 0 && (
+                            {(childListData.length !== 0) ?
+                              <>
+                                {childListData?.map((obj) => (
+                                  <div  onClick={()=>{handleTicketSelect(obj,true)}} key={obj.ChildServiceRequestNo} className="flex items-center gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 cursor-pointer transition-colors">
+                                    <Link className="h-4 w-4 text-blue-600" />
+                                    <div className="flex-1">
+                                      <span className="text-blue-600 font-medium text-sm">{obj.ChildServiceRequestNo}</span>
+                                      <p className="text-xs text-gray-600">Click to view details</p>
+                                    </div>
+                                  </div>
+                                ))}
+                              </>
+                              :
                               <p className="text-sm text-gray-500 text-center py-4">No linked tickets</p>
-                            )}
+                            }
                           </TabsContent>
                         </Tabs>
                       </CardContent>
@@ -1057,6 +1557,30 @@ const TicketView = () => {
           </div>
         </div>
       </div>
+      
+      {/* History Popup Dialog */}
+      <Dialog open={isHistoryPopupOpen} onOpenChange={setIsHistoryPopupOpen}>
+        <DialogContent className="max-w-6xl max-h-[80vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle>
+              Subscription History
+              {selectedRowForHistory && (
+                <span className="text-sm font-normal text-gray-600 ml-2 mt-2">
+                  (ID: {selectedRowForHistory.id || selectedRowForHistory.ID || Object.values(selectedRowForHistory)[0] || 'Unknown'})
+                </span>
+              )}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="overflow-hidden ">
+            <ScrollArea className="h-[60vh] w-full ">
+              <ReusableTable
+                data={historyData}
+                columns={historyColumns}
+              />
+            </ScrollArea>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

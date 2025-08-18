@@ -1,3 +1,5 @@
+
+
 import React, { useState, useMemo, useCallback, useEffect, useRef, RefObject } from 'react';
 import {
   useReactTable,
@@ -23,30 +25,34 @@ import {
   OnChangeFn,
   ColumnOrderState,
   ColumnSizingState,
+  ColumnPinningState,
 } from '@tanstack/react-table';
-import { 
-  ChevronDown, 
-  ChevronRight, 
-  Search, 
-  Filter, 
-  Download, 
-  Edit, 
-  Trash2, 
-  Eye, 
-  Settings, 
-  MoreHorizontal, 
-  ArrowUpDown, 
-  ArrowUp, 
-  ArrowDown, 
-  Plus, 
-  X, 
-  Check, 
-  AlertCircle, 
-  Loader2, 
-  Moon, 
-  Sun, 
-  Columns, 
-  RefreshCw, 
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import * as XLSX from 'xlsx';
+import {
+  ChevronDown,
+  ChevronRight,
+  Search,
+  Filter,
+  Download,
+  Edit,
+  Trash2,
+  Eye,
+  Settings,
+  MoreHorizontal,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  Plus,
+  X,
+  Check,
+  AlertCircle,
+  Loader2,
+  Moon,
+  Sun,
+  Columns,
+  RefreshCw,
   PrinterIcon,
   FileSpreadsheet,
   FileImage,
@@ -61,7 +67,13 @@ import {
   Undo,
   Redo,
   Maximize2,
-  Minimize2
+  Minimize2,
+  Pin,
+  PinOff,
+  FileText,
+  Group,
+  CheckSquare,
+  Square
 } from 'lucide-react';
 import { Button } from './button';
 import { Input } from './input';
@@ -133,6 +145,26 @@ export interface TablePreferences {
   pageSize: number;
 }
 
+// NEW: Enhanced Selection interfaces
+export interface SelectionInfo<T = any> {
+  selectedRows: T[];
+  selectedRowIds: string[];
+  totalSelected: number;
+  isAllSelected: boolean;
+  isPartiallySelected: boolean;
+}
+
+export interface SelectionActions<T = any> {
+  selectRow: (rowId: string) => void;
+  deselectRow: (rowId: string) => void;
+  selectAll: () => void;
+  deselectAll: () => void;
+  toggleRowSelection: (rowId: string) => void;
+  selectMultiple: (rowIds: string[]) => void;
+  deselectMultiple: (rowIds: string[]) => void;
+  invertSelection: () => void;
+}
+
 export interface ReusableTableProps<T = any> {
   data: T[];
   columns: ColumnDef<T>[];
@@ -147,6 +179,17 @@ export interface ReusableTableProps<T = any> {
   onBulkEdit?: (selectedRows: T[]) => void;
   onRowEdit?: (row: T, changes: Partial<T>) => void;
   onAuditLog?: (entry: AuditTrail) => void;
+
+  // NEW: Enhanced Selection Props
+  selectedRowIds?: string[]; // Control selection from outside
+  onSelectionChange?: (selectionInfo: SelectionInfo<T>) => void; // Get selection changes
+  onSelectedRowsAction?: (action: string, selectedRows: T[]) => void; // Custom actions on selected rows
+  getRowId?: (row: T, index: number) => string; // Custom row ID getter
+  selectionMode?: 'single' | 'multiple'; // Single or multiple selection
+  enableSelectAll?: boolean; // Enable/disable select all functionality
+  maxSelectable?: number; // Maximum number of rows that can be selected
+  selectableRowFilter?: (row: T) => boolean; // Filter which rows can be selected
+
   enableSelection?: boolean;
   enableSearch?: boolean;
   enableColumnVisibility?: boolean;
@@ -161,6 +204,8 @@ export interface ReusableTableProps<T = any> {
   enableAdvancedFilters?: boolean;
   enableAuditTrail?: boolean;
   enablePrintMode?: boolean;
+  enableColumnPinning?: boolean;
+  enableTreeData?: boolean;
   pageSize?: number;
   virtualItemHeight?: number;
   className?: string;
@@ -172,6 +217,7 @@ export interface ReusableTableProps<T = any> {
   timezone?: string;
   rowHeight?: 'compact' | 'normal' | 'comfortable';
   aggregationFunctions?: Record<string, (values: any[]) => any>;
+  getSubRows?: (originalRow: T, index: number) => T[] | undefined;
 }
 
 // Custom hooks
@@ -198,6 +244,172 @@ function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((val
   return [storedValue, setValue];
 }
 
+// NEW: Enhanced Selection Hook
+function useTableSelection<T = any>(
+  data: T[],
+  getRowId: (row: T, index: number) => string,
+  selectionMode: 'single' | 'multiple' = 'multiple',
+  maxSelectable?: number,
+  selectableRowFilter?: (row: T) => boolean,
+  initialSelectedIds?: string[]
+) {
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>(() => {
+    const initial: RowSelectionState = {};
+    if (initialSelectedIds) {
+      initialSelectedIds.forEach(id => {
+        initial[id] = true;
+      });
+    }
+    return initial;
+  });
+
+  // Get selectable rows
+  const selectableRows = useMemo(() => {
+    return data.filter(selectableRowFilter || (() => true));
+  }, [data, selectableRowFilter]);
+
+  // Get selected rows data
+  const selectedRows = useMemo(() => {
+    return data.filter((row, index) => {
+      const id = getRowId(row, index);
+      return rowSelection[id];
+    });
+  }, [data, rowSelection, getRowId]);
+
+  // Get selected row IDs
+  const selectedRowIds = useMemo(() => {
+    return Object.keys(rowSelection).filter(id => rowSelection[id]);
+  }, [rowSelection]);
+
+  // Selection info
+  const selectionInfo: SelectionInfo<T> = useMemo(() => {
+    const totalSelectable = selectableRows.length;
+    const totalSelected = selectedRowIds.length;
+    const isAllSelected = totalSelectable > 0 && totalSelected === totalSelectable;
+    const isPartiallySelected = totalSelected > 0 && totalSelected < totalSelectable;
+
+    return {
+      selectedRows,
+      selectedRowIds,
+      totalSelected,
+      isAllSelected,
+      isPartiallySelected
+    };
+  }, [selectedRows, selectedRowIds, selectableRows.length]);
+
+  // Selection actions
+  const selectionActions: SelectionActions<T> = useMemo(() => ({
+    selectRow: (rowId: string) => {
+      if (selectionMode === 'single') {
+        setRowSelection({ [rowId]: true });
+      } else {
+        if (maxSelectable && selectedRowIds.length >= maxSelectable) return;
+        setRowSelection(prev => ({ ...prev, [rowId]: true }));
+      }
+    },
+
+    deselectRow: (rowId: string) => {
+      setRowSelection(prev => {
+        const newSelection = { ...prev };
+        delete newSelection[rowId];
+        return newSelection;
+      });
+    },
+
+    selectAll: () => {
+      if (selectionMode === 'single') return;
+      const newSelection: RowSelectionState = {};
+      const rowsToSelect = maxSelectable
+        ? selectableRows.slice(0, maxSelectable)
+        : selectableRows;
+
+      rowsToSelect.forEach((row, index) => {
+        const id = getRowId(row, data.indexOf(row));
+        newSelection[id] = true;
+      });
+      setRowSelection(newSelection);
+    },
+
+    deselectAll: () => {
+      setRowSelection({});
+    },
+
+    toggleRowSelection: (rowId: string) => {
+      setRowSelection(prev => {
+        if (prev[rowId]) {
+          const newSelection = { ...prev };
+          delete newSelection[rowId];
+          return newSelection;
+        } else {
+          if (selectionMode === 'single') {
+            return { [rowId]: true };
+          }
+          if (maxSelectable && Object.keys(prev).length >= maxSelectable) {
+            return prev;
+          }
+          return { ...prev, [rowId]: true };
+        }
+      });
+    },
+
+    selectMultiple: (rowIds: string[]) => {
+      if (selectionMode === 'single') {
+        if (rowIds.length > 0) {
+          setRowSelection({ [rowIds[0]]: true });
+        }
+        return;
+      }
+
+      const newSelection = { ...rowSelection };
+      const idsToSelect = maxSelectable
+        ? rowIds.slice(0, Math.max(0, maxSelectable - selectedRowIds.length))
+        : rowIds;
+
+      idsToSelect.forEach(id => {
+        newSelection[id] = true;
+      });
+      setRowSelection(newSelection);
+    },
+
+    deselectMultiple: (rowIds: string[]) => {
+      const newSelection = { ...rowSelection };
+      rowIds.forEach(id => {
+        delete newSelection[id];
+      });
+      setRowSelection(newSelection);
+    },
+
+    invertSelection: () => {
+      if (selectionMode === 'single') return;
+      const newSelection: RowSelectionState = {};
+      selectableRows.forEach((row, index) => {
+        const id = getRowId(row, data.indexOf(row));
+        if (!rowSelection[id]) {
+          newSelection[id] = true;
+        }
+      });
+
+      if (maxSelectable) {
+        const selectedIds = Object.keys(newSelection).slice(0, maxSelectable);
+        const limitedSelection: RowSelectionState = {};
+        selectedIds.forEach(id => {
+          limitedSelection[id] = true;
+        });
+        setRowSelection(limitedSelection);
+      } else {
+        setRowSelection(newSelection);
+      }
+    }
+  }), [selectionMode, maxSelectable, selectedRowIds, selectableRows, rowSelection, data, getRowId]);
+
+  return {
+    rowSelection,
+    setRowSelection,
+    selectionInfo,
+    selectionActions
+  };
+}
+
 // Components
 const LoadingSpinner = ({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) => {
   const sizeClasses = {
@@ -205,7 +417,7 @@ const LoadingSpinner = ({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) => {
     md: 'w-6 h-6',
     lg: 'w-8 h-8'
   };
-  
+
   return <Loader2 className={`animate-spin ${sizeClasses[size]}`} />;
 };
 
@@ -232,15 +444,15 @@ interface ActionMenuProps<T = any> {
   permissions?: TablePermissions;
 }
 
-const ActionMenu = <T,>({ 
+const ActionMenu = <T,>({
   row,
   actions,
-  permissions 
+  permissions
 }: ActionMenuProps<T>) => {
   if (!actions || actions.length === 0) return null;
-  
+
   const visibleActions = actions.filter(action => !action.hidden?.(row));
-  
+
   if (visibleActions.length === 0) return null;
 
   return (
@@ -271,10 +483,10 @@ const ActionMenu = <T,>({
   );
 };
 
-const GlobalFilter = ({ 
-  globalFilter, 
-  setGlobalFilter 
-}: { 
+const GlobalFilter = ({
+  globalFilter,
+  setGlobalFilter
+}: {
   globalFilter: string;
   setGlobalFilter: (value: string) => void;
 }) => (
@@ -289,15 +501,15 @@ const GlobalFilter = ({
   </div>
 );
 
-const ColumnFilter = ({ 
-  column, 
-  table 
-}: { 
+const ColumnFilter = ({
+  column,
+  table
+}: {
   column: Column<any, unknown>;
   table: TanstackTable<any>;
 }) => {
   const columnFilterValue = column.getFilterValue();
-  
+
   return (
     <Input
       value={(columnFilterValue as string) ?? ''}
@@ -308,11 +520,7 @@ const ColumnFilter = ({
   );
 };
 
-const ColumnVisibilityManager = ({ 
-  table 
-}: { 
-  table: TanstackTable<any>;
-}) => {
+const ColumnVisibilityManager = ({ table }: { table: TanstackTable<any> }) => {
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -327,10 +535,15 @@ const ColumnVisibilityManager = ({
             <div key={column.id} className="flex items-center space-x-2">
               <Checkbox
                 checked={column.getIsVisible()}
-                onCheckedChange={column.getToggleVisibilityHandler()}
+                onCheckedChange={(checked) =>
+                  column.toggleVisibility(checked === true)
+                }
                 id={column.id}
               />
-              <label htmlFor={column.id} className="text-sm font-medium capitalize">
+              <label
+                htmlFor={column.id}
+                className="text-sm font-medium capitalize"
+              >
                 {column.id.replace(/([A-Z])/g, ' $1').trim()}
               </label>
             </div>
@@ -341,12 +554,101 @@ const ColumnVisibilityManager = ({
   );
 };
 
+
+// Column Pinning Manager Component
+const ColumnPinningManager = ({
+  table
+}: {
+  table: TanstackTable<any>;
+}) => {
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="outline" size="sm">
+          <Pin className="w-4 h-4 mr-2" />
+          Pin Columns
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-48 p-2">
+        <div className="space-y-2">
+          {table.getAllLeafColumns().map((column) => (
+            <div key={column.id} className="flex items-center justify-between space-x-2">
+              <label className="text-sm font-medium capitalize flex-1">
+                {column.id.replace(/([A-Z])/g, ' $1').trim()}
+              </label>
+              <div className="flex gap-1">
+                <Button
+                  size="sm"
+                  variant={column.getIsPinned() === 'left' ? 'default' : 'outline'}
+                  onClick={() => column.pin(column.getIsPinned() === 'left' ? false : 'left')}
+                  className="h-6 w-6 p-0"
+                >
+                  ←
+                </Button>
+                <Button
+                  size="sm"
+                  variant={column.getIsPinned() === 'right' ? 'default' : 'outline'}
+                  onClick={() => column.pin(column.getIsPinned() === 'right' ? false : 'right')}
+                  className="h-6 w-6 p-0"
+                >
+                  →
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+};
+
+// Column Grouping Manager Component
+const ColumnGroupingManager = ({
+  table
+}: {
+  table: TanstackTable<any>;
+}) => {
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="outline" size="sm">
+          <Group className="w-4 h-4 mr-2" />
+          Group By
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-48 p-2">
+        <div className="space-y-2">
+          {table
+            .getAllLeafColumns()
+            .filter((column) => column.getCanGroup())
+            .map((column) => (
+              <div key={column.id} className="flex items-center space-x-2">
+                <Checkbox
+                  checked={column.getIsGrouped()}
+                  onCheckedChange={() => column.toggleGrouping()}
+                  id={`group-${column.id}`}
+                />
+                <label
+                  htmlFor={`group-${column.id}`}
+                  className="text-sm font-medium capitalize"
+                >
+                  {column.id.replace(/([A-Z])/g, ' $1').trim()}
+                </label>
+              </div>
+            ))}
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+};
+
+
 // Advanced Filter Builder Component
-const AdvancedFilterBuilder = ({ 
-  columns, 
-  filters, 
-  onFiltersChange 
-}: { 
+const AdvancedFilterBuilder = ({
+  columns,
+  filters,
+  onFiltersChange
+}: {
   columns: ColumnDef<any>[];
   filters: AdvancedFilter[];
   onFiltersChange: (filters: AdvancedFilter[]) => void;
@@ -400,7 +702,7 @@ const AdvancedFilterBuilder = ({
               Add Filter
             </Button>
           </div>
-          
+
           {filters.map((filter, index) => (
             <div key={index} className="space-y-2 p-3 border rounded">
               {index > 0 && (
@@ -414,7 +716,7 @@ const AdvancedFilterBuilder = ({
                   </SelectContent>
                 </Select>
               )}
-              
+
               <div className="flex gap-2">
                 <Select value={filter.column} onValueChange={(value) => updateFilter(index, { column: value })}>
                   <SelectTrigger>
@@ -460,7 +762,7 @@ const AdvancedFilterBuilder = ({
               </div>
             </div>
           ))}
-          
+
           {filters.length === 0 && (
             <p className="text-sm text-muted-foreground text-center py-4">
               No filters applied. Click "Add Filter" to start.
@@ -472,14 +774,107 @@ const AdvancedFilterBuilder = ({
   );
 };
 
+// NEW: Enhanced Selection Controls Component
+const SelectionControls = <T,>({
+  selectionInfo,
+  selectionActions,
+  selectionMode,
+  enableSelectAll,
+  maxSelectable,
+  onSelectedRowsAction
+}: {
+  selectionInfo: SelectionInfo<T>;
+  selectionActions: SelectionActions<T>;
+  selectionMode: 'single' | 'multiple';
+  enableSelectAll: boolean;
+  maxSelectable?: number;
+  onSelectedRowsAction?: (action: string, selectedRows: T[]) => void;
+}) => {
+  if (selectionInfo.totalSelected === 0) return null;
+
+  return (
+    <div className="flex items-center gap-2 px-3 py-2 bg-primary/10 rounded-md">
+      <Badge variant="secondary">
+        {selectionInfo.totalSelected} selected
+        {maxSelectable && ` of ${maxSelectable} max`}
+      </Badge>
+
+      {selectionMode === 'multiple' && (
+        <>
+          {enableSelectAll && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={selectionInfo.isAllSelected ? selectionActions.deselectAll : selectionActions.selectAll}
+            >
+              {selectionInfo.isAllSelected ? (
+                <>
+                  <Square className="w-4 h-4 mr-1" />
+                  Deselect All
+                </>
+              ) : (
+                <>
+                  <CheckSquare className="w-4 h-4 mr-1" />
+                  Select All
+                </>
+              )}
+            </Button>
+          )}
+
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={selectionActions.invertSelection}
+          >
+            Invert Selection
+          </Button>
+        </>
+      )}
+
+      <Button
+        size="sm"
+        variant="outline"
+        onClick={selectionActions.deselectAll}
+      >
+        Clear Selection
+      </Button>
+
+      {onSelectedRowsAction && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button size="sm" variant="outline">
+              Actions
+              <ChevronDown className="w-4 h-4 ml-1" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem onClick={() => onSelectedRowsAction('export', selectionInfo.selectedRows)}>
+              <Download className="w-4 h-4 mr-2" />
+              Export Selected
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onSelectedRowsAction('duplicate', selectionInfo.selectedRows)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Duplicate Selected
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onSelectedRowsAction('archive', selectionInfo.selectedRows)}>
+              <History className="w-4 h-4 mr-2" />
+              Archive Selected
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
+    </div>
+  );
+};
+
 // Enhanced Export Menu with multiple formats
-const ExportMenu = ({ 
-  data, 
+const ExportMenu = ({
+  data,
   selectedRows,
   permissions,
   filename = 'export',
   columns
-}: { 
+}: {
   data: any[];
   selectedRows: any[];
   permissions?: TablePermissions;
@@ -488,18 +883,18 @@ const ExportMenu = ({
 }) => {
   const exportToCSV = (exportData: any[]) => {
     if (exportData.length === 0) return;
-    
+
     const headers = Object.keys(exportData[0] || {});
     const csvContent = [
       headers.join(','),
-      ...exportData.map(row => 
+      ...exportData.map(row =>
         headers.map(header => {
           const value = row[header];
           return `"${String(value).replace(/"/g, '""')}"`;
         }).join(',')
       )
     ].join('\n');
-    
+
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -510,24 +905,43 @@ const ExportMenu = ({
   };
 
   const exportToExcel = (exportData: any[]) => {
-    // Create Excel-compatible TSV format
     if (exportData.length === 0) return;
-    
+
     const headers = Object.keys(exportData[0] || {});
-    const tsvContent = [
-      headers.join('\t'),
-      ...exportData.map(row => 
-        headers.map(header => String(row[header] || '')).join('\t')
-      )
-    ].join('\n');
-    
-    const blob = new Blob([tsvContent], { type: 'application/vnd.ms-excel' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${filename}-${new Date().toISOString().split('T')[0]}.xls`;
-    a.click();
-    URL.revokeObjectURL(url);
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Data');
+
+    // Auto-size columns
+    const wscols = headers.map(() => ({ wch: 15 }));
+    worksheet['!cols'] = wscols;
+
+    XLSX.writeFile(workbook, `${filename}-${new Date().toISOString().split('T')[0]}.xlsx`);
+  };
+
+  const exportToPDF = (exportData: any[]) => {
+    if (exportData.length === 0) return;
+
+    const doc = new jsPDF();
+    const headers = Object.keys(exportData[0] || {});
+    const tableData = exportData.map(row => headers.map(header => String(row[header] || '')));
+
+    doc.setFontSize(16);
+    doc.text(filename, 14, 22);
+    doc.setFontSize(10);
+    doc.text(`Generated on ${new Date().toLocaleString()}`, 14, 30);
+
+    autoTable(doc, {
+      head: [headers.map(header => header.replace(/([A-Z])/g, ' $1').trim())],
+      body: tableData,
+      startY: 35,
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [66, 135, 245] },
+      alternateRowStyles: { fillColor: [245, 245, 245] },
+      margin: { top: 35 },
+    });
+
+    doc.save(`${filename}-${new Date().toISOString().split('T')[0]}.pdf`);
   };
 
   const exportToJSON = (exportData: any[]) => {
@@ -547,7 +961,7 @@ const ExportMenu = ({
 
     const tableData = selectedRows.length > 0 ? selectedRows : data;
     const headers = Object.keys(tableData[0] || {});
-    
+
     printWindow.document.write(`
       <html>
         <head>
@@ -579,9 +993,9 @@ const ExportMenu = ({
               </tr>
             </thead>
             <tbody>
-              ${tableData.map(row => 
-                `<tr>${headers.map(header => `<td>${String(row[header] || '')}</td>`).join('')}</tr>`
-              ).join('')}
+              ${tableData.map(row =>
+      `<tr>${headers.map(header => `<td>${String(row[header] || '')}</td>`).join('')}</tr>`
+    ).join('')}
             </tbody>
           </table>
           <script>
@@ -597,9 +1011,9 @@ const ExportMenu = ({
     `);
     printWindow.document.close();
   };
-  
+
   if (!permissions?.canExport) return null;
-  
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -621,6 +1035,10 @@ const ExportMenu = ({
           <FileImage className="w-4 h-4 mr-2" />
           Export All to JSON
         </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => exportToPDF(data)}>
+          <FileText className="w-4 h-4 mr-2" />
+          Export All to PDF
+        </DropdownMenuItem>
         {selectedRows.length > 0 && (
           <>
             <DropdownMenuItem onClick={() => exportToCSV(selectedRows)}>
@@ -635,6 +1053,10 @@ const ExportMenu = ({
               <FileImage className="w-4 h-4 mr-2" />
               Export Selected to JSON ({selectedRows.length})
             </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => exportToPDF(selectedRows)}>
+              <FileText className="w-4 h-4 mr-2" />
+              Export Selected to PDF ({selectedRows.length})
+            </DropdownMenuItem>
           </>
         )}
         <DropdownMenuItem onClick={printTable}>
@@ -647,12 +1069,12 @@ const ExportMenu = ({
 };
 
 // Inline Edit Cell Component
-const InlineEditCell = ({ 
-  value, 
-  onSave, 
+const InlineEditCell = ({
+  value,
+  onSave,
   type = 'text',
   options = [],
-  disabled = false 
+  disabled = false
 }: {
   value: any;
   onSave: (newValue: any) => void;
@@ -742,11 +1164,11 @@ const InlineEditCell = ({
 };
 
 // Virtual Scrolling Component
-const VirtualizedTableBody = ({ 
-  rows, 
-  columns, 
+const VirtualizedTableBody = ({
+  rows,
+  columns,
   itemHeight = 48,
-  containerHeight = 400 
+  containerHeight = 400
 }: {
   rows: any[];
   columns: ColumnDef<any>[];
@@ -799,7 +1221,7 @@ const VirtualizedTableBody = ({
 
 // Keyboard Navigation Hook
 const useKeyboardNavigation = (
-  tableRef: RefObject<HTMLTableElement>, 
+  tableRef: RefObject<HTMLTableElement>,
   enabled: boolean = false
 ) => {
   useEffect(() => {
@@ -878,7 +1300,7 @@ const Pagination = ({ table }: { table: TanstackTable<any> }) => (
         {table.getFilteredRowModel().rows.length} results
       </span>
     </div>
-    
+
     <div className="flex items-center gap-2">
       <Select
         value={table.getState().pagination.pageSize.toString()}
@@ -895,7 +1317,7 @@ const Pagination = ({ table }: { table: TanstackTable<any> }) => (
           ))}
         </SelectContent>
       </Select>
-      
+
       <Button
         variant="outline"
         size="sm"
@@ -904,11 +1326,11 @@ const Pagination = ({ table }: { table: TanstackTable<any> }) => (
       >
         Previous
       </Button>
-      
+
       <span className="text-sm font-medium">
         Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
       </span>
-      
+
       <Button
         variant="outline"
         size="sm"
@@ -945,6 +1367,17 @@ export function ReusableTable<T = any>({
   onBulkEdit,
   onRowEdit,
   onAuditLog,
+
+  // NEW: Enhanced Selection Props
+  selectedRowIds: controlledSelectedRowIds,
+  onSelectionChange,
+  onSelectedRowsAction,
+  getRowId = (row: T, index: number) => String(index),
+  selectionMode = 'multiple',
+  enableSelectAll = true,
+  maxSelectable,
+  selectableRowFilter,
+
   enableSelection = false,
   enableSearch = true,
   enableColumnVisibility = true,
@@ -959,6 +1392,8 @@ export function ReusableTable<T = any>({
   enableAdvancedFilters = false,
   enableAuditTrail = false,
   enablePrintMode = false,
+  enableColumnPinning = false,
+  enableTreeData = false,
   pageSize = 10,
   virtualItemHeight = 48,
   className,
@@ -969,13 +1404,13 @@ export function ReusableTable<T = any>({
   locale = 'en-US',
   timezone = 'UTC',
   rowHeight = 'normal',
-  aggregationFunctions = {}
+  aggregationFunctions = {},
+  getSubRows
 }: ReusableTableProps<T>) {
   // State management
   const [sorting, setSorting] = useLocalStorage<SortingState>(`${storageKey}-sorting`, []);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useLocalStorage<VisibilityState>(`${storageKey}-visibility`, {});
-  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [grouping, setGrouping] = useLocalStorage<GroupingState>(`${storageKey}-grouping`, []);
   const [expanded, setExpanded] = useState<ExpandedState>({});
   const [globalFilter, setGlobalFilter] = useState('');
@@ -985,17 +1420,55 @@ export function ReusableTable<T = any>({
     pageIndex: 0,
     pageSize,
   });
-  
+  const [openColumnId, setOpenColumnId] = useState<string | null>(null)
+
   // Advanced filters state
   const [advancedFilters, setAdvancedFilters] = useLocalStorage<AdvancedFilter[]>(`${storageKey}-advanced-filters`, []);
   const [auditTrail, setAuditTrail] = useLocalStorage<AuditTrail[]>(`${storageKey}-audit-trail`, []);
-  
+  const [columnPinning, setColumnPinning] = useLocalStorage<ColumnPinningState>(`${storageKey}-column-pinning`, {
+    left: [],
+    right: []
+  });
+
+  // NEW: Enhanced Selection Management
+  const {
+    rowSelection,
+    setRowSelection,
+    selectionInfo,
+    selectionActions
+  } = useTableSelection(
+    data,
+    getRowId,
+    selectionMode,
+    maxSelectable,
+    selectableRowFilter,
+    controlledSelectedRowIds
+  );
+
+  // NEW: Sync external selection changes
+  useEffect(() => {
+    if (controlledSelectedRowIds && Array.isArray(controlledSelectedRowIds)) {
+      const newSelection: RowSelectionState = {};
+      controlledSelectedRowIds.forEach(id => {
+        newSelection[id] = true;
+      });
+      setRowSelection(newSelection);
+    }
+  }, [controlledSelectedRowIds, setRowSelection]);
+
+  // NEW: Notify parent of selection changes
+  useEffect(() => {
+    if (onSelectionChange) {
+      onSelectionChange(selectionInfo);
+    }
+  }, [selectionInfo, onSelectionChange]);
+
   // Table ref for keyboard navigation
   const tableRef = useRef<HTMLTableElement>(null);
-  
+
   // Enable keyboard navigation
   useKeyboardNavigation(tableRef, enableKeyboardNav);
-  
+
   // Row height classes
   const rowHeightClasses = {
     compact: 'py-1',
@@ -1011,20 +1484,49 @@ export function ReusableTable<T = any>({
     if (enableSelection) {
       cols.push({
         id: 'select',
-        header: ({ table }) => (
-          <Checkbox
-            checked={table.getIsAllPageRowsSelected()}
-            onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-            aria-label="Select all"
-          />
-        ),
-        cell: ({ row }) => (
-          <Checkbox
-            checked={row.getIsSelected()}
-            onCheckedChange={(value) => row.toggleSelected(!!value)}
-            aria-label="Select row"
-          />
-        ),
+        header: ({ table }) => {
+          // Check if we're in single selection mode or if select all is disabled
+          if (selectionMode === 'single' || !enableSelectAll) {
+            return null;
+          }
+
+          return (
+            <Checkbox
+              checked={selectionInfo.isAllSelected}
+              ref={(el) => {
+                if (el && 'indeterminate' in el) {
+                  (el as HTMLInputElement).indeterminate = selectionInfo.isPartiallySelected;
+                }
+              }}
+              onCheckedChange={(checked) => {
+                if (checked) {
+                  selectionActions.selectAll();
+                } else {
+                  selectionActions.deselectAll();
+                }
+              }}
+              aria-label="Select all"
+            />
+          );
+        },
+        cell: ({ row }) => {
+          const rowId = getRowId(row.original, row.index);
+          const isSelectable = !selectableRowFilter || selectableRowFilter(row.original);
+          const isSelected = rowSelection[rowId] || false;
+
+          if (!isSelectable) {
+            return <div className="w-4 h-4" />;
+          }
+
+          return (
+            <Checkbox
+              checked={isSelected}
+              onCheckedChange={() => selectionActions.toggleRowSelection(rowId)}
+              aria-label="Select row"
+              disabled={!isSelectable || (maxSelectable && !isSelected && selectionInfo.totalSelected >= maxSelectable)}
+            />
+          );
+        },
         enableSorting: false,
         enableHiding: false,
         size: 50,
@@ -1049,8 +1551,134 @@ export function ReusableTable<T = any>({
     }
 
     return cols;
-  }, [columns, actions, permissions, enableSelection]);
+  }, [columns, actions, permissions, enableSelection, selectionMode, enableSelectAll, selectionInfo, rowSelection, selectionActions, getRowId, selectableRowFilter, maxSelectable]);
+  interface DataTableColumnHeaderProps<TData, TValue> {
+    column: Column<TData, TValue>
+    table: TanstackTable<TData>
+    title: string
+    enableSorting: boolean
+    enableFiltering: boolean
+    isOpen: boolean
+    onOpenChange: (open: boolean) => void
+  }
 
+  function DataTableColumnHeader<TData, TValue>({
+    column,
+    table,
+    title,
+    enableSorting,
+    enableFiltering,
+  }: DataTableColumnHeaderProps<TData, TValue>) {
+    const [tempFilter, setTempFilter] = useState<string>(
+      (column.getFilterValue() as string) ?? ""
+    )
+
+    // Row selection column → header checkbox only
+    if (column.id === "select") {
+      return (
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected()
+              ? true
+              : table.getIsSomePageRowsSelected()
+                ? "indeterminate"
+                : false
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+        />
+      )
+    }
+
+    // Actions column → just title
+    if (column.id === "actions") {
+      return <span>{title}</span>
+    }
+
+    // Normal columns → title + popover
+    return (
+      <div className="flex items-center gap-2">
+        <span className="font-medium">{title}</span>
+
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+              <Filter className="h-4 w-4 text-muted-foreground" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent
+            className="w-60 p-4 space-y-4"
+            align="start"
+            onOpenAutoFocus={(e) => e.preventDefault()}
+            onInteractOutside={(e) => {
+              if ((e.target as HTMLElement).closest("input,button,textarea,select")) {
+                e.preventDefault()
+              }
+            }}
+          >
+            {/* Sorting */}
+            {enableSorting && column.getCanSort() && (
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Sort</p>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => column.toggleSorting(false)}
+                    className="flex-1"
+                  >
+                    Asc
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => column.toggleSorting(true)}
+                    className="flex-1"
+                  >
+                    Desc
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Filtering */}
+            {enableFiltering && column.getCanFilter() && (
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Filter</p>
+
+                <Input
+                  placeholder={`Filter ${title}...`}
+                  value={tempFilter}
+                  onChange={(e) => setTempFilter(e.target.value)}
+                  className="h-8"
+                />
+
+                <div className="flex justify-end gap-2 pt-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setTempFilter("")
+                      column.setFilterValue(undefined)
+                    }}
+                  >
+                    Clear
+                  </Button>
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={() => column.setFilterValue(tempFilter || undefined)}
+                  >
+                    Apply
+                  </Button>
+                </div>
+              </div>
+            )}
+          </PopoverContent>
+        </Popover>
+      </div>
+    )
+  }
   // Table instance
   const table = useReactTable({
     data,
@@ -1066,6 +1694,7 @@ export function ReusableTable<T = any>({
       columnOrder,
       columnSizing,
       pagination,
+      columnPinning,
     },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -1077,6 +1706,7 @@ export function ReusableTable<T = any>({
     onColumnOrderChange: setColumnOrder,
     onColumnSizingChange: setColumnSizing,
     onPaginationChange: setPagination,
+    onColumnPinningChange: setColumnPinning,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -1086,18 +1716,26 @@ export function ReusableTable<T = any>({
     enableRowSelection: enableSelection,
     enableGrouping,
     enableColumnResizing: true,
+    enableColumnPinning,
     columnResizeMode: 'onChange',
     globalFilterFn: 'includesString',
+    getSubRows: enableTreeData ? getSubRows : undefined,
+    getRowId: enableSelection ? (row, index) => getRowId(row, index) : undefined,
   });
 
-  // Get selected rows data
-  const selectedRows = table.getFilteredSelectedRowModel().rows.map(row => row.original);
+  // Get selected rows data - use selectionInfo from the hook
+  const selectedRows = selectionInfo.selectedRows;
 
   // Bulk operations
   const handleBulkDelete = () => {
     if (selectedRows.length === 0 || !onBulkDelete) return;
     onBulkDelete(selectedRows);
-    setRowSelection({});
+    selectionActions.deselectAll();
+  };
+
+  const handleBulkEdit = () => {
+    if (selectedRows.length === 0 || !onBulkEdit) return;
+    onBulkEdit(selectedRows);
   };
 
   if (loading) {
@@ -1143,49 +1781,29 @@ export function ReusableTable<T = any>({
           <GlobalFilter globalFilter={globalFilter} setGlobalFilter={setGlobalFilter} />
         )}
         {enableAdvancedFilters && (
-          <AdvancedFilterBuilder 
-            columns={enhancedColumns} 
-            filters={advancedFilters} 
-            onFiltersChange={setAdvancedFilters} 
+          <AdvancedFilterBuilder
+            columns={enhancedColumns}
+            filters={advancedFilters}
+            onFiltersChange={setAdvancedFilters}
           />
         )}
         {enableColumnVisibility && permissions.canManageColumns && (
           <ColumnVisibilityManager table={table} />
         )}
+        {enableColumnPinning && permissions.canManageColumns && (
+          <ColumnPinningManager table={table} />
+        )}
+        {enableGrouping && (
+          <ColumnGroupingManager table={table} />
+        )}
         {enableExport && (
-          <ExportMenu 
-            data={data} 
-            selectedRows={selectedRows} 
+          <ExportMenu
+            data={data}
+            selectedRows={selectedRows}
             permissions={permissions}
             filename={title?.toLowerCase().replace(/\s+/g, '-') || 'export'}
             columns={enhancedColumns}
           />
-        )}
-
-        {selectedRows.length > 0 && (
-          <div className="flex items-center gap-2 px-3 py-2 bg-primary/10 rounded-md">
-            <span className="text-sm font-medium">{selectedRows.length} selected</span>
-            {onBulkDelete && (
-              <Button
-                size="sm"
-                variant="destructive"
-                onClick={handleBulkDelete}
-              >
-                <Trash2 className="w-4 h-4 mr-1" />
-                Delete
-              </Button>
-            )}
-            {onBulkEdit && permissions.canBulkEdit && (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => onBulkEdit(selectedRows)}
-              >
-                <Edit className="w-4 h-4 mr-1" />
-                Edit Selected
-              </Button>
-            )}
-          </div>
         )}
 
         {/* Accessibility and keyboard shortcuts info */}
@@ -1197,10 +1815,49 @@ export function ReusableTable<T = any>({
         )}
       </div>
 
+      {/* NEW: Enhanced Selection Controls */}
+      {enableSelection && (
+        <SelectionControls
+          selectionInfo={selectionInfo}
+          selectionActions={selectionActions}
+          selectionMode={selectionMode}
+          enableSelectAll={enableSelectAll}
+          maxSelectable={maxSelectable}
+          onSelectedRowsAction={onSelectedRowsAction}
+        />
+      )}
+
+      {/* Legacy selection controls for backward compatibility */}
+      {selectedRows.length > 0 && (onBulkDelete || onBulkEdit) && (
+        <div className="flex items-center gap-2 px-3 py-2 bg-secondary/50 rounded-md">
+          <span className="text-sm font-medium">Legacy Actions: {selectedRows.length} selected</span>
+          {onBulkDelete && (
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={handleBulkDelete}
+            >
+              <Trash2 className="w-4 h-4 mr-1" />
+              Delete
+            </Button>
+          )}
+          {onBulkEdit && permissions.canBulkEdit && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleBulkEdit}
+            >
+              <Edit className="w-4 h-4 mr-1" />
+              Edit Selected
+            </Button>
+          )}
+        </div>
+      )}
+
       {/* Table */}
       <div className="border rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table ref={tableRef} className="w-full">
             <thead className="bg-muted/50">
               {table.getHeaderGroups().map(headerGroup => (
                 <tr key={headerGroup.id}>
@@ -1213,7 +1870,7 @@ export function ReusableTable<T = any>({
                       {header.isPlaceholder ? null : (
                         <div className="flex flex-col gap-2">
                           <div className="flex items-center gap-2">
-                            {enableSorting && header.column.getCanSort() ? (
+                            {/* {enableSorting && header.column.getCanSort() ? (
                               <Button
                                 variant="ghost"
                                 size="sm"
@@ -1231,11 +1888,22 @@ export function ReusableTable<T = any>({
                               </Button>
                             ) : (
                               flexRender(header.column.columnDef.header, header.getContext())
-                            )}
+                            )} */}
+                            <DataTableColumnHeader
+                              column={header.column}
+                              table={table}
+                              title={String(flexRender(header.column.columnDef.header, header.getContext()))}
+                              enableSorting={enableSorting}
+                              enableFiltering={enableFiltering}
+                              isOpen={openColumnId === header.column.id}
+                              onOpenChange={(open) =>
+                                setOpenColumnId(open ? header.column.id : null)
+                              }
+                            />
                           </div>
-                          {enableFiltering && header.column.getCanFilter() && (
+                          {/* {enableFiltering && header.column.getCanFilter() && (
                             <ColumnFilter column={header.column} table={table} />
-                          )}
+                          )} */}
                         </div>
                       )}
                       {header.column.getCanResize() && (
@@ -1262,38 +1930,51 @@ export function ReusableTable<T = any>({
                   </td>
                 </tr>
               ) : (
-                table.getRowModel().rows.map(row => (
-                  <tr key={row.id} className="hover:bg-muted/50">
-                    {row.getVisibleCells().map(cell => {
-                      const column = cell.column;
-                      const columnMeta = column.columnDef.meta as any;
-                      const isEditable = enableInlineEdit && permissions.canInlineEdit && columnMeta?.editable;
-                      
-                      return (
-                        <td
-                          key={cell.id}
-                          className="px-4 py-3 text-sm"
-                          style={{ width: cell.column.getSize() }}
-                        >
-                          {isEditable ? (
-                            <InlineEditCell
-                              value={cell.getValue()}
-                              onSave={(newValue) => {
-                                if (onRowEdit) {
-                                  onRowEdit(row.original, { [column.id]: newValue } as Partial<T>);
-                                }
-                              }}
-                              type={columnMeta.editType || 'text'}
-                              options={columnMeta.options || []}
-                            />
-                          ) : (
-                            flexRender(cell.column.columnDef.cell, cell.getContext())
-                          )}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                ))
+                table.getRowModel().rows.map(row => {
+                  const rowId = getRowId(row.original, row.index);
+                  const isSelected = rowSelection[rowId] || false;
+                  const isSelectable = !selectableRowFilter || selectableRowFilter(row.original);
+
+                  return (
+                    <tr
+                      key={row.id}
+                      className={cn(
+                        "hover:bg-muted/50",
+                        isSelected && "bg-primary/5",
+                        !isSelectable && "opacity-50"
+                      )}
+                    >
+                      {row.getVisibleCells().map(cell => {
+                        const column = cell.column;
+                        const columnMeta = column.columnDef.meta as any;
+                        const isEditable = enableInlineEdit && permissions.canInlineEdit && columnMeta?.editable;
+
+                        return (
+                          <td
+                            key={cell.id}
+                            className={cn("px-4 py-3 text-sm", rowHeightClasses[rowHeight])}
+                            style={{ width: cell.column.getSize() }}
+                          >
+                            {isEditable ? (
+                              <InlineEditCell
+                                value={cell.getValue()}
+                                onSave={(newValue) => {
+                                  if (onRowEdit) {
+                                    onRowEdit(row.original, { [column.id]: newValue } as Partial<T>);
+                                  }
+                                }}
+                                type={columnMeta.editType || 'text'}
+                                options={columnMeta.options || []}
+                              />
+                            ) : (
+                              flexRender(cell.column.columnDef.cell, cell.getContext())
+                            )}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
@@ -1306,4 +1987,6 @@ export function ReusableTable<T = any>({
   );
 }
 
+// NEW: Export additional types and hooks for external use
+// export { useTableSelection, type SelectionInfo, type SelectionActions };
 export default ReusableTable;

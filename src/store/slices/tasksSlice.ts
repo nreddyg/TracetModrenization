@@ -18,13 +18,11 @@ export interface Task {
 
 interface TasksState {
   tasks: Task[];
-  loading: boolean;
   error: string | null;
 }
 
 const initialState: TasksState = {
   tasks: [],
-  loading: false,
   error: null,
 };
 
@@ -47,14 +45,11 @@ const tasksSlice = createSlice({
     deleteTask: (state, action: PayloadAction<string>) => {
       state.tasks = state.tasks.filter(task => task.id !== action.payload);
     },
-    setLoading: (state, action: PayloadAction<boolean>) => {
-      state.loading = action.payload;
-    },
     setError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload;
     },
   },
 });
 
-export const { setTasks, addTask, updateTask, deleteTask, setLoading, setError } = tasksSlice.actions;
+export const { setTasks, addTask, updateTask, deleteTask, setError } = tasksSlice.actions;
 export default tasksSlice.reducer;

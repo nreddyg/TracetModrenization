@@ -339,9 +339,9 @@ const TicketsList = () => {
               
               <ReusableDropdown
                 value={typeFilter}
-                onChange={setTypeFilter}
+                onChange={(value) => setTypeFilter(value as string)}
                 placeholder="Type"
-                size="sm"
+                size="small"
                 allowClear
                 options={[
                   { value: 'all', label: 'All Types' },
@@ -356,9 +356,9 @@ const TicketsList = () => {
               
               <ReusableDropdown
                 value={statusFilter}
-                onChange={setStatusFilter}
+                onChange={(value) => setStatusFilter(value as string)}
                 placeholder="Status"
-                size="sm"
+                size="small"
                 allowClear
                 options={[
                   { value: 'all', label: 'All Status' },
@@ -377,9 +377,9 @@ const TicketsList = () => {
               
               <ReusableDropdown
                 value={priorityFilter}
-                onChange={setPriorityFilter}
+                onChange={(value) => setPriorityFilter(value as string)}
                 placeholder="Priority"
-                size="sm"
+                size="small"
                 allowClear
                 options={[
                   { value: 'all', label: 'All Priority' },
@@ -393,11 +393,11 @@ const TicketsList = () => {
               
               <ReusableDropdown
                 value={assigneeFilter}
-                onChange={setAssigneeFilter}
+                onChange={(value) => setAssigneeFilter(value as string)}
                 placeholder="Assignee"
-                size="sm"
+                size="small"
                 allowClear
-                search
+                showSearch
                 options={[
                   { value: 'all', label: 'All Assignees' },
                   { value: 'john.doe', label: 'John Doe' },

@@ -5,6 +5,7 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
+import { ReusableTable } from '@/components/ui/reusable-table';
 import { Edit2, Trash2, Plus } from 'lucide-react';
 
 interface OrganizationData {
@@ -141,63 +142,66 @@ const Organization = () => {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr className="border-b border-gray-200">
-                    <th className="text-left p-3 font-medium text-gray-700">
-                      <Checkbox
-                        checked={selectedItems.length === mockData.length}
-                        onCheckedChange={toggleSelectAll}
-                      />
-                    </th>
-                    <th className="text-left p-3 font-medium text-gray-700">ASSET CODE</th>
-                    <th className="text-left p-3 font-medium text-gray-700">ASSET NAME</th>
-                    <th className="text-left p-3 font-medium text-gray-700">CUSTOMER ASSET NO</th>
-                    <th className="text-left p-3 font-medium text-gray-700">BARCODE NO</th>
-                    <th className="text-left p-3 font-medium text-gray-700">ACQUISITION</th>
-                    <th className="text-left p-3 font-medium text-gray-700">ACTIONS</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {mockData.map((item, index) => (
-                    <tr 
-                      key={item.id} 
-                      className={`border-b border-gray-100 hover:bg-gray-50 transition-colors ${
-                        index % 2 === 0 ? 'bg-white' : 'bg-gray-50/30'
-                      }`}
+            <ReusableTable
+              data={mockData}
+              columns={[
+                {
+                  id: 'select',
+                  header: ({ table }: any) => (
+                    <Checkbox
+                      checked={selectedItems.length === mockData.length}
+                      onCheckedChange={toggleSelectAll}
+                    />
+                  ),
+                  cell: ({ row }: any) => (
+                    <Checkbox
+                      checked={selectedItems.includes(row.original.id)}
+                      onCheckedChange={() => toggleSelectItem(row.original.id)}
+                    />
+                  )
+                },
+                {
+                  accessorKey: 'assetCode',
+                  header: 'ASSET CODE'
+                },
+                {
+                  accessorKey: 'assetName',
+                  header: 'ASSET NAME'
+                },
+                {
+                  accessorKey: 'customerAssetNo',
+                  header: 'CUSTOMER ASSET NO'
+                },
+                {
+                  accessorKey: 'barcodeNo',
+                  header: 'BARCODE NO'
+                },
+                {
+                  accessorKey: 'acquisition',
+                  header: 'ACQUISITION',
+                  cell: ({ getValue }: any) => (
+                    <Badge 
+                      variant={getValue() === 'Purchased' ? 'default' : 'secondary'}
+                      className={getValue() === 'Purchased' 
+                        ? 'bg-green-100 text-green-800 hover:bg-green-100' 
+                        : 'bg-blue-100 text-blue-800 hover:bg-blue-100'
+                      }
                     >
-                      <td className="p-3">
-                        <Checkbox
-                          checked={selectedItems.includes(item.id)}
-                          onCheckedChange={() => toggleSelectItem(item.id)}
-                        />
-                      </td>
-                      <td className="p-3 text-sm font-medium text-gray-900">{item.assetCode}</td>
-                      <td className="p-3 text-sm text-gray-900">{item.assetName}</td>
-                      <td className="p-3 text-sm text-gray-600">{item.customerAssetNo}</td>
-                      <td className="p-3 text-sm text-gray-600">{item.barcodeNo}</td>
-                      <td className="p-3">
-                        <Badge 
-                          variant={item.acquisition === 'Purchased' ? 'default' : 'secondary'}
-                          className={item.acquisition === 'Purchased' 
-                            ? 'bg-green-100 text-green-800 hover:bg-green-100' 
-                            : 'bg-blue-100 text-blue-800 hover:bg-blue-100'
-                          }
-                        >
-                          {item.acquisition}
-                        </Badge>
-                      </td>
-                      <td className="p-3">
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                          <Edit2 className="h-4 w-4 text-gray-600" />
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                      {getValue()}
+                    </Badge>
+                  )
+                },
+                {
+                  id: 'actions',
+                  header: 'ACTIONS',
+                  cell: () => (
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                      <Edit2 className="h-4 w-4 text-gray-600" />
+                    </Button>
+                  )
+                }
+              ] as any}
+            />
             
             <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
               <div className="text-sm text-gray-600">

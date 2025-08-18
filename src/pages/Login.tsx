@@ -109,7 +109,7 @@ const Login = () => {
               />
 
               <ReusableButton
-                type="submit"
+                htmlType="submit"
                 className="w-full"
                 loading={loading}
               >
@@ -129,7 +129,7 @@ const Login = () => {
             </div>
 
             <ReusableButton
-              variant="outline"
+              variant="default"
               className="w-full"
               onClick={handleSSO}
             >

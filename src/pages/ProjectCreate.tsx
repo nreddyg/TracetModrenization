@@ -8,7 +8,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Form } from '@/components/ui/form';
-import { useAppDispatch } from '@/store';
+import { useAppDispatch } from '@/store/reduxStore';
 import { addProject } from '@/store/slices/projectsSlice';
 import { ReusableInput } from '@/components/ui/reusable-input';
 import { ReusableTextarea } from '@/components/ui/reusable-textarea';
@@ -92,8 +92,8 @@ const ProjectCreate = () => {
         <div className="flex items-center gap-3">
           <SidebarTrigger />
           <ReusableButton 
-            variant="primary" 
-            size="small" 
+            variant="text" 
+            size="small"
             onClick={() => navigate('/projects')}
             icon={<ArrowLeft className="h-4 w-4" />}
           >
@@ -132,7 +132,7 @@ const ProjectCreate = () => {
                     placeholder="Select manager"
                     options={managerOptions}
                     value={form.watch('manager')}
-                    onChange={(value) => form.setValue('manager', value.toString())}
+                    onChange={(value) => form.setValue('manager', value as string)}
                     error={form.formState.errors.manager?.message}
                     size="small"
                   />
@@ -155,8 +155,8 @@ const ProjectCreate = () => {
                     tooltip="Select project start date"
                     placeholder="Select start date"
                     value={form.watch('startDate')}
-                    onChange={(date) => form.setValue('startDate', date)}
-                    error={form.formState.errors.startDate?.message?.length!==0}
+                    onChange={(date) => form.setValue('startDate', date || undefined)}
+                    // error={!!form.formState.errors.startDate}
                     errorMessage={form.formState.errors.startDate?.message}
                   />
 
@@ -165,9 +165,8 @@ const ProjectCreate = () => {
                     tooltip="Select project end date"
                     placeholder="Select end date"
                     value={form.watch('endDate')}
-                    onChange={(date) => form.setValue('endDate', date)}
-                    // error={}
-                    error = {(form.formState.errors.endDate?.message)?.length!=0}
+                    onChange={(date) => form.setValue('endDate', date || undefined)}
+                    // error={!!form.formState.errors.endDate}
                     errorMessage={form.formState.errors.endDate?.message}
                   />
 
@@ -209,9 +208,8 @@ const ProjectCreate = () => {
                 
                 <div className="flex justify-end gap-2 pt-4 border-t">
                   <ReusableButton 
-                   
-                    htmlType='button' 
-                    variant="primary" 
+                    htmlType="button" 
+                    variant="default" 
                     onClick={() => navigate('/projects')}
                     size="small"
                   >

@@ -71,4 +71,27 @@ export const byteArrayToFile = (
     link.download = `${fileName}.${format}`;
     link.click();
   };
+
+  //get getRequestType based on Id
+  export const getRequestTypeById = (id) => {
+    console.log("got",id)
+    switch (id) {
+      case "100":
+           return "SLAViolatedRequests";
+      case "101":
+         return "OpenAndPending";
+      case "102":
+        return "OpenTicketsInMyGroups";
+      case "103":
+        return "Closed";
+      case "104":
+        return "MyOpenAndPendingRequests";
+      case "105":
+        return "MyRequestClosed";
+         case "106":
+        return "All";
+      default:
+        return "";
+    }
+  };
  

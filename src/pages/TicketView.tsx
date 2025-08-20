@@ -23,7 +23,7 @@ import { BaseField, GenericObject, UploadedFileOutput, UploadFileInput } from '@
 import { CREATE_TICKET_DB, modules } from '@/Local_DB/Form_JSON_Data/CreateTicketDB';
 import { cn } from '@/lib/utils';
 import { deleteSRUpload, getAllSRDetailsList, getCommentHistoryList, getCommentsAPI, getLinkedServiceRequests, getManageAssetsList, GetServiceRequestAssignToLookups, getServiceRequestDetailsById, getSRAdditionalFieldsByServiceRequestType, getSRBranchList, getSRCCListLookupsList, getSRConfigList, getSRCustomerLookupsList, getSRLinkToLookupsList, getSRRequestByLookupsList, getStatusLookups, getSubscriptionByCustomer, getSubscriptionHistoryByCustomer, getUploadedFilesByServiceRequestId, postCommentAPI, postServiceRequest, saveFileUpload, ServiceRequestTypeLookups, updateServiceRequest } from '@/services/ticketServices';
-import { fileToByteArray, formatDate, byteArrayToFile, formatDateToDDMMYYYY, getActivityStatusColor, getPriorityColor, getStatusColor } from '@/_Helper_Functions/HelperFunctions';
+import { fileToByteArray, formatDate, byteArrayToFile, formatDateToDDMMYYYY, getActivityStatusColor, getPriorityColor, getStatusColor, getRequestTypeById } from '@/_Helper_Functions/HelperFunctions';
 import axios from 'axios';
 import { useAppDispatch, useAppSelector } from '@/store/reduxStore';
 import { setLoading } from '@/store/slices/projectsSlice';
@@ -126,7 +126,7 @@ interface additionalFieldData {
 }
 const enableInClose = ["CCListSelectedUsers", "Status", "FileUploadURLs", "Title", "Description"]
 const TicketView = () => {
-  const { id } = useParams();
+  const { Did, id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
   const [isCreateMode, setIsCreateMode] = useState(location.pathname === '/service-desk/create-ticket');
@@ -134,6 +134,7 @@ const TicketView = () => {
   const [selectedTicketId, setSelectedTicketId] = useState<string>();
   const [selectedTicket, setSelectedTicket] = useState<Ticket>({} as Ticket);
   const [originalTicket, setOriginalTicket] = useState<Ticket>(selectedTicket);
+  const [requestTypeId,setRequestTypeId]=useState(Did)
   const [hasChanges, setHasChanges] = useState(false);
   const [activityLogs] = useState<ActivityLog[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -179,6 +180,7 @@ const TicketView = () => {
     return matchesSearch && matchesStatus;
   });
   const [fields, setFields] = useState<BaseField[]>(CREATE_TICKET_DB);
+
   const form = useForm<GenericObject>({
     defaultValues: fields.reduce((acc, f) => {
       acc[f.name!] = f.defaultValue ?? '';
@@ -192,12 +194,17 @@ const TicketView = () => {
     }
   });
   const { control, register, handleSubmit, trigger, watch, setValue, reset, formState: { errors } } = form;
+
+
   //api calls to be made in edit mode
   useEffect(() => {
     if (!isCreateMode) {
-      fetchAllTickets();
+      if(requestTypeId){
+       fetchAllTickets(getRequestTypeById(requestTypeId));
+      }
+     
     }
-  }, [isCreateMode])
+  }, [isCreateMode,requestTypeId])
   // Function to clear all form values but preserve all field configurations and options
   const clearAllFormValues = useCallback(() => {
     const currentFields = fields;
@@ -316,9 +323,9 @@ const TicketView = () => {
     }
   }
   //fetch all tickets list
-  async function fetchAllTickets() {
+  async function fetchAllTickets(requestType:string) {
     dispatch(setLoading(true))
-    await getAllSRDetailsList('All', 111, 'All').then(res => {
+    await getAllSRDetailsList('All', 111, requestType).then(res => {
       if (res.success && res.data.status === undefined) {
         if (Array.isArray(res.data)) {
           setTickets(res.data)
@@ -1141,7 +1148,11 @@ const TicketView = () => {
       handleEdit("cancel")
     }
     commentForm.reset({comment:""})
-    window.history.replaceState(null, '', `/tickets/${ticket.ServiceRequestId}`);
+    // window.history.replaceState(null, '', `/tickets/${ticket.ServiceRequestId}`);
+    const parts = window.location.pathname.split('/');
+    parts[parts.length - 1] = ticket.ServiceRequestId.toString();
+    window.history.replaceState(null, '', parts.join('/'));
+
     }else{
       
           setSelectedTicketId(ticket.ChildServiceRequestId.toString())

@@ -15,12 +15,12 @@ import { X } from "lucide-react";
 dayjs.extend(customParseFormat);
 
 interface DateRangePickerProps {
-  label: string;
+  label?: string;
   tooltip?: string;
   value?: DateRange;
   onChange?: (range: DateRange | undefined) => void;
   className?: string;
-  placeholder?: [string, string];
+  placeholder?: [string, string] ;
   error?: string;
   allowClear?: boolean;
   format?: string; // <-- format like "DD/MM/YYYY"
@@ -246,7 +246,7 @@ const ReusableRangePicker: React.FC<DateRangePickerProps> = ({
                 <button
                   type="button"
                   onClick={handleClear}
-                  className="ml-2 flex items-center justify-center rounded-full hover:bg-muted p-1"
+                  className="ml-2 flex items-center justify-center rounded-full hover:bg-muted "
                 >
                   <X className="h-4 w-4 text-muted-foreground hover:text-black" />
                 </button>

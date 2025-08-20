@@ -19,19 +19,19 @@ import {
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { 
-  Home, 
-  Settings, 
-  Building2, 
-  Package, 
-  Wrench, 
-  FileText, 
-  HardHat, 
-  ShoppingCart, 
-  DollarSign, 
-  Calculator, 
-  Search, 
-  Headphones, 
+import {
+  Home,
+  Settings,
+  Building2,
+  Package,
+  Wrench,
+  FileText,
+  HardHat,
+  ShoppingCart,
+  DollarSign,
+  Calculator,
+  Search,
+  Headphones,
   Cog,
   ChevronRight,
   ChevronDown,
@@ -105,72 +105,31 @@ const navigation: NavItem[] = [
         link: '/service-desk/my-workbench',
       },
       {
+        label: 'My Requests',
+        icon: FileText,
+        link: '/service-desk/my-requests',
+      },
+            {
+        label: 'All Service Requests',
+        icon: FileText,
+        link: '/service-desk/all-requests',
+      },
+      {
         label: 'Ticket Progress Dashboard',
         icon: TrendingUp,
         link: '/service-desk/ticket-progress',
       },
-      {
-        label: 'Tickets',
-        icon: FileText,
-        link: '/tickets',
-        children: [
-          {
-            label: 'Dashboard',
-            icon: BarChart,
-            link: '/tickets/dashboard',
-          },
-          {
-            label: 'Benchmarking',
-            icon: TrendingUp,
-            link: '/tickets/benchmarking',
-          },
-          {
-            label: 'SLA Violated',
-            icon: AlertCircle,
-            link: '/service-desk/sla-violated',
-          },
-          {
-            label: 'Open Tickets',
-            icon: FileText,
-            link: '/tickets',
-          },
-          {
-            label: 'Tickets In My Groups',
-            icon: Users,
-            link: '/service-desk/group-tickets',
-          },
-          {
-            label: 'Closed Tickets',
-            icon: FileText,
-            link: '/service-desk/closed-tickets',
-          },
-          {
-            label: 'My Requests',
-            icon: FileText,
-            link: '/service-desk/my-requests',
-          },
-          {
-            label: 'Draft Requests',
-            icon: FileText,
-            link: '/service-desk/draft-requests',
-          },
-          {
-            label: 'All Service Requests',
-            icon: FileText,
-            link: '/service-desk/all-requests',
-          },
-        ],
-      },
-      {
-        label: 'Create Work Order',
-        icon: Wrench,
-        link: '/service-desk/create-work-order',
-      },
-      {
-        label: 'Manage Work Order',
-        icon: Wrench,
-        link: '/service-desk/work-management',
-      },
+
+      // {
+      //   label: 'Create Work Order',
+      //   icon: Wrench,
+      //   link: '/service-desk/create-work-order',
+      // },
+      // {
+      //   label: 'Manage Work Order',
+      //   icon: Wrench,
+      //   link: '/service-desk/work-management',
+      // },
       {
         label: 'User Groups',
         icon: Users,
@@ -196,11 +155,11 @@ const navigation: NavItem[] = [
         icon: BarChart,
         link: '/service-desk/reports',
       },
-      {
-        label: 'MIS Reports',
-        icon: BarChart,
-        link: '/service-desk/mis-reports',
-      },
+      // {
+      //   label: 'MIS Reports',
+      //   icon: BarChart,
+      //   link: '/service-desk/mis-reports',
+      // },
     ],
   },
   {
@@ -470,7 +429,7 @@ const AppSidebar: React.FC = () => {
   const collapsed = state === 'collapsed';
 
   const isActive = (link: string) => {
-    return location.pathname === link;
+    return location.pathname.includes(link);
   };
 
   const isSubMenuOpen = (item: NavItem) => {
@@ -494,9 +453,9 @@ const AppSidebar: React.FC = () => {
 
     return navigation.filter(item => {
       const itemMatches = item.label.toLowerCase().includes(searchTerm.toLowerCase());
-      const childMatches = item.children?.some(child => 
+      const childMatches = item.children?.some(child =>
         child.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        child.children?.some(grandChild => 
+        child.children?.some(grandChild =>
           grandChild.label.toLowerCase().includes(searchTerm.toLowerCase())
         )
       );
@@ -535,21 +494,21 @@ const AppSidebar: React.FC = () => {
           <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip={item.label}>
               <CollapsibleTrigger className="flex items-center justify-between w-full hover:bg-blue-50">
-                 <div className="flex items-center space-x-3">
-                   <item.icon className="h-4 w-4" />
-                   <TooltipProvider>
-                     <Tooltip>
-                       <TooltipTrigger asChild>
-                         <span className="group-data-[collapsible=icon]:hidden truncate max-w-[180px]">{item.label}</span>
-                       </TooltipTrigger>
-                       {item.label.length > 25 && (
-                         <TooltipContent>
-                           <p>{item.label}</p>
-                         </TooltipContent>
-                       )}
-                     </Tooltip>
-                   </TooltipProvider>
-                 </div>
+                <div className="flex items-center space-x-3">
+                  <item.icon className="h-4 w-4" />
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="group-data-[collapsible=icon]:hidden truncate max-w-[180px]">{item.label}</span>
+                      </TooltipTrigger>
+                      {item.label.length > 25 && (
+                        <TooltipContent>
+                          <p>{item.label}</p>
+                        </TooltipContent>
+                      )}
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
                 <div className="group-data-[collapsible=icon]:hidden">
                   {isSubMenuOpen(item) ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                 </div>
@@ -606,7 +565,7 @@ const AppSidebar: React.FC = () => {
         </Collapsible>
       );
     }
-    
+
     return (
       <SidebarMenuItem key={item.label}>
         <SidebarMenuButton asChild isActive={isActive(item.link)} tooltip={collapsed ? item.label : undefined}>
@@ -645,13 +604,13 @@ const AppSidebar: React.FC = () => {
           )}
         </Link>
       </SidebarHeader>
-      
+
       <SidebarContent>
         <SidebarMenu>
           {filteredNavigation.map((item) => renderMenuItem(item))}
         </SidebarMenu>
       </SidebarContent>
-      
+
       <SidebarFooter>
         <SidebarGroup>
           <SidebarGroupContent>

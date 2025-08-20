@@ -147,7 +147,9 @@ const AnimatedRoutes = () => {
                 <Route path="/tickets" element={<TicketsList />} />
                 <Route path="/tickets/create" element={<TicketCreate />} />
                 <Route path="/service-desk/create-ticket" element={<TicketView key={'create'} />} />
-                <Route path="/tickets/:id" element={<TicketView key={`edit/${ticketId}`} />} />
+                <Route path="/service-desk/all-requests/tickets/:Did/:id" element={<TicketView key={`edit`} />} />
+                 <Route path="/service-desk/my-workbench/tickets/:Did/:id" element={<TicketView key={`editMyWorkbench`} />} />
+                <Route path="/service-desk/my-requests/tickets/:Did/:id" element={<TicketView key={`editMyReq`} />} />
                 <Route path="/tickets/dashboard" element={<TicketsDashboard />} />
                 
                 {/* Masters */}
@@ -197,11 +199,11 @@ const AnimatedRoutes = () => {
                 
                 {/* Service Desk - Enhanced */}
                 <Route path="/service-desk/create-ticket" element={<TicketCreate />} />
-                <Route path="/service-desk/my-workbench" element={<MyWorkbench />} />
+                <Route path="/service-desk/my-workbench" element={<MyWorkbench key={"myworkbench"}/>} />
                 <Route path="/service-desk/sla-violated" element={<AllRequests />} />
                 <Route path="/service-desk/group-tickets" element={<AllRequests />} />
                 <Route path="/service-desk/closed-tickets" element={<AllRequests />} />
-                <Route path="/service-desk/my-requests" element={<AllRequests />} />
+                <Route path="/service-desk/my-requests" element={<MyWorkbench key={"myrequest"}/>} />
                 <Route path="/service-desk/draft-requests" element={<AllRequests />} />
                 <Route path="/service-desk/create-work-order" element={<CreateWorkOrder />} />
                 <Route path="/service-desk/manage-work-order" element={<ManageWorkOrder />} />

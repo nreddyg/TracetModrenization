@@ -168,6 +168,7 @@ const TicketView = () => {
   const msg = useMessage()
   const dispatch = useAppDispatch();
   const storeData = useAppSelector(state => state);
+  const [srtLookupData,setSrtLookupData]=useState<any[]>([]);
 
   // Add ref to track previous ServiceRequestType to prevent infinite loops
   const prevServiceRequestTypeRef = useRef<string>('');
@@ -228,7 +229,7 @@ const TicketView = () => {
           additionalFields.forEach(field => {
             setValue(field.name!, '');
           });
-          fetchAdditionalFieldsData(currentServiceRequestType, 111);
+          fetchAdditionalFieldsData(currentServiceRequestType, 111,false,'setDefaultAssigneeBasedOnServiceRequestType');
         } else {
           const additionalFields = fields.filter(f => f.isAdditionalField);
           additionalFields.forEach(field => {
@@ -410,7 +411,6 @@ const TicketView = () => {
   }
   //add comments api
   const postComment = async () => {
-    console.log("payload");
     const payload = {
       "ServiceRequestComments": [
         {
@@ -562,6 +562,11 @@ const TicketView = () => {
       }else{
         setStatusOptions([])
       }
+      if(SRTLookUp.status === 'fulfilled' && SRTLookUp.value.success && SRTLookUp.value.data.ServiceRequestTypesLookup){
+        setSrtLookupData(SRTLookUp.value.data.ServiceRequestTypesLookup);
+      }else{
+        setSrtLookupData([]);
+      }
       setLookupsDataInJson(allResponses, fetchCustomerAndAssetCodesLookup);
     } catch (error) {
       msg.warning(`Error fetching lookups: ${error}`)
@@ -590,7 +595,7 @@ const TicketView = () => {
       })
   }
   // Fetch additional fields - only clear values, preserve all field configs and options
-  async function fetchAdditionalFieldsData(name: string, compId: number, fieldData?: any) {
+  async function fetchAdditionalFieldsData(name: string, compId: number, fieldData?: any,setDefaultAssignee?:string) {
     dispatch(setLoading(true));
     let additionalCheckBoxNames = []
     let updatedFields=[]
@@ -628,6 +633,13 @@ const TicketView = () => {
           }
 
           );
+          if(setDefaultAssignee && srtLookupData.length!==0 && watch('ServiceRequestType')){
+            const selectedServiceRequestType = watch('ServiceRequestType');
+            const matchingSrt = srtLookupData.find(item => item.ServiceRequestTypeName === selectedServiceRequestType);
+            if(matchingSrt){
+              setValue('AssigneeSelectedUsers', matchingSrt.UserGroup ? matchingSrt.UserGroup.split(",") : []);
+            }
+          }
           updatedFields = [...baseFieldsOnly, ...newAdditionalFields];
           setShowAccordion(true);
           newAdditionalFields.forEach((field: any) => {

@@ -8,7 +8,7 @@ export const formatDate = (date: Date | string | number, format: string = 'YYYY-
 // "04/03/2025 09:58:52" to DD-MM-YYYY
 export function formatDateToDDMMYYYY(dateTimeStr: string) {
   if (!dateTimeStr?.trim()) return "";
-  return (([m, d, y]) => `${d}-${m}-${y}`)(
+  return (([d, m, y]) => `${d}-${m}-${y}`)(
     dateTimeStr.split(" ")[0].split("/")
   );
 }

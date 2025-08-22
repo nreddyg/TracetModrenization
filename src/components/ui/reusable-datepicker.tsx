@@ -818,3 +818,86 @@ export const ReusableDatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
 );
 
 ReusableDatePicker.displayName = "ReusableDatePicker";
+
+// Demo component to show usage
+// const DatePickerDemo = () => {
+//   const [singleDate, setSingleDate] = useState<Date | undefined>(new Date());
+//   const [stringDate, setStringDate] = useState<string>("29/08/2025"); // Test string value
+//   const [formatType, setFormatType] = useState("DD/MM/YYYY");
+  
+//   const formats = [
+//     "DD/MM/YYYY",
+//     "DD-MM-YYYY", 
+//     "YYYY-MM-DD",
+//     "YYYY/MM/DD",
+//     "MM/DD/YYYY"
+//   ];
+
+//   return (
+//     <div className="p-6 max-w-md mx-auto space-y-6 bg-gray-50 min-h-screen">
+//       <h2 className="text-xl font-semibold text-gray-900">Enhanced Date Picker Demo</h2>
+      
+//       {/* Format selector */}
+//       <div>
+//         <label className="block text-sm font-medium mb-2 text-gray-700">Select Format:</label>
+//         <select 
+//           value={formatType} 
+//           onChange={(e) => setFormatType(e.target.value)}
+//           className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+//         >
+//           {formats.map(format => (
+//             <option key={format} value={format}>{format}</option>
+//           ))}
+//         </select>
+//       </div>
+
+//       {/* Date picker with Date object */}
+//       <ReusableDatePicker
+//         label="Date Object Input"
+//         value={singleDate}
+//         defaultValue={new Date()}
+//         onChange={setSingleDate}
+//         format={formatType}
+//         isRequired={true}
+//         placeholder="Select Date"
+//         tooltip="Using Date object as value"
+//         allowClear={true}
+//       />
+
+//       {/* Date picker with string value */}
+//       <ReusableDatePicker
+//         label="String Value Input"
+//         value={stringDate}
+//         onChange={(date) => setStringDate(date ? formatDate(date, formatType) : "")}
+//         format={formatType}
+//         placeholder="Select Date"
+//         tooltip="Using string value like '29/08/2025'"
+//         allowClear={true}
+//       />
+
+//       {/* Display selected values */}
+//       <div className="text-sm text-gray-600 bg-white p-3 rounded-md border space-y-2">
+//         <div><strong>Date Object:</strong> {singleDate ? singleDate.toLocaleDateString() : 'None'}</div>
+//         <div><strong>String Value:</strong> {stringDate || 'None'}</div>
+//         <div><strong>Formatted Display:</strong> {singleDate ? formatDate(singleDate, formatType) : 'None'}</div>
+//       </div>
+      
+//       {/* Test different formats */}
+//       <div className="space-y-3">
+//         <h3 className="text-lg font-medium">Test Different Formats:</h3>
+//         {formats.map(format => (
+//           <ReusableDatePicker
+//             key={format}
+//             label={`Format: ${format}`}
+//             format={format}
+//             defaultValue="29/08/2025" // Test string default value
+//             placeholder={`Enter date as ${format}`}
+//             size="sm"
+//           />
+//         ))}
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default DatePickerDemo;

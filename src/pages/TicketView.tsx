@@ -1499,7 +1499,7 @@ const TicketView = () => {
                               </AccordionTrigger>
                               <AccordionContent className="px-6 pb-6">
                                 <div className="space-y-4">
-                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  <div className="grid grid-cols-1 md:grid-cols-2 capitalize gap-4">
                                     {getAdditionalFields().map(renderField)}
                                   </div>
                                 </div>

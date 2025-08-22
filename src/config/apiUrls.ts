@@ -31,4 +31,15 @@ export const URL_GET_USER_GROUP_BY_ID='/api/ServiceDeskAPI/GetUserGroup';
 export const URL_ADD_USER_GROUP="/api/ServiceDeskAPI/AddUserGroupDetails";
 export const URL_UPDATE_USER_GROUP="/api/ServiceDeskAPI/UpdateUserGroupDetails";
 export const URL_DELETE_USER_GROUP="/api/ServiceDeskAPI/DeleteUserGroup";
+//configuration
+
+export const URL_GET_SERVICE_REQUEST_TYPES='/api/ServiceDeskAPI/GetServiceRequestTypes'
+export const URL_GET_SERVICE_REQUEST_TYPES_BY_ID='/api/ServiceDeskAPI/GetServiceRequestTypesById'
+export const URL_GET_VENDOR_DETAILS_BY_COMPID="/api/Masters/GetVendorDetailsByCompanyId"
+export const URL_GET_SERVICE_REQUEST_STATUS="/api/ServiceDeskAPI/GetServiceRequestStatus"
+export const URL_GET_NOTIFY_TYPE_LOOKUPS="/api/ServiceDeskAPI/GetNotifyTypeListLookups"
+export const URL_POST_SERVICE_REQUEST_CONFIGURATION="/api/ServiceDeskAPI/SaveServiceRequestconfig"
+export const URL_POST_SERVICE_REQUEST_TYPE="/api/ServiceDeskAPI/AddServiceRequestType"
+export const URL_POST_DELETE_SR_TYPE_BY_ID="/api/ServiceDeskAPI/DeleteServiceRequestTypeById"
+
 

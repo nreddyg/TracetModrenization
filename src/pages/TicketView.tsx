@@ -22,7 +22,7 @@ import ReusableTable from '@/components/ui/reusable-table';
 import { BaseField, GenericObject, UploadedFileOutput, UploadFileInput } from '@/Local_DB/types/types';
 import { CREATE_TICKET_DB, modules } from '@/Local_DB/Form_JSON_Data/CreateTicketDB';
 import { cn } from '@/lib/utils';
-import { deleteSRUpload, getAllSRDetailsList, getCommentHistoryList, getCommentsAPI, getLinkedServiceRequests, getManageAssetsList, GetServiceRequestAssignToLookups, getServiceRequestDetailsById, getSRAdditionalFieldsByServiceRequestType, getSRBranchList, getSRCCListLookupsList, getSRConfigList, getSRCustomerLookupsList, getSRLinkToLookupsList, getSRRequestByLookupsList, getStatusLookups, getSubscriptionByCustomer, getSubscriptionHistoryByCustomer, getUploadedFilesByServiceRequestId, postCommentAPI, postServiceRequest, saveFileUpload, ServiceRequestTypeLookups, updateServiceRequest } from '@/services/ticketServices';
+import { deleteSRUpload, getAllSRDetailsList, getCommentHistoryList, getCommentsAPI, getLinkedServiceRequests, getManageAssetsList, GetServiceRequestAssignToLookups, getServiceRequestDetailsById, getSRAdditionalFieldsByServiceRequestType, getSRAssetsList, getSRBranchList, getSRCCListLookupsList, getSRConfigList, getSRCustomerLookupsList, getSRLinkToLookupsList, getSRRequestByLookupsList, getStatusLookups, getSubscriptionByCustomer, getSubscriptionHistoryByCustomer, getUploadedFilesByServiceRequestId, postCommentAPI, postServiceRequest, saveFileUpload, ServiceRequestTypeLookups, updateServiceRequest } from '@/services/ticketServices';
 import { fileToByteArray, formatDate, byteArrayToFile, formatDateToDDMMYYYY, getActivityStatusColor, getPriorityColor, getStatusColor, getRequestTypeById } from '@/_Helper_Functions/HelperFunctions';
 import axios from 'axios';
 import { useAppDispatch, useAppSelector } from '@/store/reduxStore';
@@ -125,6 +125,8 @@ interface additionalFieldData {
   SelectedValues: any
 }
 const enableInClose = ["CCListSelectedUsers", "Status", "FileUploadURLs", "Title", "Description"]
+const workBenchEnables=["100","101","102","103"]
+const myRequestEnables=["104","105"]
 const TicketView = () => {
   const { Did, id } = useParams();
   const location = useLocation();
@@ -149,6 +151,7 @@ const TicketView = () => {
   ]);
   const [statusFilter, setStatusFilter] = useState('All Status');
   const [cols, setCols] = useState([])
+  const [assetCols,setAssetCols]=useState([])
   const [dataSource, setDataSource] = useState([]);
   const [accordionOpen, setAccordionOpen] = useState<string | undefined>(undefined);
   const [showAccordion, setShowAccordion] = useState<boolean>(false);
@@ -171,6 +174,7 @@ const TicketView = () => {
   const dispatch = useAppDispatch();
   const storeData = useAppSelector(state => state);
   const [srtLookupData,setSrtLookupData]=useState<any[]>([]);
+  const [assetsData,setAssetData]=useState([])
 
   // Add ref to track previous ServiceRequestType to prevent infinite loops
   const prevServiceRequestTypeRef = useRef<string>('');
@@ -206,6 +210,7 @@ const TicketView = () => {
      
     }
   }, [isCreateMode,requestTypeId])
+
   // Function to clear all form values but preserve all field configurations and options
   const clearAllFormValues = useCallback(() => {
     const currentFields = fields;
@@ -223,6 +228,10 @@ const TicketView = () => {
   useEffect(() => {
     if (selectedAssetCodesData)
       fetchAllLookUps();
+    if(location?.state?.formData){
+     form.reset(location?.state?.formData)
+    }
+ 
   }, []);
   useEffect(() => {
     if (watch('Customer')) fetchSubscriptionByCustomer(watch('Customer'), 111, 'All');
@@ -263,6 +272,27 @@ const TicketView = () => {
     }
   }, [originalTicket])
 
+  //assets lisat get for edit
+   const assetListAPICall=async(id:string,compId:number)=>{
+   await getSRAssetsList(id,compId).then(res => {
+
+        if (res.success && res.data && res.data !== undefined) {
+          setAssetData(res.data.AssetsList)
+          let cols=generateColumnsFromData(res.data.AssetsList,false)
+          setAssetCols(cols)
+        } else {
+          setAssetData([])
+        }
+      }
+      )
+      .catch((err) => {
+   
+      })
+      .finally(() => {
+        dispatch(setLoading(false));
+      });
+    }
+
   //fetch single ticket related apis
   async function fetchSingleTicketRelatedAPIs(serviceRequestId: number) {
     dispatch(setLoading(true));
@@ -275,6 +305,9 @@ const TicketView = () => {
         setSelectedTicket(ticketData);
         try {
           await fetchAdditionalFieldsData(ticketData.ServiceRequestType, 111, ticketData);
+            if(ticketData.AssetId){
+             await assetListAPICall(serviceRequestId.toString(),111)
+          }
         } catch (err) {}
       }
       if (childTickets.status === 'fulfilled' && childTickets.value.data) {
@@ -456,8 +489,9 @@ const TicketView = () => {
   ): ColumnDef<T>[] {
     if (!data || data.length === 0) return [];
     const sample = data[0];
-    const columns: ColumnDef<T>[] = Object.keys(sample).map((key) => {
-      const value = sample[key];
+    let keys=Object.keys(sample)
+    const columns: ColumnDef<T>[] = keys.filter((obj)=>obj!=="ProductId").map((key) => {
+    const value = sample[key];
 
       let editType: 'text' | 'number' | 'date' | 'select' = 'text';
       if (typeof value === 'number') {
@@ -474,6 +508,8 @@ const TicketView = () => {
           editType,
         },
       } as ColumnDef<T>;
+  
+  
     });
 
     if (includeActions) {
@@ -494,7 +530,6 @@ const TicketView = () => {
         enableHiding: false,
       });
     }
-
     return columns;
   }
   async function getCommentApi(ServiceRequestId: string, compId: number) {
@@ -587,7 +622,7 @@ const TicketView = () => {
   }
   //function to navigate asset table
   function navigateToAssetTable() {
-    navigate("/service-desk/new-request/assetcode-table", { state: { flag: "goBack" } })
+    navigate("/service-desk/new-request/assetcode-table", { state: { data: form.getValues() } })
   }
   //history table api call
   async function fetchSubscriptionHistoryByCustomer(CustomerName: string, compId: number, BranchName: string, ProductId: number) {
@@ -607,6 +642,7 @@ const TicketView = () => {
   async function fetchAdditionalFieldsData(name: string, compId: number, fieldData?: any,setDefaultAssignee?:string) {
     dispatch(setLoading(true));
     let additionalCheckBoxNames = []
+    let additionalDateNames=[]
     let updatedFields=[]
     try {
       const res = await getSRAdditionalFieldsByServiceRequestType(name, compId);
@@ -619,7 +655,10 @@ const TicketView = () => {
           const newAdditionalFields = res.data.AdditionalFields.map((field: any) => {
             if (field.FieldType.toLowerCase() === "checkbox") {
               additionalCheckBoxNames.push(field.FieldName)
+            }else if(field.FieldType.toLowerCase() === "date"){
+              additionalDateNames.push(field.FieldName)
             }
+
 
             return ({
               name: field.FieldName,
@@ -631,13 +670,14 @@ const TicketView = () => {
               disabled: !isCreateMode,
               allowClear: true,
               defaultValue: '',
-
+              format: "DD-MM-YYYY",
               options: field.FieldType === 'Dropdown' || field.FieldType === 'CheckBox' || field.FieldType === 'RadioButton'
                 ? field.FieldValues?.split(",")?.map((opt: any) => ({
                   label: opt,
                   value: opt,
                 }))
                 : [],
+              // ...(field.fieldType.toLowerCase()==="date" && {format: "DD-MM-YYYY"}),
             })
           }
 
@@ -685,6 +725,9 @@ const TicketView = () => {
             additionalFields[field.FieldName] = field.FieldValue || '';
             if (additionalCheckBoxNames.includes(field.FieldName))
               additionalFields[field.FieldName] = field.FieldValue.split(",");
+
+              if (additionalDateNames.includes(field.FieldName))
+                    additionalFields[field.FieldName] = formatDateToDDMMYYYY(field.FieldValue);
           });
         }
        fieldData["AssigneeSelectedUsers"] = {  "Users":fieldData["AssigneeSelectedUsers"].split(","),"User Group": fieldData["AssigneeSelectedUserGroups"].split(",")};
@@ -731,7 +774,7 @@ const TicketView = () => {
     setAttachments(validFiles);
   };
   //handling uploaded files
-  const handleSubmitUploadedFiles = async (id: string) => {
+  const handleSubmitUploadedFiles = async (id: string,updatedData?:any) => {
     dispatch(setLoading(true));
     const uploadPayload = { ServiceReqFileUploadDetails: attachments }
     await saveFileUpload(111, id, uploadPayload).then(res => {
@@ -741,6 +784,10 @@ const TicketView = () => {
       }
     }).catch(err => { }).finally(() => {
       if (!isCreateMode) {
+     
+        if(updatedData.status=="Closed"){
+            navigate(-1)
+        }
         fetchSingleTicketRelatedAPIs(Number(selectedTicketId))
       }else{
         form.reset();
@@ -959,7 +1006,7 @@ const TicketView = () => {
   }
   //handle submit for creating tickets
   const handleSave = async () => {
-    const isValidationFailed = fields.filter(field => field.isRequired && field.isAdditionalField).map(ele => form.getValues()[ele.name]).some(e => !e);
+    const isValidationFailed = fields.filter(f => f.isAdditionalField && f.isRequired).every(f=>form.getValues()[f.name] !== undefined && form.getValues()[f.name] !== null && form.getValues()[f.name] !== '');
     if (isValidationFailed) {
       return;
     }
@@ -1039,8 +1086,11 @@ const TicketView = () => {
     await updateServiceRequest(111, 'All', payload).then(res => {
       if (res.data.status) {
         if (attachments?.length > 0) {
-          handleSubmitUploadedFiles(originalTicket.ServiceRequestId.toString())
+          handleSubmitUploadedFiles(originalTicket.ServiceRequestId.toString(),updatedData)
         }else{
+          if(updatedData.Status=="Closed"){
+             navigate(-1)
+          }
         fetchSingleTicketRelatedAPIs(Number(selectedTicketId))
         // resetValue()
         }
@@ -1113,11 +1163,19 @@ const TicketView = () => {
     
       setIsEditing(true);
       setHasChanges(true);
-      let isClosed = selectedTicket.Status !== "Closed"
+      let isNotClosed = selectedTicket.Status !== "Closed"
       fieldsCopy.forEach(field => {
-        if (isClosed) {
-          if (!field.isAlwaysOnDisabled && (field.name !== 'Branch' && field.name !== 'ServiceRequestType')) {
-            field.disabled = false;
+        if (isNotClosed) {
+          if (!field.isAlwaysOnDisabled && (field.name !== 'Branch' && field.name !== 'ServiceRequestType'&& field.name !== 'RequestedBy')) {
+            if((workBenchEnables.includes(requestTypeId)) && (field.name !== 'Severity') && (field.name !== 'Customer')&& ( field.name !== 'Title' && field.name !== 'Description') ){
+             field.disabled = false;
+            }else if((myRequestEnables.includes(requestTypeId)) && (field.name !== 'Priority')  ){
+              field.disabled = false;
+            }else if(requestTypeId==="106"){
+                 field.disabled = false;
+            }
+            
+           
           }
         } else {
           field.disabled = !enableInClose.includes(field.name)
@@ -1131,7 +1189,9 @@ const TicketView = () => {
       const confirmDiscard = window.confirm('You have unsaved changes. Do you want to discard them?');
       if (!confirmDiscard) return;
     }
+   if((selectedTicketId!==ticket.ServiceRequestId.toString())){
     form.reset({...notifyValues})
+    }
     if(!isLink){
     setSelectedTicketId(ticket.ServiceRequestId.toString())
     if (isEditing) {
@@ -1145,17 +1205,21 @@ const TicketView = () => {
 
     }else{
       
-          setSelectedTicketId(ticket.ChildServiceRequestId.toString())
+     setSelectedTicketId(ticket.ChildServiceRequestId.toString())
     if (isEditing) {
       handleEdit("cancel")
     }
     commentForm.reset({comment:""})
-    window.history.replaceState(null, '', `/tickets/${ticket.ChildServiceRequestId}`);
+        const parts = window.location.pathname.split('/');
+    parts[parts.length - 1] = ticket.ChildServiceRequestId.toString();
+    window.history.replaceState(null, '', parts.join('/'));
+    // window.history.replaceState(null, '', `/tickets/${ticket.ChildServiceRequestId}`);
     }
 
   };
   const triggerAccordionItemsValidations=async()=>{
     await trigger(fields.filter(f => f.isAdditionalField && f.isRequired).map(f => f.name));
+    setTriggerAccordionValidations(false);
   }
   useEffect(()=>{
     if(triggerAccordionValidations){
@@ -1164,7 +1228,7 @@ const TicketView = () => {
   },[triggerAccordionValidations])
   const handleTriggerAccordionItemsValidations = ():void => {
     if(fields.filter(f => f.isAdditionalField && f.isRequired).length > 0 && showAccordion){
-      const valid = fields.filter(f => f.isAdditionalField && f.isRequired).some(f=>form.getValues()[f.name] !== undefined && form.getValues()[f.name] !== null && form.getValues()[f.name] !== '');
+      const valid = fields.filter(f => f.isAdditionalField && f.isRequired).every(f=>form.getValues()[f.name] !== undefined && form.getValues()[f.name] !== null && form.getValues()[f.name] !== '');
       if (!valid) {
         setAccordionOpen('additional-fields');
         setTriggerAccordionValidations(true);
@@ -1254,7 +1318,7 @@ const TicketView = () => {
           <div className="bg-white border-b  shadow-sm px-4 lg:px-6 py-3 flex flex-col lg:flex-row lg:items-center justify-between gap-4 shrink-0">
             <div className="flex items-center gap-4 lg:gap-6 flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <div className=' text-gray-400 hover:text-blue-900 p-1 cursor-pointer' onClick={() => navigate('/tickets')}>
+                <div className=' text-gray-400 hover:text-blue-900 p-1 cursor-pointer' onClick={() => navigate(-1)}>
                   <ArrowLeft className="h-4 w-4 text-current stroke-[3]" />
                 </div>
                 <span className="text-gray-600 text-sm">All Tickets</span>
@@ -1403,9 +1467,20 @@ const TicketView = () => {
                             {getFieldsByNames(['Customer']).map(renderField)}
                           </div>
                           {watch('Customer') && <div>
+                            <div className='text-sm font-medium mb-1'>Subscription Details List:</div>
                             <ReusableTable
                               data={dataSource}
                               columns={cols}
+                              enableExport={false}
+
+                            />
+                          </div>}
+                           {!isCreateMode && selectedTicket.AssetId!==null  && <div>
+                             <div className='text-sm font-medium mb-1'>Asset List:</div>
+                            <ReusableTable
+                              data={assetsData}
+                              columns={assetCols}
+                              enableExport={false}
                             />
                           </div>}
                         </div>
@@ -1445,7 +1520,7 @@ const TicketView = () => {
                             <TabsList className="grid w-full grid-cols-3 h-auto">
                               <TabsTrigger value="comments" className="text-xs sm:text-sm px-2 sm:px-4 py-2">Comments</TabsTrigger>
                               <TabsTrigger value="history" className="text-xs sm:text-sm px-2 sm:px-4 py-2">History</TabsTrigger>
-                              <TabsTrigger value="worklog" className="text-xs sm:text-sm px-2 sm:px-4 py-2">Work Log</TabsTrigger>
+                              {/* <TabsTrigger value="worklog" className="text-xs sm:text-sm px-2 sm:px-4 py-2">Work Log</TabsTrigger> */}
                             </TabsList>
 
                             <TabsContent value="comments" className="space-y-4">
@@ -1506,8 +1581,8 @@ const TicketView = () => {
                                     <div className="flex items-center gap-2 mb-1">
                                       <span className="font-medium">{change.CommenterName}</span>
                                       <span className="text-sm text-gray-500">{change.RequestedDate}</span>
-                                      <Badge variant="outline" className="text-xs">
-                                      </Badge>
+                                      {/* <Badge variant="outline" className="text-xs">
+                                      </Badge> */}
                                     </div>
                                     <div className="text-sm">
                                       <div className='commentHistory ' dangerouslySetInnerHTML={{ __html: change.Comment }} />

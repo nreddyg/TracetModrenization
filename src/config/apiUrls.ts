@@ -24,6 +24,7 @@ export const URL_GET_SERVICE_REQUEST_DETAILS_BY_SERVICE_REQUEST_ID = '/api/Servi
 export const URL_GET_UPLOADED_FILES_API_BY_SERVICE_REQUEST_ID = '/api/ServiceDeskAPI/GetFileUpload';
 export const URL_POST_DELETE_UPLOADED_FILES='/api/ServiceDeskAPI/DeleteFileUploadById';
 export const URL_POST_UPDATE_SERVICE_REQUEST ='/api/ServiceDeskAPI/UpdateServiceRequestwithAdditionalFields';
+export const URL_GET_SR_ASSETS_LIST='/api/ServiceDeskAPI/GetServiceRequestAssetsList';
 //userGroup screen
 export const URL_GET_USER_GROUP_TABLE_DATA="/api/ServiceDeskAPI/GetUserGroupList";
 export const URL_GET_USER_GROUP_BY_ID='/api/ServiceDeskAPI/GetUserGroup';

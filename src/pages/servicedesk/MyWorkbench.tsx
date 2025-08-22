@@ -93,8 +93,9 @@ const MyWorkbench = () => {
     accessorKey: "ServiceRequestNo", header: "Service Request No",
     cell: ({ row }) => (
       <Link
-        to={`/service-desk/my-workbench/tickets/${filters.TicketCategory}/${row.original.ServiceRequestId}`}
+        to={(isMyRequest)?`/service-desk/my-requests/tickets/${filters.TicketCategory}/${row.original.ServiceRequestId}`:`/service-desk/my-workbench/tickets/${filters.TicketCategory}/${row.original.ServiceRequestId}`}
         className="text-blue-500"
+        
       >
         {row.getValue('ServiceRequestNo')}
       </Link>

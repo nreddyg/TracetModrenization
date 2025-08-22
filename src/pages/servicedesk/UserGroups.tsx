@@ -32,7 +32,7 @@ interface UserGroup {
   ActiveStatus?: boolean;
 }
 
-const UserGroupsContent = () => {
+const UserGroups = () => {
   const message = useMessage();
   const [userGroups, setUserGroups] = useState([]);
   const [selectedRecord, setSelectedRecord] = useState<UserGroup | null>(null);
@@ -513,7 +513,7 @@ const UserGroupsContent = () => {
               title=""
               onRefresh={handleRefresh}
               enableSearch={false} // We have our own search
-              enableSelection={true}
+              enableSelection={false}
               enableExport={true}
               enableColumnVisibility={true}
               enablePagination={true}
@@ -559,12 +559,12 @@ const UserGroupsContent = () => {
 };
 
 // Main component wrapped with MessageProvider
-const UserGroups = () => {
-  return (
-    <MessageProvider position="top" maxCount={5} duration={3}>
-      <UserGroupsContent />
-    </MessageProvider>
-  );
-};
+// const UserGroups = () => {
+//   return (
+//     <MessageProvider position="top" maxCount={5} duration={3}>
+//       <UserGroupsContent />
+//     </MessageProvider>
+//   );
+// };
 
 export default UserGroups;

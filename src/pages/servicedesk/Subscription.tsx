@@ -1002,8 +1002,8 @@ const SubscriptionManagement = () => {
 
   const handleNavigation = () => {
     const { CustomerName, ProductName } = getValues();
-
-    navigate('/service-desk/payment-details', {
+if(CustomerName!=='' && ProductName!==''){
+ navigate('/service-desk/payment-details', {
       state: {
         parentData: {
           CustomerName,
@@ -1011,6 +1011,11 @@ const SubscriptionManagement = () => {
         },
       },
     });
+}
+else{
+  message.error('Please select Customer Name/Product Name')
+}
+   
   }
 
   return (
@@ -1106,8 +1111,8 @@ const SubscriptionManagement = () => {
               // loading={loading}
               title=""
               onRefresh={handleRefresh}
-              enableSearch={false} // We have our own search
-              enableSelection={true}
+              enableSearch={false}
+              enableSelection={false}
               enableExport={true}
               enableColumnVisibility={true}
               enablePagination={true}

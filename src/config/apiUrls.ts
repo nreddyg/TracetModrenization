@@ -30,4 +30,14 @@ export const URL_GET_USER_GROUP_BY_ID='/api/ServiceDeskAPI/GetUserGroup';
 export const URL_ADD_USER_GROUP="/api/ServiceDeskAPI/AddUserGroupDetails";
 export const URL_UPDATE_USER_GROUP="/api/ServiceDeskAPI/UpdateUserGroupDetails";
 export const URL_DELETE_USER_GROUP="/api/ServiceDeskAPI/DeleteUserGroup";
+//Subscription screen 
+export const URL_GET_SUBSCRIPTION_LIST='/api/ServiceDeskAPI/GetSubscription';
+export const URL_GET_PRODUCT_LIST='/api/Masters/GetProductMasterDetailsByCompanyId';
+export const SUBSCRIPTION_CURRENCY='/api/ServiceDeskAPI/GetSubscriptionsCurrency';
+export const SUBSCRIPTION_NEXT_AMC_FROM_DATE='/api/ServiceDeskAPI/GetNextAMCFromDate';
+export const ADD_SUBSCRIPTION='/api/ServiceDeskAPI/AddSubscription';
+export const UPDATE_SUBSCRIPTION='/api/ServiceDeskAPI/UpdateSubscription';
+export const URL_SUBSCRIPTION_BY_ID='/api/ServiceDeskAPI/GetSubscriptionById';
+export const URL_DUPLICATE_ADD_CHECK_NO='/api/ServiceDeskAPI/CheckAddDuplicateCheque';
+export const URL_DUPLICATE_UPDATE_CHECK_NO='/api/ServiceDeskAPI/CheckUpdateDuplicateCheque'
 

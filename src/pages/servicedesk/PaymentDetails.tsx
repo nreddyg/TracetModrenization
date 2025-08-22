@@ -1,89 +1,359 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CalendarIcon, Home, Save, RotateCcw } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { useForm } from 'react-hook-form';
-
-interface PaymentFormData {
-  customerName: string;
-  productName: string;
-  orderValue: string;
-  paymentMode: string;
-  bankName: string;
-  chequeNo: string;
-  chequeDate: Date | undefined;
-  amount: string;
-  currency: string;
-  currencyAmount: string;
-  subscriptionType: string;
-  subscriptionFromDate: Date | undefined;
-  subscriptionToDate: Date | undefined;
-  subscriptionPaidDate: Date | undefined;
-  subscriptionExpiryDate: Date | undefined;
-  noOfCountDetails: string;
-  perAdditionalCountCost: string;
-  overUsageCount: string;
-  remarks: string;
-}
+import { Link, useLocation } from 'react-router-dom';
+import { Form, } from '@/components/ui/form';
+import { Controller, useForm } from 'react-hook-form';
+import { SUBSCRIPTION_PAYMENT_DB } from '@/Local_DB/Form_JSON_Data/SubscriptionDB';
+import { BaseField, GenericObject } from '@/Local_DB/types/types';
+import { ReusableDropdown } from '@/components/ui/reusable-dropdown';
+import { ReusableInput } from '@/components/ui/reusable-input';
+import { ReusableDatePicker } from '@/components/ui/reusable-datepicker';
+import { addSubscription, getAddChequeList, getNextAmcFromDate, getSubscriptionById, getSubscriptionCurrency, getUpdateChequeList, updateSubscription } from '@/services/subscriptionServices';
+import { useDispatch } from 'react-redux';
+import { setLoading } from '@/store/slices/projectsSlice';
+import { ReusableButton } from '@/components/ui/reusable-button';
+import { useMessage } from '@/components/ui/reusable-message';
+import { formatDate } from '@/_Helper_Functions/HelperFunctions';
 
 const PaymentDetails = () => {
-  const form = useForm<PaymentFormData>({
-    defaultValues: {
-      customerName: 'Keerthi',
-      productName: 'Udyog',
-      orderValue: '637.00',
-      paymentMode: '',
-      bankName: '',
-      chequeNo: '',
-      chequeDate: undefined,
-      amount: '',
-      currency: '',
-      currencyAmount: '',
-      subscriptionType: '',
-      subscriptionFromDate: undefined,
-      subscriptionToDate: undefined,
-      subscriptionPaidDate: undefined,
-      subscriptionExpiryDate: undefined,
-      noOfCountDetails: '0',
-      perAdditionalCountCost: '',
-      overUsageCount: '0',
-      remarks: '',
-    },
-  });
+  const [fields, setFields] = useState<BaseField[]>(SUBSCRIPTION_PAYMENT_DB);
+  console.log(fields,"fields")
+  const dispatch = useDispatch();
+  const location = useLocation();
+  const subData = location.state.subscriptionData ? location.state?.subscriptionData : null
+  console.log(subData, "subdata")
+  const customerName = location.state.parentData?.CustomerName;
+  const productname = location.state.parentData?.ProductName;
+  const message=useMessage();
 
-  const onSubmit = (data: PaymentFormData) => {
-    console.log('Form submitted:', data);
+  const handleSubmitForm = async (data: GenericObject): Promise<void> => {
+    dispatch(setLoading(true));
+
+  //   const formatDate = (date: Date | string): string => {
+  //   if (!date) return "";
+  //   const d = new Date(date);
+  //   const day = String(d.getDate()).padStart(2, "0");
+  //   const month = String(d.getMonth() + 1).padStart(2, "0");
+  //   const year = d.getFullYear();
+  //   return `${day}/${month}/${year}`;
+  // };
+
+    try {
+      const pay = {
+        "SubscriptionsDetails": subData
+          ? [
+            {
+              AMCExpiryDate: data.AMCExpiryDate,
+              Amount: data.Amount,
+              BankName: data.BankName,
+              ChequeDate: data.ChequeDate,
+              ChequeNo: data.ChequeNo,
+              Currency: data.Currency?.toString(),
+              CurrencyAmount: data.CurrencyAmount,
+              NoofAPICalls: data.NoOfCountDetails?.toString(),
+              OrderValue: data.OrderValue,
+              OverUsageAPIcalls: data.OverUsageCount?.toString(),
+              PaymentMode: data.PaymentDetails,
+              PerAPIcost: data.PerAdditionalCountCost,
+              Remark: data.Remark,
+              TDSAmount: "",
+            },
+          ]
+          : [
+            {
+              "CustomerName": data.CustomerName,
+              "ProductName": data.ProductName,
+              "OrderValue": data.OrderValue || "0",
+              "PaymentMode": data.PaymentDetails,
+              "BankName": data.BankName,
+              "ChequeNo": data.ChequeNo,
+              "ChequeDate": formatDate(data.ChequeDate,'DD/MM/YYYY'),
+              "Amount": data.Amount,
+              "TDSAmount": "",
+              "Type": data.Type,
+              "AMCFromDate":formatDate(data.AMCFromDate,'DD/MM/YYYY'),
+              "AMCToDate": formatDate(data.AMCToDate,'DD/MM/YYYY'),
+              "AMCPaidDate": formatDate(data.AMCPaidDate,'DD/MM/YYYY'),
+              "AMCExpiryDate": formatDate(data.AMCExpiryDate,'DD/MM/YYYY'),
+              "Currency": data.Currency?.toString(),
+              "CurrencyAmount": data.CurrencyAmount,
+              "NoofAPICalls": data.NoOfCountDetails?.toString(),
+              "PerAPIcost": data.PerAdditionalCountCost,
+              "OverUsageAPIcalls": data.OverUsageCount?.toString(),
+              "Remark": data.Remark,
+            },
+          ],
+      };
+      const paymentMode = data.PaymentDetails;
+      console.log(paymentMode, "185")
+      const chequeNo = data.ChequeNo;
+      if (paymentMode === "Cheque") {
+        if (!chequeNo || chequeNo.length < 6) {
+          console.log('minimum 6 characters required')
+          message.error("Minimum Cheque Number Should be 6 Characters!!");
+          return;
+        }
+
+        if (subData) {
+          // 🔹 Update case
+          const res = await getUpdateChequeList(chequeNo, subData?.SubscriptionId, 111);
+          if (res.data?.status === true) {
+            // message("warning", "10vh", "Cheque Number already exists", "chequewarn");
+            message.error('Cheque No. Already Exists');
+            return;
+          } else {
+            await updateSubscription("All", 111, 13911, "Keerthi", "Udyog", pay);
+          }
+        } else {
+          // 🔹 Add case
+          const res = await getAddChequeList(chequeNo, 111);
+          if (res.data?.status === true) {
+            message.error('Cheque No. Already exists');
+            return;
+          } else {
+            await addSubscription("All", 111, pay);
+          }
+        }
+      } else {
+        if (subData) {
+        const res=  await updateSubscription("All", 111, 13911, "Keerthi", "Udyog", pay);
+        } else {
+          await addSubscription("All", 111, pay);
+        }
+      }
+      message.success("Subscription saved successfully!");
+    } catch (error) {
+      message.error("Failed to save subscription");
+    } finally {
+      dispatch(setLoading(false));
+    }
   };
+
+
+  const form = useForm<GenericObject>({
+    defaultValues: fields.reduce((acc, f) => {
+      acc[f.name!] = f.defaultValue ?? ''
+      return acc;
+    }, {} as GenericObject),
+
+  });
+  const { control, register, handleSubmit, trigger, watch, setValue, reset, formState: { errors } } = form;
 
   const handleClear = () => {
     form.reset();
   };
 
+  const renderField = (field: BaseField) => {
+    const { name, label, fieldType, isRequired, show = true } = field;
+    if (!name || !show) return null;
+    const validationRules = {
+      required: isRequired ? `${label} is required` : false,
+    };
+    switch (fieldType) {
+      case 'text':
+        return (
+          <Controller
+            key={name}
+            name={name}
+            control={control}
+            rules={validationRules}
+            render={({ field: ctrl }) => (
+              <ReusableInput
+                {...field}
+                value={ctrl.value}
+                onChange={ctrl.onChange}
+                error={errors[name]?.message as string}
+              />
+            )}
+          />
+        );
+      case 'dropdown':
+        return (
+          <Controller
+            key={name}
+            name={name}
+            control={control}
+            rules={validationRules}
+            render={({ field: ctrl }) => (
+              <ReusableDropdown
+                {...field}
+                value={ctrl.value}
+                onChange={ctrl.onChange}
+                error={errors[name]?.message as string}
+              />
+            )}
+          />
+        );
+      case 'date':
+        return (
+          <Controller
+            key={name}
+            name={name}
+            control={control}
+            rules={validationRules}
+            render={({ field: ctrl }) => (
+              <ReusableDatePicker
+                {...field}
+                value={ctrl.value}
+                onChange={ctrl.onChange}
+                error={errors[name]?.message as string}
+              />
+            )}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+  // Helper function to get fields by names (similar to TicketView)
+  const getFieldsByNames = (names: string[]) => fields.filter(f => names.includes(f.name!));
+  //getCurrency
+  async function getCurrency() {
+    dispatch(setLoading(true));
+    await getSubscriptionCurrency()
+      .then((res) => {
+        if (res.success && res.data) {
+          const lookup = res.data.Currency || [];
+          if (lookup.length > 0) {
+            const options = lookup.map((user: any) => ({
+              label: user.Text,
+              value: user.Value,
+            }));
+            setFields((prevFields) =>
+              prevFields.map((f) =>
+                f.name === "Currency" ? { ...f, options } : f
+              )
+            );
+          }
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching currency lookup:", err);
+      }).finally(() => {
+        dispatch(setLoading(false))
+      })
+  }
+  async function getNextAMCDate(customerName: string, productname: string, branchname: string, compid: number) {
+    dispatch(setLoading(true));
+    await getNextAmcFromDate(customerName, productname, branchname, compid)
+      .then((res) => {
+        if (res.success && res.data) {
+          console.log(res.data[0], "res")
+          const temp = res.data[0];
+          const value = temp?.StartDate?.split(" ")[0]
+          console.log(value,"value238")
+          const ordervalue = temp?.OrderValue;
+          setFields((prevFields) =>
+            prevFields.map((f) => {
+              if (f.name === "AMCFromDate") {
+                return { ...f, defaultValue: value, disabled: value?true:false };
+              }
+              if (f.name === "OrderValue") {
+                return { ...f, defaultValue: ordervalue, disabled: temp?.OrderValue > 0 };
+              }
+              return f;
+            })
+          );
+          if (value) setValue("AMCFromDate", value, { shouldValidate: true });
+          if (ordervalue) setValue("OrderValue", ordervalue, { shouldValidate: true });
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching:", err);
+      }).finally(() => {
+        dispatch(setLoading(false))
+      })
+  }
+  useEffect(() => {
+    getCurrency();
+    if (subData === null) {
+      getNextAMCDate(customerName, productname, 'All', 111);
+    }
+  }, [])
+  const paymentMode = watch("PaymentDetails");
+  const getPaymentFields = () => {
+    switch (paymentMode) {
+      case "Cheque":
+        return ["PaymentDetails", "BankName", "ChequeNo", "ChequeDate", "Amount", "Currency", "CurrencyAmount"];
+      case "Cash":
+        return ["PaymentDetails", "Amount", "Currency", "CurrencyAmount"];
+      case "NEFT":
+        return ["PaymentDetails", "BankName", "Amount", "Currency", "CurrencyAmount"];
+      default:
+        return ["PaymentDetails"]; // show only dropdown initially
+    }
+  };
+
+  useEffect(() => {
+    if (customerName || productname) {
+      if (customerName) setValue("CustomerName", customerName, { shouldValidate: true });
+      if (productname) setValue("ProductName", productname, { shouldValidate: true });
+      setFields((prev) =>
+        prev.map((f) => {
+          if (f.name === "CustomerName") {
+            return { ...f, defaultValue: customerName, disabled: true };
+          }
+          if (f.name === "ProductName") {
+            return { ...f, defaultValue: productname, disabled: true };
+          }
+          return f;
+        })
+      );
+    }
+  }, [customerName, productname, setValue]);
+
+  //subscription By Id
+
+  async function getsubscriptionById(id: number, compid: number) {
+    dispatch(setLoading(true))
+    await getSubscriptionById(id, compid).then(res => {
+      if (res.success && res.data) {
+        console.log(res.data, "276")
+        const details = res.data.SubscriptionDetails;
+        if (details) {
+          reset({
+            CustomerName: details.CustomerName,
+            ProductName: details.ProductName,
+            OrderValue: details.OrderValue,
+            PaymentDetails: details.PaymentDetails,
+            BankName: details.BankName,
+            ChequeNo: details.ChequeNo,
+            ChequeDate: details.ChequeDate,
+            Amount: details.Amount,
+            Currency: details.Currency,
+            CurrencyAmount: details.CurrencyAmount,
+            Type: details.Type,
+            AMCFromDate:details.AMCFromDate,
+            AMCToDate: details.AMCToDate,
+            AMCPaidDate: details.AMCPaidDate,
+            AMCExpiryDate: details.AMCExpiryDate,
+            NoOfCountDetails: details.NoOfCountDetails,
+            PerAdditionalCountCost: details.PerAdditionalCountCost,
+            OverUsageCount: details.OverUsageCount,
+            Remark: details.Remark
+          });
+        }
+      }
+    })
+      .catch(err => {
+        console.error('Error fetching subscription by customer:', err);
+      }).finally(() => {
+        dispatch(setLoading(false))
+      })
+  }
+
+  useEffect(() => {
+    if (subData) {
+      getsubscriptionById(subData?.SubscriptionId, 111)
+    }
+  }, [subData?.SubscriptionId])
+
+
   return (
-    <div className="min-h-screen bg-gray-50/30">
+    <div className=" bg-gray-50/30 h-full overflow-y-scroll" >
       <header className="bg-white border-b px-6 py-4 shadow-sm">
         <div className="flex items-center gap-4">
           <SidebarTrigger />
@@ -108,484 +378,76 @@ const PaymentDetails = () => {
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Payment Details</h1>
             <p className="text-gray-600 mt-1">Manage subscription payment information</p>
+         {subData &&   <p className=" font-bold text-gray-900">Subscription Status:<span className={subData.SubscriptionStatus==='Expired'?'text-red-500':'text-green-500'}>{subData.SubscriptionStatus}</span></p>}
           </div>
-          <Button 
-            size="sm" 
-            className="bg-orange-500 hover:bg-orange-600"
-          >
-            New Service Request
-          </Button>
         </div>
-
         {/* Payment Form */}
         <Card className="border-0 shadow-sm">
           <CardContent className="p-6">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <form onSubmit={form.handleSubmit(handleSubmitForm)} className="space-y-6">
                 {/* Customer Information */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <FormField
-                    control={form.control}
-                    name="customerName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-sm font-medium">Customer Name</FormLabel>
-                        <FormControl>
-                          <Input {...field} className="border-gray-200 bg-gray-50" readOnly />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="productName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-sm font-medium">Product Name</FormLabel>
-                        <FormControl>
-                          <Input {...field} className="border-gray-200 bg-gray-50" readOnly />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="orderValue"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-sm font-medium">Order Value</FormLabel>
-                        <FormControl>
-                          <Input {...field} className="border-gray-200 bg-gray-50" readOnly />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {getFieldsByNames(['CustomerName', 'ProductName', 'OrderValue']).map((field) => (
+                    <div key={field.name}>
+                      {renderField(field)}
+                    </div>
+                  ))}
                 </div>
-
                 {/* Payment Section */}
                 <div className="bg-orange-50 p-4 rounded-lg">
                   <h3 className="text-orange-600 font-semibold mb-4">Payment</h3>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <FormField
-                      control={form.control}
-                      name="paymentMode"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-sm font-medium">Payment Mode*</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Cheque" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="cheque">Cheque</SelectItem>
-                              <SelectItem value="cash">Cash</SelectItem>
-                              <SelectItem value="online">Online</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="bankName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-sm font-medium">Bank Name*</FormLabel>
-                          <FormControl>
-                            <Input {...field} placeholder="Enter Bank Name" className="border-gray-200" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <FormField
-                      control={form.control}
-                      name="chequeNo"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-sm font-medium">Cheque No*</FormLabel>
-                          <FormControl>
-                            <Input {...field} placeholder="Enter Cheque Number" className="border-gray-200" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="chequeDate"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-sm font-medium">Cheque Date*</FormLabel>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <FormControl>
-                                <Button
-                                  variant={"outline"}
-                                  className={cn(
-                                    "w-full pl-3 text-left font-normal border-gray-200",
-                                    !field.value && "text-muted-foreground"
-                                  )}
-                                >
-                                  {field.value ? (
-                                    format(field.value, "dd/MM/yyyy")
-                                  ) : (
-                                    <span>Select Cheque Date</span>
-                                  )}
-                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                </Button>
-                              </FormControl>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                              <Calendar
-                                mode="single"
-                                selected={field.value}
-                                onSelect={field.onChange}
-                                initialFocus
-                              />
-                            </PopoverContent>
-                          </Popover>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="amount"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-sm font-medium">Amount</FormLabel>
-                          <FormControl>
-                            <Input {...field} placeholder="Enter Amount" className="border-gray-200" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                    <FormField
-                      control={form.control}
-                      name="currency"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-sm font-medium">Currency*</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="India-Rupees" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="inr">India-Rupees</SelectItem>
-                              <SelectItem value="usd">USD</SelectItem>
-                              <SelectItem value="eur">EUR</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="currencyAmount"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-sm font-medium">Currency Amount</FormLabel>
-                          <FormControl>
-                            <Input {...field} placeholder="Enter Currency Amount" className="border-gray-200" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {getFieldsByNames(getPaymentFields()).map((field) => (
+                      <div key={field.name}>
+                        {renderField(field)}
+                      </div>
+                    ))}
                   </div>
                 </div>
-
                 {/* Subscription Details */}
                 <div className="bg-orange-50 p-4 rounded-lg">
                   <h3 className="text-orange-600 font-semibold mb-4">Subscription Details</h3>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-                    <FormField
-                      control={form.control}
-                      name="subscriptionType"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-sm font-medium">Type*</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Monthly" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="monthly">Monthly</SelectItem>
-                              <SelectItem value="quarterly">Quarterly</SelectItem>
-                              <SelectItem value="annual">Annual</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="subscriptionFromDate"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-sm font-medium">Subscription From Date*</FormLabel>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <FormControl>
-                                <Button
-                                  variant={"outline"}
-                                  className={cn(
-                                    "w-full pl-3 text-left font-normal border-gray-200",
-                                    !field.value && "text-muted-foreground"
-                                  )}
-                                >
-                                  {field.value ? (
-                                    format(field.value, "dd/MM/yyyy")
-                                  ) : (
-                                    <span>08/07/2025</span>
-                                  )}
-                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                </Button>
-                              </FormControl>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                              <Calendar
-                                mode="single"
-                                selected={field.value}
-                                onSelect={field.onChange}
-                                initialFocus
-                              />
-                            </PopoverContent>
-                          </Popover>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="subscriptionToDate"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-sm font-medium">Subscription To Date*</FormLabel>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <FormControl>
-                                <Button
-                                  variant={"outline"}
-                                  className={cn(
-                                    "w-full pl-3 text-left font-normal border-gray-200",
-                                    !field.value && "text-muted-foreground"
-                                  )}
-                                >
-                                  {field.value ? (
-                                    format(field.value, "dd/MM/yyyy")
-                                  ) : (
-                                    <span>07/10/2025</span>
-                                  )}
-                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                </Button>
-                              </FormControl>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                              <Calendar
-                                mode="single"
-                                selected={field.value}
-                                onSelect={field.onChange}
-                                initialFocus
-                              />
-                            </PopoverContent>
-                          </Popover>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="subscriptionPaidDate"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-sm font-medium">Subscription Paid Date*</FormLabel>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <FormControl>
-                                <Button
-                                  variant={"outline"}
-                                  className={cn(
-                                    "w-full pl-3 text-left font-normal border-gray-200",
-                                    !field.value && "text-muted-foreground"
-                                  )}
-                                >
-                                  {field.value ? (
-                                    format(field.value, "dd/MM/yyyy")
-                                  ) : (
-                                    <span>Select AMC Paid Date</span>
-                                  )}
-                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                </Button>
-                              </FormControl>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                              <Calendar
-                                mode="single"
-                                selected={field.value}
-                                onSelect={field.onChange}
-                                initialFocus
-                              />
-                            </PopoverContent>
-                          </Popover>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {getFieldsByNames(['Type', 'AMCFromDate', 'AMCToDate', 'AMCPaidDate', 'AMCExpiryDate']).map((field) => (
+                      <div key={field.name}>
+                        {renderField(field)}
+                      </div>
+                    ))}
                   </div>
-
-                  <FormField
-                    control={form.control}
-                    name="subscriptionExpiryDate"
-                    render={({ field }) => (
-                      <FormItem className="w-full md:w-1/4">
-                        <FormLabel className="text-sm font-medium">Subscription Expiry Date*</FormLabel>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button
-                                variant={"outline"}
-                                className={cn(
-                                  "w-full pl-3 text-left font-normal border-gray-200",
-                                  !field.value && "text-muted-foreground"
-                                )}
-                              >
-                                {field.value ? (
-                                  format(field.value, "dd/MM/yyyy")
-                                ) : (
-                                  <span>07/10/2025</span>
-                                )}
-                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                              </Button>
-                            </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={field.value}
-                              onSelect={field.onChange}
-                              initialFocus
-                            />
-                          </PopoverContent>
-                        </Popover>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
                 </div>
-
                 {/* API Details */}
                 <div className="bg-orange-50 p-4 rounded-lg">
                   <h3 className="text-orange-600 font-semibold mb-4">API Details</h3>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                    <FormField
-                      control={form.control}
-                      name="noOfCountDetails"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-sm font-medium">No Of Count Details</FormLabel>
-                          <FormControl>
-                            <Input {...field} className="border-gray-200" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="perAdditionalCountCost"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-sm font-medium">Per Additional Count Cost</FormLabel>
-                          <FormControl>
-                            <Input {...field} placeholder="Enter Per API Cost" className="border-gray-200" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="overUsageCount"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-sm font-medium">Over Usage Count</FormLabel>
-                          <FormControl>
-                            <Input {...field} className="border-gray-200" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {getFieldsByNames(['NoOfCountDetails', 'PerAdditionalCountCost', 'OverUsageCount', 'Remark']).map((field) => (
+                      <div key={field.name}>
+                        {renderField(field)}
+                      </div>
+                    ))}
                   </div>
-
-                  <FormField
-                    control={form.control}
-                    name="remarks"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-sm font-medium">Remark</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="Enter Remarks" className="border-gray-200" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
                 </div>
-
                 {/* Action Buttons */}
                 <div className="flex gap-3">
-                  <Button 
-                    type="submit" 
-                    className="bg-orange-500 hover:bg-orange-600"
+                  <ReusableButton
+                    htmlType="submit"
+                    variant="default"
+                    className="bg-orange-500 border-orange-500 text-white hover:bg-orange-600 hover:border-orange-600"
+                    icon={<Save className="h-4 w-4" />}
+                    iconPosition="left"
                   >
-                    <Save className="h-4 w-4 mr-2" />
-                    Save
-                  </Button>
-                  <Button 
-                    type="button" 
-                    variant="outline" 
+                    {subData?'Update':'Save'}
+                  </ReusableButton>
+                  <ReusableButton
+                    htmlType="button"
+                    variant="default"
                     onClick={handleClear}
                     className="border-orange-500 text-orange-500 hover:bg-orange-50"
+                    icon={<RotateCcw className="h-4 w-4" />}
+                    iconPosition="left"
                   >
-                    <RotateCcw className="h-4 w-4 mr-2" />
                     Cancel
-                  </Button>
+                  </ReusableButton>
                 </div>
               </form>
             </Form>

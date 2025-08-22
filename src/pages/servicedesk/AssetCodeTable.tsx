@@ -7,10 +7,15 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { FaSearch } from 'react-icons/fa';
 import { useLocation, useNavigate } from "react-router-dom";
 import { ReusableButton } from '@/components/ui/reusable-button';
+import { useDispatch } from 'react-redux';
+import { setLoading } from '@/store/slices/projectsSlice';
+import { useMessage } from '@/components/ui/reusable-message';
  
 const AssetCodeTable = () => {
     const location = useLocation();
     const navigate = useNavigate();
+    const dispatch=useDispatch();
+     const msg = useMessage()
     const [dataSource, setDataSource] = useState([]);
     const [selectedRecords, setSelectedRecords] = useState([]); // Will contain full row data
     const [selectedRecordIds, setSelectedRecordIds] = useState([]); // Will contain just IDs
@@ -27,6 +32,7 @@ const AssetCodeTable = () => {
     // }, [selectedRecords])
  
     async function fetchAssetList(BranchName: string, compId: number) {
+        dispatch(setLoading(true))
         try {
             const res = await getManageAssetsList(BranchName, compId);
             if (res.success && res.data["AssetsListDetails"]) {
@@ -34,6 +40,8 @@ const AssetCodeTable = () => {
             }
         } catch (err) {
             console.error('Error fetching subscription by customer:', err);
+        } finally{
+            dispatch(setLoading(false))
         }
     }
  
@@ -87,7 +95,12 @@ const AssetCodeTable = () => {
  
     // Memoized navigation function
     const navigateBacktoMain = useCallback(() => {
-        navigate("/tickets/TKT-001", { state: { data: selectedRecords } })
+        if(selectedRecords?.length>0){
+ navigate("/service-desk/create-ticket", { state: { data: selectedRecords,formData:location.state.data } })
+        }else{
+                    msg.warning('Please Select Atleast One Asset')
+        }
+       
     }, [navigate, selectedRecords]);
  
     // Memoized selection change handler
@@ -96,7 +109,7 @@ const AssetCodeTable = () => {
         setSelectedRecords(selectionInfo.selectedRows);
         setSelectedRecordIds(selectionInfo.selectedRowIds);
     }, []);
-console.log(selectedRecords,"ID")
+
     // Memoized columns generation
     const columns = useMemo(() => generateColumnsFromData(dataSource), [dataSource]);
  

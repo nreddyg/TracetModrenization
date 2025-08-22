@@ -4,7 +4,7 @@ import { OptionGroup } from "@/components/ui/reusable-multi-select";
 
 
 export type FieldType = 'text' | 'dropdown' | 'multiselect' | 'textarea' | 'heading' | "date" | "upload"
-  | "richtext" | "checkbox" | "table" | "separator" | 'radiobutton' | 'numeric';
+  | "richtext" | "checkbox" | "table" | "separator" | 'radiobutton' | 'numeric'|"rangepicker";
 
 export interface DropdownOption {
     label: string;

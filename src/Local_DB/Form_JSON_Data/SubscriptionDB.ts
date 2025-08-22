@@ -161,7 +161,7 @@ export const SUBSCRIPTION_PAYMENT_DB: BaseField[] = [
         format: 'DD/MM/YYYY',
         isRequired: true,
         defaultValue: '',
-        disabled: false,
+        disabled: true,
     },
     {
         label: 'Subscription Paid Date',

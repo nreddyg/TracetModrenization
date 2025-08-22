@@ -1,20 +1,20 @@
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import {ColumnDef } from '@tanstack/react-table';
-import { Card, CardContent} from '@/components/ui/card';
+import { Card, CardContent, CardTitle} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ReusableTable} from '@/components/ui/reusable-table';
 import { Users,Package,RefreshCw,Plus,AlertTriangle,CheckCircle} from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import FilterCard from '@/components/common/FilterCard';
 import  ReusableRangePicker  from '@/components/ui/reusable-range-picker';
 import { ScrollArea } from '@radix-ui/react-scroll-area';
 import { getAllSRDetailsList } from '@/services/ticketServices';
 import { useAppDispatch } from '@/store/reduxStore';
 import { setLoading } from '@/store/slices/projectsSlice';
 import { Ticket as Request } from '../TicketView';
+import { ReusableButton } from '@/components/ui/reusable-button';
 
 const AllRequests = () => {
   const navigate=useNavigate();
@@ -22,10 +22,11 @@ const AllRequests = () => {
   const { toast } = useToast();
   const [dateRange, setDateRange] = useState<{ from: Date; to: Date } | null>(null);
   const [requests, setRequests] = useState<Request[]>([]);
+  const [filteredRequests, setFilteredRequests] = useState<Request[]>([]);
   const [columns,setColumns]=useState<ColumnDef<Request>[]>([
     {accessorKey: "ServiceRequestNo", header: "Service Request No",
       cell:({row})=>(
-        <Link to={`/tickets/${row.original.ServiceRequestId}`} className='text-blue-500 '>
+        <Link to={`/service-desk/all-requests/tickets/106/${row.original.ServiceRequestId}`} className='text-blue-500 '>
           {row.getValue('ServiceRequestNo')}
         </Link>
       )
@@ -76,19 +77,27 @@ const AllRequests = () => {
       OpenTicketsCount,totalRequests: requests.length
     };
   }, [requests]);
-
   useEffect(()=>{
     fetchAllServiceRequests();
   },[])
+  // Enhanced action handlers with audit trail
+  const handleRefresh = useCallback(() => {
+    setDateRange({ from: undefined, to: undefined });
+    fetchAllServiceRequests()
+    toast({title: "Data Refreshed",description: "All Service Requests data has been updated",});
+  },[toast]);
   //fetch all tickets
   async function fetchAllServiceRequests() {
       dispatch(setLoading(true))
       await getAllSRDetailsList('All', 111, 'All').then(res => {
         if (res.success && res.data.status === undefined) {
           if (Array.isArray(res.data)) {
-            setRequests(res.data.map(item=>({...item, AssignedTo: item.AssigneeSelectedUsers || ''+''+item.AssigneeSelectedUserGroups || ''})))
+            let data = res.data.map(item => ({ ...item, AssignedTo: item.AssigneeSelectedUsers || '' + '' + item.AssigneeSelectedUserGroups || '' }));
+            setRequests(data);
+            setFilteredRequests(data);
           } else {
-            setRequests([])
+            setRequests([]);
+            setFilteredRequests([]);
           }
         } else {
         }
@@ -123,24 +132,32 @@ const AllRequests = () => {
         return 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-600 hover:text-white';
     }
   };
-  // Enhanced action handlers with audit trail
-  const handleRefresh = useCallback(() => {
-    fetchAllServiceRequests()
-    toast({
-          title: "Data Refreshed",
-          description: "All Service Requests data has been updated",
-    });
-  },[toast]);
   //handle change
   const handleChange = (value: any) => {
-    console.log('val',value)
     if(value){
-
+      setDateRange(value);
     }else{
-      
+      setDateRange({from:undefined,to:undefined});
     }
   };
-  
+  const normalizeDate = (date: Date): Date => {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  };
+  //handle search
+  const handleSearch = (): void => {
+    const filteredDataSource = requests.filter((obj) => {
+      const { from, to } = dateRange;
+      if (!from && !to) return true;
+      const objDate = normalizeDate(new Date(obj["CreatedDate"].substring(0, 10)));
+      const startDate = from ? normalizeDate(new Date(from)) : null;
+      const endDate = to ? normalizeDate(new Date(to)) : null;
+      return from && to
+        ? startDate! <= objDate && objDate <= endDate!
+        : from ? objDate >= startDate! : objDate <= endDate!;
+    });
+    setFilteredRequests(filteredDataSource);
+  };
+
   return (
     <div className="h-full overflow-y-scroll bg-gray-50/30">
       <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
@@ -234,29 +251,30 @@ const AllRequests = () => {
           </Card>
         </div>
         <div>
-          <FilterCard actions={<Button onClick={null} className="bg-blue-600 hover:bg-blue-700">Search</Button>}>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <div className="space-y-2">
-                <ReusableRangePicker
-                  label='Date Range'
-                  tooltip='Select a date range'
-                  value={undefined}
-                  onChange={(value) => handleChange(value)}
-                  className=''
-                  placeholder={['Start Date', 'End Date']}
-                  error={undefined}
-                  allowClear={true}
-                  format='DD/MM/YYYY'
-                  disabled={false}
-                />
-              </div>
-            </div>
-          </FilterCard>
-
-        </div>  
+          <Card>
+            <CardTitle className="text-lg flex px-6 py-1 pt-2 items-center gap-2">{"Filters"}</CardTitle>
+            <CardContent>
+              <div className=" grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    <ReusableRangePicker
+                        label='Date Range'
+                        tooltip='Select a date range'
+                        value={dateRange}
+                        onChange={(value) => handleChange(value)}
+                        className=''
+                        placeholder={['From Date', 'To Date']}
+                        allowClear={true}
+                        format='DD/MM/YYYY'
+                      />
+                  <div className="flex items-end mt-6  ">
+                  <ReusableButton  size={"middle"} onClick={handleSearch} className="bg-primary h-[2.38rem]  text-white ">Search</ReusableButton>
+                  </div>
+              </div>     
+            </CardContent>
+          </Card>
+        </div>
         <div className="bg-white p-6 rounded-lg">
           <ScrollArea className=" w-full ">
-            <ReusableTable data={requests} columns={columns} enableExport={false}/>
+            <ReusableTable data={filteredRequests} columns={columns} enableExport={false}/>
           </ScrollArea>
         </div>
       </div>

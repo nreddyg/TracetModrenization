@@ -23,7 +23,7 @@ import { BaseField, GenericObject, UploadedFileOutput, UploadFileInput } from '@
 import { CREATE_TICKET_DB, modules } from '@/Local_DB/Form_JSON_Data/CreateTicketDB';
 import { cn } from '@/lib/utils';
 import { deleteSRUpload, getAllSRDetailsList, getCommentHistoryList, getCommentsAPI, getLinkedServiceRequests, getManageAssetsList, GetServiceRequestAssignToLookups, getServiceRequestDetailsById, getSRAdditionalFieldsByServiceRequestType, getSRBranchList, getSRCCListLookupsList, getSRConfigList, getSRCustomerLookupsList, getSRLinkToLookupsList, getSRRequestByLookupsList, getStatusLookups, getSubscriptionByCustomer, getSubscriptionHistoryByCustomer, getUploadedFilesByServiceRequestId, postCommentAPI, postServiceRequest, saveFileUpload, ServiceRequestTypeLookups, updateServiceRequest } from '@/services/ticketServices';
-import { fileToByteArray, formatDate, byteArrayToFile, formatDateToDDMMYYYY, getActivityStatusColor, getPriorityColor, getStatusColor } from '@/_Helper_Functions/HelperFunctions';
+import { fileToByteArray, formatDate, byteArrayToFile, formatDateToDDMMYYYY, getActivityStatusColor, getPriorityColor, getStatusColor, getRequestTypeById } from '@/_Helper_Functions/HelperFunctions';
 import axios from 'axios';
 import { useAppDispatch, useAppSelector } from '@/store/reduxStore';
 import { setLoading } from '@/store/slices/projectsSlice';
@@ -126,7 +126,7 @@ interface additionalFieldData {
 }
 const enableInClose = ["CCListSelectedUsers", "Status", "FileUploadURLs", "Title", "Description"]
 const TicketView = () => {
-  const { id } = useParams();
+  const { Did, id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
   const [isCreateMode, setIsCreateMode] = useState(location.pathname === '/service-desk/create-ticket');
@@ -134,6 +134,7 @@ const TicketView = () => {
   const [selectedTicketId, setSelectedTicketId] = useState<string>();
   const [selectedTicket, setSelectedTicket] = useState<Ticket>({} as Ticket);
   const [originalTicket, setOriginalTicket] = useState<Ticket>(selectedTicket);
+  const [requestTypeId,setRequestTypeId]=useState(Did)
   const [hasChanges, setHasChanges] = useState(false);
   const [activityLogs] = useState<ActivityLog[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -164,10 +165,12 @@ const TicketView = () => {
   const [childListData, setChildListData] = useState<any>([])
   const [updatedComments,setUpdatedComments]=useState("")
   const [notifyValues,setNotifyValues]=useState({"Notify":[]})
-  const selectedAssetCodesData: GenericObject[] = location.state ? location.state?.data : []
+  const selectedAssetCodesData: GenericObject[] = location.state ? location.state?.data : [];
+  const [triggerAccordionValidations,setTriggerAccordionValidations]=useState(false);
   const msg = useMessage()
   const dispatch = useAppDispatch();
   const storeData = useAppSelector(state => state);
+  const [srtLookupData,setSrtLookupData]=useState<any[]>([]);
 
   // Add ref to track previous ServiceRequestType to prevent infinite loops
   const prevServiceRequestTypeRef = useRef<string>('');
@@ -178,6 +181,7 @@ const TicketView = () => {
     return matchesSearch && matchesStatus;
   });
   const [fields, setFields] = useState<BaseField[]>(CREATE_TICKET_DB);
+
   const form = useForm<GenericObject>({
     defaultValues: fields.reduce((acc, f) => {
       acc[f.name!] = f.defaultValue ?? '';
@@ -191,12 +195,17 @@ const TicketView = () => {
     }
   });
   const { control, register, handleSubmit, trigger, watch, setValue, reset, formState: { errors } } = form;
+
+
   //api calls to be made in edit mode
   useEffect(() => {
     if (!isCreateMode) {
-      fetchAllTickets();
+      if(requestTypeId){
+       fetchAllTickets(getRequestTypeById(requestTypeId));
+      }
+     
     }
-  }, [isCreateMode])
+  }, [isCreateMode,requestTypeId])
   // Function to clear all form values but preserve all field configurations and options
   const clearAllFormValues = useCallback(() => {
     const currentFields = fields;
@@ -228,7 +237,7 @@ const TicketView = () => {
           additionalFields.forEach(field => {
             setValue(field.name!, '');
           });
-          fetchAdditionalFieldsData(currentServiceRequestType, 111);
+          fetchAdditionalFieldsData(currentServiceRequestType, 111,false,'setDefaultAssigneeBasedOnServiceRequestType');
         } else {
           const additionalFields = fields.filter(f => f.isAdditionalField);
           additionalFields.forEach(field => {
@@ -253,9 +262,7 @@ const TicketView = () => {
       form.reset({ ...originalTicket,...notifyValues })
     }
   }, [originalTicket])
-  useEffect(() => {
-    triggerAccordioItemsValidations();
-  }, [accordionOpen])
+
   //fetch single ticket related apis
   async function fetchSingleTicketRelatedAPIs(serviceRequestId: number) {
     dispatch(setLoading(true));
@@ -315,9 +322,9 @@ const TicketView = () => {
     }
   }
   //fetch all tickets list
-  async function fetchAllTickets() {
+  async function fetchAllTickets(requestType:string) {
     dispatch(setLoading(true))
-    await getAllSRDetailsList('All', 111, 'All').then(res => {
+    await getAllSRDetailsList('All', 111, requestType).then(res => {
       if (res.success && res.data.status === undefined) {
         if (Array.isArray(res.data)) {
           setTickets(res.data)
@@ -332,6 +339,7 @@ const TicketView = () => {
   }
   //fetch uploaded files data based on the service request id 
   async function fetchUploadedFilesByServiceRequestId(serviceRequestId: number) {
+    dispatch(setLoading(true))
     await getUploadedFilesByServiceRequestId(serviceRequestId, 111).then(res => {
       if (res.success && res.data) {
         setUploadData(res.data?.FileUploadDetails)
@@ -339,7 +347,9 @@ const TicketView = () => {
         setUploadData([]);
       }
     }).catch(err => {
-    });
+    }).finally(()=>{
+      dispatch(setLoading(false));
+    })
   }
   //store lookups data in json
   const setLookupsDataInJson = (lookupsData: allResponsesType, config: GenericObject): void => {
@@ -410,7 +420,6 @@ const TicketView = () => {
   }
   //add comments api
   const postComment = async () => {
-    console.log("payload");
     const payload = {
       "ServiceRequestComments": [
         {
@@ -489,18 +498,18 @@ const TicketView = () => {
     return columns;
   }
   async function getCommentApi(ServiceRequestId: string, compId: number) {
+    dispatch(setLoading(true))
     try {
       const res = await getCommentsAPI(ServiceRequestId, compId);
       if (res.success && res.data) {
         const commentsArray = res.data[0]?.Comments || [];
         setComments(commentsArray);
       }
-    } catch (err) {
-      console.error('Error fetching subscription by customer:', err);
-    }
+    } catch (err) {}finally{dispatch(setLoading(false))}
   }
   //subscription table api call
   async function fetchSubscriptionByCustomer(CustomerName: string, compId: number, BranchName: string) {
+    dispatch(setLoading(true))
     await getSubscriptionByCustomer(CustomerName, compId, BranchName).then(res => {
       if (res.success && res.data.status === undefined) {
         setDataSource(res.data);
@@ -511,8 +520,9 @@ const TicketView = () => {
       }
     })
       .catch(err => {
-        console.error('Error fetching subscription by customer:', err);
-      });
+      }).finally(()=>{
+        dispatch(setLoading(false));
+      })
   }
   //fetching all lookups data
   async function fetchAllLookUps() {
@@ -562,6 +572,11 @@ const TicketView = () => {
       }else{
         setStatusOptions([])
       }
+      if(SRTLookUp.status === 'fulfilled' && SRTLookUp.value.success && SRTLookUp.value.data.ServiceRequestTypesLookup){
+        setSrtLookupData(SRTLookUp.value.data.ServiceRequestTypesLookup);
+      }else{
+        setSrtLookupData([]);
+      }
       setLookupsDataInJson(allResponses, fetchCustomerAndAssetCodesLookup);
     } catch (error) {
       msg.warning(`Error fetching lookups: ${error}`)
@@ -584,13 +599,12 @@ const TicketView = () => {
         setHistoryColumns(newCols1)
       }
     }).catch(err => {
-        console.error('Error fetching subscription by customer:', err);
       }).finally(()=>{
         dispatch(setLoading(false));
       })
   }
   // Fetch additional fields - only clear values, preserve all field configs and options
-  async function fetchAdditionalFieldsData(name: string, compId: number, fieldData?: any) {
+  async function fetchAdditionalFieldsData(name: string, compId: number, fieldData?: any,setDefaultAssignee?:string) {
     dispatch(setLoading(true));
     let additionalCheckBoxNames = []
     let updatedFields=[]
@@ -628,6 +642,13 @@ const TicketView = () => {
           }
 
           );
+          if(setDefaultAssignee && srtLookupData.length!==0 && watch('ServiceRequestType')){
+            const selectedServiceRequestType = watch('ServiceRequestType');
+            const matchingSrt = srtLookupData.find(item => item.ServiceRequestTypeName === selectedServiceRequestType);
+            if(matchingSrt){
+              setValue('AssigneeSelectedUsers', matchingSrt.UserGroup ? matchingSrt.UserGroup.split(",") : []);
+            }
+          }
           updatedFields = [...baseFieldsOnly, ...newAdditionalFields];
           setShowAccordion(true);
           newAdditionalFields.forEach((field: any) => {
@@ -680,12 +701,6 @@ const TicketView = () => {
       dispatch(setLoading(false));
     }
   }
-  //trigger additional fields validations which are required 
-  async function triggerAccordioItemsValidations() {
-    if (accordionOpen === 'additional-fields') {
-      await trigger(fields.filter(f => f.isAdditionalField).map(f => f.name));
-    }
-  }
   //upload Functionality and API Integration
   const multipleFileUpload = async (
     filelist: UploadFileInput[]): Promise<void> => {
@@ -705,7 +720,6 @@ const TicketView = () => {
             FileConversionType: file.type,
           };
         } catch (error) {
-          console.error(`Failed to process file ${file.name}:`, error);
           return null;
         }
       })
@@ -947,8 +961,6 @@ const TicketView = () => {
   const handleSave = async () => {
     const isValidationFailed = fields.filter(field => field.isRequired && field.isAdditionalField).map(ele => form.getValues()[ele.name]).some(e => !e);
     if (isValidationFailed) {
-      setAccordionOpen('additional-fields');
-      msg.warning('Please Fill The Required Additional Fields!!')
       return;
     }
     const payload = {
@@ -985,19 +997,15 @@ const TicketView = () => {
       }
     }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
   };
-
   //handle Edit Save
   const handleUpdate = async () => {
     const isValidationFailed = fields.filter(field => field.isRequired && field.isAdditionalField).map(ele => form.getValues()[ele.name]).some(e => !e);
     if (isValidationFailed) {
-      setAccordionOpen('additional-fields');
-      msg.warning('Please Fill The Required Additional Fields!!')
       return;
     }
     updateServiceRequestDetails()
   }
   async function updateServiceRequestDetails() {
-
     let commentlist=commentForm.watch("comment")  && commentForm.watch("comment")!= "<p><br></p>"?`${updatedComments} Comment:${commentForm.watch("comment")}`:updatedComments
     const updatedData = {
       "ServiceRequestNo": originalTicket.ServiceRequestNo,
@@ -1073,19 +1081,25 @@ const TicketView = () => {
       setUpdatedComments("")
       setHasChanges(false);
       setIsEditing(false);
-      
       fieldsCopy.forEach(field => { field.disabled = true; });
       setFields(fieldsCopy);
   }
-
   // Handle cancel edit - only clear form values, preserve all field configs and options
   const handleEdit = (type: string) => {
   let fieldsCopy = structuredClone(fields);
     if (type === 'cancel') {
       msg.warning('All unsaved changes have been discarded.');
-      form.reset({ ...originalTicket,...notifyValues });
-      setSelectedTicket(originalTicket);
-      resetValue(fieldsCopy)
+      if(isCreateMode){
+        form.reset();
+        setAttachments([]);
+        setUpdatedComments("")
+        setHasChanges(false);
+        setIsEditing(false);
+      }else{
+        form.reset({ ...originalTicket,...notifyValues });
+        setSelectedTicket(originalTicket);
+        resetValue(fieldsCopy);
+      }
      
     } else if (type === 'clear' || type === 'save') {
       form.reset({...notifyValues});
@@ -1112,11 +1126,6 @@ const TicketView = () => {
       setFields(fieldsCopy);
     }
   };
-  //handle discard changes
-  const handleDiscardChanges = () => {
-    setSelectedTicket(originalTicket);
-    setHasChanges(false);
-  };
   const handleTicketSelect = (ticket: Ticket,isLink:boolean) => {
     if (hasChanges) {
       const confirmDiscard = window.confirm('You have unsaved changes. Do you want to discard them?');
@@ -1129,7 +1138,11 @@ const TicketView = () => {
       handleEdit("cancel")
     }
     commentForm.reset({comment:""})
-    window.history.replaceState(null, '', `/tickets/${ticket.ServiceRequestId}`);
+    // window.history.replaceState(null, '', `/tickets/${ticket.ServiceRequestId}`);
+    const parts = window.location.pathname.split('/');
+    parts[parts.length - 1] = ticket.ServiceRequestId.toString();
+    window.history.replaceState(null, '', parts.join('/'));
+
     }else{
       
           setSelectedTicketId(ticket.ChildServiceRequestId.toString())
@@ -1141,14 +1154,25 @@ const TicketView = () => {
     }
 
   };
-  const handleFieldChange = (field: string, value: string | string[]) => {
-    const newTicket = { ...selectedTicket, [field]: value };
-    setSelectedTicket(newTicket);
-    const hasChangesNow = JSON.stringify(newTicket) !== JSON.stringify(originalTicket);
-    setHasChanges(hasChangesNow);
-  };
-  const handleSaveAll = () => {
-    // Implementation for saving all changes
+  const triggerAccordionItemsValidations=async()=>{
+    await trigger(fields.filter(f => f.isAdditionalField && f.isRequired).map(f => f.name));
+  }
+  useEffect(()=>{
+    if(triggerAccordionValidations){
+      triggerAccordionItemsValidations();
+    }
+  },[triggerAccordionValidations])
+  const handleTriggerAccordionItemsValidations = ():void => {
+    if(fields.filter(f => f.isAdditionalField && f.isRequired).length > 0 && showAccordion){
+      const valid = fields.filter(f => f.isAdditionalField && f.isRequired).some(f=>form.getValues()[f.name] !== undefined && form.getValues()[f.name] !== null && form.getValues()[f.name] !== '');
+      if (!valid) {
+        setAccordionOpen('additional-fields');
+        setTriggerAccordionValidations(true);
+        msg.warning('Please Fill All The Required Additional Fields!!');
+      }
+    } else {
+      setAccordionOpen(undefined);
+    }
   };
   return (
     <div className="h-full   bg-gray-50 flex flex-col ">
@@ -1270,7 +1294,16 @@ const TicketView = () => {
                   <ReusableButton
                     size="small"
                     variant="primary"
-                    onClick={isCreateMode ? form.handleSubmit(handleSave) : form.handleSubmit(handleUpdate)}
+                    onClick={isCreateMode
+                      ? () => {
+                        handleSubmit(handleSave)();
+                        handleTriggerAccordionItemsValidations();
+                      }
+                      : () => {
+                          handleSubmit(handleUpdate)();
+                          handleTriggerAccordionItemsValidations();
+                      }
+                    }
                     icon={<Save className="h-4 w-4" />}
                   >
                     Save

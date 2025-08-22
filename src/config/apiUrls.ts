@@ -42,4 +42,14 @@ export const URL_POST_SERVICE_REQUEST_CONFIGURATION="/api/ServiceDeskAPI/SaveSer
 export const URL_POST_SERVICE_REQUEST_TYPE="/api/ServiceDeskAPI/AddServiceRequestType"
 export const URL_POST_DELETE_SR_TYPE_BY_ID="/api/ServiceDeskAPI/DeleteServiceRequestTypeById"
 
+//Subscription screen 
+export const URL_GET_SUBSCRIPTION_LIST='/api/ServiceDeskAPI/GetSubscription';
+export const URL_GET_PRODUCT_LIST='/api/Masters/GetProductMasterDetailsByCompanyId';
+export const SUBSCRIPTION_CURRENCY='/api/ServiceDeskAPI/GetSubscriptionsCurrency';
+export const SUBSCRIPTION_NEXT_AMC_FROM_DATE='/api/ServiceDeskAPI/GetNextAMCFromDate';
+export const ADD_SUBSCRIPTION='/api/ServiceDeskAPI/AddSubscription';
+export const UPDATE_SUBSCRIPTION='/api/ServiceDeskAPI/UpdateSubscription';
+export const URL_SUBSCRIPTION_BY_ID='/api/ServiceDeskAPI/GetSubscriptionById';
+export const URL_DUPLICATE_ADD_CHECK_NO='/api/ServiceDeskAPI/CheckAddDuplicateCheque';
+export const URL_DUPLICATE_UPDATE_CHECK_NO='/api/ServiceDeskAPI/CheckUpdateDuplicateCheque'
 

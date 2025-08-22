@@ -63,7 +63,8 @@ export interface field {
   modules?:any;
   isAdditionalField?: boolean; // For additional fields
   show?:boolean;
-  defaultChecked?:boolean
+  defaultChecked?:boolean;
+  dependsOn?:string;
 }
 
 export type BaseField = field;

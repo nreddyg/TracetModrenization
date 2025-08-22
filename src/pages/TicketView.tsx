@@ -210,11 +210,7 @@ const TicketView = () => {
      
     }
   }, [isCreateMode,requestTypeId])
-  useEffect(()=>{
-   if(isCreateMode && location.state){
-console.log("loc",location)
-   }
-  },[isCreateMode])
+
   // Function to clear all form values but preserve all field configurations and options
   const clearAllFormValues = useCallback(() => {
     const currentFields = fields;
@@ -534,7 +530,6 @@ console.log("loc",location)
         enableHiding: false,
       });
     }
- console.log("columns",columns)
     return columns;
   }
   async function getCommentApi(ServiceRequestId: string, compId: number) {
@@ -727,7 +722,6 @@ console.log("loc",location)
         let additionalFields: any = {};
         if (fieldData.AdditionalFields && fieldData.AdditionalFields.length > 0) {
           fieldData.AdditionalFields.forEach((field: any) => {
-            console.log("setAddi",field,field.FieldValue)
             additionalFields[field.FieldName] = field.FieldValue || '';
             if (additionalCheckBoxNames.includes(field.FieldName))
               additionalFields[field.FieldName] = field.FieldValue.split(",");
@@ -1000,10 +994,8 @@ console.log("loc",location)
   const getAdditionalFields = () => fields.filter(f => f.isAdditionalField);
   //get additional fields data
   function getAdditionalFieldsData(): additionalFieldData[] {
-    console.log("first",fields)
     return fields.filter(field => field.isAdditionalField).map(field => {
       const val = watch(field.name);
-      console.log("first",form.getValues())
       return {
         AdditionalFieldName: field.name,
         TextBoxValue: field.fieldType === 'text' || field.fieldType === 'numeric' ? val : '',
@@ -1014,7 +1006,7 @@ console.log("loc",location)
   }
   //handle submit for creating tickets
   const handleSave = async () => {
-    const isValidationFailed = fields.filter(field => field.isRequired && field.isAdditionalField).map(ele => form.getValues()[ele.name]).some(e => !e);
+    const isValidationFailed = fields.filter(f => f.isAdditionalField && f.isRequired).every(f=>form.getValues()[f.name] !== undefined && form.getValues()[f.name] !== null && form.getValues()[f.name] !== '');
     if (isValidationFailed) {
       return;
     }
@@ -1096,7 +1088,6 @@ console.log("loc",location)
         if (attachments?.length > 0) {
           handleSubmitUploadedFiles(originalTicket.ServiceRequestId.toString(),updatedData)
         }else{
-             console.log("assignto",selectedTicket,selectedTicket,updatedData)
           if(updatedData.Status=="Closed"){
              navigate(-1)
           }
@@ -1228,6 +1219,7 @@ console.log("loc",location)
   };
   const triggerAccordionItemsValidations=async()=>{
     await trigger(fields.filter(f => f.isAdditionalField && f.isRequired).map(f => f.name));
+    setTriggerAccordionValidations(false);
   }
   useEffect(()=>{
     if(triggerAccordionValidations){
@@ -1236,7 +1228,7 @@ console.log("loc",location)
   },[triggerAccordionValidations])
   const handleTriggerAccordionItemsValidations = ():void => {
     if(fields.filter(f => f.isAdditionalField && f.isRequired).length > 0 && showAccordion){
-      const valid = fields.filter(f => f.isAdditionalField && f.isRequired).some(f=>form.getValues()[f.name] !== undefined && form.getValues()[f.name] !== null && form.getValues()[f.name] !== '');
+      const valid = fields.filter(f => f.isAdditionalField && f.isRequired).every(f=>form.getValues()[f.name] !== undefined && form.getValues()[f.name] !== null && form.getValues()[f.name] !== '');
       if (!valid) {
         setAccordionOpen('additional-fields');
         setTriggerAccordionValidations(true);

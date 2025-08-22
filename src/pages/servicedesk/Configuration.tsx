@@ -3,24 +3,14 @@ import { useState } from 'react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Card, CardContent} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { ReusableDropdown } from '@/components/ui/reusable-dropdown';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Controller, useForm } from 'react-hook-form';
-import { 
-  Settings, 
-  Save,
-  Trash2,
-  Edit
-} from 'lucide-react';
+import { Settings, Save,Trash2,Edit} from 'lucide-react';
 import { ReusableInput } from '@/components/ui/reusable-input';
 import { BaseField, GenericObject } from '@/Local_DB/types/types';
 import { CONFIGURATION_DB } from '@/Local_DB/Form_JSON_Data/ConfigurationDB';
 import { ReusableMultiSelect } from '@/components/ui/reusable-multi-select';
-import { ReusableCheckbox } from '@/components/ui/reusable-checkbox';
 import ReusableSingleCheckbox from '@/components/ui/reusable-single-checkbox';
 import { ReusableTextarea } from '@/components/ui/reusable-textarea';
 
@@ -33,43 +23,9 @@ const Configuration = () => {
       }, {} as GenericObject),
       mode: 'onChange'
   });
-  console.log('form,',form.getValues())
 
   const { control, register, handleSubmit, trigger, watch, setValue, reset, formState: { errors } } = form;
 
-
-  const [newServiceRequestType, setNewServiceRequestType] = useState({
-    type: '',
-    userGroup: '',
-    vendor: '',
-    slaHours: '',
-    reminderSla: '',
-    escalationTo: '',
-    calculateSlaStatus: '',
-    description: '',
-    typeAdmin: '',
-    levelFive: ''
-  });
-
-  const [newServiceRequestStatus, setNewServiceRequestStatus] = useState({
-    statusType: ''
-  });
-
-  const serviceRequestTypes = [
-    { type: 'eg876', userGroups: '', vendors: '', slaHours: '0/0', reminderSla: '0/0', escalationTo: '' },
-    { type: 'eg256', userGroups: '', vendors: '', slaHours: '0/0', reminderSla: '0/0', escalationTo: 'Cummins' }
-  ];
-
-  const serviceRequestStatuses = [
-    { statusType: 'In Progress', index: 1 },
-    { statusType: 'Hold', index: 2 },
-    { statusType: 'Re-Open', index: 3 },
-    { statusType: 'FirstType', index: 4 },
-    { statusType: 'Test4', index: 5 }
-  ];
-
-
-  
   const getFieldsByNames = (names: string[]) => fields.filter(f => names.includes(f.name!));
   const renderField = (field: BaseField) => {
       const { name, label, fieldType, isRequired, dependsOn, show = true } = field;

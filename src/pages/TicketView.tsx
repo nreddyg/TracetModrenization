@@ -1007,7 +1007,7 @@ const TicketView = () => {
   //handle submit for creating tickets
   const handleSave = async () => {
     const isValidationFailed = fields.filter(f => f.isAdditionalField && f.isRequired).every(f=>form.getValues()[f.name] !== undefined && form.getValues()[f.name] !== null && form.getValues()[f.name] !== '');
-    if (isValidationFailed) {
+    if (!isValidationFailed) {
       return;
     }
     const payload = {
@@ -1046,8 +1046,8 @@ const TicketView = () => {
   };
   //handle Edit Save
   const handleUpdate = async () => {
-    const isValidationFailed = fields.filter(field => field.isRequired && field.isAdditionalField).map(ele => form.getValues()[ele.name]).some(e => !e);
-    if (isValidationFailed) {
+    const isValidationFailed = fields.filter(f => f.isAdditionalField && f.isRequired).every(f=>form.getValues()[f.name] !== undefined && form.getValues()[f.name] !== null && form.getValues()[f.name] !== '');
+    if (!isValidationFailed) {
       return;
     }
     updateServiceRequestDetails()

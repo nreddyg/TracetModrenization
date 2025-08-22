@@ -1,5 +1,4 @@
 import { BaseField } from "../types/types";
-import { modules } from "./CreateTicketDB";
 
 export const CONFIGURATION_DB:BaseField[]=[
     {

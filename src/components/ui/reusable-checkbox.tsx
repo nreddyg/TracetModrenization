@@ -156,7 +156,7 @@ export const ReusableCheckbox = forwardRef<CheckboxMethods, ReusableCheckboxProp
       }
 
       if (!isValid) {
-        errorMessage = requiredMessage;
+        errorMessage = error || requiredMessage;
       }
 
       setValidationError(errorMessage);
@@ -184,12 +184,14 @@ export const ReusableCheckbox = forwardRef<CheckboxMethods, ReusableCheckboxProp
       setIsIndeterminate(indeterminate);
     }, [indeterminate]);
 
-    // Validate on value changes
+    // REMOVED: Auto-validation on mount/value changes
+    // Only validate when error prop is provided or user interacts
     useEffect(() => {
-      if (isRequired) {
+      if (error) {
+        // Trigger validation only when error is explicitly provided from props
         validateField();
       }
-    }, [actualChecked, actualGroupValues, isRequired]);
+    }, [error]);
 
     // Clear validation error when external error changes
     useEffect(() => {
@@ -225,8 +227,10 @@ export const ReusableCheckbox = forwardRef<CheckboxMethods, ReusableCheckboxProp
         setInternalChecked(newChecked);
       }
       
-      // Validate immediately for react-hook-form integration
-      validateField(newChecked);
+      // Validate on user interaction
+      if (isRequired) {
+        validateField(newChecked);
+      }
       
       // Handle both event-based onChange and direct value onChange (for react-hook-form)
       if (onChange) {
@@ -259,8 +263,10 @@ export const ReusableCheckbox = forwardRef<CheckboxMethods, ReusableCheckboxProp
       
       setGroupValues(newGroupValues);
       
-      // Validate immediately for react-hook-form integration
-      validateField(newGroupValues);
+      // Validate on user interaction
+      if (isRequired) {
+        validateField(newGroupValues);
+      }
       
       // Handle both group change and direct onChange
       if (onGroupChange) {
@@ -274,8 +280,10 @@ export const ReusableCheckbox = forwardRef<CheckboxMethods, ReusableCheckboxProp
     };
 
     const handleBlur = (e: React.FocusEvent<HTMLButtonElement>) => {
-      // Trigger validation on blur for react-hook-form
-      validateField();
+      // Trigger validation on blur for user interaction
+      if (isRequired) {
+        validateField();
+      }
       onBlur?.(e);
     };
 
@@ -465,7 +473,7 @@ export const CheckboxGroup = forwardRef<HTMLDivElement, CheckboxGroupProps>(
 
       const valuesToCheck = currentValue || actualValue;
       const isValid = valuesToCheck.length > 0;
-      const errorMessage = isValid ? '' : requiredMessage;
+      const errorMessage = isValid ? '' : error;
 
       setValidationError(errorMessage);
       onValidationChange?.(isValid, errorMessage);
@@ -480,12 +488,14 @@ export const CheckboxGroup = forwardRef<HTMLDivElement, CheckboxGroupProps>(
       }
     }, [value, isControlled]);
 
-    // Validate on value changes
+    // REMOVED: Auto-validation on mount/value changes
+    // Only validate when error prop is provided
     useEffect(() => {
-      if (isRequired) {
+      if (error) {
+        // Trigger validation only when error is explicitly provided from props
         validateField();
       }
-    }, [actualValue, isRequired]);
+    }, [error]);
 
     // Clear validation error when external error changes
     useEffect(() => {
@@ -508,8 +518,10 @@ export const CheckboxGroup = forwardRef<HTMLDivElement, CheckboxGroupProps>(
         setInternalValue(newValues);
       }
       
-      // Validate immediately
-      validateField(newValues);
+      // Validate on user interaction
+      if (isRequired) {
+        validateField(newValues);
+      }
       
       onChange?.(newValues);
     };
@@ -596,14 +608,14 @@ export const CheckboxGroup = forwardRef<HTMLDivElement, CheckboxGroupProps>(
             })}
           </div>
         </fieldset>
-        {hasError && (
+        {error && (
           <p 
             id={`${name}-group-error`}
             className="text-red-500 text-xs mt-1"
             role="alert"
             aria-live="polite"
           >
-            {currentError}
+            {error}
           </p>
         )}
       </div>

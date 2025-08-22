@@ -168,7 +168,8 @@ const TicketView = () => {
   const [childListData, setChildListData] = useState<any>([])
   const [updatedComments,setUpdatedComments]=useState("")
   const [notifyValues,setNotifyValues]=useState({"Notify":[]})
-  const selectedAssetCodesData: GenericObject[] = location.state ? location.state?.data : []
+  const selectedAssetCodesData: GenericObject[] = location.state ? location.state?.data : [];
+  const [triggerAccordionValidations,setTriggerAccordionValidations]=useState(false);
   const msg = useMessage()
   const dispatch = useAppDispatch();
   const storeData = useAppSelector(state => state);
@@ -274,9 +275,7 @@ console.log("loc",location)
       form.reset({ ...originalTicket,...notifyValues })
     }
   }, [originalTicket])
-  useEffect(() => {
-    triggerAccordioItemsValidations();
-  }, [accordionOpen])
+
   //assets lisat get for edit
    const assetListAPICall=async(id:string,compId:number)=>{
    await getSRAssetsList(id,compId).then(res => {
@@ -297,6 +296,7 @@ console.log("loc",location)
         dispatch(setLoading(false));
       });
     }
+
   //fetch single ticket related apis
   async function fetchSingleTicketRelatedAPIs(serviceRequestId: number) {
     dispatch(setLoading(true));
@@ -376,6 +376,7 @@ console.log("loc",location)
   }
   //fetch uploaded files data based on the service request id 
   async function fetchUploadedFilesByServiceRequestId(serviceRequestId: number) {
+    dispatch(setLoading(true))
     await getUploadedFilesByServiceRequestId(serviceRequestId, 111).then(res => {
       if (res.success && res.data) {
         setUploadData(res.data?.FileUploadDetails)
@@ -383,7 +384,9 @@ console.log("loc",location)
         setUploadData([]);
       }
     }).catch(err => {
-    });
+    }).finally(()=>{
+      dispatch(setLoading(false));
+    })
   }
   //store lookups data in json
   const setLookupsDataInJson = (lookupsData: allResponsesType, config: GenericObject): void => {
@@ -535,18 +538,18 @@ console.log("loc",location)
     return columns;
   }
   async function getCommentApi(ServiceRequestId: string, compId: number) {
+    dispatch(setLoading(true))
     try {
       const res = await getCommentsAPI(ServiceRequestId, compId);
       if (res.success && res.data) {
         const commentsArray = res.data[0]?.Comments || [];
         setComments(commentsArray);
       }
-    } catch (err) {
-      console.error('Error fetching subscription by customer:', err);
-    }
+    } catch (err) {}finally{dispatch(setLoading(false))}
   }
   //subscription table api call
   async function fetchSubscriptionByCustomer(CustomerName: string, compId: number, BranchName: string) {
+    dispatch(setLoading(true))
     await getSubscriptionByCustomer(CustomerName, compId, BranchName).then(res => {
       if (res.success && res.data.status === undefined) {
         setDataSource(res.data);
@@ -557,8 +560,9 @@ console.log("loc",location)
       }
     })
       .catch(err => {
-        console.error('Error fetching subscription by customer:', err);
-      });
+      }).finally(()=>{
+        dispatch(setLoading(false));
+      })
   }
   //fetching all lookups data
   async function fetchAllLookUps() {
@@ -635,7 +639,6 @@ console.log("loc",location)
         setHistoryColumns(newCols1)
       }
     }).catch(err => {
-        console.error('Error fetching subscription by customer:', err);
       }).finally(()=>{
         dispatch(setLoading(false));
       })
@@ -747,12 +750,6 @@ console.log("loc",location)
       dispatch(setLoading(false));
     }
   }
-  //trigger additional fields validations which are required 
-  async function triggerAccordioItemsValidations() {
-    if (accordionOpen === 'additional-fields') {
-      await trigger(fields.filter(f => f.isAdditionalField).map(f => f.name));
-    }
-  }
   //upload Functionality and API Integration
   const multipleFileUpload = async (
     filelist: UploadFileInput[]): Promise<void> => {
@@ -772,7 +769,6 @@ console.log("loc",location)
             FileConversionType: file.type,
           };
         } catch (error) {
-          console.error(`Failed to process file ${file.name}:`, error);
           return null;
         }
       })
@@ -1020,8 +1016,6 @@ console.log("loc",location)
   const handleSave = async () => {
     const isValidationFailed = fields.filter(field => field.isRequired && field.isAdditionalField).map(ele => form.getValues()[ele.name]).some(e => !e);
     if (isValidationFailed) {
-      setAccordionOpen('additional-fields');
-      msg.warning('Please Fill The Required Additional Fields!!')
       return;
     }
     const payload = {
@@ -1058,19 +1052,15 @@ console.log("loc",location)
       }
     }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
   };
-
   //handle Edit Save
   const handleUpdate = async () => {
     const isValidationFailed = fields.filter(field => field.isRequired && field.isAdditionalField).map(ele => form.getValues()[ele.name]).some(e => !e);
     if (isValidationFailed) {
-      setAccordionOpen('additional-fields');
-      msg.warning('Please Fill The Required Additional Fields!!')
       return;
     }
     updateServiceRequestDetails()
   }
   async function updateServiceRequestDetails() {
-
     let commentlist=commentForm.watch("comment")  && commentForm.watch("comment")!= "<p><br></p>"?`${updatedComments} Comment:${commentForm.watch("comment")}`:updatedComments
     const updatedData = {
       "ServiceRequestNo": originalTicket.ServiceRequestNo,
@@ -1150,19 +1140,25 @@ console.log("loc",location)
       setUpdatedComments("")
       setHasChanges(false);
       setIsEditing(false);
-      
       fieldsCopy.forEach(field => { field.disabled = true; });
       setFields(fieldsCopy);
   }
-
   // Handle cancel edit - only clear form values, preserve all field configs and options
   const handleEdit = (type: string) => {
   let fieldsCopy = structuredClone(fields);
     if (type === 'cancel') {
       msg.warning('All unsaved changes have been discarded.');
-      form.reset({ ...originalTicket,...notifyValues });
-      setSelectedTicket(originalTicket);
-      resetValue(fieldsCopy)
+      if(isCreateMode){
+        form.reset();
+        setAttachments([]);
+        setUpdatedComments("")
+        setHasChanges(false);
+        setIsEditing(false);
+      }else{
+        form.reset({ ...originalTicket,...notifyValues });
+        setSelectedTicket(originalTicket);
+        resetValue(fieldsCopy);
+      }
      
     } else if (type === 'clear' || type === 'save') {
       form.reset({...notifyValues});
@@ -1197,11 +1193,6 @@ console.log("loc",location)
       setFields(fieldsCopy);
     }
   };
-  //handle discard changes
-  const handleDiscardChanges = () => {
-    setSelectedTicket(originalTicket);
-    setHasChanges(false);
-  };
   const handleTicketSelect = (ticket: Ticket,isLink:boolean) => {
     if (hasChanges) {
       const confirmDiscard = window.confirm('You have unsaved changes. Do you want to discard them?');
@@ -1235,14 +1226,25 @@ console.log("loc",location)
     }
 
   };
-  const handleFieldChange = (field: string, value: string | string[]) => {
-    const newTicket = { ...selectedTicket, [field]: value };
-    setSelectedTicket(newTicket);
-    const hasChangesNow = JSON.stringify(newTicket) !== JSON.stringify(originalTicket);
-    setHasChanges(hasChangesNow);
-  };
-  const handleSaveAll = () => {
-    // Implementation for saving all changes
+  const triggerAccordionItemsValidations=async()=>{
+    await trigger(fields.filter(f => f.isAdditionalField && f.isRequired).map(f => f.name));
+  }
+  useEffect(()=>{
+    if(triggerAccordionValidations){
+      triggerAccordionItemsValidations();
+    }
+  },[triggerAccordionValidations])
+  const handleTriggerAccordionItemsValidations = ():void => {
+    if(fields.filter(f => f.isAdditionalField && f.isRequired).length > 0 && showAccordion){
+      const valid = fields.filter(f => f.isAdditionalField && f.isRequired).some(f=>form.getValues()[f.name] !== undefined && form.getValues()[f.name] !== null && form.getValues()[f.name] !== '');
+      if (!valid) {
+        setAccordionOpen('additional-fields');
+        setTriggerAccordionValidations(true);
+        msg.warning('Please Fill All The Required Additional Fields!!');
+      }
+    } else {
+      setAccordionOpen(undefined);
+    }
   };
   return (
     <div className="h-full   bg-gray-50 flex flex-col ">
@@ -1364,7 +1366,16 @@ console.log("loc",location)
                   <ReusableButton
                     size="small"
                     variant="primary"
-                    onClick={isCreateMode ? form.handleSubmit(handleSave) : form.handleSubmit(handleUpdate)}
+                    onClick={isCreateMode
+                      ? () => {
+                        handleSubmit(handleSave)();
+                        handleTriggerAccordionItemsValidations();
+                      }
+                      : () => {
+                          handleSubmit(handleUpdate)();
+                          handleTriggerAccordionItemsValidations();
+                      }
+                    }
                     icon={<Save className="h-4 w-4" />}
                   >
                     Save

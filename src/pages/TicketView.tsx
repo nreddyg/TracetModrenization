@@ -260,6 +260,7 @@ const TicketView = () => {
   }, [watch('ServiceRequestType')])
   useEffect(() => {
     if (form.watch("FileUploadURLs")) {
+      console.log((form.watch("FileUploadURLs")))
       const process = async () => {
         const result = await multipleFileUpload(form.watch("FileUploadURLs"));
       };
@@ -745,34 +746,76 @@ const TicketView = () => {
     }
   }
   //upload Functionality and API Integration
-  const multipleFileUpload = async (
-    filelist: UploadFileInput[]): Promise<void> => {
-    const files: (UploadedFileOutput | null)[] = await Promise.all(
-      filelist?.map(async (file) => {
-        try {
-          if (!file.url) throw new Error("Missing file URL");
-          const response = await axios.get<Blob>(file.url, { responseType: "blob" });
-          const byteArray = await fileToByteArray(response.data);
-          const byteArrayAsArray = Array.from(byteArray);
-          const jsonArrayString = JSON.stringify(byteArrayAsArray);
-          const fileType = file.name.split(".").pop() || "";
-          return {
-            FileName: file.name,
-            ServiceDocumentFile: jsonArrayString,
-            FileType: fileType,
-            FileConversionType: file.type,
-          };
-        } catch (error) {
-          return null;
-        }
-      })
-    );
+  // const multipleFileUpload = async (
+  //   filelist: UploadFileInput[]): Promise<void> => {
+  //   const files: (UploadedFileOutput | null)[] = await Promise.all(
+  //     filelist?.map(async (file) => {
+  //       try {
+  //         if (!file.url) throw new Error("Missing file URL");
+  //         const response = await axios.get<Blob>(file.url, { responseType: "blob" });
+  //         const byteArray = await fileToByteArray(response.data);
+  //         const byteArrayAsArray = Array.from(byteArray);
+  //         const jsonArrayString = JSON.stringify(byteArrayAsArray);
+  //         const fileType = file.name.split(".").pop() || "";
+  //         return {
+  //           FileName: file.name,
+  //           ServiceDocumentFile: jsonArrayString,
+  //           FileType: fileType,
+  //           FileConversionType: file.type,
+  //         };
+  //       } catch (error) {
+  //         return null;
+  //       }
+  //     })
+  //   );
 
-    const validFiles = files.filter(
-      (file): file is UploadedFileOutput => file !== null
-    );
-    setAttachments(validFiles);
-  };
+  //   const validFiles = files.filter(
+  //     (file): file is UploadedFileOutput => file !== null
+  //   );
+  //   setAttachments(validFiles);
+  // };
+
+  //upload Functionality and API Integration
+const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> => {
+  // Ensure filelist is an array
+  const fileArray = Array.isArray(filelist) ? filelist : [];
+  
+  if (fileArray.length === 0) {
+    console.warn('No files to upload');
+    return;
+  }
+
+  const files: (UploadedFileOutput | null)[] = await Promise.all(
+    fileArray.map(async (file, index) => {
+      try {
+        if (!file.url) throw new Error(`Missing file URL for file at index ${index}`);
+        
+        const response = await axios.get<Blob>(file.url, { responseType: "blob" });
+        const byteArray = await fileToByteArray(response.data);
+        const byteArrayAsArray = Array.from(byteArray);
+        const jsonArrayString = JSON.stringify(byteArrayAsArray);
+        const fileType = file.name.split(".").pop() || "";
+        
+        return {
+          FileName: file.name,
+          ServiceDocumentFile: jsonArrayString,
+          FileType: fileType,
+          FileConversionType: file.type,
+        };
+      } catch (error) {
+        console.error(`Failed to process file ${file.name}:`, error);
+        return null;
+      }
+    })
+  );
+
+  const validFiles = files.filter(
+    (file): file is UploadedFileOutput => file !== null
+  );
+
+  console.log(`Processed ${validFiles.length} out of ${fileArray.length} files`);
+  setAttachments(validFiles);
+};
   //handling uploaded files
   const handleSubmitUploadedFiles = async (id: string,updatedData?:any) => {
     dispatch(setLoading(true));

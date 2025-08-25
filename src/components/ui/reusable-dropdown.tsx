@@ -693,3 +693,5 @@ export const ReusableDropdown: React.FC<SelectProps> = ({
     </div>
   );
 };
+
+// Demo component to show the unconstrained behavior

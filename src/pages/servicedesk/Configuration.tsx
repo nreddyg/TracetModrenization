@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Card, CardContent} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,40 +21,65 @@ const Configuration = () => {
         acc[f.name!] = f.defaultChecked ?? '';
         return acc;
       }, {} as GenericObject),
-      mode: 'onChange'
+      mode: 'onChange',
+      reValidateMode: "onChange" 
   });
 
   const { control, register, handleSubmit, trigger, watch, setValue, reset, formState: { errors } } = form;
 
   const getFieldsByNames = (names: string[]) => fields.filter(f => names.includes(f.name!));
+
+  const timeToMinutes = (timeString: string): number => {
+    if (!timeString || !timeString.includes(':')) return 0;
+    const [hours, minutes] = timeString.split(':').map(Number);
+    if (isNaN(hours) || isNaN(minutes)) return 0;
+    return hours * 60 + minutes;
+  };
+
   const renderField = (field: BaseField) => {
-      const { name, label, fieldType, isRequired, dependsOn, show = true } = field;
+      const { name, label, fieldType, isRequired,validationPattern,patternErrorMessage, dependsOn, show = true } = field;
       if (!show && dependsOn && !watch(dependsOn)) {
         return null;
       }
       const validationRules = {
         required: isRequired ? `${label} is Required` : false,
+        ...(validationPattern && {
+          pattern: {
+            value: new RegExp(validationPattern),
+            message: patternErrorMessage || 'Invalid input format'
+          }
+        }),
+        ...(name === 'ReminderForSLA' && {
+          validate: {
+            lessThanSLA: (value: string) => {
+              if (!value) return true;
+              const slaValue = watch('SLAHoursMinutes');
+              if (!slaValue) return true;
+              const reminderMinutes = timeToMinutes(value);
+              const slaMinutes = timeToMinutes(slaValue);
+              return reminderMinutes < slaMinutes || 'Reminder time must be less than SLA time';
+            }
+          }
+        })
       };
-  
+
       switch (fieldType) {
         case 'text':
           return (
             <Controller
-              key={name}
               name={name}
               control={control}
               rules={validationRules}
-              render={({ field: ctrl }) => (
+              render={({ field: ctrl, fieldState }) => (
                 <ReusableInput
                   {...field}
                   value={ctrl.value}
                   onChange={ctrl.onChange}
-                  error={errors[name]?.message as string}
+                  error={fieldState.error?.message}
                 />
               )}
             />
           );
-      
         case 'dropdown':
           return (
             <Controller
@@ -72,7 +97,6 @@ const Configuration = () => {
               )}
             />
           );
-      
         case 'multiselect':
           return (
             <div>
@@ -93,8 +117,6 @@ const Configuration = () => {
               />
             </div>
           );
-  
-        
         case 'checkbox':
           return (
              <Controller
@@ -104,6 +126,7 @@ const Configuration = () => {
                 <ReusableSingleCheckbox
                   label={label}
                   onChange={ctrl.onChange}
+                  value={ctrl.value}
                   className="text-orange-500"
                   {...field}
                 />

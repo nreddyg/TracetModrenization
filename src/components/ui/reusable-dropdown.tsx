@@ -1,7 +1,15 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { ChevronDown, X, Check } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './tooltip';
-import { cn } from '@/lib/utils';
+
+// Mock Tooltip components for demonstration
+const TooltipProvider = ({ children }) => children;
+const Tooltip = ({ children }) => children;
+const TooltipTrigger = ({ children, asChild }) => asChild ? children : <div>{children}</div>;
+const TooltipContent = ({ children }) => <div className="bg-black text-white p-2 rounded text-sm">{children}</div>;
+
+// Utility function to combine class names
+const cn = (...classes) => classes.filter(Boolean).join(' ');
 
 export interface SelectOption {
   value: string | number;
@@ -27,6 +35,7 @@ export interface SelectProps {
   status?: 'error' | 'warning';
   error?: string;
   maxTagCount?: number;
+  containerClassName?: string;
   filterOption?: boolean | ((input: string, option: SelectOption) => boolean);
   notFoundContent?: React.ReactNode;
   dropdownRender?: (menu: React.ReactNode) => React.ReactNode;
@@ -37,11 +46,14 @@ export interface SelectProps {
   onDropdownVisibleChange?: (open: boolean) => void;
   className?: string;
   dropdownClassName?: string;
-  containerClassName?: string;
+  usePortal?: boolean;
 }
 
 interface PopupPosition {
-  position: 'top' | 'bottom';
+  top: number;
+  left: number;
+  width: number;
+  transform?: string;
 }
 
 export const ReusableDropdown: React.FC<SelectProps> = ({
@@ -57,8 +69,8 @@ export const ReusableDropdown: React.FC<SelectProps> = ({
   showSearch = true,
   multiple = false,
   size = 'middle',
-  containerClassName = '',
   status,
+  containerClassName,
   isRequired = false,
   error,
   maxTagCount,
@@ -72,6 +84,7 @@ export const ReusableDropdown: React.FC<SelectProps> = ({
   onDropdownVisibleChange,
   className = '',
   dropdownClassName = '',
+  usePortal = true,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchValue, setSearchValue] = useState('');
@@ -81,7 +94,9 @@ export const ReusableDropdown: React.FC<SelectProps> = ({
     return multiple ? [] : '';
   });
   const [popupPosition, setPopupPosition] = useState<PopupPosition>({
-    position: 'bottom',
+    top: 0,
+    left: 0,
+    width: 0,
   });
 
   const selectRef = useRef<HTMLDivElement>(null);
@@ -89,58 +104,115 @@ export const ReusableDropdown: React.FC<SelectProps> = ({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const currentValue = value !== undefined ? value : internalValue;
 
-  // Calculate optimal popup position - following MultiSelect approach exactly
-  const updateDropdownPosition = () => {
-    if (!selectRef.current) return;
+  // Smart position calculation - prefers below, but goes above if no space below
+  const calculatePopupPosition = (): PopupPosition => {
+    if (!selectRef.current) {
+      return { top: 0, left: 0, width: 0 };
+    }
 
-    const rect = selectRef.current.getBoundingClientRect();
-    const spaceBelow = window.innerHeight - rect.bottom;
-    const spaceAbove = rect.top;
+    const inputRect = selectRef.current.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+    
+    // Use exact input width and position - no horizontal constraints
+    const dropdownWidth = inputRect.width;
+    const dropdownMaxHeight = 300; // Fixed dropdown height
+    const inputSpacing = 2; // Minimal gap between input and dropdown
 
-    // Same logic as MultiSelect
-    const shouldShowAbove = spaceBelow < 200 && spaceAbove > spaceBelow;
+    // Calculate available space
+    const spaceBelow = viewportHeight - inputRect.bottom;
+    const spaceAbove = inputRect.top;
 
-    setPopupPosition({
-      position: shouldShowAbove ? 'top' : 'bottom',
-    });
+    let top: number;
+    
+    // Smart vertical positioning logic:
+    // 1. If there's enough space below (at least 100px for minimal dropdown), position below
+    // 2. If not enough space below but there's space above, position above
+    // 3. If no space in either direction, still position below (will go off-screen)
+    
+    if (spaceBelow >= 100) {
+      // Enough space below - position below the input
+      top = inputRect.bottom + inputSpacing;
+    } else if (spaceAbove >= 100) {
+      // Not enough space below but space above - position above the input
+      top = inputRect.top - inputSpacing - dropdownMaxHeight;
+    } else {
+      // No adequate space in either direction - default to below (off-screen)
+      top = inputRect.bottom + inputSpacing;
+    }
+
+    const left = inputRect.left; // No horizontal constraints
+    const width = dropdownWidth;
+
+    return { 
+      top, 
+      left, 
+      width 
+    };
   };
 
   // Update position when dropdown opens
   useEffect(() => {
-    if (isOpen) {
-      updateDropdownPosition();
+    if (isOpen && selectRef.current) {
+      // Calculate position immediately
+      setPopupPosition(calculatePopupPosition());
+      
+      // Also recalculate after a tiny delay to handle any layout shifts
+      const timer = setTimeout(() => {
+        setPopupPosition(calculatePopupPosition());
+      }, 1);
+      
+      return () => clearTimeout(timer);
     }
   }, [isOpen]);
 
-  // Handle scroll and resize events - same as MultiSelect
+  // Simplified scroll and resize handlers
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (selectRef.current && !selectRef.current.contains(event.target as Node)) {
-        if (!dropdownRef.current || !dropdownRef.current.contains(event.target as Node)) {
-          setIsOpen(false);
-          setSearchValue('');
-          onDropdownVisibleChange?.(false);
-        }
-      }
+    if (!isOpen) return;
+
+    let rafId: number;
+    
+    const updatePosition = () => {
+      // Use requestAnimationFrame for smooth updates
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        setPopupPosition(calculatePopupPosition());
+      });
     };
 
-    const handleResize = () => {
-      if (isOpen && selectRef.current) {
-        updateDropdownPosition();
-      }
-    };
+    const handleResize = () => updatePosition();
+    const handleScroll = () => updatePosition();
 
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      window.addEventListener('resize', handleResize);
-      window.addEventListener('scroll', handleResize, { passive: true });
-    }
+    // Add listeners
+    window.addEventListener('resize', handleResize);
+    document.addEventListener('scroll', handleScroll, { passive: true, capture: true });
+    document.addEventListener('wheel', handleScroll, { passive: true });
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      if (rafId) cancelAnimationFrame(rafId);
       window.removeEventListener('resize', handleResize);
-      window.removeEventListener('scroll', handleResize);
+      document.removeEventListener('scroll', handleScroll, true);
+      document.removeEventListener('wheel', handleScroll);
     };
+  }, [isOpen]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+      const isOutsideSelect = selectRef.current && !selectRef.current.contains(target);
+      const isOutsideDropdown = dropdownRef.current && !dropdownRef.current.contains(target);
+      
+      if (isOutsideSelect && isOutsideDropdown) {
+        setIsOpen(false);
+        setSearchValue('');
+        onDropdownVisibleChange?.(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen, onDropdownVisibleChange]);
 
   // Close on escape key
@@ -152,6 +224,7 @@ export const ReusableDropdown: React.FC<SelectProps> = ({
         setIsOpen(false);
         setSearchValue('');
         onDropdownVisibleChange?.(false);
+        selectRef.current?.focus();
       }
     };
 
@@ -300,7 +373,7 @@ export const ReusableDropdown: React.FC<SelectProps> = ({
     const selectedOptions = getSelectedOptions();
     const hasClearButton = allowClear && selectedOptions.length > 0 && !disabled;
     const hasDropdownButton = true;
-
+    
     if (hasClearButton && hasDropdownButton) {
       return 'pr-16';
     } else if (hasDropdownButton) {
@@ -348,14 +421,14 @@ export const ReusableDropdown: React.FC<SelectProps> = ({
     return (
       <div className="flex flex-wrap gap-1">
         {displayed.map(option => (
-          <span
-            key={option.value}
+          <span 
+            key={option.value} 
             className="flex items-center gap-1 px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded border max-w-[120px]"
             title={`Selected: ${option.label}`}
           >
             <span className="truncate" title={option.label}>{option.label}</span>
-            <button
-              onClick={(e) => handleRemoveTag(option.value, e)}
+            <button 
+              onClick={(e) => handleRemoveTag(option.value, e)} 
               className="hover:bg-blue-200 rounded p-0.5 flex-shrink-0"
               title={`Remove ${option.label}`}
             >
@@ -364,7 +437,7 @@ export const ReusableDropdown: React.FC<SelectProps> = ({
           </span>
         ))}
         {remaining > 0 && (
-          <span
+          <span 
             className="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded border"
             title={`${remaining} more option(s) selected`}
           >
@@ -379,12 +452,12 @@ export const ReusableDropdown: React.FC<SelectProps> = ({
     if (showSearch && searchValue) {
       return searchValue;
     }
-
+    
     if (!multiple) {
       const selected = getSelectedOptions();
       return selected[0]?.label || '';
     }
-
+    
     return '';
   };
 
@@ -434,8 +507,8 @@ export const ReusableDropdown: React.FC<SelectProps> = ({
             {groupedOptions.ungrouped.map(renderOption)}
             {Object.entries(groupedOptions.grouped).map(([groupName, items]) => (
               <div key={groupName}>
-                <div
-                  className="px-3 py-1 text-xs font-medium text-gray-500 bg-gray-50 border-t truncate"
+                <div 
+                  className="px-3 py-1 text-xs font-medium text-gray-500 bg-gray-50 border-t truncate" 
                   title={groupName}
                 >
                   {groupName}
@@ -452,25 +525,31 @@ export const ReusableDropdown: React.FC<SelectProps> = ({
   };
 
   const renderPopup = () => {
+    // Fixed height without viewport constraints
+    const maxHeight = 300;
+
     return (
       <div
         ref={dropdownRef}
         className={cn(
-          "absolute z-50 bg-white border border-gray-300 rounded-md shadow-lg overflow-hidden",
-          popupPosition.position === 'top' ? 'bottom-full mb-1' : 'top-full mt-1',
+          "bg-white border border-gray-300 rounded-md shadow-lg z-[9999]",
           dropdownClassName,
           disabled && "pointer-events-none opacity-50"
         )}
         style={{
-          position: 'absolute',
+          position: 'fixed',
+          top: popupPosition.top,
+          left: popupPosition.left,
+          width: popupPosition.width,
+          maxHeight: `${maxHeight}px`,
           zIndex: 9999,
-          width: '100%',
-          maxHeight: '300px'
         }}
       >
         <div 
           className="overflow-y-auto overflow-x-hidden"
-          style={{ maxHeight: '300px' }}
+          style={{ 
+            maxHeight: `${maxHeight}px`,
+          }}
         >
           {renderDropdownContent()}
         </div>
@@ -488,18 +567,19 @@ export const ReusableDropdown: React.FC<SelectProps> = ({
             "flex items-center rounded border transition-colors relative overflow-hidden",
             "min-h-[40px]",
             disabled ? "bg-gray-100 cursor-not-allowed" : "bg-white hover:border-blue-400",
-            getStatusClasses(), className
+            getStatusClasses(),
+            className
           )}
-          style={{
-            backgroundColor: disabled ? '#f3f4f6' : 'hsl(240deg 73.33% 97.06%)',
-            borderColor: 'hsl(214.29deg 31.82% 91.37%)'
+          style={{ 
+            backgroundColor: disabled ? '#f3f4f6' : 'hsl(240deg 73.33% 97.06%)', 
+            borderColor: 'hsl(214.29deg 31.82% 91.37%)' 
           }}
           title={
-            !multiple && getSelectedOptions().length > 0
+            !multiple && getSelectedOptions().length > 0 
               ? `Selected: ${getSelectedOptions()[0]?.label}`
               : multiple && getSelectedOptions().length > 0
-                ? `${getSelectedOptions().length} option(s) selected`
-                : undefined
+              ? `${getSelectedOptions().length} option(s) selected`
+              : undefined
           }
         >
           <div className={cn("flex items-center w-full min-w-0", containerClassName)}>
@@ -508,10 +588,10 @@ export const ReusableDropdown: React.FC<SelectProps> = ({
                 {renderSelectedTags()}
               </div>
             )}
-
+            
             <div className={cn("flex-1 min-w-0 relative", getInputRightPadding())}>
               {!multiple && !showSearch && getSelectedOptions().length > 0 ? (
-                <div
+                <div 
                   className={cn(
                     "px-3 py-2 text-sm truncate cursor-pointer",
                     disabled && "cursor-not-allowed"
@@ -539,11 +619,11 @@ export const ReusableDropdown: React.FC<SelectProps> = ({
                     !showSearch && "cursor-pointer"
                   )}
                   title={
-                    !showSearch && !multiple && getSelectedOptions()[0]?.label
-                      ? getSelectedOptions()[0].label
+                    !showSearch && !multiple && getSelectedOptions()[0]?.label 
+                      ? getSelectedOptions()[0].label 
                       : showSearch && !multiple && getSelectedOptions()[0]?.label && !searchValue
-                        ? getSelectedOptions()[0].label
-                        : undefined
+                      ? getSelectedOptions()[0].label
+                      : undefined
                   }
                 />
               )}
@@ -576,7 +656,33 @@ export const ReusableDropdown: React.FC<SelectProps> = ({
           </div>
         </div>
 
-        {isOpen && !disabled && renderPopup()}
+        {isOpen && !disabled && (
+          <>
+            {usePortal ? (
+              createPortal(renderPopup(), document.body)
+            ) : (
+              <div 
+                className="absolute z-[9999] top-full left-0 mt-1" 
+                style={{ width: '100%' }}
+              >
+                <div
+                  className={cn(
+                    "bg-white border border-gray-300 rounded-md shadow-lg",
+                    dropdownClassName
+                  )}
+                  style={{
+                    minHeight: '50px',
+                    maxHeight: '300px',
+                    overflowY: 'auto',
+                    width: '100%'
+                  }}
+                >
+                  {renderDropdownContent()}
+                </div>
+              </div>
+            )}
+          </>
+        )}
       </div>
 
       {(status === "error" || error) && (
@@ -588,4 +694,156 @@ export const ReusableDropdown: React.FC<SelectProps> = ({
   );
 };
 
-ReusableDropdown.displayName = 'ReusableDropdown';
+// Demo component to show the unconstrained behavior
+const DropdownDemo = () => {
+  const [value1, setValue1] = useState('');
+  const [value2, setValue2] = useState([]);
+
+  const options = [
+    { label: 'Option 1', value: '1' },
+    { label: 'Option 2', value: '2' },
+    { label: 'Very Long Option Name That Might Overflow', value: '3' },
+    { label: 'Option 4', value: '4' },
+    { label: 'Option 5', value: '5' },
+    { label: 'Option 6', value: '6' },
+    { label: 'Option 7', value: '7' },
+    { label: 'Option 8', value: '8' },
+    { label: 'Option 9', value: '9' },
+    { label: 'Option 10', value: '10' },
+  ];
+
+  return (
+    <div className="p-8 space-y-8 bg-gray-50 min-h-screen">
+      <div className="max-w-4xl mx-auto space-y-6">
+        <h1 className="text-2xl font-bold text-center mb-8">Smart Positioning Dropdown Demo</h1>
+        <p className="text-center text-gray-600 mb-8">
+          The dropdown intelligently positions above/below based on available space, but can still go off-screen when needed.
+        </p>
+        
+        {/* Dropdowns positioned at different screen locations */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-white p-6 rounded-lg shadow">
+            <h3 className="font-semibold mb-4">Left Side</h3>
+            <ReusableDropdown
+              label="Select option"
+              placeholder="Choose..."
+              options={options}
+              showSearch
+              allowClear
+            />
+          </div>
+
+          <div className="bg-white p-6 rounded-lg shadow">
+            <h3 className="font-semibold mb-4">Center</h3>
+            <ReusableDropdown
+              label="Multiple Select"
+              placeholder="Choose multiple..."
+              options={options}
+              multiple
+              showSearch
+              allowClear
+              maxTagCount={2}
+            />
+          </div>
+
+          <div className="bg-white p-6 rounded-lg shadow">
+            <h3 className="font-semibold mb-4">Right Side</h3>
+            <ReusableDropdown
+              label="Right dropdown"
+              placeholder="This can go off-screen..."
+              options={options}
+              showSearch
+              allowClear
+            />
+          </div>
+        </div>
+
+        {/* Bottom positioned dropdowns */}
+        <div className="bg-white p-6 rounded-lg shadow">
+          <h2 className="text-lg font-semibold mb-4">Smart Positioning Test</h2>
+          <p className="mb-4 text-gray-600">
+            These dropdowns will appear above when there's no space below, but below when there is space.
+          </p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <ReusableDropdown
+              label="Has Space Below"
+              placeholder="Should appear below"
+              options={options}
+              showSearch
+              allowClear
+            />
+            <ReusableDropdown
+              label="Also Has Space"
+              placeholder="Also below"
+              options={options}
+              multiple
+              showSearch
+              allowClear
+            />
+          </div>
+        </div>
+
+        {/* Near bottom test */}
+        <div className="bg-white p-6 rounded-lg shadow">
+          <h3 className="font-semibold mb-4">Near Bottom Test</h3>
+          <p className="mb-4 text-gray-600">
+            Scroll to the very bottom to see dropdowns that will appear above the input field.
+          </p>
+          
+          {/* Add significant spacing to push content near viewport bottom */}
+          <div style={{ height: '70vh' }} className="flex flex-col justify-end space-y-4">
+            <ReusableDropdown
+              label="Should Appear Above (if at bottom)"
+              placeholder="Check if this opens upward"
+              options={options}
+              showSearch
+              allowClear
+            />
+            
+            <ReusableDropdown
+              label="Multiple Select Near Bottom"
+              placeholder="This should also open upward"
+              options={options}
+              multiple
+              showSearch
+              allowClear
+              maxTagCount={2}
+            />
+          </div>
+        </div>
+
+        {/* Final bottom test */}
+        <div className="bg-white p-6 rounded-lg shadow">
+          <h3 className="font-semibold mb-4">Final Bottom Test</h3>
+          <p className="mb-4 text-gray-600">
+            These are positioned at the very bottom - they should definitely open upward.
+          </p>
+          
+          <div className="space-y-4">
+            <ReusableDropdown
+              label="Definitely Opens Above"
+              placeholder="Should open upward"
+              options={options}
+              showSearch
+              allowClear
+            />
+            
+            <ReusableDropdown
+              label="Last Dropdown"
+              placeholder="Final test - opens above"
+              options={options}
+              showSearch
+              allowClear
+            />
+          </div>
+          
+          {/* Small bottom margin to ensure we're really at the bottom */}
+          <div className="h-4"></div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default DropdownDemo;

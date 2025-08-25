@@ -40,7 +40,13 @@ export const URL_GET_SERVICE_REQUEST_STATUS="/api/ServiceDeskAPI/GetServiceReque
 export const URL_GET_NOTIFY_TYPE_LOOKUPS="/api/ServiceDeskAPI/GetNotifyTypeListLookups"
 export const URL_POST_SERVICE_REQUEST_CONFIGURATION="/api/ServiceDeskAPI/SaveServiceRequestconfig"
 export const URL_POST_SERVICE_REQUEST_TYPE="/api/ServiceDeskAPI/AddServiceRequestType"
+export const URL_POST_UPDATE_SR_TYPE="/api/ServiceDeskAPI/UpdateServiceRequestType"
 export const URL_POST_DELETE_SR_TYPE_BY_ID="/api/ServiceDeskAPI/DeleteServiceRequestTypeById"
+export const URL_POST_ADD_SR_STATUS="/api/ServiceDeskAPI/AddServiceRequestStatus"
+export const URL_POST_UPDATE_SR_STATUS="/api/ServiceDeskAPI/UpdateServiceRequestStatus"
+export const URL_POST_DELETE_SR_STATUS="/api/ServiceDeskAPI/DeleteServiceRequestStatusById"
+
+
 
 //Subscription screen 
 export const URL_GET_SUBSCRIPTION_LIST='/api/ServiceDeskAPI/GetSubscription';

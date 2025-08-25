@@ -873,6 +873,7 @@ const TicketView = () => {
                 value={ctrl.value}
                 onChange={ctrl.onChange}
                 error={errors[name]?.message as string}
+                  dropdownClassName={true ? 'z-[10001]' : ''}
               />
             )}
           />

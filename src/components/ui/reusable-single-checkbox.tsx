@@ -11,12 +11,13 @@ type ReusableCheckboxProps = {
   className?: string;
   labelClassName?: string;
   disabled?: boolean;
+  value?: boolean;
 };
 
 const ReusableSingleCheckbox: React.FC<ReusableCheckboxProps> = ({
   id,
   label,
-  checked,
+  value:checked,
   defaultChecked,
   onChange,
   className,

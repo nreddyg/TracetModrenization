@@ -5,7 +5,7 @@ export const CONFIGURATION_DB:BaseField[]=[
         name:'CustomerFieldinMyRequest',
         fieldType:'checkbox',
         label:'Display Customer Field in Create Service Request',
-        defaultChecked:true,
+        defaultChecked:false,
     },
     {
         name:'AssetFieldinCreateEditServiceRequest',
@@ -85,14 +85,18 @@ export const CONFIGURATION_DB:BaseField[]=[
         label:'SLA Hours/Minutes',
         fieldType:'text',
         isRequired:false,
-        placeholder:'HH:MM'
+        placeholder:'HH:MM',
+        validationPattern: "^\\d+:[0-5]\\d$",
+        patternErrorMessage:'Please enter time in HH:MM format (e.g., 12:30)'
     },
     {
         name:'ReminderForSLA',
         label:'Reminder For SLA',
         fieldType:'text',
         isRequired:false,
-        placeholder:'HH:MM'
+        placeholder:'HH:MM',
+        validationPattern: "^\\d+:[0-5]\\d$",
+        patternErrorMessage:'Please enter time in HH:MM format (e.g., 12:30)'
     },
     {
         label: "Escalation To",

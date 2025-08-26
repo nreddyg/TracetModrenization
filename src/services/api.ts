@@ -22,7 +22,7 @@ interface CustomAxiosConfig extends InternalAxiosRequestConfig {
 api.interceptors.request.use(
   (config: CustomAxiosConfig): InternalAxiosRequestConfig => {
     if (!config.noAuth) {
-      const token = localStorage.getItem('Token');
+      const token = JSON.parse(localStorage.getItem('Token'));
       if (token) {
         // Axios v1+ headers is an instance of AxiosHeaders; use set method
         if (config.headers && typeof config.headers.set === 'function') {

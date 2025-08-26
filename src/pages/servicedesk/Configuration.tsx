@@ -162,7 +162,8 @@ let [NotifyLookup,SRStatusLookup,getVendors,SRTAssignToLookup]=await Promise.all
           { label: "UserName", value: "UserId", data: SRTAssignToLookup.status === 'fulfilled' && SRTAssignToLookup.value.success && SRTAssignToLookup.value.data.ServiceRequestAssignToUsersLookup ? SRTAssignToLookup.value.data.ServiceRequestAssignToUsersLookup : [], groupLabel: "Users" },]
         },
         UserGroups:{ data: SRTAssignToLookup.status === 'fulfilled' && SRTAssignToLookup.value.success && SRTAssignToLookup.value.data.ServiceRequestAssignToUserGroupLookup ? SRTAssignToLookup.value.data.ServiceRequestAssignToUserGroupLookup : [], label: 'UserGroupName', value: 'UserGroupId' },
-        EscalationTo:{ data: SRTAssignToLookup.status === 'fulfilled' && SRTAssignToLookup.value.success && SRTAssignToLookup.value.data.ServiceRequestAssignToUsersLookup ? SRTAssignToLookup.value.data.ServiceRequestAssignToUsersLookup : [], label: 'UserName', value: 'UserId' }
+        EscalationTo:{ data: SRTAssignToLookup.status === 'fulfilled' && SRTAssignToLookup.value.success && SRTAssignToLookup.value.data.ServiceRequestAssignToUsersLookup ? SRTAssignToLookup.value.data.ServiceRequestAssignToUsersLookup : [], label: 'UserName', value: 'UserId' },
+        StatusToCalculate: { data: SRStatusLookup.status === 'fulfilled' && SRStatusLookup.value.success && SRStatusLookup.value.data.ServiceRequestStatusLookup ? SRStatusLookup.value.data.ServiceRequestStatusLookup.filter((ele:any)=>ele.ServiceRequestStatusId!=704) : [], label: 'ServiceRequestStatusName', value: 'ServiceRequestStatusId' },
   } 
 
   setLookupsDataInJson(allResponses)
@@ -231,11 +232,11 @@ getSRConfigList(compId,branch).then((res)=>{
             message: patternErrorMessage || 'Invalid input format'
           }
         }),
-        ...(name === 'ReminderForSLA' && {
+        ...(name === 'ReminderForSLAHoursMinutes' && {
           validate: {
             lessThanSLA: (value: string) => {
               if (!value) return true;
-              const slaValue = watch('ReminderForSLAHoursMinutes');
+              const slaValue = watch('SLAHoursMinutes');
               if (!slaValue) return true;
               const reminderMinutes = timeToMinutes(value);
               const slaMinutes = timeToMinutes(slaValue);

@@ -1,3 +1,7 @@
+// login page urls
+
+export const GET_TOKEN='/token';
+
 //service desk urls
 // create ticket screen
 export const URL_GET_SRCONFIG_LIST = "/api/ServiceDeskAPI/GetServiceRequestConfiguration";

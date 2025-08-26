@@ -8,69 +8,110 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { User, Lock, Building2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { LOGIN_PAGE_DB } from '@/Local_DB/Form_JSON_Data/LoginDB';
+import { Controller, useForm } from 'react-hook-form';
+import { BaseField, GenericObject } from '@/Local_DB/types/types';
+import { Form, } from '@/components/ui/form';
+import { useMessage } from '@/components/ui/reusable-message';
+import { useDispatch } from 'react-redux';
+import { setLoading } from '@/store/slices/projectsSlice';
+import { getToken } from '@/services/loginServices';
+
 
 const Login = () => {
-  const [credentials, setCredentials] = useState({ userId: '', password: '' });
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const [loginDetails, setLoginDetails] = useState(LOGIN_PAGE_DB);
+  const message=useMessage();
+  const dispatch=useDispatch();
+
+  const form = useForm<GenericObject>({
+    defaultValues: loginDetails.reduce((acc, f) => {
+      acc[f.name!] = f.defaultValue ?? ''
+      return acc;
+    }, {} as GenericObject),
+
+  });
+  const { control, register, handleSubmit, trigger, watch, setValue, getValues, reset, formState: { errors } } = form;
+
+  const icons = [
+    <Building2 className="h-4 w-4" />,
+    <User className="h-4 w-4" />,
+    // <Lock className="h-4 w-4" />
+  ]
+
+
+  const renderField = (field: BaseField, icon) => {
+    const { name, label, fieldType, isRequired, show = true } = field;
+    if (!name || !show) return null;
+    const validationRules = {
+      required: isRequired ? `${label} is required` : false,
+    };
+    switch (fieldType) {
+      case 'text':
+      case 'password':
+        return (
+          <Controller
+            key={name}
+            name={name}
+            control={control}
+            rules={validationRules}
+            render={({ field: ctrl }) => (
+              <ReusableInput
+                {...field}
+                value={ctrl.value}
+                onChange={ctrl.onChange}
+                error={errors[name]?.message as string}
+                suffixIcon={icon}
+              />
+            )}
+          />
+        );
+    };
+  }
+  // Helper function to get fields by names (similar to TicketView)
+  const getFieldsByNames = (names: string[]) => loginDetails.filter(f => names.includes(f.name!));
 
   // Dummy credentials for testing
-  const DUMMY_CREDENTIALS = [
-    { userId: 'admin', password: 'admin123', role: 'Administrator' },
-    { userId: 'user1', password: 'user123', role: 'User' },
-    { userId: 'manager', password: 'manager123', role: 'Manager' }
-  ];
+  
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  const handleLogin = async (data: GenericObject): Promise<void> => {
+     dispatch(setLoading(true));
+     try {
+    const payload = {
+      "UserName": watch('Username'),
+      "Password": watch('password'),
+      "CompanyCode": watch('CompanyCode'),
+      "grant_type": "password",
+    };
 
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // Check dummy credentials
-    const validUser = DUMMY_CREDENTIALS.find(
-      cred => cred.userId === credentials.userId && cred.password === credentials.password
-    );
-
-    if (validUser) {
-      toast({
-        title: "Login Successful",
-        description: `Welcome back, ${validUser.role}!`,
-      });
-      
-      // Store user info in localStorage (in real app, use proper auth)
-      localStorage.setItem('user', JSON.stringify(validUser));
-      navigate('/');
-    } else {
-      toast({
-        title: "Login Failed",
-        description: "Invalid User ID or Password",
-        variant: "destructive",
-      });
-    }
-    
-    setLoading(false);
-  };
-
-  const handleSSO = () => {
-    toast({
-      title: "SSO Login",
-      description: "SSO integration would be implemented here",
-    });
-  };
+    getToken(payload).then((res)=>{
+      if(res.success){
+        if(res.data.access_token)
+        localStorage.setItem('Token',JSON.stringify(res.data.access_token));
+        navigate('/dashboard')
+      }
+      else{
+        message.error('Please Enter Valid Credentials')
+      }
+    })
+   }
+   catch(err){
+            message.error('Please Enter Valid Credentials')
+   }finally{
+    dispatch(setLoading(false))
+   }
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary/5 flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">
         {/* Logo and Title */}
         <div className="text-center space-y-4">
-          <div className="flex justify-center">
+          {/* <div className="flex justify-center">
             <div className="bg-primary/10 p-4 rounded-2xl">
               <Building2 className="h-12 w-12 text-primary" />
             </div>
-          </div>
+          </div> */}
           <div>
             <h1 className="text-3xl font-bold text-foreground">Tracet</h1>
             <p className="text-muted-foreground mt-1">Asset Management System</p>
@@ -86,7 +127,7 @@ const Login = () => {
             </p>
           </CardHeader>
           <CardContent className="space-y-6">
-            <form onSubmit={handleLogin} className="space-y-4">
+            {/* <form onSubmit={handleLogin} className="space-y-4">
               <ReusableInput
                 label="User ID"
                 type="text"
@@ -115,9 +156,27 @@ const Login = () => {
               >
                 Sign In
               </ReusableButton>
-            </form>
+            </form> */}
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(handleLogin)} className="space-y-6">
+                {/* Customer Information */}
+                <div>
+                  {getFieldsByNames(['CompanyCode', 'Username', 'password']).map((field, ind) => (
+                    <div key={field.name}>
+                      {renderField(field,icons[ind])}
+                    </div>
+                  ))}
+                </div>
+                <ReusableButton
+                  htmlType="submit"
+                  className="w-full"
+                >
+                  Login
+                </ReusableButton>
+              </form>
+            </Form>
 
-            <div className="relative">
+            {/* <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <Separator />
               </div>
@@ -135,12 +194,12 @@ const Login = () => {
             >
               <Building2 className="h-4 w-4 mr-2" />
               SSO Login
-            </ReusableButton>
+            </ReusableButton> */}
           </CardContent>
         </Card>
 
         {/* Demo Credentials */}
-        <Card className="bg-muted/30">
+        {/* <Card className="bg-muted/30">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium">Demo Credentials</CardTitle>
           </CardHeader>
@@ -154,7 +213,7 @@ const Login = () => {
               </div>
             ))}
           </CardContent>
-        </Card>
+        </Card> */}
 
         <p className="text-center text-xs text-muted-foreground">
           © 2024 Tracet. All rights reserved.

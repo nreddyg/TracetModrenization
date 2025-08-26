@@ -702,7 +702,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Search, Edit, Trash2, Plus, Save, X, Badge } from 'lucide-react';
+import { Search, Edit, Trash2, Plus, Save, X } from 'lucide-react';
 import { Form, } from '@/components/ui/form';
 import { useForm, Controller } from 'react-hook-form';
 import { ColumnDef } from '@tanstack/react-table';
@@ -718,6 +718,8 @@ import { useNavigate } from 'react-router-dom';
 import { SUBSCRIPTION_DB } from '@/Local_DB/Form_JSON_Data/SubscriptionDB';
 import { getProductName, getSubscriptionTableData } from '@/services/subscriptionServices';
 import ExcelJS from "exceljs";
+import { Badge } from '@/components/ui/badge';
+
 
 
 

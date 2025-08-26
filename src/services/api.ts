@@ -26,7 +26,7 @@ api.interceptors.request.use(
       // if (token) {
         // Axios v1+ headers is an instance of AxiosHeaders; use set method
         if (config.headers && typeof config.headers.set === 'function') {
-          config.headers.set('Authorization', `Bearer ivfMGURu0ZUMBzQdXk1eoN6dSP5U_BcUO7Zuk7jDGylMyWk8X7glFkkHb5_c8kMPhRXvLcnOZSQ4vNiwIZdNUpGeZ6xBNoxmwYrURzCXJJKXUnAa2d0UsZuMgcQUP9Y9YQ8K-bmzlZ4JBNwRFxTfDmaeqfeV6ap44ZDP5ssZpnoAlka1jTcaFhcXaHOS8oJCIsEnOn_NVIgb2duwk5xYSrJKj4oJWyHizQ9RDYhLriEPvcot6PoPw7Q9HyoKxxQuE0oTcCQ-dkQuMm4aFCOx08OZvCkxfG_HJqBu47Ren2e-RaEUmO5nsf8Ral5OqT9H`);
+          config.headers.set('Authorization', `Bearer Fz3IrXiT4Co1wXL-xaPBykm0exZFUVsRxwkuKpV1C4w4rxNDqUXkmYYfqJc8WECoBSuuAsdCOnyU9orKXmlNL1nVfOLYhnxpND-HDAGLuvU7lqvC1sPw_g_JU3Ma7RcPj9KyJ1doQbupaKvI1DevTzlk_pz6eMyfZocwb_D1aYNbZHPmC5qIw1GYNGTtPwEXE6Li5c9gRBHQDaYqZvxidc0SThpiLYkFCsLMxP1eKfAENis8L1vrPWFcmSdSmFeCJrtAIPSuzHoNIZ86zJGaupcGdMQHUHUvBORjiUSLMGPDKoqJb8d99cVXuyRg6MSM`);
         // }
       }
     }

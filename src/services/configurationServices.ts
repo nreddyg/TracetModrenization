@@ -12,7 +12,15 @@ interface APIResponse<T> {
 // interface genericResponse {
 //   [key: string]: any;
 // };
-
+//Service Request Assign To Lookup
+export const GetServiceRequestAssignToLookups = async (CompId: number, branchName: string): Promise<APIResponse<any>> => {
+    try {
+        const response = await api.get(URL_GET_SR_ASSIGN_TO_LOOKUPS, { params: { CompId: CompId, branchname: branchName } })
+        return {success: true,data: response.data,}
+    } catch (err: any) {
+        return { success: false,message: err.response?.data?.message || err.message,status: err.response?.status};
+    }
+}
 //SRConfiguration list
 export const getSRConfigList = async (CompId: number, branchName: string): Promise<APIResponse<any>> => {
     try {

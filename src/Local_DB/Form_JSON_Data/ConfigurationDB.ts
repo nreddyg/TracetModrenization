@@ -49,7 +49,7 @@ export const CONFIGURATION_DB:BaseField[]=[
         name: "DefaultSLAStatusDataList",
         placeholder: "Select Service Request Status",
         isRequired: false,
-        options: [{ label: 'Open', value: 'open' }, { label: 'In Progress', value: 'in_progress' }, { label: 'Closed', value: 'closed' }],
+        options: [],
         defaultValue:[],
         selectAll:true,
         show:false,
@@ -65,7 +65,7 @@ export const CONFIGURATION_DB:BaseField[]=[
     {
         label: "User Group",
         fieldType: "multiselect",
-        name: "UserGroup",
+        name: "UserGroups",
         placeholder: "Select User Group",
         isRequired: false,
         options: [],
@@ -74,7 +74,7 @@ export const CONFIGURATION_DB:BaseField[]=[
     {
         label: "Vendor",
         fieldType: "multiselect",
-        name: "Vendor",
+        name: "Vendors",
         placeholder: "Select Vendor",
         isRequired: false,
         options: [],
@@ -90,7 +90,7 @@ export const CONFIGURATION_DB:BaseField[]=[
         patternErrorMessage:'Please enter time in HH:MM format (e.g., 12:30)'
     },
     {
-        name:'ReminderForSLA',
+        name:'ReminderForSLAHoursMinutes',
         label:'Reminder For SLA',
         fieldType:'text',
         isRequired:false,
@@ -110,7 +110,7 @@ export const CONFIGURATION_DB:BaseField[]=[
     {
         label: "Set Status To Calculate SLA",
         fieldType: "dropdown",
-        name: "SetStatusToCalculateSLA",
+        name: "StatusToCalculate",
         placeholder: "Select Status",
         isRequired: false,
         options: [],

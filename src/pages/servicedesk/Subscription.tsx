@@ -702,7 +702,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Search, Edit, Trash2, Plus, Save, X } from 'lucide-react';
+import { Search, Edit, Trash2, Plus, Save, X, Badge } from 'lucide-react';
 import { Form, } from '@/components/ui/form';
 import { useForm, Controller } from 'react-hook-form';
 import { ColumnDef } from '@tanstack/react-table';
@@ -857,10 +857,11 @@ const SubscriptionManagement = () => {
     );
   }, [dataSource, searchTerm]);
 
-  const getStatusColor = (status: boolean) => {
+  const getStatusColor = (status:string) => {
+    console.log(status,"status")
     switch (status) {
-      case true: return 'bg-green-100 text-green-800 border-green-300';
-      case false: return 'bg-red-100 text-red-800 border-red-300';
+      case 'Active': return 'bg-green-100 text-green-800 border-green-300';
+      case 'Expired': return 'bg-red-100 text-red-800 border-red-300';
       default: return 'bg-gray-100 text-gray-800 border-gray-300';
     }
   };
@@ -902,13 +903,21 @@ const SubscriptionManagement = () => {
         <span className="text-gray-700 text-sm">{row.getValue('SubscriptionType')}</span>
       ),
     },
-    {
-      accessorKey: 'SubscriptionStatus',
-      header: 'Subscription Status',
-      cell: ({ row }) => (
-        <span className="text-gray-700 text-sm">{row.getValue('SubscriptionStatus')}</span>
-      ),
-    },
+    // {
+    //   accessorKey: 'SubscriptionStatus',
+    //   header: 'Subscription Status',
+    //   cell: ({ row }) => (
+    //     <span className="text-gray-700 text-sm">{row.getValue('SubscriptionStatus')}</span>
+    //   ),
+    // },
+     {
+        accessorKey: "SubscriptionStatus", header: "Subscription Status",
+        cell: ({ row }) => (
+          <Badge className={`${getStatusColor(row.getValue('SubscriptionStatus'))} border font-medium text-xs px-2 py-0.5 transition-colors`}>
+            {row.getValue('SubscriptionStatus')}
+          </Badge>
+        ),
+      },
   ];
 
   // Define table actions
@@ -1026,6 +1035,7 @@ else{
           <ReusableButton
             size="small"
             variant="primary"
+              onClick={()=>{navigate('/service-desk/create-ticket')}}
           >
             New Service Request
           </ReusableButton>

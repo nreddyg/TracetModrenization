@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Card, CardContent} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,7 +13,36 @@ import { CONFIGURATION_DB } from '@/Local_DB/Form_JSON_Data/ConfigurationDB';
 import { ReusableMultiSelect } from '@/components/ui/reusable-multi-select';
 import ReusableSingleCheckbox from '@/components/ui/reusable-single-checkbox';
 import { ReusableTextarea } from '@/components/ui/reusable-textarea';
+import { GetNotifyTypeLookup, getSRConfigList, getStatusLookups } from '@/services/configurationServices';
+interface OptType {
+  data:  {[key: string]: any}[];
+  label: string;
+  value: string;
+  defaultValues?: string | string[];
+}
+    //  let newList = []
+    //     let Payload = {
+    //       "IsWorkorderAllowed": getMethod("AllowWorkOrderCreation", srConfigJson),
+    //       "IsSerReqAllowedForMultipleAsset": "true",
+    //       "DisplayMyRequestAssignedTo": "true",
+    //       "DisplayMyWorkBenchAssignedTo": "true",
+    //       "DisplayMyRequestCustomer": getMethod("CustomerFieldinMyRequest", srConfigJson),
+    //       "DisplayMyWorkbenchCustomer": getMethod("CustomerFieldinMyRequest", srConfigJson),
+    //       "DisplayMyRequestSLATimer": "true",
+    //       "DisplayMyWorkbenchSLATimer": "true",
+    //       "DisplayAsset": getMethod("AssetFieldinCreateEditServiceRequest", srConfigJson),
+    //       "IsDefaultNotifyUsers": getMethod("IsDefaultNotifyUsers", srConfigJson),
+    //       "NotifyUserTypes": getMethod("NotifyUserTypes", srConfigJson).join(),
+    //       "PauseSLAByDefault": getMethod("PauseSLAcalculation", srConfigJson),
+    //       "DefaultSLAStatusDataList": getMethod("DefaultSLAStatusDataList", srConfigJson).join(),
+    //     }
+    //     newList.push(Payload);
+    //     var NewCategoryObj = { "ServiceRequestConfigDetails": newList };
+interface allResponsesType {
+  NotifyUserTypes: OptType
+  DefaultSLAStatusDataList: OptType
 
+}
 const Configuration = () => {
   const [fields,setFields] = useState<BaseField[]>(CONFIGURATION_DB);
   const form = useForm<GenericObject>({
@@ -21,40 +50,169 @@ const Configuration = () => {
         acc[f.name!] = f.defaultChecked ?? '';
         return acc;
       }, {} as GenericObject),
-      mode: 'onChange'
+      mode: 'onChange',
+      reValidateMode: "onChange" 
   });
+ const { control, register, handleSubmit, trigger, watch, setValue, reset, formState: { errors } } = form;
 
-  const { control, register, handleSubmit, trigger, watch, setValue, reset, formState: { errors } } = form;
+ useEffect(()=>{
+ const init = async () => {
+    try {
+      await fetchLookupsandGetAPIs();
+    } catch (err) {
+      console.error('Error fetching lookups:', err);
+    } finally {
+      getSRConfiguration();
+    }
+  };
+
+  init();
+ },[])
+
+  const setLookupsDataInJson = (lookupsData:allResponsesType,shouldSetData?:boolean, getData?:any): void => {
+    const arr = Object.keys(lookupsData)
+    const groupNames: string[] = []
+    const opts: { [key: string]: any } = {}
+    arr.forEach((obj) => {
+      let ret = []
+      if (lookupsData[obj].isGrouping) {
+        groupNames.push(obj)
+        let groupOpts = []
+        ret = lookupsData[obj].groupData.map((element) => {
+          groupOpts = element.data.map((ele) => {
+            let opt = {}
+            opt["label"] = ele[element.label]
+            opt["value"] = ele[element.value]
+            return opt
+          });
+          return {
+            "label": element.groupLabel,
+            "options": groupOpts
+          }
+        })
+
+      } else {
+        ret = lookupsData[obj].data.map((element) => {
+          let opt = {}
+          opt["label"] = element[lookupsData[obj].label]
+          opt["value"] = element[lookupsData[obj].value]
+          return opt
+        });
+      }
+
+      opts[obj] = ret
+
+    })
+    const data = structuredClone(fields);
+    data.forEach((obj) => {
+      if (arr.includes(obj.name)) {
+        if (groupNames.includes(obj.name)) {
+          obj.groupedOptions = opts[obj.name]
+        }
+        obj.options = opts[obj.name]
+      }
+    });
+    setFields(data);
+  }
+
+  const settingGetValuesInForm=(dataObj:any)=>{
+  // console.log("dATA",dataObj)
+    Object.keys(dataObj).forEach((key)=>{
+  
+      // form.setValue(key,dataObj[key])
+      // form.reset(dataObj)
+    })
+    console.log(form.getValues())
+
+  }
+
+ //api calls
+const fetchLookupsandGetAPIs=async ()=>{
+
+try{
+let [NotifyLookup,SRStatusLookup]=await Promise.allSettled([GetNotifyTypeLookup(),getStatusLookups(111)]);
+
+  const allResponses = {
+        NotifyUserTypes: { data: NotifyLookup.status === 'fulfilled' && NotifyLookup.value.success && NotifyLookup.value.data.ServiceRequestNotifyTypeLookup ? NotifyLookup.value.data.ServiceRequestNotifyTypeLookup : [], label: 'NotifyTypeName', value: 'NotifyTypeId' },
+        DefaultSLAStatusDataList: { data: SRStatusLookup.status === 'fulfilled' && SRStatusLookup.value.success && SRStatusLookup.value.data.ServiceRequestStatusLookup ? SRStatusLookup.value.data.ServiceRequestStatusLookup : [], label: 'ServiceRequestStatusName', value: 'ServiceRequestStatusId' },
+  } 
+
+  setLookupsDataInJson(allResponses)
+
+}catch{
+
+}finally{
+}
+
+
+}
+
+useEffect(()=>{
+console.log("AllowWorkOrderCreation",watch("AllowWorkOrderCreation"))
+},[watch("AllowWorkOrderCreation")])
+
+const getSRConfiguration=()=>{
+  console.log("called")
+getSRConfigList(111,"All").then((res)=>{
+  settingGetValuesInForm(res.data.ServiceRequestConfiguration)
+}).catch(()=>{}).finally(()=>{})
+}
+
+
 
   const getFieldsByNames = (names: string[]) => fields.filter(f => names.includes(f.name!));
+
+  const timeToMinutes = (timeString: string): number => {
+    if (!timeString || !timeString.includes(':')) return 0;
+    const [hours, minutes] = timeString.split(':').map(Number);
+    if (isNaN(hours) || isNaN(minutes)) return 0;
+    return hours * 60 + minutes;
+  };
+
   const renderField = (field: BaseField) => {
-      const { name, label, fieldType, isRequired, dependsOn, show = true } = field;
+      const { name, label, fieldType, isRequired,validationPattern,patternErrorMessage, dependsOn, show = true } = field;
       if (!show && dependsOn && !watch(dependsOn)) {
         return null;
       }
       const validationRules = {
         required: isRequired ? `${label} is Required` : false,
+        ...(validationPattern && {
+          pattern: {
+            value: new RegExp(validationPattern),
+            message: patternErrorMessage || 'Invalid input format'
+          }
+        }),
+        ...(name === 'ReminderForSLA' && {
+          validate: {
+            lessThanSLA: (value: string) => {
+              if (!value) return true;
+              const slaValue = watch('SLAHoursMinutes');
+              if (!slaValue) return true;
+              const reminderMinutes = timeToMinutes(value);
+              const slaMinutes = timeToMinutes(slaValue);
+              return reminderMinutes < slaMinutes || 'Reminder time must be less than SLA time';
+            }
+          }
+        })
       };
-  
+
       switch (fieldType) {
         case 'text':
           return (
             <Controller
-              key={name}
               name={name}
               control={control}
               rules={validationRules}
-              render={({ field: ctrl }) => (
+              render={({ field: ctrl, fieldState }) => (
                 <ReusableInput
                   {...field}
                   value={ctrl.value}
                   onChange={ctrl.onChange}
-                  error={errors[name]?.message as string}
+                  error={fieldState.error?.message}
                 />
               )}
             />
           );
-      
         case 'dropdown':
           return (
             <Controller
@@ -72,7 +230,6 @@ const Configuration = () => {
               )}
             />
           );
-      
         case 'multiselect':
           return (
             <div>
@@ -93,8 +250,6 @@ const Configuration = () => {
               />
             </div>
           );
-  
-        
         case 'checkbox':
           return (
              <Controller
@@ -104,6 +259,7 @@ const Configuration = () => {
                 <ReusableSingleCheckbox
                   label={label}
                   onChange={ctrl.onChange}
+                  value={ctrl.value}
                   className="text-orange-500"
                   {...field}
                 />
@@ -173,14 +329,14 @@ const Configuration = () => {
               <CardContent className="pt-6">
                 <div className="grid grid-cols-2 gap-6">
                   <div className="space-y-4 ">
-                    {getFieldsByNames(['CustomerCheckbox', 'AssetFieldCheckbox', 'NotifyUsersCheckbox','Notify']).map((field) => {
+                    {getFieldsByNames(['CustomerFieldinMyRequest', 'AssetFieldinCreateEditServiceRequest', 'IsDefaultNotifyUsers','NotifyUserTypes']).map((field) => {
                       return  <div className="flex-1 items-center space-x-2">
                        {renderField(field)}
                     </div>;
                     })} 
                   </div>
                   <div className="space-y-4">
-                    {getFieldsByNames(['AllowWOCreationCheckbox', 'PauseSLACheckbox','ServiceRequestStatusList']).map((field) => {
+                    {getFieldsByNames(['AllowWorkOrderCreation', 'PauseSLAcalculation','DefaultSLAStatusDataList']).map((field) => {
                       return  <div className="flex-1 items-center space-x-2">
                        {renderField(field)}
                     </div>;

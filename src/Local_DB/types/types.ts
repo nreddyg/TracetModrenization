@@ -4,7 +4,8 @@ import { OptionGroup } from "@/components/ui/reusable-multi-select";
 
 
 export type FieldType = 'text' | 'dropdown' | 'multiselect' | 'textarea' | 'heading' | "date" | "upload"
-  | "richtext" | "checkbox" | "table" | "separator" | 'radiobutton' | 'numeric'|"rangepicker";
+  | "richtext" | "checkbox" | "table" | "separator" | 'radiobutton' | 'numeric'|"rangepicker" | 
+  "timepicker";
 
 export interface DropdownOption {
     label: string;
@@ -65,6 +66,8 @@ export interface field {
   show?:boolean;
   defaultChecked?:boolean;
   dependsOn?:string;
+  validationPattern?:string;
+  patternErrorMessage?:string;
 }
 
 export type BaseField = field;

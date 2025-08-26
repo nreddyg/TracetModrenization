@@ -2,19 +2,19 @@ import { BaseField } from "../types/types";
 
 export const CONFIGURATION_DB:BaseField[]=[
     {
-        name:'CustomerCheckbox',
+        name:'CustomerFieldinMyRequest',
         fieldType:'checkbox',
         label:'Display Customer Field in Create Service Request',
-        defaultChecked:true,
+        defaultChecked:false,
     },
     {
-        name:'AssetFieldCheckbox',
+        name:'AssetFieldinCreateEditServiceRequest',
         fieldType:'checkbox',
         label:'Display Asset Field in Create Service Request',
         defaultChecked:true,
     },
     {
-        name:'NotifyUsersCheckbox',
+        name:'IsDefaultNotifyUsers',
         fieldType:'checkbox',
         label:'Notify below Users On Service Request Edit',
         defaultChecked:true, 
@@ -22,27 +22,23 @@ export const CONFIGURATION_DB:BaseField[]=[
     {
         label: "",
         fieldType: "multiselect",
-        name: "Notify",
+        name: "NotifyUserTypes",
         placeholder: "Select User",
         isRequired: false,
-        options:[
-            {label:'Requester', value:'100'},
-            {label:'CC List', value:'101'},
-            {label:'Assigned To', value:'102'},
-        ],
-        defaultValue:['102','100'],
+        options:[],
+        defaultValue:[],
         selectAll:true,
         show:false,
-        dependsOn:'NotifyUsersCheckbox'
+        dependsOn:'IsDefaultNotifyUsers'
     },
     {
-        name:'AllowWOCreationCheckbox',
+        name:'AllowWorkOrderCreation',
         fieldType:'checkbox',
         label:'Allow Work Order Creation',
         defaultChecked:true,
     },
     {
-        name:'PauseSLACheckbox',
+        name:'PauseSLAcalculation',
         fieldType:'checkbox',
         label:'Pause SLA calculation',
         defaultChecked:false,
@@ -50,14 +46,14 @@ export const CONFIGURATION_DB:BaseField[]=[
     {
         label: "Service Request Status List",
         fieldType: "multiselect",
-        name: "ServiceRequestStatusList",
+        name: "DefaultSLAStatusDataList",
         placeholder: "Select Service Request Status",
         isRequired: false,
         options: [{ label: 'Open', value: 'open' }, { label: 'In Progress', value: 'in_progress' }, { label: 'Closed', value: 'closed' }],
         defaultValue:[],
         selectAll:true,
         show:false,
-        dependsOn:'PauseSLACheckbox'
+        dependsOn:'PauseSLAcalculation'
     },
     {
         name:'ServiceRequestType',
@@ -89,14 +85,18 @@ export const CONFIGURATION_DB:BaseField[]=[
         label:'SLA Hours/Minutes',
         fieldType:'text',
         isRequired:false,
-        placeholder:'HH:MM'
+        placeholder:'HH:MM',
+        validationPattern: "^\\d+:[0-5]\\d$",
+        patternErrorMessage:'Please enter time in HH:MM format (e.g., 12:30)'
     },
     {
         name:'ReminderForSLA',
         label:'Reminder For SLA',
         fieldType:'text',
         isRequired:false,
-        placeholder:'HH:MM'
+        placeholder:'HH:MM',
+        validationPattern: "^\\d+:[0-5]\\d$",
+        patternErrorMessage:'Please enter time in HH:MM format (e.g., 12:30)'
     },
     {
         label: "Escalation To",

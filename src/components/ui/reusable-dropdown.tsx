@@ -507,8 +507,8 @@ export const ReusableDropdown: React.FC<SelectProps> = ({
             {groupedOptions.ungrouped.map(renderOption)}
             {Object.entries(groupedOptions.grouped).map(([groupName, items]) => (
               <div key={groupName}>
-                <div 
-                  className="px-3 py-1 text-xs font-medium text-gray-500 bg-gray-50 border-t truncate" 
+                <div
+                  className="px-3 py-1 text-xs font-medium text-gray-500 bg-gray-50 border-t truncate"
                   title={groupName}
                 >
                   {groupName}
@@ -520,36 +520,57 @@ export const ReusableDropdown: React.FC<SelectProps> = ({
         )}
       </div>
     );
-
+ 
     return dropdownRender ? dropdownRender(baseContent) : baseContent;
   };
 
-  const renderPopup = () => {
-    // Fixed height without viewport constraints
-    const maxHeight = 300;
-
+ const renderPopup = () => {
+    const inputRect = selectRef.current?.getBoundingClientRect();
+    if (!inputRect) return null;
+ 
+    const margin = 8;            // spacing between input and popup
+    const idealHeight = 300;
+    const minHeight = 100;
+ 
+    const spaceBelow = window.innerHeight - inputRect.bottom - margin;
+    const spaceAbove = inputRect.top - margin;
+ 
+    // Decide whether to place popup above or below
+    // You can tweak the condition. This chooses above when there's not enough space below.
+    const openAbove = spaceBelow < minHeight && spaceAbove > spaceBelow;
+ 
+    // Use the space available in chosen direction to compute maxHeight
+    const availableSpace = openAbove ? Math.max(0, spaceAbove) : Math.max(0, spaceBelow);
+    const maxHeight = Math.max(minHeight, Math.min(idealHeight, availableSpace));
+ 
+    // top is either at the input bottom (below) or the input top (above).
+    // transform moves the popup so its top/bottom lines up with the input.
+    const top = openAbove ? inputRect.top : inputRect.bottom;
+    const transform = openAbove ? "translateY(-100%)" : "translateY(0)";
+ 
+    const needsScroll = filteredOptions.length > 8; // keep your heuristic
+ 
     return (
       <div
         ref={dropdownRef}
         className={cn(
-          "bg-white border border-gray-300 rounded-md shadow-lg z-[9999]",
+          "bg-white border border-gray-300 rounded-md shadow-lg",
           dropdownClassName,
           disabled && "pointer-events-none opacity-50"
         )}
         style={{
-          position: 'fixed',
-          top: popupPosition.top,
-          left: popupPosition.left,
-          width: popupPosition.width,
-          maxHeight: `${maxHeight}px`,
+          position: "fixed",         // fixed = relative to viewport (works well with getBoundingClientRect)
+          top,
+          left: inputRect.left,
           zIndex: 9999,
+          transform,
+          width: inputRect.width,    // number is fine (px)
+          maxHeight: `${maxHeight}px`,
         }}
       >
-        <div 
-          className="overflow-y-auto overflow-x-hidden"
-          style={{ 
-            maxHeight: `${maxHeight}px`,
-          }}
+        <div
+          className={needsScroll ? "overflow-y-auto overflow-x-hidden" : ""}
+          style={{ maxHeight: `${maxHeight}px` }}
         >
           {renderDropdownContent()}
         </div>
@@ -693,5 +714,3 @@ export const ReusableDropdown: React.FC<SelectProps> = ({
     </div>
   );
 };
-
-// Demo component to show the unconstrained behavior

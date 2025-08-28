@@ -87,7 +87,7 @@ export const CONFIGURATION_DB:BaseField[]=[
         isRequired:false,
         placeholder:'HH:MM',
         validationPattern: "^\\d+:[0-5]\\d$",
-        patternErrorMessage:'Please enter time in HH:MM format (e.g., 12:30)'
+        patternErrorMessage:'Please enter time in HH:MM format (24-hour format, e.g., 14:30)'
     },
     {
         name:'ReminderForSLAHoursMinutes',
@@ -96,7 +96,7 @@ export const CONFIGURATION_DB:BaseField[]=[
         isRequired:false,
         placeholder:'HH:MM',
         validationPattern: "^\\d+:[0-5]\\d$",
-        patternErrorMessage:'Please enter time in HH:MM format (e.g., 12:30)'
+        patternErrorMessage:'Please enter time in HH:MM format (24-hour format, e.g., 14:30)'
     },
     {
         label: "Escalation To",

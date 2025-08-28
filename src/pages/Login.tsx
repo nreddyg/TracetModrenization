@@ -13,16 +13,16 @@ import { Controller, useForm } from 'react-hook-form';
 import { BaseField, GenericObject } from '@/Local_DB/types/types';
 import { Form, } from '@/components/ui/form';
 import { useMessage } from '@/components/ui/reusable-message';
-import { useDispatch } from 'react-redux';
 import { setLoading } from '@/store/slices/projectsSlice';
 import { getToken } from '@/services/loginServices';
+import { useAppDispatch } from '@/store/reduxStore';
 
 
 const Login = () => {
   const navigate = useNavigate();
   const [loginDetails, setLoginDetails] = useState(LOGIN_PAGE_DB);
   const message=useMessage();
-  const dispatch=useDispatch();
+  const dispatch=useAppDispatch();
 
   const form = useForm<GenericObject>({
     defaultValues: loginDetails.reduce((acc, f) => {

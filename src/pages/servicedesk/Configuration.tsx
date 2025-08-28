@@ -1,22 +1,26 @@
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { Card, CardContent} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ReusableDropdown } from '@/components/ui/reusable-dropdown';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Controller, useForm } from 'react-hook-form';
-import { Settings, Save,Trash2,Edit} from 'lucide-react';
+import { Settings, Save,Trash2,Edit, Search} from 'lucide-react';
 import { ReusableInput } from '@/components/ui/reusable-input';
 import { BaseField, GenericObject } from '@/Local_DB/types/types';
 import { CONFIGURATION_DB } from '@/Local_DB/Form_JSON_Data/ConfigurationDB';
 import { ReusableMultiSelect } from '@/components/ui/reusable-multi-select';
 import ReusableSingleCheckbox from '@/components/ui/reusable-single-checkbox';
 import { ReusableTextarea } from '@/components/ui/reusable-textarea';
-import { GetNotifyTypeLookup, GetServiceRequestAssignToLookups, getSRConfigList, getStatusLookups, getVendorDetails, postServiceRequestConfiguration } from '@/services/configurationServices';
+import { deleteSRType, GetNotifyTypeLookup, GetServiceRequestAssignToLookups, getServiceRequestTypes, getSRConfigList, getSRTypesById, getStatusLookups, getVendorDetails, postServiceRequestConfiguration, postServiceRequestType } from '@/services/configurationServices';
 import { useDispatch } from 'react-redux';
 import { setLoading } from '@/store/slices/projectsSlice';
 import { useMessage } from '@/components/ui/reusable-message';
+import { ColumnDef } from '@tanstack/react-table';
+import ReusableTable, { TableAction, TablePermissions } from '@/components/ui/reusable-table';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, } from '@/components/ui/dialog';
+import { ReusableButton } from '@/components/ui/reusable-button';
 interface OptType {
   data:  {[key: string]: any}[];
   label: string;
@@ -26,63 +30,159 @@ interface OptType {
 interface allResponsesType {
   NotifyUserTypes: OptType
   DefaultSLAStatusDataList: OptType
-
 }
+interface serviceRequestType{
+  "Id": number,
+  "ServiceRequestType":string,
+  "UserGroups": string,
+  "Vendors": any,
+  "SLAHoursMinutes": string,
+  "ReminderForSLAHoursMinutes": string,
+  "EscalationTo": any,
+  "StatusToCalculate": any,
+  "Description":string,
+  "ServiceRequestTypeAdmin":string
+}
+// Define table permissions
+const tablePermissions: TablePermissions = {
+  canEdit: true,
+  canDelete: true,
+  canView: true,
+  canExport: false,
+  canAdd: true,
+  canManageColumns: true, 
+};
+
 const Configuration = () => {
   const [fields,setFields] = useState<BaseField[]>(CONFIGURATION_DB);
   const dispatch=useDispatch()
-    const msg = useMessage()
+  const msg = useMessage()
   const form = useForm<GenericObject>({
-      defaultValues: fields.reduce((acc, f) => {
-        acc[f.name!] = f.defaultChecked ?? '';
-        return acc;
-      }, {} as GenericObject),
-      mode: 'onChange',
-      reValidateMode: "onChange" 
+    defaultValues: fields.reduce((acc, f) => {
+      acc[f.name!] = f.defaultChecked ?? '';
+      return acc;
+    }, {} as GenericObject),
+    mode: 'onChange',
+    reValidateMode: "onChange" 
   });
- const { control, register, handleSubmit, trigger, watch, setValue, reset, formState: { errors } } = form;
+  const { control, register, handleSubmit, trigger, watch, setValue, reset, formState: { errors } } = form;
+  const [columns,setColumns]=useState<ColumnDef<serviceRequestType>[]>([
+    {id:'ServiceRequestType',accessorKey: "ServiceRequestType", header: "Service Request Type",},
+    {id:'UserGroups',accessorKey: "UserGroups", header: "User Groups"},
+    {id:'Vendors',accessorKey: "Vendors", header: "Vendors",},
+    {id:'SLAHoursMinutes',accessorKey: "SLAHoursMinutes", header: "SLA Hours/Minutes",},
+    {id:'ReminderForSLAHoursMinutes',accessorKey: "ReminderForSLAHoursMinutes", header: "Reminder For SLAHours/Minutes"},
+    {id:'EscalationTo',accessorKey: "EscalationTo", header: "Escalation To"},
+    {id:'StatusToCalculate',accessorKey: "StatusToCalculate", header: "Status To Calculate SLA"},
+    {id:'Description',accessorKey: "Description", header: "Description"},
+    {id:'ServiceRequestTypeAdmin',accessorKey: "ServiceRequestTypeAdmin", header: "Service Request Type Admin",},
+  ]);
+  const [serviceRequestTypeData,setServiceRequestTypeData]=useState<serviceRequestType[]>([]);
+  const [isDelModalOpen, setIsDelModalOpen] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState<serviceRequestType | null>(null);
+  const [isEditMode,setIsEditMode]=useState(false);
 
- useEffect(()=>{
- const init = async () => {
-    try {
-      await fetchLookupsandGetAPIs();
-    } catch (err) {
-      console.error('Error fetching lookups:', err);
-    } finally {
-      getSRConfiguration(111,"All");
-    }
+  const handleEdit = (data:serviceRequestType): void => {
+    setSelectedRecord(data);
+    setIsEditMode(true);
+    fetchServiceRequestTypeById(data.Id)
   };
-
-  init();
- },[])
-
- const handleSave=(data,type)=>{
-  if(type==="configuration"){
- console.log(data,"config")
- 
-     let newList = []
-        let Payload = {
-          "IsWorkorderAllowed": data["AllowWorkOrderCreation"],
-          "IsSerReqAllowedForMultipleAsset": "true",
-          "DisplayMyRequestAssignedTo": "true",
-          "DisplayMyWorkBenchAssignedTo": "true",
-          "DisplayMyRequestCustomer": data["CustomerFieldinMyRequest"],
-          "DisplayMyWorkbenchCustomer":data["CustomerFieldinMyRequest"],
-          "DisplayMyRequestSLATimer": "true",
-          "DisplayMyWorkbenchSLATimer": "true",
-          "DisplayAsset":data["AssetFieldinCreateEditServiceRequest"],
-          "IsDefaultNotifyUsers": data["IsDefaultNotifyUsers"],
-          "NotifyUserTypes":data["NotifyUserTypes"]?data["NotifyUserTypes"]?.join():data["NotifyUserTypes"],
-          "PauseSLAByDefault": data["PauseSLAcalculation"],
-          "DefaultSLAStatusDataList": data["DefaultSLAStatusDataList"]?data["DefaultSLAStatusDataList"]?.join():"",
-        }
-        newList.push(Payload);
-        var NewCategoryObj = { "ServiceRequestConfigDetails": newList };
-        
-        updateSRConfigAPI(NewCategoryObj,111,data["ServiceReqConfigurationId"],)
-
+  const handleDelete = (data:serviceRequestType): void => {
+    setSelectedRecord(data);
+    setIsDelModalOpen(true);
+  };
+  const tableActions: TableAction<serviceRequestType>[] = [
+    {
+      label: 'Edit',
+      icon: Edit,
+      onClick: handleEdit,
+      variant: 'default',
+    },
+    {
+      label: 'Delete',
+      icon: Trash2,
+      onClick: handleDelete,
+      variant: 'destructive',
+    },
+  ];
+  useEffect(()=>{
+    const init = async () => {
+      try {
+        await fetchLookupsandGetAPIs();
+      } catch (err) {
+        console.error('Error fetching lookups:', err);
+      } finally {
+        getSRConfiguration(111,"All");
+        getAllServiceRequests();
+      }
+    };
+    init();
+  },[])
+  const getAllServiceRequests=async()=>{
+    dispatch(setLoading(true));
+    await getServiceRequestTypes(111).then(res=>{
+      if(res.success && res.data){
+        setServiceRequestTypeData(res.data)
+      }else{
+        setServiceRequestTypeData([])
+      }
+    }).catch(err=>{}).finally(()=>{dispatch(setLoading(false))})
   }
- }
+  const handleSave=async(data,type)=>{
+    if(type==="configuration"){ 
+      let newList = []
+          let Payload = {
+            "IsWorkorderAllowed": data["AllowWorkOrderCreation"],
+            "IsSerReqAllowedForMultipleAsset": "true",
+            "DisplayMyRequestAssignedTo": "true",
+            "DisplayMyWorkBenchAssignedTo": "true",
+            "DisplayMyRequestCustomer": data["CustomerFieldinMyRequest"],
+            "DisplayMyWorkbenchCustomer":data["CustomerFieldinMyRequest"],
+            "DisplayMyRequestSLATimer": "true",
+            "DisplayMyWorkbenchSLATimer": "true",
+            "DisplayAsset":data["AssetFieldinCreateEditServiceRequest"],
+            "IsDefaultNotifyUsers": data["IsDefaultNotifyUsers"],
+            "NotifyUserTypes":data["NotifyUserTypes"]?data["NotifyUserTypes"]?.join():data["NotifyUserTypes"],
+            "PauseSLAByDefault": data["PauseSLAcalculation"],
+            "DefaultSLAStatusDataList": data["DefaultSLAStatusDataList"]?data["DefaultSLAStatusDataList"]?.join():"",
+          }
+          newList.push(Payload);
+          var NewCategoryObj = { "ServiceRequestConfigDetails": newList };
+          updateSRConfigAPI(NewCategoryObj,111,data["ServiceReqConfigurationId"],)
+
+    }else if(type==="ServiceRequestType"){
+      let payload={
+        "ServiceRequestTypeDetails": [
+            {
+                "Name": watch('ServiceRequestType'),
+                "UserGroupList": Array.isArray(watch('UserGroups'))? watch('UserGroups').join():'', //"142"
+                "VendorList": Array.isArray(watch('Vendors'))? watch('Vendors').join():'',//"12121"
+                "SLAMinutes": watch('SLAHoursMinutes') ? watch('SLAHoursMinutes').split(':')[1] || '':'',//"56"
+                "SLAHours": watch('SLAHoursMinutes') ? watch('SLAHoursMinutes').split(':')[0] || '':'',//"12",
+                "ReminderForSLAMinutes":watch('ReminderForSLAHoursMinutes') ? watch('ReminderForSLAHoursMinutes').split(':')[1] || '':'',// "45",
+                "ReminderForSLAHours": watch('ReminderForSLAHoursMinutes') ? watch('ReminderForSLAHoursMinutes').split(':')[0] || '':'',//"12",
+                "EscalationList":Array.isArray(watch('EscalationTo'))? watch('EscalationTo').join():'',//"672",
+                "ServiceMaintStatus":watch('StatusToCalculate'),
+                "Description":watch('Description'),
+                "ResponseReminderHours": watch('ReminderForSLAHoursMinutes') ? watch('ReminderForSLAHoursMinutes').split(':')[0] || '':'',//"12",
+                "ResponseReminderMinutes": watch('ReminderForSLAHoursMinutes') ? watch('ReminderForSLAHoursMinutes').split(':')[1] || '':'',//"45",
+                "serAdminUserGroupList": watch('ServiceRequestTypeAdmin')? watch('ServiceRequestTypeAdmin')['User Group']?.join():'',
+                "serAdminUserList": ""
+            }
+        ]
+      }
+      console.log('hwehweghfh',watch('ServiceRequestTypeAdmin')['User Group'])
+      dispatch(setLoading(true));
+      await postServiceRequestType(111,'All',payload).then(res=>{
+        if(res.success && res.data.status){
+          msg.success(res.data.message);
+          form.reset({...form.getValues(),ServiceRequestType:'',UserGroups:[],Vendors:[],SLAHoursMinutes:'',ReminderForSLAHoursMinutes:'',EscalationTo:[],StatusToCalculate:'',ServiceRequestTypeAdmin:[],Description:''});
+        }else{
+          msg.warning(res?.data?.message || 'Failed to add new service request type')
+        }
+      }).catch(err=>{}).finally(()=>{dispatch(setLoading(false))})
+    }
+  }
   const setLookupsDataInJson = (lookupsData:allResponsesType,shouldSetData?:boolean, getData?:any): void => {
     const arr = Object.keys(lookupsData)
     const groupNames: string[] = []
@@ -128,55 +228,50 @@ const Configuration = () => {
     });
     setFields(data);
   }
-
   const settingGetValuesInForm=(dataObj:any)=>{
-  // console.log("dATA",dataObj)
     Object.keys(dataObj).forEach((key)=>{
-  
-
       if(key=="DefaultSLAStatusDataList" || key=="NotifyUserTypes"){
-        console.log("dataObj[key]",dataObj[key])
-      form.setValue(key,dataObj[key]?dataObj[key].split(","):"")
+        form.setValue(key,dataObj[key]?dataObj[key].split(","):"")
       }else{
         form.setValue(key,dataObj[key])
       }
-      
-      // form.reset(dataObj)
     })
-    console.log(form.getValues())
-
   }
-
- //api calls
-const fetchLookupsandGetAPIs=async ()=>{
-  dispatch(setLoading(true));
-try{
-let [NotifyLookup,SRStatusLookup,getVendors,SRTAssignToLookup]=await Promise.allSettled([GetNotifyTypeLookup(),getStatusLookups(111),getVendorDetails(111),GetServiceRequestAssignToLookups(111,"All")]);
-
-  const allResponses = {
-        NotifyUserTypes: { data: NotifyLookup.status === 'fulfilled' && NotifyLookup.value.success && NotifyLookup.value.data.ServiceRequestNotifyTypeLookup ? NotifyLookup.value.data.ServiceRequestNotifyTypeLookup : [], label: 'NotifyTypeName', value: 'NotifyTypeId' },
-        DefaultSLAStatusDataList: { data: SRStatusLookup.status === 'fulfilled' && SRStatusLookup.value.success && SRStatusLookup.value.data.ServiceRequestStatusLookup ? SRStatusLookup.value.data.ServiceRequestStatusLookup : [], label: 'ServiceRequestStatusName', value: 'ServiceRequestStatusId' },
-        Vendors: { data: getVendors.status === 'fulfilled' && getVendors.value.success && getVendors.value.data.Vendors ? getVendors.value.data.Vendors : [], label: 'VendorName', value: 'VendorID' },
-        ServiceRequestTypeAdmin: {
-          data: [], label: 'UserName', value: 'UserName', isGrouping: true, groupData: [{ label: "UserGroupName", value: "UserGroupId", data: SRTAssignToLookup.status === 'fulfilled' && SRTAssignToLookup.value.success && SRTAssignToLookup.value.data.ServiceRequestAssignToUserGroupLookup ? SRTAssignToLookup.value.data.ServiceRequestAssignToUserGroupLookup : [], groupLabel: "User Group" },
-          { label: "UserName", value: "UserId", data: SRTAssignToLookup.status === 'fulfilled' && SRTAssignToLookup.value.success && SRTAssignToLookup.value.data.ServiceRequestAssignToUsersLookup ? SRTAssignToLookup.value.data.ServiceRequestAssignToUsersLookup : [], groupLabel: "Users" },]
-        },
-        UserGroups:{ data: SRTAssignToLookup.status === 'fulfilled' && SRTAssignToLookup.value.success && SRTAssignToLookup.value.data.ServiceRequestAssignToUserGroupLookup ? SRTAssignToLookup.value.data.ServiceRequestAssignToUserGroupLookup : [], label: 'UserGroupName', value: 'UserGroupId' },
-        EscalationTo:{ data: SRTAssignToLookup.status === 'fulfilled' && SRTAssignToLookup.value.success && SRTAssignToLookup.value.data.ServiceRequestAssignToUsersLookup ? SRTAssignToLookup.value.data.ServiceRequestAssignToUsersLookup : [], label: 'UserName', value: 'UserId' },
-        StatusToCalculate: { data: SRStatusLookup.status === 'fulfilled' && SRStatusLookup.value.success && SRStatusLookup.value.data.ServiceRequestStatusLookup ? SRStatusLookup.value.data.ServiceRequestStatusLookup.filter((ele:any)=>ele.ServiceRequestStatusId!=704) : [], label: 'ServiceRequestStatusName', value: 'ServiceRequestStatusId' },
-  } 
-
-  setLookupsDataInJson(allResponses)
-
-}catch{
-
-}finally{
-    dispatch(setLoading(false));
-}
-
-
-}
-
+  const segregateOptionsAsGroupsAndUsers = (key: string, selectedIds: any[]) => {
+    const data = fields.find(obj => obj.name === key)?.groupedOptions || [];
+    return data.reduce(
+      (acc, group) => ({
+        ...acc,
+        [group.label === "User Group" ? "User Groups" : "Users"]: [
+          ...acc[group.label === "User Group" ? "User Groups" : "Users"],
+          ...group.options
+            .filter((opt: any) => selectedIds.includes(`${opt.value}`))
+            .map((opt: any) => opt.value),
+        ],
+      }),
+      { Users: [], "User Groups": [] }
+    );
+  };
+  //api calls
+  const fetchLookupsandGetAPIs=async ()=>{
+    dispatch(setLoading(true));
+    try{
+      let [NotifyLookup,SRStatusLookup,getVendors,SRTAssignToLookup]=await Promise.allSettled([GetNotifyTypeLookup(),getStatusLookups(111),getVendorDetails(111),GetServiceRequestAssignToLookups(111,"All")]);
+      const allResponses = {
+            NotifyUserTypes: { data: NotifyLookup.status === 'fulfilled' && NotifyLookup.value.success && NotifyLookup.value.data.ServiceRequestNotifyTypeLookup ? NotifyLookup.value.data.ServiceRequestNotifyTypeLookup : [], label: 'NotifyTypeName', value: 'NotifyTypeId' },
+            DefaultSLAStatusDataList: { data: SRStatusLookup.status === 'fulfilled' && SRStatusLookup.value.success && SRStatusLookup.value.data.ServiceRequestStatusLookup ? SRStatusLookup.value.data.ServiceRequestStatusLookup : [], label: 'ServiceRequestStatusName', value: 'ServiceRequestStatusId' },
+            Vendors: { data: getVendors.status === 'fulfilled' && getVendors.value.success && getVendors.value.data.Vendors ? getVendors.value.data.Vendors : [], label: 'VendorName', value: 'VendorID' },
+            ServiceRequestTypeAdmin: {
+              data: [], label: 'UserName', value: 'UserName', isGrouping: true, groupData: [{ label: "UserGroupName", value: "UserGroupId", data: SRTAssignToLookup.status === 'fulfilled' && SRTAssignToLookup.value.success && SRTAssignToLookup.value.data.ServiceRequestAssignToUserGroupLookup ? SRTAssignToLookup.value.data.ServiceRequestAssignToUserGroupLookup : [], groupLabel: "User Group" },
+              { label: "UserName", value: "UserId", data: SRTAssignToLookup.status === 'fulfilled' && SRTAssignToLookup.value.success && SRTAssignToLookup.value.data.ServiceRequestAssignToUsersLookup ? SRTAssignToLookup.value.data.ServiceRequestAssignToUsersLookup : [], groupLabel: "Users" },]
+            },
+            UserGroups:{ data: SRTAssignToLookup.status === 'fulfilled' && SRTAssignToLookup.value.success && SRTAssignToLookup.value.data.ServiceRequestAssignToUserGroupLookup ? SRTAssignToLookup.value.data.ServiceRequestAssignToUserGroupLookup : [], label: 'UserGroupName', value: 'UserGroupId' },
+            EscalationTo:{ data: SRTAssignToLookup.status === 'fulfilled' && SRTAssignToLookup.value.success && SRTAssignToLookup.value.data.ServiceRequestAssignToUsersLookup ? SRTAssignToLookup.value.data.ServiceRequestAssignToUsersLookup : [], label: 'UserName', value: 'UserId' },
+            StatusToCalculate: { data: SRStatusLookup.status === 'fulfilled' && SRStatusLookup.value.success && SRStatusLookup.value.data.ServiceRequestStatusLookup ? SRStatusLookup.value.data.ServiceRequestStatusLookup.filter((ele:any)=>ele.ServiceRequestStatusId!=704) : [], label: 'ServiceRequestStatusName', value: 'ServiceRequestStatusId' },
+      } 
+      setLookupsDataInJson(allResponses)
+    }catch{}finally{dispatch(setLoading(false));}
+  }
   const updateSRConfigAPI = async (data, CompId, id) => {
    dispatch(setLoading(true))
    await postServiceRequestConfiguration( CompId,id,data).then((res) => {
@@ -191,34 +286,27 @@ let [NotifyLookup,SRStatusLookup,getVendors,SRTAssignToLookup]=await Promise.all
       else {
        msg.warning(res.data.ErrorDetails[0]["Error Message"]);
       }
-
-    })
-      .catch((err) => {
-      }).finally(() => {
-      dispatch(setLoading(false))
-      })
+    }).catch((err) => {}).finally(() => {dispatch(setLoading(false))})
   }
-const getSRConfiguration=(compId,branch)=>{
-getSRConfigList(compId,branch).then((res)=>{
-   if (res.data !== undefined) {
-          if (res.data.status == undefined) {
-  settingGetValuesInForm(res.data.ServiceRequestConfiguration)
-          }
+  const getSRConfiguration=(compId,branch)=>{
+    getSRConfigList(compId,branch).then((res)=>{
+      if (res.data !== undefined) {
+        if (res.data.status == undefined) {
+          settingGetValuesInForm(res.data.ServiceRequestConfiguration)
         }
-}).catch(()=>{}).finally(()=>{})
-}
-
-
-
+      }}).catch(()=>{}).finally(()=>{})
+  }
+  //clear fields data
+  const handleReset=()=>{
+    form.reset({...form.getValues(),ServiceRequestType:'',UserGroups:[],Vendors:[],SLAHoursMinutes:'',ReminderForSLAHoursMinutes:'',EscalationTo:[],StatusToCalculate:'',ServiceRequestTypeAdmin:[],Description:''});
+  }
   const getFieldsByNames = (names: string[]) => fields.filter(f => names.includes(f.name!));
-
   const timeToMinutes = (timeString: string): number => {
     if (!timeString || !timeString.includes(':')) return 0;
     const [hours, minutes] = timeString.split(':').map(Number);
     if (isNaN(hours) || isNaN(minutes)) return 0;
     return hours * 60 + minutes;
   };
-
   const renderField = (field: BaseField) => {
       const { name, label, fieldType, isRequired,validationPattern,patternErrorMessage, dependsOn, show = true } = field;
       if (!show && dependsOn && !watch(dependsOn)) {
@@ -240,7 +328,7 @@ getSRConfigList(compId,branch).then((res)=>{
               if (!slaValue) return true;
               const reminderMinutes = timeToMinutes(value);
               const slaMinutes = timeToMinutes(slaValue);
-              return reminderMinutes < slaMinutes || 'Reminder time must be less than SLA time';
+              return reminderMinutes <= slaMinutes || 'Reminder time must be less than SLA time';
             }
           }
         })
@@ -337,27 +425,71 @@ getSRConfigList(compId,branch).then((res)=>{
           return null;
       }
   };
-
+   // Handle refresh
+  const handleRefresh = () => {
+    msg.info("Refreshing Service Request Type Data...");
+    getAllServiceRequests();
+  };
+  const formatSLAHoursMinutes = (val?: string) => {
+    if (!val) return "";
+    const [hours, minutes] = val.split("/");
+    return `${hours.padStart(2, "0")}:${minutes.padStart(2, "0")}`;
+  };
+  //fetch service request type data by id
+  const fetchServiceRequestTypeById = async(id: number) => {
+    dispatch(setLoading(true));
+    await getSRTypesById(111,id).then(res=>{
+      if(res.success){
+        if(res.data.ServiceRequestType){
+          form.reset({...form.getValues(),
+            ...res.data.ServiceRequestType,
+            EscalationTo:res.data.ServiceRequestType.EscalationTo?res.data.ServiceRequestType.EscalationTo.split(','):[],
+            UserGroups:res.data.ServiceRequestType.UserGroups?res.data.ServiceRequestType.UserGroups.split(','):[],
+            StatusToCalculate:res.data.ServiceRequestType.StatusToCalculate?`${res.data.ServiceRequestType.StatusToCalculate}`:'',
+            Vendors:res.data.ServiceRequestType.Vendors?res.data.ServiceRequestType.Vendors.split(','):[],
+            ServiceRequestTypeAdmin:res.data.ServiceRequestType.ServiceRequestTypeAdmin?segregateOptionsAsGroupsAndUsers('ServiceRequestTypeAdmin',res.data.ServiceRequestType.ServiceRequestTypeAdmin.split(',')):[],
+            SLAHoursMinutes: res.data.ServiceRequestType.SLAHoursMinutes? formatSLAHoursMinutes(res.data.ServiceRequestType.SLAHoursMinutes): "",
+            ReminderForSLAHoursMinutes:res.data.ServiceRequestType.ReminderForSLAHoursMinutes?formatSLAHoursMinutes(res.data.ServiceRequestType.ReminderForSLAHoursMinutes):''
+          })
+        }
+      }
+    }).catch(err=>{}).finally(()=>{dispatch(setLoading(false))})
+  }
+  //delete service request type
+  const deleteServiceRequestType = async (id: number) => {
+    dispatch(setLoading(true));
+    await deleteSRType(id, 111).then(res => {
+      if(res.success){
+        if(res.data.status){
+          msg.success(res.data.message);
+          getAllServiceRequests();
+        }else{
+          msg.warning(res.data.message);
+        }
+      }else{
+        msg.warning('Failed to delete Service Request Type !!');
+      }
+    }).catch((error) => {
+      msg.error("Error deleting Service Request Type");
+    }).finally(()=>{
+      dispatch(setLoading(false));
+    })
+  }
   return (
     <div className="h-full bg-gray-50 overflow-y-scroll">
       <header className="bg-white border-b px-4 py-3 shadow-sm">
         <div className="flex items-center gap-3">
           <SidebarTrigger />
-          <Button 
-            size="sm" 
-            className="bg-orange-500 hover:bg-orange-600 text-xs sm:text-sm px-2 sm:px-3 py-1.5"
-          >
+          <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-xs sm:text-sm px-2 sm:px-3 py-1.5">
             <span className="hidden sm:inline">New Service Request</span>
             <span className="sm:hidden">New Request</span>
           </Button>
         </div>
       </header>
-
       <div className="p-4 space-y-4">
         <div>
           <h1 className="text-base sm:text-lg font-semibold text-gray-900">Service Desk Configuration</h1>
         </div>
-
         <Tabs defaultValue="service-request-config" className="space-y-4">
           <div className="hidden sm:block">
             <TabsList className="grid w-full grid-cols-3">
@@ -373,7 +505,6 @@ getSRConfigList(compId,branch).then((res)=>{
               <TabsTrigger value="service-request-status" className="text-xs w-full">Request Status</TabsTrigger>
             </TabsList>
           </div>
-
           <TabsContent value="service-request-config" className="space-y-4">
             <Card>
               <CardContent className="pt-6">
@@ -402,7 +533,6 @@ getSRConfigList(compId,branch).then((res)=>{
               </CardContent>
             </Card>
           </TabsContent>
-
           <TabsContent value="service-request-type" className="space-y-4">
             <Card>
               <CardContent className="pt-6">
@@ -427,20 +557,35 @@ getSRConfigList(compId,branch).then((res)=>{
                   </div>
                 </div>    
                 <div className="flex gap-2 mb-6">
-                  <Button className="bg-orange-500 hover:bg-orange-600 text-sm px-4 py-2" onClick={handleSubmit(onsubmit)}>Save</Button>
-                  <Button variant="outline" className="text-sm px-4 py-2" onClick={reset}>Cancel</Button>
-                </div>
-
-                <div className="mt-8">
-                  <h3 className="text-base font-semibold mb-4">Service Request Type List</h3>
-                  <div className="border border-gray-200 rounded-lg overflow-hidden">
-                    {/* table here */}
-                  </div>
+                  <Button className="bg-orange-500 hover:bg-orange-600 text-sm px-4 py-2" onClick={handleSubmit((data)=>{handleSave(data,"ServiceRequestType")})}>Save</Button>
+                  <Button variant="outline" className="text-sm px-4 py-2" onClick={handleReset}>Cancel</Button>
                 </div>
               </CardContent>
             </Card>
+            <Card className="border-0 shadow-sm">
+              <CardHeader className="pb-3">
+              </CardHeader>
+              <CardContent className="pt-0">
+                <ReusableTable
+                  data={serviceRequestTypeData} columns={columns}
+                  actions={tableActions} permissions={tablePermissions}
+                  title="Service Request Type List" onRefresh={handleRefresh}
+                  enableSearch={true}
+                  enableSelection={false}
+                  enableExport={true}
+                  enableColumnVisibility={true}
+                  enablePagination={true}
+                  enableSorting={true}
+                  enableFiltering={true}
+                  pageSize={10}
+                  emptyMessage="No Data found"
+                  rowHeight="normal"
+                  storageKey="service-request-type-list-table"                    
+                  enableColumnPinning
+                />
+              </CardContent>
+            </Card>
           </TabsContent>
-
           <TabsContent value="service-request-status" className="space-y-4">
             <Card>
               <CardContent className="pt-6">
@@ -453,9 +598,8 @@ getSRConfigList(compId,branch).then((res)=>{
                 </div>
                 <div className="flex gap-2 mb-8">
                   <Button className="bg-orange-500 hover:bg-orange-600 text-sm px-4 py-2" onClick={handleSubmit(onsubmit)}>Save</Button>
-                  <Button variant="outline" className="text-sm px-4 py-2" onClick={reset}>Clear</Button>
+                  <Button variant="outline" className="text-sm px-4 py-2" onClick={handleReset}>Clear</Button>
                 </div>
-
                 <div>
                   <h3 className="text-base font-semibold mb-4">Service Request Status List</h3>
                   <div className="border border-gray-200 rounded-lg overflow-hidden">
@@ -471,9 +615,36 @@ getSRConfigList(compId,branch).then((res)=>{
             </Card>
           </TabsContent>
         </Tabs>
+        <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Confirm the action</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete {selectedRecord?.ServiceRequestType || "this"} Service Request Type?
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <ReusableButton
+                variant="default"
+                onClick={() => setIsDelModalOpen(false)}
+              >
+                Cancel
+              </ReusableButton>
+              <ReusableButton
+                variant="primary"
+                danger={true}
+                onClick={() => {
+                  deleteServiceRequestType(selectedRecord?.Id)
+                  setIsDelModalOpen(false)
+                }}
+              >
+                Delete
+              </ReusableButton>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
 };
-
 export default Configuration;

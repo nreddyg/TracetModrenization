@@ -20,8 +20,7 @@ interface DateRangePickerProps {
   value?: DateRange;
   onChange?: (range: DateRange | undefined) => void;
   className?: string;
-  rangeplaceholder?: [string, string];
-  placeholder?: [string, string] ;
+  placeholder?: string[] ;
   error?: string;
   allowClear?: boolean;
   format?: string; // <-- format like "DD/MM/YYYY"
@@ -34,7 +33,8 @@ const ReusableRangePicker: React.FC<DateRangePickerProps> = ({
   value,
   onChange,
   className,
-  rangeplaceholder = ["Start Date", "End Date"],
+  placeholder,
+  // rangeplaceholder = ["Start Date", "End Date"],
   allowClear = false,
   error,
   format = "DD/MM/YYYY",
@@ -222,7 +222,7 @@ const ReusableRangePicker: React.FC<DateRangePickerProps> = ({
               <input
                 id={inputId}
                 type="text"
-                placeholder={rangeplaceholder[0]}
+                placeholder={placeholder[0]}
                 className={`w-full bg-transparent outline-none ${disabled && "opacity-50 bg-muted cursor-not-allowed"}`}
                 value={fromInput}
                 onChange={handleFromInputChange}
@@ -234,7 +234,7 @@ const ReusableRangePicker: React.FC<DateRangePickerProps> = ({
               <span className="px-1">–</span>
               <input
                 type="text"
-                placeholder={rangeplaceholder[1]}
+                placeholder={placeholder[1]}
                 className={`w-full bg-transparent outline-none ${disabled && "opacity-50 bg-muted cursor-not-allowed"}`}
                 // className="w-full bg-transparent outline-none"
                 value={toInput}

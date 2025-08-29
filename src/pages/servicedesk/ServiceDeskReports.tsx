@@ -904,6 +904,7 @@ const ServiceDeskReports = () => {
                     ? dayjs(ctrl.value.to, "DD/MM/YYYY").toDate()
                     : undefined,
                 }}
+                placeholder={["From date","To date"]}
                 onChange={(range) =>
                   ctrl.onChange({
                     from: range?.from ? dayjs(range.from).format("DD/MM/YYYY") : "",

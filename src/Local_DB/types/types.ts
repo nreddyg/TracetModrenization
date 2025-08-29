@@ -35,7 +35,7 @@ export interface field {
   label?: string;
   placeholder?: string;
   jsontype?:string;
-  rangeplaceholder?:[string, string];
+  rangeplaceholder?:string[];
   value?: any;
   defaultValue?:any;
   isRequired?: boolean;

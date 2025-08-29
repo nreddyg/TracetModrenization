@@ -66,6 +66,7 @@ export interface ReusableInputProps extends Omit<React.InputHTMLAttributes<HTMLI
   onClear?: () => void;
   onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void;
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
+  fieldType?:string;
 }
 
 export interface ReusableInputRef {
@@ -92,7 +93,7 @@ export const ReusableInput = forwardRef<ReusableInputRef, ReusableInputProps>(
     addonAfter,
     
     // Password specific
-    showPasswordToggle = false,
+    showPasswordToggle = true,
     visibilityToggle = false,
     
     // Styling
@@ -129,7 +130,7 @@ export const ReusableInput = forwardRef<ReusableInputRef, ReusableInputProps>(
     onValidationChange,
     
     // Input props
-    type = 'text',
+    fieldType:type= 'text',
     value,
     defaultValue,
     placeholder,

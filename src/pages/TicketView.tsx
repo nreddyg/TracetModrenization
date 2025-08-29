@@ -22,8 +22,8 @@ import ReusableTable from '@/components/ui/reusable-table';
 import { BaseField, GenericObject, UploadedFileOutput, UploadFileInput } from '@/Local_DB/types/types';
 import { CREATE_TICKET_DB, modules } from '@/Local_DB/Form_JSON_Data/CreateTicketDB';
 import { cn } from '@/lib/utils';
-import { deleteSRUpload, getAllSRDetailsList, getCommentHistoryList, getCommentsAPI, getLinkedServiceRequests, getManageAssetsList, GetServiceRequestAssignToLookups, getServiceRequestDetailsById, getSRAdditionalFieldsByServiceRequestType, getSRBranchList, getSRCCListLookupsList, getSRConfigList, getSRCustomerLookupsList, getSRLinkToLookupsList, getSRRequestByLookupsList, getStatusLookups, getSubscriptionByCustomer, getSubscriptionHistoryByCustomer, getUploadedFilesByServiceRequestId, postCommentAPI, postServiceRequest, saveFileUpload, ServiceRequestTypeLookups, updateServiceRequest } from '@/services/ticketServices';
-import { fileToByteArray, formatDate, byteArrayToFile, formatDateToDDMMYYYY, getActivityStatusColor, getPriorityColor, getStatusColor } from '@/_Helper_Functions/HelperFunctions';
+import { deleteSRUpload, getAllSRDetailsList, getCommentHistoryList, getCommentsAPI, getLinkedServiceRequests, getManageAssetsList, GetServiceRequestAssignToLookups, getServiceRequestDetailsById, getSRAdditionalFieldsByServiceRequestType, getSRAssetsList, getSRBranchList, getSRCCListLookupsList, getSRConfigList, getSRCustomerLookupsList, getSRLinkToLookupsList, getSRRequestByLookupsList, getStatusLookups, getSubscriptionByCustomer, getSubscriptionHistoryByCustomer, getUploadedFilesByServiceRequestId, postCommentAPI, postServiceRequest, saveFileUpload, ServiceRequestTypeLookups, updateServiceRequest } from '@/services/ticketServices';
+import { fileToByteArray, formatDate, byteArrayToFile, formatDateToDDMMYYYY, getActivityStatusColor, getPriorityColor, getStatusColor, getRequestTypeById } from '@/_Helper_Functions/HelperFunctions';
 import axios from 'axios';
 import { useAppDispatch, useAppSelector } from '@/store/reduxStore';
 import { setLoading } from '@/store/slices/projectsSlice';
@@ -125,8 +125,10 @@ interface additionalFieldData {
   SelectedValues: any
 }
 const enableInClose = ["CCListSelectedUsers", "Status", "FileUploadURLs", "Title", "Description"]
+const workBenchEnables=["100","101","102","103"]
+const myRequestEnables=["104","105"]
 const TicketView = () => {
-  const { id } = useParams();
+  const { Did, id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
   const [isCreateMode, setIsCreateMode] = useState(location.pathname === '/service-desk/create-ticket');
@@ -134,6 +136,7 @@ const TicketView = () => {
   const [selectedTicketId, setSelectedTicketId] = useState<string>();
   const [selectedTicket, setSelectedTicket] = useState<Ticket>({} as Ticket);
   const [originalTicket, setOriginalTicket] = useState<Ticket>(selectedTicket);
+  const [requestTypeId,setRequestTypeId]=useState(Did)
   const [hasChanges, setHasChanges] = useState(false);
   const [activityLogs] = useState<ActivityLog[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -148,6 +151,7 @@ const TicketView = () => {
   ]);
   const [statusFilter, setStatusFilter] = useState('All Status');
   const [cols, setCols] = useState([])
+  const [assetCols,setAssetCols]=useState([])
   const [dataSource, setDataSource] = useState([]);
   const [accordionOpen, setAccordionOpen] = useState<string | undefined>(undefined);
   const [showAccordion, setShowAccordion] = useState<boolean>(false);
@@ -164,10 +168,13 @@ const TicketView = () => {
   const [childListData, setChildListData] = useState<any>([])
   const [updatedComments,setUpdatedComments]=useState("")
   const [notifyValues,setNotifyValues]=useState({"Notify":[]})
-  const selectedAssetCodesData: GenericObject[] = location.state ? location.state?.data : []
+  const selectedAssetCodesData: GenericObject[] = location.state ? location.state?.data : [];
+  const [triggerAccordionValidations,setTriggerAccordionValidations]=useState(false);
   const msg = useMessage()
   const dispatch = useAppDispatch();
   const storeData = useAppSelector(state => state);
+  const [srtLookupData,setSrtLookupData]=useState<any[]>([]);
+  const [assetsData,setAssetData]=useState([])
 
   // Add ref to track previous ServiceRequestType to prevent infinite loops
   const prevServiceRequestTypeRef = useRef<string>('');
@@ -178,6 +185,7 @@ const TicketView = () => {
     return matchesSearch && matchesStatus;
   });
   const [fields, setFields] = useState<BaseField[]>(CREATE_TICKET_DB);
+
   const form = useForm<GenericObject>({
     defaultValues: fields.reduce((acc, f) => {
       acc[f.name!] = f.defaultValue ?? '';
@@ -191,12 +199,18 @@ const TicketView = () => {
     }
   });
   const { control, register, handleSubmit, trigger, watch, setValue, reset, formState: { errors } } = form;
+
+
   //api calls to be made in edit mode
   useEffect(() => {
     if (!isCreateMode) {
-      fetchAllTickets();
+      if(requestTypeId){
+       fetchAllTickets(getRequestTypeById(requestTypeId));
+      }
+     
     }
-  }, [isCreateMode])
+  }, [isCreateMode,requestTypeId])
+
   // Function to clear all form values but preserve all field configurations and options
   const clearAllFormValues = useCallback(() => {
     const currentFields = fields;
@@ -214,6 +228,10 @@ const TicketView = () => {
   useEffect(() => {
     if (selectedAssetCodesData)
       fetchAllLookUps();
+    if(location?.state?.formData){
+     form.reset(location?.state?.formData)
+    }
+ 
   }, []);
   useEffect(() => {
     if (watch('Customer')) fetchSubscriptionByCustomer(watch('Customer'), 111, 'All');
@@ -228,7 +246,7 @@ const TicketView = () => {
           additionalFields.forEach(field => {
             setValue(field.name!, '');
           });
-          fetchAdditionalFieldsData(currentServiceRequestType, 111);
+          fetchAdditionalFieldsData(currentServiceRequestType, 111,false,'setDefaultAssigneeBasedOnServiceRequestType');
         } else {
           const additionalFields = fields.filter(f => f.isAdditionalField);
           additionalFields.forEach(field => {
@@ -253,9 +271,28 @@ const TicketView = () => {
       form.reset({ ...originalTicket,...notifyValues })
     }
   }, [originalTicket])
-  useEffect(() => {
-    triggerAccordioItemsValidations();
-  }, [accordionOpen])
+
+  //assets lisat get for edit
+   const assetListAPICall=async(id:string,compId:number)=>{
+   await getSRAssetsList(id,compId).then(res => {
+
+        if (res.success && res.data && res.data !== undefined) {
+          setAssetData(res.data.AssetsList)
+          let cols=generateColumnsFromData(res.data.AssetsList,false)
+          setAssetCols(cols)
+        } else {
+          setAssetData([])
+        }
+      }
+      )
+      .catch((err) => {
+   
+      })
+      .finally(() => {
+        dispatch(setLoading(false));
+      });
+    }
+
   //fetch single ticket related apis
   async function fetchSingleTicketRelatedAPIs(serviceRequestId: number) {
     dispatch(setLoading(true));
@@ -268,6 +305,9 @@ const TicketView = () => {
         setSelectedTicket(ticketData);
         try {
           await fetchAdditionalFieldsData(ticketData.ServiceRequestType, 111, ticketData);
+            if(ticketData.AssetId){
+             await assetListAPICall(serviceRequestId.toString(),111)
+          }
         } catch (err) {}
       }
       if (childTickets.status === 'fulfilled' && childTickets.value.data) {
@@ -315,9 +355,9 @@ const TicketView = () => {
     }
   }
   //fetch all tickets list
-  async function fetchAllTickets() {
+  async function fetchAllTickets(requestType:string) {
     dispatch(setLoading(true))
-    await getAllSRDetailsList('All', 111, 'All').then(res => {
+    await getAllSRDetailsList('All', 111, requestType).then(res => {
       if (res.success && res.data.status === undefined) {
         if (Array.isArray(res.data)) {
           setTickets(res.data)
@@ -332,6 +372,7 @@ const TicketView = () => {
   }
   //fetch uploaded files data based on the service request id 
   async function fetchUploadedFilesByServiceRequestId(serviceRequestId: number) {
+    dispatch(setLoading(true))
     await getUploadedFilesByServiceRequestId(serviceRequestId, 111).then(res => {
       if (res.success && res.data) {
         setUploadData(res.data?.FileUploadDetails)
@@ -339,7 +380,9 @@ const TicketView = () => {
         setUploadData([]);
       }
     }).catch(err => {
-    });
+    }).finally(()=>{
+      dispatch(setLoading(false));
+    })
   }
   //store lookups data in json
   const setLookupsDataInJson = (lookupsData: allResponsesType, config: GenericObject): void => {
@@ -410,7 +453,6 @@ const TicketView = () => {
   }
   //add comments api
   const postComment = async () => {
-    console.log("payload");
     const payload = {
       "ServiceRequestComments": [
         {
@@ -447,8 +489,9 @@ const TicketView = () => {
   ): ColumnDef<T>[] {
     if (!data || data.length === 0) return [];
     const sample = data[0];
-    const columns: ColumnDef<T>[] = Object.keys(sample).map((key) => {
-      const value = sample[key];
+    let keys=Object.keys(sample)
+    const columns: ColumnDef<T>[] = keys.filter((obj)=>obj!=="ProductId").map((key) => {
+    const value = sample[key];
 
       let editType: 'text' | 'number' | 'date' | 'select' = 'text';
       if (typeof value === 'number') {
@@ -465,6 +508,8 @@ const TicketView = () => {
           editType,
         },
       } as ColumnDef<T>;
+  
+  
     });
 
     if (includeActions) {
@@ -485,22 +530,21 @@ const TicketView = () => {
         enableHiding: false,
       });
     }
-
     return columns;
   }
   async function getCommentApi(ServiceRequestId: string, compId: number) {
+    dispatch(setLoading(true))
     try {
       const res = await getCommentsAPI(ServiceRequestId, compId);
       if (res.success && res.data) {
         const commentsArray = res.data[0]?.Comments || [];
         setComments(commentsArray);
       }
-    } catch (err) {
-      console.error('Error fetching subscription by customer:', err);
-    }
+    } catch (err) {}finally{dispatch(setLoading(false))}
   }
   //subscription table api call
   async function fetchSubscriptionByCustomer(CustomerName: string, compId: number, BranchName: string) {
+    dispatch(setLoading(true))
     await getSubscriptionByCustomer(CustomerName, compId, BranchName).then(res => {
       if (res.success && res.data.status === undefined) {
         setDataSource(res.data);
@@ -511,8 +555,9 @@ const TicketView = () => {
       }
     })
       .catch(err => {
-        console.error('Error fetching subscription by customer:', err);
-      });
+      }).finally(()=>{
+        dispatch(setLoading(false));
+      })
   }
   //fetching all lookups data
   async function fetchAllLookUps() {
@@ -562,6 +607,11 @@ const TicketView = () => {
       }else{
         setStatusOptions([])
       }
+      if(SRTLookUp.status === 'fulfilled' && SRTLookUp.value.success && SRTLookUp.value.data.ServiceRequestTypesLookup){
+        setSrtLookupData(SRTLookUp.value.data.ServiceRequestTypesLookup);
+      }else{
+        setSrtLookupData([]);
+      }
       setLookupsDataInJson(allResponses, fetchCustomerAndAssetCodesLookup);
     } catch (error) {
       msg.warning(`Error fetching lookups: ${error}`)
@@ -572,7 +622,7 @@ const TicketView = () => {
   }
   //function to navigate asset table
   function navigateToAssetTable() {
-    navigate("/service-desk/new-request/assetcode-table", { state: { flag: "goBack" } })
+    navigate("/service-desk/new-request/assetcode-table", { state: { data: form.getValues() } })
   }
   //history table api call
   async function fetchSubscriptionHistoryByCustomer(CustomerName: string, compId: number, BranchName: string, ProductId: number) {
@@ -584,15 +634,15 @@ const TicketView = () => {
         setHistoryColumns(newCols1)
       }
     }).catch(err => {
-        console.error('Error fetching subscription by customer:', err);
       }).finally(()=>{
         dispatch(setLoading(false));
       })
   }
   // Fetch additional fields - only clear values, preserve all field configs and options
-  async function fetchAdditionalFieldsData(name: string, compId: number, fieldData?: any) {
+  async function fetchAdditionalFieldsData(name: string, compId: number, fieldData?: any,setDefaultAssignee?:string) {
     dispatch(setLoading(true));
     let additionalCheckBoxNames = []
+    let additionalDateNames=[]
     let updatedFields=[]
     try {
       const res = await getSRAdditionalFieldsByServiceRequestType(name, compId);
@@ -605,7 +655,10 @@ const TicketView = () => {
           const newAdditionalFields = res.data.AdditionalFields.map((field: any) => {
             if (field.FieldType.toLowerCase() === "checkbox") {
               additionalCheckBoxNames.push(field.FieldName)
+            }else if(field.FieldType.toLowerCase() === "date"){
+              additionalDateNames.push(field.FieldName)
             }
+
 
             return ({
               name: field.FieldName,
@@ -617,17 +670,25 @@ const TicketView = () => {
               disabled: !isCreateMode,
               allowClear: true,
               defaultValue: '',
-
+              format: "DD-MM-YYYY",
               options: field.FieldType === 'Dropdown' || field.FieldType === 'CheckBox' || field.FieldType === 'RadioButton'
                 ? field.FieldValues?.split(",")?.map((opt: any) => ({
                   label: opt,
                   value: opt,
                 }))
                 : [],
+              // ...(field.fieldType.toLowerCase()==="date" && {format: "DD-MM-YYYY"}),
             })
           }
 
           );
+          if(setDefaultAssignee && srtLookupData.length!==0 && watch('ServiceRequestType')){
+            const selectedServiceRequestType = watch('ServiceRequestType');
+            const matchingSrt = srtLookupData.find(item => item.ServiceRequestTypeName === selectedServiceRequestType);
+            if(matchingSrt){
+              setValue('AssigneeSelectedUsers', matchingSrt.UserGroup ? matchingSrt.UserGroup.split(",") : []);
+            }
+          }
           updatedFields = [...baseFieldsOnly, ...newAdditionalFields];
           setShowAccordion(true);
           newAdditionalFields.forEach((field: any) => {
@@ -664,6 +725,9 @@ const TicketView = () => {
             additionalFields[field.FieldName] = field.FieldValue || '';
             if (additionalCheckBoxNames.includes(field.FieldName))
               additionalFields[field.FieldName] = field.FieldValue.split(",");
+
+              if (additionalDateNames.includes(field.FieldName))
+                    additionalFields[field.FieldName] = formatDateToDDMMYYYY(field.FieldValue);
           });
         }
        fieldData["AssigneeSelectedUsers"] = {  "Users":fieldData["AssigneeSelectedUsers"].split(","),"User Group": fieldData["AssigneeSelectedUserGroups"].split(",")};
@@ -680,44 +744,78 @@ const TicketView = () => {
       dispatch(setLoading(false));
     }
   }
-  //trigger additional fields validations which are required 
-  async function triggerAccordioItemsValidations() {
-    if (accordionOpen === 'additional-fields') {
-      await trigger(fields.filter(f => f.isAdditionalField).map(f => f.name));
-    }
-  }
   //upload Functionality and API Integration
-  const multipleFileUpload = async (
-    filelist: UploadFileInput[]): Promise<void> => {
-    const files: (UploadedFileOutput | null)[] = await Promise.all(
-      filelist?.map(async (file) => {
-        try {
-          if (!file.url) throw new Error("Missing file URL");
-          const response = await axios.get<Blob>(file.url, { responseType: "blob" });
-          const byteArray = await fileToByteArray(response.data);
-          const byteArrayAsArray = Array.from(byteArray);
-          const jsonArrayString = JSON.stringify(byteArrayAsArray);
-          const fileType = file.name.split(".").pop() || "";
-          return {
-            FileName: file.name,
-            ServiceDocumentFile: jsonArrayString,
-            FileType: fileType,
-            FileConversionType: file.type,
-          };
-        } catch (error) {
-          console.error(`Failed to process file ${file.name}:`, error);
-          return null;
-        }
-      })
-    );
+  // const multipleFileUpload = async (
+  //   filelist: UploadFileInput[]): Promise<void> => {
+  //   const files: (UploadedFileOutput | null)[] = await Promise.all(
+  //     filelist?.map(async (file) => {
+  //       try {
+  //         if (!file.url) throw new Error("Missing file URL");
+  //         const response = await axios.get<Blob>(file.url, { responseType: "blob" });
+  //         const byteArray = await fileToByteArray(response.data);
+  //         const byteArrayAsArray = Array.from(byteArray);
+  //         const jsonArrayString = JSON.stringify(byteArrayAsArray);
+  //         const fileType = file.name.split(".").pop() || "";
+  //         return {
+  //           FileName: file.name,
+  //           ServiceDocumentFile: jsonArrayString,
+  //           FileType: fileType,
+  //           FileConversionType: file.type,
+  //         };
+  //       } catch (error) {
+  //         return null;
+  //       }
+  //     })
+  //   );
 
-    const validFiles = files.filter(
-      (file): file is UploadedFileOutput => file !== null
-    );
-    setAttachments(validFiles);
-  };
+  //   const validFiles = files.filter(
+  //     (file): file is UploadedFileOutput => file !== null
+  //   );
+  //   setAttachments(validFiles);
+  // };
+
+  //upload Functionality and API Integration
+const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> => {
+  // Ensure filelist is an array
+  const fileArray = Array.isArray(filelist) ? filelist : [];
+  
+  if (fileArray.length === 0) {
+    console.warn('No files to upload');
+    return;
+  }
+
+  const files: (UploadedFileOutput | null)[] = await Promise.all(
+    fileArray.map(async (file, index) => {
+      try {
+        if (!file.url) throw new Error(`Missing file URL for file at index ${index}`);
+        
+        const response = await axios.get<Blob>(file.url, { responseType: "blob" });
+        const byteArray = await fileToByteArray(response.data);
+        const byteArrayAsArray = Array.from(byteArray);
+        const jsonArrayString = JSON.stringify(byteArrayAsArray);
+        const fileType = file.name.split(".").pop() || "";
+        
+        return {
+          FileName: file.name,
+          ServiceDocumentFile: jsonArrayString,
+          FileType: fileType,
+          FileConversionType: file.type,
+        };
+      } catch (error) {
+        console.error(`Failed to process file ${file.name}:`, error);
+        return null;
+      }
+    })
+  );
+
+  const validFiles = files.filter(
+    (file): file is UploadedFileOutput => file !== null
+  );
+
+  setAttachments(validFiles);
+};
   //handling uploaded files
-  const handleSubmitUploadedFiles = async (id: string) => {
+  const handleSubmitUploadedFiles = async (id: string,updatedData?:any) => {
     dispatch(setLoading(true));
     const uploadPayload = { ServiceReqFileUploadDetails: attachments }
     await saveFileUpload(111, id, uploadPayload).then(res => {
@@ -727,6 +825,10 @@ const TicketView = () => {
       }
     }).catch(err => { }).finally(() => {
       if (!isCreateMode) {
+     
+        if(updatedData.status=="Closed"){
+            navigate(-1)
+        }
         fetchSingleTicketRelatedAPIs(Number(selectedTicketId))
       }else{
         form.reset();
@@ -812,6 +914,7 @@ const TicketView = () => {
                 value={ctrl.value}
                 onChange={ctrl.onChange}
                 error={errors[name]?.message as string}
+                  dropdownClassName={true ? 'z-[10001]' : ''}
               />
             )}
           />
@@ -945,10 +1048,8 @@ const TicketView = () => {
   }
   //handle submit for creating tickets
   const handleSave = async () => {
-    const isValidationFailed = fields.filter(field => field.isRequired && field.isAdditionalField).map(ele => form.getValues()[ele.name]).some(e => !e);
-    if (isValidationFailed) {
-      setAccordionOpen('additional-fields');
-      msg.warning('Please Fill The Required Additional Fields!!')
+    const isValidationFailed = fields.filter(f => f.isAdditionalField && f.isRequired).every(f=>form.getValues()[f.name] !== undefined && form.getValues()[f.name] !== null && form.getValues()[f.name] !== '');
+    if (!isValidationFailed) {
       return;
     }
     const payload = {
@@ -985,19 +1086,15 @@ const TicketView = () => {
       }
     }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
   };
-
   //handle Edit Save
   const handleUpdate = async () => {
-    const isValidationFailed = fields.filter(field => field.isRequired && field.isAdditionalField).map(ele => form.getValues()[ele.name]).some(e => !e);
-    if (isValidationFailed) {
-      setAccordionOpen('additional-fields');
-      msg.warning('Please Fill The Required Additional Fields!!')
+    const isValidationFailed = fields.filter(f => f.isAdditionalField && f.isRequired).every(f=>form.getValues()[f.name] !== undefined && form.getValues()[f.name] !== null && form.getValues()[f.name] !== '');
+    if (!isValidationFailed) {
       return;
     }
     updateServiceRequestDetails()
   }
   async function updateServiceRequestDetails() {
-
     let commentlist=commentForm.watch("comment")  && commentForm.watch("comment")!= "<p><br></p>"?`${updatedComments} Comment:${commentForm.watch("comment")}`:updatedComments
     const updatedData = {
       "ServiceRequestNo": originalTicket.ServiceRequestNo,
@@ -1031,8 +1128,11 @@ const TicketView = () => {
     await updateServiceRequest(111, 'All', payload).then(res => {
       if (res.data.status) {
         if (attachments?.length > 0) {
-          handleSubmitUploadedFiles(originalTicket.ServiceRequestId.toString())
+          handleSubmitUploadedFiles(originalTicket.ServiceRequestId.toString(),updatedData)
         }else{
+          if(updatedData.Status=="Closed"){
+             navigate(-1)
+          }
         fetchSingleTicketRelatedAPIs(Number(selectedTicketId))
         // resetValue()
         }
@@ -1073,19 +1173,25 @@ const TicketView = () => {
       setUpdatedComments("")
       setHasChanges(false);
       setIsEditing(false);
-      
       fieldsCopy.forEach(field => { field.disabled = true; });
       setFields(fieldsCopy);
   }
-
   // Handle cancel edit - only clear form values, preserve all field configs and options
   const handleEdit = (type: string) => {
   let fieldsCopy = structuredClone(fields);
     if (type === 'cancel') {
       msg.warning('All unsaved changes have been discarded.');
-      form.reset({ ...originalTicket,...notifyValues });
-      setSelectedTicket(originalTicket);
-      resetValue(fieldsCopy)
+      if(isCreateMode){
+        form.reset();
+        setAttachments([]);
+        setUpdatedComments("")
+        setHasChanges(false);
+        setIsEditing(false);
+      }else{
+        form.reset({ ...originalTicket,...notifyValues });
+        setSelectedTicket(originalTicket);
+        resetValue(fieldsCopy);
+      }
      
     } else if (type === 'clear' || type === 'save') {
       form.reset({...notifyValues});
@@ -1099,11 +1205,19 @@ const TicketView = () => {
     
       setIsEditing(true);
       setHasChanges(true);
-      let isClosed = selectedTicket.Status !== "Closed"
+      let isNotClosed = selectedTicket.Status !== "Closed"
       fieldsCopy.forEach(field => {
-        if (isClosed) {
-          if (!field.isAlwaysOnDisabled && (field.name !== 'Branch' && field.name !== 'ServiceRequestType')) {
-            field.disabled = false;
+        if (isNotClosed) {
+          if (!field.isAlwaysOnDisabled && (field.name !== 'Branch' && field.name !== 'ServiceRequestType'&& field.name !== 'RequestedBy')) {
+            if((workBenchEnables.includes(requestTypeId)) && (field.name !== 'Severity') && (field.name !== 'Customer')&& ( field.name !== 'Title' && field.name !== 'Description') ){
+             field.disabled = false;
+            }else if((myRequestEnables.includes(requestTypeId)) && (field.name !== 'Priority')  ){
+              field.disabled = false;
+            }else if(requestTypeId==="106"){
+                 field.disabled = false;
+            }
+            
+           
           }
         } else {
           field.disabled = !enableInClose.includes(field.name)
@@ -1112,43 +1226,59 @@ const TicketView = () => {
       setFields(fieldsCopy);
     }
   };
-  //handle discard changes
-  const handleDiscardChanges = () => {
-    setSelectedTicket(originalTicket);
-    setHasChanges(false);
-  };
   const handleTicketSelect = (ticket: Ticket,isLink:boolean) => {
     if (hasChanges) {
       const confirmDiscard = window.confirm('You have unsaved changes. Do you want to discard them?');
       if (!confirmDiscard) return;
     }
+   if((selectedTicketId!==ticket.ServiceRequestId.toString())){
     form.reset({...notifyValues})
+    }
     if(!isLink){
     setSelectedTicketId(ticket.ServiceRequestId.toString())
     if (isEditing) {
       handleEdit("cancel")
     }
     commentForm.reset({comment:""})
-    window.history.replaceState(null, '', `/tickets/${ticket.ServiceRequestId}`);
+    // window.history.replaceState(null, '', `/tickets/${ticket.ServiceRequestId}`);
+    const parts = window.location.pathname.split('/');
+    parts[parts.length - 1] = ticket.ServiceRequestId.toString();
+    window.history.replaceState(null, '', parts.join('/'));
+
     }else{
       
-          setSelectedTicketId(ticket.ChildServiceRequestId.toString())
+     setSelectedTicketId(ticket.ChildServiceRequestId.toString())
     if (isEditing) {
       handleEdit("cancel")
     }
     commentForm.reset({comment:""})
-    window.history.replaceState(null, '', `/tickets/${ticket.ChildServiceRequestId}`);
+        const parts = window.location.pathname.split('/');
+    parts[parts.length - 1] = ticket.ChildServiceRequestId.toString();
+    window.history.replaceState(null, '', parts.join('/'));
+    // window.history.replaceState(null, '', `/tickets/${ticket.ChildServiceRequestId}`);
     }
 
   };
-  const handleFieldChange = (field: string, value: string | string[]) => {
-    const newTicket = { ...selectedTicket, [field]: value };
-    setSelectedTicket(newTicket);
-    const hasChangesNow = JSON.stringify(newTicket) !== JSON.stringify(originalTicket);
-    setHasChanges(hasChangesNow);
-  };
-  const handleSaveAll = () => {
-    // Implementation for saving all changes
+  const triggerAccordionItemsValidations=async()=>{
+    await trigger(fields.filter(f => f.isAdditionalField && f.isRequired).map(f => f.name));
+    setTriggerAccordionValidations(false);
+  }
+  useEffect(()=>{
+    if(triggerAccordionValidations){
+      triggerAccordionItemsValidations();
+    }
+  },[triggerAccordionValidations])
+  const handleTriggerAccordionItemsValidations = ():void => {
+    if(fields.filter(f => f.isAdditionalField && f.isRequired).length > 0 && showAccordion){
+      const valid = fields.filter(f => f.isAdditionalField && f.isRequired).every(f=>form.getValues()[f.name] !== undefined && form.getValues()[f.name] !== null && form.getValues()[f.name] !== '');
+      if (!valid) {
+        setAccordionOpen('additional-fields');
+        setTriggerAccordionValidations(true);
+        msg.warning('Please Fill All The Required Additional Fields!!');
+      }
+    } else {
+      setAccordionOpen(undefined);
+    }
   };
   return (
     <div className="h-full   bg-gray-50 flex flex-col ">
@@ -1230,7 +1360,7 @@ const TicketView = () => {
           <div className="bg-white border-b  shadow-sm px-4 lg:px-6 py-3 flex flex-col lg:flex-row lg:items-center justify-between gap-4 shrink-0">
             <div className="flex items-center gap-4 lg:gap-6 flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <div className=' text-gray-400 hover:text-blue-900 p-1 cursor-pointer' onClick={() => navigate('/tickets')}>
+                <div className=' text-gray-400 hover:text-blue-900 p-1 cursor-pointer' onClick={() => navigate(-1)}>
                   <ArrowLeft className="h-4 w-4 text-current stroke-[3]" />
                 </div>
                 <span className="text-gray-600 text-sm">All Tickets</span>
@@ -1270,7 +1400,16 @@ const TicketView = () => {
                   <ReusableButton
                     size="small"
                     variant="primary"
-                    onClick={isCreateMode ? form.handleSubmit(handleSave) : form.handleSubmit(handleUpdate)}
+                    onClick={isCreateMode
+                      ? () => {
+                        handleSubmit(handleSave)();
+                        handleTriggerAccordionItemsValidations();
+                      }
+                      : () => {
+                          handleSubmit(handleUpdate)();
+                          handleTriggerAccordionItemsValidations();
+                      }
+                    }
                     icon={<Save className="h-4 w-4" />}
                   >
                     Save
@@ -1370,9 +1509,20 @@ const TicketView = () => {
                             {getFieldsByNames(['Customer']).map(renderField)}
                           </div>
                           {watch('Customer') && <div>
+                            <div className='text-sm font-medium mb-1'>Subscription Details List:</div>
                             <ReusableTable
                               data={dataSource}
                               columns={cols}
+                              enableExport={false}
+
+                            />
+                          </div>}
+                           {!isCreateMode && selectedTicket.AssetId!==null  && <div>
+                             <div className='text-sm font-medium mb-1'>Asset List:</div>
+                            <ReusableTable
+                              data={assetsData}
+                              columns={assetCols}
+                              enableExport={false}
                             />
                           </div>}
                         </div>
@@ -1391,7 +1541,7 @@ const TicketView = () => {
                               </AccordionTrigger>
                               <AccordionContent className="px-6 pb-6">
                                 <div className="space-y-4">
-                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  <div className="grid grid-cols-1 md:grid-cols-2 capitalize gap-4">
                                     {getAdditionalFields().map(renderField)}
                                   </div>
                                 </div>
@@ -1412,7 +1562,7 @@ const TicketView = () => {
                             <TabsList className="grid w-full grid-cols-3 h-auto">
                               <TabsTrigger value="comments" className="text-xs sm:text-sm px-2 sm:px-4 py-2">Comments</TabsTrigger>
                               <TabsTrigger value="history" className="text-xs sm:text-sm px-2 sm:px-4 py-2">History</TabsTrigger>
-                              <TabsTrigger value="worklog" className="text-xs sm:text-sm px-2 sm:px-4 py-2">Work Log</TabsTrigger>
+                              {/* <TabsTrigger value="worklog" className="text-xs sm:text-sm px-2 sm:px-4 py-2">Work Log</TabsTrigger> */}
                             </TabsList>
 
                             <TabsContent value="comments" className="space-y-4">
@@ -1473,8 +1623,8 @@ const TicketView = () => {
                                     <div className="flex items-center gap-2 mb-1">
                                       <span className="font-medium">{change.CommenterName}</span>
                                       <span className="text-sm text-gray-500">{change.RequestedDate}</span>
-                                      <Badge variant="outline" className="text-xs">
-                                      </Badge>
+                                      {/* <Badge variant="outline" className="text-xs">
+                                      </Badge> */}
                                     </div>
                                     <div className="text-sm">
                                       <div className='commentHistory ' dangerouslySetInnerHTML={{ __html: change.Comment }} />

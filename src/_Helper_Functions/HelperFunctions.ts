@@ -8,7 +8,7 @@ export const formatDate = (date: Date | string | number, format: string = 'YYYY-
 // "04/03/2025 09:58:52" to DD-MM-YYYY
 export function formatDateToDDMMYYYY(dateTimeStr: string) {
   if (!dateTimeStr?.trim()) return "";
-  return (([m, d, y]) => `${d}-${m}-${y}`)(
+  return (([d, m, y]) => `${d}-${m}-${y}`)(
     dateTimeStr.split(" ")[0].split("/")
   );
 }
@@ -70,5 +70,28 @@ export const byteArrayToFile = (
     link.href = window.URL.createObjectURL(blob);
     link.download = `${fileName}.${format}`;
     link.click();
+  };
+
+  //get getRequestType based on Id
+  export const getRequestTypeById = (id) => {
+    console.log("got",id)
+    switch (id) {
+      case "100":
+           return "SLAViolatedRequests";
+      case "101":
+         return "OpenAndPending";
+      case "102":
+        return "OpenTicketsInMyGroups";
+      case "103":
+        return "Closed";
+      case "104":
+        return "MyOpenAndPendingRequests";
+      case "105":
+        return "MyRequestClosed";
+         case "106":
+        return "All";
+      default:
+        return "";
+    }
   };
  

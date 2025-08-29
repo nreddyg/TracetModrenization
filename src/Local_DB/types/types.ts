@@ -3,8 +3,9 @@ import { TreeNode } from "@/components/ui/reusable-treeSelect";
  
  
 export type FieldType = 'text' | 'dropdown' | 'multiselect' | 'textarea' | 'heading' | "date" | "upload"
-  | "richtext" | "checkbox" | "table" | "separator" | 'radiobutton' | 'numeric' | 'treeselect' | 'rangepicker';
- 
+  | "richtext" | "checkbox" | "table" | "separator" | 'radiobutton' | 'numeric'|"rangepicker" | 
+  "timepicker" | 'password' | 'treeselect';
+
 export interface DropdownOption {
     label: string;
   value: string | number;
@@ -65,9 +66,12 @@ export interface field {
   isAdditionalField?: boolean; // For additional fields
   show?:boolean;
   defaultChecked?:boolean
-   treeData?: TreeNode[];
-   tooltip?:string;
+  treeData?: TreeNode[];
+  tooltip?:string;
   errormsg?:boolean;
+  dependsOn?:string;
+  validationPattern?:string;
+  patternErrorMessage?:string;
 }
  
 export type BaseField = field;

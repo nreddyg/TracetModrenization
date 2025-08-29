@@ -50,7 +50,8 @@ export interface ReusableRadioProps {
   id?: string;
   autoFocus?: boolean;
   required?: boolean;
-  
+  isRequired?: boolean;
+
   // Custom render functions
   renderOption?: (option: RadioOption, index: number) => React.ReactNode;
 }
@@ -80,6 +81,7 @@ export const ReusableRadio = forwardRef<HTMLDivElement, ReusableRadioProps>(
     id,
     autoFocus = false,
     required = false,
+    isRequired = false,
     renderOption,
     ...props 
   }, ref) => {
@@ -98,7 +100,7 @@ export const ReusableRadio = forwardRef<HTMLDivElement, ReusableRadioProps>(
           className={cn(
             "text-sm font-medium",
             disabled && "text-muted-foreground",
-            required && "after:content-['*'] after:text-red-500 after:ml-1"
+            isRequired && "after:content-['*'] after:text-red-500 after:ml-1"
           )}
           htmlFor={id}
         >
@@ -292,7 +294,7 @@ export const ReusableRadio = forwardRef<HTMLDivElement, ReusableRadioProps>(
           disabled={disabled || loading}
           className={radioGroupClasses}
           name={name}
-          required={required}
+          required={isRequired}
           {...props}
         >
           {options.map((option, index) => renderDefaultOption(option, index))}

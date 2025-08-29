@@ -22,12 +22,12 @@ interface CustomAxiosConfig extends InternalAxiosRequestConfig {
 api.interceptors.request.use(
   (config: CustomAxiosConfig): InternalAxiosRequestConfig => {
     if (!config.noAuth) {
-      const token = localStorage.getItem('Token');
-      // if (token) {
+      const token = JSON.parse(localStorage.getItem('Token'));
+      if (token) {
         // Axios v1+ headers is an instance of AxiosHeaders; use set method
         if (config.headers && typeof config.headers.set === 'function') {
-          config.headers.set('Authorization', `Bearer dghjgy9GT_ky59tqndispurbGhUxGYQmK5C1-4ifAUnwdSeG5K2MizIsfpZZEF0EUQEWUFCKNmg1MZ2KIn73dtP5ObkIWuRaGsCK6YbH-2pGBrZAd1bHvoZBj7gaOZGRQuLGDv0uOjd2ASeUHLLzqw-oHekZyCw8ZzWZ_vXjknmSRnEhlEM4GS7gjNuPgH3gO-gF3hdXRJcs_mIL-jnowf2crMtDIXaU8UBn3P0f9R6SrM91k1CfETuHDYfXsUPwC4USTlm-3qNIQox2r0YP0KgQaZbENQdAj7EOT11HAom-kTiloTIDs35A93MxXYky`);
-        // }
+          config.headers.set('Authorization', `Bearer ${token}`);
+        }
       }
     }
     return config;
@@ -40,6 +40,8 @@ api.interceptors.response.use(
   (error: AxiosError) => {
     if (error.response?.status === 401) {
       alert('Unauthorized - Please log in again.');
+      localStorage.clear();
+      window.location.href = '/';
     }
     return Promise.reject(error);
   }

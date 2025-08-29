@@ -271,67 +271,141 @@ export const ReusableUpload = forwardRef<HTMLInputElement, UploadProps>(
       }
     };
 
+    // const handleFileSelect = async (files: FileList | null) => {
+    //   if (!files || !onChange) return;
+
+    //   const fileArray = Array.from(files);
+    //   const currentCount = value.length;
+
+    //   for (let i = 0; i < fileArray.length; i++) {
+    //     if (!multiple && i > 0) break;
+    //     if (currentCount + i >= maxFiles) break;
+
+    //     const file = fileArray[i];
+        
+    //     // Validate file type
+    //     if (!validateFileType(file, accept)) {
+    //       continue;
+    //     }
+        
+    //     // Check file size
+    //     if (file.size > maxSize * 1024 * 1024) {
+    //       continue;
+    //     }
+
+    //     // Run beforeUpload check
+    //     if (beforeUpload) {
+    //       try {
+    //         const shouldUpload = await beforeUpload(file, fileArray);
+    //         if (!shouldUpload) continue;
+    //       } catch (error) {
+    //         continue;
+    //       }
+    //     }
+
+    //     const processedFile = file;
+
+    //     const uploadFileItem: UploadFile = {
+    //       id: Date.now().toString() + i,
+    //       name: file.name,
+    //       size: file.size,
+    //       type: file.type,
+    //       file: processedFile,
+    //       url: URL.createObjectURL(processedFile),
+    //       status: action || customRequest ? 'uploading' : 'done',
+    //       percent: action || customRequest ? 0 : 100
+    //     };
+
+    //     // Generate preview
+    //     if (showPreview) {
+    //       generatePreview(processedFile, uploadFileItem.id);
+    //     }
+
+    //     // Add to file list
+    //     const newFiles = multiple ? [...value, uploadFileItem] : [uploadFileItem];
+    //     onChange(newFiles);
+
+    //     // Start upload if needed
+    //     if (action || customRequest) {
+    //       performUpload(processedFile, uploadFileItem);
+    //     }
+    //   }
+    // };
+
+    
+    
     const handleFileSelect = async (files: FileList | null) => {
-      if (!files || !onChange) return;
+  if (!files || !onChange) return;
 
-      const fileArray = Array.from(files);
-      const currentCount = value.length;
+  const fileArray = Array.from(files);
+  const currentCount = value.length;
+  const newFiles: UploadFile[] = []; // Collect all new files first
 
-      for (let i = 0; i < fileArray.length; i++) {
-        if (!multiple && i > 0) break;
-        if (currentCount + i >= maxFiles) break;
+  for (let i = 0; i < fileArray.length; i++) {
+    if (!multiple && i > 0) break;
+    if (currentCount + newFiles.length >= maxFiles) break;
 
-        const file = fileArray[i];
-        
-        // Validate file type
-        if (!validateFileType(file, accept)) {
-          continue;
-        }
-        
-        // Check file size
-        if (file.size > maxSize * 1024 * 1024) {
-          continue;
-        }
+    const file = fileArray[i];
+    
+    // Validate file type
+    if (!validateFileType(file, accept)) {
+      console.warn(`File ${file.name} has invalid type`);
+      continue;
+    }
+    
+    // Check file size
+    if (file.size > maxSize * 1024 * 1024) {
+      console.warn(`File ${file.name} is too large`);
+      continue;
+    }
 
-        // Run beforeUpload check
-        if (beforeUpload) {
-          try {
-            const shouldUpload = await beforeUpload(file, fileArray);
-            if (!shouldUpload) continue;
-          } catch (error) {
-            continue;
-          }
-        }
-
-        const processedFile = file;
-
-        const uploadFileItem: UploadFile = {
-          id: Date.now().toString() + i,
-          name: file.name,
-          size: file.size,
-          type: file.type,
-          file: processedFile,
-          url: URL.createObjectURL(processedFile),
-          status: action || customRequest ? 'uploading' : 'done',
-          percent: action || customRequest ? 0 : 100
-        };
-
-        // Generate preview
-        if (showPreview) {
-          generatePreview(processedFile, uploadFileItem.id);
-        }
-
-        // Add to file list
-        const newFiles = multiple ? [...value, uploadFileItem] : [uploadFileItem];
-        onChange(newFiles);
-
-        // Start upload if needed
-        if (action || customRequest) {
-          performUpload(processedFile, uploadFileItem);
-        }
+    // Run beforeUpload check
+    if (beforeUpload) {
+      try {
+        const shouldUpload = await beforeUpload(file, fileArray);
+        if (!shouldUpload) continue;
+      } catch (error) {
+        console.warn(`beforeUpload failed for ${file.name}`);
+        continue;
       }
+    }
+
+    const processedFile = file;
+
+    const uploadFileItem: UploadFile = {
+      id: Date.now().toString() + i + Math.random().toString(36).substr(2, 9), // More unique ID
+      name: file.name,
+      size: file.size,
+      type: file.type,
+      file: processedFile,
+      url: URL.createObjectURL(processedFile),
+      status: action || customRequest ? 'uploading' : 'done',
+      percent: action || customRequest ? 0 : 100
     };
 
+    // Generate preview
+    if (showPreview) {
+      generatePreview(processedFile, uploadFileItem.id);
+    }
+
+    newFiles.push(uploadFileItem);
+  }
+
+  // Update the file list with all new files at once
+  if (newFiles.length > 0) {
+    const updatedFiles = multiple ? [...value, ...newFiles] : newFiles;
+    onChange(updatedFiles);
+
+    // Start uploads for all new files if needed
+    if (action || customRequest) {
+      newFiles.forEach(uploadFileItem => {
+        if (uploadFileItem.file) {
+          performUpload(uploadFileItem.file, uploadFileItem);
+        }
+      });
+    }
+  }
+};
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       handleFileSelect(e.target.files);
       // Reset input value to allow selecting the same file again

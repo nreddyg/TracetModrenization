@@ -1,11 +1,8 @@
-
-
-
 import React, { useState, useEffect, useRef } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Clock, X } from "lucide-react";
+import { X } from "lucide-react";
 
 // Time parsing and formatting utilities
 const parseTime = (str, format = "HH:mm:ss") => {
@@ -92,50 +89,136 @@ const autoFormatTimeInput = (value, format, use12Hours, cursorPosition, previous
     cleanValue = value.replace(/(AM|PM|am|pm)/gi, '').trim();
   }
   
-  // Don't auto-format if user has manually added colons or is editing existing content
-  if (cleanValue.includes(':') && !isAdding) {
-    return { formatted: value, shouldAddColon: false };
-  }
-  
-  // Remove colons for processing
-  const digitsOnly = cleanValue.replace(/[^0-9]/g, '');
-  
-  if (!digitsOnly) {
-    return { formatted: amPmSuffix ? amPmSuffix : '', shouldAddColon: false };
-  }
-  
   let formatted = '';
   let shouldAddColon = false;
   
   // Determine expected segments based on format
   const hasSeconds = format.includes('ss');
-  const maxSegments = hasSeconds ? 3 : 2;
   
-  // Auto-format only when adding digits and no colons present
-  if (isAdding && !cleanValue.includes(':')) {
-    if (digitsOnly.length === 2) {
-      // After 2 digits, add colon for hours
-      formatted = digitsOnly + ':';
-      shouldAddColon = true;
-    } else if (digitsOnly.length === 4 && hasSeconds) {
-      // After 4 digits with seconds format, add second colon
-      formatted = digitsOnly.slice(0, 2) + ':' + digitsOnly.slice(2, 4) + ':';
-      shouldAddColon = true;
-    } else if (digitsOnly.length === 4 && !hasSeconds) {
-      // After 4 digits without seconds, format as HH:MM
-      formatted = digitsOnly.slice(0, 2) + ':' + digitsOnly.slice(2, 4);
-    } else if (digitsOnly.length > 4 && hasSeconds) {
-      // More than 4 digits, format as HH:MM:SS
-      const hours = digitsOnly.slice(0, 2);
-      const minutes = digitsOnly.slice(2, 4);
-      const seconds = digitsOnly.slice(4, 6);
-      formatted = hours + ':' + minutes + ':' + seconds;
+  // If input already contains colons, handle it carefully
+  if (cleanValue.includes(':')) {
+    // Split by colons to get parts
+    const parts = cleanValue.split(':');
+    const processedParts = [];
+    
+    for (let i = 0; i < parts.length; i++) {
+      // Remove any non-digits from each part
+      let digits = parts[i].replace(/[^0-9]/g, '');
+      
+      if (i === 0) {
+        // Hours part - limit to 2 digits, validate range based on format
+        digits = digits.slice(0, 2);
+        if (digits.length === 2) {
+          const hourValue = parseInt(digits, 10);
+          if (use12Hours) {
+            if (hourValue < 1) digits = '01';
+            else if (hourValue > 12) digits = '12';
+          } else {
+            if (hourValue > 23) digits = '23';
+          }
+        }
+      } else if (i === 1 || i === 2) {
+        // Minutes or seconds part - limit to 2 digits and cap at 59
+        digits = digits.slice(0, 2);
+        if (digits.length === 2) {
+          const value = parseInt(digits, 10);
+          if (value > 59) digits = '59';
+        }
+      }
+      
+      processedParts.push(digits);
+    }
+    
+    // Reconstruct with colons
+    formatted = processedParts.join(':');
+    
+    // Remove trailing colon if it exists and no digits follow
+    if (formatted.endsWith(':') && processedParts[processedParts.length - 1] === '') {
+      formatted = formatted.slice(0, -1);
+    }
+  } else {
+    // No colons present - handle auto-formatting
+    const digitsOnly = cleanValue.replace(/[^0-9]/g, '');
+    
+    if (!digitsOnly) {
+      return { formatted: amPmSuffix ? amPmSuffix : '', shouldAddColon: false };
+    }
+    
+    // Auto-format only when adding digits
+    if (isAdding) {
+      if (digitsOnly.length === 2) {
+        // After 2 digits, add colon for hours
+        formatted = digitsOnly + ':';
+        shouldAddColon = true;
+      } else if (digitsOnly.length === 4 && hasSeconds) {
+        // After 4 digits with seconds format, add second colon
+        let hours = digitsOnly.slice(0, 2);
+        let minutes = digitsOnly.slice(2, 4);
+        
+        // Validate hours
+        const hourValue = parseInt(hours, 10);
+        if (use12Hours) {
+          if (hourValue < 1) hours = '01';
+          else if (hourValue > 12) hours = '12';
+        } else {
+          if (hourValue > 23) hours = '23';
+        }
+        
+        // Validate minutes
+        const minuteValue = parseInt(minutes, 10);
+        if (minuteValue > 59) minutes = '59';
+        
+        formatted = hours + ':' + minutes + ':';
+        shouldAddColon = true;
+      } else if (digitsOnly.length === 4 && !hasSeconds) {
+        // After 4 digits without seconds, format as HH:MM
+        let hours = digitsOnly.slice(0, 2);
+        let minutes = digitsOnly.slice(2, 4);
+        
+        // Validate hours
+        const hourValue = parseInt(hours, 10);
+        if (use12Hours) {
+          if (hourValue < 1) hours = '01';
+          else if (hourValue > 12) hours = '12';
+        } else {
+          if (hourValue > 23) hours = '23';
+        }
+        
+        // Validate minutes
+        const minuteValue = parseInt(minutes, 10);
+        if (minuteValue > 59) minutes = '59';
+        
+        formatted = hours + ':' + minutes;
+      } else if (digitsOnly.length > 4 && hasSeconds) {
+        // More than 4 digits, format as HH:MM:SS
+        let hours = digitsOnly.slice(0, 2);
+        let minutes = digitsOnly.slice(2, 4);
+        let seconds = digitsOnly.slice(4, 6);
+        
+        // Validate hours
+        const hourValue = parseInt(hours, 10);
+        if (use12Hours) {
+          if (hourValue < 1) hours = '01';
+          else if (hourValue > 12) hours = '12';
+        } else {
+          if (hourValue > 23) hours = '23';
+        }
+        
+        // Validate minutes
+        const minuteValue = parseInt(minutes, 10);
+        if (minuteValue > 59) minutes = '59';
+        
+        // Validate seconds
+        const secondValue = parseInt(seconds, 10);
+        if (secondValue > 59) seconds = '59';
+        
+        formatted = hours + ':' + minutes + ':' + seconds;
+      } else {
+        formatted = digitsOnly;
+      }
     } else {
       formatted = digitsOnly;
     }
-  } else {
-    // Don't auto-format, just clean up
-    formatted = cleanValue;
   }
   
   return { 
@@ -204,7 +287,7 @@ export function ReusableTimePicker({
   disableHours = [],
   disableMinutes = [],
   disableSeconds = [],
-  showSeconds = true,
+  showSeconds = false,
   use12Hours = false
 }) {
   const [open, setOpen] = useState(false);
@@ -216,6 +299,7 @@ export function ReusableTimePicker({
   const [isPM, setIsPM] = useState(false);
   const inputRef = useRef(null);
   const isUpdatingFromPopup = useRef(false);
+  const isManualInput = useRef(false);
   const previousValue = useRef('');
 
   // Initialize from value prop
@@ -277,13 +361,14 @@ export function ReusableTimePicker({
     setIsPM(false);
   };
 
-  // Handle popup selection changes
+  // Handle popup selection changes - ONLY when selections are made via popup, not manual input
   useEffect(() => {
     if (
       selectedHour !== null &&
       selectedMinute !== null &&
       (!showSeconds || selectedSecond !== null) &&
-      open
+      open &&
+      !isManualInput.current // Prevent formatting during manual input
     ) {
       let hour = selectedHour;
       if (use12Hours) {
@@ -303,6 +388,9 @@ export function ReusableTimePicker({
     const rawValue = e.target.value;
     const cursorPosition = e.target.selectionStart;
     
+    // Mark that we're in manual input mode
+    isManualInput.current = true;
+    
     // Store cursor position
     const currentCursorPos = cursorPosition;
     
@@ -312,6 +400,11 @@ export function ReusableTimePicker({
     
     setInputValue(formattedValue);
     previousValue.current = formattedValue;
+    
+    // Reset manual input flag after a short delay
+    setTimeout(() => {
+      isManualInput.current = false;
+    }, 100);
     
     // Restore cursor position after state update
     setTimeout(() => {
@@ -344,8 +437,11 @@ export function ReusableTimePicker({
     }
   };
 
-  const handleInputBlur = () => {
-    // Validate and correct the time when input loses focus
+  const validateAndSetValue = () => {
+    // Mark that manual input is done
+    isManualInput.current = false;
+    
+    // Validate and correct the time
     if (inputValue) {
       const corrected = validateAndCorrectTime(inputValue, format, use12Hours);
       if (corrected !== inputValue) {
@@ -355,6 +451,22 @@ export function ReusableTimePicker({
           setError(false);
           onChange?.(parsed.format(format));
         }
+      }
+    }
+  };
+
+  const handleInputBlur = () => {
+    validateAndSetValue();
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      validateAndSetValue();
+      // Close the popup and blur the input to finalize the value
+      setOpen(false);
+      if (inputRef.current) {
+        inputRef.current.blur();
       }
     }
   };
@@ -376,6 +488,7 @@ export function ReusableTimePicker({
 
   const handleClear = (e) => {
     e.stopPropagation();
+    isManualInput.current = false;
     setInputValue("");
     resetSelectionStates();
     setError(false);
@@ -386,27 +499,23 @@ export function ReusableTimePicker({
     }
   };
 
-  const handleClockClick = (e) => {
-    e.stopPropagation();
-    setOpen(!open);
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
-  };
-
   const handleHourSelect = (hour) => {
+    isManualInput.current = false;
     setSelectedHour(hour);
   };
 
   const handleMinuteSelect = (minute) => {
+    isManualInput.current = false;
     setSelectedMinute(minute);
   };
 
   const handleSecondSelect = (second) => {
+    isManualInput.current = false;
     setSelectedSecond(second);
   };
 
   const handlePeriodSelect = (pm) => {
+    isManualInput.current = false;
     setIsPM(pm);
   };
 
@@ -423,38 +532,29 @@ export function ReusableTimePicker({
       )}
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <div className="flex gap-2">
-            <div className="relative flex-1">
-              <Input
-                ref={inputRef}
+          <div className="relative">
+            <Input
+              ref={inputRef}
+              disabled={isDisabled}
+              placeholder={placeholder}
+              value={inputValue}
+              onChange={handleManualInput}
+              onBlur={handleInputBlur}
+              onKeyDown={handleKeyDown}
+              onFocus={handleInputFocus}
+              onClick={handleInputClick}
+              className={`${className} ${error ? 'border-red-500' : ''} pr-8 h-[45px]`}
+            />
+            {inputValue && (
+              <button
+                type="button"
+                onClick={handleClear}
                 disabled={isDisabled}
-                placeholder={placeholder}
-                value={inputValue}
-                onChange={handleManualInput}
-                onBlur={handleInputBlur}
-                onFocus={handleInputFocus}
-                onClick={handleInputClick}
-                className={`${className} ${error ? 'border-red-500' : ''}`}
-              />
-            </div>
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={handleClockClick}
-              disabled={isDisabled}
-              className="px-3"
-            >
-              <Clock size={16} />
-            </Button>
-            <Button 
-              type="button" 
-              variant="ghost" 
-              onClick={handleClear} 
-              disabled={isDisabled}
-              className="text-red-500 px-2 hover:text-red-600"
-            >
-              <X size={16} />
-            </Button>
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 p-1 rounded-sm hover:bg-gray-100"
+              >
+                <X size={16} />
+              </button>
+            )}
           </div>
         </PopoverTrigger>
         <PopoverContent className="p-4 w-auto" align="start">
@@ -562,46 +662,3 @@ export function ReusableTimePicker({
     </div>
   );
 }
-
-// Demo component to test the TimePicker
-// function TimePickerDemo() {
-//   const [time1, setTime1] = useState("14:30:00");
-//   const [time2, setTime2] = useState("");
-//   const [time3, setTime3] = useState("2:30:45 PM");
-
-//   return (
-//     <div className="p-8 space-y-8 max-w-md">
-//       <h2 className="text-2xl font-bold mb-6">Enhanced Time Picker Demo</h2>
-//       <TimePicker
-//         label="24-hour format with seconds"
-//         value={time1}
-//         onChange={setTime1}
-//         format="HH:mm:ss"
-//         showSeconds={true}
-//         placeholder="HH:mm:ss"
-//       />
-      
-//       <TimePicker
-//         label="24-hour format without seconds"
-//         value={time2}
-//         onChange={setTime2}
-//         format="HH:mm"
-//         showSeconds={false}
-//         placeholder="HH:mm"
-//       />
-      
-//       <TimePicker
-//         label="12-hour format with AM/PM"
-//         value={time3}
-//         onChange={setTime3}
-//         format="h:mm:ss A"
-//         use12Hours={true}
-//         showSeconds={true}
-//         placeholder="h:mm:ss A"
-//       />
-      
-  
-//     </div>
-//   );
-// }
-ReusableTimePicker.displayName = "ReusableTimePicker";

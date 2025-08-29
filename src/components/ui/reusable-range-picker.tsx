@@ -21,6 +21,7 @@ interface DateRangePickerProps {
   onChange?: (range: DateRange | undefined) => void;
   className?: string;
   rangeplaceholder?: [string, string];
+  placeholder?: [string, string] ;
   error?: string;
   allowClear?: boolean;
   format?: string; // <-- format like "DD/MM/YYYY"
@@ -246,7 +247,7 @@ const ReusableRangePicker: React.FC<DateRangePickerProps> = ({
                 <button
                   type="button"
                   onClick={handleClear}
-                  className="ml-2 flex items-center justify-center rounded-full hover:bg-muted"
+                  className="ml-2 flex items-center justify-center rounded-full hover:bg-muted "
                 >
                   <X className="h-4 w-4 text-muted-foreground hover:text-black" />
                 </button>

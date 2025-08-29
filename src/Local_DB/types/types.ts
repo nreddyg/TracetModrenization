@@ -1,11 +1,10 @@
-// types.ts
-
 import { OptionGroup } from "@/components/ui/reusable-multi-select";
-
-
+import { TreeNode } from "@/components/ui/reusable-treeSelect";
+ 
+ 
 export type FieldType = 'text' | 'dropdown' | 'multiselect' | 'textarea' | 'heading' | "date" | "upload"
-  | "richtext" | "checkbox" | "table" | "separator" | 'radiobutton' | 'numeric';
-
+  | "richtext" | "checkbox" | "table" | "separator" | 'radiobutton' | 'numeric' | 'treeselect' | 'rangepicker';
+ 
 export interface DropdownOption {
     label: string;
   value: string | number;
@@ -21,7 +20,7 @@ export interface Options {
   icon?: React.ReactNode;
   description?: string;
 }
-
+ 
 export interface field {
   numberOfColumns?: number;
   isAlwaysOnDisabled?:boolean;
@@ -34,6 +33,8 @@ export interface field {
   name?: string;
   label?: string;
   placeholder?: string;
+  jsontype?:string;
+  rangeplaceholder?:[string, string];
   value?: any;
   defaultValue?:any;
   isRequired?: boolean;
@@ -64,10 +65,13 @@ export interface field {
   isAdditionalField?: boolean; // For additional fields
   show?:boolean;
   defaultChecked?:boolean
+   treeData?: TreeNode[];
+   tooltip?:string;
+  errormsg?:boolean;
 }
-
+ 
 export type BaseField = field;
-
+ 
 export type UploadedFileOutput = {
   FileName: string;
   ServiceDocumentFile: string; // stringified byte array
@@ -94,7 +98,8 @@ export type QuillModules = {
   history?: any;
   keyboard?: any;
 };
-
+ 
 export type GenericObject={
   [key:string]:any
 }
+ 

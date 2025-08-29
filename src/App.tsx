@@ -15,6 +15,7 @@ import { ReusableLoader } from "@/components/ui/reusable-loader";
 import { MessageProvider } from "./components/ui/reusable-message";
 import WrapperLazyComponent from "./components/common/WrapperLazyComponent";
 import AssetCodeTable from "./pages/servicedesk/AssetCodeTable";
+import ServiceRequestReport from "./pages/servicedesk/ServiceRequestDetailsHistory";
 // Lazy load all pages
 const Index = WrapperLazyComponent(() => import("./pages/Index"))
 const Login = WrapperLazyComponent(() => import("./pages/Login"));
@@ -112,6 +113,7 @@ const AnimatedRoutes = () => {
   const location = useLocation();
   const isLoginPage = location.pathname === '/login';
   const ticketId = /^\/tickets\/([^/]+)$/.test(location.pathname)? location.pathname.split("/").pop():'';
+  const cleanRoutes = ["/service-desk/srdetailshistoryview"];
 
   if (isLoginPage) {
     return (
@@ -120,6 +122,16 @@ const AnimatedRoutes = () => {
             <Route path="/login" element={<Login />} />
           </Routes>
       </div>
+    );
+  }
+    if (cleanRoutes.includes(location.pathname)) {
+    return (
+      <Routes location={location}>
+        <Route
+          path="/service-desk/srdetailshistoryview"
+          element={<ServiceRequestReport />}
+        />
+      </Routes>
     );
   }
   
@@ -216,6 +228,7 @@ const AnimatedRoutes = () => {
                 <Route path="/service-desk/work-management" element={<WorkManagement />} />
                 <Route path="/service-desk/administration" element={<Administration />} />
                 <Route path="/service-desk/reports" element={<ServiceDeskReports />} />
+                {/* <Route path="/service-desk/srdetailshistoryview" element={<ServiceRequestReport/>} /> */}
                 <Route path="/service-desk/ticket-progress" element={<TicketProgressDashboard />} />
                 
                 {/* Utilities */}

@@ -83,6 +83,21 @@ import { Badge } from './badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './dropdown-menu';
 import { Popover, PopoverContent, PopoverTrigger } from './popover';
 import { cn } from '@/lib/utils';
+import {
+  DndContext,
+  closestCenter,
+  MouseSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 // Enhanced types for enterprise features
 export interface TablePermissions {
@@ -179,7 +194,10 @@ export interface ReusableTableProps<T = any> {
   onBulkEdit?: (selectedRows: T[]) => void;
   onRowEdit?: (row: T, changes: Partial<T>) => void;
   onAuditLog?: (entry: AuditTrail) => void;
-
+enableRowReordering?: boolean;
+onRowReorder?: (newData: T[]) => void;
+  columnVisibility?: VisibilityState; // 👈 new
+  onColumnVisibilityChange?: (updater: VisibilityState) => void; // 👈 new
   // NEW: Enhanced Selection Props
   selectedRowIds?: string[]; // Control selection from outside
   onSelectionChange?: (selectionInfo: SelectionInfo<T>) => void; // Get selection changes
@@ -521,6 +539,34 @@ const ColumnFilter = ({
 };
 
 const ColumnVisibilityManager = ({ table }: { table: TanstackTable<any> }) => {
+  const allColumns = table.getAllLeafColumns();
+
+  // Only columns that the table allows hiding
+  const toggleableColumns = allColumns.filter((col) => col.getCanHide());
+
+  // Compute Select All state from toggleable columns only
+  const allVisible =
+    toggleableColumns.length > 0 &&
+    toggleableColumns.every((col) => col.getIsVisible());
+  const someVisible =
+    toggleableColumns.some((col) => col.getIsVisible()) && !allVisible;
+
+  // One-shot update for all columns to avoid multiple renders/flicker
+  const handleToggleAll = (checked: boolean) => {
+    table.setColumnVisibility((prev) => {
+      const next = { ...prev };
+      toggleableColumns.forEach((col) => {
+        next[col.id] = checked; // true => show all, false => hide all
+      });
+      return next;
+    });
+  };
+
+  // Individual toggle keeps Select All state in sync automatically
+  const handleToggleColumn = (column: any, checked: boolean) => {
+    column.toggleVisibility(checked);
+  };
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -529,30 +575,55 @@ const ColumnVisibilityManager = ({ table }: { table: TanstackTable<any> }) => {
           Columns
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-48 p-2">
-        <div className="space-y-2">
-          {table.getAllLeafColumns().map((column) => (
-            <div key={column.id} className="flex items-center space-x-2">
-              <Checkbox
-                checked={column.getIsVisible()}
-                onCheckedChange={(checked) =>
-                  column.toggleVisibility(checked === true)
-                }
-                id={column.id}
-              />
-              <label
-                htmlFor={column.id}
-                className="text-sm font-medium capitalize"
-              >
-                {column.id.replace(/([A-Z])/g, ' $1').trim()}
-              </label>
-            </div>
-          ))}
+
+      <PopoverContent className="w-56 p-2">
+        <div className="space-y-2 overflow-y-auto" style={{ maxHeight: "40vh" }}>
+          {/* Select All */}
+          <div className="flex items-center space-x-2 border-b pb-2 mb-2">
+            <Checkbox
+              id="select-all-columns"
+              checked={allVisible ? true : someVisible ? "indeterminate" : false}
+              onCheckedChange={(checked) => handleToggleAll(checked === true)}
+            />
+            <label htmlFor="select-all-columns" className="text-sm font-medium">
+              Select All
+            </label>
+          </div>
+
+          {/* Individual columns */}
+          {allColumns.map((column) => {
+            const canHide = column.getCanHide(); // false for locked columns
+            const label =
+              (column.columnDef.header as any)?.toString?.() ||
+              column.id.replace(/([A-Z])/g, " $1").trim();
+
+            return (
+              <div key={column.id} className="flex items-center space-x-2">
+                <Checkbox
+                  id={column.id}
+                  checked={column.getIsVisible()}
+                  disabled={!canHide}
+                  onCheckedChange={(checked) => {
+                    if (canHide) handleToggleColumn(column, checked === true);
+                  }}
+                />
+                <label
+                  htmlFor={column.id}
+                  className={`text-sm font-medium capitalize ${
+                    !canHide ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
+                >
+                  {label}
+                </label>
+              </div>
+            );
+          })}
         </div>
       </PopoverContent>
     </Popover>
   );
 };
+
 
 
 // Column Pinning Manager Component
@@ -570,7 +641,7 @@ const ColumnPinningManager = ({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-48 p-2">
-        <div className="space-y-2">
+        <div className="space-y-2 overflow-y-auto" style={{ maxHeight: "40vh" }}>
           {table.getAllLeafColumns().map((column) => (
             <div key={column.id} className="flex items-center justify-between space-x-2">
               <label className="text-sm font-medium capitalize flex-1">
@@ -866,6 +937,27 @@ const SelectionControls = <T,>({
     </div>
   );
 };
+function getVisibleData(table: TanstackTable<any>, exportData: any[]) {
+  const visibleCols = table.getAllLeafColumns().filter(col => col.getIsVisible());
+
+  const headers = visibleCols.map(
+    col => (col.columnDef.header as string) || col.id
+  );
+
+  const body = exportData.map(row =>
+    visibleCols.map(col => {
+      try {
+        const tableRow = table.getRowModel().rows.find(r => r.original === row);
+        return String(tableRow?.getValue(col.id) ?? "");
+      } catch {
+        return "";
+      }
+    })
+  );
+
+  return { headers, body };
+}
+
 
 // Enhanced Export Menu with multiple formats
 const ExportMenu = ({
@@ -873,87 +965,97 @@ const ExportMenu = ({
   selectedRows,
   permissions,
   filename = 'export',
-  columns
+  table,
 }: {
   data: any[];
   selectedRows: any[];
   permissions?: TablePermissions;
   filename?: string;
   columns?: ColumnDef<any>[];
+   table: TanstackTable<any>;
 }) => {
-  const exportToCSV = (exportData: any[]) => {
-    if (exportData.length === 0) return;
+ const exportToCSV = (exportData: any[], table: TanstackTable<any>) => {
+  if (exportData.length === 0) return;
 
-    const headers = Object.keys(exportData[0] || {});
-    const csvContent = [
-      headers.join(','),
-      ...exportData.map(row =>
-        headers.map(header => {
-          const value = row[header];
-          return `"${String(value).replace(/"/g, '""')}"`;
-        }).join(',')
-      )
-    ].join('\n');
+  const { headers, body } = getVisibleData(table, exportData);
 
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${filename}-${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
+  const csvContent = [
+    headers.join(","),
+    ...body.map(row =>
+      row.map(val => `"${val.replace(/"/g, '""')}"`).join(",")
+    ),
+  ].join("\n");
 
-  const exportToExcel = (exportData: any[]) => {
-    if (exportData.length === 0) return;
+  const blob = new Blob([csvContent], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${filename}-${new Date().toISOString().split("T")[0]}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+};
 
-    const headers = Object.keys(exportData[0] || {});
-    const worksheet = XLSX.utils.json_to_sheet(exportData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Data');
 
-    // Auto-size columns
-    const wscols = headers.map(() => ({ wch: 15 }));
-    worksheet['!cols'] = wscols;
+  const exportToExcel = (exportData: any[], table: TanstackTable<any>) => {
+  if (exportData.length === 0) return;
 
-    XLSX.writeFile(workbook, `${filename}-${new Date().toISOString().split('T')[0]}.xlsx`);
-  };
+  const { headers, body } = getVisibleData(table, exportData);
 
-  const exportToPDF = (exportData: any[]) => {
-    if (exportData.length === 0) return;
+  const worksheet = XLSX.utils.aoa_to_sheet([headers, ...body]);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Data");
 
-    const doc = new jsPDF();
-    const headers = Object.keys(exportData[0] || {});
-    const tableData = exportData.map(row => headers.map(header => String(row[header] || '')));
+  worksheet["!cols"] = headers.map(() => ({ wch: 20 }));
 
-    doc.setFontSize(16);
-    doc.text(filename, 14, 22);
-    doc.setFontSize(10);
-    doc.text(`Generated on ${new Date().toLocaleString()}`, 14, 30);
+  XLSX.writeFile(workbook, `${filename}-${new Date().toISOString().split("T")[0]}.xlsx`);
+};
 
-    autoTable(doc, {
-      head: [headers.map(header => header.replace(/([A-Z])/g, ' $1').trim())],
-      body: tableData,
-      startY: 35,
-      styles: { fontSize: 8 },
-      headStyles: { fillColor: [66, 135, 245] },
-      alternateRowStyles: { fillColor: [245, 245, 245] },
-      margin: { top: 35 },
-    });
 
-    doc.save(`${filename}-${new Date().toISOString().split('T')[0]}.pdf`);
-  };
+const exportToPDF = (exportData: any[], table: TanstackTable<any>) => {
+  if (exportData.length === 0) return;
 
-  const exportToJSON = (exportData: any[]) => {
-    const jsonContent = JSON.stringify(exportData, null, 2);
-    const blob = new Blob([jsonContent], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${filename}-${new Date().toISOString().split('T')[0]}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
+  const doc = new jsPDF();
+  const { headers, body } = getVisibleData(table, exportData);
+
+  doc.setFontSize(14);
+  doc.text(filename, 14, 20);
+
+  autoTable(doc, {
+    head: [headers],
+    body,
+    startY: 30,
+    styles: { fontSize: 8, cellPadding: 2 },
+    headStyles: { fillColor: [66, 135, 245] },
+    alternateRowStyles: { fillColor: [240, 240, 240] },
+    theme: "grid",
+    margin: { top: 30 },
+  });
+
+  doc.save(`${filename}-${new Date().toISOString().split("T")[0]}.pdf`);
+};
+
+
+
+ const exportToJSON = (exportData: any[], table: TanstackTable<any>) => {
+  if (exportData.length === 0) return;
+
+  const { headers, body } = getVisibleData(table, exportData);
+
+  const jsonData = body.map(row =>
+    Object.fromEntries(headers.map((h, i) => [h, row[i]]))
+  );
+
+  const blob = new Blob([JSON.stringify(jsonData, null, 2)], {
+    type: "application/json",
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${filename}-${new Date().toISOString().split("T")[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+};
+
 
   const printTable = () => {
     const printWindow = window.open('', '', 'height=600,width=800');
@@ -1023,46 +1125,36 @@ const ExportMenu = ({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuItem onClick={() => exportToCSV(data)}>
-          <FileSpreadsheet className="w-4 h-4 mr-2" />
-          Export All to CSV
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => exportToExcel(data)}>
-          <FileSpreadsheet className="w-4 h-4 mr-2" />
-          Export All to Excel
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => exportToJSON(data)}>
-          <FileImage className="w-4 h-4 mr-2" />
-          Export All to JSON
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => exportToPDF(data)}>
-          <FileText className="w-4 h-4 mr-2" />
-          Export All to PDF
-        </DropdownMenuItem>
-        {selectedRows.length > 0 && (
-          <>
-            <DropdownMenuItem onClick={() => exportToCSV(selectedRows)}>
-              <FileSpreadsheet className="w-4 h-4 mr-2" />
-              Export Selected to CSV ({selectedRows.length})
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => exportToExcel(selectedRows)}>
-              <FileSpreadsheet className="w-4 h-4 mr-2" />
-              Export Selected to Excel ({selectedRows.length})
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => exportToJSON(selectedRows)}>
-              <FileImage className="w-4 h-4 mr-2" />
-              Export Selected to JSON ({selectedRows.length})
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => exportToPDF(selectedRows)}>
-              <FileText className="w-4 h-4 mr-2" />
-              Export Selected to PDF ({selectedRows.length})
-            </DropdownMenuItem>
-          </>
-        )}
-        <DropdownMenuItem onClick={printTable}>
-          <PrinterIcon className="w-4 h-4 mr-2" />
-          Print Table
-        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => exportToCSV(data, table)}>
+  Export All to CSV
+</DropdownMenuItem>
+<DropdownMenuItem onClick={() => exportToExcel(data, table)}>
+  Export All to Excel
+</DropdownMenuItem>
+<DropdownMenuItem onClick={() => exportToJSON(data, table)}>
+  Export All to JSON
+</DropdownMenuItem>
+<DropdownMenuItem onClick={() => exportToPDF(data, table)}>
+  Export All to PDF
+</DropdownMenuItem>
+
+{selectedRows.length > 0 && (
+  <>
+    <DropdownMenuItem onClick={() => exportToCSV(selectedRows, table)}>
+      Export Selected to CSV ({selectedRows.length})
+    </DropdownMenuItem>
+    <DropdownMenuItem onClick={() => exportToExcel(selectedRows, table)}>
+      Export Selected to Excel ({selectedRows.length})
+    </DropdownMenuItem>
+    <DropdownMenuItem onClick={() => exportToJSON(selectedRows, table)}>
+      Export Selected to JSON ({selectedRows.length})
+    </DropdownMenuItem>
+    <DropdownMenuItem onClick={() => exportToPDF(selectedRows, table)}>
+      Export Selected to PDF ({selectedRows.length})
+    </DropdownMenuItem>
+  </>
+)}
+
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -1342,6 +1434,30 @@ const Pagination = ({ table }: { table: TanstackTable<any> }) => (
     </div>
   </div>
 );
+function DraggableRow({ row, children }: { row: any; children: React.ReactNode }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: row.id,
+  });
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.6 : 1,
+    cursor: "grab",
+  };
+
+  return (
+    <tr
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      className={row.getIsSelected() ? "bg-primary/5 hover:bg-muted/50" : "hover:bg-muted/50"}
+    >
+      {children}
+    </tr>
+  );
+}
 
 // Main Reusable Table Component
 export function ReusableTable<T = any>({
@@ -1350,6 +1466,8 @@ export function ReusableTable<T = any>({
   loading = false,
   error = null,
   title,
+   columnVisibility: controlledColumnVisibility,
+  onColumnVisibilityChange,
   permissions = {
     canEdit: false,
     canDelete: false,
@@ -1405,12 +1523,20 @@ export function ReusableTable<T = any>({
   timezone = 'UTC',
   rowHeight = 'normal',
   aggregationFunctions = {},
-  getSubRows
+  getSubRows,
+    enableRowReordering = false,
+  onRowReorder,
 }: ReusableTableProps<T>) {
   // State management
   const [sorting, setSorting] = useLocalStorage<SortingState>(`${storageKey}-sorting`, []);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = useLocalStorage<VisibilityState>(`${storageKey}-visibility`, {});
+  // const [columnVisibility, setColumnVisibility] = useLocalStorage<VisibilityState>(`${storageKey}-visibility`, {});
+    const [uncontrolledColumnVisibility, setUncontrolledColumnVisibility] = useState<VisibilityState>({});
+  const isColumnVisibilityControlled = controlledColumnVisibility !== undefined;
+  const columnVisibility: VisibilityState = isColumnVisibilityControlled
+    ? (controlledColumnVisibility as VisibilityState)
+    : uncontrolledColumnVisibility;
+    // const [openColumnId, setOpenColumnId] = useState<string | null>(null)):
   const [grouping, setGrouping] = useLocalStorage<GroupingState>(`${storageKey}-grouping`, []);
   const [expanded, setExpanded] = useState<ExpandedState>({});
   const [globalFilter, setGlobalFilter] = useState('');
@@ -1429,7 +1555,16 @@ export function ReusableTable<T = any>({
     left: [],
     right: []
   });
+ const handleColumnVisibilityChange: OnChangeFn<VisibilityState> = (updater) => {
+    const prev = columnVisibility;
+    const next = typeof updater === 'function' ? (updater as any)(prev) : updater;
 
+    if (!isColumnVisibilityControlled) {
+      setUncontrolledColumnVisibility(next);
+    }
+    // Notify parent with the final map of visibilities
+    onColumnVisibilityChange?.(next as VisibilityState);
+  };
   // NEW: Enhanced Selection Management
   const {
     rowSelection,
@@ -1598,7 +1733,7 @@ export function ReusableTable<T = any>({
     // Normal columns → title + popover
     return (
       <div className="flex items-center gap-2">
-        <span className="font-medium">{title}</span>
+        <span className="font-medium capitalize">{title}</span>
 
         <Popover>
           <PopoverTrigger asChild>
@@ -1695,10 +1830,11 @@ export function ReusableTable<T = any>({
       columnSizing,
       pagination,
       columnPinning,
+      
     },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
-    onColumnVisibilityChange: setColumnVisibility,
+    onColumnVisibilityChange: handleColumnVisibilityChange,
     onRowSelectionChange: setRowSelection,
     onGroupingChange: setGrouping,
     onExpandedChange: setExpanded,
@@ -1798,11 +1934,12 @@ export function ReusableTable<T = any>({
         )}
         {enableExport && (
           <ExportMenu
-            data={data}
+            data={table.getCoreRowModel().rows.map(r => r.original)}
             selectedRows={selectedRows}
             permissions={permissions}
-            filename={title?.toLowerCase().replace(/\s+/g, '-') || 'export'}
+            filename={title || 'export'}
             columns={enhancedColumns}
+            table={table}
           />
         )}
 
@@ -1857,15 +1994,23 @@ export function ReusableTable<T = any>({
       {/* Table */}
       <div className="border rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
-          <table ref={tableRef} className="w-full">
+          <table ref={tableRef} className="w-full  table-fixed">
             <thead className="bg-muted/50">
               {table.getHeaderGroups().map(headerGroup => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map(header => (
                     <th
-                      key={header.id}
-                      className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider border-b relative"
-                      style={{ width: header.getSize() }}
+                    key={header.id}
+  className="ps-4 px-2 py-1 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider border-b relative bg-background z-10"
+ style={{
+  width: header.getSize(),
+  minWidth: header.column.columnDef.minSize ?? 50,
+  maxWidth: header.column.columnDef.maxSize ?? 1000,
+  position: header.column.getIsPinned() ? "sticky" : "relative",
+  left: header.column.getIsPinned() === "left" ? header.column.getStart("left") : undefined,
+  right: header.column.getIsPinned() === "right" ? header.column.getStart("right") : undefined,
+  zIndex: header.column.getIsPinned() ? 20 : 1,
+}}
                     >
                       {header.isPlaceholder ? null : (
                         <div className="flex flex-col gap-2">
@@ -1918,65 +2063,149 @@ export function ReusableTable<T = any>({
                 </tr>
               ))}
             </thead>
-            <tbody className="bg-background divide-y divide-border">
-              {loading ? (
-                Array.from({ length: 5 }, (_, i) => (
-                  <SkeletonRow key={i} columns={enhancedColumns.length} />
-                ))
-              ) : table.getRowModel().rows.length === 0 ? (
-                <tr>
-                  <td colSpan={enhancedColumns.length} className="px-4 py-8 text-center text-muted-foreground">
-                    {emptyMessage}
+            {enableRowReordering ? (
+  <DndContext
+    sensors={useSensors(useSensor(MouseSensor), useSensor(TouchSensor))}
+    collisionDetection={closestCenter}
+    onDragEnd={({ active, over }) => {
+      if (over && active.id !== over.id) {
+        const oldIndex = table.getRowModel().rows.findIndex(r => r.id === active.id);
+        const newIndex = table.getRowModel().rows.findIndex(r => r.id === over.id);
+        const newData = arrayMove([...data], oldIndex, newIndex);
+        onRowReorder?.(newData);
+      }
+    }}
+  >
+    <SortableContext
+      items={table.getRowModel().rows.map(r => r.id)}
+      strategy={verticalListSortingStrategy}
+    >
+      <tbody className="bg-background divide-y divide-border">
+        {table.getRowModel().rows.map(row => {
+          const rowId = getRowId(row.original, row.index);
+          const isSelected = rowSelection[rowId] || false;
+          const isSelectable = !selectableRowFilter || selectableRowFilter(row.original);
+
+          return (
+            <DraggableRow key={row.id} row={row}>
+              {row.getVisibleCells().map(cell => {
+                const column = cell.column;
+                const columnMeta = column.columnDef.meta as any;
+                const isEditable =
+                  enableInlineEdit &&
+                  permissions.canInlineEdit &&
+                  columnMeta?.editable;
+
+                return (
+                  <td
+                    key={cell.id}
+                    className={cn(
+                      "px-4 py-3 text-sm bg-background",
+                      rowHeightClasses[rowHeight]
+                    )}
+                    style={{
+                      width: cell.column.getSize(),
+                      position: cell.column.getIsPinned() ? "sticky" : "relative",
+                      left:
+                        cell.column.getIsPinned() === "left"
+                          ? cell.column.getStart("left")
+                          : undefined,
+                      right:
+                        cell.column.getIsPinned() === "right"
+                          ? cell.column.getAfter("right")
+                          : undefined,
+                      zIndex: cell.column.getIsPinned() ? 10 : 1,
+                    }}
+                  >
+                    {isEditable ? (
+                      <InlineEditCell
+                        value={cell.getValue()}
+                        onSave={(newValue) => {
+                          if (onRowEdit) {
+                            onRowEdit(row.original, { [column.id]: newValue } as Partial<T>);
+                          }
+                        }}
+                        type={columnMeta.editType || "text"}
+                        options={columnMeta.options || []}
+                      />
+                    ) : (
+                      flexRender(cell.column.columnDef.cell, cell.getContext())
+                    )}
                   </td>
-                </tr>
-              ) : (
-                table.getRowModel().rows.map(row => {
-                  const rowId = getRowId(row.original, row.index);
-                  const isSelected = rowSelection[rowId] || false;
-                  const isSelectable = !selectableRowFilter || selectableRowFilter(row.original);
+                );
+              })}
+            </DraggableRow>
+          );
+        })}
+      </tbody>
+    </SortableContext>
+  </DndContext>
+) : (
+  <tbody className="bg-background divide-y divide-border">
+    {table.getRowModel().rows.map(row => {
+      const rowId = getRowId(row.original, row.index);
+      const isSelected = rowSelection[rowId] || false;
+      const isSelectable = !selectableRowFilter || selectableRowFilter(row.original);
 
-                  return (
-                    <tr
-                      key={row.id}
-                      className={cn(
-                        "hover:bg-muted/50",
-                        isSelected && "bg-primary/5",
-                        !isSelectable && "opacity-50"
-                      )}
-                    >
-                      {row.getVisibleCells().map(cell => {
-                        const column = cell.column;
-                        const columnMeta = column.columnDef.meta as any;
-                        const isEditable = enableInlineEdit && permissions.canInlineEdit && columnMeta?.editable;
+      return (
+        <tr
+          key={row.id}
+          className={cn(
+            "hover:bg-muted/50",
+            isSelected && "bg-primary/5",
+            !isSelectable && "opacity-50"
+          )}
+        >
+          {row.getVisibleCells().map(cell => {
+            const column = cell.column;
+            const columnMeta = column.columnDef.meta as any;
+            const isEditable =
+              enableInlineEdit && permissions.canInlineEdit && columnMeta?.editable;
 
-                        return (
-                          <td
-                            key={cell.id}
-                            className={cn("px-4 py-3 text-sm", rowHeightClasses[rowHeight])}
-                            style={{ width: cell.column.getSize() }}
-                          >
-                            {isEditable ? (
-                              <InlineEditCell
-                                value={cell.getValue()}
-                                onSave={(newValue) => {
-                                  if (onRowEdit) {
-                                    onRowEdit(row.original, { [column.id]: newValue } as Partial<T>);
-                                  }
-                                }}
-                                type={columnMeta.editType || 'text'}
-                                options={columnMeta.options || []}
-                              />
-                            ) : (
-                              flexRender(cell.column.columnDef.cell, cell.getContext())
-                            )}
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
+            return (
+              <td
+                key={cell.id}
+                className={cn(
+                  "px-4 py-3 text-sm bg-background",
+                  rowHeightClasses[rowHeight]
+                )}
+                style={{
+                  width: cell.column.getSize(),
+                  position: cell.column.getIsPinned() ? "sticky" : "relative",
+                  left:
+                    cell.column.getIsPinned() === "left"
+                      ? cell.column.getStart("left")
+                      : undefined,
+                  right:
+                    cell.column.getIsPinned() === "right"
+                      ? cell.column.getAfter("right")
+                      : undefined,
+                  zIndex: cell.column.getIsPinned() ? 10 : 1,
+                }}
+              >
+                {isEditable ? (
+                  <InlineEditCell
+                    value={cell.getValue()}
+                    onSave={(newValue) => {
+                      if (onRowEdit) {
+                        onRowEdit(row.original, { [column.id]: newValue } as Partial<T>);
+                      }
+                    }}
+                    type={columnMeta.editType || "text"}
+                    options={columnMeta.options || []}
+                  />
+                ) : (
+                  flexRender(cell.column.columnDef.cell, cell.getContext())
+                )}
+              </td>
+            );
+          })}
+        </tr>
+      );
+    })}
+  </tbody>
+)}
+
           </table>
         </div>
 

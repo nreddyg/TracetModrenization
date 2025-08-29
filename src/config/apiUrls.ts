@@ -48,7 +48,8 @@ export const URL_POST_UPDATE_SR_TYPE="/api/ServiceDeskAPI/UpdateServiceRequestTy
 export const URL_POST_DELETE_SR_TYPE_BY_ID="/api/ServiceDeskAPI/DeleteServiceRequestTypeById"
 export const URL_POST_ADD_SR_STATUS="/api/ServiceDeskAPI/AddServiceRequestStatus"
 export const URL_POST_UPDATE_SR_STATUS="/api/ServiceDeskAPI/UpdateServiceRequestStatus"
-export const URL_POST_DELETE_SR_STATUS="/api/ServiceDeskAPI/DeleteServiceRequestStatusById"
+export const URL_POST_DELETE_SR_STATUS="/api/ServiceDeskAPI/DeleteServiceRequestStatusById";
+export const URL_POST_UPDATE_SR_STATUS_SEQUENCE="/api/ServiceDeskAPI/UpdateIndexSequence";
 
 
 

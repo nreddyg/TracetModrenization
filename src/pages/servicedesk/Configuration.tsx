@@ -1,19 +1,19 @@
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
+import { Card, CardContent} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ReusableDropdown } from '@/components/ui/reusable-dropdown';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Controller, useForm } from 'react-hook-form';
-import { Settings, Save,Trash2,Edit, Search} from 'lucide-react';
+import {Save,Trash2,Edit, Search} from 'lucide-react';
 import { ReusableInput } from '@/components/ui/reusable-input';
 import { BaseField, GenericObject } from '@/Local_DB/types/types';
 import { CONFIGURATION_DB } from '@/Local_DB/Form_JSON_Data/ConfigurationDB';
 import { ReusableMultiSelect } from '@/components/ui/reusable-multi-select';
 import ReusableSingleCheckbox from '@/components/ui/reusable-single-checkbox';
 import { ReusableTextarea } from '@/components/ui/reusable-textarea';
-import { deleteSRType, GetNotifyTypeLookup, GetServiceRequestAssignToLookups, getServiceRequestTypes, getSRConfigList, getSRTypesById, getStatusLookups, getVendorDetails, postServiceRequestConfiguration, postServiceRequestType } from '@/services/configurationServices';
+import { deleteSRType, GetNotifyTypeLookup, GetServiceRequestAssignToLookups, GetServiceRequestStatus, getServiceRequestTypes, getSRConfigList, getSRTypesById, getStatusLookups, getVendorDetails, postDeleteServiceRequestStatus, postServiceRequestConfiguration, postServiceRequestStatus, postServiceRequestType, postUpdateServiceRequestStatus, postUpdateServiceRequesttype, postUpdateStatusSequence } from '@/services/configurationServices';
 import { useDispatch } from 'react-redux';
 import { setLoading } from '@/store/slices/projectsSlice';
 import { useMessage } from '@/components/ui/reusable-message';
@@ -42,6 +42,11 @@ interface serviceRequestType{
   "StatusToCalculate": any,
   "Description":string,
   "ServiceRequestTypeAdmin":string
+}
+interface Status{
+  "Id": number,
+  "StatusType":string,
+  "Index": number
 }
 // Define table permissions
 const tablePermissions: TablePermissions = {
@@ -77,20 +82,47 @@ const Configuration = () => {
     {id:'Description',accessorKey: "Description", header: "Description"},
     {id:'ServiceRequestTypeAdmin',accessorKey: "ServiceRequestTypeAdmin", header: "Service Request Type Admin",},
   ]);
+  const [statusColumns,setStatusColumns]=useState<ColumnDef<Status>[]>([
+    {id:'StatusType',accessorKey: "StatusType", header: "Status Type"},
+    {id:'Index',accessorKey: "Index", header: "Index"},
+    {id:'Actions',header: "Actions", cell: ({ row }) => (
+      row.original.StatusType!=="Open" && row.original.StatusType!=="Closed" && (
+        <div className="flex gap-2">
+          <Edit className='primary' size={16} cursor={'pointer'} onClick={()=>handleEditStatus(row.original)}>Edit</Edit>
+          <Trash2 className='text-red-500' size={16} cursor={'pointer'} onClick={() => handleDeleteStatus(row.original)}>Delete</Trash2>
+        </div>
+      ))}
+  ])
+  const [statusTableData,setStatusTableData]=useState<Status[]>([]);
   const [serviceRequestTypeData,setServiceRequestTypeData]=useState<serviceRequestType[]>([]);
   const [isDelModalOpen, setIsDelModalOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<serviceRequestType | null>(null);
+  const [selectedStatusRec,setSelectedStatusRec]=useState<Status | null>(null);
   const [isEditMode,setIsEditMode]=useState(false);
-
+  const [isEditStatusMode,setIsEditStatusMode]=useState(false);
+  const [currentTab,setCurrentTab]=useState('service-request-config')
   const handleEdit = (data:serviceRequestType): void => {
     setSelectedRecord(data);
     setIsEditMode(true);
     fetchServiceRequestTypeById(data.Id)
   };
   const handleDelete = (data:serviceRequestType): void => {
-    setSelectedRecord(data);
     setIsDelModalOpen(true);
+    setSelectedRecord(data);
   };
+  const handleDeleteStatus=(data:Status):void=>{
+    setIsDelModalOpen(true);
+    setSelectedStatusRec(data);
+  }
+  const handleEditStatus=(data:Status):void=>{
+    dispatch(setLoading(true));
+    setSelectedStatusRec(data);
+    setIsEditStatusMode(true);
+    form.reset({...form.getValues(),Status:data.StatusType})
+    setTimeout(()=>{
+      dispatch(setLoading(false));
+    },1000)
+  }
   const tableActions: TableAction<serviceRequestType>[] = [
     {
       label: 'Edit',
@@ -101,10 +133,10 @@ const Configuration = () => {
     {
       label: 'Delete',
       icon: Trash2,
-      onClick: handleDelete,
+      onClick:handleDelete,
       variant: 'destructive',
     },
-  ];
+  ]; 
   useEffect(()=>{
     const init = async () => {
       try {
@@ -113,12 +145,13 @@ const Configuration = () => {
         console.error('Error fetching lookups:', err);
       } finally {
         getSRConfiguration(111,"All");
-        getAllServiceRequests();
+        fetchAllServiceRequests();
+        fetchAllStatusList();
       }
     };
     init();
   },[])
-  const getAllServiceRequests=async()=>{
+  const fetchAllServiceRequests=async()=>{
     dispatch(setLoading(true));
     await getServiceRequestTypes(111).then(res=>{
       if(res.success && res.data){
@@ -128,7 +161,18 @@ const Configuration = () => {
       }
     }).catch(err=>{}).finally(()=>{dispatch(setLoading(false))})
   }
-  const handleSave=async(data,type)=>{
+  //all status list
+  const fetchAllStatusList=async()=>{
+    dispatch(setLoading(true));
+    await GetServiceRequestStatus(111).then(res=>{
+      if(res.success && res.data){
+        setStatusTableData(res.data);
+      }else{
+        msg.warning('No Data Found !!')
+      }
+    }).catch(err=>{}).finally(()=>{dispatch(setLoading(false))})
+  }
+  const handleSave=async(data:any,type:string)=>{
     if(type==="configuration"){ 
       let newList = []
           let Payload = {
@@ -150,37 +194,88 @@ const Configuration = () => {
           var NewCategoryObj = { "ServiceRequestConfigDetails": newList };
           updateSRConfigAPI(NewCategoryObj,111,data["ServiceReqConfigurationId"],)
 
-    }else if(type==="ServiceRequestType"){
-      let payload={
+    } else if (type === "ServiceRequestType") {
+      let payload = {
         "ServiceRequestTypeDetails": [
-            {
-                "Name": watch('ServiceRequestType'),
-                "UserGroupList": Array.isArray(watch('UserGroups'))? watch('UserGroups').join():'', //"142"
-                "VendorList": Array.isArray(watch('Vendors'))? watch('Vendors').join():'',//"12121"
-                "SLAMinutes": watch('SLAHoursMinutes') ? watch('SLAHoursMinutes').split(':')[1] || '':'',//"56"
-                "SLAHours": watch('SLAHoursMinutes') ? watch('SLAHoursMinutes').split(':')[0] || '':'',//"12",
-                "ReminderForSLAMinutes":watch('ReminderForSLAHoursMinutes') ? watch('ReminderForSLAHoursMinutes').split(':')[1] || '':'',// "45",
-                "ReminderForSLAHours": watch('ReminderForSLAHoursMinutes') ? watch('ReminderForSLAHoursMinutes').split(':')[0] || '':'',//"12",
-                "EscalationList":Array.isArray(watch('EscalationTo'))? watch('EscalationTo').join():'',//"672",
-                "ServiceMaintStatus":watch('StatusToCalculate'),
-                "Description":watch('Description'),
-                "ResponseReminderHours": watch('ReminderForSLAHoursMinutes') ? watch('ReminderForSLAHoursMinutes').split(':')[0] || '':'',//"12",
-                "ResponseReminderMinutes": watch('ReminderForSLAHoursMinutes') ? watch('ReminderForSLAHoursMinutes').split(':')[1] || '':'',//"45",
-                "serAdminUserGroupList": watch('ServiceRequestTypeAdmin')? watch('ServiceRequestTypeAdmin')['User Group']?.join():'',
-                "serAdminUserList": ""
-            }
+          {
+            "Name": watch('ServiceRequestType'),
+            "UserGroupList": Array.isArray(watch('UserGroups')) ? watch('UserGroups').join() : '', //"142"
+            "VendorList": Array.isArray(watch('Vendors')) ? watch('Vendors').join() : '',//"12121"
+            "SLAMinutes": watch('SLAHoursMinutes') ? watch('SLAHoursMinutes').split(':')[1] || '' : '',//"56"
+            "SLAHours": watch('SLAHoursMinutes') ? watch('SLAHoursMinutes').split(':')[0] || '' : '',//"12",
+            "ReminderForSLAMinutes": watch('ReminderForSLAHoursMinutes') ? watch('ReminderForSLAHoursMinutes').split(':')[1] || '' : '',// "45",
+            "ReminderForSLAHours": watch('ReminderForSLAHoursMinutes') ? watch('ReminderForSLAHoursMinutes').split(':')[0] || '' : '',//"12",
+            "EscalationList": Array.isArray(watch('EscalationTo')) ? watch('EscalationTo').join() : '',//"672",
+            "ServiceMaintStatus": watch('StatusToCalculate'),
+            "Description": watch('Description'),
+            "ResponseReminderHours": watch('ReminderForSLAHoursMinutes') ? watch('ReminderForSLAHoursMinutes').split(':')[0] || '' : '',//"12",
+            "ResponseReminderMinutes": watch('ReminderForSLAHoursMinutes') ? watch('ReminderForSLAHoursMinutes').split(':')[1] || '' : '',//"45",
+            "serAdminUserGroupList": watch('ServiceRequestTypeAdmin') && watch('ServiceRequestTypeAdmin')['User Group'] ? watch('ServiceRequestTypeAdmin')['User Group']?.join() : '',
+            "serAdminUserList":watch('ServiceRequestTypeAdmin') &&  watch('ServiceRequestTypeAdmin')['Users'] ? watch('ServiceRequestTypeAdmin')['Users']?.join() : ''
+          }
         ]
       }
-      console.log('hwehweghfh',watch('ServiceRequestTypeAdmin')['User Group'])
-      dispatch(setLoading(true));
-      await postServiceRequestType(111,'All',payload).then(res=>{
-        if(res.success && res.data.status){
-          msg.success(res.data.message);
-          form.reset({...form.getValues(),ServiceRequestType:'',UserGroups:[],Vendors:[],SLAHoursMinutes:'',ReminderForSLAHoursMinutes:'',EscalationTo:[],StatusToCalculate:'',ServiceRequestTypeAdmin:[],Description:''});
-        }else{
-          msg.warning(res?.data?.message || 'Failed to add new service request type')
-        }
-      }).catch(err=>{}).finally(()=>{dispatch(setLoading(false))})
+      if (isEditMode && selectedRecord) {
+        dispatch(setLoading(true));
+        await postUpdateServiceRequesttype(111,selectedRecord.Id,'All',payload).then(res=>{
+          if(res.success){
+            if(res.data.status){
+              msg.success(res.data.message);
+              fetchAllServiceRequests();
+              handleReset();
+            }else{
+              msg.warning(res.data.message || 'Failed to update service request type !!')
+            }
+          }else{
+            msg.warning('Failed to update service request type !!')
+          }
+
+        }).catch(err=>{{}}).finally(()=>{dispatch(setLoading(false))})
+      } else {
+        dispatch(setLoading(true));
+        await postServiceRequestType(111, 'All', payload).then(res => {
+          if (res.success && res.data.status) {
+            msg.success(res.data.message);
+            fetchAllServiceRequests();
+            handleReset();
+          } else {
+            msg.warning(res?.data?.message || 'Failed to add new service request type')
+          }
+        }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
+      }
+    } else if(type==='AddNewStatus'){
+      let payload={"ServiceRequestStatusDetails": [{"Name":watch('Status')}]};
+      if(isEditStatusMode && selectedStatusRec){
+        dispatch(setLoading(true));
+        await postUpdateServiceRequestStatus(111,selectedStatusRec?.Id,payload).then(res=>{
+          if(res.success){
+            if(res.data.status){
+              msg.success(res.data.message);
+              handleReset('UpdateStatus');
+              fetchAllStatusList();
+            }else{
+              msg.warning(res.data.message)
+            }
+          }else{
+            msg.warning('Failed to update service request status !!')
+          }
+        }).catch(err=>{}).finally(()=>{dispatch(setLoading(false))})
+      }else{
+        dispatch(setLoading(true))
+        await postServiceRequestStatus(111,payload).then(res=>{
+          if(res.success){
+            if(res.data.status){
+              msg.success(res.data.message);
+              handleReset('Status');
+              fetchAllStatusList();
+            }else{
+              msg.warning(res.data.message || 'Failed to add new status !!')
+            }
+          }else{
+            msg.warning('Failed to add new status !!')
+          }
+        }).catch(err=>{}).finally(()=>{dispatch(setLoading(false))})
+      }
     }
   }
   const setLookupsDataInJson = (lookupsData:allResponsesType,shouldSetData?:boolean, getData?:any): void => {
@@ -242,14 +337,14 @@ const Configuration = () => {
     return data.reduce(
       (acc, group) => ({
         ...acc,
-        [group.label === "User Group" ? "User Groups" : "Users"]: [
-          ...acc[group.label === "User Group" ? "User Groups" : "Users"],
+        [group.label === "User Group" ? "User Group" : "Users"]: [
+          ...acc[group.label === "User Group" ? "User Group" : "Users"],
           ...group.options
             .filter((opt: any) => selectedIds.includes(`${opt.value}`))
             .map((opt: any) => opt.value),
         ],
       }),
-      { Users: [], "User Groups": [] }
+      { Users: [], "User Group": [] }
     );
   };
   //api calls
@@ -297,8 +392,16 @@ const Configuration = () => {
       }}).catch(()=>{}).finally(()=>{})
   }
   //clear fields data
-  const handleReset=()=>{
-    form.reset({...form.getValues(),ServiceRequestType:'',UserGroups:[],Vendors:[],SLAHoursMinutes:'',ReminderForSLAHoursMinutes:'',EscalationTo:[],StatusToCalculate:'',ServiceRequestTypeAdmin:[],Description:''});
+  const handleReset=(type?:string)=>{
+    if(type){
+      form.reset({...form.getValues(),Status:''});
+      setIsEditStatusMode(false);
+      setSelectedStatusRec(null)
+    }else{
+      form.reset({...form.getValues(),ServiceRequestType:'',UserGroups:[],Vendors:[],SLAHoursMinutes:'',ReminderForSLAHoursMinutes:'',EscalationTo:[],StatusToCalculate:'',ServiceRequestTypeAdmin:[],Description:''});
+      setIsEditMode(false);
+      setSelectedRecord(null);
+    }
   }
   const getFieldsByNames = (names: string[]) => fields.filter(f => names.includes(f.name!));
   const timeToMinutes = (timeString: string): number => {
@@ -426,9 +529,14 @@ const Configuration = () => {
       }
   };
    // Handle refresh
-  const handleRefresh = () => {
-    msg.info("Refreshing Service Request Type Data...");
-    getAllServiceRequests();
+  const handleRefresh = (type?:string) => {
+    if(type){
+      msg.info("Refreshing Service Request Status Data...");
+      fetchAllStatusList()
+    }else{
+      msg.info("Refreshing Service Request Type Data...");
+      fetchAllServiceRequests();
+    }
   };
   const formatSLAHoursMinutes = (val?: string) => {
     if (!val) return "";
@@ -462,7 +570,10 @@ const Configuration = () => {
       if(res.success){
         if(res.data.status){
           msg.success(res.data.message);
-          getAllServiceRequests();
+          if(selectedRecord && selectedRecord.Id==id){
+            handleReset();
+          }
+          fetchAllServiceRequests();
         }else{
           msg.warning(res.data.message);
         }
@@ -472,6 +583,45 @@ const Configuration = () => {
     }).catch((error) => {
       msg.error("Error deleting Service Request Type");
     }).finally(()=>{
+      dispatch(setLoading(false));
+    })
+  }
+  //delete status
+  const deleteStatus=async(id:number)=>{
+    await postDeleteServiceRequestStatus(111,id).then(res=>{
+      if(res.success){
+        if(res.data.status){
+          msg.success(res.data.message);
+          if(selectedStatusRec && selectedStatusRec.Id==id){
+            handleReset('DeleteStatus');
+          }
+          fetchAllStatusList();
+        }else{
+          msg.warning(res.data.message);
+        }
+      }else{
+        msg.warning('Failed to delete status !!')
+      }
+    }).catch(err=>{}).finally(()=>{
+
+    })
+  }
+  //update service request status sequence
+  const handleUpdateStatusSequence=async()=>{
+    dispatch(setLoading(true));
+    let updatedSequence = statusTableData.map(item =>item.Id).join()
+    await postUpdateStatusSequence(111,updatedSequence).then(res=>{
+      if(res.success){
+        if(res.data.status){
+          msg.success(res.data.message);
+          fetchAllStatusList();
+        }else{
+          msg.warning(res.data.message);
+        }
+      }else{
+        msg.warning('Failed to update status sequence !!');
+      }
+    }).catch(err=>{}).finally(()=>{
       dispatch(setLoading(false));
     })
   }
@@ -490,7 +640,7 @@ const Configuration = () => {
         <div>
           <h1 className="text-base sm:text-lg font-semibold text-gray-900">Service Desk Configuration</h1>
         </div>
-        <Tabs defaultValue="service-request-config" className="space-y-4">
+        <Tabs value={currentTab} onValueChange={setCurrentTab}  className="space-y-4">
           <div className="hidden sm:block">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="service-request-config" className="text-sm">Service Request Configuration</TabsTrigger>
@@ -557,19 +707,17 @@ const Configuration = () => {
                   </div>
                 </div>    
                 <div className="flex gap-2 mb-6">
-                  <Button className="bg-orange-500 hover:bg-orange-600 text-sm px-4 py-2" onClick={handleSubmit((data)=>{handleSave(data,"ServiceRequestType")})}>Save</Button>
-                  <Button variant="outline" className="text-sm px-4 py-2" onClick={handleReset}>Cancel</Button>
+                  <Button className="bg-orange-500 hover:bg-orange-600 text-sm px-4 py-2" onClick={handleSubmit((data)=>{handleSave(data,"ServiceRequestType")})}>{isEditMode && currentTab==='service-request-type'?'Update':'Save'}</Button>
+                  <Button variant="outline" className="text-sm px-4 py-2" onClick={()=>handleReset('')}>Cancel</Button>
                 </div>
               </CardContent>
             </Card>
             <Card className="border-0 shadow-sm">
-              <CardHeader className="pb-3">
-              </CardHeader>
-              <CardContent className="pt-0">
+              <CardContent className="pt-3">
                 <ReusableTable
                   data={serviceRequestTypeData} columns={columns}
                   actions={tableActions} permissions={tablePermissions}
-                  title="Service Request Type List" onRefresh={handleRefresh}
+                  title="Service Request Type List" onRefresh={()=>handleRefresh('')}
                   enableSearch={true}
                   enableSelection={false}
                   enableExport={true}
@@ -579,7 +727,6 @@ const Configuration = () => {
                   enableFiltering={true}
                   pageSize={10}
                   emptyMessage="No Data found"
-                  rowHeight="normal"
                   storageKey="service-request-type-list-table"                    
                   enableColumnPinning
                 />
@@ -597,16 +744,28 @@ const Configuration = () => {
                       })} 
                 </div>
                 <div className="flex gap-2 mb-8">
-                  <Button className="bg-orange-500 hover:bg-orange-600 text-sm px-4 py-2" onClick={handleSubmit(onsubmit)}>Save</Button>
-                  <Button variant="outline" className="text-sm px-4 py-2" onClick={handleReset}>Clear</Button>
+                  <Button className="bg-orange-500 hover:bg-orange-600 text-sm px-4 py-2" onClick={handleSubmit((data)=>{handleSave(data,"AddNewStatus")})}>{currentTab==='service-request-status' && isEditStatusMode ?'Update':'Save'}</Button>
+                  <Button variant="outline" className="text-sm px-4 py-2" onClick={()=>handleReset('AddNewStatus')}>Clear</Button>
                 </div>
                 <div>
-                  <h3 className="text-base font-semibold mb-4">Service Request Status List</h3>
-                  <div className="border border-gray-200 rounded-lg overflow-hidden">
-                    {/* table here */}
+                  <div className="border border-gray-200 rounded-lg overflow-hidden p-3">
+                    <ReusableTable
+                      data={statusTableData} columns={statusColumns}
+                      permissions={tablePermissions}
+                      title="Service Request Status List"
+                      onRefresh={()=>handleRefresh('Status')} enableSearch={true}
+                      enableSelection={false} enableExport={true}
+                      enableColumnVisibility={true} enablePagination={true}
+                      enableSorting={true} enableFiltering={true}
+                      pageSize={10} emptyMessage="No Data found"
+                      rowHeight="normal" storageKey="service-request-type-list-table"    
+                      enableRowReordering
+                      onRowReorder={(newData) => setStatusTableData(newData)}                
+                    />
                   </div>
-                  <div className="mt-4">
-                    <Button className="bg-orange-500 hover:bg-orange-600 text-sm px-4 py-2">
+                  <div className="mt-4 flex justify-end">
+                    <Button className="bg-orange-500 hover:bg-orange-600 text-sm px-4 py-2"
+                    onClick={handleUpdateStatusSequence}>
                       Update Index Sequence
                     </Button>
                   </div>
@@ -620,7 +779,11 @@ const Configuration = () => {
             <DialogHeader>
               <DialogTitle>Confirm the action</DialogTitle>
               <DialogDescription>
-                Are you sure you want to delete {selectedRecord?.ServiceRequestType || "this"} Service Request Type?
+                Are you sure you want to delete{" "}
+                  {currentTab === "service-request-type"
+                    ? `${selectedRecord?.ServiceRequestType || "this"} Service Request Type`
+                    : `${selectedStatusRec?.StatusType || "this"} Status`
+                  }
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
@@ -633,10 +796,7 @@ const Configuration = () => {
               <ReusableButton
                 variant="primary"
                 danger={true}
-                onClick={() => {
-                  deleteServiceRequestType(selectedRecord?.Id)
-                  setIsDelModalOpen(false)
-                }}
+                onClick={currentTab==="service-request-type"?()=>{deleteServiceRequestType(selectedRecord?.Id);setIsDelModalOpen(false)}:()=>{deleteStatus(selectedStatusRec?.Id);setIsDelModalOpen(false)}} 
               >
                 Delete
               </ReusableButton>

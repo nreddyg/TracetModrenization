@@ -798,7 +798,6 @@ const SubscriptionManagement = () => {
   const [dataSource, setDatasource] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [fields, setFields] = useState<BaseField[]>(SUBSCRIPTION_DB);
-  console.log(fields, "739")
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -860,7 +859,6 @@ const SubscriptionManagement = () => {
   }, [dataSource, searchTerm]);
 
   const getStatusColor = (status:string) => {
-    console.log(status,"status")
     switch (status) {
       case 'Active': return 'bg-green-100 text-green-800 border-green-300';
       case 'Expired': return 'bg-red-100 text-red-800 border-red-300';
@@ -955,7 +953,6 @@ const SubscriptionManagement = () => {
   //table data api integration
   async function getSubscriptionData(compId: number, BranchName: string) {
     await getSubscriptionTableData(compId, BranchName).then(res => {
-      console.log('Subscription Data:', res.data);
       if (res.success && res.data) {
         if (res.data?.length > 0) {
           setDatasource(res.data?.reverse())
@@ -974,12 +971,10 @@ const SubscriptionManagement = () => {
       getProductName(111).then(res => res.data),
     ]);
 
-    console.log(prodResult, "prodresult")
 
     setFields(prev =>
       prev.map(field => {
         if (field.name === "CustomerName" && custResult.status === "fulfilled") {
-          console.log(custResult.value[0].CustomerId, "906")
           return {
             ...field,
             defaultValue: custResult.value[0].CustomerName,
@@ -990,7 +985,6 @@ const SubscriptionManagement = () => {
           };
         }
         if (field.name === "ProductName" && prodResult.status === "fulfilled") {
-          console.log(prodResult.value[0].ProductId, "917")
           return {
             ...field,
             defaultValue: prodResult.value[0].ProductName,

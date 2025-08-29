@@ -260,7 +260,6 @@ const TicketView = () => {
   }, [watch('ServiceRequestType')])
   useEffect(() => {
     if (form.watch("FileUploadURLs")) {
-      console.log((form.watch("FileUploadURLs")))
       const process = async () => {
         const result = await multipleFileUpload(form.watch("FileUploadURLs"));
       };
@@ -813,7 +812,6 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
     (file): file is UploadedFileOutput => file !== null
   );
 
-  console.log(`Processed ${validFiles.length} out of ${fileArray.length} files`);
   setAttachments(validFiles);
 };
   //handling uploaded files

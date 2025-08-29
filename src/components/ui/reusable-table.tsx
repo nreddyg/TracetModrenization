@@ -83,6 +83,21 @@ import { Badge } from './badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './dropdown-menu';
 import { Popover, PopoverContent, PopoverTrigger } from './popover';
 import { cn } from '@/lib/utils';
+import {
+  DndContext,
+  closestCenter,
+  MouseSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 // Enhanced types for enterprise features
 export interface TablePermissions {
@@ -179,7 +194,8 @@ export interface ReusableTableProps<T = any> {
   onBulkEdit?: (selectedRows: T[]) => void;
   onRowEdit?: (row: T, changes: Partial<T>) => void;
   onAuditLog?: (entry: AuditTrail) => void;
-
+enableRowReordering?: boolean;
+onRowReorder?: (newData: T[]) => void;
   columnVisibility?: VisibilityState; // 👈 new
   onColumnVisibilityChange?: (updater: VisibilityState) => void; // 👈 new
   // NEW: Enhanced Selection Props
@@ -1418,6 +1434,30 @@ const Pagination = ({ table }: { table: TanstackTable<any> }) => (
     </div>
   </div>
 );
+function DraggableRow({ row, children }: { row: any; children: React.ReactNode }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: row.id,
+  });
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.6 : 1,
+    cursor: "grab",
+  };
+
+  return (
+    <tr
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      className={row.getIsSelected() ? "bg-primary/5 hover:bg-muted/50" : "hover:bg-muted/50"}
+    >
+      {children}
+    </tr>
+  );
+}
 
 // Main Reusable Table Component
 export function ReusableTable<T = any>({
@@ -1426,6 +1466,8 @@ export function ReusableTable<T = any>({
   loading = false,
   error = null,
   title,
+   columnVisibility: controlledColumnVisibility,
+  onColumnVisibilityChange,
   permissions = {
     canEdit: false,
     canDelete: false,
@@ -1481,12 +1523,20 @@ export function ReusableTable<T = any>({
   timezone = 'UTC',
   rowHeight = 'normal',
   aggregationFunctions = {},
-  getSubRows
+  getSubRows,
+    enableRowReordering = false,
+  onRowReorder,
 }: ReusableTableProps<T>) {
   // State management
   const [sorting, setSorting] = useLocalStorage<SortingState>(`${storageKey}-sorting`, []);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = useLocalStorage<VisibilityState>(`${storageKey}-visibility`, {});
+  // const [columnVisibility, setColumnVisibility] = useLocalStorage<VisibilityState>(`${storageKey}-visibility`, {});
+    const [uncontrolledColumnVisibility, setUncontrolledColumnVisibility] = useState<VisibilityState>({});
+  const isColumnVisibilityControlled = controlledColumnVisibility !== undefined;
+  const columnVisibility: VisibilityState = isColumnVisibilityControlled
+    ? (controlledColumnVisibility as VisibilityState)
+    : uncontrolledColumnVisibility;
+    // const [openColumnId, setOpenColumnId] = useState<string | null>(null)):
   const [grouping, setGrouping] = useLocalStorage<GroupingState>(`${storageKey}-grouping`, []);
   const [expanded, setExpanded] = useState<ExpandedState>({});
   const [globalFilter, setGlobalFilter] = useState('');
@@ -1505,7 +1555,16 @@ export function ReusableTable<T = any>({
     left: [],
     right: []
   });
+ const handleColumnVisibilityChange: OnChangeFn<VisibilityState> = (updater) => {
+    const prev = columnVisibility;
+    const next = typeof updater === 'function' ? (updater as any)(prev) : updater;
 
+    if (!isColumnVisibilityControlled) {
+      setUncontrolledColumnVisibility(next);
+    }
+    // Notify parent with the final map of visibilities
+    onColumnVisibilityChange?.(next as VisibilityState);
+  };
   // NEW: Enhanced Selection Management
   const {
     rowSelection,
@@ -1775,7 +1834,7 @@ export function ReusableTable<T = any>({
     },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
-    onColumnVisibilityChange: setColumnVisibility,
+    onColumnVisibilityChange: handleColumnVisibilityChange,
     onRowSelectionChange: setRowSelection,
     onGroupingChange: setGrouping,
     onExpandedChange: setExpanded,
@@ -2004,71 +2063,149 @@ export function ReusableTable<T = any>({
                 </tr>
               ))}
             </thead>
-            <tbody className="bg-background divide-y divide-border">
-              {loading ? (
-                Array.from({ length: 5 }, (_, i) => (
-                  <SkeletonRow key={i} columns={enhancedColumns.length} />
-                ))
-              ) : table.getRowModel().rows.length === 0 ? (
-                <tr>
-                  <td colSpan={enhancedColumns.length} className="px-4 py-8 text-center text-muted-foreground">
-                    {emptyMessage}
+            {enableRowReordering ? (
+  <DndContext
+    sensors={useSensors(useSensor(MouseSensor), useSensor(TouchSensor))}
+    collisionDetection={closestCenter}
+    onDragEnd={({ active, over }) => {
+      if (over && active.id !== over.id) {
+        const oldIndex = table.getRowModel().rows.findIndex(r => r.id === active.id);
+        const newIndex = table.getRowModel().rows.findIndex(r => r.id === over.id);
+        const newData = arrayMove([...data], oldIndex, newIndex);
+        onRowReorder?.(newData);
+      }
+    }}
+  >
+    <SortableContext
+      items={table.getRowModel().rows.map(r => r.id)}
+      strategy={verticalListSortingStrategy}
+    >
+      <tbody className="bg-background divide-y divide-border">
+        {table.getRowModel().rows.map(row => {
+          const rowId = getRowId(row.original, row.index);
+          const isSelected = rowSelection[rowId] || false;
+          const isSelectable = !selectableRowFilter || selectableRowFilter(row.original);
+
+          return (
+            <DraggableRow key={row.id} row={row}>
+              {row.getVisibleCells().map(cell => {
+                const column = cell.column;
+                const columnMeta = column.columnDef.meta as any;
+                const isEditable =
+                  enableInlineEdit &&
+                  permissions.canInlineEdit &&
+                  columnMeta?.editable;
+
+                return (
+                  <td
+                    key={cell.id}
+                    className={cn(
+                      "px-4 py-3 text-sm bg-background",
+                      rowHeightClasses[rowHeight]
+                    )}
+                    style={{
+                      width: cell.column.getSize(),
+                      position: cell.column.getIsPinned() ? "sticky" : "relative",
+                      left:
+                        cell.column.getIsPinned() === "left"
+                          ? cell.column.getStart("left")
+                          : undefined,
+                      right:
+                        cell.column.getIsPinned() === "right"
+                          ? cell.column.getAfter("right")
+                          : undefined,
+                      zIndex: cell.column.getIsPinned() ? 10 : 1,
+                    }}
+                  >
+                    {isEditable ? (
+                      <InlineEditCell
+                        value={cell.getValue()}
+                        onSave={(newValue) => {
+                          if (onRowEdit) {
+                            onRowEdit(row.original, { [column.id]: newValue } as Partial<T>);
+                          }
+                        }}
+                        type={columnMeta.editType || "text"}
+                        options={columnMeta.options || []}
+                      />
+                    ) : (
+                      flexRender(cell.column.columnDef.cell, cell.getContext())
+                    )}
                   </td>
-                </tr>
-              ) : (
-                table.getRowModel().rows.map(row => {
-                  const rowId = getRowId(row.original, row.index);
-                  const isSelected = rowSelection[rowId] || false;
-                  const isSelectable = !selectableRowFilter || selectableRowFilter(row.original);
+                );
+              })}
+            </DraggableRow>
+          );
+        })}
+      </tbody>
+    </SortableContext>
+  </DndContext>
+) : (
+  <tbody className="bg-background divide-y divide-border">
+    {table.getRowModel().rows.map(row => {
+      const rowId = getRowId(row.original, row.index);
+      const isSelected = rowSelection[rowId] || false;
+      const isSelectable = !selectableRowFilter || selectableRowFilter(row.original);
 
-                  return (
-                    <tr
-                      key={row.id}
-                      className={cn(
-                        "hover:bg-muted/50",
-                        isSelected && "bg-primary/5",
-                        !isSelectable && "opacity-50"
-                      )}
-                    >
-                      {row.getVisibleCells().map(cell => {
-                        const column = cell.column;
-                        const columnMeta = column.columnDef.meta as any;
-                        const isEditable = enableInlineEdit && permissions.canInlineEdit && columnMeta?.editable;
+      return (
+        <tr
+          key={row.id}
+          className={cn(
+            "hover:bg-muted/50",
+            isSelected && "bg-primary/5",
+            !isSelectable && "opacity-50"
+          )}
+        >
+          {row.getVisibleCells().map(cell => {
+            const column = cell.column;
+            const columnMeta = column.columnDef.meta as any;
+            const isEditable =
+              enableInlineEdit && permissions.canInlineEdit && columnMeta?.editable;
 
-                        return (
-                          <td
-                            key={cell.id}
-  className={cn("px-4 py-3 text-sm bg-background", rowHeightClasses[rowHeight])}
-  style={{
-    width: cell.column.getSize(),
-    position: cell.column.getIsPinned() ? "sticky" : "relative",
-    left: cell.column.getIsPinned() === "left" ? cell.column.getStart("left") : undefined,
-    right: cell.column.getIsPinned() === "right" ? cell.column.getAfter("right") : undefined,
-    zIndex: cell.column.getIsPinned() ? 10 : 1,
-  }}
-                          >
-                            {isEditable ? (
-                              <InlineEditCell
-                                value={cell.getValue()}
-                                onSave={(newValue) => {
-                                  if (onRowEdit) {
-                                    onRowEdit(row.original, { [column.id]: newValue } as Partial<T>);
-                                  }
-                                }}
-                                type={columnMeta.editType || 'text'}
-                                options={columnMeta.options || []}
-                              />
-                            ) : (
-                              flexRender(cell.column.columnDef.cell, cell.getContext())
-                            )}
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
+            return (
+              <td
+                key={cell.id}
+                className={cn(
+                  "px-4 py-3 text-sm bg-background",
+                  rowHeightClasses[rowHeight]
+                )}
+                style={{
+                  width: cell.column.getSize(),
+                  position: cell.column.getIsPinned() ? "sticky" : "relative",
+                  left:
+                    cell.column.getIsPinned() === "left"
+                      ? cell.column.getStart("left")
+                      : undefined,
+                  right:
+                    cell.column.getIsPinned() === "right"
+                      ? cell.column.getAfter("right")
+                      : undefined,
+                  zIndex: cell.column.getIsPinned() ? 10 : 1,
+                }}
+              >
+                {isEditable ? (
+                  <InlineEditCell
+                    value={cell.getValue()}
+                    onSave={(newValue) => {
+                      if (onRowEdit) {
+                        onRowEdit(row.original, { [column.id]: newValue } as Partial<T>);
+                      }
+                    }}
+                    type={columnMeta.editType || "text"}
+                    options={columnMeta.options || []}
+                  />
+                ) : (
+                  flexRender(cell.column.columnDef.cell, cell.getContext())
+                )}
+              </td>
+            );
+          })}
+        </tr>
+      );
+    })}
+  </tbody>
+)}
+
           </table>
         </div>
 

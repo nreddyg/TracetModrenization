@@ -32,9 +32,7 @@ const MyWorkbench = () => {
   const [dateRange, setDateRange] = useState<{ from: Date; to: Date } | null>(null);
   const [dataSource, setDataSource] = useState<Request[]>([]);
   const [dataSourceToShow, setDataSourceToShow] = useState<Request[]>([]);
-  console.log("location",location,location.pathname)
   const [isMyRequest,setMyRequest]=useState(location.pathname==="/service-desk/my-requests")
-   console.log("location",isMyRequest)
   const [fields, setFields] = useState<BaseField[]>(isMyRequest? MyRequest_Filter_DB: workbench_Filter_DB);
   const [filters, setFilters] = useState<Filters>({
     TicketCategory:isMyRequest?"104": "101",
@@ -289,7 +287,6 @@ const MyWorkbench = () => {
   const onSubmit = (value: any) => {
 
     let filtersCopy = structuredClone(filters);
-    console.log('val', value)
     if (value.CreatedDate) {
       let datearr = []
       const startDate = value.CreatedDate.from
@@ -318,7 +315,6 @@ const MyWorkbench = () => {
 
 
   };
-  console.log("filters", filters)
   const normalizeDate = (date: Date): Date => {
     return new Date(date.getFullYear(), date.getMonth(), date.getDate());
   };

@@ -82,7 +82,6 @@ const PaymentDetails = () => {
 
   const handleSubmitForm = async (data: GenericObject): Promise<void> => {
     dispatch(setLoading(true));
-console.log(data,"data1554")
     try {
       const pay = {
         "SubscriptionsDetails": subData
@@ -339,10 +338,8 @@ console.log(data,"data1554")
     await getNextAmcFromDate(customerName, productname, branchname, compid)
       .then((res) => {
         if (res.success && res.data) {
-          console.log(res.data[0], "res")
           const temp = res.data[0];
           const value = temp?.StartDate?.split(" ")[0]
-          console.log(value,"value238")
           const ordervalue = temp?.OrderValue;
           setFields((prevFields) =>
             prevFields.map((f) => {
@@ -409,7 +406,6 @@ console.log(data,"data1554")
     dispatch(setLoading(true))
     await getSubscriptionById(id, compid).then(res => {
       if (res.success && res.data) {
-        console.log(res.data, "276")
         const details = res.data.SubscriptionDetails;
         if (details) {
           reset({

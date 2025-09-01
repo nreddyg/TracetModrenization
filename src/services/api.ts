@@ -39,7 +39,7 @@ api.interceptors.response.use(
   (response: AxiosResponse) => response,
   (error: AxiosError) => {
     if (error.response?.status === 401) {
-      alert('Unauthorized - Please log in again.');
+      // alert('Unauthorized - Please log in again.');
       localStorage.clear();
       window.location.href = '/';
     }

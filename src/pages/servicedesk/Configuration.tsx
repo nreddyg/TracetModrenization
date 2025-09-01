@@ -85,13 +85,6 @@ const Configuration = () => {
   const [statusColumns,setStatusColumns]=useState<ColumnDef<Status>[]>([
     {id:'StatusType',accessorKey: "StatusType", header: "Status Type"},
     {id:'Index',accessorKey: "Index", header: "Index"},
-    {id:'Actions',header: "Actions", cell: ({ row }) => (
-      row.original.StatusType!=="Open" && row.original.StatusType!=="Closed" && (
-        <div className="flex gap-2">
-          <Edit className='primary' size={16} cursor={'pointer'} onClick={()=>handleEditStatus(row.original)}>Edit</Edit>
-          <Trash2 className='text-red-500' size={16} cursor={'pointer'} onClick={() => handleDeleteStatus(row.original)}>Delete</Trash2>
-        </div>
-      ))}
   ])
   const [statusTableData,setStatusTableData]=useState<Status[]>([]);
   const [serviceRequestTypeData,setServiceRequestTypeData]=useState<serviceRequestType[]>([]);
@@ -135,6 +128,22 @@ const Configuration = () => {
       icon: Trash2,
       onClick:handleDelete,
       variant: 'destructive',
+    },
+  ]; 
+   const statusTableActions: TableAction<Status>[] = [
+    {
+      label: 'Edit',
+      icon: Edit,
+      onClick: handleEditStatus,
+      variant: 'default',
+      hidden:row=>row.StatusType==='Open' || row.StatusType==='Closed'
+    },
+    {
+      label: 'Delete',
+      icon: Trash2,
+      onClick:handleDeleteStatus,
+      variant: 'destructive',
+      hidden:row=>row.StatusType==='Open' || row.StatusType==='Closed'
     },
   ]; 
   useEffect(()=>{
@@ -760,7 +769,8 @@ const Configuration = () => {
                       pageSize={10} emptyMessage="No Data found"
                       rowHeight="normal" storageKey="service-request-type-list-table"    
                       enableRowReordering
-                      onRowReorder={(newData) => setStatusTableData(newData)}                
+                      onRowReorder={(newData) => setStatusTableData(newData)}  
+                      actions={statusTableActions}              
                     />
                   </div>
                   <div className="mt-4 flex justify-end">

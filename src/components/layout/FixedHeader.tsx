@@ -34,6 +34,10 @@ const FixedHeader: React.FC = () => {
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  const logoutFunction = () => {
+    localStorage.clear();
+    window.location.href = "/login";
+  };
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 shadow-sm">
       <div className="flex items-center justify-between gap-2 px-4 lg:px-6 py-3">
@@ -187,7 +191,7 @@ const FixedHeader: React.FC = () => {
                 <span>Settings</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="cursor-pointer text-red-600">
+              <DropdownMenuItem className="cursor-pointer text-red-600" onClick={logoutFunction}>
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Log out</span>
               </DropdownMenuItem>

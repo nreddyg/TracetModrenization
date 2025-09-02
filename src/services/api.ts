@@ -6,12 +6,11 @@ import axios, {
 } from 'axios';
 
 const api = axios.create({
-  baseURL: "http://10.20.1.34:8054",
+  baseURL:import.meta.env.VITE_API_URL,
   // timeout: 10000,
     headers: {
     'Content-Type': 'application/json'
   }
-
 });
 
 // Extend config type to include our custom noAuth flag

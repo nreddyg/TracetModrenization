@@ -719,6 +719,7 @@ import { SUBSCRIPTION_DB } from '@/Local_DB/Form_JSON_Data/SubscriptionDB';
 import { getProductName, getSubscriptionTableData } from '@/services/subscriptionServices';
 import ExcelJS from "exceljs";
 import { Badge } from '@/components/ui/badge';
+import { useAppSelector } from '@/store';
 
 
 
@@ -799,12 +800,15 @@ const SubscriptionManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [fields, setFields] = useState<BaseField[]>(SUBSCRIPTION_DB);
   const dispatch = useDispatch();
+  const companyId=useAppSelector(state=>state.projects.companyId);
   const navigate = useNavigate();
 
   useEffect(() => {
-    getSubscriptionData(111, 'All');
-    fetchLookups();
-  }, [])
+    if(companyId){
+      getSubscriptionData(companyId, 'All');
+      fetchLookups();
+    }
+  }, [companyId])
 
   const form = useForm<GenericObject>({
     defaultValues: fields.reduce((acc, f) => {
@@ -967,8 +971,8 @@ const SubscriptionManagement = () => {
   //fetch lookup data
   async function fetchLookups() {
     const [custResult, prodResult] = await Promise.allSettled([
-      getSRCustomerLookupsList(111, 'All').then(res => res.data.ServiceRequestCustomerLookup),
-      getProductName(111).then(res => res.data),
+      getSRCustomerLookupsList(companyId, 'All').then(res => res.data.ServiceRequestCustomerLookup),
+      getProductName(companyId).then(res => res.data),
     ]);
 
 

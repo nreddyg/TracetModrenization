@@ -1,13 +1,12 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ReusableTable } from '@/components/ui/reusable-table';
-import { Users, Package, RefreshCw, Plus, AlertTriangle, CheckCircle } from 'lucide-react';
+import { RefreshCw, Plus} from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import FilterCard from '@/components/common/FilterCard';
 import ReusableRangePicker from '@/components/ui/reusable-range-picker';
 import { ScrollArea } from '@radix-ui/react-scroll-area';
 import { getAllSRDetailsList } from '@/services/ticketServices';
@@ -20,123 +19,76 @@ import { BaseField, GenericObject } from '@/Local_DB/types/types';
 import { Controller, useForm } from 'react-hook-form';
 import { MyRequest_Filter_DB, workbench_Filter_DB } from '@/Local_DB/Form_JSON_Data/MyWorkbenchandRequestsDB';
 import { getRequestTypeById } from '@/_Helper_Functions/HelperFunctions';
+import { useAppSelector } from '@/store';
 interface Filters {
   TicketCategory: string;
   CreatedDate: any[]; // Assuming these are ISO date strings
 }
 const MyWorkbench = () => {
   const navigate = useNavigate();
+  const companyId=useAppSelector(state=>state.projects.companyId)
   const dispatch = useAppDispatch();
   const location=useLocation()
   const { toast } = useToast();
-  const [dateRange, setDateRange] = useState<{ from: Date; to: Date } | null>(null);
   const [dataSource, setDataSource] = useState<Request[]>([]);
   const [dataSourceToShow, setDataSourceToShow] = useState<Request[]>([]);
   const [isMyRequest,setMyRequest]=useState(location.pathname==="/service-desk/my-requests")
   const [fields, setFields] = useState<BaseField[]>(isMyRequest? MyRequest_Filter_DB: workbench_Filter_DB);
   const [filters, setFilters] = useState<Filters>({
-    TicketCategory:isMyRequest?"104": "101",
+    TicketCategory: isMyRequest ? "104" : "101",
     CreatedDate: ["", ""], // Empty strings initially
   });
-  // const [columns, setColumns] = useState<ColumnDef<Request>[]>([
-  //   {
-  //     accessorKey: "ServiceRequestNo", header: "Service Request No",
-  //     cell: ({ row }) => (
-  //       <Link to={`/service-desk/my-workbench/tickets/${filters.TicketCategory}/${row.original.ServiceRequestId}`} className='text-blue-500 '>
-  //         {row.getValue('ServiceRequestNo')}
-  //       </Link>
-  //     )
-  //   },
-  //   { accessorKey: "Title", header: "Title" },
-  //   {
-  //     accessorKey: "CreatedDate", header: "Created Date",
-  //     cell: ({ row }) => (
-  //       <span>
-  //         {new Date(row.getValue('CreatedDate')).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}
-  //       </span>
-  //     )
-  //   },
-  //   {
-  //     accessorKey: "Severity", header: "Severity",
-  //     cell: ({ row }) => (
-  //       <Badge className={`${getColorForStatus(row.getValue('Severity'))} border font-medium text-xs px-2 py-0.5 transition-colors`}>
-  //         {row.getValue('Severity')}
-  //       </Badge>
-  //     ),
-  //   },
-  //   { accessorKey: "AssignedTo", header: "Assigned To" },
-  //   { accessorKey: "ServiceRequestType", header: "Service Request Type" },
-  //   { accessorKey: "RequestedBy", header: "Requested By" },
-  //   {
-  //     accessorKey: "Priority", header: "Priority",
-  //     cell: ({ row }) => (
-  //       <Badge className={`${getColorForStatus(row.getValue('Priority'))} border font-medium text-xs px-2 py-0.5 transition-colors`}>
-  //         {row.getValue('Priority')}
-  //       </Badge>
-  //     ),
-  //   },
-  //   {
-  //     accessorKey: "Status", header: "Status",
-  //     cell: ({ row }) => (
-  //       <Badge className={`${getColorForStatus(row.getValue('Status'))} border font-medium text-xs px-2 py-0.5 transition-colors`}>
-  //         {row.getValue('Status')}
-  //       </Badge>
-  //     ),
-  //   },
-  //   { accessorKey: "Customer", header: "Customer" },
-  // ]);
-
   const columns = useMemo<ColumnDef<Request>[]>(() => [
-  {
-    accessorKey: "ServiceRequestNo", header: "Service Request No",
-    cell: ({ row }) => (
-      <Link
-        to={(isMyRequest)?`/service-desk/my-requests/tickets/${filters.TicketCategory}/${row.original.ServiceRequestId}`:`/service-desk/my-workbench/tickets/${filters.TicketCategory}/${row.original.ServiceRequestId}`}
-        className="text-blue-500"
-        
-      >
-        {row.getValue('ServiceRequestNo')}
-      </Link>
-    )
-  },
-  { accessorKey: "Title", header: "Title" },
-  {
-    accessorKey: "CreatedDate", header: "Created Date",
-    cell: ({ row }) => (
-      <span>
-        {new Date(row.getValue('CreatedDate')).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}
-      </span>
-    )
-  },
-  {
-    accessorKey: "Severity", header: "Severity",
-    cell: ({ row }) => (
-      <Badge className={`${getColorForStatus(row.getValue('Severity'))} border font-medium text-xs px-2 py-0.5 transition-colors`}>
-        {row.getValue('Severity')}
-      </Badge>
-    ),
-  },
-  { accessorKey: "AssignedTo", header: "Assigned To" },
-  { accessorKey: "ServiceRequestType", header: "Service Request Type" },
-  { accessorKey: "RequestedBy", header: "Requested By" },
-  {
-    accessorKey: "Priority", header: "Priority",
-    cell: ({ row }) => (
-      <Badge className={`${getColorForStatus(row.getValue('Priority'))} border font-medium text-xs px-2 py-0.5 transition-colors`}>
-        {row.getValue('Priority')}
-      </Badge>
-    ),
-  },
-  {
-    accessorKey: "Status", header: "Status",
-    cell: ({ row }) => (
-      <Badge className={`${getColorForStatus(row.getValue('Status'))} border font-medium text-xs px-2 py-0.5 transition-colors`}>
-        {row.getValue('Status')}
-      </Badge>
-    ),
-  },
-  { accessorKey: "Customer", header: "Customer" },
-], [filters.TicketCategory]);
+    {
+      accessorKey: "ServiceRequestNo", header: "Service Request No",
+      cell: ({ row }) => (
+        <Link
+          to={(isMyRequest) ? `/service-desk/my-requests/tickets/${filters.TicketCategory}/${row.original.ServiceRequestId}` : `/service-desk/my-workbench/tickets/${filters.TicketCategory}/${row.original.ServiceRequestId}`}
+          className="text-blue-500"
+
+        >
+          {row.getValue('ServiceRequestNo')}
+        </Link>
+      )
+    },
+    { accessorKey: "Title", header: "Title" },
+    {
+      accessorKey: "CreatedDate", header: "Created Date",
+      cell: ({ row }) => (
+        <span>
+          {new Date(row.getValue('CreatedDate')).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+        </span>
+      )
+    },
+    {
+      accessorKey: "Severity", header: "Severity",
+      cell: ({ row }) => (
+        <Badge className={`${getColorForStatus(row.getValue('Severity'))} border font-medium text-xs px-2 py-0.5 transition-colors`}>
+          {row.getValue('Severity')}
+        </Badge>
+      ),
+    },
+    { accessorKey: "AssignedTo", header: "Assigned To" },
+    { accessorKey: "ServiceRequestType", header: "Service Request Type" },
+    { accessorKey: "RequestedBy", header: "Requested By" },
+    {
+      accessorKey: "Priority", header: "Priority",
+      cell: ({ row }) => (
+        <Badge className={`${getColorForStatus(row.getValue('Priority'))} border font-medium text-xs px-2 py-0.5 transition-colors`}>
+          {row.getValue('Priority')}
+        </Badge>
+      ),
+    },
+    {
+      accessorKey: "Status", header: "Status",
+      cell: ({ row }) => (
+        <Badge className={`${getColorForStatus(row.getValue('Status'))} border font-medium text-xs px-2 py-0.5 transition-colors`}>
+          {row.getValue('Status')}
+        </Badge>
+      ),
+    },
+    { accessorKey: "Customer", header: "Customer" },
+  ], [filters.TicketCategory]);
 
   const form = useForm<GenericObject>({
     defaultValues: fields.reduce((acc, f) => {
@@ -145,18 +97,6 @@ const MyWorkbench = () => {
     }, {} as GenericObject),
   })
   const { control, register, handleSubmit, trigger, watch, setValue, reset, formState: { errors } } = form;
-  // Stats calculations
-  // const stats = useMemo(() => {
-  //   const InProgressTicketsCount = dataSource.filter(req => req.Status === 'In Progress').length;
-  //   const ResolvedTicketsCount = dataSource.filter(req => req.Status === 'Resolved').length;
-  //   const ClosedTicketsCount = dataSource.filter(req => req.Status === 'Closed').length;
-  //   const PendingTicketsCount = dataSource.filter(req => req.Status === 'Pending').length;
-  //   const OpenTicketsCount = dataSource.filter(req => req.Status === 'Open').length;
-  //   return {
-  //     InProgressTicketsCount,ResolvedTicketsCount,ClosedTicketsCount,PendingTicketsCount,
-  //     OpenTicketsCount,totaldataSource: dataSource.length
-  //   };
-  // }, [dataSource]);
 
   const renderField = (field: BaseField) => {
     const { name, label, fieldType, isRequired, show = true } = field;
@@ -212,11 +152,13 @@ const MyWorkbench = () => {
   };
 
   useEffect(() => {
-    fetchAllServiceRequests(getRequestTypeById(filters.TicketCategory), false);
-  }, [])
+    if(companyId){
+      fetchAllServiceRequests(getRequestTypeById(filters.TicketCategory), false);
+    }
+  }, [companyId])
   async function fetchAllServiceRequests(requestType: string, isDateSelected: boolean, filtersCopy?: Filters) {
     dispatch(setLoading(true))
-    await getAllSRDetailsList('All', 111, requestType).then(res => {
+    await getAllSRDetailsList('All',companyId, requestType).then(res => {
       if (res.success && res.data.status === undefined) {
         if (Array.isArray(res.data)) {
           let getData = res.data.map(item => ({ ...item, AssignedTo: item.AssigneeSelectedUsers || '' + '' + item.AssigneeSelectedUserGroups || '' }))
@@ -285,66 +227,47 @@ const MyWorkbench = () => {
   }, [toast, filters]);
   //handle change
   const onSubmit = (value: any) => {
-
     let filtersCopy = structuredClone(filters);
     if (value.CreatedDate) {
       let datearr = []
       const startDate = value.CreatedDate.from
       const endDate = value.CreatedDate.to
-      // formattedStartDate = formatDate(startDate)
-      // formattedEndDate = formatDate(endDate)
       datearr.push(startDate)
       datearr.push(endDate)
       filtersCopy["CreatedDate"] = datearr
-
-    }else{
-      filtersCopy["CreatedDate"]=[]
+    } else {
+      filtersCopy["CreatedDate"] = []
     }
-
     if (value.TicketCategory) {
       filtersCopy["TicketCategory"] = value.TicketCategory
-
     }
-
     if (value.TicketCategory !== filters.TicketCategory) {
-      fetchAllServiceRequests(getRequestTypeById(filtersCopy.TicketCategory),true, filtersCopy);
-    } else{
+      fetchAllServiceRequests(getRequestTypeById(filtersCopy.TicketCategory), true, filtersCopy);
+    } else {
       filterDataSource(dataSource, filtersCopy)
     }
     setFilters(filtersCopy)
-
-
   };
   const normalizeDate = (date: Date): Date => {
     return new Date(date.getFullYear(), date.getMonth(), date.getDate());
   };
   const filterDataSource = (dataSource: any[], filters: Filters): void => {
     const filteredDataSource = dataSource.filter((obj) => {
-
       return Object.keys(filters).every((key) => {
-
         if (key === "CreatedDate") {
           const [startStr, endStr] = filters[key];
           if (!startStr && !endStr) return true; // No filter applied
-
           const startDate = normalizeDate(new Date(startStr));
           const endDate = normalizeDate(new Date(endStr));
           const objDate = normalizeDate(new Date(obj["CreatedDate"].substring(0, 10)));
-          // return startDate <= objDate && objDate <= endDate;
           return startStr && endStr
-        ? startDate! <= objDate && objDate <= endDate!
-        : startStr ? objDate >= startDate! : objDate <= endDate!;
+            ? startDate! <= objDate && objDate <= endDate!
+            : startStr ? objDate >= startDate! : objDate <= endDate!;
         } else {
           return true
         }
-
-        // @ts-ignore: Safe to ignore because key is known to be a valid key
-        // const filterArray = filters[key as keyof Filters] as string[]
-        // @ts-ignore: Same here for simplicity
-        // return filterArray.length === 0 || filterArray.includes(obj[key]);
       });
     });
-
     setDataSourceToShow(filteredDataSource);
   };
 
@@ -354,7 +277,7 @@ const MyWorkbench = () => {
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">{isMyRequest?"My Requests": "My Workbench"}</h1>
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">{isMyRequest ? "My Requests" : "My Workbench"}</h1>
             {/* <p className="text-gray-600 mt-1 text-sm sm:text-base">View and manage all your service requests in one place</p> */}
           </div>
           <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
@@ -370,89 +293,14 @@ const MyWorkbench = () => {
             </Button>
           </div>
         </div>
-
-        {/* Enhanced Stats Cards */}
-        {/* <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4 lg:gap-6">
-          <Card className="border-0 shadow-sm bg-gradient-to-br from-blue-50 to-blue-100/50">
-            <CardContent className="p-3 sm:p-4 lg:p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs sm:text-sm font-medium text-blue-600 mb-1">Total Tickets</p>
-                  <p className="text-lg sm:text-xl lg:text-2xl font-bold text-blue-900">{stats.totalRequests}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-sm bg-gradient-to-br from-red-50 to-red-100/50">
-            <CardContent className="p-3 sm:p-4 lg:p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs sm:text-sm font-medium text-red-600 mb-1">Open</p>
-                  <p className="text-lg sm:text-xl lg:text-2xl font-bold text-red-900">{stats.OpenTicketsCount}</p>
-                </div>
-                <div className="p-2 sm:p-3 bg-red-500 rounded-lg">
-                  <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-white" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-sm bg-gradient-to-br from-amber-50 to-amber-100/50">
-            <CardContent className="p-3 sm:p-4 lg:p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs sm:text-sm font-medium text-amber-600 mb-1">In Progress</p>
-                  <p className="text-lg sm:text-xl lg:text-2xl font-bold text-amber-900">{stats.InProgressTicketsCount}</p>
-                </div>
-                <div className="p-2 sm:p-3 bg-amber-500 rounded-lg">
-                  <Package className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-white" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-sm bg-gradient-to-br from-purple-50 to-purple-100/50">
-            <CardContent className="p-3 sm:p-4 lg:p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs sm:text-sm font-medium text-purple-600 mb-1">Resolved</p>
-                  <p className="text-lg sm:text-xl lg:text-2xl font-bold text-purple-900">{stats.ResolvedTicketsCount}</p>
-                </div>
-                <div className="p-2 sm:p-3 bg-purple-500 rounded-lg">
-                  <Users className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-white" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-sm bg-gradient-to-br from-emerald-50 to-emerald-100/50">
-            <CardContent className="p-3 sm:p-4 lg:p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs sm:text-sm font-medium text-emerald-600 mb-1">Closed</p>
-                  <p className="text-lg sm:text-xl lg:text-2xl font-bold text-emerald-900">{stats.ClosedTicketsCount}</p>
-                </div>
-                <div className="p-2 sm:p-3 bg-emerald-500 rounded-lg">
-                  <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-white" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div> */}
         <div>
-
-
           <Card>
-
             <CardTitle className="text-lg flex px-6 py-1 pt-2 items-center gap-2">
               {"Filters"}
             </CardTitle>
-
             <CardContent>
               <form onSubmit={form.handleSubmit(onSubmit)}>
                 <div className=" grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-
                   {
                     fields.map((field) => (
                       <div key={field.name}>
@@ -464,14 +312,8 @@ const MyWorkbench = () => {
                   </div>
                 </div>
               </form>
-
-
-
             </CardContent>
           </Card>
-
-
-
         </div>
         <div className="bg-white p-6 rounded-lg">
           <ScrollArea className=" w-full ">

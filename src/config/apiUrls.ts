@@ -1,6 +1,7 @@
 // login page urls
 
 export const GET_TOKEN='/token';
+export const URL_ORGANZIATION_DETAILS="/api/Masters/GetSelectedOrganizationByAccesToken";
 
 //service desk urls
 // create ticket screen

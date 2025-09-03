@@ -10,9 +10,11 @@ import { ReusableButton } from '@/components/ui/reusable-button';
 import { useDispatch } from 'react-redux';
 import { setLoading } from '@/store/slices/projectsSlice';
 import { useMessage } from '@/components/ui/reusable-message';
+import { useAppSelector } from '@/store';
  
 const AssetCodeTable = () => {
     const location = useLocation();
+    const companyId=useAppSelector(state=>state.projects.companyId)
     const navigate = useNavigate();
     const dispatch=useDispatch();
      const msg = useMessage()
@@ -23,8 +25,10 @@ const AssetCodeTable = () => {
     const { flag } = location.state;
  
     useEffect(() => {
-        fetchAssetList("All", 111)
-    }, [])
+        if (companyId) {
+            fetchAssetList("All", companyId)
+        }
+    }, [companyId])
  
     // Removed the problematic useEffect that was causing infinite loops
     // useEffect(() => {

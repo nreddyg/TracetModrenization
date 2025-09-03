@@ -21,6 +21,7 @@ import { USER_GROUP_DB } from '@/Local_DB/Form_JSON_Data/UserGroupDB';
 import { GetServiceRequestAssignToLookups } from '@/services/ticketServices';
 import { useAppDispatch } from '@/store/reduxStore';
 import { setLoading } from '@/store/slices/projectsSlice';
+import { useAppSelector } from '@/store';
 
 
 interface UserGroup {
@@ -42,16 +43,19 @@ const UserGroups = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [fields, setFields] = useState<BaseField[]>(USER_GROUP_DB);
   const dispatch = useAppDispatch();
+  const companyId=useAppSelector(state=>state.projects.companyId)
   
   useEffect(() => {
-    getUserGroupTableData(111, 'All');
-  }, [])
+    if(companyId){
+      getUserGroupTableData(companyId, 'All');
+    }
+  }, [companyId])
 
   useEffect(() => {
-    if (selectedRecord !== null) {
-      getUserGroupDataById(111, selectedRecord?.UserGroupId)
+    if (selectedRecord !== null && companyId) {
+      getUserGroupDataById(companyId, selectedRecord?.UserGroupId)
     }
-  }, [selectedRecord])
+  }, [selectedRecord,companyId])
 
   //table data api integration
   async function getUserGroupTableData(compId: number, BranchName: string) {
@@ -100,7 +104,7 @@ const UserGroups = () => {
       if (res.success && res.data) {
         if (res.data.status === true) {
           message.success(res.data.message)
-          getUserGroupTableData(111, 'All')
+          getUserGroupTableData(companyId, 'All')
         }
         else {
           message.error(res.data.message)
@@ -143,8 +147,10 @@ const UserGroups = () => {
 
 
   useEffect(() => {
-    SelectUsersLookup(111, 'All')
-  }, [])
+    if(companyId){
+      SelectUsersLookup(companyId, 'All')
+    }
+  }, [companyId])
 
 
 
@@ -274,15 +280,15 @@ const UserGroups = () => {
     let res;
 
       if (!isEditMode) {
-       res=await addUserGroup(111,'All',pay)
+       res=await addUserGroup(companyId,'All',pay)
       } else if (selectedRecord) {
-              res = await updateUserGroup(111,'All',selectedRecord?.UserGroupId,pay);
+              res = await updateUserGroup(companyId,'All',selectedRecord?.UserGroupId,pay);
       }
 
     
     if (res?.success && res.data?.status) {
       message.success(res.data.message || (isEditMode ? 'User group updated' : 'User group created'));
-      getUserGroupTableData(111, 'All');
+      getUserGroupTableData(companyId, 'All');
       handleCancel();
     } else {
       message.error(res?.data?.message || 'Operation failed');
@@ -547,7 +553,7 @@ const UserGroups = () => {
             <ReusableButton
               variant="primary"
               danger={true}
-              onClick={() => { deleteUserGroupData(111, selectedRecord?.UserGroupId); setIsDelModalOpen(false) }}
+              onClick={() => { deleteUserGroupData(companyId, selectedRecord?.UserGroupId); setIsDelModalOpen(false) }}
             >
               Delete
             </ReusableButton>

@@ -7,13 +7,16 @@ import { Provider } from 'react-redux';
 import { store } from '@/store/reduxStore';
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import AppSidebar from "@/components/AppSidebar";
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import FixedHeader from "@/components/layout/FixedHeader";
 import { ReusableLoader } from "@/components/ui/reusable-loader";
 import { MessageProvider } from "./components/ui/reusable-message";
 import WrapperLazyComponent from "./components/common/WrapperLazyComponent";
 import AssetCodeTable from "./pages/servicedesk/AssetCodeTable";
 import ServiceRequestReport from "./pages/servicedesk/ServiceRequestDetailsHistory";
+import { getOrganizationDetailsByToken } from "./services/appService";
+import { useAppDispatch } from "./store";
+import { setCompanyId, setLoading } from "./store/slices/projectsSlice";
 
 // Lazy load all pages
 const Index = WrapperLazyComponent(() => import("./pages/Index"));
@@ -109,6 +112,7 @@ const NotFound = WrapperLazyComponent(() => import("./pages/NotFound"));
 const queryClient = new QueryClient();
 
 const AnimatedRoutes = () => {
+  const dispatch=useAppDispatch();
   const location = useLocation();
   const isLoginPage = location.pathname === '/login';
   const ticketId = /^\/tickets\/([^/]+)$/.test(location.pathname)? location.pathname.split("/").pop():'';
@@ -126,7 +130,7 @@ const AnimatedRoutes = () => {
       </div>
     );
   }
-    if (cleanRoutes.includes(location.pathname)) {
+  if (cleanRoutes.includes(location.pathname)) {
     return (
       <Routes location={location}>
         <Route
@@ -135,6 +139,23 @@ const AnimatedRoutes = () => {
         />
       </Routes>
     );
+  }
+
+  useEffect(()=>{
+    fetchOrganizationDetailsByToken();
+  },[])
+  //get organization details by token
+  const fetchOrganizationDetailsByToken=async()=>{
+    dispatch(setLoading(true));
+    await getOrganizationDetailsByToken().then(res=>{
+      if(res.success){
+        if(res.data && res.data.organizations && Array.isArray(res.data.organizations)){
+          if(res.data.organizations.length!==0){
+            dispatch(setCompanyId(res.data.organizations[0]['OrganizationId'] || null));
+          }
+        }
+      }
+    }).catch(err=>{}).finally(()=>{dispatch(setLoading(false))})
   }
   return (
     <MessageProvider duration={3} maxCount={5} offset={24}>
@@ -260,7 +281,7 @@ const AnimatedRoutes = () => {
 const App = () => (
   <Provider store={store}>
     <QueryClientProvider client={queryClient}>
-      <ReusableLoader overlay={false} />
+      <ReusableLoader />
       <TooltipProvider>
         <Toaster />
         <Sonner />

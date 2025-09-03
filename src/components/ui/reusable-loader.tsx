@@ -24,7 +24,7 @@ export interface ReusableLoaderProps {
   strokeWidth?: number;
   strokeColor?: string;
   trailColor?: string;
-  type?: 'default' | 'dots' | 'pulse' | 'bars' | 'progress' | 'spin';
+  type?: 'loader' | 'default' | 'dots' | 'pulse' | 'bars' | 'progress' | 'spin';
   direction?: 'horizontal' | 'vertical';
 }
 
@@ -40,7 +40,7 @@ export const ReusableLoader: React.FC<ReusableLoaderProps> = ({
   indicator,
   wrapperClassName,
   theme = 'auto',
-  overlay = false,
+  overlay = true,
   overlayClassName,
   overlayStyle,
   percent,
@@ -48,7 +48,7 @@ export const ReusableLoader: React.FC<ReusableLoaderProps> = ({
   strokeWidth,
   strokeColor = 'hsl(var(--primary))',
   trailColor = 'hsl(var(--muted))',
-  type = 'spin',
+  type = 'loader',
   direction = 'vertical'
 }) => {
   const globalLoading = useAppSelector((state: RootState) => state.projects.loading);
@@ -99,8 +99,7 @@ export const ReusableLoader: React.FC<ReusableLoaderProps> = ({
 
   // Theme classes
   const getThemeClasses = () => {
-    const baseOverlay = overlay ? 'bg-background/80 backdrop-blur-sm' : '';
-    
+   const baseOverlay = overlay ? 'bg-background/10 backdrop-blur-[1px] loader-overlay' : '';
     if (theme === 'light') return `${baseOverlay} text-foreground`;
     if (theme === 'dark') return `${baseOverlay} bg-black/80 text-white`;
     return `${baseOverlay} text-foreground`; // auto
@@ -311,16 +310,100 @@ export const ReusableLoader: React.FC<ReusableLoaderProps> = ({
   );
   };
 
+  const Loader: React.FC = () => {
+    return (
+      <div className="flex items-center justify-center h-full w-full">
+        <div className="loader relative w-10 h-10 rotate-[165deg]" />
+        <style>
+          {`
+            .loader::before,
+            .loader::after {
+              content: "";
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              display: block;
+              width: 0.5em;
+              height: 0.5em;
+              border-radius: 0.25em;
+              transform: translate(-50%, -50%);
+            }
+
+            .loader::before {
+              animation: before8 2s infinite;
+            }
+
+            .loader::after {
+              animation: after6 2s infinite;
+            }
+
+            @keyframes before8 {
+              0% {
+                width: 0.5em;
+                box-shadow: 1em -0.5em rgba(225, 20, 98, 0.75),
+                            -1em 0.5em rgba(111, 202, 220, 0.75);
+              }
+              35% {
+                width: 2.5em;
+                box-shadow: 0 -0.5em rgba(225, 20, 98, 0.75),
+                            0 0.5em rgba(111, 202, 220, 0.75);
+              }
+              70% {
+                width: 0.5em;
+                box-shadow: -1em -0.5em rgba(225, 20, 98, 0.75),
+                            1em 0.5em rgba(111, 202, 220, 0.75);
+              }
+              100% {
+                box-shadow: 1em -0.5em rgba(225, 20, 98, 0.75),
+                            -1em 0.5em rgba(111, 202, 220, 0.75);
+              }
+            }
+
+            @keyframes after6 {
+              0% {
+                height: 0.5em;
+                box-shadow: 0.5em 1em rgba(61, 184, 143, 0.75),
+                            -0.5em -1em rgba(233, 169, 32, 0.75);
+              }
+              35% {
+                height: 2.5em;
+                box-shadow: 0.5em 0 rgba(61, 184, 143, 0.75),
+                            -0.5em 0 rgba(233, 169, 32, 0.75);
+              }
+              70% {
+                height: 0.5em;
+                box-shadow: 0.5em -1em rgba(61, 184, 143, 0.75),
+                            -0.5em 1em rgba(233, 169, 32, 0.75);
+              }
+              100% {
+                box-shadow: 0.5em 1em rgba(61, 184, 143, 0.75),
+                            -0.5em -1em rgba(233, 169, 32, 0.75);
+              }
+            }
+
+            .loader {
+              position: absolute;
+              top: calc(50% - 1.25em);
+              left: calc(50% - 1.25em);
+            }
+          `}
+        </style>
+      </div>
+    );
+  };
+
   const renderSpinner = () => {
     if (indicator) return indicator;
     
     switch (type) {
+      case 'loader': return <Loader/>;
       case 'dots': return <DotsSpinner />;
       case 'pulse': return <PulseSpinner />;
       case 'bars': return <BarsSpinner />;
       case 'progress': return <ProgressSpinner />;
-      case 'spin':return <Spinner/>
-      default: return <DefaultSpinner />;
+      case 'spin':return <Spinner/>;
+      case 'default':return <DefaultSpinner />;
+      default: return <Loader/>;
     }
   };
 

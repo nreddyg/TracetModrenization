@@ -17,8 +17,10 @@ import { useDispatch } from 'react-redux';
 import { setLoading } from '@/store/slices/projectsSlice';
 import { ReusableButton } from '@/components/ui/reusable-button';
 import { useMessage } from '@/components/ui/reusable-message';
+import { useAppSelector } from '@/store';
 
 const PaymentDetails = () => {
+  const companyId=useAppSelector(state=>state.projects.companyId)
   const [fields, setFields] = useState<BaseField[]>(SUBSCRIPTION_PAYMENT_DB);
   const dispatch = useDispatch();
   const location = useLocation();
@@ -138,13 +140,12 @@ const PaymentDetails = () => {
 
         if (subData) {
           // 🔹 Update case
-          const res = await getUpdateChequeList(chequeNo, subData?.SubscriptionId, 111);
+          const res = await getUpdateChequeList(chequeNo, subData?.SubscriptionId, companyId);
           if (res.data?.status === true) {
-            // message("warning", "10vh", "Cheque Number already exists", "chequewarn");
             message.error('Cheque No. Already Exists');
             return;
           } else {
-          const res=  await updateSubscription("All", 111, 13911, "Keerthi", "Udyog", pay);
+          const res=  await updateSubscription("All", companyId, 13911, "Keerthi", "Udyog", pay);
          if(res?.success && res.data){
           if(res.data.status===true){
             message.success(res.data.message)
@@ -158,12 +159,12 @@ const PaymentDetails = () => {
           }
         } else {
           // 🔹 Add case
-          const res = await getAddChequeList(chequeNo, 111);
+          const res = await getAddChequeList(chequeNo, companyId);
           if (res.data?.status === true) {
             message.error('Cheque No. Already exists');
             return;
           } else {
-          const res=  await addSubscription("All", 111, pay);
+          const res=  await addSubscription("All", companyId, pay);
              if(res?.success && res.data){
           if(res.data.status===true){
             message.success(res.data.message)
@@ -179,9 +180,9 @@ const PaymentDetails = () => {
       } else {
         let res;
         if (subData) {
-       res= await updateSubscription("All", 111, 13911, "Keerthi", "Udyog", pay);
+       res= await updateSubscription("All", companyId, 13911, "Keerthi", "Udyog", pay);
         } else {
-         res= await addSubscription("All", 111, pay);
+         res= await addSubscription("All", companyId, pay);
         }
        if(res?.success && res.data){
         if(res.data.status===true){
@@ -364,10 +365,10 @@ const PaymentDetails = () => {
   }
   useEffect(() => {
     getCurrency();
-    if (subData === null) {
-      getNextAMCDate(customerName, productname, 'All', 111);
+    if (subData === null && companyId) {
+      getNextAMCDate(customerName, productname, 'All', companyId);
     }
-  }, [])
+  }, [companyId])
   const paymentMode = watch("PaymentDetails");
   const getPaymentFields = () => {
     switch (paymentMode) {
@@ -440,15 +441,15 @@ const PaymentDetails = () => {
   }
 
   useEffect(() => {
-    if (subData) {
-      getsubscriptionById(subData?.SubscriptionId, 111)
-     setFields((prev) =>
+    if (subData && companyId) {
+      getsubscriptionById(subData?.SubscriptionId, companyId)
+      setFields((prev) =>
         prev.map((f) => {
-          if (f.name === "Type" || f.name==='AMCFromDate' || f.name==='AMCToDate' || f.name==='AMCPaidDate' || f.name==='CustomerName' ||f.name==='ProductName') {
+          if (f.name === "Type" || f.name === 'AMCFromDate' || f.name === 'AMCToDate' || f.name === 'AMCPaidDate' || f.name === 'CustomerName' || f.name === 'ProductName') {
             return { ...f, disabled: true };
           }
-          if(f.name==='OrderValue' && parseFloat(getValues('OrderValue'))){
-            return {...f,disabled:true}
+          if (f.name === 'OrderValue' && parseFloat(getValues('OrderValue'))) {
+            return { ...f, disabled: true }
           }
           return f;
         })
@@ -467,7 +468,7 @@ const PaymentDetails = () => {
         })
       ); 
     }
-  }, [subData?.SubscriptionId])
+  }, [subData?.SubscriptionId,companyId])
 
 
   return (

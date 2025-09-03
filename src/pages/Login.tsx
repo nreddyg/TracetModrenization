@@ -75,16 +75,12 @@ const Login = () => {
   
 
   const handleLogin = async (data: GenericObject): Promise<void> => {
-     dispatch(setLoading(true));
-     try {
     const payload = {
-      "UserName": watch('Username'),
-      "Password": watch('password'),
-      "CompanyCode": watch('CompanyCode'),
-      "grant_type": "password",
+      "UserName": watch('Username'),"Password": watch('password'),
+      "CompanyCode": watch('CompanyCode'),"grant_type": "password",
     };
-
-    getToken(payload).then((res)=>{
+    dispatch(setLoading(true));
+    await getToken(payload).then((res)=>{
       if(res.success){
         if(res.data.access_token)
         localStorage.setItem('Token',JSON.stringify(res.data.access_token));
@@ -93,15 +89,10 @@ const Login = () => {
       else{
         message.error('Please Enter Valid Credentials')
       }
-    })
+    }).catch(err=>{message.error('Please Enter Valid Credentials')
+    }).finally(()=>{dispatch(setLoading(false))})
    }
-   catch(err){
-            message.error('Please Enter Valid Credentials')
-   }finally{
-    dispatch(setLoading(false))
-   }
-  }
-
+  
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary/5 flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">

@@ -15,9 +15,11 @@ import { useAppDispatch } from '@/store/reduxStore';
 import { setLoading } from '@/store/slices/projectsSlice';
 import { Ticket as Request } from '../TicketView';
 import { ReusableButton } from '@/components/ui/reusable-button';
+import { useAppSelector } from '@/store';
 
 const AllRequests = () => {
   const navigate=useNavigate();
+  const companyId=useAppSelector(state=>state.projects.companyId);
   const dispatch=useAppDispatch();
   const { toast } = useToast();
   const [dateRange, setDateRange] = useState<{ from: Date; to: Date } | null>(null);
@@ -78,18 +80,22 @@ const AllRequests = () => {
     };
   }, [requests]);
   useEffect(()=>{
-    fetchAllServiceRequests();
-  },[])
+    if(companyId){
+      fetchAllServiceRequests();
+    }
+  },[companyId])
   // Enhanced action handlers with audit trail
   const handleRefresh = useCallback(() => {
     setDateRange({ from: undefined, to: undefined });
-    fetchAllServiceRequests()
-    toast({title: "Data Refreshed",description: "All Service Requests data has been updated",});
+    if(companyId){
+      fetchAllServiceRequests()
+      toast({title: "Data Refreshed",description: "All Service Requests data has been updated",});
+    }
   },[toast]);
   //fetch all tickets
   async function fetchAllServiceRequests() {
       dispatch(setLoading(true))
-      await getAllSRDetailsList('All', 111, 'All').then(res => {
+      await getAllSRDetailsList('All', companyId, 'All').then(res => {
         if (res.success && res.data.status === undefined) {
           if (Array.isArray(res.data)) {
             let data = res.data.map(item => ({ ...item, AssignedTo: item.AssigneeSelectedUsers || '' + '' + item.AssigneeSelectedUserGroups || '' }));
@@ -184,7 +190,7 @@ const AllRequests = () => {
         {/* Enhanced Stats Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4 lg:gap-6">
           <Card className="border-0 shadow-sm bg-gradient-to-br from-blue-50 to-blue-100/50">
-            <CardContent className="p-3 sm:p-4 lg:p-6">
+            <CardContent className="p-3 sm:p-4 lg:p-5">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs sm:text-sm font-medium text-blue-600 mb-1">Total Tickets</p>
@@ -195,7 +201,7 @@ const AllRequests = () => {
           </Card>
 
           <Card className="border-0 shadow-sm bg-gradient-to-br from-red-50 to-red-100/50">
-            <CardContent className="p-3 sm:p-4 lg:p-6">
+            <CardContent className="p-3 sm:p-4 lg:p-5">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs sm:text-sm font-medium text-red-600 mb-1">Open</p>
@@ -209,7 +215,7 @@ const AllRequests = () => {
           </Card>
 
           <Card className="border-0 shadow-sm bg-gradient-to-br from-amber-50 to-amber-100/50">
-            <CardContent className="p-3 sm:p-4 lg:p-6">
+            <CardContent className="p-3 sm:p-4 lg:p-5">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs sm:text-sm font-medium text-amber-600 mb-1">In Progress</p>
@@ -223,7 +229,7 @@ const AllRequests = () => {
           </Card>
 
           <Card className="border-0 shadow-sm bg-gradient-to-br from-purple-50 to-purple-100/50">
-            <CardContent className="p-3 sm:p-4 lg:p-6">
+            <CardContent className="p-3 sm:p-4 lg:p-5">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs sm:text-sm font-medium text-purple-600 mb-1">Resolved</p>
@@ -237,7 +243,7 @@ const AllRequests = () => {
           </Card>
 
           <Card className="border-0 shadow-sm bg-gradient-to-br from-emerald-50 to-emerald-100/50">
-            <CardContent className="p-3 sm:p-4 lg:p-6">
+            <CardContent className="p-3 sm:p-4 lg:p-5">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs sm:text-sm font-medium text-emerald-600 mb-1">Closed</p>

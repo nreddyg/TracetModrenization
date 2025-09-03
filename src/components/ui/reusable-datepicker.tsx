@@ -1,4 +1,5 @@
 import React, { useId, useState, useEffect, useRef, forwardRef } from "react";
+import { createPortal } from 'react-dom';
 import { Calendar, X, Info, ChevronLeft, ChevronRight } from "lucide-react";
 
 // Simple utility function to replace @/lib/utils cn
@@ -33,12 +34,23 @@ export interface DatePickerProps {
   errorMessage?: string;
   labelClassName?: string;
   wrapperClassName?: string;
+  usePortal?: boolean;
+  dropdownClassName?: string;
 }
 
 interface TooltipProps {
   content: string | React.ReactNode;
   placement?: "top" | "right" | "bottom" | "left";
   children: React.ReactNode;
+}
+
+interface PopupPosition {
+  top: number;
+  left: number;
+  width: number;
+  maxHeight?: number;
+  showAbove: boolean;
+  transform?: string;
 }
 
 // Simple Tooltip component without createPortal
@@ -266,10 +278,10 @@ const CustomCalendar: React.FC<CalendarProps> = ({
           disabled={isDisabled}
           className={cn(
             "h-9 w-9 text-sm rounded-md font-normal transition-colors",
-            "hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500",
+            "hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500",
             isSelected && "bg-blue-600 text-white hover:bg-blue-700",
-            isToday && !isSelected && "bg-slate-100 font-medium",
-            isDisabled && "text-slate-400 cursor-not-allowed hover:bg-transparent line-through"
+            isToday && !isSelected && "bg-gray-100 font-medium",
+            isDisabled && "text-gray-400 cursor-not-allowed hover:bg-transparent line-through"
           )}
         >
           {day}
@@ -281,13 +293,13 @@ const CustomCalendar: React.FC<CalendarProps> = ({
   };
 
   return (
-    <div className="p-3 bg-white">
+    <div className="py-1">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-4 px-3">
         <button
           type="button"
           onClick={goToPreviousMonth}
-          className="p-1 hover:bg-slate-100 rounded-md transition-colors"
+          className="p-1 hover:bg-gray-100 rounded-md transition-colors"
         >
           <ChevronLeft className="h-4 w-4" />
         </button>
@@ -299,23 +311,23 @@ const CustomCalendar: React.FC<CalendarProps> = ({
         <button
           type="button"
           onClick={goToNextMonth}
-          className="p-1 hover:bg-slate-100 rounded-md transition-colors"
+          className="p-1 hover:bg-gray-100 rounded-md transition-colors"
         >
           <ChevronRight className="h-4 w-4" />
         </button>
       </div>
 
       {/* Day headers */}
-      <div className="grid grid-cols-7 gap-1 mb-2">
+      <div className="grid grid-cols-7 gap-1 mb-2 px-3">
         {dayNames.map(day => (
-          <div key={day} className="h-9 w-9 text-xs font-medium text-slate-600 flex items-center justify-center">
+          <div key={day} className="h-9 w-9 text-xs font-medium text-gray-600 flex items-center justify-center">
             {day}
           </div>
         ))}
       </div>
 
       {/* Calendar grid */}
-      <div className="grid grid-cols-7 gap-1">
+      <div className="grid grid-cols-7 gap-1 px-3">
         {renderCalendarDays()}
       </div>
 
@@ -358,6 +370,8 @@ export const ReusableDatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
       errorMessage,
       labelClassName,
       wrapperClassName,
+      usePortal = true,
+      dropdownClassName = '',
       ...props
     },
     ref
@@ -366,6 +380,12 @@ export const ReusableDatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
     const [isOpen, setIsOpen] = useState(false);
     const [inputValue, setInputValue] = useState("");
     const [lastValidValue, setLastValidValue] = useState("");
+    const [popupPosition, setPopupPosition] = useState<PopupPosition>({
+      top: 0,
+      left: 0,
+      width: 0,
+      showAbove: false,
+    });
     
     // Normalize initial values
     const normalizedValue = normalizeToDate(value, dateFormat);
@@ -373,15 +393,9 @@ export const ReusableDatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
     
     const [month, setMonth] = useState<Date>(normalizedValue || normalizedDefaultValue || new Date());
     const [internalValue, setInternalValue] = useState<Date | undefined>(normalizedValue || normalizedDefaultValue);
-    const [popupPosition, setPopupPosition] = useState<{
-      top?: number;
-      bottom?: number;
-      left: number;
-      maxHeight?: number;
-      showAbove: boolean;
-    }>({ left: 0, showAbove: false });
 
-    const wrapperRef = useRef<HTMLDivElement>(null);
+    const datePickerRef = useRef<HTMLDivElement>(null);
+    const calendarRef = useRef<HTMLDivElement>(null);
 
     const actualOpen = controlledOpen ?? isOpen;
     const setActualOpen = (open: boolean) => {
@@ -390,15 +404,9 @@ export const ReusableDatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
     };
 
     const sizeClasses = {
-      sm: "h-8 text-sm",
-      md: "h-10 text-sm",
-      lg: "h-12 text-base",
-    };
-
-    const inputPaddingClasses = {
-      sm: "pl-3 pr-8",
-      md: "pl-3 pr-10",
-      lg: "pl-4 pr-12",
+      sm: "min-h-[24px] text-sm",
+      md: "min-h-[32px] text-sm",
+      lg: "min-h-[40px] text-base",
     };
 
     const iconSizeClasses = {
@@ -407,101 +415,129 @@ export const ReusableDatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
       lg: "h-5 w-5",
     };
 
-    const iconContainerClasses = {
-      sm: "right-2 gap-1",
-      md: "right-3 gap-1.5",
-      lg: "right-4 gap-2",
-    };
+    // Smart position calculation with responsive maxHeight - similar to first component
+    const calculatePopupPosition = (): PopupPosition => {
+      if (!datePickerRef.current) {
+        return { top: 0, left: 0, width: 0, showAbove: false };
+      }
 
-    const getPlaceholder = () => {
-      if (placeholder && placeholder !== "Select date") return placeholder;
-      return `Select date (${dateFormat.toUpperCase()})`;
-    };
-
-    // Calculate responsive popup position
-    const calculatePopupPosition = () => {
-      if (!wrapperRef.current) return;
-
-      const rect = wrapperRef.current.getBoundingClientRect();
+      const inputRect = datePickerRef.current.getBoundingClientRect();
       const viewportHeight = window.innerHeight;
       const viewportWidth = window.innerWidth;
       
+      // Calendar popup dimensions
       const popupHeight = 380; // Approximate height of calendar popup
-      const popupWidth = 320;
+      const popupWidth = Math.max(320, inputRect.width); // Minimum width for calendar, or input width
       const margin = 16;
       const spacing = 4;
 
       // Calculate available space
-      const spaceBelow = viewportHeight - rect.bottom - margin;
-      const spaceAbove = rect.top - margin;
-      const spaceLeft = rect.left;
-      const spaceRight = viewportWidth - rect.right;
+      const spaceBelow = viewportHeight - inputRect.bottom - margin;
+      const spaceAbove = inputRect.top - margin;
+      const spaceLeft = inputRect.left;
+      const spaceRight = viewportWidth - inputRect.right;
 
       // Determine if popup should show above or below
       const showAbove = spaceBelow < popupHeight && spaceAbove > spaceBelow && spaceAbove >= 200;
 
       // Calculate horizontal position
-      let left = 0;
+      let left = inputRect.left;
       if (spaceRight >= popupWidth) {
         // Align with left edge of input
-        left = 0;
+        left = inputRect.left;
       } else if (spaceLeft >= popupWidth) {
         // Align with right edge of input
-        left = rect.width - popupWidth;
+        left = inputRect.right - popupWidth;
       } else {
         // Center in available space
         const availableWidth = Math.min(viewportWidth - 2 * margin, popupWidth);
-        left = Math.max(margin - rect.left, (rect.width - availableWidth) / 2);
+        left = Math.max(margin, inputRect.left + (inputRect.width - availableWidth) / 2);
       }
 
       // Calculate vertical position and max height
-      let position: typeof popupPosition;
+      let top: number;
+      let maxHeight: number;
       
       if (showAbove) {
         const availableHeight = Math.min(spaceAbove - spacing, popupHeight);
-        position = {
-          bottom: rect.height + spacing,
-          left,
-          maxHeight: availableHeight,
-          showAbove: true
-        };
+        top = inputRect.top - spacing - Math.min(availableHeight, popupHeight);
+        maxHeight = availableHeight;
       } else {
         const availableHeight = Math.min(spaceBelow - spacing, popupHeight);
-        position = {
-          top: rect.height + spacing,
-          left,
-          maxHeight: availableHeight,
-          showAbove: false
-        };
+        top = inputRect.bottom + spacing;
+        maxHeight = availableHeight;
       }
 
-      setPopupPosition(position);
+      return { 
+        top, 
+        left, 
+        width: popupWidth,
+        maxHeight,
+        showAbove
+      };
     };
 
-    // Update position when popup opens
+    // Update position when dropdown opens
     useEffect(() => {
-      if (actualOpen) {
-        // Small delay to ensure DOM is ready
-        const timer = setTimeout(calculatePopupPosition, 10);
+      if (actualOpen && datePickerRef.current) {
+        // Calculate position immediately
+        setPopupPosition(calculatePopupPosition());
+        
+        // Also recalculate after a tiny delay to handle any layout shifts
+        const timer = setTimeout(() => {
+          setPopupPosition(calculatePopupPosition());
+        }, 10);
+        
         return () => clearTimeout(timer);
       }
     }, [actualOpen]);
 
-    // Update position on scroll and resize
+    // Enhanced scroll and resize handlers with responsive positioning
     useEffect(() => {
       if (!actualOpen) return;
 
-      const handlePositionUpdate = () => {
-        calculatePopupPosition();
+      let rafId: number;
+      
+      const updatePosition = () => {
+        // Use requestAnimationFrame for smooth updates
+        if (rafId) cancelAnimationFrame(rafId);
+        rafId = requestAnimationFrame(() => {
+          setPopupPosition(calculatePopupPosition());
+        });
       };
 
-      window.addEventListener('scroll', handlePositionUpdate, { passive: true });
-      window.addEventListener('resize', handlePositionUpdate);
+      const handleResize = () => updatePosition();
+      const handleScroll = () => updatePosition();
+
+      // Add listeners
+      window.addEventListener('resize', handleResize);
+      document.addEventListener('scroll', handleScroll, { passive: true, capture: true });
+      document.addEventListener('wheel', handleScroll, { passive: true });
 
       return () => {
-        window.removeEventListener('scroll', handlePositionUpdate);
-        window.removeEventListener('resize', handlePositionUpdate);
+        if (rafId) cancelAnimationFrame(rafId);
+        window.removeEventListener('resize', handleResize);
+        document.removeEventListener('scroll', handleScroll, true);
+        document.removeEventListener('wheel', handleScroll);
       };
+    }, [actualOpen]);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+      if (!actualOpen) return;
+
+      const handleClickOutside = (event: MouseEvent) => {
+        const target = event.target as Node;
+        const isOutsideDatePicker = datePickerRef.current && !datePickerRef.current.contains(target);
+        const isOutsideCalendar = calendarRef.current && !calendarRef.current.contains(target);
+        
+        if (isOutsideDatePicker && isOutsideCalendar) {
+          handlePopupClose();
+        }
+      };
+
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [actualOpen]);
 
     // Handle internal value and external value coordination
@@ -565,26 +601,13 @@ export const ReusableDatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
       const handleKeyDown = (e: KeyboardEvent) => {
         if (e.key === 'Escape') {
           handlePopupClose();
+          datePickerRef.current?.focus();
         }
       };
 
       document.addEventListener('keydown', handleKeyDown);
       return () => document.removeEventListener('keydown', handleKeyDown);
     }, [actualOpen, inputValue, lastValidValue]);
-
-    // Close when clicking outside
-    useEffect(() => {
-      if (!actualOpen) return;
-
-      const handleClickOutside = (event: MouseEvent) => {
-        if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
-          handlePopupClose();
-        }
-      };
-
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, [actualOpen]);
 
     const isDateDisabled = (date: Date): boolean => {
       if (minDate && date < minDate) return true;
@@ -654,9 +677,9 @@ export const ReusableDatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
       const todayFormatted = formatDate(today, dateFormat);
       
       return (
-        <div className="border-t pt-3">
+        <div className="border-t pt-3 px-3">
           <div className={cn(
-            "flex items-center text-sm px-3",
+            "flex items-center text-sm",
             showTodayButton ? "justify-between" : "justify-center"
           )}>
             {showTodayButton && (
@@ -676,7 +699,7 @@ export const ReusableDatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
               </button>
             )}
             <div className={cn(
-              "text-xs text-slate-600",
+              "text-xs text-gray-600",
               !showTodayButton && "text-center"
             )}>
               {getFooterText()}
@@ -699,117 +722,171 @@ export const ReusableDatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
       }
     };
 
+    const getPlaceholder = () => {
+      if (placeholder && placeholder !== "Select date") return placeholder;
+      return `Select date (${dateFormat.toUpperCase()})`;
+    };
+
+    const getStatusClasses = () => {
+      if (error || errorMessage) return 'border-red-500 focus-within:border-red-500 ring-red-200';
+      return 'border-gray-300 focus-within:border-blue-500 ring-blue-200';
+    };
+
+    const renderCalendarContent = () => (
+      <CustomCalendar
+        selected={normalizeToDate(value, dateFormat) || internalValue}
+        onSelect={handleDateSelect}
+        month={month}
+        onMonthChange={setMonth}
+        disabled={isDateDisabled}
+        footer={showFooter ? renderFooter() : undefined}
+      />
+    );
+
+    const renderPopup = () => (
+      <div
+        ref={calendarRef}
+        className={cn(
+          "bg-white border border-gray-300 rounded-md shadow-lg",
+          // Add smooth transition for position changes
+          "transition-all duration-200 ease-out",
+          dropdownClassName,
+          disabled && "pointer-events-none opacity-50"
+        )}
+        style={{
+          position: "fixed",
+          top: popupPosition.top,
+          left: popupPosition.left,
+          zIndex: 9999,
+          width: popupPosition.width,
+          maxHeight: popupPosition.maxHeight ? `${popupPosition.maxHeight}px` : "380px",
+        }}
+      >
+        <div
+          className="overflow-y-auto overflow-x-hidden"
+          style={{ 
+            maxHeight: popupPosition.maxHeight ? `${popupPosition.maxHeight}px` : "380px"
+          }}
+        >
+          {renderCalendarContent()}
+        </div>
+      </div>
+    );
+
     return (
-      <div className={cn("relative w-full", wrapperClassName)} ref={wrapperRef}>
+      <div className={cn("space-y-2", wrapperClassName)} ref={datePickerRef}>
         {label && (
-          <div className={cn("flex items-center gap-1 mb-2", labelClassName)}>
-            <label htmlFor={inputId} className="text-sm font-medium text-slate-700">
-              {label}{(isRequired || required) && <span className='text-red-500'> *</span>}
-            </label>
-            {tooltip && (
-              <Tooltip content={tooltip} placement={tooltipPlacement}>
-                <Info className="h-3.5 w-3.5 text-slate-500 cursor-help" />
-              </Tooltip>
-            )}
+          <div className="text-sm font-medium">
+            <div className={cn("flex items-center gap-1", labelClassName)}>
+              <label htmlFor={inputId} className="text-sm font-medium">
+                {label}{(isRequired || required) && <span className='text-red-500'> *</span>}
+              </label>
+              {tooltip && (
+                <Tooltip content={tooltip} placement={tooltipPlacement}>
+                  <Info className="h-3.5 w-3.5 text-gray-500 cursor-help" />
+                </Tooltip>
+              )}
+            </div>
           </div>
         )}
         
         <div className="relative">
           <div
             className={cn(
-              "relative flex items-center w-full border border-slate-300 bg-white rounded-md transition-colors",
+              "flex items-center rounded border transition-colors relative overflow-hidden",
               sizeClasses[size],
-              disabled && "opacity-50 cursor-not-allowed bg-slate-50",
-              !disabled && "cursor-pointer hover:border-slate-400",
+              disabled ? "bg-gray-100 cursor-not-allowed" : "bg-white hover:border-blue-400",
               actualOpen && !disabled && "ring-2 ring-blue-500 border-blue-500",
-              (error || errorMessage) && "border-red-500",
+              getStatusClasses(),
               className
             )}
+            style={{ 
+              backgroundColor: disabled ? '#f3f4f6' : 'hsl(240deg 73.33% 97.06%)', 
+              borderColor: disabled ? undefined : 'hsl(214.29deg 31.82% 91.37%)' 
+            }}
             onClick={handleWrapperClick}
           >
-            <input
-              ref={ref}
-              id={inputId}
-              type="text"
-              value={inputValue}
-              onChange={handleInputChange}
-              onClick={handleInputClick}
-              placeholder={getPlaceholder()}
-              disabled={disabled}
-              readOnly={disabled}
-              className={cn(
-                "w-full bg-transparent border-none outline-none placeholder:text-slate-400",
-                inputPaddingClasses[size],
-                disabled && "cursor-not-allowed"
-              )}
-              {...props}
-            />
-
-            <div className={cn(
-              "absolute flex items-center pointer-events-none",
-              iconContainerClasses[size]
-            )}>
-              {allowClear && inputValue && !disabled && (
-                <button 
-                  type="button" 
-                  onClick={handleClear} 
+            <div className="flex items-center w-full min-w-0">
+              <div className="flex-1 min-w-0 relative pr-16">
+                <input
+                  ref={ref}
+                  id={inputId}
+                  type="text"
+                  value={inputValue}
+                  onChange={handleInputChange}
+                  onClick={handleInputClick}
+                  placeholder={getPlaceholder()}
+                  disabled={disabled}
                   className={cn(
-                    "p-0.5 hover:bg-slate-100 rounded-sm pointer-events-auto",
-                    "transition-colors duration-200"
+                    "w-full bg-transparent outline-none text-sm px-3 py-2 truncate",
+                    "placeholder:text-gray-400",
+                    disabled && "cursor-not-allowed"
                   )}
-                  aria-label="Clear date"
+                  {...props}
+                />
+              </div>
+            </div>
+
+            <div className="absolute right-0 top-0 h-full flex items-center gap-1 pr-3 bg-inherit">
+              {allowClear && inputValue && !disabled && (
+                <button
+                  type="button"
+                  onClick={handleClear}
+                  className="hover:bg-gray-200 rounded p-1 text-gray-500 flex-shrink-0"
                 >
-                  <X className={iconSizeClasses[size]} />
+                  <X size={14} />
                 </button>
               )}
-              <Calendar className={cn(
-                "text-slate-500",
-                iconSizeClasses[size],
-                disabled && "opacity-50"
-              )} />
+              <div className="text-gray-400 flex-shrink-0 pointer-events-none">
+                <Calendar className={cn(
+                  iconSizeClasses[size],
+                  disabled && "opacity-50"
+                )} />
+              </div>
             </div>
           </div>
 
           {(error || errorMessage) && (
-            <p className="text-sm text-red-500 mt-1">
+            <p className="text-xs text-red-500 mt-1" role="alert">
               {typeof error === "string" ? error : errorMessage}
             </p>
           )}
 
-          {/* Calendar popup - positioned responsively */}
           {actualOpen && !disabled && (
-            <div 
-              className={cn(
-                "absolute z-50 bg-white border border-slate-200 rounded-lg shadow-lg",
-                "w-80 max-w-[calc(100vw-2rem)]",
-                // Add smooth transition for position changes
-                "transition-all duration-200 ease-out"
+            <>
+              {usePortal ? (
+                createPortal(renderPopup(), document.body)
+              ) : (
+                <div 
+                  className="absolute z-[9999] top-full left-0 mt-1" 
+                  style={{ width: '100%' }}
+                >
+                  <div
+                    className={cn(
+                      "bg-white border border-gray-300 rounded-md shadow-lg",
+                      // Add smooth transition for position changes
+                      "transition-all duration-200 ease-out",
+                      dropdownClassName
+                    )}
+                    style={{
+                      minHeight: '200px',
+                      maxHeight: popupPosition.maxHeight ? `${popupPosition.maxHeight}px` : '380px',
+                      overflowY: 'auto',
+                      width: '100%'
+                    }}
+                  >
+                    <div
+                      className="overflow-y-auto overflow-x-hidden"
+                      style={{ 
+                        maxHeight: popupPosition.maxHeight ? `${popupPosition.maxHeight}px` : '380px'
+                      }}
+                    >
+                      {renderCalendarContent()}
+                    </div>
+                  </div>
+                </div>
               )}
-              style={{
-                ...(popupPosition.showAbove 
-                  ? { bottom: popupPosition.bottom } 
-                  : { top: popupPosition.top }
-                ),
-                left: popupPosition.left,
-                maxHeight: popupPosition.maxHeight,
-              }}
-            >
-              <div 
-                className="overflow-y-auto overflow-x-hidden"
-                style={{ 
-                  maxHeight: popupPosition.maxHeight ? `${popupPosition.maxHeight}px` : 'auto'
-                }}
-              >
-                <CustomCalendar
-                  selected={normalizeToDate(value, dateFormat) || internalValue}
-                  onSelect={handleDateSelect}
-                  month={month}
-                  onMonthChange={setMonth}
-                  disabled={isDateDisabled}
-                  footer={showFooter ? renderFooter() : undefined}
-                />
-              </div>
-            </div>
+            </>
           )}
         </div>
       </div>
@@ -818,86 +895,3 @@ export const ReusableDatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
 );
 
 ReusableDatePicker.displayName = "ReusableDatePicker";
-
-// Demo component to show usage
-// const DatePickerDemo = () => {
-//   const [singleDate, setSingleDate] = useState<Date | undefined>(new Date());
-//   const [stringDate, setStringDate] = useState<string>("29/08/2025"); // Test string value
-//   const [formatType, setFormatType] = useState("DD/MM/YYYY");
-  
-//   const formats = [
-//     "DD/MM/YYYY",
-//     "DD-MM-YYYY", 
-//     "YYYY-MM-DD",
-//     "YYYY/MM/DD",
-//     "MM/DD/YYYY"
-//   ];
-
-//   return (
-//     <div className="p-6 max-w-md mx-auto space-y-6 bg-gray-50 min-h-screen">
-//       <h2 className="text-xl font-semibold text-gray-900">Enhanced Date Picker Demo</h2>
-      
-//       {/* Format selector */}
-//       <div>
-//         <label className="block text-sm font-medium mb-2 text-gray-700">Select Format:</label>
-//         <select 
-//           value={formatType} 
-//           onChange={(e) => setFormatType(e.target.value)}
-//           className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-//         >
-//           {formats.map(format => (
-//             <option key={format} value={format}>{format}</option>
-//           ))}
-//         </select>
-//       </div>
-
-//       {/* Date picker with Date object */}
-//       <ReusableDatePicker
-//         label="Date Object Input"
-//         value={singleDate}
-//         defaultValue={new Date()}
-//         onChange={setSingleDate}
-//         format={formatType}
-//         isRequired={true}
-//         placeholder="Select Date"
-//         tooltip="Using Date object as value"
-//         allowClear={true}
-//       />
-
-//       {/* Date picker with string value */}
-//       <ReusableDatePicker
-//         label="String Value Input"
-//         value={stringDate}
-//         onChange={(date) => setStringDate(date ? formatDate(date, formatType) : "")}
-//         format={formatType}
-//         placeholder="Select Date"
-//         tooltip="Using string value like '29/08/2025'"
-//         allowClear={true}
-//       />
-
-//       {/* Display selected values */}
-//       <div className="text-sm text-gray-600 bg-white p-3 rounded-md border space-y-2">
-//         <div><strong>Date Object:</strong> {singleDate ? singleDate.toLocaleDateString() : 'None'}</div>
-//         <div><strong>String Value:</strong> {stringDate || 'None'}</div>
-//         <div><strong>Formatted Display:</strong> {singleDate ? formatDate(singleDate, formatType) : 'None'}</div>
-//       </div>
-      
-//       {/* Test different formats */}
-//       <div className="space-y-3">
-//         <h3 className="text-lg font-medium">Test Different Formats:</h3>
-//         {formats.map(format => (
-//           <ReusableDatePicker
-//             key={format}
-//             label={`Format: ${format}`}
-//             format={format}
-//             defaultValue="29/08/2025" // Test string default value
-//             placeholder={`Enter date as ${format}`}
-//             size="sm"
-//           />
-//         ))}
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default DatePickerDemo;

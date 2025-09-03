@@ -23,7 +23,9 @@ const PaymentDetails = () => {
   const dispatch = useDispatch();
   const location = useLocation();
   const subData = location.state.subscriptionData ? location.state?.subscriptionData : null
+  console.log(subData,"subData")
   const customerName = location.state.parentData?.CustomerName;
+  console.log(customerName,"customerName")
   const productname = location.state.parentData?.ProductName;
   const message=useMessage();
   const navigate=useNavigate();
@@ -144,7 +146,7 @@ const PaymentDetails = () => {
             message.error('Cheque No. Already Exists');
             return;
           } else {
-          const res=  await updateSubscription("All", 111, 13911, "Keerthi", "Udyog", pay);
+          const res=  await updateSubscription("All", 111, subData?.SubscriptionId, subData?.CustomerName, subData?.ProductName, pay);
          if(res?.success && res.data){
           if(res.data.status===true){
             message.success(res.data.message)
@@ -179,7 +181,7 @@ const PaymentDetails = () => {
       } else {
         let res;
         if (subData) {
-       res= await updateSubscription("All", 111, 13911, "Keerthi", "Udyog", pay);
+       res= await updateSubscription("All", 111, subData?.SubscriptionId, subData?.CustomerName, subData?.ProductName, pay);
         } else {
          res= await addSubscription("All", 111, pay);
         }

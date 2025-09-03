@@ -26,11 +26,11 @@ import {
   Scatter,
 } from 'recharts';
 import { Badge } from '@/components/ui/badge';
-import { 
-  TrendingUp, 
-  AlertTriangle, 
-  Users, 
-  BarChart3, 
+import {
+  TrendingUp,
+  AlertTriangle,
+  Users,
+  BarChart3,
   PieChart as PieChartIcon,
   Activity,
   Star,
@@ -110,10 +110,10 @@ const TicketGraphsView: React.FC<TicketGraphsViewProps> = ({ tickets }) => {
   // 3. Team / Agent Performance
   const agentPerformance = tickets.reduce((acc, ticket) => {
     if (!acc[ticket.assignedTo]) {
-      acc[ticket.assignedTo] = { 
-        name: ticket.assignedTo, 
-        tickets: 0, 
-        avgResolution: 0, 
+      acc[ticket.assignedTo] = {
+        name: ticket.assignedTo,
+        tickets: 0,
+        avgResolution: 0,
         slaBreaches: 0,
         firstResponse: 0,
         resolved: 0
@@ -196,7 +196,7 @@ const TicketGraphsView: React.FC<TicketGraphsViewProps> = ({ tickets }) => {
 
   const agentCSAT = agentData.map(agent => {
     const agentTickets = tickets.filter(t => t.assignedTo === agent.name && t.csatScore);
-    const avgCSAT = agentTickets.length > 0 
+    const avgCSAT = agentTickets.length > 0
       ? (agentTickets.reduce((sum, t) => sum + t.csatScore!, 0) / agentTickets.length).toFixed(1)
       : 'N/A';
     return {
@@ -233,27 +233,31 @@ const TicketGraphsView: React.FC<TicketGraphsViewProps> = ({ tickets }) => {
               Tickets by Status
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <ChartContainer config={chartConfig} className="h-[250px] sm:h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={statusData}
-                    cx="50%"
-                    cy="50%"
-                    outerRadius="70%"
-                    dataKey="value"
-                    label={({ name, value }) => window.innerWidth > 640 ? `${name}: ${value}` : value.toString()}
-                  >
-                    {statusData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                </PieChart>
-              </ResponsiveContainer>
-            </ChartContainer>
-          </CardContent>
+          <CardContent className="flex justify-center items-center">
+  <ChartContainer config={chartConfig} className="h-[250px] sm:h-[300px]">
+    <ResponsiveContainer width="100%" height="100%">
+      <PieChart>
+        <Pie
+          data={statusData}
+          cx="50%"
+          cy="50%"
+          outerRadius="70%"
+          dataKey="value"
+          label={({ name, value }) =>
+            window.innerWidth > 640 ? `${name}: ${value}` : value.toString()
+          }
+          labelLine
+        >
+          {statusData.map((entry, index) => (
+            <Cell key={`cell-${index}`} fill={entry.color} />
+          ))}
+        </Pie>
+        <ChartTooltip content={<ChartTooltipContent />} />
+      </PieChart>
+    </ResponsiveContainer>
+  </ChartContainer>
+</CardContent>
+
         </Card>
 
         <Card>
@@ -263,7 +267,7 @@ const TicketGraphsView: React.FC<TicketGraphsViewProps> = ({ tickets }) => {
               Tickets Created vs Resolved
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent  className="flex justify-center items-center">
             <ChartContainer config={chartConfig} className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={trendData}>
@@ -289,7 +293,7 @@ const TicketGraphsView: React.FC<TicketGraphsViewProps> = ({ tickets }) => {
               SLA Compliance Overview
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent  className="flex justify-center items-center">
             <ChartContainer config={chartConfig} className="h-[250px] sm:h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -319,7 +323,7 @@ const TicketGraphsView: React.FC<TicketGraphsViewProps> = ({ tickets }) => {
               SLA Breach Trend
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent  className="flex justify-center items-center">
             <ChartContainer config={chartConfig} className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={slaBreachTrend}>
@@ -344,7 +348,7 @@ const TicketGraphsView: React.FC<TicketGraphsViewProps> = ({ tickets }) => {
               Tickets Handled per Agent
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent  className="flex justify-center items-center">
             <ChartContainer config={chartConfig} className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={agentData} layout="horizontal">
@@ -366,7 +370,7 @@ const TicketGraphsView: React.FC<TicketGraphsViewProps> = ({ tickets }) => {
               Average Resolution Time by Agent
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent  className="flex justify-center items-center">
             <ChartContainer config={chartConfig} className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={agentData}>
@@ -391,7 +395,7 @@ const TicketGraphsView: React.FC<TicketGraphsViewProps> = ({ tickets }) => {
               Tickets by Issue Type
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent  className="flex justify-center items-center">
             <ChartContainer config={chartConfig} className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={typeChartData}>
@@ -413,7 +417,7 @@ const TicketGraphsView: React.FC<TicketGraphsViewProps> = ({ tickets }) => {
               Resolution Time by Category
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent  className="flex justify-center items-center">
             <ChartContainer config={chartConfig} className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={categoryChartData}>
@@ -438,7 +442,7 @@ const TicketGraphsView: React.FC<TicketGraphsViewProps> = ({ tickets }) => {
               Tickets by Priority
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent  className="flex justify-center items-center">
             <ChartContainer config={chartConfig} className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={priorityData}>
@@ -464,7 +468,7 @@ const TicketGraphsView: React.FC<TicketGraphsViewProps> = ({ tickets }) => {
               Open High-Priority Tickets
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent  className="flex justify-center items-center">
             <div className="space-y-2">
               {highPriorityTickets.slice(0, 5).map(ticket => (
                 <div key={ticket.id} className="flex items-center justify-between p-2 border rounded">

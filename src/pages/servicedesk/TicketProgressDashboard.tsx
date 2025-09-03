@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -26,11 +26,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { 
-  Calendar, 
-  Filter, 
-  Download, 
-  Eye, 
+import {
+  Calendar,
+  Filter,
+  Download,
+  Eye,
   Edit,
   Search,
   X,
@@ -46,6 +46,16 @@ import {
 } from 'lucide-react';
 import TicketRecordsView from '@/components/tickets/TicketRecordsView';
 import TicketGraphsView from '@/components/tickets/TicketGraphsView';
+import { Form } from '@/components/ui/form';
+import { Controller, useForm } from 'react-hook-form';
+import { BaseField, GenericObject } from '@/Local_DB/types/types';
+import { TICKET_PROGRESS_DB } from '@/Local_DB/Form_JSON_Data/TicketProgressDashBoardDB';
+import { ReusableInput } from '@/components/ui/reusable-input';
+import { ReusableDropdown } from '@/components/ui/reusable-dropdown';
+import { ReusableDatePicker } from '@/components/ui/reusable-datepicker';
+import { ReusableMultiSelect } from '@/components/ui/reusable-multi-select';
+import { ReusableButton } from '@/components/ui/reusable-button';
+import { GetServiceRequestAssignToLookups } from '@/services/ticketServices';
 
 interface Ticket {
   id: string;
@@ -219,6 +229,7 @@ const TicketProgressDashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [assigneePopoverOpen, setAssigneePopoverOpen] = useState(false);
   const [activeView, setActiveView] = useState('records');
+  const [fields, setFields] = useState(TICKET_PROGRESS_DB);
 
   const filteredTickets = useMemo(() => {
     return tickets.filter(ticket => {
@@ -226,11 +237,11 @@ const TicketProgressDashboard = () => {
       const matchAssignee = selectedAssignees.length === 0 || selectedAssignees.includes(ticket.assignedTo);
       const matchStatus = selectedStatus === 'All Status' || ticket.status === selectedStatus;
       const matchCategory = selectedCategory === 'All Categories' || ticket.category === selectedCategory;
-      const matchSearch = searchTerm === '' || 
+      const matchSearch = searchTerm === '' ||
         ticket.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         ticket.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
         ticket.description.toLowerCase().includes(searchTerm.toLowerCase());
-      
+
       let matchDate = true;
       if (startDate && endDate) {
         const ticketDate = new Date(ticket.createdOn);
@@ -244,8 +255,8 @@ const TicketProgressDashboard = () => {
   }, [tickets, selectedProject, selectedAssignees, selectedStatus, selectedCategory, startDate, endDate, searchTerm]);
 
   const handleAssigneeToggle = (assignee: string) => {
-    setSelectedAssignees(prev => 
-      prev.includes(assignee) 
+    setSelectedAssignees(prev =>
+      prev.includes(assignee)
         ? prev.filter(a => a !== assignee)
         : [...prev, assignee]
     );
@@ -300,8 +311,171 @@ const TicketProgressDashboard = () => {
   const resolvedTickets = filteredTickets.filter(t => t.status === 'Resolved').length;
   const closedTickets = filteredTickets.filter(t => t.status === 'Closed').length;
 
+  const form = useForm<GenericObject>({
+    defaultValues: fields.reduce((acc, f) => {
+      acc[f.name!] = f.defaultValue ?? ''
+      return acc;
+    }, {} as GenericObject),
+
+  });
+  const { control, register, handleSubmit, trigger, watch, setValue, getValues, reset, formState: { errors } } = form;
+
+  const renderField = (field: BaseField) => {
+    const { name, label, fieldType, isRequired, show = true } = field;
+    if (!name || !show) return null;
+    const validationRules = {
+      required: isRequired ? `${label} is required` : false,
+    };
+    switch (fieldType) {
+      case 'text':
+        return (
+          <Controller
+            key={name}
+            name={name}
+            control={control}
+            rules={validationRules}
+            render={({ field: ctrl }) => (
+              <ReusableInput
+                {...field}
+                value={ctrl.value}
+                onChange={ctrl.onChange}
+                error={errors[name]?.message as string}
+              />
+            )}
+          />
+        );
+      case 'dropdown':
+        return (
+          <Controller
+            key={name}
+            name={name}
+            control={control}
+            rules={validationRules}
+            render={({ field: ctrl }) => (
+              <ReusableDropdown
+                {...field}
+                value={ctrl.value}
+                onChange={ctrl.onChange}
+                error={errors[name]?.message as string}
+              />
+            )}
+          />
+        );
+      case 'date':
+        return (
+          <Controller
+            key={name}
+            name={name}
+            control={control}
+            rules={validationRules}
+            render={({ field: ctrl }) => (
+              <ReusableDatePicker
+                {...field}
+                value={ctrl.value}
+                onChange={ctrl.onChange}
+                error={errors[name]?.message as string}
+              />
+            )}
+          />
+        );
+      case 'multiselect':
+        return (
+          <Controller
+            key={name}
+            name={name}
+            control={control}
+            rules={validationRules}
+            render={({ field: ctrl }) => (
+              <ReusableMultiSelect
+                {...field}
+                value={ctrl.value}
+                onChange={ctrl.onChange}
+                error={errors[name]?.message as string}
+              />
+            )}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+  // Helper function to get fields by names (similar to TicketView)
+  const getFieldsByNames = (names: string[]) => fields.filter(f => names.includes(f.name!));
+
+  //fetch lookup data
+
+  // async function fetchLookups() {
+  //   const [assigneesValues] = await Promise.allSettled([
+  //     GetServiceRequestAssignToLookups(111, 'All').then(res => res.data),
+  //   ]);
+
+  //   setFields(prev =>
+  //     prev.map(field => {
+  //       if (field.name === "Assignees" && assigneesValues.status === "fulfilled") {
+  //         console.log(assigneesValues.value.ServiceRequestAssignToUsersLookup,"415")
+  //         return {
+  //           ...field,
+  //           options: assigneesValues.value.ServiceRequestAssignToUsersLookup.map(item => ({
+  //             label: item.UserName,
+  //             value: item.UserName,
+  //           })),
+  //           groupedOptions:assigneesValues.value.ServiceRequestAssignToUserGroupLookup.map(item => ({
+  //             label: item.UserGroupName,
+  //             value: item.UserGroupName,
+  //           })),
+  //         };
+  //       }
+
+  //       return field;
+  //     })
+  //   );
+  //   // reset({
+  //   //   Assignees:
+  //   //     assigneesValues.status === "fulfilled" ? custResult.value[0].CustomerName : '',
+  //   // });
+  // }
+
+  async function fetchLookups() {
+  const [assigneesValues] = await Promise.allSettled([
+    GetServiceRequestAssignToLookups(111, 'All').then(res => res.data),
+  ]);
+
+  setFields(prev =>
+    prev.map(field => {
+      if (field.name === "Assignees" && assigneesValues.status === "fulfilled") {
+        const users = assigneesValues.value.ServiceRequestAssignToUsersLookup;
+        const groups = assigneesValues.value.ServiceRequestAssignToUserGroupLookup;
+        
+        // Create grouped options by associating users with groups
+        const groupedOptions = groups.map(group => ({
+          label: group.UserGroupName,
+          options: users
+            .filter(user => user.UserGroupId === group.UserGroupId) // Assuming there's a group association
+            .map(user => ({
+              label: user.UserName,
+              value: user.UserName,
+            }))
+        }));
+
+        return {
+          ...field,
+          // Don't set both options and groupedOptions - choose one
+          groupedOptions: groupedOptions,
+          // Remove or comment out the options line if using groupedOptions
+          // options: users.map(user => ({ label: user.UserName, value: user.UserName })),
+        };
+      }
+      return field;
+    })
+  );
+}
+
+  useEffect(() => {
+    fetchLookups();
+  }, [])
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className=" bg-gray-50  h-full overflow-y-scroll">
       <header className="bg-white border-b px-4 sm:px-6 py-3 sm:py-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
           <div className="flex items-center gap-2 sm:gap-4">
@@ -391,7 +565,61 @@ const TicketProgressDashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(() => { })} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {getFieldsByNames(['Project', 'Status', 'Category']).map((field) => (
+                    <div key={field.name}>
+                      {renderField(field)}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {getFieldsByNames(['Search', 'StartDate', 'EndDate']).map((field) => (
+                    <div key={field.name}>
+                      {renderField(field)}
+                    </div>
+                  ))}
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {getFieldsByNames(['Assignees']).map((field) => (
+                    <div key={field.name}>
+                      {renderField(field)}
+                    </div>
+                  ))}
+                </div>
+                {/* Action Buttons */}
+                <div className='flex justify-between items-center'>
+                  <div className="flex gap-3">
+                    <ReusableButton
+                      htmlType="submit"
+                      variant="default"
+                      className="bg-orange-500 border-orange-500 text-white hover:bg-orange-600 hover:border-orange-600"
+                      // icon={<Save className="h-4 w-4" />}
+                      iconPosition="left"
+                    >
+                      Submit
+                    </ReusableButton>
+                    <ReusableButton
+                      htmlType="button"
+                      variant="default"
+                      onClick={clearAllFilters}
+                      className="border-orange-500 text-orange-500 hover:bg-orange-50"
+                      icon={<X className="h-4 w-4" />}
+                      iconPosition="left"
+                    >
+                      Clear Filters
+                    </ReusableButton>
+                  </div>
+                  <div className="text-sm text-gray-600 bg-gray-50 px-3 py-1 rounded-md">
+                    Showing <span className="font-semibold">{filteredTickets.length}</span> of <span className="font-semibold">{tickets.length}</span> tickets
+                  </div>
+                </div>
+              </form>
+            </Form>
+            {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-gray-700">Project</label>
                 <Select value={selectedProject} onValueChange={setSelectedProject}>
@@ -540,7 +768,7 @@ const TicketProgressDashboard = () => {
               <div className="text-sm text-gray-600 bg-gray-50 px-3 py-1 rounded-md">
                 Showing <span className="font-semibold">{filteredTickets.length}</span> of <span className="font-semibold">{tickets.length}</span> tickets
               </div>
-            </div>
+            </div> */}
           </CardContent>
         </Card>
 

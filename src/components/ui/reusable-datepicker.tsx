@@ -793,10 +793,10 @@ export const ReusableDatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
         <div className="relative">
           <div
             className={cn(
-              "flex items-center rounded border transition-colors relative overflow-hidden",
+              "flex items-center rounded-md border transition-colors relative overflow-hidden w-full ",
               sizeClasses[size],
-              disabled ? "bg-gray-100 cursor-not-allowed" : "bg-white hover:border-blue-400",
-              actualOpen && !disabled && "ring-2 ring-blue-500 border-blue-500",
+              disabled ? "opacity-50 bg-gray-100 cursor-not-allowed" : "bg-background",
+              actualOpen && !disabled && "ring-2 ring-blue-500 border-blue-500 bg-background",
               getStatusClasses(),
               className
             )}

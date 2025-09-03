@@ -18,12 +18,14 @@ interface ProjectsState {
   projects: Project[];
   loading: boolean;
   error: string | null;
+  companyId:number | null;
 }
 
 const initialState: ProjectsState = {
   projects: [],
   loading: false,
   error: null,
+  companyId:null
 };
 
 const projectsSlice = createSlice({
@@ -48,11 +50,14 @@ const projectsSlice = createSlice({
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.loading = action.payload;
     },
+    setCompanyId:(state,action:PayloadAction<number | null>)=>{
+      state.companyId=action.payload
+    },
     setError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload;
     },
   },
 });
 
-export const { setProjects, addProject, updateProject, deleteProject, setLoading, setError } = projectsSlice.actions;
+export const { setProjects, addProject, updateProject, deleteProject, setLoading,setCompanyId,setError } = projectsSlice.actions;
 export default projectsSlice.reducer;

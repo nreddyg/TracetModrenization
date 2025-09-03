@@ -1,6 +1,7 @@
 // login page urls
 
 export const GET_TOKEN='/token';
+export const URL_ORGANZIATION_DETAILS="/api/Masters/GetSelectedOrganizationByAccesToken";
 
 //service desk urls
 // create ticket screen
@@ -35,6 +36,31 @@ export const URL_GET_USER_GROUP_BY_ID='/api/ServiceDeskAPI/GetUserGroup';
 export const URL_ADD_USER_GROUP="/api/ServiceDeskAPI/AddUserGroupDetails";
 export const URL_UPDATE_USER_GROUP="/api/ServiceDeskAPI/UpdateUserGroupDetails";
 export const URL_DELETE_USER_GROUP="/api/ServiceDeskAPI/DeleteUserGroup";
+//Reports 
+export const URL_GET_REPORT_FOR_SR_DETAILS="/api/ServiceDeskAPI/GetServiceRequestDetailsReport";
+export const URL_GET_REPORT_FOR_SR_DETAILS_COLUMNS="/api/ServiceDeskAPI/GetDefaultColumnsServiceRequests";
+export const URL_GET_REPORT_FOR_SR_DETAILS_HISTORY="/api/ServiceDeskAPI/GetServiceRequestHistoyReport";
+export const URL_GET_SR_SLA_MET_SEL_VIOLATED="/api/ServiceDeskAPI/GetServiceRequestSLAReport";
+export const URL_GET_SR_SLA_MET_SEL_VIOLATED_COLUMNS="/api/ServiceDeskAPI/GetDefaultColumnsSLAMetViolated";
+export const URL_GET_SR_SEVERITY = "api/ServiceDeskAPI/GetServiceRequestSeverityLookups";
+export const URL_GET_SR_PRIORITY = 'api/ServiceDeskAPI/GetServiceRequestPriorityLookups';
+export const URL_GET_MAIN_CATEGORY_DETAILS="/api/Masters/GetCategoryLookups";
+export const URL_GET_SUB_CATEGORY_DETAILS = "/api/Masters/GetSubCategoryLookups";
+export const URL_GET_DEPARTMENT_DETAILS = "api/Masters/GetDepartmentDetailsByCompanyId";
+export const URL_GET_SLA_STATUS = "api/ServiceDeskAPI/GetServiceRequestSLAStatusLookups";
+export const URL_GET_LEVEL_FIVE_COMPANY="api/Masters/GetHeirarchyDetailsByCompanyId";
+export const URL_POST_COLUMNS_FOR_SR_DETAILS="api/ServiceDeskAPI/SaveDefaultServiceRequestDetailsColumns";
+export const URL_POST_COLUMNS_FOR_SR_MET_VIOLATED="api/ServiceDeskAPI/SaveDefaultServiceRequestSLADetailsColumns";
+export const URL_ADDITIONAL_FIELD_CONFIG_DETAILS="api/Settings/GetAllAdditionalFieldConfigurationDetails"
+ 
+// export const URL_GET_WORK_ORDER_LIST="/api/ServiceDeskAPI/DeleteUserGroup";
+// export const URL_GET_WORK_ORDER_DETAILS="/api/ServiceDeskAPI/DeleteUserGroup";
+// export const URL_GET_SCHEDULED_WORK_ORDER_LIST="/api/ServiceDeskAPI/DeleteUserGroup";
+// export const URL_GET_WORK_ORDER_TASK_DETAILS="/api/ServiceDeskAPI/DeleteUserGroup";
+// export const URL_GET_WORK_ORDER_PENALITY="/api/ServiceDeskAPI/DeleteUserGroup";
+
+
+
 //configuration
 
 export const URL_GET_SERVICE_REQUEST_TYPES='/api/ServiceDeskAPI/GetServiceRequestTypes'

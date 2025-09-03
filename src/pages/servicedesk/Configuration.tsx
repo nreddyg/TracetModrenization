@@ -21,6 +21,7 @@ import { ColumnDef } from '@tanstack/react-table';
 import ReusableTable, { TableAction, TablePermissions } from '@/components/ui/reusable-table';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, } from '@/components/ui/dialog';
 import { ReusableButton } from '@/components/ui/reusable-button';
+import { useAppSelector } from '@/store';
 interface OptType {
   data:  {[key: string]: any}[];
   label: string;
@@ -59,6 +60,7 @@ const tablePermissions: TablePermissions = {
 };
 
 const Configuration = () => {
+  const companyId=useAppSelector(state=>state.projects.companyId);
   const [fields,setFields] = useState<BaseField[]>(CONFIGURATION_DB);
   const dispatch=useDispatch()
   const msg = useMessage()
@@ -85,13 +87,6 @@ const Configuration = () => {
   const [statusColumns,setStatusColumns]=useState<ColumnDef<Status>[]>([
     {id:'StatusType',accessorKey: "StatusType", header: "Status Type"},
     {id:'Index',accessorKey: "Index", header: "Index"},
-    {id:'Actions',header: "Actions", cell: ({ row }) => (
-      row.original.StatusType!=="Open" && row.original.StatusType!=="Closed" && (
-        <div className="flex gap-2">
-          <Edit className='primary' size={16} cursor={'pointer'} onClick={()=>handleEditStatus(row.original)}>Edit</Edit>
-          <Trash2 className='text-red-500' size={16} cursor={'pointer'} onClick={() => handleDeleteStatus(row.original)}>Delete</Trash2>
-        </div>
-      ))}
   ])
   const [statusTableData,setStatusTableData]=useState<Status[]>([]);
   const [serviceRequestTypeData,setServiceRequestTypeData]=useState<serviceRequestType[]>([]);
@@ -137,6 +132,22 @@ const Configuration = () => {
       variant: 'destructive',
     },
   ]; 
+   const statusTableActions: TableAction<Status>[] = [
+    {
+      label: 'Edit',
+      icon: Edit,
+      onClick: handleEditStatus,
+      variant: 'default',
+      hidden:row=>row.StatusType==='Open' || row.StatusType==='Closed'
+    },
+    {
+      label: 'Delete',
+      icon: Trash2,
+      onClick:handleDeleteStatus,
+      variant: 'destructive',
+      hidden:row=>row.StatusType==='Open' || row.StatusType==='Closed'
+    },
+  ]; 
   useEffect(()=>{
     const init = async () => {
       try {
@@ -144,16 +155,20 @@ const Configuration = () => {
       } catch (err) {
         console.error('Error fetching lookups:', err);
       } finally {
-        getSRConfiguration(111,"All");
-        fetchAllServiceRequests();
-        fetchAllStatusList();
+        if(companyId){
+          getSRConfiguration(companyId,"All");
+          fetchAllServiceRequests();
+          fetchAllStatusList();
+        }
       }
     };
-    init();
-  },[])
+    if(companyId){
+      init();
+    }
+  },[companyId])
   const fetchAllServiceRequests=async()=>{
     dispatch(setLoading(true));
-    await getServiceRequestTypes(111).then(res=>{
+    await getServiceRequestTypes(companyId).then(res=>{
       if(res.success && res.data){
         setServiceRequestTypeData(res.data)
       }else{
@@ -164,7 +179,7 @@ const Configuration = () => {
   //all status list
   const fetchAllStatusList=async()=>{
     dispatch(setLoading(true));
-    await GetServiceRequestStatus(111).then(res=>{
+    await GetServiceRequestStatus(companyId).then(res=>{
       if(res.success && res.data){
         setStatusTableData(res.data);
       }else{
@@ -192,7 +207,7 @@ const Configuration = () => {
           }
           newList.push(Payload);
           var NewCategoryObj = { "ServiceRequestConfigDetails": newList };
-          updateSRConfigAPI(NewCategoryObj,111,data["ServiceReqConfigurationId"],)
+          updateSRConfigAPI(NewCategoryObj,companyId,data["ServiceReqConfigurationId"],)
 
     } else if (type === "ServiceRequestType") {
       let payload = {
@@ -217,7 +232,7 @@ const Configuration = () => {
       }
       if (isEditMode && selectedRecord) {
         dispatch(setLoading(true));
-        await postUpdateServiceRequesttype(111,selectedRecord.Id,'All',payload).then(res=>{
+        await postUpdateServiceRequesttype(companyId,selectedRecord.Id,'All',payload).then(res=>{
           if(res.success){
             if(res.data.status){
               msg.success(res.data.message);
@@ -233,7 +248,7 @@ const Configuration = () => {
         }).catch(err=>{{}}).finally(()=>{dispatch(setLoading(false))})
       } else {
         dispatch(setLoading(true));
-        await postServiceRequestType(111, 'All', payload).then(res => {
+        await postServiceRequestType(companyId, 'All', payload).then(res => {
           if (res.success && res.data.status) {
             msg.success(res.data.message);
             fetchAllServiceRequests();
@@ -247,7 +262,7 @@ const Configuration = () => {
       let payload={"ServiceRequestStatusDetails": [{"Name":watch('Status')}]};
       if(isEditStatusMode && selectedStatusRec){
         dispatch(setLoading(true));
-        await postUpdateServiceRequestStatus(111,selectedStatusRec?.Id,payload).then(res=>{
+        await postUpdateServiceRequestStatus(companyId,selectedStatusRec?.Id,payload).then(res=>{
           if(res.success){
             if(res.data.status){
               msg.success(res.data.message);
@@ -262,7 +277,7 @@ const Configuration = () => {
         }).catch(err=>{}).finally(()=>{dispatch(setLoading(false))})
       }else{
         dispatch(setLoading(true))
-        await postServiceRequestStatus(111,payload).then(res=>{
+        await postServiceRequestStatus(companyId,payload).then(res=>{
           if(res.success){
             if(res.data.status){
               msg.success(res.data.message);
@@ -351,7 +366,7 @@ const Configuration = () => {
   const fetchLookupsandGetAPIs=async ()=>{
     dispatch(setLoading(true));
     try{
-      let [NotifyLookup,SRStatusLookup,getVendors,SRTAssignToLookup]=await Promise.allSettled([GetNotifyTypeLookup(),getStatusLookups(111),getVendorDetails(111),GetServiceRequestAssignToLookups(111,"All")]);
+      let [NotifyLookup,SRStatusLookup,getVendors,SRTAssignToLookup]=await Promise.allSettled([GetNotifyTypeLookup(),getStatusLookups(companyId),getVendorDetails(companyId),GetServiceRequestAssignToLookups(companyId,"All")]);
       const allResponses = {
             NotifyUserTypes: { data: NotifyLookup.status === 'fulfilled' && NotifyLookup.value.success && NotifyLookup.value.data.ServiceRequestNotifyTypeLookup ? NotifyLookup.value.data.ServiceRequestNotifyTypeLookup : [], label: 'NotifyTypeName', value: 'NotifyTypeId' },
             DefaultSLAStatusDataList: { data: SRStatusLookup.status === 'fulfilled' && SRStatusLookup.value.success && SRStatusLookup.value.data.ServiceRequestStatusLookup ? SRStatusLookup.value.data.ServiceRequestStatusLookup : [], label: 'ServiceRequestStatusName', value: 'ServiceRequestStatusId' },
@@ -373,7 +388,7 @@ const Configuration = () => {
       if (res.data.status !== undefined) {
         if (res.data.status === true) {
            msg.success(res.data.message);
-          getSRConfiguration(111, "All")
+          getSRConfiguration(companyId, "All")
         } else {
           msg.warning(res.data.message)
         }
@@ -546,7 +561,7 @@ const Configuration = () => {
   //fetch service request type data by id
   const fetchServiceRequestTypeById = async(id: number) => {
     dispatch(setLoading(true));
-    await getSRTypesById(111,id).then(res=>{
+    await getSRTypesById(companyId,id).then(res=>{
       if(res.success){
         if(res.data.ServiceRequestType){
           form.reset({...form.getValues(),
@@ -566,7 +581,7 @@ const Configuration = () => {
   //delete service request type
   const deleteServiceRequestType = async (id: number) => {
     dispatch(setLoading(true));
-    await deleteSRType(id, 111).then(res => {
+    await deleteSRType(id, companyId).then(res => {
       if(res.success){
         if(res.data.status){
           msg.success(res.data.message);
@@ -588,7 +603,7 @@ const Configuration = () => {
   }
   //delete status
   const deleteStatus=async(id:number)=>{
-    await postDeleteServiceRequestStatus(111,id).then(res=>{
+    await postDeleteServiceRequestStatus(companyId,id).then(res=>{
       if(res.success){
         if(res.data.status){
           msg.success(res.data.message);
@@ -610,7 +625,7 @@ const Configuration = () => {
   const handleUpdateStatusSequence=async()=>{
     dispatch(setLoading(true));
     let updatedSequence = statusTableData.map(item =>item.Id).join()
-    await postUpdateStatusSequence(111,updatedSequence).then(res=>{
+    await postUpdateStatusSequence(companyId,updatedSequence).then(res=>{
       if(res.success){
         if(res.data.status){
           msg.success(res.data.message);
@@ -760,7 +775,8 @@ const Configuration = () => {
                       pageSize={10} emptyMessage="No Data found"
                       rowHeight="normal" storageKey="service-request-type-list-table"    
                       enableRowReordering
-                      onRowReorder={(newData) => setStatusTableData(newData)}                
+                      onRowReorder={(newData) => setStatusTableData(newData)}  
+                      actions={statusTableActions}              
                     />
                   </div>
                   <div className="mt-4 flex justify-end">

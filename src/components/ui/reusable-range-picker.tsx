@@ -1,4 +1,4 @@
-
+ 
 import * as React from "react";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
@@ -11,29 +11,30 @@ import {
 import { DateRange } from "react-day-picker";
 import { cn } from "@/lib/utils";
 import { X } from "lucide-react";
-
+ 
 dayjs.extend(customParseFormat);
-
+ 
 interface DateRangePickerProps {
   label?: string;
   tooltip?: string;
   value?: DateRange;
   onChange?: (range: DateRange | undefined) => void;
   className?: string;
-  placeholder?: [string, string] ;
+  placeholder?: string[] ;
   error?: string;
   allowClear?: boolean;
   format?: string; // <-- format like "DD/MM/YYYY"
   disabled?: boolean,
 }
-
+ 
 const ReusableRangePicker: React.FC<DateRangePickerProps> = ({
   label,
   tooltip,
   value,
   onChange,
   className,
-  placeholder = ["Start Date", "End Date"],
+  placeholder,
+  // rangeplaceholder = ["Start Date", "End Date"],
   allowClear = false,
   error,
   format = "DD/MM/YYYY",
@@ -47,23 +48,23 @@ const ReusableRangePicker: React.FC<DateRangePickerProps> = ({
   const [lastValidToDate, setLastValidToDate] = React.useState<string>("");
   const [calendarMonth, setCalendarMonth] = React.useState<Date>(new Date());
   const inputId = React.useId();
-
+ 
   const isValidFormat = (text: string): boolean =>
     dayjs(text, format, true).isValid();
-
+ 
   const isValidInput = (text: string): boolean => {
     const validChars = /^[\d\/\-\.]*$/;
     return validChars.test(text) && text.length <= 10;
   };
-
+ 
   const formatDate = (date?: Date): string =>
     date ? dayjs(date).format(format) : "";
-
+ 
   const parseInput = (text: string): Date | undefined => {
     const parsed = dayjs(text, format, true);
     return parsed.isValid() ? parsed.toDate() : undefined;
   };
-
+ 
   React.useEffect(() => {
     setInternalValue(value);
     const fromFormatted = formatDate(value?.from);
@@ -72,12 +73,12 @@ const ReusableRangePicker: React.FC<DateRangePickerProps> = ({
     setToInput(toFormatted);
     setLastValidFromDate(fromFormatted);
     setLastValidToDate(toFormatted);
-
+ 
     if (value?.from) {
       setCalendarMonth(value.from);
     }
   }, [value, format]);
-
+ 
   const handleChange = (range: DateRange | undefined) => {
     setInternalValue(range);
     const fromFormatted = formatDate(range?.from);
@@ -86,27 +87,27 @@ const ReusableRangePicker: React.FC<DateRangePickerProps> = ({
     setToInput(toFormatted);
     setLastValidFromDate(fromFormatted);
     setLastValidToDate(toFormatted);
-
+ 
     if (range?.from) {
       setCalendarMonth(range.from);
     }
-
+ 
     onChange?.(range);
   };
-
+ 
   const handleFromInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const text = e.target.value;
     if (!isValidInput(text)) {
       setFromInput("");
       return;
     }
-
+ 
     setFromInput(text);
-
+ 
     if (isValidFormat(text)) {
       const parsed = parseInput(text);
       const to = internalValue?.to;
-
+ 
       if (parsed && (!to || parsed <= to)) {
         const newRange = { from: parsed, to };
         setInternalValue(newRange);
@@ -118,20 +119,20 @@ const ReusableRangePicker: React.FC<DateRangePickerProps> = ({
       }
     }
   };
-
+ 
   const handleToInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const text = e.target.value;
     if (!isValidInput(text)) {
       setToInput("");
       return;
     }
-
+ 
     setToInput(text);
-
+ 
     if (isValidFormat(text)) {
       const parsed = parseInput(text);
       const from = internalValue?.from;
-
+ 
       if (parsed && (!from || from <= parsed)) {
         const newRange = { from, to: parsed };
         setInternalValue(newRange);
@@ -143,19 +144,19 @@ const ReusableRangePicker: React.FC<DateRangePickerProps> = ({
       }
     }
   };
-
+ 
   // const handleFromInputBlur = () => {
   //   if (fromInput && !isValidFormat(fromInput)) {
   //     setFromInput(lastValidFromDate);
   //   }
   // };
-
+ 
   // const handleToInputBlur = () => {
   //   if (toInput && !isValidFormat(toInput)) {
   //     setToInput(lastValidToDate);
   //   }
   // };
-
+ 
   const handleFromInputBlur = () => {
     if (fromInput === "" && internalValue?.from) {
       const restored = formatDate(internalValue.from);
@@ -163,12 +164,12 @@ const ReusableRangePicker: React.FC<DateRangePickerProps> = ({
       setLastValidFromDate(restored);
       return;
     }
-
+ 
     if (!isValidFormat(fromInput)) {
       setFromInput(lastValidFromDate);
     }
   };
-
+ 
   const handleToInputBlur = () => {
     if (toInput === "" && internalValue?.to) {
       const restored = formatDate(internalValue.to);
@@ -176,13 +177,13 @@ const ReusableRangePicker: React.FC<DateRangePickerProps> = ({
       setLastValidToDate(restored);
       return;
     }
-
+ 
     if (!isValidFormat(toInput)) {
       setToInput(lastValidToDate);
     }
   };
-
-
+ 
+ 
   const handleClear = (e: React.MouseEvent) => {
     e.stopPropagation();
     setFromInput("");
@@ -194,9 +195,9 @@ const ReusableRangePicker: React.FC<DateRangePickerProps> = ({
     onChange?.(undefined);
     setOpen(false);
   };
-
+ 
   const showError = error && (!internalValue?.from || !internalValue?.to);
-
+ 
   return (
     <div className={cn("grid gap-2", className)}>
       {label && (
@@ -204,7 +205,7 @@ const ReusableRangePicker: React.FC<DateRangePickerProps> = ({
           {label}
         </label>
       )}
-
+ 
       {/* <Popover open={open} onOpenChange={setOpen}> */}
       <Popover open={!disabled && open} onOpenChange={(val) => !disabled && setOpen(val)}>
         <PopoverTrigger asChild>
@@ -214,7 +215,7 @@ const ReusableRangePicker: React.FC<DateRangePickerProps> = ({
                 "flex items-center justify-between gap-2 border border-input rounded-md px-3 py-2 text-sm",
                 "bg-background",              // Set background like the first field
                 "w-full",                     // Make it full width of the container
-                !internalValue && "text-muted-foreground",
+                // !internalValue && "text-muted-foreground",
                 disabled && "opacity-50 bg-muted cursor-not-allowed"
               )}
             >
@@ -254,7 +255,7 @@ const ReusableRangePicker: React.FC<DateRangePickerProps> = ({
             </div>
           </div>
         </PopoverTrigger>
-
+ 
         <PopoverContent className="w-auto p-0" align="start">
           <Calendar
             mode="range"
@@ -267,10 +268,12 @@ const ReusableRangePicker: React.FC<DateRangePickerProps> = ({
           />
         </PopoverContent>
       </Popover>
-
+ 
       {showError && <p className="text-red-600 text-sm mb-1">{error}</p>}
     </div>
-
+ 
   );
 };
 export default ReusableRangePicker;
+ 
+ 

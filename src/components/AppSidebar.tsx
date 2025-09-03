@@ -55,7 +55,7 @@ const navigation: NavItem[] = [
   {
     label: 'Dashboard',
     icon: Home,
-    link: '/',
+    link: '/dashboard',
   },
   {
     label: 'Timesheet',

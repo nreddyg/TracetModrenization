@@ -15,9 +15,11 @@ import { useAppDispatch } from '@/store/reduxStore';
 import { setLoading } from '@/store/slices/projectsSlice';
 import { Ticket as Request } from '../TicketView';
 import { ReusableButton } from '@/components/ui/reusable-button';
+import { useAppSelector } from '@/store';
 
 const AllRequests = () => {
   const navigate=useNavigate();
+  const companyId=useAppSelector(state=>state.projects.companyId);
   const dispatch=useAppDispatch();
   const { toast } = useToast();
   const [dateRange, setDateRange] = useState<{ from: Date; to: Date } | null>(null);
@@ -78,18 +80,22 @@ const AllRequests = () => {
     };
   }, [requests]);
   useEffect(()=>{
-    fetchAllServiceRequests();
-  },[])
+    if(companyId){
+      fetchAllServiceRequests();
+    }
+  },[companyId])
   // Enhanced action handlers with audit trail
   const handleRefresh = useCallback(() => {
     setDateRange({ from: undefined, to: undefined });
-    fetchAllServiceRequests()
-    toast({title: "Data Refreshed",description: "All Service Requests data has been updated",});
+    if(companyId){
+      fetchAllServiceRequests()
+      toast({title: "Data Refreshed",description: "All Service Requests data has been updated",});
+    }
   },[toast]);
   //fetch all tickets
   async function fetchAllServiceRequests() {
       dispatch(setLoading(true))
-      await getAllSRDetailsList('All', 111, 'All').then(res => {
+      await getAllSRDetailsList('All', companyId, 'All').then(res => {
         if (res.success && res.data.status === undefined) {
           if (Array.isArray(res.data)) {
             let data = res.data.map(item => ({ ...item, AssignedTo: item.AssigneeSelectedUsers || '' + '' + item.AssigneeSelectedUserGroups || '' }));

@@ -30,8 +30,7 @@ export const workbench_Filter_DB: BaseField[] = [
         ],
         defaultValue:"101",
         disabled: false,
-        className: " min-h-[20px] rounded-md",
-        containerClassName: "w-full h-9 rounded-md"
+        className: "w-full h-9 rounded-md"
     },
 
     {
@@ -67,8 +66,8 @@ export const MyRequest_Filter_DB: BaseField[] = [
         ],
         defaultValue:"104",
         disabled: false,
-        className: " min-h-[20px] rounded-md",
-        containerClassName: "w-full h-9 rounded-md"
+        className: "w-full h-9 rounded-md",
+     
     },
 
     {

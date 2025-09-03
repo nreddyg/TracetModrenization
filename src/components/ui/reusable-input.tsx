@@ -320,7 +320,7 @@ export const ReusableInput = forwardRef<ReusableInputRef, ReusableInputProps>(
 
     // Label positioning classes
     const labelClasses = useMemo(() => {
-      const baseClasses = "text-sm font-medium";
+      const baseClasses = "text-sm font-medium text-slate-700";
       
       switch (labelPosition) {
         case 'left':
@@ -341,7 +341,7 @@ export const ReusableInput = forwardRef<ReusableInputRef, ReusableInputProps>(
         case 'right':
           return 'flex items-center';
         default: // 'top' or 'bottom'
-          return 'space-y-2';
+          return 'relative w-full';
       }
     }, [labelPosition]);
 
@@ -367,7 +367,9 @@ export const ReusableInput = forwardRef<ReusableInputRef, ReusableInputProps>(
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
+               
                 {labelElement}
+              
               </TooltipTrigger>
               <TooltipContent>
                 <p>{tooltip}</p>
@@ -560,10 +562,12 @@ export const ReusableInput = forwardRef<ReusableInputRef, ReusableInputProps>(
     );
 
     return (
-      <div className={cn(containerLayoutClasses, containerClassName)}>
+      <div className={cn(containerLayoutClasses, containerClassName,'w-full ')}>
         {/* Label positioning logic */}
+         <div className='flex items-center gap-1 mb-2'>
         {labelPosition === 'top' && renderLabel()}
         {labelPosition === 'left' && renderLabel()}
+        </div>
         
         {renderInputSection()}
         

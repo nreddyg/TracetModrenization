@@ -1429,7 +1429,7 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
                     <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
                       <CardContent className="pt-6">
                         <div className="space-y-6">
-                          <div className='grid md:grid-cols-[2.2fr_1.8fr] sm:grid-cols-1 space-x-3 space-y-1'>
+                          <div className='grid md:grid-cols-[2.2fr_1.8fr] sm:grid-cols-1 space-x-3 '>
                             {getFieldsByNames(['Title', 'ServiceRequestType']).map((field) => (
                               <div key={field.name}>
                                 {renderField(field)}
@@ -1533,8 +1533,8 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
                         <CardContent className="p-0">
                           <Accordion type="single" collapsible value={accordionOpen} onValueChange={setAccordionOpen}>
                             <AccordionItem value="additional-fields" className="border-none">
-                              <AccordionTrigger className="px-6 py-4 hover:no-underline">
-                                <div className="flex items-center gap-2">
+                              <AccordionTrigger className="px-6 py-4 hover:no-underline w-full">
+                                <div className="flex items-center gap-2 w-full">
                                   <Tag className="h-5 w-5" />
                                   <span className="font-semibold">Additional Fields</span>
                                 </div>
@@ -1588,11 +1588,13 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
                                     <ReusableButton
                                       size="small"
                                       onClick={commentForm.handleSubmit(postComment)}
+                                      disabled={!isEditing}
                                     >
                                       Post Comment
                                     </ReusableButton>
                                   </div>
                                 </form>
+
                               </div>
 
                               {comments?.map((comment) => (

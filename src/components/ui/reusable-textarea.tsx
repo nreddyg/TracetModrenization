@@ -228,7 +228,7 @@ export const ReusableTextarea = forwardRef<TextareaRef, ReusableTextareaProps>(
         case 'borderless':
           return 'border-0 shadow-none focus:ring-0 focus:border-0';
         case 'filled':
-          return 'bg-gray-50 border-0 focus:bg-white focus:ring-1 focus:ring-blue-500';
+          return 'bg-gray-50 border-0 focus:bg-white focus:ring-1 ';
         default:
           return bordered ? 'border border-gray-300' : 'border-0';
       }
@@ -245,7 +245,7 @@ export const ReusableTextarea = forwardRef<TextareaRef, ReusableTextareaProps>(
       if (status === 'success') {
         return 'border-green-500 focus:border-green-500 focus:ring-green-200';
       }
-      return 'focus:border-blue-500 focus:ring-blue-200';
+      return '';
     };
     
     // Render label
@@ -407,8 +407,10 @@ export const ReusableTextarea = forwardRef<TextareaRef, ReusableTextareaProps>(
     };
 
     return (
-      <div className={cn("space-y-2  ", containerClassName)}>
+      <div className={cn(" ", containerClassName)}>
+        <div className='flex items-center gap-1 mb-2'>
         {renderLabel()}
+        </div>
         {renderTextareaWrapper()}
         {(error || status === 'error') && <p className="text-xs text-red-500">{error}</p>}
         {status === 'warning' && <p className="text-xs text-orange-500">Warning message</p>}

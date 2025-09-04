@@ -365,14 +365,16 @@ export const ReusableCheckbox = forwardRef<CheckboxMethods, ReusableCheckboxProp
       if (!options || options.length === 0) return null;
 
       return (
-        <fieldset className="space-y-3">
+        <fieldset className="mb-1">
           {label && (
-            <legend className="mb-3">
+            <div className='flex items-center gap-1 mb-1'>
+            <legend className="">    
               {renderLabel(label, undefined, undefined, true)}
             </legend>
+            </div>
           )}
           <div 
-            className="space-y-2" 
+            className="space-y-2 p-0" 
             role="group" 
             aria-required={isRequired}
             aria-invalid={hasError}

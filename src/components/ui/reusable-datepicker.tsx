@@ -278,7 +278,7 @@ const CustomCalendar: React.FC<CalendarProps> = ({
           disabled={isDisabled}
           className={cn(
             "h-9 w-9 text-sm rounded-md font-normal transition-colors",
-            "hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500",
+            "hover:bg-gray-100 focus:outline-none focus:ring-2 ",
             isSelected && "bg-blue-600 text-white hover:bg-blue-700",
             isToday && !isSelected && "bg-gray-100 font-medium",
             isDisabled && "text-gray-400 cursor-not-allowed hover:bg-transparent line-through"
@@ -404,9 +404,9 @@ export const ReusableDatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
     };
 
     const sizeClasses = {
-      sm: "min-h-[24px] text-sm",
-      md: "min-h-[32px] text-sm",
-      lg: "min-h-[40px] text-base",
+      sm: "h-8 text-sm",
+      md: "h-10 text-sm",
+      lg: "h-12 text-base",
     };
 
     const iconSizeClasses = {
@@ -689,7 +689,7 @@ export const ReusableDatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
                 disabled={isTodayDisabled}
                 className={cn(
                   "text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-medium transition-all duration-200",
-                  "focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-3 py-1.5",
+                  "focus:outline-none focus:ring-2 rounded px-3 py-1.5",
                   "active:scale-95",
                   isTodayDisabled && "opacity-50 cursor-not-allowed hover:text-blue-600 hover:bg-transparent"
                 )}
@@ -729,7 +729,7 @@ export const ReusableDatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
 
     const getStatusClasses = () => {
       if (error || errorMessage) return 'border-red-500 focus-within:border-red-500 ring-red-200';
-      return 'border-gray-300 focus-within:border-blue-500 ring-blue-200';
+      return '';
     };
 
     const renderCalendarContent = () => (
@@ -774,10 +774,10 @@ export const ReusableDatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
     );
 
     return (
-      <div className={cn("space-y-2", wrapperClassName)} ref={datePickerRef}>
+      <div className={cn("", wrapperClassName)} ref={datePickerRef}>
         {label && (
           <div className="text-sm font-medium">
-            <div className={cn("flex items-center gap-1", labelClassName)}>
+            <div className={cn("flex items-center gap-1 mb-2", labelClassName)}>
               <label htmlFor={inputId} className="text-sm font-medium">
                 {label}{(isRequired || required) && <span className='text-red-500'> *</span>}
               </label>
@@ -796,7 +796,7 @@ export const ReusableDatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
               "flex items-center rounded-md border transition-colors relative overflow-hidden w-full ",
               sizeClasses[size],
               disabled ? "opacity-50 bg-gray-100 cursor-not-allowed" : "bg-background",
-              actualOpen && !disabled && "ring-2 ring-blue-500 border-blue-500 bg-background",
+              actualOpen && !disabled && "ring-2 border-blue-500 bg-background",
               getStatusClasses(),
               className
             )}

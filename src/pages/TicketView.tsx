@@ -1421,9 +1421,9 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
           
           {/* Content Grid with Individual Scroll Areas */}
           <div className="flex-1 p-3 overflow-hidden min-h-0  ">
-            <div className="grid grid-cols-1 xl:grid-cols-12 gap-1 h-full">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-1 h-full">
               {/* Left Column - Main Content */}
-              <div className="xl:col-span-8 flex flex-col  min-h-0 ">
+              <div className="lg:col-span-8 flex flex-col  min-h-0 ">
                 <ScrollArea className="flex-1  ">
                   <div className="space-y-6 pr-3">
                     <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
@@ -1533,7 +1533,7 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
                         <CardContent className="p-0">
                           <Accordion type="single" collapsible value={accordionOpen} onValueChange={setAccordionOpen}>
                             <AccordionItem value="additional-fields" className="border-none">
-                              <AccordionTrigger className="px-6 py-4 hover:no-underline w-full">
+                              <AccordionTrigger className="px-6 w-full py-4 hover:no-underline">
                                 <div className="flex items-center gap-2 w-full">
                                   <Tag className="h-5 w-5" />
                                   <span className="font-semibold">Additional Fields</span>
@@ -1588,13 +1588,11 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
                                     <ReusableButton
                                       size="small"
                                       onClick={commentForm.handleSubmit(postComment)}
-                                      disabled={!isEditing}
                                     >
                                       Post Comment
                                     </ReusableButton>
                                   </div>
                                 </form>
-
                               </div>
 
                               {comments?.map((comment) => (
@@ -1667,7 +1665,7 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
               </div>
 
               {/* Right Column - Details Panel */}
-              <div className="xl:col-span-4 flex flex-col min-h-0">
+              <div className="lg:col-span-4 flex flex-col min-h-0">
                 <ScrollArea className="flex-1 h-full">
                   <div className="pr-1">
                     <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">

@@ -315,7 +315,7 @@ export const ReusableInput = forwardRef<ReusableInputRef, ReusableInputProps>(
       // if (validationPattern && isValid && inputValue) {
       //   return 'border-green-500 focus:border-green-500 focus:ring-green-200';
       // }
-      return 'focus:border-blue-500 focus:ring-blue-200';
+      return '';
     }, [error, warning, status, validationError, validationPattern, isValid, inputValue]);
 
     // Label positioning classes
@@ -506,10 +506,12 @@ export const ReusableInput = forwardRef<ReusableInputRef, ReusableInputProps>(
     // Render the input field section
     const renderInputSection = () => (
       <div className={labelPosition === 'left' || labelPosition === 'right' ? 'flex-1' : ''}>
-        <div className="">
+        <div className={""
+          // cn(focused && "focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 rounded-md",)
+          }>
           {renderAddonBefore()}
           
-          <div className={inputWrapperClass}>
+          <div className={inputWrapperClass }>
             {prefixIcon && (
               <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 z-10">
                 {prefixIcon}
@@ -530,7 +532,7 @@ export const ReusableInput = forwardRef<ReusableInputRef, ReusableInputProps>(
                 sizeClasses,
                 variantClasses,
                 statusClasses,
-                ellipsisPlaceholder && "overflow-hidden text-ellipsis whitespace-nowrap",
+                ellipsisPlaceholder && "overflow-hidden  text-ellipsis whitespace-nowrap",
                 prefixIcon && "pl-10",
                 (suffixIcon || showPasswordToggle || visibilityToggle || allowClear || loading) && "pr-10",
                 focused && "ring-2 ring-opacity-50",
@@ -538,9 +540,9 @@ export const ReusableInput = forwardRef<ReusableInputRef, ReusableInputProps>(
                 addonBefore && "rounded-l-none border-l-0",
                 addonAfter && "rounded-r-none border-r-0",
                 !hasAddon && "rounded-md",
-                "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-backgroun",
+                "flex h-10 w-full  rounded-md border border-input bg-background px-3 py-2 text-base ",
                 inputClassName,
-                className
+                className,
               )}
               {...props}
             />

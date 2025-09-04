@@ -790,7 +790,7 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
       if (status === 'warning') {
         return "border-yellow-500 focus-within:border-yellow-500 focus-within:ring-yellow-200";
       }
-      return "focus-within:ring-blue-200";
+      return "";
     };
 
     const handleContainerClick = (e: React.MouseEvent) => {
@@ -824,7 +824,7 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
             ref={triggerRef}
             className={cn(
               "w-full rounded-md border cursor-text transition-colors",
-              "focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2",
+              "focus-within:outline-none focus-within:ring-2 ",
               getSizeClasses(),
               getVariantClasses(),
               getStatusClasses(),

@@ -11,6 +11,7 @@ import {
 import { DateRange } from "react-day-picker";
 import { cn } from "@/lib/utils";
 import { X } from "lucide-react";
+import { Label } from "./label";
  
 dayjs.extend(customParseFormat);
  
@@ -25,6 +26,8 @@ interface DateRangePickerProps {
   allowClear?: boolean;
   format?: string; // <-- format like "DD/MM/YYYY"
   disabled?: boolean,
+  isRequired?:boolean,
+  containerClassName?:string
 }
  
 const ReusableRangePicker: React.FC<DateRangePickerProps> = ({
@@ -38,7 +41,9 @@ const ReusableRangePicker: React.FC<DateRangePickerProps> = ({
   allowClear = false,
   error,
   format = "DD/MM/YYYY",
-  disabled
+  disabled,
+  isRequired=false,
+  containerClassName
 }) => {
   const [internalValue, setInternalValue] = React.useState<DateRange | undefined>(value);
   const [open, setOpen] = React.useState(false);
@@ -199,24 +204,27 @@ const ReusableRangePicker: React.FC<DateRangePickerProps> = ({
   const showError = error && (!internalValue?.from || !internalValue?.to);
  
   return (
-    <div className={cn("grid gap-2", className)}>
+    <div className={cn("relative w-full", containerClassName)}>
+    <div className='flex items-center gap-1 mb-2'>
       {label && (
-        <label htmlFor={inputId} className="text-sm font-medium text-foreground">
-          {label}
-        </label>
+        // <label htmlFor={inputId} className="text-sm font-medium text-slate-700">
+        //   {label}
+        // </label>
+        <Label className="text-sm font-medium text-slate-700">{label}{isRequired ?<span className='text-red-500'> *</span>:''}</Label>
       )}
+      </div>
  
       {/* <Popover open={open} onOpenChange={setOpen}> */}
       <Popover open={!disabled && open} onOpenChange={(val) => !disabled && setOpen(val)}>
         <PopoverTrigger asChild>
-          <div className="relative w-full">
+          <div className={cn("relative w-full focus-within:ring-2 rounded-md ",!disabled && open && "ring-2" )}>
             <div
               className={cn(
-                "flex items-center justify-between gap-2 border border-input rounded-md px-3 py-2 text-sm",
+                "flex items-center justify-between gap-2 border border-input rounded-md px-3  h-10 text-sm",
                 "bg-background",              // Set background like the first field
-                "w-full",                     // Make it full width of the container
+                "w-full",    className,                 // Make it full width of the container
                 // !internalValue && "text-muted-foreground",
-                disabled && "opacity-50 bg-muted cursor-not-allowed"
+                disabled && "opacity-50 bg-muted cursor-not-allowed",
               )}
             >
               <input

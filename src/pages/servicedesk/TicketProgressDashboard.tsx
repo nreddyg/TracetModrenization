@@ -301,7 +301,7 @@ const TicketProgressDashboard = () => {
   const closedTickets = filteredTickets.filter(t => t.status === 'Closed').length;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="h-full overflow-y-scroll bg-gray-50">
       <header className="bg-white border-b px-4 sm:px-6 py-3 sm:py-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
           <div className="flex items-center gap-2 sm:gap-4">

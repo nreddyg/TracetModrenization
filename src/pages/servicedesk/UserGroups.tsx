@@ -431,7 +431,7 @@ const UserGroups = () => {
             iconPosition="left"
             onClick={handleAddUserGroup}
           >
-            Add User Group
+           {selectedRecord ? "Update User Group" :"Add User Group" }
           </ReusableButton>
         </div>
 

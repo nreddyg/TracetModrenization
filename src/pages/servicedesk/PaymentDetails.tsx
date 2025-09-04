@@ -520,7 +520,7 @@ const PaymentDetails = () => {
                   <h3 className="text-orange-600 font-semibold mb-4">Payment</h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {getFieldsByNames(getPaymentFields()).map((field) => (
-                      <div key={field.name} className={field.name==='ChequeDate' ? "mt-1" : "mt-0"}>
+                      <div key={field.name}>
                         {renderField(field)}
                       </div>
                     ))}

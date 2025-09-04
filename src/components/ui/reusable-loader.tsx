@@ -40,7 +40,7 @@ export const ReusableLoader: React.FC<ReusableLoaderProps> = ({
   indicator,
   wrapperClassName,
   theme = 'auto',
-  overlay = false,
+  overlay = true,
   overlayClassName,
   overlayStyle,
   percent,
@@ -99,8 +99,7 @@ export const ReusableLoader: React.FC<ReusableLoaderProps> = ({
 
   // Theme classes
   const getThemeClasses = () => {
-    const baseOverlay = overlay ? 'bg-background/80 backdrop-blur-sm' : '';
-    
+   const baseOverlay = overlay ? 'bg-background/10 backdrop-blur-[1px] loader-overlay' : '';
     if (theme === 'light') return `${baseOverlay} text-foreground`;
     if (theme === 'dark') return `${baseOverlay} bg-black/80 text-white`;
     return `${baseOverlay} text-foreground`; // auto

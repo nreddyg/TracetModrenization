@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronDown, X, Check } from 'lucide-react';
+import { Label } from './label';
 
 // Mock Tooltip components for demonstration
 const TooltipProvider = ({ children }) => children;
@@ -384,7 +385,8 @@ export const ReusableDropdown: React.FC<SelectProps> = ({
 
   const renderLabel = () => {
     if (!label) return null;
-    const labelContent = <span className="text-sm font-medium">{label}{isRequired ? <span className='text-red-500'> *</span> : ''}</span>;
+    // const labelContent = <span className="text-sm font-medium">{label}{isRequired ? <span className='text-red-500'> *</span> : ''}</span>;
+          const labelContent = <Label className={"text-sm font-medium text-slate-700"}>{label}{isRequired ?<span className='text-red-500'> *</span>:''}</Label>;
 
     if (tooltip) {
       return (
@@ -579,14 +581,14 @@ export const ReusableDropdown: React.FC<SelectProps> = ({
   };
 
   return (
-    <div ref={selectRef} className={cn("space-y-2")}>
-      <div className="text-sm font-medium">{renderLabel()}</div>
+    <div ref={selectRef} className={cn("relative w-full")}>
+      <div className="flex items-center gap-1 mb-2">{renderLabel()}</div>
 
-      <div className="relative">
+      <div className="relative " >
         <div
           className={cn(
-            "flex items-center rounded border transition-colors relative overflow-hidden",
-            "min-h-[40px]",
+            "flex items-center rounded-md flex items-center w-full p-0  min-w-0 h-10 border transition-colors relative overflow-hidden",
+            "",
             disabled ? "bg-gray-100 cursor-not-allowed" : "bg-white hover:border-blue-400",
             getStatusClasses(),
             className
@@ -603,7 +605,7 @@ export const ReusableDropdown: React.FC<SelectProps> = ({
               : undefined
           }
         >
-          <div className={cn("flex items-center w-full min-w-0", containerClassName)}>
+          {/* <div className={cn("flex items-center w-full p-0  min-w-0")}> */}
             {multiple && getSelectedOptions().length > 0 && (
               <div className="flex-shrink-0 pl-3 py-1">
                 {renderSelectedTags()}
@@ -649,7 +651,7 @@ export const ReusableDropdown: React.FC<SelectProps> = ({
                 />
               )}
             </div>
-          </div>
+          {/* </div> */}
 
           <div className="absolute right-0 top-0 h-full flex items-center gap-1 pr-3 bg-inherit">
             {allowClear && getSelectedOptions().length > 0 && !disabled && (

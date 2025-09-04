@@ -633,7 +633,7 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
             "flex items-center space-x-2 px-3 py-2 hover:bg-gray-50 cursor-pointer",
             size === 'small' && "px-2 py-1.5 text-sm",
             size === 'large' && "px-4 py-3",
-            option.disabled && "opacity-50 cursor-not-allowed",
+            option.disabled && " bg-gray-100 cursor-not-allowed",
             isFocused && "bg-blue-50",
             isSelected && "bg-blue-50"
           )}
@@ -828,7 +828,7 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
               getSizeClasses(),
               getVariantClasses(),
               getStatusClasses(),
-              disabled && "cursor-not-allowed opacity-50",
+              disabled && "cursor-not-allowed  bg-gray-100",
               className
             )}
             onClick={handleContainerClick}
@@ -853,7 +853,7 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
                       "placeholder:text-muted-foreground",
                       size === 'small' && "text-sm",
                       size === 'large' && "text-base",
-                      disabled && "cursor-not-allowed"
+                      disabled && "cursor-not-allowed  bg-gray-100"
                     )}
                     style={{ minWidth: isSearching || normalizedValue.length === 0 ? '120px' : '60px' }}
                   />

@@ -136,11 +136,6 @@ const navigation: NavItem[] = [
         link: '/service-desk/user-groups',
       },
       {
-        label: 'Administration',
-        icon: Shield,
-        link: '/service-desk/administration',
-      },
-      {
         label: 'Configuration',
         icon: Settings,
         link: '/service-desk/configuration',

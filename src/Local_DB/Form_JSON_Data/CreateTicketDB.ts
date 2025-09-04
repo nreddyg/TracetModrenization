@@ -42,6 +42,8 @@ export const CREATE_TICKET_DB: BaseField[] = [
     options: [],
     allowClear: true,
     disabled:false,
+      // className: " min-h-[40px]",
+      containerClassName: "w-full h-10 rounded-md"
   },
   {
     name: 'Description',

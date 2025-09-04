@@ -281,7 +281,7 @@ const AnimatedRoutes = () => {
 const App = () => (
   <Provider store={store}>
     <QueryClientProvider client={queryClient}>
-      <ReusableLoader overlay={false} />
+      <ReusableLoader />
       <TooltipProvider>
         <Toaster />
         <Sonner />

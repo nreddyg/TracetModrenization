@@ -107,6 +107,18 @@
   .animate-slide-in-right {
     animation: slideInRight 0.4s ease-out;
   }
+
+  /* loader overlay css */
+.loader-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 9999 !important;
+}
   
   .animate-swim-lane {
     animation: swimLane 0.6s cubic-bezier(0.4, 0, 0.2, 1);
@@ -190,3 +202,4 @@
   background-color: hsl(var(--primary));
   color: hsl(var(--primary-foreground));
 }
+

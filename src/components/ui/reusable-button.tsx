@@ -169,7 +169,7 @@ export const ReusableButton = forwardRef<HTMLButtonElement, ReusableButtonProps>
 
     const baseClasses = cn(
       // Base styles
-      'inline-flex items-center justify-center font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none border',
+      'inline-flex items-center justify-center font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-auto border',
 
       // Size classes
       getSizeClasses(size, effectiveShape),
@@ -187,7 +187,7 @@ export const ReusableButton = forwardRef<HTMLButtonElement, ReusableButtonProps>
       loading && 'opacity-50 cursor-not-allowed',
 
       // Disabled state
-      isDisabled && 'opacity-50 cursor-not-allowed',
+      isDisabled && 'opacity-50 bg-gray-100 cursor-not-allowed',
 
       // Gap for icon and text
       (icon || loading) && children && 'gap-2',

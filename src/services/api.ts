@@ -40,7 +40,7 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       // alert('Unauthorized - Please log in again.');
       localStorage.clear();
-      window.location.href = '/';
+      window.location.href = '/login';
     }
     return Promise.reject(error);
   }

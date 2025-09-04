@@ -271,8 +271,18 @@ export const ReusableRichTextEditor = forwardRef<ReactQuill, ReusableRichTextEdi
           .ql-toolbar,
           .ql-editor {
             opacity: 0.5;
-            pointer-events: none;
+          
+              cursor: not-allowed;
+    // background-color: #f0f0f0;
           }
+    .ql-toolbar{
+       background-color: #f0f0f0; 
+       color:#f0f0f0; 
+       pointer-events: none;
+    }
+       .ql-toolbar.ql-snow {
+          background-color: #f0f0f0; 
+        }
         ` : ''}
       `;
       

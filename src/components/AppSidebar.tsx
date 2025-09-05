@@ -532,7 +532,10 @@ const AppSidebar: React.FC = () => {
                                   <SidebarMenuSubButton asChild isActive={isActive(grandChild.link)}>
                                     <Link to={grandChild.link} className="flex items-center space-x-2">
                                       <grandChild.icon className="h-3 w-3" />
-                                      <span>{grandChild.label}</span>
+                                      <span
+                                       className="truncate"
+                                    title={String(grandChild.label)}
+                                      >{grandChild.label}</span>
                                     </Link>
                                   </SidebarMenuSubButton>
                                 </SidebarMenuSubItem>
@@ -548,7 +551,10 @@ const AppSidebar: React.FC = () => {
                       <SidebarMenuSubButton asChild isActive={isActive(child.link)}>
                         <Link to={child.link} className="flex items-center space-x-2">
                           <child.icon className="h-3 w-3" />
-                          <span>{child.label}</span>
+                          <span
+                           className="truncate"
+                           title={String(child.label)}
+                          >{child.label}</span>
                         </Link>
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
@@ -564,7 +570,7 @@ const AppSidebar: React.FC = () => {
     return (
       <SidebarMenuItem key={item.label}>
         <SidebarMenuButton asChild isActive={isActive(item.link)} tooltip={collapsed ? item.label : undefined}>
-          <Link to={item.link} className="flex items-center space-x-3 hover:bg-blue-50">
+          <Link to={item.link} className="flex items-center space-x-1 hover:bg-blue-50">
             <item.icon className="h-4 w-4 shrink-0" />
             {!collapsed && (
               <TooltipProvider>
@@ -611,21 +617,21 @@ const AppSidebar: React.FC = () => {
           <SidebarGroupContent>
             {!collapsed && (
               <div className="relative group-data-[collapsible=icon]:hidden">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-black h-4 w-4" />
                 <Input
                   placeholder="Search modules..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 h-8"
+                  className="pl-10 h-8 text-black"
                 />
               </div>
             )}
           </SidebarGroupContent>
         </SidebarGroup>
         {!collapsed && (
-          <div className="text-xs text-gray-500 text-center border-t pt-2 group-data-[collapsible=icon]:hidden">
+          <div className="text-xs text-white text-center border-t pt-2 group-data-[collapsible=icon]:hidden">
             <div>&copy; {new Date().getFullYear()} Tracet Enterprise</div>
-            <div className="text-blue-600 font-medium">v2.0.1</div>
+            <div className="text-white font-medium">v2.0.1</div>
           </div>
         )}
       </SidebarFooter>

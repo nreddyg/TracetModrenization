@@ -1231,8 +1231,10 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
       const confirmDiscard = window.confirm('You have unsaved changes. Do you want to discard them?');
       if (!confirmDiscard) return;
     }
-   if((selectedTicketId!==ticket.ServiceRequestId.toString())){
+   if(!isLink &&(selectedTicketId!==ticket.ServiceRequestId.toString())){
     form.reset({...notifyValues})
+    }else if(isLink && (selectedTicketId!==ticket.ChildServiceRequestId.toString())){
+     form.reset({...notifyValues})
     }
     if(!isLink){
     setSelectedTicketId(ticket.ServiceRequestId.toString())
@@ -1247,6 +1249,7 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
 
     }else{
       
+      console.log("coming")
      setSelectedTicketId(ticket.ChildServiceRequestId.toString())
     if (isEditing) {
       handleEdit("cancel")

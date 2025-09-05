@@ -1100,16 +1100,18 @@ else{
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base font-semibold">Subscription List</CardTitle>
-              <ReusableInput
-                placeholder="Search subscriptions..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                prefixIcon={<Search className="h-3 w-3 text-gray-400" />}
-                allowClear={true}
-                onClear={() => setSearchTerm('')}
-                size="small"
-                className="w-50 pl-7"
-              />
+              <div>
+                <ReusableInput
+                  placeholder="Search subscriptions..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  prefixIcon={<Search className="h-3 w-3 text-gray-400" />}
+                  allowClear={true}
+                  onClear={() => setSearchTerm('')}
+                  size="small"
+                  className="w-50 pl-7"
+                />
+              </div>
             </div>
           </CardHeader>
           <CardContent className="pt-0">

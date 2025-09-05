@@ -794,12 +794,12 @@ export const TracetTreeSelect: React.FC<TracetTreeSelectProps> = ({
             {/* TreeSelect Input */}
             <div className="relative">
                 <div
-                    className={`
-                        flex items-center rounded-md w-full p-0 min-w-0 h-10 border transition-colors relative overflow-hidden cursor-pointer
-                        ${disabled ? 'bg-gray-100 cursor-not-allowed' : 'bg-white hover:border-blue-400'}
-                        ${isOpen ? 'border-blue-500 ring-1 ring-blue-500' : ''}
-                        ${multiSelectConfig.className || className || ''}
-                    `}
+                   className={`
+            flex items-center rounded-md w-full p-0 min-w-0 h-10 border transition-colors relative overflow-hidden cursor-pointer
+            ${disabled ? 'bg-gray-100 cursor-not-allowed' : 'bg-[hsl(238_73%_97%)] hover:border-gray-300'}
+            ${isOpen ? 'border-blue-500 ring-1 ring-blue-500' : ''}
+            ${multiSelectConfig.className || className || ''}
+          `}
                     style={{ 
                         backgroundColor: disabled ? '#f3f4f6' : 'hsl(240deg 73.33% 97.06%)', 
                         borderColor: 'hsl(214.29deg 31.82% 91.37%)' 

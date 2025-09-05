@@ -690,8 +690,8 @@ const Configuration = () => {
                   </div>
                 </div>
                 <div className="mt-6">
-                  <Button className="bg-orange-500 hover:bg-orange-600 text-sm px-4 py-2" onClick={handleSubmit((data)=>{handleSave(data,"configuration")})}>
-                    <Save className="h-3 w-3 mr-1" />
+                  <Button className="bg-blue-500 hover:bg-blue-600 text-sm px-4 py-2" onClick={handleSubmit((data)=>{handleSave(data,"configuration")})}>
+                    {/* <Save className="h-3 w-3 mr-1" /> */}
                     Save
                   </Button>
                 </div>

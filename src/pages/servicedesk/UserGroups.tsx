@@ -470,7 +470,7 @@ const UserGroups = () => {
                     <ReusableButton
                       htmlType="submit"
                       variant="primary"
-                      icon={<Save className="h-3 w-3" />}
+                      // icon={<Save className="h-3 w-3" />}
                       iconPosition="left"
                       size="middle"
                     >
@@ -480,7 +480,7 @@ const UserGroups = () => {
                       htmlType="button"
                       variant="default"
                       onClick={handleCancel}
-                      icon={<X className="h-3 w-3" />}
+                      // icon={<X className="h-3 w-3" />}
                       iconPosition="left"
                       size="middle"
                     >

@@ -1174,7 +1174,7 @@ let payload=
                   <Button
                     onClick={handleViewReport}
                     disabled={isGeneratingReport}
-                    className="bg-orange-600 hover:bg-orange-700"
+                    className="bg-blue-600 hover:bg-blue-700"
                   >
                     {isGeneratingReport ? (
                       <>

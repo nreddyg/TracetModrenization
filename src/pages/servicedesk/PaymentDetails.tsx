@@ -553,9 +553,9 @@ const PaymentDetails = () => {
                   <ReusableButton
                     htmlType="submit"
                     variant="default"
-                    className="bg-orange-500 border-orange-500 text-white hover:bg-orange-600 hover:border-orange-600"
-                    icon={<Save className="h-4 w-4" />}
-                    iconPosition="left"
+                    className="bg-blue-500 border-blue-500 text-white hover:bg-blue-600 hover:border-blue-600"
+                    // icon={<Save className="h-4 w-4" />}
+                    // iconPosition="left"
                   >
                     {subData?'Update':'Save'}
                   </ReusableButton>
@@ -563,9 +563,9 @@ const PaymentDetails = () => {
                     htmlType="button"
                     variant="default"
                     onClick={handleClear}
-                    className="border-orange-500 text-orange-500 hover:bg-orange-50"
-                    icon={<RotateCcw className="h-4 w-4" />}
-                    iconPosition="left"
+                    // className="border-orange-500 text-orange-500 hover:bg-orange-50"
+                    // icon={<RotateCcw className="h-4 w-4" />}
+                    // iconPosition="left"
                   >
                     Cancel
                   </ReusableButton>

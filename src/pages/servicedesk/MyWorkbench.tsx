@@ -308,7 +308,7 @@ const MyWorkbench = () => {
                       </div>))
                   }
                   <div className="flex items-center mt-6  ">
-                    <ReusableButton size={"middle"} htmlType='submit' className="bg-primary h-[2.38rem] hover:bg-blue-700  text-white ">Search</ReusableButton>
+                    <ReusableButton size={"middle"} htmlType='submit' variant="primary" className='h-9 mt-1'>Search</ReusableButton>
                   </div>
                 </div>
               </form>

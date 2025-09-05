@@ -271,8 +271,8 @@ const AllRequests = () => {
                         allowClear={true}
                         format='DD/MM/YYYY'
                       />
-                  <div className="flex items-end mt-6  ">
-                  <ReusableButton  size={"middle"} onClick={handleSearch} className="bg-primary h-[2.38rem]  text-white ">Search</ReusableButton>
+                  <div className="flex items-end mt-4  ">
+                  <ReusableButton  size={"middle"} onClick={handleSearch} variant="primary" className='h-10'>Search</ReusableButton>
                   </div>
               </div>     
             </CardContent>

@@ -645,7 +645,7 @@ const Configuration = () => {
       <header className="bg-white border-b px-4 py-3 shadow-sm">
         <div className="flex items-center gap-3">
           <SidebarTrigger />
-          <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-xs sm:text-sm px-2 sm:px-3 py-1.5">
+          <Button size="sm" className="bg-primary h-[2.38rem] hover:bg-blue-700  text-white">
             <span className="hidden sm:inline">New Service Request</span>
             <span className="sm:hidden">New Request</span>
           </Button>

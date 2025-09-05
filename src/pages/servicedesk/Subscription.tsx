@@ -1034,7 +1034,8 @@ else{
           <SidebarTrigger />
           <ReusableButton
             size="small"
-            variant="primary"
+            // variant="primary"
+            className='bg-primary h-[2.38rem] hover:bg-blue-700  text-white'
               onClick={()=>{navigate('/service-desk/create-ticket')}}
           >
             New Service Request
@@ -1098,7 +1099,7 @@ else{
         {/* User Group List with ReusableTable */}
         <Card className="border-0 shadow-sm">
           <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-evenly">
               <CardTitle className="text-base font-semibold">Subscription List</CardTitle>
               <ReusableInput
                 placeholder="Search subscriptions..."

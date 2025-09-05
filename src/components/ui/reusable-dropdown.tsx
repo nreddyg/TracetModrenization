@@ -367,7 +367,7 @@ export const ReusableDropdown: React.FC<SelectProps> = ({
   const getStatusClasses = () => {
     if (status === 'error') return 'border-red-500 focus-within:border-red-500 ring-red-200';
     if (status === 'warning') return 'border-yellow-500 focus-within:border-yellow-500 ring-yellow-200';
-    return 'border-gray-300 focus-within:border-blue-500 ring-blue-200';
+    return '';
   };
 
   const getInputRightPadding = () => {
@@ -588,7 +588,7 @@ export const ReusableDropdown: React.FC<SelectProps> = ({
         <div
           className={cn(
             "flex items-center rounded-md flex items-center w-full p-0  min-w-0 h-10 border transition-colors relative overflow-hidden",
-            "",
+            "focus-within:outline-none focus-within:ring-2 ",
             disabled ? "bg-gray-100 cursor-not-allowed" : "bg-white hover:border-blue-400",
             getStatusClasses(),
             className
@@ -637,7 +637,7 @@ export const ReusableDropdown: React.FC<SelectProps> = ({
                   disabled={disabled}
                   readOnly={!showSearch}
                   className={cn(
-                    "w-full bg-transparent outline-none text-sm px-3 py-2 truncate",
+                    "w-full bg-transparent placeholder-gray-400  outline-none text-sm px-3 py-2 truncate",
                     disabled && "cursor-not-allowed",
                     !showSearch && "cursor-pointer"
                   )}

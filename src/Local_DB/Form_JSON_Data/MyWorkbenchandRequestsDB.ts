@@ -38,7 +38,8 @@ export const workbench_Filter_DB: BaseField[] = [
         fieldType: "rangepicker",
         name:"CreatedDate",    
         allowClear: true,
-        disabled: false
+        disabled: false,
+         className:"w-full h-9 rounded-md"
     }
 ]
 
@@ -75,6 +76,7 @@ export const MyRequest_Filter_DB: BaseField[] = [
         fieldType: "rangepicker",
         name:"CreatedDate",    
         allowClear: true,
-        disabled: false
+        disabled: false,
+        className:"w-full h-9 rounded-md"
     }
 ]

@@ -9,7 +9,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
-import { CalendarIcon, Filter, Eye, Settings2, Download, RefreshCw, Search, Check, ChevronDown } from 'lucide-react';
+import { CalendarIcon, Filter, Eye, Settings2, Download, RefreshCw, Search, Check, ChevronDown, Save } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { SidebarTrigger } from '@/components/ui/sidebar';
@@ -1259,10 +1259,14 @@ let payload=
                   <CardTitle className="text-lg">Report Results - {activeTab}</CardTitle>
                   <div>
                     <ReusableButton
-                     onClick={handlePostColumns}
-              // icon={<Save className="h-4 w-4" />}
-              className="bg-primary hover:bg-primary/90"
-                    />
+                      onClick={handlePostColumns}
+                      icon={<Save
+                         className="h-4 w-4" />}
+                      className="bg-primary text-white hover:bg-primary/90 hover:text-white"
+                        variant="default"
+                    >
+                      Apply As Default Grid Columns
+                    </ReusableButton>
                   </div>
                 </CardHeader>
                 <CardContent>

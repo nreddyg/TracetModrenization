@@ -1199,7 +1199,7 @@ let payload=
             >
               <div className="space-y-2 h-full overflow-y-hidden">
                 {/* Primary Filters */}
-                <div>
+                <div className='px-1'>
                   <h4 className="text-sm font-semibold text-gray-900 mb-3">Primary Filters</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {activeTab === "Service Request SLA Met/SLA Violated"
@@ -1213,11 +1213,11 @@ let payload=
                 {activeTab !== "Service Request Detail History" ?
                   <Accordion type="single" collapsible className="w-full">
                     <AccordionItem value="additional-filters">
-                      <AccordionTrigger className="text-sm font-semibold text-gray-900">
+                      <AccordionTrigger className="text-sm font-semibold text-gray-900 px-1">
                         Additional Filters
                       </AccordionTrigger>
                       <AccordionContent>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-1">
                           {activeTab === "Service Request SLA Met/SLA Violated"
                             ? getFieldsByNames(["servicereqno", "LevelFiveCompanyinSLA", "Customersla", "slarequestedby", "statusinSLA", "severityinSLA", "priorityinSLA", "assetcode", "levelfivedepartment", 'maincategoryinSLA', 'subcategoryinSLA']).map(renderField)
                             : getFieldsByNames(['RequestedBy', 'LevelFiveCompany', 'Customer', 'AssignTo', 'Severity', 'Priority', 'AssetCode', 'LevelFiveDepartment', 'MainCategory', 'SubCategory']).map(renderField)
@@ -1230,7 +1230,7 @@ let payload=
                   : ""
                 }
                 {activeTab !== "Service Request Detail History" ?
-                  <div>
+                  <div className='px-1'>
                     {/* <h4 className="text-sm font-semibold text-gray-900 mb-3">Date Range</h4> */}
                     {getFieldsByNames(['dateRange']).map(renderField)}
                   </div>

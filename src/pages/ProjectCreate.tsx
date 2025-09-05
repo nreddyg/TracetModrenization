@@ -82,7 +82,6 @@ const ProjectCreate = () => {
     };
     
     dispatch(addProject(projectData));
-    console.log('Creating project:', data);
     navigate('/projects');
   };
 

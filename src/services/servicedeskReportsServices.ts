@@ -126,7 +126,6 @@ export const getMainCategoryLookUp=async(compId:number):Promise<APIResponse<any>
  
 //Get SUB Category LookUps
 export const getSubCategoryLookUp=async(compId:number, id:number):Promise<APIResponse<any>>=>{
-     console.log("id",id);
     try{
         const response=await api.get(URL_GET_SUB_CATEGORY_DETAILS,{params:{CompId:compId, MainCatId:id}})
         return {success:true,data:response.data}

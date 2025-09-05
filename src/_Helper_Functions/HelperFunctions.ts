@@ -74,7 +74,6 @@ export const byteArrayToFile = (
 
   //get getRequestType based on Id
   export const getRequestTypeById = (id) => {
-    console.log("got",id)
     switch (id) {
       case "100":
            return "SLAViolatedRequests";

@@ -109,12 +109,10 @@ const TicketCreate = () => {
     };
     
     dispatch(addTicket(ticketData));
-    console.log('Creating ticket:', data);
     navigate('/tickets');
   };
 
   const saveDraft = (data: TicketFormData) => {
-    console.log('Saving draft:', data);
   };
 
   return (

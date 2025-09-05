@@ -780,7 +780,6 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
   const fileArray = Array.isArray(filelist) ? filelist : [];
   
   if (fileArray.length === 0) {
-    console.warn('No files to upload');
     return;
   }
 
@@ -1249,7 +1248,6 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
 
     }else{
       
-      console.log("coming")
      setSelectedTicketId(ticket.ChildServiceRequestId.toString())
     if (isEditing) {
       handleEdit("cancel")

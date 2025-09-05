@@ -1717,7 +1717,6 @@ export function ReusableTable<T = any>({
         }))
         .sort((a, b) => a.label.localeCompare(b.label));
     }, [column.id, table]);
-    console.log(options, "raw")
 
 
 

@@ -349,13 +349,11 @@ export const ReusableUpload = forwardRef<HTMLInputElement, UploadProps>(
     
     // Validate file type
     if (!validateFileType(file, accept)) {
-      console.warn(`File ${file.name} has invalid type`);
       continue;
     }
     
     // Check file size
     if (file.size > maxSize * 1024 * 1024) {
-      console.warn(`File ${file.name} is too large`);
       continue;
     }
 
@@ -365,7 +363,6 @@ export const ReusableUpload = forwardRef<HTMLInputElement, UploadProps>(
         const shouldUpload = await beforeUpload(file, fileArray);
         if (!shouldUpload) continue;
       } catch (error) {
-        console.warn(`beforeUpload failed for ${file.name}`);
         continue;
       }
     }

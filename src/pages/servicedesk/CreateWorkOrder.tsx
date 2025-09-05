@@ -32,7 +32,6 @@ const CreateWorkOrder = () => {
   });
 
   const onSubmit = (data: any) => {
-    console.log('Work Order Data:', data);
   };
 
   const handleClear = () => {

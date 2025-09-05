@@ -58,7 +58,6 @@ export const updateUserGroup=async(compId:number,BranchName:string,usergroupid:n
 //delete UserGroup
 
 export const deleteUserGroup=async(compId:number,usergroupid:number):Promise<APIResponse<any>>=>{
-    console.log(compId,usergroupid,"61services")
     try{
         const response=await api.post(URL_DELETE_USER_GROUP,"",{params:{UserGroupId:usergroupid,CompId:compId}})
         return {success:true,data:response.data}

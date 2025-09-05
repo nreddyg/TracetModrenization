@@ -161,7 +161,6 @@ const ServiceDeskReports = () => {
     };
   }
   useEffect(()=>{
-    console.log(columnVisibility,"Swathi")
   },[columnVisibility])
   useEffect(() => {
     fetchAdditionalFieldConfigurationDetails(111)
@@ -205,7 +204,6 @@ const ServiceDeskReports = () => {
 
   const selectedMainCategory = watch("MainCategory");
   const selectedMainCategoryforSLA = watch("maincategoryinSLA");
-  console.log("selectedMainCategory", selectedMainCategory, "SLA", selectedMainCategoryforSLA);
    useEffect(() => {
     if (selectedMainCategory) {
       getSubCategoryDetails(111, selectedMainCategory)
@@ -347,7 +345,6 @@ const ServiceDeskReports = () => {
     await getServiceRequestDetailsColumns(compId).then(res => {
       if (res.success && res.data.status === undefined) {
         const tempCols = buildColumnsFromApi(res.data)
-        // console.log(tempCols,"temp")
         setColumnVisibility(tempCols.initialVisibility)
         setCols(tempCols.columns)
 
@@ -361,7 +358,6 @@ const ServiceDeskReports = () => {
     await getServiceRequestSLAMetViolatedColumns(compId).then(res => {
       if (res.success && res.data.status === undefined) {
         const tempCols = buildColumnsFromApi(res.data)
-        // console.log(tempCols,"temp")
         setColumnVisibility(tempCols.initialVisibility)
         setCols(tempCols.columns)
 
@@ -464,7 +460,6 @@ const ServiceDeskReports = () => {
       SubCategoryId: watch("subcategoryinSLA"),
       Assetcode: watch("assetcode")
     }
-    console.log(obj2, "Nag")
 
     // Simulate report generation
     await new Promise(resolve => setTimeout(resolve, 2000));
@@ -499,7 +494,6 @@ const ServiceDeskReports = () => {
       window.open(`/service-desk/srdetailshistoryview`, "ReportWindow",
         "width=900,height=800,left=200,top=100,resizable=yes")
     }
-      console.log( watch("ServiceRequestDetailHistory") ,"Nag")
      
     }
   };
@@ -509,7 +503,6 @@ const ServiceDeskReports = () => {
   };
 
   const handleExportReport = () => {
-    console.log('Exporting report...');
   };
 
   const filteredReportTabs = reportTabs.filter(tab =>
@@ -526,9 +519,7 @@ const ServiceDeskReports = () => {
     showSearch: true, // Enable inline search
 
     onSelect: (selectedKeys, info, treeData) => {
-      console.log("✅ Selected Keys (IDs):", selectedKeys);
-      console.log("ℹ️ Info Object:", info);
-      console.log("🌳 Full Tree Data:", treeData);
+     
 
       // If you want selected node's title(s)
       const getSelectedTitles = (nodes, selectedValues) => {
@@ -545,7 +536,6 @@ const ServiceDeskReports = () => {
       };
 
       const selectedTitles = getSelectedTitles(treeData, selectedKeys);
-      console.log("📂 Selected Titles:", selectedTitles);
     }
   };
   //   TREEFUNWITHPARENT----------
@@ -591,12 +581,10 @@ const ServiceDeskReports = () => {
       const res = await getDepartment(compId);
       if (res.success && res.data) {
         const treeData = treefunWithParent(res.data, "#", '', '', 'Code');
-        console.log("treeDatadepatment", treeData);
         SettingLookupsData(treeData, 'department', 'LevelFiveDepartment');
         SettingLookupsData(treeData, 'department', 'levelfivedepartmentINsla');
       }
     } catch (err) {
-      console.error('Error fetching department details:', err);
     }
   }
 
@@ -604,9 +592,7 @@ const ServiceDeskReports = () => {
     try {
       const res = await getCompanyHierarchy(compId);
       if (res.success && res.data) {
-        console.log("data", res.data);
         const treeData = treefunWithParent(res.data, "#", '', '', 'Code');
-        console.log("treeData", treeData);
         SettingLookupsData(treeData, 'company', 'LevelFiveCompanyinSLA');
       }
     } catch (err) {
@@ -661,13 +647,11 @@ const ServiceDeskReports = () => {
       dispatch(setLoading(false));
     }
   }
-  console.log("fields", fields);
 
 
 
   //store lookups data in json
   const setLookupsDataInJson = (lookupsData: allResponsesType): void => {
-    console.log("date", lookupsData);
     const arr = Object.keys(lookupsData)
     const groupNames: string[] = []
     const opts: { [key: string]: any } = {}
@@ -703,7 +687,6 @@ const ServiceDeskReports = () => {
     })
     let jsonCopy = activeTab === "Service Request SLA Met/SLA Violated" ? slaDB : activeTab === "Service Request Detail History" ? serviceHistoryDetail : SERVICE_DESK_DB
     const data = structuredClone(jsonCopy);
-    console.log('opts', opts)
     data.forEach((obj) => {
       if (arr.includes(obj.name)) {
         if (groupNames.includes(obj.name)) {
@@ -715,7 +698,6 @@ const ServiceDeskReports = () => {
         }
       }
     });
-    console.log('dattatatatattata', data)
     setFields(data);
   }
 
@@ -823,7 +805,6 @@ const ServiceDeskReports = () => {
   };
   const renderField = (field: BaseField) => {
     const { name, label, fieldType, isRequired, show = true } = field;
-    console.log("sachin")
     if (!name || !show) return null;
     const validationRules = {
       required: isRequired ? `${label} is Required` : false,
@@ -1085,13 +1066,11 @@ let payload=
 
     
     if(activeTab==="Service Request Details"){
-      console.log("pen1","swathi")
     postServiceRequestDetailsColumns(111,payForSRDetails)
         // fetchServiceRequestDetailsColumns(111)
 
     }
     else if (activeTab==="Service Request SLA Met/SLA Violated"){
-      console.log("pen","swathi")
    
     postServiceRequestMetViolatedColumns(111,payForSRSLAMetViolated)
     }

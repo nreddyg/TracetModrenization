@@ -20,7 +20,6 @@ const ManageWorkOrder = () => {
   const [currentPage, setCurrentPage] = useState(1);
 
   const handleSearch = () => {
-    console.log('Search filters:', filters);
   };
 
   const handleFilterChange = (field: string, value: string) => {

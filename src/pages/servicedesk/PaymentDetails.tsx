@@ -25,9 +25,7 @@ const PaymentDetails = () => {
   const dispatch = useDispatch();
   const location = useLocation();
   const subData = location.state.subscriptionData ? location.state?.subscriptionData : null
-  console.log(subData,"subData")
   const customerName = location.state.parentData?.CustomerName;
-  console.log(customerName,"customerName")
   const productname = location.state.parentData?.ProductName;
   const message=useMessage();
   const navigate=useNavigate();
@@ -63,7 +61,6 @@ const PaymentDetails = () => {
     
     // Validate the date
     if (isNaN(inputDate.getTime())) {
-      console.error('Invalid date provided:', date);
       return '';
     }
     

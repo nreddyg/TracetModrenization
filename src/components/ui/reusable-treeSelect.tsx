@@ -795,7 +795,7 @@ export const TracetTreeSelect: React.FC<TracetTreeSelectProps> = ({
             <div className="relative">
                 <div
                    className={`
-            flex items-center bg-transparent outline-none w-full min-h-[41px] px-3 py-2 my-2 text-sm border border-gray-2ll0 rounded-md cursor-pointer
+            flex items-center rounded-md w-full p-0 min-w-0 h-10 border transition-colors relative overflow-hidden cursor-pointer
             ${disabled ? 'bg-gray-100 cursor-not-allowed' : 'bg-[hsl(238_73%_97%)] hover:border-gray-300'}
             ${isOpen ? 'border-blue-500 ring-1 ring-blue-500' : ''}
             ${multiSelectConfig.className || className || ''}

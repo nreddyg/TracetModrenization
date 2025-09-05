@@ -153,14 +153,14 @@ const Login = () => {
                 {/* Customer Information */}
                 <div>
                   {getFieldsByNames(['CompanyCode', 'Username', 'password']).map((field, ind) => (
-                    <div key={field.name}>
+                    <div key={field.name} className='mb-2'>
                       {renderField(field,icons[ind])}
                     </div>
                   ))}
                 </div>
                 <ReusableButton
                   htmlType="submit"
-                  className="w-full"
+                  className="w-full mb-2"
                 >
                   Login
                 </ReusableButton>

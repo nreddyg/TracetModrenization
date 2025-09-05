@@ -6,14 +6,19 @@ import { Button } from '@/components/ui/button';
 import { ReusableDropdown } from '@/components/ui/reusable-dropdown';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Controller, useForm } from 'react-hook-form';
-import {Save,Trash2,Edit, Search} from 'lucide-react';
+import {Trash2,Edit} from 'lucide-react';
 import { ReusableInput } from '@/components/ui/reusable-input';
 import { BaseField, GenericObject } from '@/Local_DB/types/types';
 import { CONFIGURATION_DB } from '@/Local_DB/Form_JSON_Data/ConfigurationDB';
 import { ReusableMultiSelect } from '@/components/ui/reusable-multi-select';
 import ReusableSingleCheckbox from '@/components/ui/reusable-single-checkbox';
 import { ReusableTextarea } from '@/components/ui/reusable-textarea';
-import { deleteSRType, GetNotifyTypeLookup, GetServiceRequestAssignToLookups, GetServiceRequestStatus, getServiceRequestTypes, getSRConfigList, getSRTypesById, getStatusLookups, getVendorDetails, postDeleteServiceRequestStatus, postServiceRequestConfiguration, postServiceRequestStatus, postServiceRequestType, postUpdateServiceRequestStatus, postUpdateServiceRequesttype, postUpdateStatusSequence } from '@/services/configurationServices';
+import { deleteSRType, GetNotifyTypeLookup, GetServiceRequestAssignToLookups, GetServiceRequestStatus, 
+  getServiceRequestTypes, getSRConfigList, getSRTypesById, getStatusLookups, getVendorDetails, 
+  postDeleteServiceRequestStatus, postServiceRequestConfiguration, postServiceRequestStatus, 
+  postServiceRequestType, postUpdateServiceRequestStatus, postUpdateServiceRequesttype, 
+  postUpdateStatusSequence } 
+  from '@/services/configurationServices';
 import { useDispatch } from 'react-redux';
 import { setLoading } from '@/store/slices/projectsSlice';
 import { useMessage } from '@/components/ui/reusable-message';
@@ -690,10 +695,16 @@ const Configuration = () => {
                   </div>
                 </div>
                 <div className="mt-6">
-                  <Button className="bg-blue-500 hover:bg-blue-600 text-sm px-4 py-2" onClick={handleSubmit((data)=>{handleSave(data,"configuration")})}>
-                    {/* <Save className="h-3 w-3 mr-1" /> */}
+                  <ReusableButton
+                    htmlType="button"
+                    variant="default"
+                    onClick={handleSubmit((data) => { handleSave(data, "configuration") })}
+                    iconPosition="left"
+                    size="middle"
+                    className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+                  >
                     Save
-                  </Button>
+                  </ReusableButton>
                 </div>
               </CardContent>
             </Card>
@@ -722,8 +733,25 @@ const Configuration = () => {
                   </div>
                 </div>    
                 <div className="flex gap-2 mb-6">
-                  <Button className="bg-orange-500 hover:bg-orange-600 text-sm px-4 py-2" onClick={handleSubmit((data)=>{handleSave(data,"ServiceRequestType")})}>{isEditMode && currentTab==='service-request-type'?'Update':'Save'}</Button>
-                  <Button variant="outline" className="text-sm px-4 py-2" onClick={()=>handleReset('')}>Cancel</Button>
+                  <ReusableButton
+                      htmlType="button"
+                      variant="default"
+                      onClick={handleSubmit((data)=>{handleSave(data,"ServiceRequestType")})}
+                      iconPosition="left"
+                      size="middle"
+                      className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+                      >
+                      {isEditMode && currentTab==='service-request-type'?'Update':'Save'}
+                    </ReusableButton>
+                   <ReusableButton
+                      htmlType="button"
+                      variant="default"
+                      onClick={()=>handleReset('')}
+                      iconPosition="left"
+                      size="middle"
+                      >
+                      Cancel
+                    </ReusableButton>
                 </div>
               </CardContent>
             </Card>
@@ -759,8 +787,25 @@ const Configuration = () => {
                       })} 
                 </div>
                 <div className="flex gap-2 mb-8">
-                  <Button className="bg-orange-500 hover:bg-orange-600 text-sm px-4 py-2" onClick={handleSubmit((data)=>{handleSave(data,"AddNewStatus")})}>{currentTab==='service-request-status' && isEditStatusMode ?'Update':'Save'}</Button>
-                  <Button variant="outline" className="text-sm px-4 py-2" onClick={()=>handleReset('AddNewStatus')}>Clear</Button>
+                  <ReusableButton
+                      htmlType="button"
+                      variant="default"
+                      onClick={handleSubmit((data)=>{handleSave(data,"AddNewStatus")})}
+                      iconPosition="left"
+                      size="middle"
+                      className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+                      >
+                      {currentTab==='service-request-status' && isEditStatusMode ?'Update':'Save'}
+                    </ReusableButton>
+                   <ReusableButton
+                      htmlType="button"
+                      variant="default"
+                      onClick={()=>handleReset('AddNewStatus')}
+                      iconPosition="left"
+                      size="middle"
+                      >
+                      Clear
+                    </ReusableButton>
                 </div>
                 <div>
                   <div className="border border-gray-200 rounded-lg overflow-hidden p-3">
@@ -780,10 +825,16 @@ const Configuration = () => {
                     />
                   </div>
                   <div className="mt-4 flex justify-end">
-                    <Button className="bg-orange-500 hover:bg-orange-600 text-sm px-4 py-2"
-                    onClick={handleUpdateStatusSequence}>
+                    <ReusableButton
+                      htmlType="button"
+                      variant="default"
+                      onClick={handleUpdateStatusSequence}
+                      iconPosition="left"
+                      size="middle"
+                      className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+                    >
                       Update Index Sequence
-                    </Button>
+                    </ReusableButton>
                   </div>
                 </div>
               </CardContent>

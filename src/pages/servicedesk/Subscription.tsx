@@ -1099,7 +1099,7 @@ else{
         {/* User Group List with ReusableTable */}
         <Card className="border-0 shadow-sm">
           <CardHeader className="pb-3">
-            <div className="flex items-center justify-evenly">
+            <div className="flex items-center justify-between">
               <CardTitle className="text-base font-semibold">Subscription List</CardTitle>
               <div>
                 <ReusableInput

@@ -66,10 +66,10 @@ export const SERVICE_DESK_DB: BaseField[] = [
         jsontype: 'servicerequestDetails'
     },
     {
-        label: "Company",
+        label: "Branch",
         fieldType: "multiselect",
         name: "LevelFiveCompany",
-        placeholder: "Select Five Level Company",
+        placeholder: "Select Branch",
         isRequired: false,
         visible: false,
         options: [],
@@ -95,7 +95,7 @@ export const SERVICE_DESK_DB: BaseField[] = [
         fieldType: 'treeselect',
         name: 'LevelFiveDepartment',
         label: 'Level Five Department',
-        placeholder: 'Type to search files...',
+        placeholder: 'Select Department',
         treeData: [],
         isRequired: false,
         allowClear: true,
@@ -149,7 +149,7 @@ export const SERVICE_DESK_DB: BaseField[] = [
         name: 'AssetCode',
         label: 'Asset Code',
         fieldType: 'text',
-        placeholder: 'Assigned to',
+        placeholder: 'Asset Code',
         isRequired: false,
         jsontype: 'servicerequestDetails'
     },
@@ -212,7 +212,7 @@ export const SERVICE_DESK_DB: BaseField[] = [
         label: "Assigned To",
         fieldType: "multiselect",
         name: "assignedto",
-        placeholder: "Select SLA Status",
+        placeholder: "Select Assignee",
         isRequired: false,
         visible: false,
         options: [],
@@ -253,8 +253,8 @@ export const SERVICE_DESK_DB: BaseField[] = [
     {
         fieldType: 'treeselect',
         name: 'LevelFiveCompanyinSLA',
-        label: 'Level Five Company',
-        placeholder: 'Select Level Five Company',
+        label: 'Branch',
+        placeholder: 'Select Branch',
         treeData: [],
         isRequired: false,
         allowClear: true,
@@ -266,8 +266,8 @@ export const SERVICE_DESK_DB: BaseField[] = [
     {
         fieldType: 'treeselect',
         name: 'levelfivedepartmentINsla',
-        label: 'Level Five Department',
-        placeholder: 'Type to search files...',
+        label: 'Department',
+        placeholder: 'Select Department',
         treeData: [],
         isRequired: false,
         allowClear: true,
@@ -360,7 +360,7 @@ export const SERVICE_DESK_DB: BaseField[] = [
         name: 'assetcode',
         label: 'Asset Code',
         fieldType: 'text',
-        placeholder: 'Assigned to',
+        placeholder: 'Asset Code',
         isRequired: false,
         jsontype: "slaViolated"
     },
@@ -402,215 +402,4 @@ export const SERVICE_DESK_DB: BaseField[] = [
         jsontype: 'serviceReqHistoryDetail'
     },
 ];
- 
- 
-// export const SERVICE_DESK_SLA_VIOLATED_MET_DB: BaseField[] = [
-//     {
-//         label: "SLA Status",
-//         fieldType: "multiselect",
-//         name: "slastatus",
-//         placeholder: "Select SLA Status",
-//         isRequired: true,
-//         visible: false,
-//         options: [],
-//         defaultValue: [],
-//         selectAll: true,
-//         show: true,
-//         jsontype:"slaViolated"
-//     },
-//     {
-//         label: "Assigned To",
-//         fieldType: "multiselect",
-//         name: "assignedto",
-//         placeholder: "Select SLA Status",
-//         isRequired: true,
-//         visible: false,
-//         options: [],
-//         defaultValue: [],
-//         selectAll: true,
-//         show: true,
-//         jsontype:"slaViolated"
- 
-//     },
-//     {
-//         label: "Select Service Request Type",
-//         fieldType: "multiselect",
-//         name: "servicereqType",
-//         placeholder: "Select Service Request Type",
-//         isRequired: true,
-//         visible: false,
-//         options: [],
-//         defaultValue: [],
-//         selectAll: true,
-//         show: true,
-//         jsontype:"slaViolated"
- 
-//     },
-//     {
-//         label: "Service Request No",
-//         fieldType: "multiselect",
-//         name: "servicereqno",
-//         placeholder: "Select Service Request",
-//         isRequired: true,
-//         visible: false,
-//         options: [],
-//         defaultValue: [],
-//         selectAll: true,
-//         show: true,
-//         jsontype:"slaViolated"
- 
-//     },
-//     {
-//         fieldType: 'treeselect',
-//         name: 'LevelFiveCompany',
-//         label: 'Level Five Company',
-//         placeholder: 'Select Level Five Company',
-//         treeData: [],
-//         isRequired: true,
-//         allowClear: true,
-//         disabled: false,
-//         errormsg: false,
-//         jsontype:"slaViolated"
- 
-//     },
-//     {
-//         label: "Customer",
-//         fieldType: "multiselect",
-//         name: "Customer",
-//         placeholder: "Select Customer",
-//         isRequired: true,
-//         visible: false,
-//         options: [],
-//         defaultValue: [],
-//         selectAll: true,
-//         show: true,
-//         jsontype:"slaViolated"
- 
-//     },
-//     {
-//         label: "Date Range",
-//         fieldType: "rangepicker",
-//         name: "dateRange",
-//         rangeplaceholder: ['Start Date', 'End Date'],
-//         isRequired: true,
-//         visible: true,
-//         allowClear: true,
-//         format: "DD/MM/YYYY",
-//         defaultValue: null,
-//         disabled: false,
-//         tooltip: "Pick a start and end date",
-//         show: true,
-//         jsontype:"slaViolated"
-//     },
-//     {
-//         label: "Requested By",
-//         fieldType: "multiselect",
-//         name: "slarequestedby",
-//         placeholder: "Select Requested Status",
-//         isRequired: true,
-//         visible: false,
-//         options: [],
-//         defaultValue: [],
-//         selectAll: true,
-//         show: true,
-//         jsontype:"slaViolated"
-//     },
-//     {
-//         label: "Select Status",
-//         fieldType: "multiselect",
-//         name: "status",
-//         placeholder: "Select Status",
-//         isRequired: true,
-//         visible: false,
-//         options: [],
-//         defaultValue: [],
-//         selectAll: true,
-//         show: true,
-//         jsontype:"slaViolated"
-//     },
-//     {
-//         label: "Severity",
-//         fieldType: "multiselect",
-//         name: "severity",
-//         placeholder: "Select Severity",
-//         isRequired: true,
-//         visible: false,
-//         options: [],
-//         defaultValue: [],
-//         selectAll: true,
-//         show: true,
-//         jsontype:"slaViolated"
-//     },
-//     {
-//         label: "Priority",
-//         fieldType: "multiselect",
-//         name: "priority",
-//         placeholder: "Select Priority",
-//         isRequired: true,
-//         visible: false,
-//         options: [],
-//         defaultValue: [],
-//         selectAll: true,
-//         show: true,
-//         jsontype:"slaViolated"
-//     },
-//     {
-//         name: 'assetcode',
-//         label: 'Asset Code',
-//         fieldType: 'text',
-//         placeholder: 'Assigned to',
-//         isRequired: false,
-//         jsontype:"slaViolated"
-//     },
-//     {
-//         label: "Main Category",
-//         fieldType: "multiselect",
-//         name: "maincategory",
-//         placeholder: "Select Main Category",
-//         isRequired: true,
-//         visible: false,
-//         options: [],
-//         defaultValue: [],
-//         selectAll: true,
-//         show: true,
-//         jsontype:"slaViolated"
-//     },
-//     {
-//         label: "Sub Category",
-//         fieldType: "multiselect",
-//         name: "subcategory",
-//         placeholder: "Select Sub Category",
-//         isRequired: true,
-//         visible: false,
-//         options: [],
-//         defaultValue: [],
-//         selectAll: true,
-//         show: true,
-//         jsontype:"slaViolated"
-//     },
-//     {
-//         fieldType: 'treeselect',
-//         name: 'levelfivedepartment',
-//         label: 'Level Five Department',
-//         placeholder: 'Type to search files...',
-//         treeData: [],
-//         isRequired: true,
-//         allowClear: true,
-//         disabled: false,
-//         errormsg: false,
-//         jsontype:"slaViolated"
-//     },
-// ]
- 
-// export const SERVICE_REQ_DETAIL_HISTORY_DB: BaseField[] = [
-//     {
-//         label: "Service Request Detail History",
-//         fieldType: "dropdown",
-//         name: "ServiceRequestDetailHistory",
-//         placeholder: "Select Service Request",
-//         isRequired: true,
-//         options: [],
-//         allowClear: true,
-//     },
-// ]
  

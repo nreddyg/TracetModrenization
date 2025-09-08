@@ -165,8 +165,6 @@ const ServiceDeskReports = () => {
   useEffect(() => {
     fetchAdditionalFieldConfigurationDetails(111)
     fetchAllLookUps();
-    getDepartmentTreedata(111);
-    getCompanyHierarchyTreedata(111);
   }, [])
   function buildColumnsFromApi<T extends Record<string, any>>(
     apiResponse: ColumnApiResponse,
@@ -462,7 +460,7 @@ const ServiceDeskReports = () => {
     }
 
     // Simulate report generation
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise(resolve => setTimeout(resolve, 500));
 
     setIsGeneratingReport(false);
     if (activeTab !== "Service Request Detail History") {
@@ -561,45 +559,7 @@ const ServiceDeskReports = () => {
     return treeData;
   };
 
-  //   SETTING DATA IN LOOKUPS------------ this is related to treeData
-  function SettingLookupsData(lookupdata, jsonName, keyName) {
-    let jsonData = [];
-    if (jsonName === "department") {
-      jsonData = fields;
-      const index = jsonData.findIndex((x) => x.name === keyName)
-      jsonData[index].treeData = lookupdata;
-    } else if (jsonName === "company") {
-      jsonData = fields;
-      const index = jsonData.findIndex((x) => x.name === keyName)
-      jsonData[index].treeData = lookupdata;
-    }
-    setFields(jsonData);
-  }
-
-  async function getDepartmentTreedata(compId: number) {
-    try {
-      const res = await getDepartment(compId);
-      if (res.success && res.data) {
-        const treeData = treefunWithParent(res.data, "#", '', '', 'Code');
-        SettingLookupsData(treeData, 'department', 'LevelFiveDepartment');
-        SettingLookupsData(treeData, 'department', 'levelfivedepartmentINsla');
-      }
-    } catch (err) {
-    }
-  }
-
-  async function getCompanyHierarchyTreedata(compId: number) {
-    try {
-      const res = await getCompanyHierarchy(compId);
-      if (res.success && res.data) {
-        const treeData = treefunWithParent(res.data, "#", '', '', 'Code');
-        SettingLookupsData(treeData, 'company', 'LevelFiveCompanyinSLA');
-      }
-    } catch (err) {
-      console.error('Error fetching department details:', err);
-    }
-  }
-
+ 
   // fetching SubCategories list based on main Asset selected
     async function getSubCategoryDetails(compId: number, id: number | null) {
     dispatch(setLoading(true));
@@ -1211,7 +1171,7 @@ let payload=
                 {activeTab !== "Service Request Detail History" ?
                   <div className='px-1'>
                     {/* <h4 className="text-sm font-semibold text-gray-900 mb-3">Date Range</h4> */}
-                    {getFieldsByNames(['dateRange']).map(renderField)}
+                    {getFieldsByNames(['dateRange','dateRangeinSLA']).map(renderField)}
                   </div>
                   : ""
                 }

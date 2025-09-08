@@ -678,7 +678,7 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
 
     // Helper function to check if text should be truncated
     const shouldTruncateText = (text: string, maxChars: number = 40) => {
-      return text.length > maxChars;
+      return text?.length > maxChars;
     };
 
     // Render option with ellipsis and tooltip for long text

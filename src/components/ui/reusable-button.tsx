@@ -150,11 +150,10 @@ export const ReusableButton = forwardRef<HTMLButtonElement, ReusableButtonProps>
     const isIconOnly = !children && (icon || loading);
     const effectiveShape = isIconOnly ? 'circle' : shape;
 
-    // Auto insert space for Chinese characters
+
     const processedChildren = React.useMemo(() => {
       if (!autoInsertSpace || typeof children !== 'string') return children;
 
-      // Simple check for mixed Chinese/English content
       const hasChinese = /[\u4e00-\u9fff]/.test(children);
       const hasEnglish = /[a-zA-Z]/.test(children);
 

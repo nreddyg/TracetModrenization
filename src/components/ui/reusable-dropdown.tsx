@@ -3,7 +3,6 @@ import { createPortal } from 'react-dom';
 import { ChevronDown, X, Check } from 'lucide-react';
 import { Label } from './label';
 
-// Mock Tooltip components for demonstration
 const TooltipProvider = ({ children }) => children;
 const Tooltip = ({ children }) => children;
 const TooltipTrigger = ({ children, asChild }) => asChild ? children : <div>{children}</div>;
@@ -538,7 +537,7 @@ export const ReusableDropdown: React.FC<SelectProps> = ({
     const spaceAbove = inputRect.top - margin;
  
     // Decide whether to place popup above or below
-    // You can tweak the condition. This chooses above when there's not enough space below.
+    // This chooses above when there's not enough space below.
     const openAbove = spaceBelow < minHeight && spaceAbove > spaceBelow;
  
     // Use the space available in chosen direction to compute maxHeight

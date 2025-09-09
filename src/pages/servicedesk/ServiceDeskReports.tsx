@@ -16,7 +16,7 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 import FilterCard from '@/components/common/FilterCard';
 import { useAppDispatch } from '@/store';
 import { setLoading } from '@/store/slices/projectsSlice';
-import { ColumnDef, createColumnHelper, VisibilityState } from "@tanstack/react-table";
+import { ColumnDef, createColumnHelper, FilterFn, VisibilityState } from "@tanstack/react-table";
 import { getAdditionaliFieldsConfigurationDetails, getCompanyHierarchy, getDepartment, getMainCategoryLookUp, getServiceRequestDetailsColumns, getServiceRequestDetailsHistoryReport, getServiceRequestDetailsReport, getServiceRequestPriority, getServiceRequestSeverity, getServiceRequestSLAMetViolatedColumns, getServiceRequestSLAMetViolatedReport, getSlaStatus, getSubCategoryLookUp, postServiceRequestDetailsColumns, postServiceRequestMetViolatedColumns } from '@/services/servicedeskReportsServices';
 import { TracetTreeSelect, TreeNode } from '@/components/ui/reusable-treeSelect';
 import { useDispatch } from 'react-redux';
@@ -120,14 +120,8 @@ const ServiceDeskReports = () => {
   const dispatch = useAppDispatch();
   const [reportTabs] = useState([
     'Service Request Details',
-    // 'Service Request Type',
     'Service Request SLA Met/SLA Violated',
     'Service Request Detail History',
-    // 'Work Orders List',
-    // 'Work Order Details',
-    // 'Scheduled Work Order List',
-    // 'Work Order Task Details',
-    // 'Work Order Penalty'
   ]);
 
   const [activeTab, setActiveTab] = useState('Service Request Details');
@@ -160,12 +154,33 @@ const ServiceDeskReports = () => {
       [columnName: string]: "true" | "false";
     };
   }
-  useEffect(()=>{
-  },[columnVisibility])
+
+  useEffect(() => {
+  setDataSourse([]);
+  setShowReport(false)
+}, [activeTab]);
+
+  useEffect(() => {
+  }, [columnVisibility])
   useEffect(() => {
     fetchAdditionalFieldConfigurationDetails(111)
     fetchAllLookUps();
   }, [])
+    const multiSelectFilter: FilterFn<any> = (row, columnId, filterValue) => {
+
+  const selected = Array.isArray(filterValue) ? filterValue : [];
+
+  if (selected.length === 0) return true;
+
+  const cell = row.getValue(columnId);
+
+  if (cell == null) return false;
+
+  if (Array.isArray(cell)) return cell.some(v => selected.includes(String(v)));
+
+  return selected.includes(String(cell));
+
+};
   function buildColumnsFromApi<T extends Record<string, any>>(
     apiResponse: ColumnApiResponse,
     editableColumns: string[] = [],
@@ -183,6 +198,9 @@ const ServiceDeskReports = () => {
             header: colName,
             cell: (info) => info.getValue() ?? "",
             enableHiding: true, // allow ColumnVisibilityManager to toggle
+              enableColumnFilter: true,
+
+          filterFn: multiSelectFilter,
             meta: {
               editable: editableColumns.includes(colName),
               editType: typeMapper[colName] || "text",
@@ -202,14 +220,14 @@ const ServiceDeskReports = () => {
 
   const selectedMainCategory = watch("MainCategory");
   const selectedMainCategoryforSLA = watch("maincategoryinSLA");
-   useEffect(() => {
+  useEffect(() => {
     if (selectedMainCategory) {
       getSubCategoryDetails(111, selectedMainCategory)
     } else {
       getSubCategoryDetails(111, null)
     }
   }, [selectedMainCategory])
- 
+
   useEffect(() => {
     if (selectedMainCategoryforSLA) {
       getSubCategoryDetails(111, selectedMainCategoryforSLA)
@@ -217,7 +235,7 @@ const ServiceDeskReports = () => {
       getSubCategoryDetails(111, null)
     }
   }, [selectedMainCategoryforSLA])
- 
+
 
 
   //method for generating columns based on data
@@ -284,12 +302,11 @@ const ServiceDeskReports = () => {
 
 
   async function fetchServiceRequestDetailsReport(compId: number, BranchID: string, srType: string, srNo: string, srStatus: string, requestedBy: string, fromDate: string, toDate: string, customer: string, AssigneeUsers: string, AssigneeGroups: string, severity: string, priority: string, SLAStatus: string, dept: string, mainCategory: string, subCategory: string, assetCode: string) {
-    dispatch(setLoading(true))
+    // dispatch(setLoading(true))
     await getServiceRequestDetailsReport(compId, BranchID, srType, srNo, srStatus, requestedBy, fromDate, toDate, customer, AssigneeUsers, AssigneeGroups, severity, priority, SLAStatus, dept, mainCategory, subCategory, assetCode).then(res => {
       if (res.success && res.data.status === undefined) {
         const tabData = res.data.ServiceRequestDetailsReport
         setDataSourse(tabData)
-
       } else {
 
       }
@@ -325,15 +342,15 @@ const ServiceDeskReports = () => {
   //     }
   //   }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
   // }
-    async function fetchAdditionalFieldConfigurationDetails(compId: number) {
+  async function fetchAdditionalFieldConfigurationDetails(compId: number) {
     dispatch(setLoading(true))
     await getAdditionaliFieldsConfigurationDetails(compId).then(res => {
       if (res.success && res.data.status === undefined) {
-          additionalFields.current = res.data.AdditionalFieldConfigurationDetails.filter(x=> x.TransactionTypeId === 105 || x.TransactionType === "Service request");
-      
+        additionalFields.current = res.data.AdditionalFieldConfigurationDetails.filter(x => x.TransactionTypeId === 105 || x.TransactionType === "Service request");
+
 
       } else {
-          additionalFields.current = [];
+        additionalFields.current = [];
 
       }
     }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
@@ -349,7 +366,10 @@ const ServiceDeskReports = () => {
       } else {
 
       }
-    }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
+    }).catch(err => { }).finally(() => {
+      //  dispatch(setLoading(false)) 
+           fetchServiceRequestDetailsReport(111, formatToString(watch("LevelFiveCompany")), formatToString(watch("ServiceRequestType")), formatToString(watch("ServiceRequest")), formatToString(watch("Status")), formatToString(watch("RequestedBy")), "", "", formatToString(watch("Customer")), formatToString(watch("AssignTo")["Users"]), formatToString(watch("AssignTo")["User Group"]), formatToString(watch("Severity")), formatToString(watch("Priority")), formatToString(watch("slastatus")), formatToString(watch("LevelFiveDepartment")), formatToString(watch("MainCategory")), formatToString(watch("SubCategory")), formatToString(watch("AssetCode")))
+      })
   }
   async function fetchServiceRequestSLAViolatedColumns(compId: number) {
     dispatch(setLoading(true))
@@ -362,7 +382,10 @@ const ServiceDeskReports = () => {
       } else {
 
       }
-    }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
+    }).catch(err => { }).finally(() => { 
+      // dispatch(setLoading(false)) 
+        fetchServiceRequestSLAmetViolatedReport(111, formatToString(watch("LevelFiveCompanyinSLA")), formatToString(watch("serviceReqTypeSLA")), formatToString(watch("servicereqno")), formatToString(watch("statusinSLA")), formatToString(watch("slarequestedby")), "", "", formatToString(watch("Customersla")), formatToString(watch("AssignTo")["Users"]), formatToString(watch("AssignTo")["User Group"]), formatToString(watch("severityinSLA")), formatToString(watch("priorityinSLA")), formatToString(watch("slastatus")), formatToString(watch("levelfivedepartmentINsla")), formatToString(watch("maincategoryinSLA")), formatToString(watch("subcategoryinSLA")), formatToString(watch("assetcode")))
+    })
   }
 
   const handleFilterChange = (field: string, value: string) => {
@@ -419,7 +442,7 @@ const ServiceDeskReports = () => {
     setIsGeneratingReport(true);
       const historyReport = watch("ServiceRequestDetailHistory");
     // fetchServiceRequestDetailsReport(111,watch("LevelFiveCompany"),watch("ServiceRequestType"),watch("servicereqno"),watch("Status"),watch("requestedBy"),"","",watch("Customersla"),watch("AssignTo"),"",watch("severityinSLA"),watch("priorityinSLA"),watch("slastatus"),watch("levelfivedepartment"),watch("MainCategory"),watch("SubCategory"),watch("AssetCode"))
-
+ 
     const obj = {
       BranchId: watch("LevelFiveCompany"),
       serviceReqTypeId: watch("ServiceRequestType"),
@@ -458,28 +481,26 @@ const ServiceDeskReports = () => {
       SubCategoryId: watch("subcategoryinSLA"),
       Assetcode: watch("assetcode")
     }
-
+ 
     // Simulate report generation
-    await new Promise(resolve => setTimeout(resolve, 500));
-
+    await new Promise(resolve => setTimeout(resolve, 200));
+ 
     setIsGeneratingReport(false);
     if (activeTab !== "Service Request Detail History") {
-
+ 
       setShowReport(true);
       if (activeTab === "Service Request Details") {
         fetchServiceRequestDetailsColumns(111)
-        fetchServiceRequestDetailsReport(111, formatToString(watch("LevelFiveCompany")), formatToString(watch("ServiceRequestType")), formatToString(watch("ServiceRequest")), formatToString(watch("Status")), formatToString(watch("RequestedBy")), "", "", formatToString(watch("Customer")), formatToString(watch("AssignTo")["Users"]), formatToString(watch("AssignTo")["User Group"]), formatToString(watch("Severity")), formatToString(watch("Priority")), formatToString(watch("slastatus")), formatToString(watch("LevelFiveDepartment")), formatToString(watch("MainCategory")), formatToString(watch("SubCategory")), formatToString(watch("AssetCode")))
       }
       else if (activeTab === "Service Request SLA Met/SLA Violated") {
-
+ 
         fetchServiceRequestSLAViolatedColumns(111)
-        fetchServiceRequestSLAmetViolatedReport(111, formatToString(watch("LevelFiveCompanyinSLA")), formatToString(watch("serviceReqTypeSLA")), formatToString(watch("servicereqno")), formatToString(watch("statusinSLA")), formatToString(watch("slarequestedby")), "", "", formatToString(watch("Customersla")), formatToString(watch("AssignTo")["Users"]), formatToString(watch("AssignTo")["User Group"]), formatToString(watch("severityinSLA")), formatToString(watch("priorityinSLA")), formatToString(watch("slastatus")), formatToString(watch("levelfivedepartmentINsla")), formatToString(watch("maincategoryinSLA")), formatToString(watch("subcategoryinSLA")), formatToString(watch("assetcode")))
-
+ 
       }
       else if(activeTab==="Service Request Detail History"){
      
       }
-
+ 
     }
     else {
            if (historyReport === "") {
@@ -495,9 +516,10 @@ const ServiceDeskReports = () => {
      
     }
   };
+ 
 
   const handleClearFilters = () => {
-   form.reset()
+    form.reset()
   };
 
   const handleExportReport = () => {
@@ -515,10 +537,7 @@ const ServiceDeskReports = () => {
     labelClassName: 'font-semibold',
     className: 'custom-tree-select',
     showSearch: true, // Enable inline search
-
     onSelect: (selectedKeys, info, treeData) => {
-     
-
       // If you want selected node's title(s)
       const getSelectedTitles = (nodes, selectedValues) => {
         let titles: string[] = [];
@@ -559,46 +578,36 @@ const ServiceDeskReports = () => {
     return treeData;
   };
 
- 
+
   // fetching SubCategories list based on main Asset selected
-    async function getSubCategoryDetails(compId: number, id: number | null) {
+  async function getSubCategoryDetails(compId: number, id: number | null) {
     dispatch(setLoading(true));
     try {
       if (id == null) {
-        // if no id, clear both SubCategory dropdowns
         const data = structuredClone(fields);
- 
         const subCatIndex = data.findIndex(x => x.name === "SubCategory");
         if (subCatIndex >= 0) data[subCatIndex].options = [];
- 
         const subCatSLAIndex = data.findIndex(x => x.name === "subcategoryinSLA");
         if (subCatSLAIndex >= 0) data[subCatSLAIndex].options = [];
- 
         setFields(data);
         return;
       }
- 
       const res = await getSubCategoryLookUp(compId, id);
- 
       if (res?.data?.SubCategoriesLookup?.length > 0) {
         const subCategories = res.data.SubCategoriesLookup.map((obj: any) => ({
           ...obj,
           label: obj.CategoryName,
           value: obj.CategoryId,
         }));
- 
         const data = structuredClone(fields);
- 
         if (id === selectedMainCategory) {
           const idx = data.findIndex(x => x.name === "SubCategory");
           if (idx >= 0) data[idx].options = subCategories;
         }
- 
         if (id === selectedMainCategoryforSLA) {
           const idx = data.findIndex(x => x.name === "subcategoryinSLA");
           if (idx >= 0) data[idx].options = subCategories;
         }
- 
         setFields(data);
       }
     } catch (err) {
@@ -632,7 +641,7 @@ const ServiceDeskReports = () => {
             "options": groupOpts
           }
         })
- 
+
       } else if (lookupsData[obj].treedata) {
         ret = lookupsData[obj].data
       } else {
@@ -661,7 +670,7 @@ const ServiceDeskReports = () => {
     setFields(data);
   }
 
-// fetch all lookUps
+  // fetch all lookUps
   async function fetchAllLookUps() {
     dispatch(setLoading(true));
     try {
@@ -845,7 +854,7 @@ const ServiceDeskReports = () => {
                     ? dayjs(ctrl.value.to, "DD/MM/YYYY").toDate()
                     : undefined,
                 }}
-                placeholder={["From date","To date"]}
+                placeholder={["From date", "To date"]}
                 onChange={(range) =>
                   ctrl.onChange({
                     from: range?.from ? dayjs(range.from).format("DD/MM/YYYY") : "",
@@ -900,142 +909,166 @@ const ServiceDeskReports = () => {
         return null;
     }
   };
-//   function buildColumnPayload(
-//   allColumns: string[],
-//   columnVisibility: VisibilityState
-// ) {
-//   const payload: Record<string, string> = {};
+  //   function buildColumnPayload(
+  //   allColumns: string[],
+  //   columnVisibility: VisibilityState
+  // ) {
+  //   const payload: Record<string, string> = {};
 
-//   allColumns.forEach((colName) => {
-//     // if not in visibility state, default to false
-//     payload[colName] = columnVisibility[colName] ? "true" : "false";
-//   });
+  //   allColumns.forEach((colName) => {
+  //     // if not in visibility state, default to false
+  //     payload[colName] = columnVisibility[colName] ? "true" : "false";
+  //   });
 
-//   return { DefaultColumnsDetails: [payload] };
-// }
-  const handlePostColumns=async()=>{
-     const addFields = additionalFields.current.reduce((acc, x) => {
-      acc[x.AdditionalFieldName.replaceAll(" ","")] = "false";
+  //   return { DefaultColumnsDetails: [payload] };
+  // }
+
+  //postServiceRequestDetailsColumns met violated post api integration
+  async function postServiceRequestColumns(compId: number, data: any) {
+    dispatch(setLoading(true));
+    await postServiceRequestDetailsColumns(compId, data).then(res => {
+      if (res.data.status === true) {
+        msg.success(res.data.message)
+      }
+      else {
+        msg.error(res.data.message)
+      }
+    })
+      .catch(err => {
+      }).finally(() => {
+        dispatch(setLoading(false))
+      })
+  }
+
+  //SLA met violated post api integration
+  async function postSLAMetViolatedColumns(compId: number, data: any) {
+    dispatch(setLoading(true));
+    await postServiceRequestMetViolatedColumns(compId, data).then(res => {
+      if (res.data.status === true) {
+        msg.success(res.data.message)
+      }
+      else {
+        msg.error(res.data.message)
+      }
+    }).catch(err => {
+    }).finally(() => {
+      dispatch(setLoading(false))
+    })
+  }
+
+  const handlePostColumns = async () => {
+    const addFields = additionalFields.current.reduce((acc, x) => {
+      acc[x.AdditionalFieldName.replaceAll(" ", "")] = "false";
       return acc;
     }, {});
-let payload=
-      {
-        "Title": columnVisibility["Title"]?.toString(),
-        "ProblemSummary": columnVisibility["Description"]?.toString(),
-        "RequestedByName": columnVisibility["Requested By"]?.toString(),
-        "RequestedDate": columnVisibility["Requested Date & Time"]?.toString(),
-        "AssignTo": columnVisibility["Assigned To"]?.toString(),
-        "SeverityName": columnVisibility["Severity"]?.toString(),
-        "PriorityName": columnVisibility["Priority"]?.toString(),
-        "CreatedByName": columnVisibility["Created By"]?.toString(),
-        "SRCreatedDate":columnVisibility["Created Date & Time"]?.toString(),
-        "BranchName": "false",
-        "SLADuration": columnVisibility["SLA Duration (In Hrs:Mins)"]?.toString(),
-        "ReminderForSLA": columnVisibility["SLA Reminder before (In Hrs:Mins)"]?.toString(),
-        "TotalResolutionHours":  columnVisibility["Resolution Time (In Hrs:Mins)"]?.toString(),
-        "SRClosedDate":  columnVisibility["Closed Date & Time "]?.toString(),
-        "SRClosedBy": columnVisibility["Closed By"]?.toString() ,
-        "SLAStatus":  columnVisibility["SLA Status"]?.toString(),
-        "CustomerName":  columnVisibility["Customer Name"]?.toString(),
-        "SMTypeName":  columnVisibility["Maintenance Type"]?.toString(),
-        "SRStatusName":  columnVisibility["Status"]?.toString(),
-        "ServiceRequestNo":  columnVisibility["Service Request No"]?.toString(),
-        "CcList":  columnVisibility["Cc List"]?.toString(),
-        "LinkTo":  columnVisibility["Linked To"]?.toString(),
-        "EsclationUserName":  columnVisibility["Escalated To"]?.toString(),
-        "AssetCode":  columnVisibility["Asset Code"]?.toString(),
-        "AssetName":  columnVisibility["Asset Name"]?.toString(),
-        "Category":  columnVisibility["Category"]?.toString(),
-        "BranchName_100": "false",
-        "BranchCode_100": "false",
-        "BranchName_101": "false",
-        "BranchCode_101": "false",
-        "BranchName_102": "false",
-        "BranchCode_102": "false",
-        "BranchName_103": "false",
-        "BranchCode_103": "false",
-        "BranchName_104": "false",
-        "BranchCode_104": "false",
-        "LocName_100": "false",
-        "LocCode_100": "false",
-        "LocName_101": "false",
-        "LocCode_101": "false",
-        "LocName_102": "false",
-        "LocCode_102": "false",
-        "LocName_103": "false",
-        "LocCode_103": "false",
-        "LocName_104": "false",
-        "LocCode_104": "false",
-        "CostName_100": "false",
-        "CostCode_100": "false",
-        "CostName_101": "false",
-        "CostCode_101": "false",
-        "CostName_102": "false",
-        "CostCode_102": "false",
-        "CostName_103": "false",
-        "CostCode_103": "false",
-        "CostName_104": "false",
-        "CostCode_104": "false",
-        "DepName_100": "false",
-        "DepCode_100": "false",
-        "DepName_101": "false",
-        "DepCode_101": "false",
-        "DepName_102": "false",
-        "DepCode_102": "false",
-        "DepName_103": "false",
-        "DepCode_103": "false",
-        "DepName_104": "false",
-        "DepCode_104": "false",
-        "MaintenanceType":  columnVisibility["Maintenance Type"]?.toString(),
-        "MaintenanceFromDate":  columnVisibility["Maintenance Start Date"]?.toString(),
-        "MaintenanceToDate":  columnVisibility["Maintenance End Date"]?.toString(),
-        "MaintenanceVendorName":  columnVisibility["Vendor"]?.toString(),
-        "MaintenanceAmount":  columnVisibility["Maintenance Amount"]?.toString(),
-        "RequestedEMailId":  columnVisibility["Requested By E-Mail Id"]?.toString(),
-        "RequestedEMPId" :  columnVisibility["Requested By Employee Id"]?.toString(),
-      }
-     
+    let payload =
+    {
+      "Title": columnVisibility["Title"]?.toString(),
+      "ProblemSummary": columnVisibility["Description"]?.toString(),
+      "RequestedByName": columnVisibility["Requested By"]?.toString(),
+      "RequestedDate": columnVisibility["Requested Date & Time"]?.toString(),
+      "AssignTo": columnVisibility["Assigned To"]?.toString(),
+      "SeverityName": columnVisibility["Severity"]?.toString(),
+      "PriorityName": columnVisibility["Priority"]?.toString(),
+      "CreatedByName": columnVisibility["Created By"]?.toString(),
+      "SRCreatedDate": columnVisibility["Created Date & Time"]?.toString(),
+      "BranchName": "false",
+      "SLADuration": columnVisibility["SLA Duration (In Hrs:Mins)"]?.toString(),
+      "ReminderForSLA": columnVisibility["SLA Reminder before (In Hrs:Mins)"]?.toString(),
+      "TotalResolutionHours": columnVisibility["Resolution Time (In Hrs:Mins)"]?.toString(),
+      "SRClosedDate": columnVisibility["Closed Date & Time "]?.toString(),
+      "SRClosedBy": columnVisibility["Closed By"]?.toString(),
+      "SLAStatus": columnVisibility["SLA Status"]?.toString(),
+      "CustomerName": columnVisibility["Customer Name"]?.toString(),
+      "SMTypeName": columnVisibility["Service Request Type"]?.toString(),
+      "CcList": columnVisibility["Cc List"]?.toString(),
+      "LinkTo": columnVisibility["Linked To"]?.toString(),
+      "EsclationUserName": columnVisibility["Escalated To"]?.toString(),
+      "AssetCode": columnVisibility["Asset Code"]?.toString(),
+      "Category": columnVisibility["Category"]?.toString(),
+      "BranchName_100": "false",
+      "BranchCode_100": "false",
+      "BranchName_101": "false",
+      "BranchCode_101": "false",
+      "BranchName_102": "false",
+      "BranchCode_102": "false",
+      "BranchName_103": "false",
+      "BranchCode_103": "false",
+      "BranchName_104": "false",
+      "BranchCode_104": "false",
+      "LocName_100": "false",
+      "LocCode_100": "false",
+      "LocName_101": "false",
+      "LocCode_101": "false",
+      "LocName_102": "false",
+      "LocCode_102": "false",
+      "LocName_103": "false",
+      "LocCode_103": "false",
+      "LocName_104": "false",
+      "LocCode_104": "false",
+      "CostName_100": "false",
+      "CostCode_100": "false",
+      "CostName_101": "false",
+      "CostCode_101": "false",
+      "CostName_102": "false",
+      "CostCode_102": "false",
+      "CostName_103": "false",
+      "CostCode_103": "false",
+      "CostName_104": "false",
+      "CostCode_104": "false",
+      "DepName_100": "false",
+      "DepCode_100": "false",
+      "DepName_101": "false",
+      "DepCode_101": "false",
+      "DepName_102": "false",
+      "DepCode_102": "false",
+      "DepName_103": "false",
+      "DepCode_103": "false",
+      "DepName_104": "false",
+      "DepCode_104": "false",
+      "MaintenanceType": columnVisibility["Maintenance Type"]?.toString(),
+      "MaintenanceFromDate": columnVisibility["Maintenance Start Date"]?.toString(),
+      "MaintenanceToDate": columnVisibility["Maintenance End Date"]?.toString(),
+      "MaintenanceVendorName": columnVisibility["Vendor"]?.toString(),
+      "MaintenanceAmount": columnVisibility["Maintenance Amount"]?.toString(),
+      "RequestedEMailId": columnVisibility["Requested By E-Mail Id"]?.toString(),
+      "RequestedEMPId": columnVisibility["Requested By Employee Id"]?.toString(),
+    }
 
     let payForSRDetails = {
-      "DefaultColumnsDetails" :  [{...payload,...addFields}]
+      "DefaultColumnsDetails": [{
+        ...payload,
+        ...addFields,
+        ...(activeTab === "Service Request Details" && {
+          "ServiceRequestNo": columnVisibility["Service Request No"]?.toString(),
+          "AssetName": columnVisibility["Asset Name"]?.toString(),
+          "SRStatusName": columnVisibility["Status"]?.toString(),
+        }),
+      }]
     }
-    //     delete payload["ServiceRequestNo"]
-    // delete payload["AssetName"]
-    // delete payload["SRStatusName"]
-    // delete payload["TotalResolutionHours"]
-
-      //  const slaPay={
-      //   "Servicerequestno":columnVisibility["Service Request No"]?.toString(),
-      //   // "TotalResolutionHours":columnVisibility[""].toString(), 
-      //   "ResolutionDate":columnVisibility[""].toString(), 
-      //   // "ResponseDate":columnVisibility[""].toString(), 
-      //   // "SRStatusName":columnVisibility[""].toString(),
-      //    "SMTypeName":"false",
-      //    "TotalResolutionHours":columnVisibility["Resolution Time (In Hrs)"]?.toString(),
-      //    "CreatedDate":columnVisibility["Created Date & Time"]?.toString(),
-      //    "ResponseDate":columnVisibility["First Response Date & Time"]?.toString(),
-      //    "SRStatusName":columnVisibility["Service Request Status"]?.toString(),
-      //    "Assetname":columnVisibility["Asset Name"]?.toString()
-
-      //   }
-      let payForSRSLAMetViolated = {
-        // "DefaultColumnsDetails" :  [{...payload,...slaPay}]
+    let slaPayLoad = {
+      "ResolutionDate": columnVisibility["Resolved Date & Time"]?.toString() || "false",
+      "CreatedDate": "false",
+      "ResponseDate": columnVisibility["First Response Date & Time"]?.toString() || "false",
+      "TotalResolutionHours": columnVisibility["Resolution Time (In Hrs)(inhrs)"]?.toString() || "false"
     }
-    
-
-
-    
-    if(activeTab==="Service Request Details"){
-    postServiceRequestDetailsColumns(111,payForSRDetails)
-        // fetchServiceRequestDetailsColumns(111)
-
+    let payForSRSLAMetViolated = {
+      "DefaultColumnsDetails": [{
+        ...payload,
+        ...slaPayLoad,
+        ...(activeTab === "Service Request SLA Met/SLA Violated" && {
+          "Servicerequestno": columnVisibility["Service Request No"]?.toString(),
+          "Assetname": columnVisibility["Asset Name"]?.toString() || "false",
+          "SRStatusName": columnVisibility["Status"]?.toString() || "false",
+        }),
+      }]
     }
-    else if (activeTab==="Service Request SLA Met/SLA Violated"){
-   
-    postServiceRequestMetViolatedColumns(111,payForSRSLAMetViolated)
+    if (activeTab === "Service Request Details") {
+      postServiceRequestColumns(111, payForSRDetails);
     }
-
-    
+    else if (activeTab === "Service Request SLA Met/SLA Violated") {
+      postSLAMetViolatedColumns(111, payForSRSLAMetViolated)
+    }
   }
 
   const getColumnDisplayText = () => {
@@ -1171,7 +1204,7 @@ let payload=
                 {activeTab !== "Service Request Detail History" ?
                   <div className='px-1'>
                     {/* <h4 className="text-sm font-semibold text-gray-900 mb-3">Date Range</h4> */}
-                    {getFieldsByNames(['dateRange','dateRangeinSLA']).map(renderField)}
+                    {getFieldsByNames(['dateRange', 'dateRangeinSLA']).map(renderField)}
                   </div>
                   : ""
                 }
@@ -1200,9 +1233,9 @@ let payload=
                     <ReusableButton
                       onClick={handlePostColumns}
                       icon={<Save
-                         className="h-4 w-4" />}
+                        className="h-4 w-4" />}
                       className="bg-primary text-white hover:bg-primary/90 hover:text-white"
-                        variant="default"
+                      variant="default"
                     >
                       Apply As Default Grid Columns
                     </ReusableButton>
@@ -1210,6 +1243,7 @@ let payload=
                 </CardHeader>
                 <CardContent>
                   <ReusableTable
+                  // key={activeTab}
                     data={dataSource}
                     columns={cols}
                     enableSearch={true}

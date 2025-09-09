@@ -2111,7 +2111,7 @@ export function ReusableTable<T = any>({
             </thead>
             {enableRowReordering ? (
               <DndContext
-                sensors={useSensors(useSensor(MouseSensor), useSensor(TouchSensor))}
+                sensors={useSensors(useSensor(MouseSensor,{activationConstraint:{distance:5}}), useSensor(TouchSensor))}
                 collisionDetection={closestCenter}
                 onDragEnd={({ active, over }) => {
                   if (over && active.id !== over.id) {

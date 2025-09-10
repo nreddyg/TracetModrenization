@@ -22,6 +22,7 @@ import { GetServiceRequestAssignToLookups } from '@/services/ticketServices';
 import { useAppDispatch } from '@/store/reduxStore';
 import { setLoading } from '@/store/slices/projectsSlice';
 import { useAppSelector } from '@/store';
+import { Item } from '@radix-ui/react-dropdown-menu';
 
 
 interface UserGroup {
@@ -43,10 +44,10 @@ const UserGroups = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [fields, setFields] = useState<BaseField[]>(USER_GROUP_DB);
   const dispatch = useAppDispatch();
-  const companyId=useAppSelector(state=>state.projects.companyId)
-  
+  const companyId = useAppSelector(state => state.projects.companyId)
+
   useEffect(() => {
-    if(companyId){
+    if (companyId) {
       getUserGroupTableData(companyId, 'All');
     }
   }, [companyId])
@@ -55,28 +56,28 @@ const UserGroups = () => {
     if (selectedRecord !== null && companyId) {
       getUserGroupDataById(companyId, selectedRecord?.UserGroupId)
     }
-  }, [selectedRecord,companyId])
+  }, [selectedRecord, companyId])
 
   //table data api integration
   async function getUserGroupTableData(compId: number, BranchName: string) {
-     dispatch(setLoading(true));
+    dispatch(setLoading(true));
     await getUserGroupData(compId, BranchName).then(res => {
       if (res.success && res.data) {
         if (res.data.UserGroupDetails?.length > 0) {
-          setUserGroups(res.data.UserGroupDetails?.reverse())
+          setUserGroups(res.data.UserGroupDetails?.map((item) => ({ ...item, Status: item.Status ? 'Active' : 'In Active' })).reverse())
         }
       }
     })
       .catch(err => {
         console.error('Error fetching subscription by customer:', err);
-      }).finally(()=>{
+      }).finally(() => {
         dispatch(setLoading(false))
       })
   }
 
   //get usergroupby id api integration
   async function getUserGroupDataById(compId: number, usergroupid: number) {
-     dispatch(setLoading(true))
+    dispatch(setLoading(true))
     await getUserGroupById(compId, usergroupid).then(res => {
       if (res.success && res.data) {
         const details = res.data.UserGroupDetails;
@@ -92,14 +93,14 @@ const UserGroups = () => {
     })
       .catch(err => {
         console.error('Error fetching subscription by customer:', err);
-      }).finally(()=>{
+      }).finally(() => {
         dispatch(setLoading(false))
       })
   }
 
   //delete usergroup api integration
   async function deleteUserGroupData(compId: number, usergroupid: number) {
-     dispatch(setLoading(true));
+    dispatch(setLoading(true));
     await deleteUserGroup(compId, usergroupid).then(res => {
       if (res.success && res.data) {
         if (res.data.status === true) {
@@ -112,7 +113,7 @@ const UserGroups = () => {
       }
     })
       .catch(err => {
-      }).finally(()=>{
+      }).finally(() => {
         dispatch(setLoading(false))
       })
   }
@@ -120,7 +121,7 @@ const UserGroups = () => {
   //users lookup integartion 
 
   async function SelectUsersLookup(compid: number, branchname: string) {
-     dispatch(setLoading(true));
+    dispatch(setLoading(true));
     await GetServiceRequestAssignToLookups(compid, branchname)
       .then((res) => {
         if (res.success && res.data) {
@@ -140,14 +141,14 @@ const UserGroups = () => {
       })
       .catch((err) => {
         console.error("Error fetching users lookup:", err);
-      }).finally(()=>{
+      }).finally(() => {
         dispatch(setLoading(false))
       })
   }
 
 
   useEffect(() => {
-    if(companyId){
+    if (companyId) {
       SelectUsersLookup(companyId, 'All')
     }
   }, [companyId])
@@ -262,42 +263,42 @@ const UserGroups = () => {
     }
     dispatch(setLoading(true));
     try {
-     const payload =(isEditMode)?[{
-      UserGroupName: data.userGroupName,
-      Users: data.Users?.join(','),
-      Description: data.description,
-      ActiveStatus:data.Status==='Active'?'true':'false',
-    }]:
-    [{
-      UserGroupName: data.userGroupName,
-      Users: data.Users?.join(','),
-      Description: data.description,
-    }];
+      const payload = (isEditMode) ? [{
+        UserGroupName: data.userGroupName,
+        Users: data.Users?.join(','),
+        Description: data.description,
+        ActiveStatus: data.Status === 'Active' ? 'true' : 'false',
+      }] :
+        [{
+          UserGroupName: data.userGroupName,
+          Users: data.Users?.join(','),
+          Description: data.description,
+        }];
 
- 
 
-    const pay={UserGroupDetails:payload};
-    let res;
+
+      const pay = { UserGroupDetails: payload };
+      let res;
 
       if (!isEditMode) {
-       res=await addUserGroup(companyId,'All',pay)
+        res = await addUserGroup(companyId, 'All', pay)
       } else if (selectedRecord) {
-              res = await updateUserGroup(companyId,'All',selectedRecord?.UserGroupId,pay);
+        res = await updateUserGroup(companyId, 'All', selectedRecord?.UserGroupId, pay);
       }
 
-    
-    if (res?.success && res.data?.status) {
-      message.success(res.data.message || (isEditMode ? 'User group updated' : 'User group created'));
-      getUserGroupTableData(companyId, 'All');
-      handleCancel();
-    } else {
-      message.error(res?.data?.message || 'Operation failed');
+
+      if (res?.success && res.data?.status) {
+        message.success(res.data.message || (isEditMode ? 'User group updated' : 'User group created'));
+        getUserGroupTableData(companyId, 'All');
+        handleCancel();
+      } else {
+        message.error(res?.data?.message || 'Operation failed');
+      }
+    } catch (error) {
+      message.error("Failed to save user group");
+    } finally {
+      dispatch(setLoading(false))
     }
-  } catch (error) {
-    message.error("Failed to save user group");
-  } finally{
-    dispatch(setLoading(false))
-  }
   };
 
   const handleEdit = (group: UserGroup): void => {
@@ -341,10 +342,10 @@ const UserGroups = () => {
     );
   }, [userGroups, searchTerm]);
 
-  const getStatusColor = (status: boolean) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
-      case true: return 'bg-green-100 text-green-800 border-green-300';
-      case false: return 'bg-red-100 text-red-800 border-red-300';
+      case 'Active': return 'bg-green-100 text-green-800 border-green-300';
+      case 'In Active': return 'bg-red-100 text-red-800 border-red-300';
       default: return 'bg-gray-100 text-gray-800 border-gray-300';
     }
   };
@@ -377,7 +378,7 @@ const UserGroups = () => {
       header: 'Status',
       cell: ({ row }) => (
         <Badge className={`${getStatusColor(row.getValue('Status'))} border font-medium text-xs px-2 py-0.5`}>
-          {row.getValue('Status') === true ? `Active` : 'In Active'}
+          {row.getValue('Status')}
         </Badge>
       ),
     },
@@ -430,8 +431,9 @@ const UserGroups = () => {
             icon={<Plus className="h-3 w-3" />}
             iconPosition="left"
             onClick={handleAddUserGroup}
+           className="whitespace-nowrap"
           >
-           {selectedRecord ? "Update User Group" :"Add User Group" }
+            {selectedRecord ? "Update User Group" : "Add User Group"}
           </ReusableButton>
         </div>
 
@@ -496,9 +498,12 @@ const UserGroups = () => {
         {/* User Group List with ReusableTable */}
         <Card className="border-0 shadow-sm">
           <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base font-semibold">User Group List</CardTitle>
-              <div>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <CardTitle className="text-base font-semibold">
+                User Group List
+              </CardTitle>
+
+              <div className="w-full sm:w-64">
                 <ReusableInput
                   placeholder="Search user groups..."
                   value={searchTerm}
@@ -507,10 +512,11 @@ const UserGroups = () => {
                   allowClear={true}
                   onClear={() => setSearchTerm('')}
                   size="small"
-                  className="w-50 pl-7"
+                  className="w-full pl-7"
                 />
               </div>
             </div>
+
           </CardHeader>
           <CardContent className="pt-0">
             <ReusableTable
@@ -520,7 +526,7 @@ const UserGroups = () => {
               permissions={tablePermissions}
               title=""
               onRefresh={handleRefresh}
-              enableSearch={false} // We have our own search
+              enableSearch={false}
               enableSelection={false}
               enableExport={true}
               enableColumnVisibility={true}

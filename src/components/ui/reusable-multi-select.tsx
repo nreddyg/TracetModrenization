@@ -1069,7 +1069,7 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
         </div>
 
         {(status === "error" || error) && (
-          <p className="text-xs text-red-500" role="alert">
+          <p className="text-xs text-red-500 mt-1" role="alert">
             {error}
           </p>
         )}

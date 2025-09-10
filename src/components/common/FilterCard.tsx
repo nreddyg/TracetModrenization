@@ -16,16 +16,16 @@ const FilterCard: React.FC<FilterCardProps> = ({
 }) => {
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="text-lg flex items-center gap-2">
+      {/* <CardHeader> */}
+        {/* <CardTitle className="text-lg flex items-center gap-2">
           <Filter className="h-5 w-5" />
           {title}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
+        </CardTitle> */}
+      {/* </CardHeader> */}
+      <CardContent className='mt-5'>
         {children}
         {actions && (
-          <div className="flex justify-end gap-3 mt-6">
+          <div className="flex xs:justify-center sm:justify-end md:justify-end lg:justify-end  gap-3 mt-6">
             {actions}
           </div>
         )}

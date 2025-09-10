@@ -156,9 +156,9 @@ const ServiceDeskReports = () => {
   }
 
   useEffect(() => {
-  setDataSourse([]);
-  setShowReport(false)
-}, [activeTab]);
+    setDataSourse([]);
+    setShowReport(false)
+  }, [activeTab]);
 
   useEffect(() => {
   }, [columnVisibility])
@@ -166,21 +166,21 @@ const ServiceDeskReports = () => {
     fetchAdditionalFieldConfigurationDetails(111)
     fetchAllLookUps();
   }, [])
-    const multiSelectFilter: FilterFn<any> = (row, columnId, filterValue) => {
+  const multiSelectFilter: FilterFn<any> = (row, columnId, filterValue) => {
 
-  const selected = Array.isArray(filterValue) ? filterValue : [];
+    const selected = Array.isArray(filterValue) ? filterValue : [];
 
-  if (selected.length === 0) return true;
+    if (selected.length === 0) return true;
 
-  const cell = row.getValue(columnId);
+    const cell = row.getValue(columnId);
 
-  if (cell == null) return false;
+    if (cell == null) return false;
 
-  if (Array.isArray(cell)) return cell.some(v => selected.includes(String(v)));
+    if (Array.isArray(cell)) return cell.some(v => selected.includes(String(v)));
 
-  return selected.includes(String(cell));
+    return selected.includes(String(cell));
 
-};
+  };
   function buildColumnsFromApi<T extends Record<string, any>>(
     apiResponse: ColumnApiResponse,
     editableColumns: string[] = [],
@@ -198,9 +198,9 @@ const ServiceDeskReports = () => {
             header: colName,
             cell: (info) => info.getValue() ?? "",
             enableHiding: true, // allow ColumnVisibilityManager to toggle
-              enableColumnFilter: true,
+            enableColumnFilter: true,
 
-          filterFn: multiSelectFilter,
+            filterFn: multiSelectFilter,
             meta: {
               editable: editableColumns.includes(colName),
               editType: typeMapper[colName] || "text",
@@ -368,8 +368,8 @@ const ServiceDeskReports = () => {
       }
     }).catch(err => { }).finally(() => {
       //  dispatch(setLoading(false)) 
-           fetchServiceRequestDetailsReport(111, formatToString(watch("LevelFiveCompany")), formatToString(watch("ServiceRequestType")), formatToString(watch("ServiceRequest")), formatToString(watch("Status")), formatToString(watch("RequestedBy")), "", "", formatToString(watch("Customer")), formatToString(watch("AssignTo")["Users"]), formatToString(watch("AssignTo")["User Group"]), formatToString(watch("Severity")), formatToString(watch("Priority")), formatToString(watch("slastatus")), formatToString(watch("LevelFiveDepartment")), formatToString(watch("MainCategory")), formatToString(watch("SubCategory")), formatToString(watch("AssetCode")))
-      })
+      fetchServiceRequestDetailsReport(111, formatToString(watch("LevelFiveCompany")), formatToString(watch("ServiceRequestType")), formatToString(watch("ServiceRequest")), formatToString(watch("Status")), formatToString(watch("RequestedBy")), "", "", formatToString(watch("Customer")), formatToString(watch("AssignTo")["Users"]), formatToString(watch("AssignTo")["User Group"]), formatToString(watch("Severity")), formatToString(watch("Priority")), formatToString(watch("slastatus")), formatToString(watch("LevelFiveDepartment")), formatToString(watch("MainCategory")), formatToString(watch("SubCategory")), formatToString(watch("AssetCode")))
+    })
   }
   async function fetchServiceRequestSLAViolatedColumns(compId: number) {
     dispatch(setLoading(true))
@@ -382,9 +382,9 @@ const ServiceDeskReports = () => {
       } else {
 
       }
-    }).catch(err => { }).finally(() => { 
+    }).catch(err => { }).finally(() => {
       // dispatch(setLoading(false)) 
-        fetchServiceRequestSLAmetViolatedReport(111, formatToString(watch("LevelFiveCompanyinSLA")), formatToString(watch("serviceReqTypeSLA")), formatToString(watch("servicereqno")), formatToString(watch("statusinSLA")), formatToString(watch("slarequestedby")), "", "", formatToString(watch("Customersla")), formatToString(watch("AssignTo")["Users"]), formatToString(watch("AssignTo")["User Group"]), formatToString(watch("severityinSLA")), formatToString(watch("priorityinSLA")), formatToString(watch("slastatus")), formatToString(watch("levelfivedepartmentINsla")), formatToString(watch("maincategoryinSLA")), formatToString(watch("subcategoryinSLA")), formatToString(watch("assetcode")))
+      fetchServiceRequestSLAmetViolatedReport(111, formatToString(watch("LevelFiveCompanyinSLA")), formatToString(watch("serviceReqTypeSLA")), formatToString(watch("servicereqno")), formatToString(watch("statusinSLA")), formatToString(watch("slarequestedby")), "", "", formatToString(watch("Customersla")), formatToString(watch("AssignTo")["Users"]), formatToString(watch("AssignTo")["User Group"]), formatToString(watch("severityinSLA")), formatToString(watch("priorityinSLA")), formatToString(watch("slastatus")), formatToString(watch("levelfivedepartmentINsla")), formatToString(watch("maincategoryinSLA")), formatToString(watch("subcategoryinSLA")), formatToString(watch("assetcode")))
     })
   }
 
@@ -440,9 +440,9 @@ const ServiceDeskReports = () => {
   // },[isGeneratingReport])
   const handleViewReport = async () => {
     setIsGeneratingReport(true);
-      const historyReport = watch("ServiceRequestDetailHistory");
+    const historyReport = watch("ServiceRequestDetailHistory");
     // fetchServiceRequestDetailsReport(111,watch("LevelFiveCompany"),watch("ServiceRequestType"),watch("servicereqno"),watch("Status"),watch("requestedBy"),"","",watch("Customersla"),watch("AssignTo"),"",watch("severityinSLA"),watch("priorityinSLA"),watch("slastatus"),watch("levelfivedepartment"),watch("MainCategory"),watch("SubCategory"),watch("AssetCode"))
- 
+
     const obj = {
       BranchId: watch("LevelFiveCompany"),
       serviceReqTypeId: watch("ServiceRequestType"),
@@ -481,42 +481,42 @@ const ServiceDeskReports = () => {
       SubCategoryId: watch("subcategoryinSLA"),
       Assetcode: watch("assetcode")
     }
- 
+
     // Simulate report generation
     await new Promise(resolve => setTimeout(resolve, 200));
- 
+
     setIsGeneratingReport(false);
     if (activeTab !== "Service Request Detail History") {
- 
+
       setShowReport(true);
       if (activeTab === "Service Request Details") {
         fetchServiceRequestDetailsColumns(111)
       }
       else if (activeTab === "Service Request SLA Met/SLA Violated") {
- 
+
         fetchServiceRequestSLAViolatedColumns(111)
- 
+
       }
-      else if(activeTab==="Service Request Detail History"){
-     
+      else if (activeTab === "Service Request Detail History") {
+
       }
- 
+
     }
     else {
-           if (historyReport === "") {
-      msg.warning(`Please select Service Request`);
-      setIsGeneratingReport(false);
-    } else {
-      msg.success("can open report or table");
-      // setIsGeneratingReport(true);
-       localStorage.setItem("srData", JSON.stringify({ id: watch("ServiceRequestDetailHistory") }));
-      window.open(`/service-desk/srdetailshistoryview`, "ReportWindow",
-        "width=900,height=800,left=200,top=100,resizable=yes")
-    }
-     
+      if (historyReport === "") {
+        msg.warning(`Please select Service Request`);
+        setIsGeneratingReport(false);
+      } else {
+        msg.success("can open report or table");
+        // setIsGeneratingReport(true);
+        localStorage.setItem("srData", JSON.stringify({ id: watch("ServiceRequestDetailHistory") }));
+        window.open(`/service-desk/srdetailshistoryview`, "ReportWindow",
+          "width=900,height=800,left=200,top=100,resizable=yes")
+      }
+
     }
   };
- 
+
 
   const handleClearFilters = () => {
     form.reset()
@@ -1142,7 +1142,8 @@ const ServiceDeskReports = () => {
             {/* Enhanced Filters Section */}
             <FilterCard
               actions={
-                <>
+                <div className='flex items-center gap-3 xs:flex-col xs:justify-center sm:flex-row md:flex-row lg:flex-row '>
+
                   <Button
                     onClick={handleViewReport}
                     disabled={isGeneratingReport}
@@ -1166,7 +1167,7 @@ const ServiceDeskReports = () => {
                   >
                     Clear All
                   </Button>
-                </>
+                </div>
               }
             >
               <div className="space-y-2 h-full overflow-y-hidden">
@@ -1243,7 +1244,7 @@ const ServiceDeskReports = () => {
                 </CardHeader>
                 <CardContent>
                   <ReusableTable
-                  // key={activeTab}
+                    // key={activeTab}
                     data={dataSource}
                     columns={cols}
                     enableSearch={true}

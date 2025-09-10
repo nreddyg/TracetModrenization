@@ -10,7 +10,7 @@ interface APIResponse<T> {
 }
 
 const api = axios.create({
-  baseURL: "http://10.20.1.34:8054",
+  baseURL: import.meta.env.VITE_BASE_URL,
   // timeout: 10000,
     headers: {
         'Content-Type' :'application/x-www-form-urlencoded',

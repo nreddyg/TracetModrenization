@@ -800,11 +800,11 @@ const SubscriptionManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [fields, setFields] = useState<BaseField[]>(SUBSCRIPTION_DB);
   const dispatch = useDispatch();
-  const companyId=useAppSelector(state=>state.projects.companyId);
+  const companyId = useAppSelector(state => state.projects.companyId);
   const navigate = useNavigate();
 
   useEffect(() => {
-    if(companyId){
+    if (companyId) {
       getSubscriptionData(companyId, 'All');
       fetchLookups();
     }
@@ -862,7 +862,7 @@ const SubscriptionManagement = () => {
     );
   }, [dataSource, searchTerm]);
 
-  const getStatusColor = (status:string) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
       case 'Active': return 'bg-green-100 text-green-800 border-green-300';
       case 'Expired': return 'bg-red-100 text-red-800 border-red-300';
@@ -914,14 +914,14 @@ const SubscriptionManagement = () => {
     //     <span className="text-gray-700 text-sm">{row.getValue('SubscriptionStatus')}</span>
     //   ),
     // },
-     {
-        accessorKey: "SubscriptionStatus", header: "Subscription Status",
-        cell: ({ row }) => (
-          <Badge className={`${getStatusColor(row.getValue('SubscriptionStatus'))} border font-medium text-xs px-2 py-0.5 transition-colors`}>
-            {row.getValue('SubscriptionStatus')}
-          </Badge>
-        ),
-      },
+    {
+      accessorKey: "SubscriptionStatus", header: "Subscription Status",
+      cell: ({ row }) => (
+        <Badge className={`${getStatusColor(row.getValue('SubscriptionStatus'))} border font-medium text-xs px-2 py-0.5 transition-colors`}>
+          {row.getValue('SubscriptionStatus')}
+        </Badge>
+      ),
+    },
   ];
 
   // Define table actions
@@ -1011,20 +1011,20 @@ const SubscriptionManagement = () => {
 
   const handleNavigation = () => {
     const { CustomerName, ProductName } = getValues();
-if(CustomerName!=='' && ProductName!==''){
- navigate('/service-desk/payment-details', {
-      state: {
-        parentData: {
-          CustomerName,
-          ProductName,
+    if (CustomerName !== '' && ProductName !== '') {
+      navigate('/service-desk/payment-details', {
+        state: {
+          parentData: {
+            CustomerName,
+            ProductName,
+          },
         },
-      },
-    });
-}
-else{
-  message.error('Please select Customer Name/Product Name')
-}
-   
+      });
+    }
+    else {
+      message.error('Please select Customer Name/Product Name')
+    }
+
   }
 
   return (
@@ -1036,7 +1036,7 @@ else{
             size="small"
             // variant="primary"
             className='bg-primary h-[2.38rem] hover:bg-blue-700  text-white'
-              onClick={()=>{navigate('/service-desk/create-ticket')}}
+            onClick={() => { navigate('/service-desk/create-ticket') }}
           >
             New Service Request
           </ReusableButton>
@@ -1045,18 +1045,20 @@ else{
 
       <div className="p-4 space-y-4 " >
         {/* Header Section */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           <div >
             <h1 className="text-lg font-semibold text-gray-900">Subscription</h1>
             <p className="text-sm text-gray-600 mt-0.5">Subscription Management</p>
           </div>
-          <div className='flex gap-2'>
+          <div className='flex gap-2 w-full sm:w-64 justify-center'>
             <ReusableButton
               size="small"
               variant="primary"
               icon={<Plus className="h-3 w-3" />}
               iconPosition="left"
               onClick={handleNavigation}
+              className="whitespace-nowrap"
+
             >
               Payment Details
             </ReusableButton>
@@ -1066,6 +1068,7 @@ else{
               icon={<></>}
               iconPosition="left"
               onClick={() => downloadExcel(dataSource, columns)}
+              className="whitespace-nowrap"
             >
               Export to Excel
             </ReusableButton>
@@ -1099,9 +1102,9 @@ else{
         {/* User Group List with ReusableTable */}
         <Card className="border-0 shadow-sm">
           <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
               <CardTitle className="text-base font-semibold">Subscription List</CardTitle>
-              <div>
+              <div className="w-full sm:w-64">
                 <ReusableInput
                   placeholder="Search subscriptions..."
                   value={searchTerm}
@@ -1110,7 +1113,7 @@ else{
                   allowClear={true}
                   onClear={() => setSearchTerm('')}
                   size="small"
-                  className="w-50 pl-7"
+                  className="w-full pl-7"
                 />
               </div>
             </div>

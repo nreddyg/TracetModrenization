@@ -4,14 +4,16 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "build:dev": "vite build --mode development",
-    "build:qa": "vite build --mode qa",
-    "build:prod": "vite build --mode production",
-    "lint": "eslint .",
-    "preview": "vite preview"
-  },
+  "dev": "vite --mode dev",                
+  "build": "vite build",                     
+  "build:dev": "vite build --mode dev",      
+  "build:newdev": "vite build --mode newdev",
+  "build:qa": "vite build --mode qa",
+  "build:prod": "vite build --mode production",
+  "lint": "eslint .",
+  "preview": "vite preview"
+},
+
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",

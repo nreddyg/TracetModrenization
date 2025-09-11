@@ -25,7 +25,7 @@ const FilterCard: React.FC<FilterCardProps> = ({
       <CardContent className='mt-5'>
         {children}
         {actions && (
-          <div className="flex xs:justify-center sm:justify-end md:justify-end lg:justify-end  gap-3 mt-6">
+          <div className="flex xxs:justify-center xs2:justify-end md:justify-end lg:justify-end  gap-3 mt-6">
             {actions}
           </div>
         )}

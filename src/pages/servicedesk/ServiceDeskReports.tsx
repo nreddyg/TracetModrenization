@@ -1142,7 +1142,7 @@ const ServiceDeskReports = () => {
             {/* Enhanced Filters Section */}
             <FilterCard
               actions={
-                <div className='flex items-center gap-3 xs:flex-col xs:justify-center sm:flex-row md:flex-row lg:flex-row '>
+                <div className='flex items-center gap-3 xxs:flex-col xxs:justify-center xs2:flex-row md:flex-row lg:flex-row '>
 
                   <Button
                     onClick={handleViewReport}

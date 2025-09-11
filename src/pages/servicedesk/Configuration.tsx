@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Card, CardContent} from '@/components/ui/card';
@@ -712,7 +711,7 @@ const Configuration = () => {
           <TabsContent value="service-request-type" className="space-y-4">
             <Card>
               <CardContent className="pt-6">
-                <div className="grid grid-cols-2 gap-6 mb-6">
+                <div className="grid xxs:grid-cols-1 xs2:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-6">
                   <div className="space-y-4">
                     <div className="space-y-2 ">
                       {getFieldsByNames(['ServiceRequestType','UserGroups','Vendors','SLAHoursMinutes','ReminderForSLAHoursMinutes']).map((field) => {

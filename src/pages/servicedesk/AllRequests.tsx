@@ -1,4 +1,3 @@
-
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import {ColumnDef } from '@tanstack/react-table';
 import { Card, CardContent, CardTitle} from '@/components/ui/card';
@@ -188,7 +187,8 @@ const AllRequests = () => {
         </div>
 
         {/* Enhanced Stats Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4 lg:gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
+
           <Card className="border-0 shadow-sm bg-gradient-to-br from-blue-50 to-blue-100/50">
             <CardContent className="p-3 sm:p-4 lg:p-5">
               <div className="flex items-center justify-between">
@@ -256,6 +256,7 @@ const AllRequests = () => {
             </CardContent>
           </Card>
         </div>
+
         <div>
           <Card>
             <CardTitle className="text-lg flex px-6 py-1 pt-2 items-center gap-2">{"Filters"}</CardTitle>

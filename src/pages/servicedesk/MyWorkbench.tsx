@@ -307,7 +307,7 @@ const MyWorkbench = () => {
                         {renderField(field)}
                       </div>))
                   }
-                  <div className="flex items-center mt-6  ">
+                  <div className="flex items-center xxs:mt-1 xs2:mt-2 sm:mt-6 md:mt-6" >
                     <ReusableButton size={"middle"} htmlType='submit' variant="primary" className='h-9 mt-1'>Search</ReusableButton>
                   </div>
                 </div>

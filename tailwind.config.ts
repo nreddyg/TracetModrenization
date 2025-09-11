@@ -20,8 +20,8 @@ export default {
 		},
 		extend: {
 			screens: {
-				xs: "310px", // custom breakpoint for very small mobiles
-				sm: "365px"
+				xxs: "310px", // custom breakpoint for very small mobiles
+				xs2: "365px"
 			},
 			colors: {
 				border: 'hsl(var(--border))',

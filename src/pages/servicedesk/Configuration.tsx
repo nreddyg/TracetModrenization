@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Card, CardContent} from '@/components/ui/card';
@@ -13,7 +14,7 @@ import { ReusableMultiSelect } from '@/components/ui/reusable-multi-select';
 import ReusableSingleCheckbox from '@/components/ui/reusable-single-checkbox';
 import { ReusableTextarea } from '@/components/ui/reusable-textarea';
 import { deleteSRType, GetNotifyTypeLookup, GetServiceRequestAssignToLookups, GetServiceRequestStatus, 
-  getServiceRequestTypes, getSRConfigList, getSRTypesById, getStatusLookups, getVendorDetails, 
+  getServiceRequestTypes, getSRConfigList, getSRTypesById, getStatusLookups, getStatusLookupsForSLA, getVendorDetails, 
   postDeleteServiceRequestStatus, postServiceRequestConfiguration, postServiceRequestStatus, 
   postServiceRequestType, postUpdateServiceRequestStatus, postUpdateServiceRequesttype, 
   postUpdateStatusSequence } 
@@ -375,7 +376,7 @@ const Configuration = () => {
   const fetchLookupsandGetAPIs=async ()=>{
     dispatch(setLoading(true));
     try{
-      let [NotifyLookup,SRStatusLookup,getVendors,SRTAssignToLookup,getBranches]=await Promise.allSettled([GetNotifyTypeLookup(),getStatusLookups(companyId),getVendorDetails(companyId),GetServiceRequestAssignToLookups(companyId,"All"),getSRBranchList(companyId)]);
+      let [NotifyLookup,SRStatusLookup,getVendors,SRTAssignToLookup,getBranches,getStatusForSLA]=await Promise.allSettled([GetNotifyTypeLookup(),getStatusLookups(companyId),getVendorDetails(companyId),GetServiceRequestAssignToLookups(companyId,"All"),getSRBranchList(companyId),getStatusLookupsForSLA(companyId)]);
       const allResponses = {
             NotifyUserTypes: { data: NotifyLookup.status === 'fulfilled' && NotifyLookup.value.success && NotifyLookup.value.data.ServiceRequestNotifyTypeLookup ? NotifyLookup.value.data.ServiceRequestNotifyTypeLookup : [], label: 'NotifyTypeName', value: 'NotifyTypeId' },
             DefaultSLAStatusDataList: { data: SRStatusLookup.status === 'fulfilled' && SRStatusLookup.value.success && SRStatusLookup.value.data.ServiceRequestStatusLookup ? SRStatusLookup.value.data.ServiceRequestStatusLookup : [], label: 'ServiceRequestStatusName', value: 'ServiceRequestStatusId' },
@@ -386,7 +387,7 @@ const Configuration = () => {
             },
             UserGroups:{ data: SRTAssignToLookup.status === 'fulfilled' && SRTAssignToLookup.value.success && SRTAssignToLookup.value.data.ServiceRequestAssignToUserGroupLookup ? SRTAssignToLookup.value.data.ServiceRequestAssignToUserGroupLookup : [], label: 'UserGroupName', value: 'UserGroupId' },
             EscalationTo:{ data: SRTAssignToLookup.status === 'fulfilled' && SRTAssignToLookup.value.success && SRTAssignToLookup.value.data.ServiceRequestAssignToUsersLookup ? SRTAssignToLookup.value.data.ServiceRequestAssignToUsersLookup : [], label: 'UserName', value: 'UserId' },
-            StatusToCalculate: { data: SRStatusLookup.status === 'fulfilled' && SRStatusLookup.value.success && SRStatusLookup.value.data.ServiceRequestStatusLookup ? SRStatusLookup.value.data.ServiceRequestStatusLookup.filter((ele:any)=>ele.ServiceRequestStatusId!=704) : [], label: 'ServiceRequestStatusName', value: 'ServiceRequestStatusId' },
+            StatusToCalculate: { data: getStatusForSLA.status === 'fulfilled' && getStatusForSLA.value.success && getStatusForSLA.value.data.ServiceRequestStatusToCalculateSLALookup ? getStatusForSLA.value.data.ServiceRequestStatusToCalculateSLALookup.filter((ele:any)=>ele.ServiceRequestStatusId!=704) : [], label: 'ServiceRequestStatusName', value: 'ServiceRequestStatusId' },
                     Branches: { data: getBranches.status === 'fulfilled' && getBranches.value.success && getBranches.value.data ? getBranches.value.data.filter((ele: any) => ele.id !== 0 && ele.parent !== '#' && ele.type !== '99') : [], label: 'Name', value: 'id' },
 
           } 
@@ -686,7 +687,7 @@ const Configuration = () => {
           <TabsContent value="service-request-config" className="space-y-4">
             <Card>
               <CardContent className="pt-6">
-                <div className="grid xxs:grid-cols-1 xs2:grid-cols-1 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="grid grid-cols-2 gap-6">
                   <div className="space-y-4 ">
                     {getFieldsByNames(['CustomerFieldinMyRequest', 'AssetFieldinCreateEditServiceRequest', 'IsDefaultNotifyUsers','NotifyUserTypes']).map((field) => {
                       return  <div className="flex-1 items-center space-x-2">
@@ -696,7 +697,7 @@ const Configuration = () => {
                   </div>
                   <div className="space-y-4">
                     {getFieldsByNames(['AllowWorkOrderCreation', 'PauseSLAcalculation','DefaultSLAStatusDataList']).map((field) => {
-                      return  <div className={`flex-1 items-center space-x-2 ${field.name==='PauseSLAcalculation'?' sm:!mb-4 lg:!mb-8':''}`}>
+                      return  <div className="flex-1 items-center space-x-2">
                        {renderField(field)}
                     </div>;
                     })} 
@@ -720,7 +721,7 @@ const Configuration = () => {
           <TabsContent value="service-request-type" className="space-y-4">
             <Card>
               <CardContent className="pt-6">
-                <div className="grid xxs:grid-cols-1 xs2:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-6">
+                <div className="grid grid-cols-2 gap-6 mb-6">
                   <div className="space-y-4">
                     <div className="space-y-2 ">
                       {getFieldsByNames(['ServiceRequestType','UserGroups','Vendors','SLAHoursMinutes','ReminderForSLAHoursMinutes',"Branches"]).map((field) => {

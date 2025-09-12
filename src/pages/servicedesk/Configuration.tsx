@@ -27,6 +27,7 @@ import ReusableTable, { TableAction, TablePermissions } from '@/components/ui/re
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, } from '@/components/ui/dialog';
 import { ReusableButton } from '@/components/ui/reusable-button';
 import { useAppSelector } from '@/store';
+import { getSRBranchList } from '@/services/ticketServices';
 interface OptType {
   data:  {[key: string]: any}[];
   label: string;
@@ -47,6 +48,7 @@ interface serviceRequestType{
   "EscalationTo": any,
   "StatusToCalculate": any,
   "Description":string,
+  "Branches":string,
   "ServiceRequestTypeAdmin":string
 }
 interface Status{
@@ -87,6 +89,7 @@ const Configuration = () => {
     {id:'EscalationTo',accessorKey: "EscalationTo", header: "Escalation To"},
     {id:'StatusToCalculate',accessorKey: "StatusToCalculate", header: "Status To Calculate SLA"},
     {id:'Description',accessorKey: "Description", header: "Description"},
+    {id:'Branches',accessorKey: "Branches", header: "Branches"},
     {id:'ServiceRequestTypeAdmin',accessorKey: "ServiceRequestTypeAdmin", header: "Service Request Type Admin",},
   ]);
   const [statusColumns,setStatusColumns]=useState<ColumnDef<Status>[]>([
@@ -231,10 +234,12 @@ const Configuration = () => {
             "ResponseReminderHours": watch('ReminderForSLAHoursMinutes') ? watch('ReminderForSLAHoursMinutes').split(':')[0] || '' : '',//"12",
             "ResponseReminderMinutes": watch('ReminderForSLAHoursMinutes') ? watch('ReminderForSLAHoursMinutes').split(':')[1] || '' : '',//"45",
             "serAdminUserGroupList": watch('ServiceRequestTypeAdmin') && watch('ServiceRequestTypeAdmin')['User Group'] ? watch('ServiceRequestTypeAdmin')['User Group']?.join() : '',
-            "serAdminUserList":watch('ServiceRequestTypeAdmin') &&  watch('ServiceRequestTypeAdmin')['Users'] ? watch('ServiceRequestTypeAdmin')['Users']?.join() : ''
+            "serAdminUserList":watch('ServiceRequestTypeAdmin') &&  watch('ServiceRequestTypeAdmin')['Users'] ? watch('ServiceRequestTypeAdmin')['Users']?.join() : '',
+            "BranchList":Array.isArray(watch('Branches')) ? watch('Branches').join() : ''
           }
         ]
       }
+      console.log(payload,"Nag")
       if (isEditMode && selectedRecord) {
         dispatch(setLoading(true));
         await postUpdateServiceRequesttype(companyId,selectedRecord.Id,'All',payload).then(res=>{
@@ -371,7 +376,7 @@ const Configuration = () => {
   const fetchLookupsandGetAPIs=async ()=>{
     dispatch(setLoading(true));
     try{
-      let [NotifyLookup,SRStatusLookup,getVendors,SRTAssignToLookup]=await Promise.allSettled([GetNotifyTypeLookup(),getStatusLookups(companyId),getVendorDetails(companyId),GetServiceRequestAssignToLookups(companyId,"All")]);
+      let [NotifyLookup,SRStatusLookup,getVendors,SRTAssignToLookup,getBranches]=await Promise.allSettled([GetNotifyTypeLookup(),getStatusLookups(companyId),getVendorDetails(companyId),GetServiceRequestAssignToLookups(companyId,"All"),getSRBranchList(companyId)]);
       const allResponses = {
             NotifyUserTypes: { data: NotifyLookup.status === 'fulfilled' && NotifyLookup.value.success && NotifyLookup.value.data.ServiceRequestNotifyTypeLookup ? NotifyLookup.value.data.ServiceRequestNotifyTypeLookup : [], label: 'NotifyTypeName', value: 'NotifyTypeId' },
             DefaultSLAStatusDataList: { data: SRStatusLookup.status === 'fulfilled' && SRStatusLookup.value.success && SRStatusLookup.value.data.ServiceRequestStatusLookup ? SRStatusLookup.value.data.ServiceRequestStatusLookup : [], label: 'ServiceRequestStatusName', value: 'ServiceRequestStatusId' },
@@ -383,7 +388,10 @@ const Configuration = () => {
             UserGroups:{ data: SRTAssignToLookup.status === 'fulfilled' && SRTAssignToLookup.value.success && SRTAssignToLookup.value.data.ServiceRequestAssignToUserGroupLookup ? SRTAssignToLookup.value.data.ServiceRequestAssignToUserGroupLookup : [], label: 'UserGroupName', value: 'UserGroupId' },
             EscalationTo:{ data: SRTAssignToLookup.status === 'fulfilled' && SRTAssignToLookup.value.success && SRTAssignToLookup.value.data.ServiceRequestAssignToUsersLookup ? SRTAssignToLookup.value.data.ServiceRequestAssignToUsersLookup : [], label: 'UserName', value: 'UserId' },
             StatusToCalculate: { data: SRStatusLookup.status === 'fulfilled' && SRStatusLookup.value.success && SRStatusLookup.value.data.ServiceRequestStatusLookup ? SRStatusLookup.value.data.ServiceRequestStatusLookup.filter((ele:any)=>ele.ServiceRequestStatusId!=704) : [], label: 'ServiceRequestStatusName', value: 'ServiceRequestStatusId' },
-      } 
+                    Branches: { data: getBranches.status === 'fulfilled' && getBranches.value.success && getBranches.value.data ? getBranches.value.data.filter((ele: any) => ele.id !== 0 && ele.parent !== '#' && ele.type !== '99') : [], label: 'Name', value: 'id' },
+
+          } 
+          
       setLookupsDataInJson(allResponses)
     }catch{}finally{dispatch(setLoading(false));}
   }
@@ -418,7 +426,7 @@ const Configuration = () => {
       setIsEditStatusMode(false);
       setSelectedStatusRec(null)
     }else{
-      form.reset({...form.getValues(),ServiceRequestType:'',UserGroups:[],Vendors:[],SLAHoursMinutes:'',ReminderForSLAHoursMinutes:'',EscalationTo:[],StatusToCalculate:'',ServiceRequestTypeAdmin:[],Description:''});
+      form.reset({...form.getValues(),ServiceRequestType:'',UserGroups:[],Vendors:[],SLAHoursMinutes:'',ReminderForSLAHoursMinutes:'',EscalationTo:[],StatusToCalculate:'',ServiceRequestTypeAdmin:[],Branches:[],Description:''});
       setIsEditMode(false);
       setSelectedRecord(null);
     }
@@ -577,7 +585,8 @@ const Configuration = () => {
             Vendors:res.data.ServiceRequestType.Vendors?res.data.ServiceRequestType.Vendors.split(','):[],
             ServiceRequestTypeAdmin:res.data.ServiceRequestType.ServiceRequestTypeAdmin?segregateOptionsAsGroupsAndUsers('ServiceRequestTypeAdmin',res.data.ServiceRequestType.ServiceRequestTypeAdmin.split(',')):[],
             SLAHoursMinutes: res.data.ServiceRequestType.SLAHoursMinutes? formatSLAHoursMinutes(res.data.ServiceRequestType.SLAHoursMinutes): "",
-            ReminderForSLAHoursMinutes:res.data.ServiceRequestType.ReminderForSLAHoursMinutes?formatSLAHoursMinutes(res.data.ServiceRequestType.ReminderForSLAHoursMinutes):''
+            ReminderForSLAHoursMinutes:res.data.ServiceRequestType.ReminderForSLAHoursMinutes?formatSLAHoursMinutes(res.data.ServiceRequestType.ReminderForSLAHoursMinutes):'',
+            Branches:res.data.ServiceRequestType.Branches?res.data.ServiceRequestType.Branches.split(","):[]
           })
         }
       }
@@ -715,7 +724,7 @@ const Configuration = () => {
                 <div className="grid grid-cols-2 gap-6 mb-6">
                   <div className="space-y-4">
                     <div className="space-y-2 ">
-                      {getFieldsByNames(['ServiceRequestType','UserGroups','Vendors','SLAHoursMinutes','ReminderForSLAHoursMinutes']).map((field) => {
+                      {getFieldsByNames(['ServiceRequestType','UserGroups','Vendors','SLAHoursMinutes','ReminderForSLAHoursMinutes',"Branches"]).map((field) => {
                         return  <div className="flex-1 items-center space-x-2">
                         {renderField(field)}
                       </div>;

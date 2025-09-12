@@ -136,6 +136,18 @@ export const CONFIGURATION_DB:BaseField[]=[
         placeholder: 'Enter Description',
         isRequired: false,
     },
+     {
+        name: 'Branches',
+        label: 'Branch',
+        fieldType: 'multiselect',
+        placeholder: 'Select Branch',
+        isRequired: false,
+        
+        options: [],
+        defaultValue:[],
+        value: [],
+        selectAll:true,
+    },
     {
         name: 'Status',
         label: 'Status Type',

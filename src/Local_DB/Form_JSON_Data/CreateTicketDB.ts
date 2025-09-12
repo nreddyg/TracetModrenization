@@ -124,16 +124,16 @@ export const CREATE_TICKET_DB: BaseField[] = [
     fieldType: "dropdown",
     name: "Priority",
     placeholder: "Select Priority",
-    isRequired: false,
+    isRequired: true,
     allowClear: true,
     options: [
       { label: "Low", value: "Low" },
       { label: "Medium", value: "Medium" },
       { label: "High", value: "High" },
     ],
-    defaultValue:'',
-    show:false,
-    disabled:false
+    defaultValue:'Medium',
+    show:true,
+    disabled:false,
   },
   {    
     label: "Asset Code",

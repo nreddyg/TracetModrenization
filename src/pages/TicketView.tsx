@@ -1061,6 +1061,7 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
           "AssigneeSelectedUsers": watch('AssigneeSelectedUsers')["Users"] ? watch('AssigneeSelectedUsers')["Users"].join(',') : "",
           "CCListSelectedUsers": watch('CCListSelectedUsers')["Users"] ? watch('CCListSelectedUsers')["Users"].join(',') : "",
           "Severity": watch('Severity'),
+          // "Priority":watch('Priority'),
           "AssetIds": watch('AssetId').join(','),
           "IsDraft": false,
           "RequestedDate": formatDate(watch('RequestedDate'), 'DD-MM-YYYY'),
@@ -1081,7 +1082,8 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
         msg.success(res.data.message)
         setHasChanges(false);
       } else {
-        msg.warning(res?.data?.ErrorDetails[0]['Error Message'] || 'Please Fille All The Required Fields')
+        let errMsg=(res.data.ErrorDetails && res.data.ErrorDetails[0]['Error Message'])?res.data.ErrorDetails[0]['Error Message']:res.data.message
+        msg.warning(errMsg);
       }
     }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
   };

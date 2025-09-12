@@ -708,7 +708,7 @@ export const ReusableDropdown: React.FC<SelectProps> = ({
       </div>
 
       {(status === "error" || error) && (
-        <p className="text-xs text-red-500" role="alert">
+        <p className="text-xs text-red-500 mt-1" role="alert">
           {error}
         </p>
       )}

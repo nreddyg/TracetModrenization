@@ -1036,11 +1036,11 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
   //get additional fields data
   function getAdditionalFieldsData(): additionalFieldData[] {
     return fields.filter(field => field.isAdditionalField).map(field => {
-      const val = watch(field.name);
+      const val = watch(field.name) || '';
       return {
         AdditionalFieldName: field.name,
         TextBoxValue: field.fieldType === 'text' || field.fieldType === 'numeric' ? val : '',
-        DateValues: field.fieldType === 'date' ? formatDate(val, 'DD/MM/YYYY') : '',
+        DateValues: field.fieldType === 'date' && val ? formatDate(val, 'DD/MM/YYYY') : '',
         SelectedValues: field.fieldType === 'dropdown' || field.fieldType === 'radiobutton' ? val : field.fieldType === 'checkbox' ? Array.isArray(val) ? val.join(',') : '' : ''
       };
     });
@@ -1061,6 +1061,7 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
           "AssigneeSelectedUsers": watch('AssigneeSelectedUsers')["Users"] ? watch('AssigneeSelectedUsers')["Users"].join(',') : "",
           "CCListSelectedUsers": watch('CCListSelectedUsers')["Users"] ? watch('CCListSelectedUsers')["Users"].join(',') : "",
           "Severity": watch('Severity'),
+          "Priority":watch('Priority'),
           "AssetIds": watch('AssetId').join(','),
           "IsDraft": false,
           "RequestedDate": formatDate(watch('RequestedDate'), 'DD-MM-YYYY'),
@@ -1081,7 +1082,8 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
         msg.success(res.data.message)
         setHasChanges(false);
       } else {
-        msg.warning(res?.data?.ErrorDetails[0]['Error Message'] || 'Please Fille All The Required Fields')
+        let errMsg=(res.data.ErrorDetails && res.data.ErrorDetails[0]['Error Message'])?res.data.ErrorDetails[0]['Error Message']:res.data.message
+        msg.warning(errMsg);
       }
     }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
   };

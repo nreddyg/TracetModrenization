@@ -412,7 +412,7 @@ export const ReusableTextarea = forwardRef<TextareaRef, ReusableTextareaProps>(
         {renderLabel()}
         </div>
         {renderTextareaWrapper()}
-        {(error || status === 'error') && <p className="text-xs text-red-500">{error}</p>}
+        {(error || status === 'error') && <p className="text-xs text-red-500 mt-1">{error}</p>}
         {status === 'warning' && <p className="text-xs text-orange-500">Warning message</p>}
         {status === 'success' && <p className="text-xs text-green-500">Success message</p>}
         {renderCount()}

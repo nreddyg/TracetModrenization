@@ -14,7 +14,7 @@ import { MessageProvider } from "./components/ui/reusable-message";
 import WrapperLazyComponent from "./components/common/WrapperLazyComponent";
 import AssetCodeTable from "./pages/servicedesk/AssetCodeTable";
 import ServiceRequestReport from "./pages/servicedesk/ServiceRequestDetailsHistory";
-import { getOrganizationDetailsByToken } from "./services/appService";
+import { getOrganizationDetailsByToken, getUserDetailsByUserName } from "./services/appService";
 import { useAppDispatch } from "./store";
 import { setCompanyId, setLoading } from "./store/slices/projectsSlice";
 
@@ -140,10 +140,13 @@ const AnimatedRoutes = () => {
       </Routes>
     );
   }
-
+  let userName=JSON.parse(localStorage.getItem('UserName'));
   useEffect(()=>{
-    fetchOrganizationDetailsByToken();
-  },[])
+    if(userName){
+      fetchUserDetailsByUserName()
+      fetchOrganizationDetailsByToken();
+    }
+  },[userName])
   //get organization details by token
   const fetchOrganizationDetailsByToken=async()=>{
     dispatch(setLoading(true));
@@ -153,6 +156,18 @@ const AnimatedRoutes = () => {
           if(res.data.organizations.length!==0){
             dispatch(setCompanyId(res.data.organizations[0]['OrganizationId'] || null));
           }
+        }
+      }
+    }).catch(err=>{}).finally(()=>{dispatch(setLoading(false))})
+  }
+  const fetchUserDetailsByUserName=async()=>{
+    dispatch(setLoading(true));
+    await getUserDetailsByUserName(userName).then(res=>{
+      if(res.success && Array.isArray(res.data)){
+         if(res.data.length!==0){
+          localStorage.setItem('LoggedInUser',JSON.stringify(res.data[0]))
+        }else{
+           localStorage.setItem('LoggedInUser',JSON.stringify({}));
         }
       }
     }).catch(err=>{}).finally(()=>{dispatch(setLoading(false))})

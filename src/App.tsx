@@ -162,7 +162,7 @@ const AnimatedRoutes = () => {
   }
   const fetchUserDetailsByUserName=async()=>{
     await getUserDetailsByUserName(userName).then(res=>{
-      if(res.data.success && Array.isArray(res.data)){
+      if(res.success && Array.isArray(res.data)){
          if(res.data.length!==0){
           localStorage.setItem('LoggedInUser',JSON.stringify(res.data[0]))
         }else{

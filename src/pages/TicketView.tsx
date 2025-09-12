@@ -78,7 +78,8 @@ export interface Ticket {
    ChildServiceRequestNo?:string,
   RequestType?: string,
   AssignedTo?:string,
-  TicketStatus?: string
+  TicketStatus?: string,
+  RequestedById?:number
 }
 interface ActivityLog {
   id: string;
@@ -175,6 +176,7 @@ const TicketView = () => {
   const storeData = useAppSelector(state => state);
   const [srtLookupData,setSrtLookupData]=useState<any[]>([]);
   const [assetsData,setAssetData]=useState([])
+    let LoggedInUserData=JSON.parse(localStorage.getItem('LoggedInUser'));
 
   // Add ref to track previous ServiceRequestType to prevent infinite loops
   const prevServiceRequestTypeRef = useRef<string>('');
@@ -1131,7 +1133,7 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
         if (attachments?.length > 0) {
           handleSubmitUploadedFiles(originalTicket.ServiceRequestId.toString(),updatedData)
         }else{
-          if(updatedData.Status=="Closed"){
+          if(updatedData.Status=="Closed" && requestTypeId!=="106"){
              navigate(-1)
           }
         fetchSingleTicketRelatedAPIs(Number(selectedTicketId))
@@ -1208,19 +1210,33 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
       setHasChanges(true);
       let isNotClosed = selectedTicket.Status !== "Closed"
       fieldsCopy.forEach(field => {
-        if (isNotClosed) {
+      if (isNotClosed) {
           if (!field.isAlwaysOnDisabled && (field.name !== 'Branch' && field.name !== 'ServiceRequestType'&& field.name !== 'RequestedBy')) {
             if((workBenchEnables.includes(requestTypeId)) && (field.name !== 'Severity') && (field.name !== 'Customer')&& ( field.name !== 'Title' && field.name !== 'Description') ){
              field.disabled = false;
-            }else if((myRequestEnables.includes(requestTypeId)) && (field.name !== 'Priority')  ){
-              field.disabled = false;
+            }else if(myRequestEnables.includes(requestTypeId) && (field.name !== 'Priority')  ){
+              if (field.name == 'Title' || field.name == 'Description') {
+                if (selectedTicket.Status == "Open" || selectedTicket.Status == "Re-Open") {
+                  field.disabled = false;
+                }
+              } else {
+                field.disabled = false;
+              }
             }else if(requestTypeId==="106"){
-                 field.disabled = false;
+              if (field.name == 'Title' || field.name == 'Description') {
+                console.log('jhdjewhgewhewhdwedh')
+                if (((selectedTicket.Status == "Open" || selectedTicket.Status == "Re-Open") && selectedTicket["RequestedById"] == LoggedInUserData.UserId)) {
+                  field.disabled = false;
+                }
+              } else {
+                console.log('jhdjewhgewhewhdwedhs else', field.name)
+                field.disabled = false;
+              }
             }
-            
+           
            
           }
-        } else {
+        }else {
           field.disabled = !enableInClose.includes(field.name)
         }
       });
@@ -1491,7 +1507,7 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
                                         </div>
 
                                         {/* Delete Icon */}
-                                        {isEditing &&
+                                        {isEditing && (x["FileCreatedBy"]==LoggedInUserData.UserId) &&
                                           <button
                                             onClick={() => {
                                               handleAttachmentDelete(x.FileUploadId)

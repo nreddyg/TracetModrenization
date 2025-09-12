@@ -108,8 +108,7 @@ const ServiceRequestReport: React.FC = () => {
   } else {
     pdf.addImage(imgData, "PNG", margin, y, imgWidth, imgHeight);
   }
-
-  pdf.save("ServiceRequestReport.pdf");
+  pdf.save("Service Request Detail History Report.pdf");
 };
 
 
@@ -130,7 +129,7 @@ const ServiceRequestReport: React.FC = () => {
     );
     XLSX.utils.book_append_sheet(wb, historySheet, "History");
 
-    XLSX.writeFile(wb, "ServiceRequestReport.xlsx");
+    XLSX.writeFile(wb, "Service Request Detail History Report.xlsx");
   };
 
   const handleExportCSV = () => {
@@ -148,7 +147,7 @@ const ServiceRequestReport: React.FC = () => {
     const worksheet = XLSX.utils.aoa_to_sheet(csvData);
     const csv = XLSX.utils.sheet_to_csv(worksheet);
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    saveAs(blob, "ServiceRequestReport.csv");
+    saveAs(blob, "Service Request Detail History Report.csv");
   };
 
   return (

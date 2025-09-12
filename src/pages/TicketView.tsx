@@ -1367,7 +1367,7 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
                 <span className="text-gray-600 text-sm">All Tickets</span>
                 <span className="text-gray-400">|</span>
                 {!isCreateMode && <span className="text-blue-600 font-medium">{selectedTicket?.Title || ''}</span>}
-                <Badge className={getPriorityColor(watch('Severity'))}>{watch('Severity')}</Badge>
+                <Badge className={getPriorityColor(watch('Severity')) }>{watch('Severity')}</Badge>
                 {!isCreateMode && <Badge className={getStatusColor(selectedTicket?.Status)}>{selectedTicket?.Status || ''}</Badge>}
               </div>
 
@@ -1378,7 +1378,7 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
               )}
             </div>
 
-            <div className="xxs:flex items-center justify-end">
+            <div className="xxs:flex items-center gap-3 justify-end">
               {!isEditing && !isCreateMode ? (
                 <ReusableButton
                   variant="primary"

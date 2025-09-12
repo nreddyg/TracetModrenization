@@ -677,7 +677,7 @@ const Configuration = () => {
           <TabsContent value="service-request-config" className="space-y-4">
             <Card>
               <CardContent className="pt-6">
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid xxs:grid-cols-1 xs2:grid-cols-1 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 gap-6">
                   <div className="space-y-4 ">
                     {getFieldsByNames(['CustomerFieldinMyRequest', 'AssetFieldinCreateEditServiceRequest', 'IsDefaultNotifyUsers','NotifyUserTypes']).map((field) => {
                       return  <div className="flex-1 items-center space-x-2">
@@ -687,7 +687,7 @@ const Configuration = () => {
                   </div>
                   <div className="space-y-4">
                     {getFieldsByNames(['AllowWorkOrderCreation', 'PauseSLAcalculation','DefaultSLAStatusDataList']).map((field) => {
-                      return  <div className="flex-1 items-center space-x-2">
+                      return  <div className={`flex-1 items-center space-x-2 ${field.name==='PauseSLAcalculation'?' sm:!mb-4 lg:!mb-8':''}`}>
                        {renderField(field)}
                     </div>;
                     })} 

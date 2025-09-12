@@ -31,9 +31,9 @@ export function formatDateToDDMMYYYY(dateTimeStr: string) {
  export const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'Critical': return 'bg-red-600 text-white';
-      case 'High': return 'bg-red-100 text-red-800';
-      case 'Medium': return 'bg-yellow-100 text-yellow-800';
-      case 'Low': return 'bg-green-100 text-green-800';
+      case 'High': return 'bg-red-100 text-red-800 hover:bg-red-200';
+      case 'Medium': return 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200';
+      case 'Low': return 'bg-green-100 text-green-800 hover:bg-green-200';
       default: return 'bg-gray-100 text-gray-800';
     }
 };

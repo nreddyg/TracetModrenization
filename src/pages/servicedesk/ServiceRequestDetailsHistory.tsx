@@ -1,6 +1,6 @@
 import ReusableTable from "@/components/ui/reusable-table";
 import { getServiceRequestDetailsHistoryReport } from "@/services/servicedeskReportsServices";
-import { useAppDispatch } from "@/store";
+import { useAppDispatch, useAppSelector } from "@/store";
 import { setLoading } from "@/store/slices/projectsSlice";
 import { ColumnDef } from "@tanstack/react-table";
 import React, { useEffect, useState, useRef } from "react";
@@ -23,13 +23,15 @@ const ServiceRequestReport: React.FC = () => {
   const [dataSource, setDataSource] = useState<any[]>([]);
   const [cols, setCols] = useState<ColumnDef<any>[]>([]);
   const storedData = localStorage.getItem("srData");
+  const companyId=useAppSelector(state=>state.projects.companyId);
+  
 
   // Ref to capture the full component
   const reportRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchServiceRequestDetailsHistoryReport(
-      111,
+      companyId,
       "All",
       JSON.parse(storedData || "{}").id || ""
     );
@@ -108,8 +110,7 @@ const ServiceRequestReport: React.FC = () => {
   } else {
     pdf.addImage(imgData, "PNG", margin, y, imgWidth, imgHeight);
   }
-
-  pdf.save("ServiceRequestReport.pdf");
+  pdf.save("Service Request Detail History Report.pdf");
 };
 
 
@@ -130,7 +131,7 @@ const ServiceRequestReport: React.FC = () => {
     );
     XLSX.utils.book_append_sheet(wb, historySheet, "History");
 
-    XLSX.writeFile(wb, "ServiceRequestReport.xlsx");
+    XLSX.writeFile(wb, "Service Request Detail History Report.xlsx");
   };
 
   const handleExportCSV = () => {
@@ -148,7 +149,7 @@ const ServiceRequestReport: React.FC = () => {
     const worksheet = XLSX.utils.aoa_to_sheet(csvData);
     const csv = XLSX.utils.sheet_to_csv(worksheet);
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    saveAs(blob, "ServiceRequestReport.csv");
+    saveAs(blob, "Service Request Detail History Report.csv");
   };
 
   return (

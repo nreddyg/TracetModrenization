@@ -133,12 +133,13 @@ const ServiceDeskReports = () => {
   const [slaDB, setSLADB] = useState<BaseField[]>()
   const [serviceHistoryDetail, setServiceHistoryDetail] = useState<BaseField[]>()
   const [columnVisibility, setColumnVisibility] = useState({});
+  const companyId=useAppSelector(state=>state.projects.companyId);
   // const dispatch =useDispatch();
   const msg = useMessage()
   const [dataSource, setDataSourse] = useState([])
   const [cols, setCols] = useState([])
   let additionalFields = useRef([]);
-  const companyId = useAppSelector(state => state.projects.companyId)
+ 
 
 
   // let data = activeTab === "Service Request SLA Met/SLA Violated" ? slaDB : activeTab === "Service Request Detail History" ? serviceHistoryDetail : fields;
@@ -1120,7 +1121,8 @@ const ServiceDeskReports = () => {
             {/* Enhanced Filters Section */}
             <FilterCard
               actions={
-                <>
+                <div className='flex items-center gap-3 xxs:flex-col xxs:justify-center xs2:flex-row md:flex-row lg:flex-row '>
+
                   <Button
                     onClick={handleViewReport}
                     disabled={isGeneratingReport}
@@ -1144,7 +1146,7 @@ const ServiceDeskReports = () => {
                   >
                     Clear All
                   </Button>
-                </>
+                </div>
               }
             >
               <div className="space-y-2 h-full overflow-y-hidden">

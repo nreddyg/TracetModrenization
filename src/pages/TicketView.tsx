@@ -78,7 +78,8 @@ export interface Ticket {
    ChildServiceRequestNo?:string,
   RequestType?: string,
   AssignedTo?:string,
-  TicketStatus?: string
+  TicketStatus?: string,
+  RequestedById?:number
 }
 interface ActivityLog {
   id: string;
@@ -175,6 +176,7 @@ const TicketView = () => {
   const storeData = useAppSelector(state => state);
   const [srtLookupData,setSrtLookupData]=useState<any[]>([]);
   const [assetsData,setAssetData]=useState([])
+    let LoggedInUserData=JSON.parse(localStorage.getItem('LoggedInUser'));
 
   // Add ref to track previous ServiceRequestType to prevent infinite loops
   const prevServiceRequestTypeRef = useRef<string>('');
@@ -1036,11 +1038,11 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
   //get additional fields data
   function getAdditionalFieldsData(): additionalFieldData[] {
     return fields.filter(field => field.isAdditionalField).map(field => {
-      const val = watch(field.name);
+      const val = watch(field.name) || '';
       return {
         AdditionalFieldName: field.name,
         TextBoxValue: field.fieldType === 'text' || field.fieldType === 'numeric' ? val : '',
-        DateValues: field.fieldType === 'date' ? formatDate(val, 'DD/MM/YYYY') : '',
+        DateValues: field.fieldType === 'date' && val ? formatDate(val, 'DD/MM/YYYY') : '',
         SelectedValues: field.fieldType === 'dropdown' || field.fieldType === 'radiobutton' ? val : field.fieldType === 'checkbox' ? Array.isArray(val) ? val.join(',') : '' : ''
       };
     });
@@ -1061,6 +1063,7 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
           "AssigneeSelectedUsers": watch('AssigneeSelectedUsers')["Users"] ? watch('AssigneeSelectedUsers')["Users"].join(',') : "",
           "CCListSelectedUsers": watch('CCListSelectedUsers')["Users"] ? watch('CCListSelectedUsers')["Users"].join(',') : "",
           "Severity": watch('Severity'),
+          "Priority":watch('Priority'),
           "AssetIds": watch('AssetId').join(','),
           "IsDraft": false,
           "RequestedDate": formatDate(watch('RequestedDate'), 'DD-MM-YYYY'),
@@ -1081,7 +1084,8 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
         msg.success(res.data.message)
         setHasChanges(false);
       } else {
-        msg.warning(res?.data?.ErrorDetails[0]['Error Message'] || 'Please Fille All The Required Fields')
+        let errMsg=(res.data.ErrorDetails && res.data.ErrorDetails[0]['Error Message'])?res.data.ErrorDetails[0]['Error Message']:res.data.message
+        msg.warning(errMsg);
       }
     }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
   };
@@ -1129,7 +1133,7 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
         if (attachments?.length > 0) {
           handleSubmitUploadedFiles(originalTicket.ServiceRequestId.toString(),updatedData)
         }else{
-          if(updatedData.Status=="Closed"){
+          if(updatedData.Status=="Closed" && requestTypeId!=="106"){
              navigate(-1)
           }
         fetchSingleTicketRelatedAPIs(Number(selectedTicketId))
@@ -1206,19 +1210,33 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
       setHasChanges(true);
       let isNotClosed = selectedTicket.Status !== "Closed"
       fieldsCopy.forEach(field => {
-        if (isNotClosed) {
+      if (isNotClosed) {
           if (!field.isAlwaysOnDisabled && (field.name !== 'Branch' && field.name !== 'ServiceRequestType'&& field.name !== 'RequestedBy')) {
             if((workBenchEnables.includes(requestTypeId)) && (field.name !== 'Severity') && (field.name !== 'Customer')&& ( field.name !== 'Title' && field.name !== 'Description') ){
              field.disabled = false;
-            }else if((myRequestEnables.includes(requestTypeId)) && (field.name !== 'Priority')  ){
-              field.disabled = false;
+            }else if(myRequestEnables.includes(requestTypeId) && (field.name !== 'Priority')  ){
+              if (field.name == 'Title' || field.name == 'Description') {
+                if (selectedTicket.Status == "Open" || selectedTicket.Status == "Re-Open") {
+                  field.disabled = false;
+                }
+              } else {
+                field.disabled = false;
+              }
             }else if(requestTypeId==="106"){
-                 field.disabled = false;
+              if (field.name == 'Title' || field.name == 'Description') {
+                console.log('jhdjewhgewhewhdwedh')
+                if (((selectedTicket.Status == "Open" || selectedTicket.Status == "Re-Open") && selectedTicket["RequestedById"] == LoggedInUserData.UserId)) {
+                  field.disabled = false;
+                }
+              } else {
+                console.log('jhdjewhgewhewhdwedhs else', field.name)
+                field.disabled = false;
+              }
             }
-            
+           
            
           }
-        } else {
+        }else {
           field.disabled = !enableInClose.includes(field.name)
         }
       });
@@ -1358,7 +1376,7 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col min-w-0 ">
           {/* Navigation and Action Bar */}
-          <div className="bg-white border-b  shadow-sm px-4 lg:px-6 py-3 flex flex-col lg:flex-row lg:items-center justify-between gap-4 shrink-0">
+          <div className="bg-white border-b shadow-sm px-4 lg:px-6 py-3 flex flex-row xxs:flex-col xs2:flex-row lg:flex-row lg:items-center justify-between gap-4 shrink-0">
             <div className="flex items-center gap-4 lg:gap-6 flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <div className=' text-gray-400 hover:text-blue-900 p-1 cursor-pointer' onClick={() => navigate(-1)}>
@@ -1367,7 +1385,7 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
                 <span className="text-gray-600 text-sm">All Tickets</span>
                 <span className="text-gray-400">|</span>
                 {!isCreateMode && <span className="text-blue-600 font-medium">{selectedTicket?.Title || ''}</span>}
-                <Badge className={getPriorityColor(watch('Severity'))}>{watch('Severity')}</Badge>
+                <Badge className={getPriorityColor(watch('Severity')) }>{watch('Severity')}</Badge>
                 {!isCreateMode && <Badge className={getStatusColor(selectedTicket?.Status)}>{selectedTicket?.Status || ''}</Badge>}
               </div>
 
@@ -1378,7 +1396,7 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
               )}
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="xxs:flex items-center gap-3 justify-end">
               {!isEditing && !isCreateMode ? (
                 <ReusableButton
                   variant="primary"
@@ -1426,11 +1444,11 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
               {/* Left Column - Main Content */}
               <div className="lg:col-span-8 flex flex-col  min-h-0 ">
                 <ScrollArea className="flex-1  ">
-                  <div className="space-y-6 pr-3">
+                  <div className="space-y-6 pr-1">
                     <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
                       <CardContent className="pt-6">
                         <div className="space-y-6">
-                          <div className='grid md:grid-cols-[2.2fr_1.8fr] sm:grid-cols-1 space-x-3 '>
+                          <div className='grid md:grid-cols-[2.2fr_1.8fr] sm:grid-cols-1 gap-x-3 gap-y-3 '>
                             {getFieldsByNames(['Title', 'ServiceRequestType']).map((field) => (
                               <div key={field.name}>
                                 {renderField(field)}
@@ -1489,7 +1507,7 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
                                         </div>
 
                                         {/* Delete Icon */}
-                                        {isEditing &&
+                                        {isEditing && (x["FileCreatedBy"]==LoggedInUserData.UserId) &&
                                           <button
                                             onClick={() => {
                                               handleAttachmentDelete(x.FileUploadId)

@@ -56,6 +56,7 @@ import { ReusableDatePicker } from '@/components/ui/reusable-datepicker';
 import { ReusableMultiSelect } from '@/components/ui/reusable-multi-select';
 import { ReusableButton } from '@/components/ui/reusable-button';
 import { GetServiceRequestAssignToLookups } from '@/services/ticketServices';
+import { useAppSelector } from '@/store';
 
 interface Ticket {
   id: string;
@@ -230,6 +231,8 @@ const TicketProgressDashboard = () => {
   const [assigneePopoverOpen, setAssigneePopoverOpen] = useState(false);
   const [activeView, setActiveView] = useState('records');
   const [fields, setFields] = useState(TICKET_PROGRESS_DB);
+  const companyId=useAppSelector(state=>state.projects.companyId);
+  
 
   const filteredTickets = useMemo(() => {
     return tickets.filter(ticket => {
@@ -406,7 +409,7 @@ const TicketProgressDashboard = () => {
 
   // async function fetchLookups() {
   //   const [assigneesValues] = await Promise.allSettled([
-  //     GetServiceRequestAssignToLookups(111, 'All').then(res => res.data),
+  //     GetServiceRequestAssignToLookups(companyId, 'All').then(res => res.data),
   //   ]);
 
   //   setFields(prev =>
@@ -437,7 +440,7 @@ const TicketProgressDashboard = () => {
 
   async function fetchLookups() {
   const [assigneesValues] = await Promise.allSettled([
-    GetServiceRequestAssignToLookups(111, 'All').then(res => res.data),
+    GetServiceRequestAssignToLookups(companyId, 'All').then(res => res.data),
   ]);
 
   setFields(prev =>

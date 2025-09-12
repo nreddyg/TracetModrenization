@@ -1,6 +1,6 @@
 import ReusableTable from "@/components/ui/reusable-table";
 import { getServiceRequestDetailsHistoryReport } from "@/services/servicedeskReportsServices";
-import { useAppDispatch } from "@/store";
+import { useAppDispatch, useAppSelector } from "@/store";
 import { setLoading } from "@/store/slices/projectsSlice";
 import { ColumnDef } from "@tanstack/react-table";
 import React, { useEffect, useState, useRef } from "react";
@@ -23,13 +23,15 @@ const ServiceRequestReport: React.FC = () => {
   const [dataSource, setDataSource] = useState<any[]>([]);
   const [cols, setCols] = useState<ColumnDef<any>[]>([]);
   const storedData = localStorage.getItem("srData");
+  const companyId=useAppSelector(state=>state.projects.companyId);
+  
 
   // Ref to capture the full component
   const reportRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchServiceRequestDetailsHistoryReport(
-      111,
+      companyId,
       "All",
       JSON.parse(storedData || "{}").id || ""
     );

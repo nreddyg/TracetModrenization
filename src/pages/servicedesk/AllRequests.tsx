@@ -98,8 +98,8 @@ const AllRequests = () => {
         if (res.success && res.data.status === undefined) {
           if (Array.isArray(res.data)) {
             let data = res.data.map(item => ({ ...item, AssignedTo: item.AssigneeSelectedUsers || '' + '' + item.AssigneeSelectedUserGroups || '' }));
-            setRequests(data);
-            setFilteredRequests(data);
+            setRequests([...data].reverse());
+            setFilteredRequests([...data].reverse());
           } else {
             setRequests([]);
             setFilteredRequests([]);

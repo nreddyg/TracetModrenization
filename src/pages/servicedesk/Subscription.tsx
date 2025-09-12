@@ -720,6 +720,7 @@ import { getProductName, getSubscriptionTableData } from '@/services/subscriptio
 import ExcelJS from "exceljs";
 import { Badge } from '@/components/ui/badge';
 import { useAppSelector } from '@/store';
+import { setLoading } from '@/store/slices/projectsSlice';
 
 
 
@@ -956,6 +957,7 @@ const SubscriptionManagement = () => {
 
   //table data api integration
   async function getSubscriptionData(compId: number, BranchName: string) {
+    dispatch(setLoading(true))
     await getSubscriptionTableData(compId, BranchName).then(res => {
       if (res.success && res.data) {
         if (res.data?.length > 0) {
@@ -965,17 +967,17 @@ const SubscriptionManagement = () => {
     })
       .catch(err => {
         console.error('Error fetching subscription by customer:', err);
-      });
+      }).finally(()=>{dispatch(setLoading(false))});
   }
 
   //fetch lookup data
   async function fetchLookups() {
-    const [custResult, prodResult] = await Promise.allSettled([
+    dispatch(setLoading(true));
+    try{
+      const [custResult, prodResult] = await Promise.allSettled([
       getSRCustomerLookupsList(companyId, 'All').then(res => res.data.ServiceRequestCustomerLookup),
       getProductName(companyId).then(res => res.data),
     ]);
-
-
     setFields(prev =>
       prev.map(field => {
         if (field.name === "CustomerName" && custResult.status === "fulfilled") {
@@ -1007,6 +1009,14 @@ const SubscriptionManagement = () => {
       ProductName:
         prodResult.status === "fulfilled" ? prodResult.value[0].ProductName : '',
     });
+    }
+    catch(error){
+      message.warning(`Error Fetching Lookups ${error}`)
+    }
+    finally{
+      dispatch(setLoading(false));
+    }
+    
   }
 
   const handleNavigation = () => {

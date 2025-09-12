@@ -176,7 +176,9 @@ const TicketView = () => {
   const storeData = useAppSelector(state => state);
   const [srtLookupData,setSrtLookupData]=useState<any[]>([]);
   const [assetsData,setAssetData]=useState([])
-    let LoggedInUserData=JSON.parse(localStorage.getItem('LoggedInUser'));
+  let LoggedInUserData=JSON.parse(localStorage.getItem('LoggedInUser'));
+  const companyId=useAppSelector(state=>state.projects.companyId);
+  
 
   // Add ref to track previous ServiceRequestType to prevent infinite loops
   const prevServiceRequestTypeRef = useRef<string>('');
@@ -236,7 +238,7 @@ const TicketView = () => {
  
   }, []);
   useEffect(() => {
-    if (watch('Customer')) fetchSubscriptionByCustomer(watch('Customer'), 111, 'All');
+    if (watch('Customer')) fetchSubscriptionByCustomer(watch('Customer'), companyId, 'All');
   }, [watch('Customer')])
   useEffect(() => {
     if (isCreateMode) {
@@ -248,7 +250,7 @@ const TicketView = () => {
           additionalFields.forEach(field => {
             setValue(field.name!, '');
           });
-          fetchAdditionalFieldsData(currentServiceRequestType, 111,false,'setDefaultAssigneeBasedOnServiceRequestType');
+          fetchAdditionalFieldsData(currentServiceRequestType, companyId,false,'setDefaultAssigneeBasedOnServiceRequestType');
         } else {
           const additionalFields = fields.filter(f => f.isAdditionalField);
           additionalFields.forEach(field => {
@@ -300,15 +302,15 @@ const TicketView = () => {
     dispatch(setLoading(true));
     try {
       const [TicketDetails, childTickets, uploadedFiles, getComments, getCommentsHistory] = await Promise.allSettled([
-        getServiceRequestDetailsById(serviceRequestId, 111, 'All'), getLinkedServiceRequests(serviceRequestId, 111), getUploadedFilesByServiceRequestId(serviceRequestId, 111), getCommentsAPI(serviceRequestId.toString(), 111), getCommentHistoryList(serviceRequestId, 111)
+        getServiceRequestDetailsById(serviceRequestId, companyId, 'All'), getLinkedServiceRequests(serviceRequestId, companyId), getUploadedFilesByServiceRequestId(serviceRequestId, companyId), getCommentsAPI(serviceRequestId.toString(), companyId), getCommentHistoryList(serviceRequestId, companyId)
       ]);
       if (TicketDetails.status === 'fulfilled' && TicketDetails.value.data && TicketDetails.value.data.ServiceRequestDetails) {
         let ticketData = TicketDetails.value.data.ServiceRequestDetails
         setSelectedTicket(ticketData);
         try {
-          await fetchAdditionalFieldsData(ticketData.ServiceRequestType, 111, ticketData);
+          await fetchAdditionalFieldsData(ticketData.ServiceRequestType, companyId, ticketData);
             if(ticketData.AssetId){
-             await assetListAPICall(serviceRequestId.toString(),111)
+             await assetListAPICall(serviceRequestId.toString(),companyId)
           }
         } catch (err) {}
       }
@@ -359,7 +361,7 @@ const TicketView = () => {
   //fetch all tickets list
   async function fetchAllTickets(requestType:string) {
     dispatch(setLoading(true))
-    await getAllSRDetailsList('All', 111, requestType).then(res => {
+    await getAllSRDetailsList('All', companyId, requestType).then(res => {
       if (res.success && res.data.status === undefined) {
         if (Array.isArray(res.data)) {
           setTickets(res.data)
@@ -375,7 +377,7 @@ const TicketView = () => {
   //fetch uploaded files data based on the service request id 
   async function fetchUploadedFilesByServiceRequestId(serviceRequestId: number) {
     dispatch(setLoading(true))
-    await getUploadedFilesByServiceRequestId(serviceRequestId, 111).then(res => {
+    await getUploadedFilesByServiceRequestId(serviceRequestId, companyId).then(res => {
       if (res.success && res.data) {
         setUploadData(res.data?.FileUploadDetails)
       } else {
@@ -465,13 +467,13 @@ const TicketView = () => {
     }
    
     dispatch(setLoading(true))
-    await postCommentAPI(111, 'All', payload).then(res => {
+    await postCommentAPI(companyId, 'All', payload).then(res => {
         let commentList=`${updatedComments} Comment:${payload["ServiceRequestComments"][0].Comment}`
       if (res.data.status) {
         msg.success(res.data.message)
         setUpdatedComments(commentList)
         commentForm.setValue("comment","")
-        getCommentApi(originalTicket.ServiceRequestId.toString(), 111);
+        getCommentApi(originalTicket.ServiceRequestId.toString(), companyId);
       } else {
         msg.warning(res?.data?.ErrorDetails[0]['Error Message'] || 'Please Fill All The Required Fields')
       }
@@ -481,7 +483,7 @@ const TicketView = () => {
   const handleHistoryClick = (row: any) => {
     setSelectedRowForHistory(row);
     const recordId = row.id || row.ID || Object.values(row)[0] || 'Unknown';
-    fetchSubscriptionHistoryByCustomer(watch("Customer"), 111, "All", row.ProductId)
+    fetchSubscriptionHistoryByCustomer(watch("Customer"), companyId, "All", row.ProductId)
     setIsHistoryPopupOpen(true);
   };
   //method for generating columns based on data
@@ -566,21 +568,21 @@ const TicketView = () => {
     dispatch(setLoading(true));
     try {
       const [SRTLookUp, SRTAssignToLookup, SRTRequestedByLookup, SRTLinkToLookup, SRTCCListLookup, SRTBranchListLookup, ConfigData, StatusLookup] = await Promise.allSettled([
-        ServiceRequestTypeLookups(111), GetServiceRequestAssignToLookups(111, 'All'),
-        getSRRequestByLookupsList(111, 'All'), getSRLinkToLookupsList(111, 'All'),
-        getSRCCListLookupsList(111, 'All'), getSRBranchList(111), getSRConfigList(111, 'All'),
-        getStatusLookups(111)
+        ServiceRequestTypeLookups(companyId), GetServiceRequestAssignToLookups(companyId, 'All'),
+        getSRRequestByLookupsList(companyId, 'All'), getSRLinkToLookupsList(companyId, 'All'),
+        getSRCCListLookupsList(companyId, 'All'), getSRBranchList(companyId), getSRConfigList(companyId, 'All'),
+        getStatusLookups(companyId)
       ]);
       let configuration = ConfigData.status === 'fulfilled' && ConfigData.value.data && ConfigData.value.data.ServiceRequestConfiguration ? ConfigData.value.data.ServiceRequestConfiguration : { CustomerFieldinMyRequest: true, AssetFieldinCreateEditServiceRequest: true }
       let fetchCustomerAndAssetCodesLookup = { Customer: configuration.CustomerFieldinMyRequest, AssetId: configuration.AssetFieldinCreateEditServiceRequest,...configuration };
       let SRTCustomerLookup: [] = [], Assets: [] = [];
       if (fetchCustomerAndAssetCodesLookup.Customer) {
-        await getSRCustomerLookupsList(111, 'All').then(res => {
+        await getSRCustomerLookupsList(companyId, 'All').then(res => {
           SRTCustomerLookup = res.success ? res.data.ServiceRequestCustomerLookup ? res.data.ServiceRequestCustomerLookup : [] : []
         }).catch(err => { }).finally(() => { })
       }
       if (fetchCustomerAndAssetCodesLookup.AssetId) {
-        await getManageAssetsList('All', 111).then(res => {
+        await getManageAssetsList('All', companyId).then(res => {
           Assets = res.success ? res.data.AssetsListDetails ? res.data.AssetsListDetails : [] : []
         }).catch(err => { }).finally(() => { })
       }
@@ -819,7 +821,7 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
   const handleSubmitUploadedFiles = async (id: string,updatedData?:any) => {
     dispatch(setLoading(true));
     const uploadPayload = { ServiceReqFileUploadDetails: attachments }
-    await saveFileUpload(111, id, uploadPayload).then(res => {
+    await saveFileUpload(companyId, id, uploadPayload).then(res => {
       if (res.data.status) {
         msg.success(res.data.message)
         setAttachments([]);
@@ -1078,7 +1080,7 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
       ]
     }
     dispatch(setLoading(true));
-    await postServiceRequest(111, 'All', payload).then(res => {
+    await postServiceRequest(companyId, 'All', payload).then(res => {
       if (res.data.status) {
         handleSubmitUploadedFiles(res.data.ServiceRequestId);
         msg.success(res.data.message)
@@ -1128,7 +1130,7 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
       "ServiceRequestDetails": [updatedData]
     }
     dispatch(setLoading(true));
-    await updateServiceRequest(111, 'All', payload).then(res => {
+    await updateServiceRequest(companyId, 'All', payload).then(res => {
       if (res.data.status) {
         if (attachments?.length > 0) {
           handleSubmitUploadedFiles(originalTicket.ServiceRequestId.toString(),updatedData)
@@ -1153,7 +1155,7 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
   //handle Attachment delete
   const handleAttachmentDelete = async (fileId: number) => {
     dispatch(setLoading(true))
-    await deleteSRUpload(fileId, 111).then((res) => {
+    await deleteSRUpload(fileId, companyId).then((res) => {
       if (res.data.status !== undefined) {
         if (res.data.status === true) {
           msg.success(res.data.message)
@@ -1224,12 +1226,10 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
               }
             }else if(requestTypeId==="106"){
               if (field.name == 'Title' || field.name == 'Description') {
-                console.log('jhdjewhgewhewhdwedh')
                 if (((selectedTicket.Status == "Open" || selectedTicket.Status == "Re-Open") && selectedTicket["RequestedById"] == LoggedInUserData.UserId)) {
                   field.disabled = false;
                 }
               } else {
-                console.log('jhdjewhgewhewhdwedhs else', field.name)
                 field.disabled = false;
               }
             }
@@ -1364,7 +1364,7 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
                           {ticket.Status}
                         </Badge>
                         <span>•</span>
-                        <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={ticket.AssigneeSelectedUsers}>{ticket.AssigneeSelectedUsers}</span>
+                        <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={ticket.AssigneeSelectedUsers + '' + ticket.AssigneeSelectedUserGroups}>{ticket.AssigneeSelectedUsers + '' + ticket.AssigneeSelectedUserGroups}</span>
                       </div>
                     </div>
                   ))}

@@ -1366,16 +1366,15 @@ const useKeyboardNavigation = (
 };
 
 const Pagination = ({ table }: { table: TanstackTable<any> }) => (
-  <div className="flex items-center justify-between px-4 py-3 border-t">
-    <div className="flex items-center gap-2">
-      <span className="text-sm text-muted-foreground">
-        Showing {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} to{' '}
-        {Math.min((table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize, table.getFilteredRowModel().rows.length)} of{' '}
-        {table.getFilteredRowModel().rows.length} results
-      </span>
+  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-4 py-3 border-t gap-2">
+    <div className="text-sm text-muted-foreground">
+      Showing{' '}
+      {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} to{' '}
+      {Math.min((table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize, table.getFilteredRowModel().rows.length)} of{' '}
+      {table.getFilteredRowModel().rows.length} results
     </div>
 
-    <div className="flex items-center gap-2">
+    <div className="flex flex-wrap items-center gap-2">
       <Select
         value={table.getState().pagination.pageSize.toString()}
         onValueChange={(value) => table.setPageSize(Number(value))}

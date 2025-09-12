@@ -161,6 +161,7 @@ const AnimatedRoutes = () => {
     }).catch(err=>{}).finally(()=>{dispatch(setLoading(false))})
   }
   const fetchUserDetailsByUserName=async()=>{
+    dispatch(setLoading(true));
     await getUserDetailsByUserName(userName).then(res=>{
       if(res.success && Array.isArray(res.data)){
          if(res.data.length!==0){
@@ -169,7 +170,7 @@ const AnimatedRoutes = () => {
            localStorage.setItem('LoggedInUser',JSON.stringify({}));
         }
       }
-    }).catch(err=>{}).finally(()=>{})
+    }).catch(err=>{}).finally(()=>{dispatch(setLoading(false))})
   }
   return (
     <MessageProvider duration={3} maxCount={5} offset={24}>

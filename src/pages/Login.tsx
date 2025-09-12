@@ -85,7 +85,7 @@ const Login = () => {
         if(res.data.access_token)
         localStorage.setItem('Token',JSON.stringify(res.data.access_token));
         localStorage.setItem('UserName',JSON.stringify(watch('Username')));
-        navigate('/dashboard')
+        navigate('/service-desk/all-requests')
       }
       else{
         localStorage.setItem('UserName','');

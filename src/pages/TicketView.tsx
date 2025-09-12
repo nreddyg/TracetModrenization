@@ -1040,7 +1040,7 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
       return {
         AdditionalFieldName: field.name,
         TextBoxValue: field.fieldType === 'text' || field.fieldType === 'numeric' ? val : '',
-        DateValues: field.fieldType === 'date' ? formatDate(val, 'DD/MM/YYYY') : '',
+        DateValues: field.fieldType === 'date' && val ? formatDate(val, 'DD/MM/YYYY') : '',
         SelectedValues: field.fieldType === 'dropdown' || field.fieldType === 'radiobutton' ? val : field.fieldType === 'checkbox' ? Array.isArray(val) ? val.join(',') : '' : ''
       };
     });
@@ -1061,7 +1061,7 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
           "AssigneeSelectedUsers": watch('AssigneeSelectedUsers')["Users"] ? watch('AssigneeSelectedUsers')["Users"].join(',') : "",
           "CCListSelectedUsers": watch('CCListSelectedUsers')["Users"] ? watch('CCListSelectedUsers')["Users"].join(',') : "",
           "Severity": watch('Severity'),
-          // "Priority":watch('Priority'),
+          "Priority":watch('Priority'),
           "AssetIds": watch('AssetId').join(','),
           "IsDraft": false,
           "RequestedDate": formatDate(watch('RequestedDate'), 'DD-MM-YYYY'),

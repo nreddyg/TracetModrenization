@@ -425,16 +425,16 @@ const UserGroups = () => {
             <h1 className="text-lg font-semibold text-gray-900">User Groups</h1>
             <p className="text-sm text-gray-600 mt-0.5">Manage user groups and permissions</p>
           </div>
-          <ReusableButton
+          {!selectedRecord && <ReusableButton
             size="small"
             variant="primary"
             icon={<Plus className="h-3 w-3" />}
             iconPosition="left"
             onClick={handleAddUserGroup}
-           className="whitespace-nowrap"
-          >
-            {selectedRecord ? "Update User Group" : "Add User Group"}
+            className="whitespace-nowrap"
+          >Add User Group
           </ReusableButton>
+          }
         </div>
 
         {/* User Group Form */}

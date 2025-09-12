@@ -162,7 +162,7 @@ export const CREATE_TICKET_DB: BaseField[] = [
   {
     label: "Requested By",
     fieldType: "dropdown",
-    name: "RequestedBy",
+    name: "RequestedById",
     placeholder: "Select Requested By",
     allowClear: true,
     isRequired: true,

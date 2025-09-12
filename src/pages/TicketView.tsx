@@ -1,7 +1,7 @@
 
 
 import { useState, useEffect, useCallback, useRef, ReactNode } from 'react';
-import { useParams, useSearchParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -114,7 +114,7 @@ interface OptType {
 interface allResponsesType {
   ServiceRequestType: OptType
   AssigneeSelectedUsers: OptType
-  RequestedBy: OptType
+  RequestedById: OptType
   Customer: OptType
   LinkTo: OptType
   AssetId: OptType
@@ -193,6 +193,9 @@ const TicketView = () => {
   const form = useForm<GenericObject>({
     defaultValues: fields.reduce((acc, f) => {
       acc[f.name!] = f.defaultValue ?? '';
+      if(f.name==="RequestedById"){
+        acc[f.name!]=LoggedInUserData?.UserId || ''
+      }
       return acc;
     }, {} as GenericObject),
     mode: 'onChange'
@@ -593,7 +596,7 @@ const TicketView = () => {
           data: [], label: 'UserName', value: 'UserName', isGrouping: true, groupData: [{ label: "UserGroupName", value: "UserGroupName", data: SRTAssignToLookup.status === 'fulfilled' && SRTAssignToLookup.value.success && SRTAssignToLookup.value.data.ServiceRequestAssignToUserGroupLookup ? SRTAssignToLookup.value.data.ServiceRequestAssignToUserGroupLookup : [], groupLabel: "User Group" },
           { label: "UserName", value: "UserName", data: SRTAssignToLookup.status === 'fulfilled' && SRTAssignToLookup.value.success && SRTAssignToLookup.value.data.ServiceRequestAssignToUsersLookup ? SRTAssignToLookup.value.data.ServiceRequestAssignToUsersLookup : [], groupLabel: "Users" },]
         }
-        , RequestedBy: { data: SRTRequestedByLookup.status === 'fulfilled' && SRTRequestedByLookup.value.success && SRTRequestedByLookup.value.data.ServiceRequestRequestedByLookup ? SRTRequestedByLookup.value.data.ServiceRequestRequestedByLookup : [], label: 'UserName', value: 'UserName' }
+        , RequestedById: { data: SRTRequestedByLookup.status === 'fulfilled' && SRTRequestedByLookup.value.success && SRTRequestedByLookup.value.data.ServiceRequestRequestedByLookup ? SRTRequestedByLookup.value.data.ServiceRequestRequestedByLookup : [], label: 'UserName', value: 'UserId' }
         , Customer: fetchCustomerAndAssetCodesLookup.Customer ? { data: SRTCustomerLookup, label: 'CustomerName', value: 'CustomerName' } : { data: [], label: '', value: '' }
         , LinkTo: { data: SRTLinkToLookup.status === 'fulfilled' && SRTLinkToLookup.value.success && SRTLinkToLookup.value.data.ServiceRequestLinkToLookup ? SRTLinkToLookup.value.data.ServiceRequestLinkToLookup : [], label: 'ServiceRequestName', value: 'ServiceRequestName' }
         , CCListSelectedUsers: {
@@ -736,7 +739,7 @@ const TicketView = () => {
         }
        fieldData["AssigneeSelectedUsers"] = {  "Users":fieldData["AssigneeSelectedUsers"].split(","),"User Group": fieldData["AssigneeSelectedUserGroups"].split(",")};
         fieldData["CCListSelectedUsers"] = {  "Users":fieldData["CCListSelectedUsers"].split(","),"User Group": fieldData["CCListSelectedUserGroups"].split(",")};
-        fieldData['RequestedBy'] = fieldData['RequestedBy']?.replace(/\s*\(/g, " (");
+        // fieldData['RequestedBy'] = fieldData['RequestedBy']?.replace(/\s*\(/g, " (");
         fieldData['RequestedDate'] = formatDateToDDMMYYYY(fieldData['RequestedDate']);
         form.reset({ ...fieldData, ...additionalFields,...notifyValues });
         setOriginalTicket({ ...fieldData, ...additionalFields,...notifyValues });
@@ -1069,7 +1072,7 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
           "AssetIds": watch('AssetId').join(','),
           "IsDraft": false,
           "RequestedDate": formatDate(watch('RequestedDate'), 'DD-MM-YYYY'),
-          "RequestedBy": 659,
+          "RequestedBy": watch('RequestedById'),
           "BranchName": watch('Branch'),
           "LinkTo": watch('LinkTo'),
           "Customer": watch('Customer'),
@@ -1213,7 +1216,7 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
       let isNotClosed = selectedTicket.Status !== "Closed"
       fieldsCopy.forEach(field => {
       if (isNotClosed) {
-          if (!field.isAlwaysOnDisabled && (field.name !== 'Branch' && field.name !== 'ServiceRequestType'&& field.name !== 'RequestedBy')) {
+          if (!field.isAlwaysOnDisabled && (field.name !== 'Branch' && field.name !== 'ServiceRequestType'&& field.name !== 'RequestedById')) {
             if((workBenchEnables.includes(requestTypeId)) && (field.name !== 'Severity') && (field.name !== 'Customer')&& ( field.name !== 'Title' && field.name !== 'Description') ){
              field.disabled = false;
             }else if(myRequestEnables.includes(requestTypeId) && (field.name !== 'Priority')  ){
@@ -1226,12 +1229,10 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
               }
             }else if(requestTypeId==="106"){
               if (field.name == 'Title' || field.name == 'Description') {
-                console.log('jhdjewhgewhewhdwedh')
                 if (((selectedTicket.Status == "Open" || selectedTicket.Status == "Re-Open") && selectedTicket["RequestedById"] == LoggedInUserData.UserId)) {
                   field.disabled = false;
                 }
               } else {
-                console.log('jhdjewhgewhewhdwedhs else', field.name)
                 field.disabled = false;
               }
             }
@@ -1366,7 +1367,7 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
                           {ticket.Status}
                         </Badge>
                         <span>•</span>
-                        <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={ticket.AssigneeSelectedUsers}>{ticket.AssigneeSelectedUsers}</span>
+                        <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={ticket.AssigneeSelectedUsers + '' + ticket.AssigneeSelectedUserGroups}>{ticket.AssigneeSelectedUsers + '' + ticket.AssigneeSelectedUserGroups}</span>
                       </div>
                     </div>
                   ))}
@@ -1698,7 +1699,7 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
                           </TabsList>
 
                           <TabsContent value="details" className="p-6 space-y-4">
-                            {getFieldsByNames(['Status', 'AssigneeSelectedUsers', 'Severity', 'Priority', 'AssetId', 'RequestedDate', 'RequestedBy', 'Branch', 'CCListSelectedUsers', 'LinkTo','Notify']).map(renderField)}
+                            {getFieldsByNames(['Status', 'AssigneeSelectedUsers', 'Severity', 'Priority', 'AssetId', 'RequestedDate', 'RequestedById', 'Branch', 'CCListSelectedUsers', 'LinkTo','Notify']).map(renderField)}
                           
                           </TabsContent>
                           <TabsContent value="linkedissues" className="p-6 space-y-3">

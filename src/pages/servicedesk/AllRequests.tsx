@@ -98,8 +98,8 @@ const AllRequests = () => {
         if (res.success && res.data.status === undefined) {
           if (Array.isArray(res.data)) {
             let data = res.data.map(item => ({ ...item, AssignedTo: item.AssigneeSelectedUsers || '' + '' + item.AssigneeSelectedUserGroups || '' }));
-            setRequests(data);
-            setFilteredRequests(data);
+            setRequests([...data].reverse());
+            setFilteredRequests([...data].reverse());
           } else {
             setRequests([]);
             setFilteredRequests([]);
@@ -187,13 +187,13 @@ const AllRequests = () => {
         </div>
 
         {/* Enhanced Stats Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-6">
 
           <Card className="border-0 shadow-sm bg-gradient-to-br from-blue-50 to-blue-100/50">
             <CardContent className="p-3 sm:p-4 lg:p-5">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs sm:text-sm font-medium text-blue-600 mb-1">Total Tickets</p>
+                  <p className="text-xs md:text-sm font-medium text-blue-600 mb-1">Total Tickets</p>
                   <p className="text-lg sm:text-xl lg:text-2xl font-bold text-blue-900">{stats.totalRequests}</p>
                 </div>
               </div>

@@ -1036,7 +1036,7 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
   //get additional fields data
   function getAdditionalFieldsData(): additionalFieldData[] {
     return fields.filter(field => field.isAdditionalField).map(field => {
-      const val = watch(field.name);
+      const val = watch(field.name) || '';
       return {
         AdditionalFieldName: field.name,
         TextBoxValue: field.fieldType === 'text' || field.fieldType === 'numeric' ? val : '',

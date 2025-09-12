@@ -2,7 +2,7 @@
 
 export const GET_TOKEN='/token';
 export const URL_ORGANZIATION_DETAILS="/api/Masters/GetSelectedOrganizationByAccesToken";
-export const URL_GET_USER_DETAILS="/api/Masters/GetUserDetailsByUserName?UserName=Ganesh";
+export const URL_GET_USER_DETAILS="/api/Masters/GetUserDetailsByUserName";
 
 //service desk urls
 // create ticket screen

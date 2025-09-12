@@ -812,7 +812,7 @@ const Configuration = () => {
                       iconPosition="left"
                       size="middle"
                       >
-                      Clear
+                      Cancel
                     </ReusableButton>
                 </div>
                 <div>

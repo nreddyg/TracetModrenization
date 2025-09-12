@@ -14,7 +14,7 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import FilterCard from '@/components/common/FilterCard';
-import { useAppDispatch } from '@/store';
+import { useAppDispatch, useAppSelector } from '@/store';
 import { setLoading } from '@/store/slices/projectsSlice';
 import { ColumnDef, createColumnHelper, FilterFn, VisibilityState } from "@tanstack/react-table";
 import { getAdditionaliFieldsConfigurationDetails, getCompanyHierarchy, getDepartment, getMainCategoryLookUp, getServiceRequestDetailsColumns, getServiceRequestDetailsHistoryReport, getServiceRequestDetailsReport, getServiceRequestPriority, getServiceRequestSeverity, getServiceRequestSLAMetViolatedColumns, getServiceRequestSLAMetViolatedReport, getSlaStatus, getSubCategoryLookUp, postServiceRequestDetailsColumns, postServiceRequestMetViolatedColumns } from '@/services/servicedeskReportsServices';
@@ -138,6 +138,8 @@ const ServiceDeskReports = () => {
   const [dataSource, setDataSourse] = useState([])
   const [cols, setCols] = useState([])
   let additionalFields = useRef([]);
+  const companyId = useAppSelector(state => state.projects.companyId)
+
 
   // let data = activeTab === "Service Request SLA Met/SLA Violated" ? slaDB : activeTab === "Service Request Detail History" ? serviceHistoryDetail : fields;
   const form = useForm<GenericObject>({
@@ -156,31 +158,33 @@ const ServiceDeskReports = () => {
   }
 
   useEffect(() => {
-  setDataSourse([]);
-  setShowReport(false)
-}, [activeTab]);
+    setDataSourse([]);
+    setShowReport(false)
+  }, [activeTab]);
 
   useEffect(() => {
   }, [columnVisibility])
   useEffect(() => {
-    fetchAdditionalFieldConfigurationDetails(111)
-    fetchAllLookUps();
-  }, [])
-    const multiSelectFilter: FilterFn<any> = (row, columnId, filterValue) => {
+    if (companyId) {
+      fetchAdditionalFieldConfigurationDetails(companyId)
+      fetchAllLookUps();
+    }
+  }, [companyId])
+  const multiSelectFilter: FilterFn<any> = (row, columnId, filterValue) => {
 
-  const selected = Array.isArray(filterValue) ? filterValue : [];
+    const selected = Array.isArray(filterValue) ? filterValue : [];
 
-  if (selected.length === 0) return true;
+    if (selected.length === 0) return true;
 
-  const cell = row.getValue(columnId);
+    const cell = row.getValue(columnId);
 
-  if (cell == null) return false;
+    if (cell == null) return false;
 
-  if (Array.isArray(cell)) return cell.some(v => selected.includes(String(v)));
+    if (Array.isArray(cell)) return cell.some(v => selected.includes(String(v)));
 
-  return selected.includes(String(cell));
+    return selected.includes(String(cell));
 
-};
+  };
   function buildColumnsFromApi<T extends Record<string, any>>(
     apiResponse: ColumnApiResponse,
     editableColumns: string[] = [],
@@ -198,9 +202,9 @@ const ServiceDeskReports = () => {
             header: colName,
             cell: (info) => info.getValue() ?? "",
             enableHiding: true, // allow ColumnVisibilityManager to toggle
-              enableColumnFilter: true,
+            enableColumnFilter: true,
 
-          filterFn: multiSelectFilter,
+            filterFn: multiSelectFilter,
             meta: {
               editable: editableColumns.includes(colName),
               editType: typeMapper[colName] || "text",
@@ -222,19 +226,19 @@ const ServiceDeskReports = () => {
   const selectedMainCategoryforSLA = watch("maincategoryinSLA");
   useEffect(() => {
     if (selectedMainCategory) {
-      getSubCategoryDetails(111, selectedMainCategory)
+      getSubCategoryDetails(companyId, selectedMainCategory)
     } else {
-      getSubCategoryDetails(111, null)
+      getSubCategoryDetails(companyId, null)
     }
-  }, [selectedMainCategory])
+  }, [selectedMainCategory, companyId])
 
   useEffect(() => {
     if (selectedMainCategoryforSLA) {
-      getSubCategoryDetails(111, selectedMainCategoryforSLA)
+      getSubCategoryDetails(companyId, selectedMainCategoryforSLA)
     } else {
-      getSubCategoryDetails(111, null)
+      getSubCategoryDetails(companyId, null)
     }
-  }, [selectedMainCategoryforSLA])
+  }, [selectedMainCategoryforSLA, companyId])
 
 
 
@@ -368,8 +372,8 @@ const ServiceDeskReports = () => {
       }
     }).catch(err => { }).finally(() => {
       //  dispatch(setLoading(false)) 
-           fetchServiceRequestDetailsReport(111, formatToString(watch("LevelFiveCompany")), formatToString(watch("ServiceRequestType")), formatToString(watch("ServiceRequest")), formatToString(watch("Status")), formatToString(watch("RequestedBy")), "", "", formatToString(watch("Customer")), formatToString(watch("AssignTo")["Users"]), formatToString(watch("AssignTo")["User Group"]), formatToString(watch("Severity")), formatToString(watch("Priority")), formatToString(watch("slastatus")), formatToString(watch("LevelFiveDepartment")), formatToString(watch("MainCategory")), formatToString(watch("SubCategory")), formatToString(watch("AssetCode")))
-      })
+      fetchServiceRequestDetailsReport(companyId, formatToString(watch("LevelFiveCompany")), formatToString(watch("ServiceRequestType")), formatToString(watch("ServiceRequest")), formatToString(watch("Status")), formatToString(watch("RequestedBy")), "", "", formatToString(watch("Customer")), formatToString(watch("AssignTo")["Users"]), formatToString(watch("AssignTo")["User Group"]), formatToString(watch("Severity")), formatToString(watch("Priority")), formatToString(watch("slastatus")), formatToString(watch("LevelFiveDepartment")), formatToString(watch("MainCategory")), formatToString(watch("SubCategory")), formatToString(watch("AssetCode")))
+    })
   }
   async function fetchServiceRequestSLAViolatedColumns(compId: number) {
     dispatch(setLoading(true))
@@ -382,9 +386,9 @@ const ServiceDeskReports = () => {
       } else {
 
       }
-    }).catch(err => { }).finally(() => { 
+    }).catch(err => { }).finally(() => {
       // dispatch(setLoading(false)) 
-        fetchServiceRequestSLAmetViolatedReport(111, formatToString(watch("LevelFiveCompanyinSLA")), formatToString(watch("serviceReqTypeSLA")), formatToString(watch("servicereqno")), formatToString(watch("statusinSLA")), formatToString(watch("slarequestedby")), "", "", formatToString(watch("Customersla")), formatToString(watch("AssignTo")["Users"]), formatToString(watch("AssignTo")["User Group"]), formatToString(watch("severityinSLA")), formatToString(watch("priorityinSLA")), formatToString(watch("slastatus")), formatToString(watch("levelfivedepartmentINsla")), formatToString(watch("maincategoryinSLA")), formatToString(watch("subcategoryinSLA")), formatToString(watch("assetcode")))
+      fetchServiceRequestSLAmetViolatedReport(companyId, formatToString(watch("LevelFiveCompanyinSLA")), formatToString(watch("serviceReqTypeSLA")), formatToString(watch("servicereqno")), formatToString(watch("statusinSLA")), formatToString(watch("slarequestedby")), "", "", formatToString(watch("Customersla")), formatToString(watch("AssignTo")["Users"]), formatToString(watch("AssignTo")["User Group"]), formatToString(watch("severityinSLA")), formatToString(watch("priorityinSLA")), formatToString(watch("slastatus")), formatToString(watch("levelfivedepartmentINsla")), formatToString(watch("maincategoryinSLA")), formatToString(watch("subcategoryinSLA")), formatToString(watch("assetcode")))
     })
   }
 
@@ -425,24 +429,11 @@ const ServiceDeskReports = () => {
     }
   }
 
-  // useEffect(()=>{
-  //       if(activeTab==="Service Request Details"){
-  //   fetchServiceRequestDetailsColumns(111)
-  // fetchServiceRequestDetailsReport(111,formatToString(watch("LevelFiveCompany")),formatToString(watch("ServiceRequestType")),formatToString(watch("ServiceRequest")),formatToString(watch("Status")),formatToString(watch("RequestedBy")),"","",formatToString(watch("Customer")),formatToString(watch("AssignTo")["User Group"]),formatToString(watch("AssignTo")["Users"]),formatToString(watch("Severity")),formatToString(watch("Priority")),formatToString(watch("slastatus")),formatToString(watch("LevelFiveDepartment")),formatToString(watch("MainCategory")),formatToString(watch("SubCategory")),formatToString(watch("AssetCode")))
-  // }
-  // else if(activeTab==="Service Request SLA Met/SLA Violated"){
 
-  //   fetchServiceRequestSLAViolatedColumns(111)
-  // fetchServiceRequestSLAmetViolatedReport(111, '',"","","","","","","","","","","","","","","","")
-
-  // }
-
-  // },[isGeneratingReport])
   const handleViewReport = async () => {
     setIsGeneratingReport(true);
-      const historyReport = watch("ServiceRequestDetailHistory");
-    // fetchServiceRequestDetailsReport(111,watch("LevelFiveCompany"),watch("ServiceRequestType"),watch("servicereqno"),watch("Status"),watch("requestedBy"),"","",watch("Customersla"),watch("AssignTo"),"",watch("severityinSLA"),watch("priorityinSLA"),watch("slastatus"),watch("levelfivedepartment"),watch("MainCategory"),watch("SubCategory"),watch("AssetCode"))
- 
+    const historyReport = watch("ServiceRequestDetailHistory");
+
     const obj = {
       BranchId: watch("LevelFiveCompany"),
       serviceReqTypeId: watch("ServiceRequestType"),
@@ -481,42 +472,42 @@ const ServiceDeskReports = () => {
       SubCategoryId: watch("subcategoryinSLA"),
       Assetcode: watch("assetcode")
     }
- 
+
     // Simulate report generation
     await new Promise(resolve => setTimeout(resolve, 200));
- 
+
     setIsGeneratingReport(false);
     if (activeTab !== "Service Request Detail History") {
- 
+
       setShowReport(true);
       if (activeTab === "Service Request Details") {
-        fetchServiceRequestDetailsColumns(111)
+        fetchServiceRequestDetailsColumns(companyId)
       }
       else if (activeTab === "Service Request SLA Met/SLA Violated") {
- 
-        fetchServiceRequestSLAViolatedColumns(111)
- 
+
+        fetchServiceRequestSLAViolatedColumns(companyId)
+
       }
-      else if(activeTab==="Service Request Detail History"){
-     
+      else if (activeTab === "Service Request Detail History") {
+
       }
- 
+
     }
     else {
-           if (historyReport === "") {
-      msg.warning(`Please select Service Request`);
-      setIsGeneratingReport(false);
-    } else {
-      msg.success("can open report or table");
-      // setIsGeneratingReport(true);
-       localStorage.setItem("srData", JSON.stringify({ id: watch("ServiceRequestDetailHistory") }));
-      window.open(`/service-desk/srdetailshistoryview`, "ReportWindow",
-        "width=900,height=800,left=200,top=100,resizable=yes")
-    }
-     
+      if (historyReport === "") {
+        msg.warning(`Please select Service Request`);
+        setIsGeneratingReport(false);
+      } else {
+        msg.success("can open report or table");
+        // setIsGeneratingReport(true);
+        localStorage.setItem("srData", JSON.stringify({ id: watch("ServiceRequestDetailHistory") }));
+        window.open(`/service-desk/srdetailshistoryview`, "ReportWindow",
+          "width=900,height=800,left=200,top=100,resizable=yes")
+      }
+
     }
   };
- 
+
 
   const handleClearFilters = () => {
     form.reset()
@@ -677,19 +668,19 @@ const ServiceDeskReports = () => {
       const [SRTLookUp, SRTRequestedByLookup, SRTLinkToLookup, StatusLookup,
         CustomerLookUp, SRTBranchListLookup, SRSeverity, SRPriority, SRTAssignToLookup, SRMainCategoryLookUps, SRSLAStatus, getCompanyHierarchyTreeData, deptTreeData] =
         await Promise.allSettled([
-          ServiceRequestTypeLookups(111),
-          getSRRequestByLookupsList(111, 'All'),
-          getSRLinkToLookupsList(111, 'All'),
-          getStatusLookups(111),
-          getSRCustomerLookupsList(111, 'All'),
-          getSRBranchList(111),
+          ServiceRequestTypeLookups(companyId),
+          getSRRequestByLookupsList(companyId, 'All'),
+          getSRLinkToLookupsList(companyId, 'All'),
+          getStatusLookups(companyId),
+          getSRCustomerLookupsList(companyId, 'All'),
+          getSRBranchList(companyId),
           getServiceRequestSeverity(),
           getServiceRequestPriority(),
-          GetServiceRequestAssignToLookups(111, 'All'),
-          getMainCategoryLookUp(111),
+          GetServiceRequestAssignToLookups(companyId, 'All'),
+          getMainCategoryLookUp(companyId),
           getSlaStatus(),
-          getCompanyHierarchy(111),
-          getDepartment(111)
+          getCompanyHierarchy(companyId),
+          getDepartment(companyId)
         ]);
       const allResponses = {
         ServiceRequestType: { data: SRTLookUp.status === 'fulfilled' && SRTLookUp.value.success && SRTLookUp.value.data.ServiceRequestTypesLookup ? SRTLookUp.value.data.ServiceRequestTypesLookup : [], label: 'ServiceRequestTypeName', value: 'ServiceRequestTypeId' },
@@ -746,19 +737,6 @@ const ServiceDeskReports = () => {
     }
   }
 
-  // useEffect(() => {
-  //   if (activeTab === "Service Request Details") {
-  //     fetchServiceRequestDetailsColumns(111)
-  //     fetchServiceRequestDetailsReport(111, formatToString(watch("LevelFiveCompany")), formatToString(watch("ServiceRequestType")), formatToString(watch("ServiceRequest")), formatToString(watch("Status")), formatToString(watch("RequestedBy")), "", "", formatToString(watch("Customer")), formatToString(watch("AssignTo")["User Group"]), formatToString(watch("AssignTo")["Users"]), formatToString(watch("Severity")), formatToString(watch("Priority")), formatToString(watch("slastatus")), formatToString(watch("LevelFiveDepartment")), formatToString(watch("MainCategory")), formatToString(watch("SubCategory")), formatToString(watch("AssetCode")))
-  //   }
-  //   else if (activeTab === "Service Request SLA Met/SLA Violated") {
-
-  //     fetchServiceRequestSLAViolatedColumns(111)
-  //     fetchServiceRequestSLAmetViolatedReport(111, '', "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "")
-
-  //   }
-
-  // }, [isGeneratingReport])
   const getFieldsByNames = (names: string[]) => {
     if (activeTab === "Service Request Details") {
       const allData = fields.filter(f => f.jsontype === "servicerequestDetails");
@@ -1064,10 +1042,10 @@ const ServiceDeskReports = () => {
       }]
     }
     if (activeTab === "Service Request Details") {
-      postServiceRequestColumns(111, payForSRDetails);
+      postServiceRequestColumns(companyId, payForSRDetails);
     }
     else if (activeTab === "Service Request SLA Met/SLA Violated") {
-      postSLAMetViolatedColumns(111, payForSRSLAMetViolated)
+      postSLAMetViolatedColumns(companyId, payForSRSLAMetViolated)
     }
   }
 
@@ -1243,7 +1221,7 @@ const ServiceDeskReports = () => {
                 </CardHeader>
                 <CardContent>
                   <ReusableTable
-                  // key={activeTab}
+                    // key={activeTab}
                     data={dataSource}
                     columns={cols}
                     enableSearch={true}

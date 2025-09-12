@@ -1226,12 +1226,10 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
               }
             }else if(requestTypeId==="106"){
               if (field.name == 'Title' || field.name == 'Description') {
-                console.log('jhdjewhgewhewhdwedh')
                 if (((selectedTicket.Status == "Open" || selectedTicket.Status == "Re-Open") && selectedTicket["RequestedById"] == LoggedInUserData.UserId)) {
                   field.disabled = false;
                 }
               } else {
-                console.log('jhdjewhgewhewhdwedhs else', field.name)
                 field.disabled = false;
               }
             }
@@ -1366,7 +1364,7 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
                           {ticket.Status}
                         </Badge>
                         <span>•</span>
-                        <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={ticket.AssigneeSelectedUsers}>{ticket.AssigneeSelectedUsers}</span>
+                        <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={ticket.AssigneeSelectedUsers + '' + ticket.AssigneeSelectedUserGroups}>{ticket.AssigneeSelectedUsers + '' + ticket.AssigneeSelectedUserGroups}</span>
                       </div>
                     </div>
                   ))}

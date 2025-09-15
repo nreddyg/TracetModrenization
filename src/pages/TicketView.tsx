@@ -1363,15 +1363,15 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
                     >
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-sm font-medium text-blue-600">{ticket.ServiceRequestNo}</span>
-                        <Badge className={getPriorityColor(ticket.Severity || '')} variant="secondary">
+                        <Badge title='Severity' className={getPriorityColor(ticket.Severity || '')} variant="secondary">
                           {ticket.Severity}
                         </Badge>
                       </div>
-                      <h3 className="text-sm font-medium text-gray-900 mb-1 line-clamp-2">
+                      <h3 className="text-sm font-medium text-gray-900 mb-1 line-clamp-2" title={ticket?.Title} style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {ticket.Title}
                       </h3>
                       <div className="flex items-center gap-2 text-xs text-gray-500">
-                        <Badge className={getStatusColor(ticket.Status)} variant="outline">
+                        <Badge title='Status' className={getStatusColor(ticket.Status)} variant="outline">
                           {ticket.Status}
                         </Badge>
                         <span>•</span>
@@ -1395,12 +1395,9 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
                 </div>
                 <span className="text-gray-600 text-sm">All Tickets</span>
                 <span className="text-gray-400">|</span>
-                {!isCreateMode && originalTicket && (
-                  <span className="text-blue-600 font-semibold text-base">{originalTicket.ServiceRequestNo}</span>
-                )}
-                {!isCreateMode && <span className="text-blue-600 font-medium">{selectedTicket?.Title || ''}</span>}
-                <Badge className={getPriorityColor(watch('Severity')) }>{watch('Severity')}</Badge>
-                {!isCreateMode && <Badge className={getStatusColor(selectedTicket?.Status)}>{selectedTicket?.Status || ''}</Badge>}
+                {!isCreateMode && <h6 className="text-blue-600 font-medium truncate block max-w-xs" title={selectedTicket?.Title}>{originalTicket.ServiceRequestNo} {selectedTicket?.Title || ''}</h6>}
+                <Badge className={getPriorityColor(watch('Severity')) } title='Severity'>{watch('Severity')}</Badge>
+                {!isCreateMode && <Badge className={getStatusColor(selectedTicket?.Status)} title='Status'>{selectedTicket?.Status || ''}</Badge>}
               </div>
 
               {isCreateMode && (

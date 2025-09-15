@@ -26,6 +26,7 @@ export const URL_GET_COMMENT_CHANGES_HISTORY_BY_SERVICE_REQUEST_ID = "/api/Servi
 export const URL_POST_SERVICE_REQUEST_COMMENT_API = '/api/ServiceDeskAPI/UpdateServiceRequestComments';
 export const URL_GET_COMMENTS_API = '/api/ServiceDeskAPI/GetAllServiceRequestsCommentsById';
 export const URL_GET_STATUS_LOOKUP_API = '/api/ServiceDeskAPI/GetServiceRequestStatusLookups';
+export const URL_GET_STATUS_LOOKUP_FOR_CALCULATE_SLA_API = '/api/ServiceDeskAPI/GetServiceRequestStatusToCalculateSLALookups';
 export const URL_GET_LINKED_SERVICE_REQUESTS_API = '/api/ServiceDeskAPI/GetChildServiceRequest';
 export const URL_GET_SERVICE_REQUEST_DETAILS_BY_SERVICE_REQUEST_ID = '/api/ServiceDeskAPI/GetAllServiceRequestsDetailswithAdditionalFields'; //ServiceRequestId=10748&branchname=All&CompId=111
 export const URL_GET_UPLOADED_FILES_API_BY_SERVICE_REQUEST_ID = '/api/ServiceDeskAPI/GetFileUpload';

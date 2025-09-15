@@ -1,23 +1,25 @@
 
 import { useEffect, useState } from 'react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { Card, CardContent} from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ReusableDropdown } from '@/components/ui/reusable-dropdown';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Controller, useForm } from 'react-hook-form';
-import {Trash2,Edit} from 'lucide-react';
+import { Trash2, Edit } from 'lucide-react';
 import { ReusableInput } from '@/components/ui/reusable-input';
 import { BaseField, GenericObject } from '@/Local_DB/types/types';
 import { CONFIGURATION_DB } from '@/Local_DB/Form_JSON_Data/ConfigurationDB';
 import { ReusableMultiSelect } from '@/components/ui/reusable-multi-select';
 import ReusableSingleCheckbox from '@/components/ui/reusable-single-checkbox';
 import { ReusableTextarea } from '@/components/ui/reusable-textarea';
-import { deleteSRType, GetNotifyTypeLookup, GetServiceRequestAssignToLookups, GetServiceRequestStatus, 
-  getServiceRequestTypes, getSRConfigList, getSRTypesById, getStatusLookups, getStatusLookupsForSLA, getVendorDetails, 
-  postDeleteServiceRequestStatus, postServiceRequestConfiguration, postServiceRequestStatus, 
-  postServiceRequestType, postUpdateServiceRequestStatus, postUpdateServiceRequesttype, 
-  postUpdateStatusSequence } 
+import {
+  deleteSRType, GetNotifyTypeLookup, GetServiceRequestAssignToLookups, GetServiceRequestStatus,
+  getServiceRequestTypes, getSRConfigList, getSRTypesById, getStatusLookups, getStatusLookupsForSLA, getVendorDetails,
+  postDeleteServiceRequestStatus, postServiceRequestConfiguration, postServiceRequestStatus,
+  postServiceRequestType, postUpdateServiceRequestStatus, postUpdateServiceRequesttype,
+  postUpdateStatusSequence
+}
   from '@/services/configurationServices';
 import { useDispatch } from 'react-redux';
 import { setLoading } from '@/store/slices/projectsSlice';
@@ -29,7 +31,7 @@ import { ReusableButton } from '@/components/ui/reusable-button';
 import { useAppSelector } from '@/store';
 import { getSRBranchList } from '@/services/ticketServices';
 interface OptType {
-  data:  {[key: string]: any}[];
+  data: { [key: string]: any }[];
   label: string;
   value: string;
   defaultValues?: string | string[];
@@ -38,22 +40,22 @@ interface allResponsesType {
   NotifyUserTypes: OptType
   DefaultSLAStatusDataList: OptType
 }
-interface serviceRequestType{
+interface serviceRequestType {
   "Id": number,
-  "ServiceRequestType":string,
+  "ServiceRequestType": string,
   "UserGroups": string,
   "Vendors": any,
   "SLAHoursMinutes": string,
   "ReminderForSLAHoursMinutes": string,
   "EscalationTo": any,
   "StatusToCalculate": any,
-  "Description":string,
-  "Branches":string,
-  "ServiceRequestTypeAdmin":string
+  "Description": string,
+  "Branches": string,
+  "ServiceRequestTypeAdmin": string
 }
-interface Status{
+interface Status {
   "Id": number,
-  "StatusType":string,
+  "StatusType": string,
   "Index": number
 }
 // Define table permissions
@@ -63,13 +65,13 @@ const tablePermissions: TablePermissions = {
   canView: true,
   canExport: false,
   canAdd: true,
-  canManageColumns: true, 
+  canManageColumns: true,
 };
 
 const Configuration = () => {
-  const companyId=useAppSelector(state=>state.projects.companyId);
-  const [fields,setFields] = useState<BaseField[]>(CONFIGURATION_DB);
-  const dispatch=useDispatch()
+  const companyId = useAppSelector(state => state.projects.companyId);
+  const [fields, setFields] = useState<BaseField[]>(CONFIGURATION_DB);
+  const dispatch = useDispatch()
   const msg = useMessage()
   const form = useForm<GenericObject>({
     defaultValues: fields.reduce((acc, f) => {
@@ -77,54 +79,54 @@ const Configuration = () => {
       return acc;
     }, {} as GenericObject),
     mode: 'onChange',
-    reValidateMode: "onChange" 
+    reValidateMode: "onChange"
   });
   const { control, register, handleSubmit, trigger, watch, setValue, reset, formState: { errors } } = form;
-  const [columns,setColumns]=useState<ColumnDef<serviceRequestType>[]>([
-    {id:'ServiceRequestType',accessorKey: "ServiceRequestType", header: "Service Request Type",},
-    {id:'UserGroups',accessorKey: "UserGroups", header: "User Groups"},
-    {id:'Vendors',accessorKey: "Vendors", header: "Vendors",},
-    {id:'SLAHoursMinutes',accessorKey: "SLAHoursMinutes", header: "SLA Hours/Minutes",},
-    {id:'ReminderForSLAHoursMinutes',accessorKey: "ReminderForSLAHoursMinutes", header: "Reminder For SLAHours/Minutes"},
-    {id:'EscalationTo',accessorKey: "EscalationTo", header: "Escalation To"},
-    {id:'StatusToCalculate',accessorKey: "StatusToCalculate", header: "Status To Calculate SLA"},
-    {id:'Description',accessorKey: "Description", header: "Description"},
-    {id:'Branches',accessorKey: "Branches", header: "Branches"},
-    {id:'ServiceRequestTypeAdmin',accessorKey: "ServiceRequestTypeAdmin", header: "Service Request Type Admin",},
+  const [columns, setColumns] = useState<ColumnDef<serviceRequestType>[]>([
+    { id: 'ServiceRequestType', accessorKey: "ServiceRequestType", header: "Service Request Type", },
+    { id: 'UserGroups', accessorKey: "UserGroups", header: "User Groups" },
+    { id: 'Vendors', accessorKey: "Vendors", header: "Vendors", },
+    { id: 'SLAHoursMinutes', accessorKey: "SLAHoursMinutes", header: "SLA Hours/Minutes", },
+    { id: 'ReminderForSLAHoursMinutes', accessorKey: "ReminderForSLAHoursMinutes", header: "Reminder For SLAHours/Minutes" },
+    { id: 'EscalationTo', accessorKey: "EscalationTo", header: "Escalation To" },
+    { id: 'StatusToCalculate', accessorKey: "StatusToCalculate", header: "Status To Calculate SLA" },
+    { id: 'Description', accessorKey: "Description", header: "Description" },
+    { id: 'Branches', accessorKey: "Branches", header: "Branches" },
+    { id: 'ServiceRequestTypeAdmin', accessorKey: "ServiceRequestTypeAdmin", header: "Service Request Type Admin", },
   ]);
-  const [statusColumns,setStatusColumns]=useState<ColumnDef<Status>[]>([
-    {id:'StatusType',accessorKey: "StatusType", header: "Status Type"},
-    {id:'Index',accessorKey: "Index", header: "Index"},
+  const [statusColumns, setStatusColumns] = useState<ColumnDef<Status>[]>([
+    { id: 'StatusType', accessorKey: "StatusType", header: "Status Type" },
+    { id: 'Index', accessorKey: "Index", header: "Index" },
   ])
-  const [statusTableData,setStatusTableData]=useState<Status[]>([]);
-  const [serviceRequestTypeData,setServiceRequestTypeData]=useState<serviceRequestType[]>([]);
+  const [statusTableData, setStatusTableData] = useState<Status[]>([]);
+  const [serviceRequestTypeData, setServiceRequestTypeData] = useState<serviceRequestType[]>([]);
   const [isDelModalOpen, setIsDelModalOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<serviceRequestType | null>(null);
-  const [selectedStatusRec,setSelectedStatusRec]=useState<Status | null>(null);
-  const [isEditMode,setIsEditMode]=useState(false);
-  const [isEditStatusMode,setIsEditStatusMode]=useState(false);
-  const [currentTab,setCurrentTab]=useState('service-request-config')
-  const handleEdit = (data:serviceRequestType): void => {
+  const [selectedStatusRec, setSelectedStatusRec] = useState<Status | null>(null);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [isEditStatusMode, setIsEditStatusMode] = useState(false);
+  const [currentTab, setCurrentTab] = useState('service-request-config')
+  const handleEdit = (data: serviceRequestType): void => {
     setSelectedRecord(data);
     setIsEditMode(true);
     fetchServiceRequestTypeById(data.Id)
   };
-  const handleDelete = (data:serviceRequestType): void => {
+  const handleDelete = (data: serviceRequestType): void => {
     setIsDelModalOpen(true);
     setSelectedRecord(data);
   };
-  const handleDeleteStatus=(data:Status):void=>{
+  const handleDeleteStatus = (data: Status): void => {
     setIsDelModalOpen(true);
     setSelectedStatusRec(data);
   }
-  const handleEditStatus=(data:Status):void=>{
+  const handleEditStatus = (data: Status): void => {
     dispatch(setLoading(true));
     setSelectedStatusRec(data);
     setIsEditStatusMode(true);
-    form.reset({...form.getValues(),Status:data.StatusType})
-    setTimeout(()=>{
+    form.reset({ ...form.getValues(), Status: data.StatusType })
+    setTimeout(() => {
       dispatch(setLoading(false));
-    },1000)
+    }, 1000)
   }
   const tableActions: TableAction<serviceRequestType>[] = [
     {
@@ -136,86 +138,86 @@ const Configuration = () => {
     {
       label: 'Delete',
       icon: Trash2,
-      onClick:handleDelete,
+      onClick: handleDelete,
       variant: 'destructive',
     },
-  ]; 
-   const statusTableActions: TableAction<Status>[] = [
+  ];
+  const statusTableActions: TableAction<Status>[] = [
     {
       label: 'Edit',
       icon: Edit,
       onClick: handleEditStatus,
       variant: 'default',
-      hidden:row=>row.StatusType==='Open' || row.StatusType==='Closed'
+      hidden: row => row.StatusType === 'Open' || row.StatusType === 'Closed'
     },
     {
       label: 'Delete',
       icon: Trash2,
-      onClick:handleDeleteStatus,
+      onClick: handleDeleteStatus,
       variant: 'destructive',
-      hidden:row=>row.StatusType==='Open' || row.StatusType==='Closed'
+      hidden: row => row.StatusType === 'Open' || row.StatusType === 'Closed'
     },
-  ]; 
-  useEffect(()=>{
+  ];
+  useEffect(() => {
     const init = async () => {
       try {
         await fetchLookupsandGetAPIs();
       } catch (err) {
         console.error('Error fetching lookups:', err);
       } finally {
-        if(companyId){
-          getSRConfiguration(companyId,"All");
+        if (companyId) {
+          getSRConfiguration(companyId, "All");
           fetchAllServiceRequests();
           fetchAllStatusList();
         }
       }
     };
-    if(companyId){
+    if (companyId) {
       init();
     }
-  },[companyId])
-  const fetchAllServiceRequests=async()=>{
+  }, [companyId])
+  const fetchAllServiceRequests = async () => {
     dispatch(setLoading(true));
-    await getServiceRequestTypes(companyId).then(res=>{
-      if(res.success && res.data){
+    await getServiceRequestTypes(companyId).then(res => {
+      if (res.success && res.data) {
         setServiceRequestTypeData(res.data)
-      }else{
+      } else {
         setServiceRequestTypeData([])
       }
-    }).catch(err=>{}).finally(()=>{dispatch(setLoading(false))})
+    }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
   }
   //all status list
-  const fetchAllStatusList=async()=>{
+  const fetchAllStatusList = async () => {
     dispatch(setLoading(true));
-    await GetServiceRequestStatus(companyId).then(res=>{
-      if(res.success && res.data){
+    await GetServiceRequestStatus(companyId).then(res => {
+      if (res.success && res.data) {
         setStatusTableData(res.data);
-      }else{
+      } else {
         msg.warning('No Data Found !!')
       }
-    }).catch(err=>{}).finally(()=>{dispatch(setLoading(false))})
+    }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
   }
-  const handleSave=async(data:any,type:string)=>{
-    if(type==="configuration"){ 
+  const handleSave = async (data: any, type: string) => {
+    if (type === "configuration") {
       let newList = []
-          let Payload = {
-            "IsWorkorderAllowed": data["AllowWorkOrderCreation"],
-            "IsSerReqAllowedForMultipleAsset": "true",
-            "DisplayMyRequestAssignedTo": "true",
-            "DisplayMyWorkBenchAssignedTo": "true",
-            "DisplayMyRequestCustomer": data["CustomerFieldinMyRequest"],
-            "DisplayMyWorkbenchCustomer":data["CustomerFieldinMyRequest"],
-            "DisplayMyRequestSLATimer": "true",
-            "DisplayMyWorkbenchSLATimer": "true",
-            "DisplayAsset":data["AssetFieldinCreateEditServiceRequest"],
-            "IsDefaultNotifyUsers": data["IsDefaultNotifyUsers"],
-            "NotifyUserTypes":data["NotifyUserTypes"]?data["NotifyUserTypes"]?.join():data["NotifyUserTypes"],
-            "PauseSLAByDefault": data["PauseSLAcalculation"],
-            "DefaultSLAStatusDataList": data["DefaultSLAStatusDataList"]?data["DefaultSLAStatusDataList"]?.join():"",
-          }
-          newList.push(Payload);
-          var NewCategoryObj = { "ServiceRequestConfigDetails": newList };
-          updateSRConfigAPI(NewCategoryObj,companyId,data["ServiceReqConfigurationId"],)
+      let Payload = {
+        "IsWorkorderAllowed": data["AllowWorkOrderCreation"],
+        "IsSerReqAllowedForMultipleAsset": "true",
+        "DisplayMyRequestAssignedTo": "true",
+        "DisplayMyWorkBenchAssignedTo": "true",
+        "DisplayMyRequestCustomer": data["CustomerFieldinMyRequest"],
+        "DisplayMyWorkbenchCustomer": data["CustomerFieldinMyRequest"],
+        "DisplayMyRequestSLATimer": "true",
+        "DisplayMyWorkbenchSLATimer": "true",
+        "DisplayAsset": data["AssetFieldinCreateEditServiceRequest"],
+        "IsDefaultNotifyUsers": data["IsDefaultNotifyUsers"],
+        "NotifyUserTypes": data["NotifyUserTypes"] ? data["NotifyUserTypes"]?.join() : data["NotifyUserTypes"],
+        "PauseSLAByDefault": data["PauseSLAcalculation"],
+        "DefaultSLAStatusDataList": data["DefaultSLAStatusDataList"] ? data["DefaultSLAStatusDataList"]?.join() : "",
+      }
+      newList.push(Payload);
+      var NewCategoryObj = { "ServiceRequestConfigDetails": newList };
+      updateSRConfigAPI(NewCategoryObj, companyId, data["ServiceReqConfigurationId"],)
 
     } else if (type === "ServiceRequestType") {
       let payload = {
@@ -234,28 +236,28 @@ const Configuration = () => {
             "ResponseReminderHours": watch('ReminderForSLAHoursMinutes') ? watch('ReminderForSLAHoursMinutes').split(':')[0] || '' : '',//"12",
             "ResponseReminderMinutes": watch('ReminderForSLAHoursMinutes') ? watch('ReminderForSLAHoursMinutes').split(':')[1] || '' : '',//"45",
             "serAdminUserGroupList": watch('ServiceRequestTypeAdmin') && watch('ServiceRequestTypeAdmin')['User Group'] ? watch('ServiceRequestTypeAdmin')['User Group']?.join() : '',
-            "serAdminUserList":watch('ServiceRequestTypeAdmin') &&  watch('ServiceRequestTypeAdmin')['Users'] ? watch('ServiceRequestTypeAdmin')['Users']?.join() : '',
-            "BranchList":Array.isArray(watch('Branches')) ? watch('Branches').join() : ''
+            "serAdminUserList": watch('ServiceRequestTypeAdmin') && watch('ServiceRequestTypeAdmin')['Users'] ? watch('ServiceRequestTypeAdmin')['Users']?.join() : '',
+            "BranchList": Array.isArray(watch('Branches')) ? watch('Branches').join() : ''
           }
         ]
       }
-      console.log(payload,"Nag")
+      console.log(payload, "Nag")
       if (isEditMode && selectedRecord) {
         dispatch(setLoading(true));
-        await postUpdateServiceRequesttype(companyId,selectedRecord.Id,'All',payload).then(res=>{
-          if(res.success){
-            if(res.data.status){
+        await postUpdateServiceRequesttype(companyId, selectedRecord.Id, 'All', payload).then(res => {
+          if (res.success) {
+            if (res.data.status) {
               msg.success(res.data.message);
               fetchAllServiceRequests();
               handleReset();
-            }else{
+            } else {
               msg.warning(res.data.message || 'Failed to update service request type !!')
             }
-          }else{
+          } else {
             msg.warning('Failed to update service request type !!')
           }
 
-        }).catch(err=>{{}}).finally(()=>{dispatch(setLoading(false))})
+        }).catch(err => { { } }).finally(() => { dispatch(setLoading(false)) })
       } else {
         dispatch(setLoading(true));
         await postServiceRequestType(companyId, 'All', payload).then(res => {
@@ -268,42 +270,42 @@ const Configuration = () => {
           }
         }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
       }
-    } else if(type==='AddNewStatus'){
-      let payload={"ServiceRequestStatusDetails": [{"Name":watch('Status')}]};
-      if(isEditStatusMode && selectedStatusRec){
+    } else if (type === 'AddNewStatus') {
+      let payload = { "ServiceRequestStatusDetails": [{ "Name": watch('Status') }] };
+      if (isEditStatusMode && selectedStatusRec) {
         dispatch(setLoading(true));
-        await postUpdateServiceRequestStatus(companyId,selectedStatusRec?.Id,payload).then(res=>{
-          if(res.success){
-            if(res.data.status){
+        await postUpdateServiceRequestStatus(companyId, selectedStatusRec?.Id, payload).then(res => {
+          if (res.success) {
+            if (res.data.status) {
               msg.success(res.data.message);
               handleReset('UpdateStatus');
               fetchAllStatusList();
-            }else{
+            } else {
               msg.warning(res.data.message)
             }
-          }else{
+          } else {
             msg.warning('Failed to update service request status !!')
           }
-        }).catch(err=>{}).finally(()=>{dispatch(setLoading(false))})
-      }else{
+        }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
+      } else {
         dispatch(setLoading(true))
-        await postServiceRequestStatus(companyId,payload).then(res=>{
-          if(res.success){
-            if(res.data.status){
+        await postServiceRequestStatus(companyId, payload).then(res => {
+          if (res.success) {
+            if (res.data.status) {
               msg.success(res.data.message);
               handleReset('Status');
               fetchAllStatusList();
-            }else{
+            } else {
               msg.warning(res.data.message || 'Failed to add new status !!')
             }
-          }else{
+          } else {
             msg.warning('Failed to add new status !!')
           }
-        }).catch(err=>{}).finally(()=>{dispatch(setLoading(false))})
+        }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
       }
     }
   }
-  const setLookupsDataInJson = (lookupsData:allResponsesType,shouldSetData?:boolean, getData?:any): void => {
+  const setLookupsDataInJson = (lookupsData: allResponsesType, shouldSetData?: boolean, getData?: any): void => {
     const arr = Object.keys(lookupsData)
     const groupNames: string[] = []
     const opts: { [key: string]: any } = {}
@@ -348,12 +350,12 @@ const Configuration = () => {
     });
     setFields(data);
   }
-  const settingGetValuesInForm=(dataObj:any)=>{
-    Object.keys(dataObj).forEach((key)=>{
-      if(key=="DefaultSLAStatusDataList" || key=="NotifyUserTypes"){
-        form.setValue(key,dataObj[key]?dataObj[key].split(","):"")
-      }else{
-        form.setValue(key,dataObj[key])
+  const settingGetValuesInForm = (dataObj: any) => {
+    Object.keys(dataObj).forEach((key) => {
+      if (key == "DefaultSLAStatusDataList" || key == "NotifyUserTypes") {
+        form.setValue(key, dataObj[key] ? dataObj[key].split(",") : "")
+      } else {
+        form.setValue(key, dataObj[key])
       }
     })
   }
@@ -373,60 +375,61 @@ const Configuration = () => {
     );
   };
   //api calls
-  const fetchLookupsandGetAPIs=async ()=>{
+  const fetchLookupsandGetAPIs = async () => {
     dispatch(setLoading(true));
-    try{
-      let [NotifyLookup,SRStatusLookup,getVendors,SRTAssignToLookup,getBranches,getStatusForSLA]=await Promise.allSettled([GetNotifyTypeLookup(),getStatusLookups(companyId),getVendorDetails(companyId),GetServiceRequestAssignToLookups(companyId,"All"),getSRBranchList(companyId),getStatusLookupsForSLA(companyId)]);
+    try {
+      let [NotifyLookup, SRStatusLookup, getVendors, SRTAssignToLookup, getBranches, getStatusForSLA] = await Promise.allSettled([GetNotifyTypeLookup(), getStatusLookups(companyId), getVendorDetails(companyId), GetServiceRequestAssignToLookups(companyId, "All"), getSRBranchList(companyId), getStatusLookupsForSLA(companyId)]);
       const allResponses = {
-            NotifyUserTypes: { data: NotifyLookup.status === 'fulfilled' && NotifyLookup.value.success && NotifyLookup.value.data.ServiceRequestNotifyTypeLookup ? NotifyLookup.value.data.ServiceRequestNotifyTypeLookup : [], label: 'NotifyTypeName', value: 'NotifyTypeId' },
-            DefaultSLAStatusDataList: { data: SRStatusLookup.status === 'fulfilled' && SRStatusLookup.value.success && SRStatusLookup.value.data.ServiceRequestStatusLookup ? SRStatusLookup.value.data.ServiceRequestStatusLookup : [], label: 'ServiceRequestStatusName', value: 'ServiceRequestStatusId' },
-            Vendors: { data: getVendors.status === 'fulfilled' && getVendors.value.success && getVendors.value.data.Vendors ? getVendors.value.data.Vendors : [], label: 'VendorName', value: 'VendorID' },
-            ServiceRequestTypeAdmin: {
-              data: [], label: 'UserName', value: 'UserName', isGrouping: true, groupData: [{ label: "UserGroupName", value: "UserGroupId", data: SRTAssignToLookup.status === 'fulfilled' && SRTAssignToLookup.value.success && SRTAssignToLookup.value.data.ServiceRequestAssignToUserGroupLookup ? SRTAssignToLookup.value.data.ServiceRequestAssignToUserGroupLookup : [], groupLabel: "User Group" },
-              { label: "UserName", value: "UserId", data: SRTAssignToLookup.status === 'fulfilled' && SRTAssignToLookup.value.success && SRTAssignToLookup.value.data.ServiceRequestAssignToUsersLookup ? SRTAssignToLookup.value.data.ServiceRequestAssignToUsersLookup : [], groupLabel: "Users" },]
-            },
-            UserGroups:{ data: SRTAssignToLookup.status === 'fulfilled' && SRTAssignToLookup.value.success && SRTAssignToLookup.value.data.ServiceRequestAssignToUserGroupLookup ? SRTAssignToLookup.value.data.ServiceRequestAssignToUserGroupLookup : [], label: 'UserGroupName', value: 'UserGroupId' },
-            EscalationTo:{ data: SRTAssignToLookup.status === 'fulfilled' && SRTAssignToLookup.value.success && SRTAssignToLookup.value.data.ServiceRequestAssignToUsersLookup ? SRTAssignToLookup.value.data.ServiceRequestAssignToUsersLookup : [], label: 'UserName', value: 'UserId' },
-            StatusToCalculate: { data: getStatusForSLA.status === 'fulfilled' && getStatusForSLA.value.success && getStatusForSLA.value.data.ServiceRequestStatusToCalculateSLALookup ? getStatusForSLA.value.data.ServiceRequestStatusToCalculateSLALookup.filter((ele:any)=>ele.ServiceRequestStatusId!=704) : [], label: 'ServiceRequestStatusName', value: 'ServiceRequestStatusId' },
-                    Branches: { data: getBranches.status === 'fulfilled' && getBranches.value.success && getBranches.value.data ? getBranches.value.data.filter((ele: any) => ele.id !== 0 && ele.parent !== '#' && ele.type !== '99') : [], label: 'Name', value: 'id' },
+        NotifyUserTypes: { data: NotifyLookup.status === 'fulfilled' && NotifyLookup.value.success && NotifyLookup.value.data.ServiceRequestNotifyTypeLookup ? NotifyLookup.value.data.ServiceRequestNotifyTypeLookup : [], label: 'NotifyTypeName', value: 'NotifyTypeId' },
+        DefaultSLAStatusDataList: { data: SRStatusLookup.status === 'fulfilled' && SRStatusLookup.value.success && SRStatusLookup.value.data.ServiceRequestStatusLookup ? SRStatusLookup.value.data.ServiceRequestStatusLookup : [], label: 'ServiceRequestStatusName', value: 'ServiceRequestStatusId' },
+        Vendors: { data: getVendors.status === 'fulfilled' && getVendors.value.success && getVendors.value.data.Vendors ? getVendors.value.data.Vendors : [], label: 'VendorName', value: 'VendorID' },
+        ServiceRequestTypeAdmin: {
+          data: [], label: 'UserName', value: 'UserName', isGrouping: true, groupData: [{ label: "UserGroupName", value: "UserGroupId", data: SRTAssignToLookup.status === 'fulfilled' && SRTAssignToLookup.value.success && SRTAssignToLookup.value.data.ServiceRequestAssignToUserGroupLookup ? SRTAssignToLookup.value.data.ServiceRequestAssignToUserGroupLookup : [], groupLabel: "User Group" },
+          { label: "UserName", value: "UserId", data: SRTAssignToLookup.status === 'fulfilled' && SRTAssignToLookup.value.success && SRTAssignToLookup.value.data.ServiceRequestAssignToUsersLookup ? SRTAssignToLookup.value.data.ServiceRequestAssignToUsersLookup : [], groupLabel: "Users" },]
+        },
+        UserGroups: { data: SRTAssignToLookup.status === 'fulfilled' && SRTAssignToLookup.value.success && SRTAssignToLookup.value.data.ServiceRequestAssignToUserGroupLookup ? SRTAssignToLookup.value.data.ServiceRequestAssignToUserGroupLookup : [], label: 'UserGroupName', value: 'UserGroupId' },
+        EscalationTo: { data: SRTAssignToLookup.status === 'fulfilled' && SRTAssignToLookup.value.success && SRTAssignToLookup.value.data.ServiceRequestAssignToUsersLookup ? SRTAssignToLookup.value.data.ServiceRequestAssignToUsersLookup : [], label: 'UserName', value: 'UserId' },
+        StatusToCalculate: { data: getStatusForSLA.status === 'fulfilled' && getStatusForSLA.value.success && getStatusForSLA.value.data.ServiceRequestStatusToCalculateSLALookup ? getStatusForSLA.value.data.ServiceRequestStatusToCalculateSLALookup.filter((ele: any) => ele.ServiceRequestStatusId != 704) : [], label: 'ServiceRequestStatusName', value: 'ServiceRequestStatusId' },
+        Branches: { data: getBranches.status === 'fulfilled' && getBranches.value.success && getBranches.value.data ? getBranches.value.data.filter((ele: any) => ele.id !== 0 && ele.parent !== '#' && ele.type !== '99') : [], label: 'Name', value: 'id' },
 
-          } 
-          
+      }
+
       setLookupsDataInJson(allResponses)
-    }catch{}finally{dispatch(setLoading(false));}
+    } catch { } finally { dispatch(setLoading(false)); }
   }
   const updateSRConfigAPI = async (data, CompId, id) => {
-   dispatch(setLoading(true))
-   await postServiceRequestConfiguration( CompId,id,data).then((res) => {
+    dispatch(setLoading(true))
+    await postServiceRequestConfiguration(CompId, id, data).then((res) => {
       if (res.data.status !== undefined) {
         if (res.data.status === true) {
-           msg.success(res.data.message);
+          msg.success(res.data.message);
           getSRConfiguration(companyId, "All")
         } else {
           msg.warning(res.data.message)
         }
       }
       else {
-       msg.warning(res.data.ErrorDetails[0]["Error Message"]);
+        msg.warning(res.data.ErrorDetails[0]["Error Message"]);
       }
-    }).catch((err) => {}).finally(() => {dispatch(setLoading(false))})
+    }).catch((err) => { }).finally(() => { dispatch(setLoading(false)) })
   }
-  const getSRConfiguration=(compId,branch)=>{
-    getSRConfigList(compId,branch).then((res)=>{
+  const getSRConfiguration = (compId, branch) => {
+    getSRConfigList(compId, branch).then((res) => {
       if (res.data !== undefined) {
         if (res.data.status == undefined) {
           settingGetValuesInForm(res.data.ServiceRequestConfiguration)
         }
-      }}).catch(()=>{}).finally(()=>{})
+      }
+    }).catch(() => { }).finally(() => { })
   }
   //clear fields data
-  const handleReset=(type?:string)=>{
-    if(type){
-      form.reset({...form.getValues(),Status:''});
+  const handleReset = (type?: string) => {
+    if (type) {
+      form.reset({ ...form.getValues(), Status: '' });
       setIsEditStatusMode(false);
       setSelectedStatusRec(null)
-    }else{
-      form.reset({...form.getValues(),ServiceRequestType:'',UserGroups:[],Vendors:[],SLAHoursMinutes:'',ReminderForSLAHoursMinutes:'',EscalationTo:[],StatusToCalculate:'',ServiceRequestTypeAdmin:[],Branches:[],Description:''});
+    } else {
+      form.reset({ ...form.getValues(), ServiceRequestType: '', UserGroups: [], Vendors: [], SLAHoursMinutes: '', ReminderForSLAHoursMinutes: '', EscalationTo: [], StatusToCalculate: '', ServiceRequestTypeAdmin: [], Branches: [], Description: '' });
       setIsEditMode(false);
       setSelectedRecord(null);
     }
@@ -439,58 +442,77 @@ const Configuration = () => {
     return hours * 60 + minutes;
   };
   const renderField = (field: BaseField) => {
-      const { name, label, fieldType, isRequired,validationPattern,patternErrorMessage, dependsOn, show = true } = field;
-      if (!show && dependsOn && !watch(dependsOn)) {
-        return null;
-      }
-      const validationRules = {
-        required: isRequired ? `${label} is Required` : false,
-        ...(validationPattern && {
-          pattern: {
-            value: new RegExp(validationPattern),
-            message: patternErrorMessage || 'Invalid input format'
+    const { name, label, fieldType, isRequired, validationPattern, patternErrorMessage, dependsOn, show = true } = field;
+    if (!show && dependsOn && !watch(dependsOn)) {
+      return null;
+    }
+    const validationRules = {
+      required: isRequired ? `${label} is Required` : false,
+      ...(validationPattern && {
+        pattern: {
+          value: new RegExp(validationPattern),
+          message: patternErrorMessage || 'Invalid input format'
+        }
+      }),
+      ...(name === 'ReminderForSLAHoursMinutes' && {
+        validate: {
+          lessThanSLA: (value: string) => {
+            if (!value) return true;
+            const slaValue = watch('SLAHoursMinutes');
+            if (!slaValue) return true;
+            const reminderMinutes = timeToMinutes(value);
+            const slaMinutes = timeToMinutes(slaValue);
+            return reminderMinutes <= slaMinutes || 'Reminder time must be less than SLA time';
           }
-        }),
-        ...(name === 'ReminderForSLAHoursMinutes' && {
-          validate: {
-            lessThanSLA: (value: string) => {
-              if (!value) return true;
-              const slaValue = watch('SLAHoursMinutes');
-              if (!slaValue) return true;
-              const reminderMinutes = timeToMinutes(value);
-              const slaMinutes = timeToMinutes(slaValue);
-              return reminderMinutes <= slaMinutes || 'Reminder time must be less than SLA time';
-            }
-          }
-        })
-      };
+        }
+      })
+    };
 
-      switch (fieldType) {
-        case 'text':
-          return (
-            <Controller
-              name={name}
-              control={control}
-              rules={validationRules}
-              render={({ field: ctrl, fieldState }) => (
-                <ReusableInput
-                  {...field}
-                  value={ctrl.value}
-                  onChange={ctrl.onChange}
-                  error={fieldState.error?.message}
-                />
-              )}
-            />
-          );
-        case 'dropdown':
-          return (
+    switch (fieldType) {
+      case 'text':
+        return (
+          <Controller
+            name={name}
+            control={control}
+            rules={validationRules}
+            render={({ field: ctrl, fieldState }) => (
+              <ReusableInput
+                {...field}
+                value={ctrl.value}
+                onChange={ctrl.onChange}
+                error={fieldState.error?.message}
+              />
+            )}
+          />
+        );
+      case 'dropdown':
+        return (
+          <Controller
+            key={name}
+            name={name}
+            control={control}
+            rules={validationRules}
+            render={({ field: ctrl }) => (
+              <ReusableDropdown
+                {...field}
+                value={ctrl.value}
+                onChange={ctrl.onChange}
+                error={errors[name]?.message as string}
+              />
+            )}
+          />
+        );
+      case 'multiselect':
+        return (
+          <div>
             <Controller
               key={name}
               name={name}
               control={control}
               rules={validationRules}
               render={({ field: ctrl }) => (
-                <ReusableDropdown
+                <ReusableMultiSelect
+                  label={label!}
                   {...field}
                   value={ctrl.value}
                   onChange={ctrl.onChange}
@@ -498,70 +520,51 @@ const Configuration = () => {
                 />
               )}
             />
-          );
-        case 'multiselect':
-          return (
-            <div>
-              <Controller
-                key={name}
-                name={name}
-                control={control}
-                rules={validationRules}
-                render={({ field: ctrl }) => (
-                  <ReusableMultiSelect
-                    label={label!}
-                    {...field}
-                    value={ctrl.value}
-                    onChange={ctrl.onChange}
-                    error={errors[name]?.message as string}
-                  />
-                )}
+          </div>
+        );
+      case 'checkbox':
+        return (
+          <Controller
+            name={name}
+            control={control}
+            render={({ field: ctrl }) => (
+              <ReusableSingleCheckbox
+                label={label}
+                onChange={ctrl.onChange}
+                value={ctrl.value}
+                className="text-orange-500"
+                {...field}
               />
-            </div>
-          );
-        case 'checkbox':
-          return (
-             <Controller
-              name={name}
-              control={control}
-              render={({ field: ctrl }) => (
-                <ReusableSingleCheckbox
-                  label={label}
-                  onChange={ctrl.onChange}
-                  value={ctrl.value}
-                  className="text-orange-500"
-                  {...field}
-                />
-              )}
-            />
-          );
-        case 'textarea':
-          return (
-            <Controller
-              key={name}
-              name={name}
-              control={control}
-              rules={validationRules}
-              render={({ field: ctrl }) => (
+            )}
+          />
+        );
+      case 'textarea':
+        return (
+          <Controller
+            key={name}
+            name={name}
+            control={control}
+            rules={validationRules}
+            render={({ field: ctrl }) => (
               <ReusableTextarea
                 {...field}
                 value={ctrl.value}
                 onChange={ctrl.onChange}
                 error={errors[name]?.message as string}
               />
-              )}
-            />
+            )}
+          />
         );
-        default:
-          return null;
-      }
+      default:
+        return null;
+    }
   };
-   // Handle refresh
-  const handleRefresh = (type?:string) => {
-    if(type){
+  // Handle refresh
+  const handleRefresh = (type?: string) => {
+    if (type) {
       msg.info("Refreshing Service Request Status Data...");
       fetchAllStatusList()
-    }else{
+    } else {
       msg.info("Refreshing Service Request Type Data...");
       fetchAllServiceRequests();
     }
@@ -572,85 +575,86 @@ const Configuration = () => {
     return `${hours.padStart(2, "0")}:${minutes.padStart(2, "0")}`;
   };
   //fetch service request type data by id
-  const fetchServiceRequestTypeById = async(id: number) => {
+  const fetchServiceRequestTypeById = async (id: number) => {
     dispatch(setLoading(true));
-    await getSRTypesById(companyId,id).then(res=>{
-      if(res.success){
-        if(res.data.ServiceRequestType){
-          form.reset({...form.getValues(),
+    await getSRTypesById(companyId, id).then(res => {
+      if (res.success) {
+        if (res.data.ServiceRequestType) {
+          form.reset({
+            ...form.getValues(),
             ...res.data.ServiceRequestType,
-            EscalationTo:res.data.ServiceRequestType.EscalationTo?res.data.ServiceRequestType.EscalationTo.split(','):[],
-            UserGroups:res.data.ServiceRequestType.UserGroups?res.data.ServiceRequestType.UserGroups.split(','):[],
-            StatusToCalculate:res.data.ServiceRequestType.StatusToCalculate?`${res.data.ServiceRequestType.StatusToCalculate}`:'',
-            Vendors:res.data.ServiceRequestType.Vendors?res.data.ServiceRequestType.Vendors.split(','):[],
-            ServiceRequestTypeAdmin:res.data.ServiceRequestType.ServiceRequestTypeAdmin?segregateOptionsAsGroupsAndUsers('ServiceRequestTypeAdmin',res.data.ServiceRequestType.ServiceRequestTypeAdmin.split(',')):[],
-            SLAHoursMinutes: res.data.ServiceRequestType.SLAHoursMinutes? formatSLAHoursMinutes(res.data.ServiceRequestType.SLAHoursMinutes): "",
-            ReminderForSLAHoursMinutes:res.data.ServiceRequestType.ReminderForSLAHoursMinutes?formatSLAHoursMinutes(res.data.ServiceRequestType.ReminderForSLAHoursMinutes):'',
-            Branches:res.data.ServiceRequestType.Branches?res.data.ServiceRequestType.Branches.split(","):[]
+            EscalationTo: res.data.ServiceRequestType.EscalationTo ? res.data.ServiceRequestType.EscalationTo.split(',') : [],
+            UserGroups: res.data.ServiceRequestType.UserGroups ? res.data.ServiceRequestType.UserGroups.split(',') : [],
+            StatusToCalculate: res.data.ServiceRequestType.StatusToCalculate ? `${res.data.ServiceRequestType.StatusToCalculate}` : '',
+            Vendors: res.data.ServiceRequestType.Vendors ? res.data.ServiceRequestType.Vendors.split(',') : [],
+            ServiceRequestTypeAdmin: res.data.ServiceRequestType.ServiceRequestTypeAdmin ? segregateOptionsAsGroupsAndUsers('ServiceRequestTypeAdmin', res.data.ServiceRequestType.ServiceRequestTypeAdmin.split(',')) : [],
+            SLAHoursMinutes: res.data.ServiceRequestType.SLAHoursMinutes ? formatSLAHoursMinutes(res.data.ServiceRequestType.SLAHoursMinutes) : "",
+            ReminderForSLAHoursMinutes: res.data.ServiceRequestType.ReminderForSLAHoursMinutes ? formatSLAHoursMinutes(res.data.ServiceRequestType.ReminderForSLAHoursMinutes) : '',
+            Branches: res.data.ServiceRequestType.Branches ? res.data.ServiceRequestType.Branches.split(",") : []
           })
         }
       }
-    }).catch(err=>{}).finally(()=>{dispatch(setLoading(false))})
+    }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
   }
   //delete service request type
   const deleteServiceRequestType = async (id: number) => {
     dispatch(setLoading(true));
     await deleteSRType(id, companyId).then(res => {
-      if(res.success){
-        if(res.data.status){
+      if (res.success) {
+        if (res.data.status) {
           msg.success(res.data.message);
-          if(selectedRecord && selectedRecord.Id==id){
+          if (selectedRecord && selectedRecord.Id == id) {
             handleReset();
           }
           fetchAllServiceRequests();
-        }else{
+        } else {
           msg.warning(res.data.message);
         }
-      }else{
+      } else {
         msg.warning('Failed to delete Service Request Type !!');
       }
     }).catch((error) => {
       msg.error("Error deleting Service Request Type");
-    }).finally(()=>{
+    }).finally(() => {
       dispatch(setLoading(false));
     })
   }
   //delete status
-  const deleteStatus=async(id:number)=>{
-    await postDeleteServiceRequestStatus(companyId,id).then(res=>{
-      if(res.success){
-        if(res.data.status){
+  const deleteStatus = async (id: number) => {
+    await postDeleteServiceRequestStatus(companyId, id).then(res => {
+      if (res.success) {
+        if (res.data.status) {
           msg.success(res.data.message);
-          if(selectedStatusRec && selectedStatusRec.Id==id){
+          if (selectedStatusRec && selectedStatusRec.Id == id) {
             handleReset('DeleteStatus');
           }
           fetchAllStatusList();
-        }else{
+        } else {
           msg.warning(res.data.message);
         }
-      }else{
+      } else {
         msg.warning('Failed to delete status !!')
       }
-    }).catch(err=>{}).finally(()=>{
+    }).catch(err => { }).finally(() => {
 
     })
   }
   //update service request status sequence
-  const handleUpdateStatusSequence=async()=>{
+  const handleUpdateStatusSequence = async () => {
     dispatch(setLoading(true));
-    let updatedSequence = statusTableData.map(item =>item.Id).join()
-    await postUpdateStatusSequence(companyId,updatedSequence).then(res=>{
-      if(res.success){
-        if(res.data.status){
+    let updatedSequence = statusTableData.map(item => item.Id).join()
+    await postUpdateStatusSequence(companyId, updatedSequence).then(res => {
+      if (res.success) {
+        if (res.data.status) {
           msg.success(res.data.message);
           fetchAllStatusList();
-        }else{
+        } else {
           msg.warning(res.data.message);
         }
-      }else{
+      } else {
         msg.warning('Failed to update status sequence !!');
       }
-    }).catch(err=>{}).finally(()=>{
+    }).catch(err => { }).finally(() => {
       dispatch(setLoading(false));
     })
   }
@@ -669,7 +673,7 @@ const Configuration = () => {
         <div>
           <h1 className="text-base sm:text-lg font-semibold text-gray-900">Service Desk Configuration</h1>
         </div>
-        <Tabs value={currentTab} onValueChange={setCurrentTab}  className="space-y-4">
+        <Tabs value={currentTab} onValueChange={setCurrentTab} className="space-y-4">
           <div className="hidden sm:block">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="service-request-config" className="text-sm">Service Request Configuration</TabsTrigger>
@@ -687,20 +691,20 @@ const Configuration = () => {
           <TabsContent value="service-request-config" className="space-y-4">
             <Card>
               <CardContent className="pt-6">
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="space-y-4 ">
-                    {getFieldsByNames(['CustomerFieldinMyRequest', 'AssetFieldinCreateEditServiceRequest', 'IsDefaultNotifyUsers','NotifyUserTypes']).map((field) => {
-                      return  <div className="flex-1 items-center space-x-2">
-                       {renderField(field)}
+                <div className="grid xxs:grid-cols-1 xs2:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-6">  
+                <div className="space-y-4 ">
+                  {getFieldsByNames(['CustomerFieldinMyRequest', 'AssetFieldinCreateEditServiceRequest', 'IsDefaultNotifyUsers', 'NotifyUserTypes']).map((field) => {
+                    return <div className="flex-1 items-center space-x-2">
+                      {renderField(field)}
                     </div>;
-                    })} 
-                  </div>
+                  })}
+                </div>
                   <div className="space-y-4">
-                    {getFieldsByNames(['AllowWorkOrderCreation', 'PauseSLAcalculation','DefaultSLAStatusDataList']).map((field) => {
-                      return  <div className="flex-1 items-center space-x-2">
-                       {renderField(field)}
-                    </div>;
-                    })} 
+                    {getFieldsByNames(['AllowWorkOrderCreation', 'PauseSLAcalculation', 'DefaultSLAStatusDataList']).map((field) => {
+                      return <div className={`flex-1 items-center space-x-2 ${field.name === 'PauseSLAcalculation' ? ' sm:!mb-4 lg:!mb-8' : ''}`}>
+                        {renderField(field)}
+                      </div>;
+                    })}
                   </div>
                 </div>
                 <div className="mt-6">
@@ -721,46 +725,46 @@ const Configuration = () => {
           <TabsContent value="service-request-type" className="space-y-4">
             <Card>
               <CardContent className="pt-6">
-                <div className="grid grid-cols-2 gap-6 mb-6">
-                  <div className="space-y-4">
-                    <div className="space-y-2 ">
-                      {getFieldsByNames(['ServiceRequestType','UserGroups','Vendors','SLAHoursMinutes','ReminderForSLAHoursMinutes',"Branches"]).map((field) => {
-                        return  <div className="flex-1 items-center space-x-2">
+                <div className="grid xxs:grid-cols-1 xs2:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-6">
+                <div className="space-y-4">
+                  <div className="space-y-2 ">
+                    {getFieldsByNames(['ServiceRequestType', 'UserGroups', 'Vendors', 'SLAHoursMinutes', 'ReminderForSLAHoursMinutes', "Branches"]).map((field) => {
+                      return <div className="flex-1 items-center space-x-2">
                         {renderField(field)}
                       </div>;
-                      })} 
-                    </div>
+                    })}
                   </div>
+                </div>
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      {getFieldsByNames(['EscalationTo','StatusToCalculate','ServiceRequestTypeAdmin','Description']).map((field) => {
-                        return  <div className="flex-1 items-center space-x-2">
-                        {renderField(field)}
-                      </div>;
-                      })} 
+                      {getFieldsByNames(['EscalationTo', 'StatusToCalculate', 'ServiceRequestTypeAdmin', 'Description']).map((field) => {
+                        return <div className="flex-1 items-center space-x-2">
+                          {renderField(field)}
+                        </div>;
+                      })}
                     </div>
                   </div>
-                </div>    
+                </div>
                 <div className="flex gap-2 mb-6">
                   <ReusableButton
-                      htmlType="button"
-                      variant="default"
-                      onClick={handleSubmit((data)=>{handleSave(data,"ServiceRequestType")})}
-                      iconPosition="left"
-                      size="middle"
-                      className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
-                      >
-                      {isEditMode && currentTab==='service-request-type'?'Update':'Save'}
-                    </ReusableButton>
-                   <ReusableButton
-                      htmlType="button"
-                      variant="default"
-                      onClick={()=>handleReset('')}
-                      iconPosition="left"
-                      size="middle"
-                      >
-                      Cancel
-                    </ReusableButton>
+                    htmlType="button"
+                    variant="default"
+                    onClick={handleSubmit((data) => { handleSave(data, "ServiceRequestType") })}
+                    iconPosition="left"
+                    size="middle"
+                    className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+                  >
+                    {isEditMode && currentTab === 'service-request-type' ? 'Update' : 'Save'}
+                  </ReusableButton>
+                  <ReusableButton
+                    htmlType="button"
+                    variant="default"
+                    onClick={() => handleReset('')}
+                    iconPosition="left"
+                    size="middle"
+                  >
+                    Cancel
+                  </ReusableButton>
                 </div>
               </CardContent>
             </Card>
@@ -769,7 +773,7 @@ const Configuration = () => {
                 <ReusableTable
                   data={serviceRequestTypeData} columns={columns}
                   actions={tableActions} permissions={tablePermissions}
-                  title="Service Request Type List" onRefresh={()=>handleRefresh('')}
+                  title="Service Request Type List" onRefresh={() => handleRefresh('')}
                   enableSearch={true}
                   enableSelection={false}
                   enableExport={true}
@@ -779,7 +783,7 @@ const Configuration = () => {
                   enableFiltering={true}
                   pageSize={10}
                   emptyMessage="No Data found"
-                  storageKey="service-request-type-list-table"                    
+                  storageKey="service-request-type-list-table"
                   enableColumnPinning
                 />
               </CardContent>
@@ -790,31 +794,31 @@ const Configuration = () => {
               <CardContent className="pt-6">
                 <div className="mb-6">
                   {getFieldsByNames(['Status']).map((field) => {
-                        return  <div className="flex-1 items-center space-x-2">
-                        {renderField(field)}
-                      </div>;
-                      })} 
+                    return <div className="flex-1 items-center space-x-2">
+                      {renderField(field)}
+                    </div>;
+                  })}
                 </div>
                 <div className="flex gap-2 mb-8">
                   <ReusableButton
-                      htmlType="button"
-                      variant="default"
-                      onClick={handleSubmit((data)=>{handleSave(data,"AddNewStatus")})}
-                      iconPosition="left"
-                      size="middle"
-                      className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
-                      >
-                      {currentTab==='service-request-status' && isEditStatusMode ?'Update':'Save'}
-                    </ReusableButton>
-                   <ReusableButton
-                      htmlType="button"
-                      variant="default"
-                      onClick={()=>handleReset('AddNewStatus')}
-                      iconPosition="left"
-                      size="middle"
-                      >
-                      Cancel
-                    </ReusableButton>
+                    htmlType="button"
+                    variant="default"
+                    onClick={handleSubmit((data) => { handleSave(data, "AddNewStatus") })}
+                    iconPosition="left"
+                    size="middle"
+                    className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+                  >
+                    {currentTab === 'service-request-status' && isEditStatusMode ? 'Update' : 'Save'}
+                  </ReusableButton>
+                  <ReusableButton
+                    htmlType="button"
+                    variant="default"
+                    onClick={() => handleReset('AddNewStatus')}
+                    iconPosition="left"
+                    size="middle"
+                  >
+                    Cancel
+                  </ReusableButton>
                 </div>
                 <div>
                   <div className="border border-gray-200 rounded-lg overflow-hidden p-3">
@@ -822,15 +826,15 @@ const Configuration = () => {
                       data={statusTableData} columns={statusColumns}
                       permissions={tablePermissions}
                       title="Service Request Status List"
-                      onRefresh={()=>handleRefresh('Status')} enableSearch={true}
+                      onRefresh={() => handleRefresh('Status')} enableSearch={true}
                       enableSelection={false} enableExport={true}
                       enableColumnVisibility={true} enablePagination={true}
                       enableSorting={true} enableFiltering={true}
                       pageSize={10} emptyMessage="No Data found"
-                      rowHeight="normal" storageKey="service-request-type-list-table"    
+                      rowHeight="normal" storageKey="service-request-type-list-table"
                       enableRowReordering
-                      onRowReorder={(newData) => setStatusTableData(newData)}  
-                      actions={statusTableActions}              
+                      onRowReorder={(newData) => setStatusTableData(newData)}
+                      actions={statusTableActions}
                     />
                   </div>
                   <div className="mt-4 flex justify-end">
@@ -856,10 +860,10 @@ const Configuration = () => {
               <DialogTitle>Confirm the action</DialogTitle>
               <DialogDescription>
                 Are you sure you want to delete{" "}
-                  {currentTab === "service-request-type"
-                    ? `${selectedRecord?.ServiceRequestType || "this"} Service Request Type`
-                    : `${selectedStatusRec?.StatusType || "this"} Status`
-                  }
+                {currentTab === "service-request-type"
+                  ? `${selectedRecord?.ServiceRequestType || "this"} Service Request Type`
+                  : `${selectedStatusRec?.StatusType || "this"} Status`
+                }
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
@@ -872,7 +876,7 @@ const Configuration = () => {
               <ReusableButton
                 variant="primary"
                 danger={true}
-                onClick={currentTab==="service-request-type"?()=>{deleteServiceRequestType(selectedRecord?.Id);setIsDelModalOpen(false)}:()=>{deleteStatus(selectedStatusRec?.Id);setIsDelModalOpen(false)}} 
+                onClick={currentTab === "service-request-type" ? () => { deleteServiceRequestType(selectedRecord?.Id); setIsDelModalOpen(false) } : () => { deleteStatus(selectedStatusRec?.Id); setIsDelModalOpen(false) }}
               >
                 Delete
               </ReusableButton>

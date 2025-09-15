@@ -375,7 +375,7 @@ const TicketView = () => {
     await getAllSRDetailsList('All', companyId, requestType).then(res => {
       if (res.success && res.data.status === undefined) {
         if (Array.isArray(res.data)) {
-          setTickets(res.data)
+          setTickets([...res.data].reverse())
         } else {
           setTickets([])
         }

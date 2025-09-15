@@ -275,9 +275,17 @@ const TicketView = () => {
   }, [form.watch("FileUploadURLs")]);
   useEffect(() => {
     if (Object.keys(originalTicket).length > 0) {
-      form.reset({ ...originalTicket,...notifyValues })
+      let requestedById=parseId(originalTicket.RequestedById)
+      form.reset({ ...originalTicket,...notifyValues,RequestedById: requestedById})
     }
   }, [originalTicket])
+
+  function parseId(rawId: unknown): number | "" {
+    if (typeof rawId === "string" && /^\d+$/.test(rawId)) {
+      return Number(rawId);
+    }
+    return "";
+  }
 
   //assets lisat get for edit
    const assetListAPICall=async(id:string,compId:number)=>{
@@ -571,7 +579,7 @@ const TicketView = () => {
     dispatch(setLoading(true));
     try {
       const [SRTLookUp, SRTAssignToLookup, SRTRequestedByLookup, SRTLinkToLookup, SRTCCListLookup, SRTBranchListLookup, ConfigData, StatusLookup] = await Promise.allSettled([
-        ServiceRequestTypeLookups(companyId), GetServiceRequestAssignToLookups(companyId, 'All'),
+        ServiceRequestTypeLookups(companyId,0), GetServiceRequestAssignToLookups(companyId, 'All'),
         getSRRequestByLookupsList(companyId, 'All'), getSRLinkToLookupsList(companyId, 'All'),
         getSRCCListLookupsList(companyId, 'All'), getSRBranchList(companyId), getSRConfigList(companyId, 'All'),
         getStatusLookups(companyId)

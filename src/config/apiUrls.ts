@@ -7,7 +7,8 @@ export const URL_GET_USER_DETAILS="/api/Masters/GetUserDetailsByUserName";
 //service desk urls
 // create ticket screen
 export const URL_GET_SRCONFIG_LIST = "/api/ServiceDeskAPI/GetServiceRequestConfiguration";
-export const URL_GET_SR_TYPE_LOOKUPS = "/api/ServiceDeskAPI/GetServiceRequestTypeLookups";
+// export const URL_GET_SR_TYPE_LOOKUPS = "/api/ServiceDeskAPI/GetServiceRequestTypeLookups";
+export const URL_GET_SR_TYPE_LOOKUPS="/api/ServiceDeskAPI/GetServiceRequestTypeLookupsByBranchId";
 export const URL_CREATE_SERVICE_REQUEST = "/api/ServiceDeskAPI/CreateServiceRequestwithAdditionalFields";
 export const URL_SAVE_FILE_UPLOAD = "/api/ServiceDeskAPI/SaveFileUploadByServiceRequestId";
 export const URL_GET_SR_ASSIGN_TO_LOOKUPS = "/api/ServiceDeskAPI/GetServiceRequestAssignToLookups";

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ReusableInput } from '@/components/ui/reusable-input';
 import { ReusableButton } from '@/components/ui/reusable-button';
@@ -39,7 +39,11 @@ const Login = () => {
     // <Lock className="h-4 w-4" />
   ]
 
-
+  useEffect(() => {
+    if (localStorage.getItem('Token')) {
+      navigate('/service-desk/all-requests')
+    }
+  }, [])
   const renderField = (field: BaseField, icon) => {
     const { name, label, fieldType, isRequired, show = true } = field;
     if (!name || !show) return null;

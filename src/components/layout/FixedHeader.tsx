@@ -81,6 +81,7 @@ const FixedHeader: React.FC = () => {
         if (!branch) {
           branch = lookupData[0].value;
           setSelectedBranch(branch);
+          dispatch(setBranch(branch));
           localStorage.setItem("Branch", branch);
         }
       }

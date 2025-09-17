@@ -1067,7 +1067,7 @@ const getSelectedValuesText = () => {
             onFocus={onFocus}
             onBlur={onBlur}
             title={
-              (normalizedValue.length > 0 && (disabled || normalizedValue.length > maxTagCount))
+              (normalizedValue.length > 0)
                 ? `Selected (${normalizedValue.length}): ${getSelectedValuesText()}`
                 : undefined
             }

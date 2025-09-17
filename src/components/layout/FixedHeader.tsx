@@ -39,7 +39,6 @@ const FixedHeader: React.FC = () => {
       fetchBranchList(selectedCompany);
     }
   }, [selectedCompany]);
-  console.log("seletedBranch",selectedBranch);
 
   const fetchCompanyList = async () => {
     dispatch(setLoading(true));

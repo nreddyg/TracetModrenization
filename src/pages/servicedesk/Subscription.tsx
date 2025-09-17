@@ -802,14 +802,15 @@ const SubscriptionManagement = () => {
   const [fields, setFields] = useState<BaseField[]>(SUBSCRIPTION_DB);
   const dispatch = useDispatch();
   const companyId = useAppSelector(state => state.projects.companyId);
+  const branchName = useAppSelector(state => state.projects.branch);
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (companyId) {
-      getSubscriptionData(companyId, 'All');
+    if (companyId && branchName) {
+      getSubscriptionData(companyId, branchName);
       fetchLookups();
     }
-  }, [companyId])
+  }, [companyId, branchName])
 
   const form = useForm<GenericObject>({
     defaultValues: fields.reduce((acc, f) => {
@@ -967,19 +968,18 @@ const SubscriptionManagement = () => {
     })
       .catch(err => {
         console.error('Error fetching subscription by customer:', err);
-      }).finally(()=>{dispatch(setLoading(false))});
+      }).finally(() => { dispatch(setLoading(false)) });
   }
 
   //fetch lookup data
   async function fetchLookups() {
     dispatch(setLoading(true));
-    try{
+    try {
       const [custResult, prodResult] = await Promise.allSettled([
-      getSRCustomerLookupsList(companyId, 'All').then(res => res.data.ServiceRequestCustomerLookup),
-      getProductName(companyId).then(res => res.data),
-    ]);
-    setFields(prev =>
-      prev.map(field => {
+        getSRCustomerLookupsList(companyId, branchName).then(res => res.data.ServiceRequestCustomerLookup),
+        getProductName(companyId).then(res => res.data),
+      ]);
+      setFields(prev => prev.map(field => {
         if (field.name === "CustomerName" && custResult?.status === "fulfilled") {
           return {
             ...field,
@@ -1002,21 +1002,23 @@ const SubscriptionManagement = () => {
         }
         return field;
       })
-    );
-    reset({
-      CustomerName:
-        custResult.status === "fulfilled" ? custResult.value[0].CustomerName : '',
-      ProductName:
-        prodResult.status === "fulfilled" ? prodResult.value[0].ProductName : '',
-    });
+      );
+      reset({
+        CustomerName:
+          // custResult.status === "fulfilled" ? custResult.value[0].CustomerName : '',
+          custResult.status === "fulfilled" && custResult.value.length > 0 ? custResult.value[0].CustomerName : '',
+        ProductName:
+          // prodResult.status === "fulfilled" ? prodResult.value[0].ProductName : '',
+          prodResult.status === "fulfilled" && prodResult.value.length > 0 ? prodResult.value[0].ProductName : '',
+      });
     }
-    catch(error){
+    catch (error) {
       message.warning(`Error Fetching Lookups ${error}`)
     }
-    finally{
+    finally {
       dispatch(setLoading(false));
     }
-    
+
   }
 
   const handleNavigation = () => {

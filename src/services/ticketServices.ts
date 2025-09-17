@@ -54,7 +54,6 @@ export const ServiceRequestTypeLookups = async (CompId: number,branchId:string):
 
 //Service Request Assign To Lookup
 export const GetServiceRequestAssignToLookups = async (CompId: number, branchName: string | Number): Promise<APIResponse<any>> => {
-        console.log("compId",CompId, branchName);
     try {
         const response = await api.get(URL_GET_SR_ASSIGN_TO_LOOKUPS, { params: { CompId: CompId, branchname: branchName } })
         return {success: true,data: response.data,}

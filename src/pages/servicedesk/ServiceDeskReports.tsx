@@ -136,7 +136,6 @@ const ServiceDeskReports = () => {
   const companyId=useAppSelector(state=>state.projects.companyId);
   const branch = useAppSelector(state=>state.projects.branch);
   const branchId = useAppSelector(state=>state.projects.branchId);
-  console.log("branch", branch);
   // const dispatch =useDispatch();
   const msg = useMessage()
   const [dataSource, setDataSourse] = useState([])
@@ -701,7 +700,7 @@ function buildColumnsFromApi<T extends Record<string, any>>(
           data: [], label: 'UserName', value: 'UserId', isGrouping: true, groupData: [{ label: "UserGroupName", value: "UserGroupId", data: SRTAssignToLookup.status === 'fulfilled' && SRTAssignToLookup.value.success && SRTAssignToLookup.value.data.ServiceRequestAssignToUserGroupLookup ? SRTAssignToLookup.value.data.ServiceRequestAssignToUserGroupLookup : [], groupLabel: "User Group" },
           { label: "UserName", value: "UserId", data: SRTAssignToLookup.status === 'fulfilled' && SRTAssignToLookup.value.success && SRTAssignToLookup.value.data.ServiceRequestAssignToUsersLookup ? SRTAssignToLookup.value.data.ServiceRequestAssignToUsersLookup : [], groupLabel: "Users" },]
         },
-        MainCategory: { data: SRMainCategoryLookUps.status === 'fulfilled' && SRMainCategoryLookUps.value.success && SRMainCategoryLookUps.value.data ? SRMainCategoryLookUps.value.data.CategoriesLookup : [], label: "CategoryName", value: "CategoryId" },
+        MainCategory: { data: SRMainCategoryLookUps.status === 'fulfilled' && SRMainCategoryLookUps.value.success && SRMainCategoryLookUps.value.data && SRMainCategoryLookUps.value.data.CategoriesLookup ? SRMainCategoryLookUps.value.data.CategoriesLookup : [], label: "CategoryName", value: "CategoryId" },
         ServiceRequestDetailHistory: { data: SRTLinkToLookup.status === 'fulfilled' && SRTLinkToLookup.value.success && SRTLinkToLookup.value.data.ServiceRequestLinkToLookup ? SRTLinkToLookup.value.data.ServiceRequestLinkToLookup : [], label: 'ServiceRequestName', value: 'ServiceRequestId' },
         slastatus: { data: SRSLAStatus.status === 'fulfilled' && SRSLAStatus.value.success && SRSLAStatus.value.data ? SRSLAStatus.value.data.ServiceRequestSeverityLookup : [], label: "tSLAStatusName", value: "tSLAStatusId" },
         assignedto: {
@@ -715,7 +714,7 @@ function buildColumnsFromApi<T extends Record<string, any>>(
         statusinSLA: { data: StatusLookup.status === 'fulfilled' && StatusLookup.value.success && StatusLookup.value.data.ServiceRequestStatusLookup ? StatusLookup.value.data.ServiceRequestStatusLookup : [], label: 'ServiceRequestStatusName', value: 'tSLAStatusId' },
         severityinSLA: { data: SRSeverity.status === 'fulfilled' && SRSeverity.value.success && SRSeverity.value.data ? SRSeverity.value.data.ServiceRequestSeverityLookup : [], label: "ServiceRequestSeverityName", value: "ServiceRequestSeverityId" },
         priorityinSLA: { data: SRPriority.status === 'fulfilled' && SRPriority.value.success && SRPriority.value.data ? SRPriority.value.data.ServiceRequestSeverityLookup : [], label: "ServiceRequestPriorityName", value: "ServiceRequestPriorityId" },
-        maincategoryinSLA: { data: SRMainCategoryLookUps.status === 'fulfilled' && SRMainCategoryLookUps.value.success && SRMainCategoryLookUps.value.data ? SRMainCategoryLookUps.value.data.CategoriesLookup : [], label: "CategoryName", value: "CategoryId" },
+        maincategoryinSLA: { data: SRMainCategoryLookUps.status === 'fulfilled' && SRMainCategoryLookUps.value.success && SRMainCategoryLookUps.value.data && SRMainCategoryLookUps.value.data.CategoriesLookup ? SRMainCategoryLookUps.value.data.CategoriesLookup : [], label: "CategoryName", value: "CategoryId" },
         LevelFiveCompanyinSLA:
         {
           data: getCompanyHierarchyTreeData.status === 'fulfilled'

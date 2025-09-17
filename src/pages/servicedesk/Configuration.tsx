@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -30,6 +30,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { ReusableButton } from '@/components/ui/reusable-button';
 import { useAppSelector } from '@/store';
 import { getSRBranchList } from '@/services/ticketServices';
+import { useToast } from '@/hooks/use-toast';
 interface OptType {
   data: { [key: string]: any }[];
   label: string;
@@ -106,6 +107,7 @@ const Configuration = () => {
   const [selectedStatusRec, setSelectedStatusRec] = useState<Status | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isEditStatusMode, setIsEditStatusMode] = useState(false);
+  const { toast } = useToast();
   const [currentTab, setCurrentTab] = useState('service-request-config')
   const handleEdit = (data: serviceRequestType): void => {
     setSelectedRecord(data);
@@ -559,16 +561,16 @@ const Configuration = () => {
         return null;
     }
   };
-  // Handle refresh
-  const handleRefresh = (type?: string) => {
-    if (type) {
-      msg.info("Refreshing Service Request Status Data...");
+  // handle refresh
+    const handleRefresh = useCallback((type?: string) => {
+     if (type) {
+      toast({title: "Data Refreshed",description: "All status data has been updated",});
       fetchAllStatusList()
     } else {
-      msg.info("Refreshing Service Request Type Data...");
+      toast({title: "Data Refreshed",description: "All service request types data has been updated",});
       fetchAllServiceRequests();
     }
-  };
+    },[toast]);
   const formatSLAHoursMinutes = (val?: string) => {
     if (!val) return "";
     const [hours, minutes] = val.split("/");

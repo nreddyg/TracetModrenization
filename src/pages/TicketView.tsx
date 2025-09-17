@@ -854,7 +854,7 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
   }
   //to render re usable components based on the json data from db
   const renderField = (field: BaseField) => {
-    let fieldsToShowInEdit:string[]=['Priority','Status','Notify']
+    let fieldsToShowInEdit:string[]=['Status','Notify']
     const { name, label, fieldType, isRequired, show = true } = field;
     const overrideShow = !show && fieldsToShowInEdit.includes(name) && !isCreateMode;
     if (!name || (!overrideShow && (!show || (fieldsToShowInEdit.includes(name) && !isCreateMode)))) {

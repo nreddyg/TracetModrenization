@@ -3,6 +3,9 @@
 export const GET_TOKEN='/token';
 export const URL_ORGANZIATION_DETAILS="/api/Masters/GetSelectedOrganizationByAccesToken";
 export const URL_GET_USER_DETAILS="/api/Masters/GetUserDetailsByUserName";
+//header nav urls
+export const URL_GET_COMPANY_LIST="/api/Masters/GetOrganizationsByUserId";
+export const URL_GET_BRANCH_LIST="/api/Masters/GetHeirarchyDetailsLastLevelByCompanyId";
 
 //service desk urls
 // create ticket screen

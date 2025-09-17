@@ -20,6 +20,7 @@ const FixedHeader: React.FC = () => {
   const dispatch = useAppDispatch();
   const storeData= useAppSelector((state) => state.projects);
   const userId = storeData.userId || JSON.parse(localStorage.getItem("LoggedInUser") || "{}")?.UserId;
+  const LoggedInUser= JSON.parse(localStorage.getItem("LoggedInUser") || "{}");
   const [companyList, setCompanyList] = useState<{ value: number; label: string }[]>([]);
   const [branchList, setBranchList] = useState<{ value: string; label: string;id?:string }[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<number | null>(
@@ -138,6 +139,7 @@ const FixedHeader: React.FC = () => {
     localStorage.clear();
     window.location.href = "/login";
   };
+  const getInitial = (name?: string) =>name && name.length > 0 ? name.charAt(0).toUpperCase() : '';
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 shadow-sm">
       <div className="flex items-center justify-between gap-2 px-4 lg:px-6 py-3">
@@ -267,7 +269,8 @@ const FixedHeader: React.FC = () => {
                 <Avatar className="h-8 w-8 lg:h-9 lg:w-9">
                   <AvatarImage src="/avatars/01.png" alt="Profile" />
                   <AvatarFallback className="bg-blue-100 text-blue-600 font-semibold text-xs lg:text-sm">
-                    JD
+                    {getInitial(LoggedInUser?.FirstName)}
+                    {getInitial(LoggedInUser?.LastName)}
                   </AvatarFallback>
                 </Avatar>
               </Button>
@@ -275,9 +278,9 @@ const FixedHeader: React.FC = () => {
             <DropdownMenuContent className="w-56" align="end" forceMount>
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">John Doe</p>
+                  <p className="text-sm font-medium leading-none">{LoggedInUser?.FirstName} {LoggedInUser?.LastName}</p>
                   <p className="text-xs leading-none text-muted-foreground">
-                    john.doe@tracet.com
+                   {LoggedInUser?.Email}
                   </p>
                 </div>
               </DropdownMenuLabel>

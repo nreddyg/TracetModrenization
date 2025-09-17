@@ -19,6 +19,7 @@ import { useAppSelector } from '@/store';
 const AllRequests = () => {
   const navigate=useNavigate();
   const companyId=useAppSelector(state=>state.projects.companyId);
+  const branch=useAppSelector(state=>state.projects.branch);
   const dispatch=useAppDispatch();
   const { toast } = useToast();
   const [dateRange, setDateRange] = useState<{ from: Date; to: Date } | null>(null);
@@ -79,10 +80,11 @@ const AllRequests = () => {
     };
   }, [requests]);
   useEffect(()=>{
-    if(companyId){
+    if(companyId && branch){
       fetchAllServiceRequests();
+      setDateRange({ from: undefined, to: undefined });
     }
-  },[companyId])
+  },[companyId,branch])
   // Enhanced action handlers with audit trail
   const handleRefresh = useCallback(() => {
     setDateRange({ from: undefined, to: undefined });
@@ -94,7 +96,7 @@ const AllRequests = () => {
   //fetch all tickets
   async function fetchAllServiceRequests() {
       dispatch(setLoading(true))
-      await getAllSRDetailsList('All', companyId, 'All').then(res => {
+      await getAllSRDetailsList(branch, companyId, 'All').then(res => {
         if (res.success && res.data.status === undefined) {
           if (Array.isArray(res.data)) {
             let data = res.data.map(item => ({ ...item, AssignedTo: item.AssigneeSelectedUsers || '' + '' + item.AssigneeSelectedUserGroups || '' }));
@@ -105,6 +107,8 @@ const AllRequests = () => {
             setFilteredRequests([]);
           }
         } else {
+            setRequests([]);
+            setFilteredRequests([]);
         }
       }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
   }

@@ -20,7 +20,7 @@ interface ProjectsState {
   error: string | null;
   companyId:number | null;
   userId?:number | null;
-  branch?:number | string | null;
+  branch?:string | null;
 }
 
 const initialState: ProjectsState = {
@@ -57,7 +57,7 @@ const projectsSlice = createSlice({
     setCompanyId:(state,action:PayloadAction<number | null>)=>{
       state.companyId=action.payload
     },
-    setBranch:(state,action:PayloadAction<number | string | null>)=>{
+    setBranch:(state,action:PayloadAction<string | null>)=>{
       state.branch=action.payload
     },
     setUserId:(state,action:PayloadAction<number | null>)=>{

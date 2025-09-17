@@ -178,7 +178,8 @@ const TicketView = () => {
   const [assetsData,setAssetData]=useState([])
   let LoggedInUserData=JSON.parse(localStorage.getItem('LoggedInUser'));
   const companyId=useAppSelector(state=>state.projects.companyId);
-  
+  const branch=useAppSelector(state=>state.projects.branch) || '';
+  const branchId=useAppSelector(state=>state.projects.branchId) || '';
 
   // Add ref to track previous ServiceRequestType to prevent infinite loops
   const prevServiceRequestTypeRef = useRef<string>('');
@@ -233,16 +234,15 @@ const TicketView = () => {
   }, [selectedTicketId])
   //Will execute on component mounts and respective dependency mutations
   useEffect(() => {
-    if (selectedAssetCodesData)
+    if (selectedAssetCodesData && companyId && branch)
       fetchAllLookUps();
     if(location?.state?.formData){
      form.reset(location?.state?.formData)
     }
- 
-  }, []);
+  }, [companyId,branch]);
   useEffect(() => {
-    if (watch('Customer')) fetchSubscriptionByCustomer(watch('Customer'), companyId, 'All');
-  }, [watch('Customer')])
+    if (watch('Customer') && companyId && branch) fetchSubscriptionByCustomer(watch('Customer'), companyId, branch);
+  }, [watch('Customer'),companyId,branch])
   useEffect(() => {
     if (isCreateMode) {
       const currentServiceRequestType = watch('ServiceRequestType');
@@ -313,7 +313,7 @@ const TicketView = () => {
     dispatch(setLoading(true));
     try {
       const [TicketDetails, childTickets, uploadedFiles, getComments, getCommentsHistory] = await Promise.allSettled([
-        getServiceRequestDetailsById(serviceRequestId, companyId, 'All'), getLinkedServiceRequests(serviceRequestId, companyId), getUploadedFilesByServiceRequestId(serviceRequestId, companyId), getCommentsAPI(serviceRequestId.toString(), companyId), getCommentHistoryList(serviceRequestId, companyId)
+        getServiceRequestDetailsById(serviceRequestId, companyId, branch), getLinkedServiceRequests(serviceRequestId, companyId), getUploadedFilesByServiceRequestId(serviceRequestId, companyId), getCommentsAPI(serviceRequestId.toString(), companyId), getCommentHistoryList(serviceRequestId, companyId)
       ]);
       if (TicketDetails.status === 'fulfilled' && TicketDetails.value.data && TicketDetails.value.data.ServiceRequestDetails) {
         let ticketData = TicketDetails.value.data.ServiceRequestDetails
@@ -372,7 +372,7 @@ const TicketView = () => {
   //fetch all tickets list
   async function fetchAllTickets(requestType:string) {
     dispatch(setLoading(true))
-    await getAllSRDetailsList('All', companyId, requestType).then(res => {
+    await getAllSRDetailsList(branch, companyId, requestType).then(res => {
       if (res.success && res.data.status === undefined) {
         if (Array.isArray(res.data)) {
           setTickets([...res.data].reverse())
@@ -478,7 +478,7 @@ const TicketView = () => {
     }
    
     dispatch(setLoading(true))
-    await postCommentAPI(companyId, 'All', payload).then(res => {
+    await postCommentAPI(companyId, branch, payload).then(res => {
         let commentList=`${updatedComments} Comment:${payload["ServiceRequestComments"][0].Comment}`
       if (res.data.status) {
         msg.success(res.data.message)
@@ -494,7 +494,7 @@ const TicketView = () => {
   const handleHistoryClick = (row: any) => {
     setSelectedRowForHistory(row);
     const recordId = row.id || row.ID || Object.values(row)[0] || 'Unknown';
-    fetchSubscriptionHistoryByCustomer(watch("Customer"), companyId, "All", row.ProductId)
+    fetchSubscriptionHistoryByCustomer(watch("Customer"), companyId, branch, row.ProductId)
     setIsHistoryPopupOpen(true);
   };
   //method for generating columns based on data
@@ -579,21 +579,21 @@ const TicketView = () => {
     dispatch(setLoading(true));
     try {
       const [SRTLookUp, SRTAssignToLookup, SRTRequestedByLookup, SRTLinkToLookup, SRTCCListLookup, SRTBranchListLookup, ConfigData, StatusLookup] = await Promise.allSettled([
-        ServiceRequestTypeLookups(companyId,0), GetServiceRequestAssignToLookups(companyId, 'All'),
-        getSRRequestByLookupsList(companyId, 'All'), getSRLinkToLookupsList(companyId, 'All'),
-        getSRCCListLookupsList(companyId, 'All'), getSRBranchList(companyId), getSRConfigList(companyId, 'All'),
+        ServiceRequestTypeLookups(companyId,branchId), GetServiceRequestAssignToLookups(companyId, branch),
+        getSRRequestByLookupsList(companyId, branch), getSRLinkToLookupsList(companyId, branch),
+        getSRCCListLookupsList(companyId, branch), getSRBranchList(companyId), getSRConfigList(companyId,branch),
         getStatusLookups(companyId)
       ]);
       let configuration = ConfigData.status === 'fulfilled' && ConfigData.value.data && ConfigData.value.data.ServiceRequestConfiguration ? ConfigData.value.data.ServiceRequestConfiguration : { CustomerFieldinMyRequest: true, AssetFieldinCreateEditServiceRequest: true }
       let fetchCustomerAndAssetCodesLookup = { Customer: configuration.CustomerFieldinMyRequest, AssetId: configuration.AssetFieldinCreateEditServiceRequest,...configuration };
       let SRTCustomerLookup: [] = [], Assets: [] = [];
       if (fetchCustomerAndAssetCodesLookup.Customer) {
-        await getSRCustomerLookupsList(companyId, 'All').then(res => {
+        await getSRCustomerLookupsList(companyId, branch).then(res => {
           SRTCustomerLookup = res.success ? res.data.ServiceRequestCustomerLookup ? res.data.ServiceRequestCustomerLookup : [] : []
         }).catch(err => { }).finally(() => { })
       }
       if (fetchCustomerAndAssetCodesLookup.AssetId) {
-        await getManageAssetsList('All', companyId).then(res => {
+        await getManageAssetsList(branch, companyId).then(res => {
           Assets = res.success ? res.data.AssetsListDetails ? res.data.AssetsListDetails : [] : []
         }).catch(err => { }).finally(() => { })
       }
@@ -1092,7 +1092,7 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
       ]
     }
     dispatch(setLoading(true));
-    await postServiceRequest(companyId, 'All', payload).then(res => {
+    await postServiceRequest(companyId, branch, payload).then(res => {
       if (res.data.status) {
         handleSubmitUploadedFiles(res.data.ServiceRequestId);
         msg.success(res.data.message)
@@ -1142,7 +1142,7 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
       "ServiceRequestDetails": [updatedData]
     }
     dispatch(setLoading(true));
-    await updateServiceRequest(companyId, 'All', payload).then(res => {
+    await updateServiceRequest(companyId, branch, payload).then(res => {
       if (res.data.status) {
         if (attachments?.length > 0) {
           handleSubmitUploadedFiles(originalTicket.ServiceRequestId.toString(),updatedData)

@@ -26,7 +26,8 @@ interface Filters {
 }
 const MyWorkbench = () => {
   const navigate = useNavigate();
-  const companyId=useAppSelector(state=>state.projects.companyId)
+  const companyId=useAppSelector(state=>state.projects.companyId);
+  const branch=useAppSelector(state=>state.projects.branch) || '';
   const dispatch = useAppDispatch();
   const location=useLocation()
   const { toast } = useToast();
@@ -152,13 +153,13 @@ const MyWorkbench = () => {
   };
 
   useEffect(() => {
-    if(companyId){
+    if(companyId && branch){
       fetchAllServiceRequests(getRequestTypeById(filters.TicketCategory), false);
     }
-  }, [companyId])
+  }, [companyId,branch])
   async function fetchAllServiceRequests(requestType: string, isDateSelected: boolean, filtersCopy?: Filters) {
     dispatch(setLoading(true))
-    await getAllSRDetailsList('All',companyId, requestType).then(res => {
+    await getAllSRDetailsList(branch,companyId, requestType).then(res => {
       if (res.success && res.data.status === undefined) {
         if (Array.isArray(res.data)) {
           let getData = res.data.map(item => ({ ...item, AssignedTo: item.AssigneeSelectedUsers || '' + '' + item.AssigneeSelectedUserGroups || '' }))

@@ -29,7 +29,7 @@ const initialState: ProjectsState = {
   error: null,
   companyId:null,
   userId:null,
-  branch:null,
+  branch:'',
 };
 
 const projectsSlice = createSlice({
@@ -57,7 +57,7 @@ const projectsSlice = createSlice({
     setCompanyId:(state,action:PayloadAction<number | null>)=>{
       state.companyId=action.payload
     },
-    setBranch:(state,action:PayloadAction<string | null>)=>{
+    setBranch:(state,action:PayloadAction<string>)=>{
       state.branch=action.payload
     },
     setUserId:(state,action:PayloadAction<number | null>)=>{

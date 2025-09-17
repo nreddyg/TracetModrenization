@@ -134,13 +134,14 @@ const ServiceDeskReports = () => {
   const [serviceHistoryDetail, setServiceHistoryDetail] = useState<BaseField[]>()
   const [columnVisibility, setColumnVisibility] = useState({});
   const companyId=useAppSelector(state=>state.projects.companyId);
+  const branch = useAppSelector(state=>state.projects.branch);
+  const branchId = useAppSelector(state=>state.projects.branchId);
+  console.log("branch", branch);
   // const dispatch =useDispatch();
   const msg = useMessage()
   const [dataSource, setDataSourse] = useState([])
   const [cols, setCols] = useState([])
   let additionalFields = useRef([]);
- 
-
 
   // let data = activeTab === "Service Request SLA Met/SLA Violated" ? slaDB : activeTab === "Service Request Detail History" ? serviceHistoryDetail : fields;
   const form = useForm<GenericObject>({
@@ -609,8 +610,6 @@ const ServiceDeskReports = () => {
     }
   }
 
-
-
   //store lookups data in json
   const setLookupsDataInJson = (lookupsData: allResponsesType): void => {
     const arr = Object.keys(lookupsData)
@@ -669,15 +668,15 @@ const ServiceDeskReports = () => {
       const [SRTLookUp, SRTRequestedByLookup, SRTLinkToLookup, StatusLookup,
         CustomerLookUp, SRTBranchListLookup, SRSeverity, SRPriority, SRTAssignToLookup, SRMainCategoryLookUps, SRSLAStatus, getCompanyHierarchyTreeData, deptTreeData] =
         await Promise.allSettled([
-          ServiceRequestTypeLookups(companyId,0),
-          getSRRequestByLookupsList(companyId, 'All'),
-          getSRLinkToLookupsList(companyId, 'All'),
+          ServiceRequestTypeLookups(companyId, branchId),
+          getSRRequestByLookupsList(companyId, branch),
+          getSRLinkToLookupsList(companyId, branch),
           getStatusLookups(companyId),
-          getSRCustomerLookupsList(companyId, 'All'),
+          getSRCustomerLookupsList(companyId, branch),
           getSRBranchList(companyId),
           getServiceRequestSeverity(),
           getServiceRequestPriority(),
-          GetServiceRequestAssignToLookups(companyId, 'All'),
+          GetServiceRequestAssignToLookups(companyId, branch),
           getMainCategoryLookUp(companyId),
           getSlaStatus(),
           getCompanyHierarchy(companyId),

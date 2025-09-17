@@ -15,6 +15,7 @@ import { setLoading } from '@/store/slices/projectsSlice';
 import { Ticket as Request } from '../TicketView';
 import { ReusableButton } from '@/components/ui/reusable-button';
 import { useAppSelector } from '@/store';
+import { useMessage } from '@/components/ui/reusable-message';
 
 const AllRequests = () => {
   const navigate=useNavigate();
@@ -22,6 +23,7 @@ const AllRequests = () => {
   const branch=useAppSelector(state=>state.projects.branch);
   const dispatch=useAppDispatch();
   const { toast } = useToast();
+  const msg=useMessage();
   const [dateRange, setDateRange] = useState<{ from: Date; to: Date } | null>(null);
   const [requests, setRequests] = useState<Request[]>([]);
   const [filteredRequests, setFilteredRequests] = useState<Request[]>([]);
@@ -107,6 +109,7 @@ const AllRequests = () => {
             setFilteredRequests([]);
           }
         } else {
+            msg.warning(res.data.message || "No Data Found");
             setRequests([]);
             setFilteredRequests([]);
         }

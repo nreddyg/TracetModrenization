@@ -118,12 +118,18 @@ const AssetCodeTable = () => {
         <>
             <div className='bg-white p-5 h-[85vh]'>
                 <div className='px-2' style={{display:'flex',justifyContent:"space-between",}}>
-                    <h1>Asset Codes List</h1>
+                    <h1 className='text-lg font-semibold'>Assets Data</h1>
                     <div>
                         <ReusableButton
-                        title='Submit'
-                        onClick={()=>navigateBacktoMain()}
-                        >Submit</ReusableButton>
+                            htmlType="button"
+                            variant="default"
+                            onClick={()=>navigateBacktoMain()}
+                            iconPosition="left"
+                            size="middle"
+                            className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+                        >
+                            Submit
+                        </ReusableButton>
                     </div>
                 </div>
                 <div className='mt-4'>

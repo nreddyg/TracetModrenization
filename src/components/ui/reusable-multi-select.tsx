@@ -883,10 +883,38 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
       if (!inputRect) return null;
    
       const margin = 8;            
-      const headerHeight = selectAll ? 50 : 0; // Height of "Select All" header
-      const idealContentHeight = listHeight;
-      const totalIdealHeight = headerHeight + idealContentHeight + 20; // Add padding
-      const minHeight = 100;
+      const headerHeight = selectAll && filteredOptions.length > 0 ? 45 : 0; // Height of "Select All" header
+      const createTagHeight = (mode === 'tags' && searchTerm && !filteredOptions.some(opt => opt.value === searchTerm)) ? 40 : 0;
+      const optionHeight = size === 'small' ? 36 : size === 'large' ? 52 : 44; // Per option height
+      const groupHeaderHeight = 32; // Per group header
+      const padding = 8; // Container padding
+      
+      // Calculate actual content height based on visible items
+      let actualContentHeight = padding;
+      
+      if (loading) {
+        actualContentHeight += 80; // Loading state height
+      } else if (filteredOptions.length === 0) {
+        actualContentHeight += 80; // Empty state height
+      } else {
+        actualContentHeight += headerHeight + createTagHeight;
+        
+        if (groupedOptions) {
+          groupedOptions.forEach(group => {
+            const groupFilteredOptions = filterOptions(group.options, searchTerm);
+            if (groupFilteredOptions.length > 0) {
+              actualContentHeight += groupHeaderHeight; // Group title
+              if (groupSelectAll) actualContentHeight += 36; // Group select all
+              actualContentHeight += groupFilteredOptions.length * optionHeight;
+            }
+          });
+        } else {
+          actualContentHeight += filteredOptions.length * optionHeight;
+        }
+      }
+      
+      const maxAllowedHeight = listHeight + headerHeight + padding;
+      const minHeight = 80;
    
       const spaceBelow = window.innerHeight - inputRect.bottom - margin;
       const spaceAbove = inputRect.top - margin;
@@ -894,9 +922,14 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
       // Decide whether to place popup above or below
       const openAbove = spaceBelow < minHeight && spaceAbove > spaceBelow;
    
-      // Use the space available in chosen direction to compute maxHeight
+      // Use the space available in chosen direction
       const availableSpace = openAbove ? Math.max(0, spaceAbove) : Math.max(0, spaceBelow);
-      const maxHeight = Math.max(minHeight, Math.min(totalIdealHeight, availableSpace));
+      
+      // Calculate final height - use smaller of actual content or available space
+      const finalHeight = Math.min(
+        Math.max(minHeight, actualContentHeight), // At least minHeight, but fit content
+        Math.min(maxAllowedHeight, availableSpace) // Don't exceed max or available space
+      );
    
       const top = openAbove ? inputRect.top : inputRect.bottom;
       const transform = openAbove ? "translateY(-100%)" : "translateY(0)";
@@ -921,8 +954,8 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
               : typeof dropdownMatchSelectWidth === 'number' 
                 ? dropdownMatchSelectWidth 
                 : inputRect.width,
-            maxHeight: `${maxHeight}px`,
-            height: `${Math.min(maxHeight, totalIdealHeight)}px`,
+            height: `${finalHeight}px`,
+            maxHeight: `${finalHeight}px`,
           }}
           onScroll={onPopupScroll}
         >

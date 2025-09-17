@@ -25,8 +25,8 @@ const FixedHeader: React.FC = () => {
   const [selectedCompany, setSelectedCompany] = useState<number | null>(
     localStorage.getItem("CompanyId") ? parseInt(localStorage.getItem("CompanyId")!, 10) : null
   );
-  const [selectedBranch, setSelectedBranch] = useState<string | null>(
-    localStorage.getItem("Branch") || null
+  const [selectedBranch, setSelectedBranch] = useState<string>(
+    localStorage.getItem("Branch") || ''
   );
   useEffect(() => {
     if (userId) {

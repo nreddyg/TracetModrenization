@@ -45,10 +45,11 @@ const UserGroups = () => {
   const [fields, setFields] = useState<BaseField[]>(USER_GROUP_DB);
   const dispatch = useAppDispatch();
   const companyId = useAppSelector(state => state.projects.companyId)
+  const branchName = useAppSelector(state=>state.projects.branch);
 
   useEffect(() => {
     if (companyId) {
-      getUserGroupTableData(companyId, 'All');
+      getUserGroupTableData(companyId, branchName);
     }
   }, [companyId])
 
@@ -105,7 +106,7 @@ const UserGroups = () => {
       if (res.success && res.data) {
         if (res.data.status === true) {
           message.success(res.data.message)
-          getUserGroupTableData(companyId, 'All')
+          getUserGroupTableData(companyId, branchName)
         }
         else {
           message.error(res.data.message)
@@ -149,7 +150,7 @@ const UserGroups = () => {
 
   useEffect(() => {
     if (companyId) {
-      SelectUsersLookup(companyId, 'All')
+      SelectUsersLookup(companyId, branchName)
     }
   }, [companyId])
 
@@ -281,15 +282,15 @@ const UserGroups = () => {
       let res;
 
       if (!isEditMode) {
-        res = await addUserGroup(companyId, 'All', pay)
+        res = await addUserGroup(companyId, branchName, pay)
       } else if (selectedRecord) {
-        res = await updateUserGroup(companyId, 'All', selectedRecord?.UserGroupId, pay);
+        res = await updateUserGroup(companyId, branchName, selectedRecord?.UserGroupId, pay);
       }
 
 
       if (res?.success && res.data?.status) {
         message.success(res.data.message || (isEditMode ? 'User group updated' : 'User group created'));
-        getUserGroupTableData(companyId, 'All');
+        getUserGroupTableData(companyId, branchName);
         handleCancel();
       } else {
         message.error(res?.data?.message || 'Operation failed');

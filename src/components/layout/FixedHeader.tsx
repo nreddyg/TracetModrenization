@@ -6,13 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { ReusableDropdown } from '@/components/ui/reusable-dropdown';
-import { Home, MapPin, User, Settings, LogOut, Bell, ChevronDown, Building2, Menu } from 'lucide-react';
+import { Home, User, Settings, LogOut, Bell, Menu } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { GetBranchListBasedonCompanyId, GetCompanyListBasedonUserId } from '@/services/headerServices';
 import { useAppDispatch } from '@/store';
-import { setBranch, setCompanyId, setLoading } from '@/store/slices/projectsSlice';
+import { setBranch, setBranchId, setCompanyId, setLoading } from '@/store/slices/projectsSlice';
 
 const FixedHeader: React.FC = () => {
   const navigate=useNavigate();
@@ -21,7 +21,7 @@ const FixedHeader: React.FC = () => {
   const storeData= useAppSelector((state) => state.projects);
   const userId = storeData.userId || JSON.parse(localStorage.getItem("LoggedInUser") || "{}")?.UserId;
   const [companyList, setCompanyList] = useState<{ value: number; label: string }[]>([]);
-  const [branchList, setBranchList] = useState<{ value: string; label: string }[]>([]);
+  const [branchList, setBranchList] = useState<{ value: string; label: string;id?:string }[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<number | null>(
     localStorage.getItem("CompanyId") ? parseInt(localStorage.getItem("CompanyId")!, 10) : null
   );
@@ -56,6 +56,9 @@ const FixedHeader: React.FC = () => {
           setSelectedCompany(compId);
           dispatch(setCompanyId(compId));
           localStorage.setItem("CompanyId", String(compId));
+        }else{
+          dispatch(setCompanyId(compId))
+          setSelectedCompany(compId);
         }
       }
     } catch (err) {
@@ -70,10 +73,11 @@ const FixedHeader: React.FC = () => {
     try {
       const res = await GetBranchListBasedonCompanyId(compId);
       if (res.success && Array.isArray(res.data) && res.data.length > 0) {
-        const updated = [{ BranchId: 0, Name: "All" }, ...res.data.slice(1)];
+        const updated = [{ id: 0, Name: "All" }, ...res.data.slice(1)];
         const lookupData = updated.map((item: any) => ({
           value: item.Name,
           label: item.Name,
+          id:item.id
         }));
         setBranchList(lookupData);
         let branch = selectedBranch;
@@ -81,7 +85,17 @@ const FixedHeader: React.FC = () => {
           branch = lookupData[0].value;
           setSelectedBranch(branch);
           dispatch(setBranch(branch));
+          dispatch(setBranchId(lookupData[0].id));
           localStorage.setItem("Branch", branch);
+        }else{
+          setSelectedBranch(branch);
+          dispatch(setBranch(branch));
+        }
+        if(localStorage.getItem("BranchId")){
+          dispatch(setBranchId(localStorage.getItem("BranchId")))
+        }else{
+          dispatch(setBranchId(lookupData[0].id));
+          localStorage.setItem("BranchId", String(lookupData[0].id));
         }
       }
     } catch (err) {
@@ -101,8 +115,18 @@ const FixedHeader: React.FC = () => {
       navigate('/service-desk/all-requests');
     } else if (name === "Branch") {
       setSelectedBranch(value);
-      dispatch(setBranch(value));
-      localStorage.setItem("Branch", value);
+      dispatch(setBranch(value || ''));
+      if(value && branchList.length>0){
+        const branchObj=branchList.find(branch=>branch.value===value);
+        if(branchObj && branchObj.id){
+          dispatch(setBranchId(branchObj.id));
+          localStorage.setItem("BranchId", String(branchObj.id));
+        }else{
+          dispatch(setBranchId(""));
+          localStorage.setItem("BranchId", "");
+        }
+      }
+      localStorage.setItem("Branch", value || '');
       navigate('/service-desk/all-requests');
     }
   };
@@ -212,7 +236,7 @@ const FixedHeader: React.FC = () => {
             <ReusableDropdown
               options={companyList}
               value={selectedCompany}
-              onChange={(value) => handleChange('CompanyId', value)}
+              onChange={(value,...args) => handleChange('CompanyId', value)}
               placeholder="Select company"
               size="small"
               className="min-w-[120px]"

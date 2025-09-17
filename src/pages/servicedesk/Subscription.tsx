@@ -806,11 +806,11 @@ const SubscriptionManagement = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (companyId) {
+    if (companyId && branchName) {
       getSubscriptionData(companyId, branchName);
       fetchLookups();
     }
-  }, [companyId])
+  }, [companyId, branchName])
 
   const form = useForm<GenericObject>({
     defaultValues: fields.reduce((acc, f) => {

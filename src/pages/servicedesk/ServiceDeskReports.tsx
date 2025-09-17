@@ -728,7 +728,6 @@ const ServiceDeskReports = () => {
           treedata: true,
         },
       };
-      console.log("all",allResponses, "RmIANcategory",SRMainCategoryLookUps);
       setLookupsDataInJson(allResponses);
     } catch (error) {
       msg.warning(`Error fetching lookups: ${error}`)

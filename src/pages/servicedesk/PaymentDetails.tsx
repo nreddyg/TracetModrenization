@@ -27,6 +27,8 @@ const PaymentDetails = () => {
   const subData = location.state.subscriptionData ? location.state?.subscriptionData : null
   const customerName = location.state.parentData?.CustomerName;
   const productname = location.state.parentData?.ProductName;
+    const branchName = useAppSelector(state => state.projects.branch);
+
   const message=useMessage();
   const navigate=useNavigate();
 
@@ -144,7 +146,7 @@ const PaymentDetails = () => {
             message.error('Cheque No. Already Exists');
             return;
           } else {
-          const res=  await updateSubscription("All", companyId, subData?.SubscriptionId, subData?.CustomerName, subData?.ProductName, pay);
+          const res=  await updateSubscription(branchName, companyId, subData?.SubscriptionId, subData?.CustomerName, subData?.ProductName, pay);
          if(res?.success && res.data){
           if(res.data.status===true){
             message.success(res.data.message)
@@ -163,7 +165,7 @@ const PaymentDetails = () => {
             message.error('Cheque No. Already exists');
             return;
           } else {
-          const res=  await addSubscription("All", companyId, pay);
+          const res=  await addSubscription(branchName, companyId, pay);
              if(res?.success && res.data){
           if(res.data.status===true){
             message.success(res.data.message)
@@ -179,9 +181,9 @@ const PaymentDetails = () => {
       } else {
         let res;
         if (subData) {
-       res= await updateSubscription("All", companyId, subData?.SubscriptionId, subData?.CustomerName, subData?.ProductName, pay);
+       res= await updateSubscription(branchName, companyId, subData?.SubscriptionId, subData?.CustomerName, subData?.ProductName, pay);
         } else {
-         res= await addSubscription("All", companyId, pay);
+         res= await addSubscription(branchName, companyId, pay);
         }
        if(res?.success && res.data){
         if(res.data.status===true){
@@ -364,10 +366,10 @@ const PaymentDetails = () => {
   }
   useEffect(() => {
     getCurrency();
-    if (subData === null && companyId) {
-      getNextAMCDate(customerName, productname, 'All', companyId);
+    if (subData === null && companyId && branchName) {
+      getNextAMCDate(customerName, productname, branchName, companyId);
     }
-  }, [companyId])
+  }, [companyId, branchName])
   const paymentMode = watch("PaymentDetails");
   const getPaymentFields = () => {
     switch (paymentMode) {
@@ -559,7 +561,7 @@ const PaymentDetails = () => {
                   <ReusableButton
                     htmlType="button"
                     variant="default"
-                    onClick={handleClear}
+                    onClick={()=>{subData?navigate(-1):handleClear}}
                     // className="border-orange-500 text-orange-500 hover:bg-orange-50"
                     // icon={<RotateCcw className="h-4 w-4" />}
                     // iconPosition="left"

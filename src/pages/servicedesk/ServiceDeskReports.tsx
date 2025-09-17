@@ -668,7 +668,7 @@ const ServiceDeskReports = () => {
       const [SRTLookUp, SRTRequestedByLookup, SRTLinkToLookup, StatusLookup,
         CustomerLookUp, SRTBranchListLookup, SRSeverity, SRPriority, SRTAssignToLookup, SRMainCategoryLookUps, SRSLAStatus, getCompanyHierarchyTreeData, deptTreeData] =
         await Promise.allSettled([
-          ServiceRequestTypeLookups(companyId, branch),
+          ServiceRequestTypeLookups(companyId, branchId),
           getSRRequestByLookupsList(companyId, branch),
           getSRLinkToLookupsList(companyId, branch),
           getStatusLookups(companyId),

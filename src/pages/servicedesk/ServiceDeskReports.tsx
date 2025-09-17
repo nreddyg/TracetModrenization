@@ -136,7 +136,6 @@ const ServiceDeskReports = () => {
   const companyId=useAppSelector(state=>state.projects.companyId);
   const branch = useAppSelector(state=>state.projects.branch);
   const branchId = useAppSelector(state=>state.projects.branchId);
-  console.log("branch", branch);
   // const dispatch =useDispatch();
   const msg = useMessage()
   const [dataSource, setDataSourse] = useState([])

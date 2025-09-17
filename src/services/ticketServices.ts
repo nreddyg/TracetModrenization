@@ -43,7 +43,7 @@ export const getSRConfigList = async (CompId: number, branchName: string): Promi
     }
 }
 //service request type lookup
-export const ServiceRequestTypeLookups = async (CompId: number,branchId:number): Promise<APIResponse<any>> => {
+export const ServiceRequestTypeLookups = async (CompId: number,branchId:string): Promise<APIResponse<any>> => {
     try {
         const response = await api.get(URL_GET_SR_TYPE_LOOKUPS, { params: { CompId: CompId,BranchId:branchId } })
         return {success: true,data: response.data,}

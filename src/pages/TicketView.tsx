@@ -179,6 +179,7 @@ const TicketView = () => {
   let LoggedInUserData=JSON.parse(localStorage.getItem('LoggedInUser'));
   const companyId=useAppSelector(state=>state.projects.companyId);
   const branch=useAppSelector(state=>state.projects.branch) || '';
+  const branchId=useAppSelector(state=>state.projects.branchId) || '';
 
   // Add ref to track previous ServiceRequestType to prevent infinite loops
   const prevServiceRequestTypeRef = useRef<string>('');
@@ -578,7 +579,7 @@ const TicketView = () => {
     dispatch(setLoading(true));
     try {
       const [SRTLookUp, SRTAssignToLookup, SRTRequestedByLookup, SRTLinkToLookup, SRTCCListLookup, SRTBranchListLookup, ConfigData, StatusLookup] = await Promise.allSettled([
-        ServiceRequestTypeLookups(companyId,0), GetServiceRequestAssignToLookups(companyId, branch),
+        ServiceRequestTypeLookups(companyId,branchId), GetServiceRequestAssignToLookups(companyId, branch),
         getSRRequestByLookupsList(companyId, branch), getSRLinkToLookupsList(companyId, branch),
         getSRCCListLookupsList(companyId, branch), getSRBranchList(companyId), getSRConfigList(companyId,branch),
         getStatusLookups(companyId)

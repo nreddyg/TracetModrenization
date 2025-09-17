@@ -20,7 +20,8 @@ interface ProjectsState {
   error: string | null;
   companyId:number | null;
   userId?:number | null;
-  branch?:string | null;
+  branch?:string;
+  branchId?:string;
 }
 
 const initialState: ProjectsState = {
@@ -30,6 +31,7 @@ const initialState: ProjectsState = {
   companyId:null,
   userId:null,
   branch:'',
+  branchId:""
 };
 
 const projectsSlice = createSlice({
@@ -60,6 +62,9 @@ const projectsSlice = createSlice({
     setBranch:(state,action:PayloadAction<string>)=>{
       state.branch=action.payload
     },
+    setBranchId:(state,action:PayloadAction<string>)=>{
+      state.branchId=action.payload
+    },
     setUserId:(state,action:PayloadAction<number | null>)=>{
       state.userId=action.payload
     },
@@ -70,5 +75,5 @@ const projectsSlice = createSlice({
 });
 
 export const { setProjects, addProject, updateProject, deleteProject, setLoading,
-  setCompanyId,setBranch,setUserId,setError } = projectsSlice.actions;
+  setCompanyId,setBranch,setBranchId,setUserId,setError } = projectsSlice.actions;
 export default projectsSlice.reducer;

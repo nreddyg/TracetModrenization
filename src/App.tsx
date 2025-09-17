@@ -16,7 +16,7 @@ import AssetCodeTable from "./pages/servicedesk/AssetCodeTable";
 import ServiceRequestReport from "./pages/servicedesk/ServiceRequestDetailsHistory";
 import { getOrganizationDetailsByToken, getUserDetailsByUserName } from "./services/appService";
 import { useAppDispatch } from "./store";
-import { setCompanyId, setLoading } from "./store/slices/projectsSlice";
+import { setCompanyId, setLoading, setUserId } from "./store/slices/projectsSlice";
 
 // Lazy load all pages
 const Index = WrapperLazyComponent(() => import("./pages/Index"));
@@ -165,9 +165,11 @@ const AnimatedRoutes = () => {
     await getUserDetailsByUserName(userName).then(res=>{
       if(res.success && Array.isArray(res.data)){
          if(res.data.length!==0){
-          localStorage.setItem('LoggedInUser',JSON.stringify(res.data[0]))
+          localStorage.setItem('LoggedInUser',JSON.stringify(res.data[0]));
+          dispatch(setUserId(res.data[0]['UserId'] || null));
         }else{
            localStorage.setItem('LoggedInUser',JSON.stringify({}));
+           dispatch(setUserId(null));
         }
       }
     }).catch(err=>{}).finally(()=>{dispatch(setLoading(false))})

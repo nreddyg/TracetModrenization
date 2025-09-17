@@ -171,7 +171,7 @@ const ServiceDeskReports = () => {
       fetchAdditionalFieldConfigurationDetails(companyId)
       fetchAllLookUps();
     }
-  }, [companyId])
+  }, [companyId,branch])
   const multiSelectFilter: FilterFn<any> = (row, columnId, filterValue) => {
 
     const selected = Array.isArray(filterValue) ? filterValue : [];
@@ -187,42 +187,47 @@ const ServiceDeskReports = () => {
     return selected.includes(String(cell));
 
   };
-  function buildColumnsFromApi<T extends Record<string, any>>(
-    apiResponse: ColumnApiResponse,
-    editableColumns: string[] = [],
-    typeMapper: Record<string, "text" | "number" | "date" | "select"> = {}
-  ): { columns: ColumnDef<T>[]; initialVisibility: VisibilityState } {
-    const columnHelper = createColumnHelper<T>();
-    const [_, columnsMeta] = Object.entries(apiResponse)[0];
+function buildColumnsFromApi<T extends Record<string, any>>(
+  apiResponse: ColumnApiResponse,
+  editableColumns: string[] = [],
+  typeMapper: Record<string, "text" | "number" | "date" | "select"> = {}
+): { columns: ColumnDef<T>[]; initialVisibility: VisibilityState } {
+  const [_, columnsMeta] = Object.entries(apiResponse)[0];
 
-    const columns: ColumnDef<T>[] = Object.entries(columnsMeta).map(
-      ([colName]) =>
-        columnHelper.accessor(
-          (row) => row[colName as keyof T], // accessor fn (safe for dynamic keys)
-          {
-            id: colName,
-            header: colName,
-            cell: (info) => info.getValue() ?? "",
-            enableHiding: true, // allow ColumnVisibilityManager to toggle
-            enableColumnFilter: true,
+  const columns: ColumnDef<T>[] = Object.entries(columnsMeta).map(
+    ([colName], index) => {
+      // Ensure we have a valid column name
+      if (!colName || !colName.trim()) {
+        console.warn(`Column at index ${index} has empty name, skipping`);
+        return null;
+      }
+      
+      return {
+        accessorKey: colName,
+        id: colName,
+        header: colName,
+        cell: (info) => info.getValue() ?? "",
+        enableHiding: true,
+        enableColumnFilter: true,
+        filterFn: multiSelectFilter,
+        meta: {
+          editable: editableColumns.includes(colName),
+          editType: typeMapper[colName] || "text",
+        },
+      } as ColumnDef<T>;
+    }
+  ).filter(Boolean) as ColumnDef<T>[]; // Remove null entries
 
-            filterFn: multiSelectFilter,
-            meta: {
-              editable: editableColumns.includes(colName),
-              editType: typeMapper[colName] || "text",
-            },
-          }
-        )
-    );
-
-    // build VisibilityState (true/false per column)
-    const initialVisibility: VisibilityState = {};
-    Object.entries(columnsMeta).forEach(([colName, visible]) => {
+  // build VisibilityState (true/false per column)
+  const initialVisibility: VisibilityState = {};
+  Object.entries(columnsMeta).forEach(([colName, visible]) => {
+    if (colName && colName.trim()) {
       initialVisibility[colName] = visible === "true";
-    });
+    }
+  });
 
-    return { columns, initialVisibility };
-  }
+  return { columns, initialVisibility };
+}
 
   const selectedMainCategory = watch("MainCategory");
   const selectedMainCategoryforSLA = watch("maincategoryinSLA");
@@ -370,6 +375,7 @@ const ServiceDeskReports = () => {
         setCols(tempCols.columns)
 
       } else {
+        msg.warning(`${res.data.message}`)
 
       }
     }).catch(err => { }).finally(() => {

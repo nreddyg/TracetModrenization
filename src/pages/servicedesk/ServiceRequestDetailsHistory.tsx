@@ -23,6 +23,7 @@ const ServiceRequestReport: React.FC = () => {
   const [dataSource, setDataSource] = useState<any[]>([]);
   const [cols, setCols] = useState<ColumnDef<any>[]>([]);
   const storedData = localStorage.getItem("srData");
+  const branch = useAppSelector(state=>state.projects.branch);
   const companyId=useAppSelector(state=>state.projects.companyId);
   
 
@@ -32,10 +33,10 @@ const ServiceRequestReport: React.FC = () => {
   useEffect(() => {
     fetchServiceRequestDetailsHistoryReport(
       companyId,
-      "All",
+      branch,
       JSON.parse(storedData || "{}").id || ""
     );
-  }, []);
+  }, [branch]);
 
   async function fetchServiceRequestDetailsHistoryReport(
     compId: number,
@@ -75,8 +76,8 @@ const ServiceRequestReport: React.FC = () => {
   if (!data) return <p>Loading...</p>;
 
   const details = data.ServiceRequestDetails;
-  const assets = data.AssetDetails;
-  const comments = Object.values(data.Comments);
+  const assets = data.AssetDetails ;
+  const comments = Object.values(data.Comments||{});
 
   // 📦 Export Handlers
   const handleExportPDF = async () => {

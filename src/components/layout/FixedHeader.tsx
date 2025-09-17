@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { useAppSelector } from '@/store/reduxStore';
@@ -40,6 +39,7 @@ const FixedHeader: React.FC = () => {
       fetchBranchList(selectedCompany);
     }
   }, [selectedCompany]);
+  console.log("seletedBranch",selectedBranch);
 
   const fetchCompanyList = async () => {
     dispatch(setLoading(true));

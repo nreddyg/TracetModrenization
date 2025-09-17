@@ -53,7 +53,8 @@ export const ServiceRequestTypeLookups = async (CompId: number,branchId:number):
 }
 
 //Service Request Assign To Lookup
-export const GetServiceRequestAssignToLookups = async (CompId: number, branchName: string): Promise<APIResponse<any>> => {
+export const GetServiceRequestAssignToLookups = async (CompId: number, branchName: string | Number): Promise<APIResponse<any>> => {
+        console.log("compId",CompId, branchName);
     try {
         const response = await api.get(URL_GET_SR_ASSIGN_TO_LOOKUPS, { params: { CompId: CompId, branchname: branchName } })
         return {success: true,data: response.data,}
@@ -73,7 +74,7 @@ export const GetHeirarchyDetailsLastLevel = async (CompId: number): Promise<APIR
 }
 
 //GetServiceRequestRequestedByLookups 
- export const getSRRequestByLookupsList=async(compId:number,branchName:string):Promise<APIResponse<any>>=>{
+ export const getSRRequestByLookupsList=async(compId:number,branchName:string | Number):Promise<APIResponse<any>>=>{
     try{
         const response=await api.get(URL_GET_SR_REQUESTED_BY_LOOKUPS,{params:{CompId:compId,branchname:branchName}})
         return {success:true,data:response.data}
@@ -84,7 +85,7 @@ export const GetHeirarchyDetailsLastLevel = async (CompId: number): Promise<APIR
  }
 
  //GetServiceRequestCustomerLookups
- export const getSRCustomerLookupsList=async(compId:number,branchName:string):Promise<APIResponse<any>>=>{
+ export const getSRCustomerLookupsList=async(compId:number,branchName:string | Number):Promise<APIResponse<any>>=>{
     try{
         const response=await api.get(URL_GET_SR_CUSTOMER_LOOKUPS,{params:{CompId:compId,branchname:branchName}})
         return {success:true,data:response.data}
@@ -106,7 +107,7 @@ export const getSRAdditionalFieldsByServiceRequestType=async(ServiceRequestTypeN
 }
 
 //GetSubscriptionByCustomer
-export const getSubscriptionByCustomer=async(CustomerName:string,compId:number,BranchName:string):Promise<APIResponse<any>>=>{
+export const getSubscriptionByCustomer=async(CustomerName:string,compId:number,BranchName:string | Number):Promise<APIResponse<any>>=>{
     try{
         const response=await api.get(URL_GET_SUBSCRIPTION_BY_CUSTOMER,{params:{CompId:compId,CustomerName:CustomerName,BranchName:BranchName}})
         return {success:true,data:response.data}
@@ -116,7 +117,7 @@ export const getSubscriptionByCustomer=async(CustomerName:string,compId:number,B
    }
 }
 //GetSubscriptionHistoryByCustomer
-export const getSubscriptionHistoryByCustomer=async(CustomerName:string,compId:number,BranchName:string,ProductID:number):Promise<APIResponse<any>>=>{
+export const getSubscriptionHistoryByCustomer=async(CustomerName:string,compId:number,BranchName:string | Number,ProductID:number):Promise<APIResponse<any>>=>{
     try{
         const response=await api.get(URL_GET_SUBSCRIPTION_HISTORY_BY_CUSTOMER,{params:{CompId:compId,CustomerName:CustomerName,BranchName:BranchName,ProductId:ProductID}})
         return {success:true,data:response.data}
@@ -127,7 +128,7 @@ export const getSubscriptionHistoryByCustomer=async(CustomerName:string,compId:n
 }
 
 //GetManageAssetsList
-export const getManageAssetsList=async(BranchName:string,compId:number):Promise<APIResponse<any>>=>{
+export const getManageAssetsList=async(BranchName:string | Number,compId:number):Promise<APIResponse<any>>=>{
     try{
         const response=await api.get(URL_GET_MANAGE_ASSETS_LIST,{params:{CompId:compId,BranchName:BranchName}})
         return {success:true,data:response.data}
@@ -138,7 +139,7 @@ export const getManageAssetsList=async(BranchName:string,compId:number):Promise<
 }
 
 //GetAllServiceRequestsDetails
-export const getAllSRDetailsList=async(BranchName:string,compId:number,requesttype:string):Promise<APIResponse<any>>=>{
+export const getAllSRDetailsList=async(BranchName:string | Number,compId:number,requesttype:string):Promise<APIResponse<any>>=>{
     try{
         const response=await api.get(URL_GET_ALL_SERVICE_REQUESTS_DETAILS,{params:{CompId:compId,BranchName:BranchName,requesttype:requesttype}})
         return {success:true,data:response.data}
@@ -149,7 +150,7 @@ export const getAllSRDetailsList=async(BranchName:string,compId:number,requestty
 }
 
 //Get Service Request Link To Lookup List
-export const getSRLinkToLookupsList=async(CompId:number,BranchName:string):Promise<APIResponse<any>>=>{
+export const getSRLinkToLookupsList=async(CompId:number,BranchName:string | Number):Promise<APIResponse<any>>=>{
     try{
         const response=await api.get(URL_GET_SERVICE_REQUEST_LINK_TO_LOOKUP_LIST,{params:{CompId:CompId,branchname:BranchName}})
         return {success:true,data:response.data}
@@ -160,7 +161,7 @@ export const getSRLinkToLookupsList=async(CompId:number,BranchName:string):Promi
  }
 
  //Get CC List Lookup List
-export const getSRCCListLookupsList=async(CompId:number,BranchName:string):Promise<APIResponse<any>>=>{
+export const getSRCCListLookupsList=async(CompId:number,BranchName:string | Number):Promise<APIResponse<any>>=>{
     try{
         const response=await api.get(URL_GET_SERVICE_REQUEST_CC_LIST_LOOKUPS,{params:{CompId:CompId,branchname:BranchName}})
         return {success:true,data:response.data}
@@ -194,7 +195,7 @@ export const getCommentHistoryList=async(ServiceRequestId:number,compId:number):
 }
  
 // post comment API
-export const postCommentAPI = async (compId: number, branchname: string, data: any): Promise<APIResponse<any>> => {
+export const postCommentAPI = async (compId: number, branchname: string | Number, data: any): Promise<APIResponse<any>> => {
     try {
         const response = await api.post(URL_POST_SERVICE_REQUEST_COMMENT_API, data, { params: { CompId: compId, branchname: branchname } });
         return {success: true,data: response.data};
@@ -241,7 +242,7 @@ export const getUploadedFilesByServiceRequestId = async (serviceRequestId: numbe
     }
 };
 //get individual ticket details by service request id
-export const getServiceRequestDetailsById = async (serviceRequestId: number, compId: number, branchName: string): Promise<APIResponse<any>> => {
+export const getServiceRequestDetailsById = async (serviceRequestId: number, compId: number, branchName: string | Number): Promise<APIResponse<any>> => {
     try {
         const response = await api.get(URL_GET_SERVICE_REQUEST_DETAILS_BY_SERVICE_REQUEST_ID, { params: { ServiceRequestId: serviceRequestId, CompId: compId, branchname: branchName } });
         return { success: true, data: response.data };
@@ -261,7 +262,7 @@ export const deleteSRUpload = async (FileUploadId: number, compId: number): Prom
 };
 
 //update service request
-export const updateServiceRequest = async (compId: number, branchName: string, data: any): Promise<APIResponse<any>> => {
+export const updateServiceRequest = async (compId: number, branchName: string | Number, data: any): Promise<APIResponse<any>> => {
     try {
         const response = await api.post(URL_POST_UPDATE_SERVICE_REQUEST, data, { params: { CompId: compId, branchName: branchName } });
         return { success: true, data: response.data };

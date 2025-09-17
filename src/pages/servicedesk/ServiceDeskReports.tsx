@@ -135,6 +135,7 @@ const ServiceDeskReports = () => {
   const [columnVisibility, setColumnVisibility] = useState({});
   const companyId=useAppSelector(state=>state.projects.companyId);
   const branch = useAppSelector(state=>state.projects.branch);
+  const branchId = useAppSelector(state=>state.projects.branchId);
   console.log("branch", branch);
   // const dispatch =useDispatch();
   const msg = useMessage()
@@ -609,8 +610,6 @@ const ServiceDeskReports = () => {
     }
   }
 
-
-
   //store lookups data in json
   const setLookupsDataInJson = (lookupsData: allResponsesType): void => {
     const arr = Object.keys(lookupsData)
@@ -669,7 +668,7 @@ const ServiceDeskReports = () => {
       const [SRTLookUp, SRTRequestedByLookup, SRTLinkToLookup, StatusLookup,
         CustomerLookUp, SRTBranchListLookup, SRSeverity, SRPriority, SRTAssignToLookup, SRMainCategoryLookUps, SRSLAStatus, getCompanyHierarchyTreeData, deptTreeData] =
         await Promise.allSettled([
-          ServiceRequestTypeLookups(companyId,0),
+          ServiceRequestTypeLookups(companyId, branch),
           getSRRequestByLookupsList(companyId, branch),
           getSRLinkToLookupsList(companyId, branch),
           getStatusLookups(companyId),

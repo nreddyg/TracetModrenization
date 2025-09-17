@@ -980,23 +980,23 @@ const SubscriptionManagement = () => {
     ]);
     setFields(prev =>
       prev.map(field => {
-        if (field.name === "CustomerName" && custResult.status === "fulfilled") {
+        if (field.name === "CustomerName" && custResult?.status === "fulfilled") {
           return {
             ...field,
-            defaultValue: custResult.value[0].CustomerName,
-            options: custResult.value.map(item => ({
-              label: item.CustomerName,
-              value: item.CustomerName,
+            defaultValue: custResult.value[0]?.CustomerName,
+            options: custResult?.value.map(item => ({
+              label: item?.CustomerName,
+              value: item?.CustomerName,
             })),
           };
         }
         if (field.name === "ProductName" && prodResult.status === "fulfilled") {
           return {
             ...field,
-            defaultValue: prodResult.value[0].ProductName,
-            options: prodResult.value.map(item => ({
-              label: item.ProductName,
-              value: item.ProductName,
+            defaultValue: prodResult.value[0]?.ProductName,
+            options: prodResult?.value.map(item => ({
+              label: item?.ProductName,
+              value: item?.ProductName,
             }))
           };
         }

@@ -664,6 +664,7 @@ const TicketView = () => {
       if (res.success && res.data && res.data.AdditionalFields) {
         const baseFieldsOnly = fields.filter(f => !f.isAdditionalField);
         if (res.data.AdditionalFields.length === 0) {
+          updatedFields=[...baseFieldsOnly]
           setShowAccordion(false);
           setAccordionOpen(undefined);
         } else {

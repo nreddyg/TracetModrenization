@@ -561,7 +561,7 @@ const PaymentDetails = () => {
                   <ReusableButton
                     htmlType="button"
                     variant="default"
-                    onClick={()=>{subData?navigate(-1):handleClear}}
+                    onClick={()=>{navigate(-1)}}
                     // className="border-orange-500 text-orange-500 hover:bg-orange-50"
                     // icon={<RotateCcw className="h-4 w-4" />}
                     // iconPosition="left"

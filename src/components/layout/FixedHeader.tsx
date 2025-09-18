@@ -116,7 +116,7 @@ const FixedHeader: React.FC = () => {
       navigate('/service-desk/all-requests');
     } else if (name === "Branch") {
       setSelectedBranch(value);
-      dispatch(setBranch(value || ''));
+      dispatch(setBranch(value || 'All'));
       if(value && branchList.length>0){
         const branchObj=branchList.find(branch=>branch.value===value);
         if(branchObj && branchObj.id){
@@ -127,7 +127,7 @@ const FixedHeader: React.FC = () => {
           localStorage.setItem("BranchId", "0");
         }
       }
-      localStorage.setItem("Branch", value || '');
+      localStorage.setItem("Branch", value || 'All');
       navigate('/service-desk/all-requests');
     }
   };

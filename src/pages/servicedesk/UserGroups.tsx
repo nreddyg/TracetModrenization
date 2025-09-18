@@ -43,15 +43,16 @@ const UserGroups = () => {
   const [isDelModalOpen, setIsDelModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [fields, setFields] = useState<BaseField[]>(USER_GROUP_DB);
+  const [deleteRecord,setDeleteRecord]=useState<UserGroup | null>(null);
   const dispatch = useAppDispatch();
   const companyId = useAppSelector(state => state.projects.companyId)
   const branchName = useAppSelector(state=>state.projects.branch);
 
   useEffect(() => {
-    if (companyId) {
+    if (companyId && branchName) {
       getUserGroupTableData(companyId, branchName);
     }
-  }, [companyId])
+  }, [companyId, branchName])
 
   useEffect(() => {
     if (selectedRecord !== null && companyId) {
@@ -66,6 +67,8 @@ const UserGroups = () => {
       if (res.success && res.data) {
         if (res.data.UserGroupDetails?.length > 0) {
           setUserGroups(res.data.UserGroupDetails?.map((item) => ({ ...item, Status: item.Status ? 'Active' : 'In Active' })).reverse())
+        }else{
+          setUserGroups([])
         }
       }
     })
@@ -107,6 +110,7 @@ const UserGroups = () => {
         if (res.data.status === true) {
           message.success(res.data.message)
           getUserGroupTableData(companyId, branchName)
+          setDeleteRecord(null);
         }
         else {
           message.error(res.data.message)
@@ -149,10 +153,10 @@ const UserGroups = () => {
 
 
   useEffect(() => {
-    if (companyId) {
+    if (companyId && branchName) {
       SelectUsersLookup(companyId, branchName)
     }
-  }, [companyId])
+  }, [companyId,branchName])
 
 
 
@@ -289,9 +293,10 @@ const UserGroups = () => {
 
 
       if (res?.success && res.data?.status) {
-        message.success(res.data.message || (isEditMode ? 'User group updated' : 'User group created'));
         getUserGroupTableData(companyId, branchName);
+        message.success(res.data.message || (isEditMode ? 'User group updated' : 'User group created'));
         handleCancel();
+        setSelectedRecord(null);
       } else {
         message.error(res?.data?.message || 'Operation failed');
       }
@@ -309,7 +314,7 @@ const UserGroups = () => {
   };
 
   const handleDelete = (group: UserGroup): void => {
-    setSelectedRecord(group);
+    setDeleteRecord(group);
     setIsDelModalOpen(true);
   };
 
@@ -319,7 +324,8 @@ const UserGroups = () => {
     setIsFormVisible(false);
     setIsEditMode(false);
     setSelectedRecord(null);
-    reset({
+    setDeleteRecord(null);
+        reset({
       userGroupName: '',
       Users: [],
       description: '',
@@ -330,13 +336,14 @@ const UserGroups = () => {
   const handleAddUserGroup = (): void => {
     setIsEditMode(false);
     setSelectedRecord(null);
-    reset();
+    setDeleteRecord(null) ;  
+     reset();
     setIsFormVisible(true);
   };
 
   // Filter data based on search
   const filteredData = useMemo(() => {
-    return userGroups.filter(group =>
+    return userGroups?.filter(group =>
       Object.values(group).some(value =>
         value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
       )
@@ -549,7 +556,7 @@ const UserGroups = () => {
           <DialogHeader>
             <DialogTitle>Confirm the action</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete {selectedRecord?.UserGroup || "this"} User Group?
+              Are you sure you want to delete {deleteRecord?.UserGroup || "this"} User Group?
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -562,7 +569,7 @@ const UserGroups = () => {
             <ReusableButton
               variant="primary"
               danger={true}
-              onClick={() => { deleteUserGroupData(companyId, selectedRecord?.UserGroupId); setIsDelModalOpen(false) }}
+              onClick={() => { deleteUserGroupData(companyId, deleteRecord?.UserGroupId); setIsDelModalOpen(false) }}
             >
               Delete
             </ReusableButton>

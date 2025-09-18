@@ -286,12 +286,12 @@ function useTableSelection<T = any>(
 
   // Get selectable rows
   const selectableRows = useMemo(() => {
-    return data.filter(selectableRowFilter || (() => true));
+    return data?.filter(selectableRowFilter || (() => true));
   }, [data, selectableRowFilter]);
 
   // Get selected rows data
   const selectedRows = useMemo(() => {
-    return data.filter((row, index) => {
+    return data?.filter((row, index) => {
       const id = getRowId(row, index);
       return rowSelection[id];
     });
@@ -304,8 +304,8 @@ function useTableSelection<T = any>(
 
   // Selection info
   const selectionInfo: SelectionInfo<T> = useMemo(() => {
-    const totalSelectable = selectableRows.length;
-    const totalSelected = selectedRowIds.length;
+    const totalSelectable = selectableRows?.length;
+    const totalSelected = selectedRowIds?.length;
     const isAllSelected = totalSelectable > 0 && totalSelected === totalSelectable;
     const isPartiallySelected = totalSelected > 0 && totalSelected < totalSelectable;
 
@@ -316,7 +316,7 @@ function useTableSelection<T = any>(
       isAllSelected,
       isPartiallySelected
     };
-  }, [selectedRows, selectedRowIds, selectableRows.length]);
+  }, [selectedRows, selectedRowIds, selectableRows?.length]);
 
   // Selection actions
   const selectionActions: SelectionActions<T> = useMemo(() => ({
@@ -2003,7 +2003,7 @@ useEffect(() => {
         )}
         {enableExport && (
           <ExportMenu
-            data={table.getCoreRowModel().rows.map(r => r.original)}
+            data={table?.getCoreRowModel().rows.map(r => r.original)}
             selectedRows={selectedRows}
             permissions={permissions}
             filename={title || 'export'}
@@ -2034,7 +2034,7 @@ useEffect(() => {
       )}
 
       {/* Legacy selection controls for backward compatibility */}
-      {selectedRows.length > 0 && (onBulkDelete || onBulkEdit) && (
+      {selectedRows?.length > 0 && (onBulkDelete || onBulkEdit) && (
         <div className="flex items-center gap-2 px-3 py-2 bg-secondary/50 rounded-md">
           <span className="text-sm font-medium">Legacy Actions: {selectedRows.length} selected</span>
           {onBulkDelete && (

@@ -286,12 +286,12 @@ function useTableSelection<T = any>(
 
   // Get selectable rows
   const selectableRows = useMemo(() => {
-    return data.filter(selectableRowFilter || (() => true));
+    return data?.filter(selectableRowFilter || (() => true));
   }, [data, selectableRowFilter]);
 
   // Get selected rows data
   const selectedRows = useMemo(() => {
-    return data.filter((row, index) => {
+    return data?.filter((row, index) => {
       const id = getRowId(row, index);
       return rowSelection[id];
     });
@@ -304,8 +304,8 @@ function useTableSelection<T = any>(
 
   // Selection info
   const selectionInfo: SelectionInfo<T> = useMemo(() => {
-    const totalSelectable = selectableRows.length;
-    const totalSelected = selectedRowIds.length;
+    const totalSelectable = selectableRows?.length;
+    const totalSelected = selectedRowIds?.length;
     const isAllSelected = totalSelectable > 0 && totalSelected === totalSelectable;
     const isPartiallySelected = totalSelected > 0 && totalSelected < totalSelectable;
 
@@ -316,7 +316,7 @@ function useTableSelection<T = any>(
       isAllSelected,
       isPartiallySelected
     };
-  }, [selectedRows, selectedRowIds, selectableRows.length]);
+  }, [selectedRows, selectedRowIds, selectableRows?.length]);
 
   // Selection actions
   const selectionActions: SelectionActions<T> = useMemo(() => ({
@@ -1683,7 +1683,17 @@ export function ReusableTable<T = any>({
     isOpen: boolean
     onOpenChange: (open: boolean) => void
   }
+const headerRef = React.useRef<HTMLDivElement>(null);
+const [calculatedMinWidth, setCalculatedMinWidth] = React.useState<number>(150);
+function getMinWidthFromChars(charCount: number, font: string = '12px Arial'): number {
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d');
+  if (!context) return 48; // fallback minimum width
 
+  context.font = font;
+  const avgCharWidth = context.measureText('M').width; // Use 'M' as average char width
+  return Math.ceil(avgCharWidth * charCount + 32); // +32 for padding
+}
   function DataTableColumnHeader<TData, TValue>({
     column,
     table,
@@ -1691,6 +1701,16 @@ export function ReusableTable<T = any>({
     enableSorting,
     enableFiltering,
   }: DataTableColumnHeaderProps<TData, TValue>) {
+useEffect(() => {
+  if (headerRef.current) {
+    const actualWidth = headerRef.current.offsetWidth + 16;
+
+    const minCharsWidth = getMinWidthFromChars(10);  // Minimum width based on 4 chars
+    const calculated = Math.max(actualWidth, minCharsWidth);
+
+    setCalculatedMinWidth(calculated);
+  }
+}, [title]);
     const [tempFilter, setTempFilter] = React.useState<string[]>(
       Array.isArray(column.getFilterValue()) ? (column.getFilterValue() as string[]) : []
     );
@@ -1743,10 +1763,12 @@ export function ReusableTable<T = any>({
 
     // Normal columns → title + popover
     return (
-      <div className="flex items-center gap-2">
-        <span className="font-medium capitalize">{title}</span>
+      <div ref={headerRef} className="flex items-center space-x-1 min-w-0">
+        <span className="font-medium capitalize truncate flex-1 min-w-10" title={title}>{title}</span>
 
-        <Popover>
+        <Popover open={openColumnId === column.id} onOpenChange={(open) => {
+          setOpenColumnId(open ? column.id : null);
+        }}>
           <PopoverTrigger asChild>
             <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
               <MoreVertical className="h-4 w-4 text-muted-foreground" />
@@ -1816,8 +1838,10 @@ export function ReusableTable<T = any>({
                   <Button
                     variant="default"
                     size="sm"
-                    onClick={() =>
+                    onClick={() => {
                       column.setFilterValue(tempFilter.length ? tempFilter : undefined)
+                      setOpenColumnId(null);
+                    }
                     }
                   >
                     Apply
@@ -1979,7 +2003,7 @@ export function ReusableTable<T = any>({
         )}
         {enableExport && (
           <ExportMenu
-            data={table.getCoreRowModel().rows.map(r => r.original)}
+            data={table?.getCoreRowModel().rows.map(r => r.original)}
             selectedRows={selectedRows}
             permissions={permissions}
             filename={title || 'export'}
@@ -2010,7 +2034,7 @@ export function ReusableTable<T = any>({
       )}
 
       {/* Legacy selection controls for backward compatibility */}
-      {selectedRows.length > 0 && (onBulkDelete || onBulkEdit) && (
+      {selectedRows?.length > 0 && (onBulkDelete || onBulkEdit) && (
         <div className="flex items-center gap-2 px-3 py-2 bg-secondary/50 rounded-md">
           <span className="text-sm font-medium">Legacy Actions: {selectedRows.length} selected</span>
           {onBulkDelete && (
@@ -2049,9 +2073,10 @@ export function ReusableTable<T = any>({
                       className="ps-4 px-2 py-1 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider border-b relative bg-background z-10"
                       style={{
                         width: header.getSize(),
-                        minWidth: header.column.columnDef.minSize ?? 50,
+                        minWidth: `${calculatedMinWidth}px`,
                         maxWidth: header.column.columnDef.maxSize ?? 1000,
                         position: header.column.getIsPinned() ? "sticky" : "relative",
+                        whiteSpace: 'nowrap',
                         left: header.column.getIsPinned() === "left" ? header.column.getStart("left") : undefined,
                         right: header.column.getIsPinned() === "right" ? header.column.getStart("right") : undefined,
                         zIndex: header.column.getIsPinned() ? 20 : 1,
@@ -2110,7 +2135,7 @@ export function ReusableTable<T = any>({
             </thead>
             {enableRowReordering ? (
               <DndContext
-                sensors={useSensors(useSensor(MouseSensor,{activationConstraint:{distance:5}}), useSensor(TouchSensor))}
+                sensors={useSensors(useSensor(MouseSensor, { activationConstraint: { distance: 5 } }), useSensor(TouchSensor))}
                 collisionDetection={closestCenter}
                 onDragEnd={({ active, over }) => {
                   if (over && active.id !== over.id) {
@@ -2173,9 +2198,21 @@ export function ReusableTable<T = any>({
                                     type={columnMeta.editType || "text"}
                                     options={columnMeta.options || []}
                                   />
-                                ) : (
-                                  flexRender(cell.column.columnDef.cell, cell.getContext())
-                                )}
+                                ) :
+
+                                  <div
+                                    className="overflow-hidden"
+                                    style={{
+                                      display: '-webkit-box',
+                                      WebkitLineClamp: 2,
+                                      WebkitBoxOrient: 'vertical',
+                                      textOverflow: 'ellipsis',
+                                    }}
+                                    title={String(cell.getValue())}
+                                  >
+                                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                  </div>
+                                }
                               </td>
                             );
                           })}
@@ -2239,9 +2276,19 @@ export function ReusableTable<T = any>({
                                 type={columnMeta.editType || "text"}
                                 options={columnMeta.options || []}
                               />
-                            ) : (
-                              flexRender(cell.column.columnDef.cell, cell.getContext())
-                            )}
+                            ) : <div
+                              className="overflow-hidden"
+                              style={{
+                                display: '-webkit-box',
+                                WebkitLineClamp: 2,
+                                WebkitBoxOrient: 'vertical',
+                                textOverflow: 'ellipsis',
+                              }}
+                              title={String(cell.getValue())}
+                            >
+                              {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                            </div>
+                            }
                           </td>
                         );
                       })}

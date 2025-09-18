@@ -134,13 +134,13 @@ const ServiceDeskReports = () => {
   const [serviceHistoryDetail, setServiceHistoryDetail] = useState<BaseField[]>()
   const [columnVisibility, setColumnVisibility] = useState({});
   const companyId=useAppSelector(state=>state.projects.companyId);
+  const branch = useAppSelector(state=>state.projects.branch);
+  const branchId = useAppSelector(state=>state.projects.branchId);
   // const dispatch =useDispatch();
   const msg = useMessage()
   const [dataSource, setDataSourse] = useState([])
   const [cols, setCols] = useState([])
   let additionalFields = useRef([]);
- 
-
 
   // let data = activeTab === "Service Request SLA Met/SLA Violated" ? slaDB : activeTab === "Service Request Detail History" ? serviceHistoryDetail : fields;
   const form = useForm<GenericObject>({
@@ -170,7 +170,7 @@ const ServiceDeskReports = () => {
       fetchAdditionalFieldConfigurationDetails(companyId)
       fetchAllLookUps();
     }
-  }, [companyId])
+  }, [companyId,branch])
   const multiSelectFilter: FilterFn<any> = (row, columnId, filterValue) => {
 
     const selected = Array.isArray(filterValue) ? filterValue : [];
@@ -186,42 +186,47 @@ const ServiceDeskReports = () => {
     return selected.includes(String(cell));
 
   };
-  function buildColumnsFromApi<T extends Record<string, any>>(
-    apiResponse: ColumnApiResponse,
-    editableColumns: string[] = [],
-    typeMapper: Record<string, "text" | "number" | "date" | "select"> = {}
-  ): { columns: ColumnDef<T>[]; initialVisibility: VisibilityState } {
-    const columnHelper = createColumnHelper<T>();
-    const [_, columnsMeta] = Object.entries(apiResponse)[0];
+function buildColumnsFromApi<T extends Record<string, any>>(
+  apiResponse: ColumnApiResponse,
+  editableColumns: string[] = [],
+  typeMapper: Record<string, "text" | "number" | "date" | "select"> = {}
+): { columns: ColumnDef<T>[]; initialVisibility: VisibilityState } {
+  const [_, columnsMeta] = Object.entries(apiResponse)[0];
 
-    const columns: ColumnDef<T>[] = Object.entries(columnsMeta).map(
-      ([colName]) =>
-        columnHelper.accessor(
-          (row) => row[colName as keyof T], // accessor fn (safe for dynamic keys)
-          {
-            id: colName,
-            header: colName,
-            cell: (info) => info.getValue() ?? "",
-            enableHiding: true, // allow ColumnVisibilityManager to toggle
-            enableColumnFilter: true,
+  const columns: ColumnDef<T>[] = Object.entries(columnsMeta).map(
+    ([colName], index) => {
+      // Ensure we have a valid column name
+      if (!colName || !colName.trim()) {
+        console.warn(`Column at index ${index} has empty name, skipping`);
+        return null;
+      }
+      
+      return {
+        accessorKey: colName,
+        id: colName,
+        header: colName,
+        cell: (info) => info.getValue() ?? "",
+        enableHiding: true,
+        enableColumnFilter: true,
+        filterFn: multiSelectFilter,
+        meta: {
+          editable: editableColumns.includes(colName),
+          editType: typeMapper[colName] || "text",
+        },
+      } as ColumnDef<T>;
+    }
+  ).filter(Boolean) as ColumnDef<T>[]; // Remove null entries
 
-            filterFn: multiSelectFilter,
-            meta: {
-              editable: editableColumns.includes(colName),
-              editType: typeMapper[colName] || "text",
-            },
-          }
-        )
-    );
-
-    // build VisibilityState (true/false per column)
-    const initialVisibility: VisibilityState = {};
-    Object.entries(columnsMeta).forEach(([colName, visible]) => {
+  // build VisibilityState (true/false per column)
+  const initialVisibility: VisibilityState = {};
+  Object.entries(columnsMeta).forEach(([colName, visible]) => {
+    if (colName && colName.trim()) {
       initialVisibility[colName] = visible === "true";
-    });
+    }
+  });
 
-    return { columns, initialVisibility };
-  }
+  return { columns, initialVisibility };
+}
 
   const selectedMainCategory = watch("MainCategory");
   const selectedMainCategoryforSLA = watch("maincategoryinSLA");
@@ -369,6 +374,7 @@ const ServiceDeskReports = () => {
         setCols(tempCols.columns)
 
       } else {
+        msg.warning(`${res.data.message}`)
 
       }
     }).catch(err => { }).finally(() => {
@@ -609,8 +615,6 @@ const ServiceDeskReports = () => {
     }
   }
 
-
-
   //store lookups data in json
   const setLookupsDataInJson = (lookupsData: allResponsesType): void => {
     const arr = Object.keys(lookupsData)
@@ -669,15 +673,15 @@ const ServiceDeskReports = () => {
       const [SRTLookUp, SRTRequestedByLookup, SRTLinkToLookup, StatusLookup,
         CustomerLookUp, SRTBranchListLookup, SRSeverity, SRPriority, SRTAssignToLookup, SRMainCategoryLookUps, SRSLAStatus, getCompanyHierarchyTreeData, deptTreeData] =
         await Promise.allSettled([
-          ServiceRequestTypeLookups(companyId,0),
-          getSRRequestByLookupsList(companyId, 'All'),
-          getSRLinkToLookupsList(companyId, 'All'),
+          ServiceRequestTypeLookups(companyId, branchId),
+          getSRRequestByLookupsList(companyId, branch),
+          getSRLinkToLookupsList(companyId, branch),
           getStatusLookups(companyId),
-          getSRCustomerLookupsList(companyId, 'All'),
+          getSRCustomerLookupsList(companyId, branch),
           getSRBranchList(companyId),
           getServiceRequestSeverity(),
           getServiceRequestPriority(),
-          GetServiceRequestAssignToLookups(companyId, 'All'),
+          GetServiceRequestAssignToLookups(companyId, branch),
           getMainCategoryLookUp(companyId),
           getSlaStatus(),
           getCompanyHierarchy(companyId),
@@ -696,7 +700,7 @@ const ServiceDeskReports = () => {
           data: [], label: 'UserName', value: 'UserId', isGrouping: true, groupData: [{ label: "UserGroupName", value: "UserGroupId", data: SRTAssignToLookup.status === 'fulfilled' && SRTAssignToLookup.value.success && SRTAssignToLookup.value.data.ServiceRequestAssignToUserGroupLookup ? SRTAssignToLookup.value.data.ServiceRequestAssignToUserGroupLookup : [], groupLabel: "User Group" },
           { label: "UserName", value: "UserId", data: SRTAssignToLookup.status === 'fulfilled' && SRTAssignToLookup.value.success && SRTAssignToLookup.value.data.ServiceRequestAssignToUsersLookup ? SRTAssignToLookup.value.data.ServiceRequestAssignToUsersLookup : [], groupLabel: "Users" },]
         },
-        MainCategory: { data: SRMainCategoryLookUps.status === 'fulfilled' && SRMainCategoryLookUps.value.success && SRMainCategoryLookUps.value.data ? SRMainCategoryLookUps.value.data.CategoriesLookup : [], label: "CategoryName", value: "CategoryId" },
+        MainCategory: { data: SRMainCategoryLookUps.status === 'fulfilled' && SRMainCategoryLookUps.value.success && SRMainCategoryLookUps.value.data && SRMainCategoryLookUps.value.data.CategoriesLookup ? SRMainCategoryLookUps.value.data.CategoriesLookup : [], label: "CategoryName", value: "CategoryId" },
         ServiceRequestDetailHistory: { data: SRTLinkToLookup.status === 'fulfilled' && SRTLinkToLookup.value.success && SRTLinkToLookup.value.data.ServiceRequestLinkToLookup ? SRTLinkToLookup.value.data.ServiceRequestLinkToLookup : [], label: 'ServiceRequestName', value: 'ServiceRequestId' },
         slastatus: { data: SRSLAStatus.status === 'fulfilled' && SRSLAStatus.value.success && SRSLAStatus.value.data ? SRSLAStatus.value.data.ServiceRequestSeverityLookup : [], label: "tSLAStatusName", value: "tSLAStatusId" },
         assignedto: {
@@ -710,7 +714,7 @@ const ServiceDeskReports = () => {
         statusinSLA: { data: StatusLookup.status === 'fulfilled' && StatusLookup.value.success && StatusLookup.value.data.ServiceRequestStatusLookup ? StatusLookup.value.data.ServiceRequestStatusLookup : [], label: 'ServiceRequestStatusName', value: 'tSLAStatusId' },
         severityinSLA: { data: SRSeverity.status === 'fulfilled' && SRSeverity.value.success && SRSeverity.value.data ? SRSeverity.value.data.ServiceRequestSeverityLookup : [], label: "ServiceRequestSeverityName", value: "ServiceRequestSeverityId" },
         priorityinSLA: { data: SRPriority.status === 'fulfilled' && SRPriority.value.success && SRPriority.value.data ? SRPriority.value.data.ServiceRequestSeverityLookup : [], label: "ServiceRequestPriorityName", value: "ServiceRequestPriorityId" },
-        maincategoryinSLA: { data: SRMainCategoryLookUps.status === 'fulfilled' && SRMainCategoryLookUps.value.success && SRMainCategoryLookUps.value.data ? SRMainCategoryLookUps.value.data.CategoriesLookup : [], label: "CategoryName", value: "CategoryId" },
+        maincategoryinSLA: { data: SRMainCategoryLookUps.status === 'fulfilled' && SRMainCategoryLookUps.value.success && SRMainCategoryLookUps.value.data && SRMainCategoryLookUps.value.data.CategoriesLookup ? SRMainCategoryLookUps.value.data.CategoriesLookup : [], label: "CategoryName", value: "CategoryId" },
         LevelFiveCompanyinSLA:
         {
           data: getCompanyHierarchyTreeData.status === 'fulfilled'

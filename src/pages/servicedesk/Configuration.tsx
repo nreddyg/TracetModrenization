@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -30,6 +30,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { ReusableButton } from '@/components/ui/reusable-button';
 import { useAppSelector } from '@/store';
 import { getSRBranchList } from '@/services/ticketServices';
+import { useToast } from '@/hooks/use-toast';
 interface OptType {
   data: { [key: string]: any }[];
   label: string;
@@ -70,6 +71,7 @@ const tablePermissions: TablePermissions = {
 
 const Configuration = () => {
   const companyId = useAppSelector(state => state.projects.companyId);
+  const branch=useAppSelector(state => state.projects.branch) || '';
   const [fields, setFields] = useState<BaseField[]>(CONFIGURATION_DB);
   const dispatch = useDispatch()
   const msg = useMessage()
@@ -105,6 +107,7 @@ const Configuration = () => {
   const [selectedStatusRec, setSelectedStatusRec] = useState<Status | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isEditStatusMode, setIsEditStatusMode] = useState(false);
+  const { toast } = useToast();
   const [currentTab, setCurrentTab] = useState('service-request-config')
   const handleEdit = (data: serviceRequestType): void => {
     setSelectedRecord(data);
@@ -166,16 +169,16 @@ const Configuration = () => {
         console.error('Error fetching lookups:', err);
       } finally {
         if (companyId) {
-          getSRConfiguration(companyId, "All");
+          getSRConfiguration(companyId,branch);
           fetchAllServiceRequests();
           fetchAllStatusList();
         }
       }
     };
-    if (companyId) {
+    if (companyId && branch) {
       init();
     }
-  }, [companyId])
+  }, [companyId, branch])
   const fetchAllServiceRequests = async () => {
     dispatch(setLoading(true));
     await getServiceRequestTypes(companyId).then(res => {
@@ -241,10 +244,9 @@ const Configuration = () => {
           }
         ]
       }
-      console.log(payload, "Nag")
       if (isEditMode && selectedRecord) {
         dispatch(setLoading(true));
-        await postUpdateServiceRequesttype(companyId, selectedRecord.Id, 'All', payload).then(res => {
+        await postUpdateServiceRequesttype(companyId, selectedRecord.Id, branch, payload).then(res => {
           if (res.success) {
             if (res.data.status) {
               msg.success(res.data.message);
@@ -260,7 +262,7 @@ const Configuration = () => {
         }).catch(err => { { } }).finally(() => { dispatch(setLoading(false)) })
       } else {
         dispatch(setLoading(true));
-        await postServiceRequestType(companyId, 'All', payload).then(res => {
+        await postServiceRequestType(companyId,branch, payload).then(res => {
           if (res.success && res.data.status) {
             msg.success(res.data.message);
             fetchAllServiceRequests();
@@ -378,7 +380,7 @@ const Configuration = () => {
   const fetchLookupsandGetAPIs = async () => {
     dispatch(setLoading(true));
     try {
-      let [NotifyLookup, SRStatusLookup, getVendors, SRTAssignToLookup, getBranches, getStatusForSLA] = await Promise.allSettled([GetNotifyTypeLookup(), getStatusLookups(companyId), getVendorDetails(companyId), GetServiceRequestAssignToLookups(companyId, "All"), getSRBranchList(companyId), getStatusLookupsForSLA(companyId)]);
+      let [NotifyLookup, SRStatusLookup, getVendors, SRTAssignToLookup, getBranches, getStatusForSLA] = await Promise.allSettled([GetNotifyTypeLookup(), getStatusLookups(companyId), getVendorDetails(companyId), GetServiceRequestAssignToLookups(companyId, branch), getSRBranchList(companyId), getStatusLookupsForSLA(companyId)]);
       const allResponses = {
         NotifyUserTypes: { data: NotifyLookup.status === 'fulfilled' && NotifyLookup.value.success && NotifyLookup.value.data.ServiceRequestNotifyTypeLookup ? NotifyLookup.value.data.ServiceRequestNotifyTypeLookup : [], label: 'NotifyTypeName', value: 'NotifyTypeId' },
         DefaultSLAStatusDataList: { data: SRStatusLookup.status === 'fulfilled' && SRStatusLookup.value.success && SRStatusLookup.value.data.ServiceRequestStatusLookup ? SRStatusLookup.value.data.ServiceRequestStatusLookup : [], label: 'ServiceRequestStatusName', value: 'ServiceRequestStatusId' },
@@ -403,7 +405,7 @@ const Configuration = () => {
       if (res.data.status !== undefined) {
         if (res.data.status === true) {
           msg.success(res.data.message);
-          getSRConfiguration(companyId, "All")
+          getSRConfiguration(companyId, branch)
         } else {
           msg.warning(res.data.message)
         }
@@ -559,16 +561,16 @@ const Configuration = () => {
         return null;
     }
   };
-  // Handle refresh
-  const handleRefresh = (type?: string) => {
-    if (type) {
-      msg.info("Refreshing Service Request Status Data...");
+  // handle refresh
+    const handleRefresh = useCallback((type?: string) => {
+     if (type) {
+      toast({title: "Data Refreshed",description: "All status data has been updated",});
       fetchAllStatusList()
     } else {
-      msg.info("Refreshing Service Request Type Data...");
+      toast({title: "Data Refreshed",description: "All service request types data has been updated",});
       fetchAllServiceRequests();
     }
-  };
+    },[toast]);
   const formatSLAHoursMinutes = (val?: string) => {
     if (!val) return "";
     const [hours, minutes] = val.split("/");

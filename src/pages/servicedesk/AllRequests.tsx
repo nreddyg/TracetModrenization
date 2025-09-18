@@ -15,12 +15,15 @@ import { setLoading } from '@/store/slices/projectsSlice';
 import { Ticket as Request } from '../TicketView';
 import { ReusableButton } from '@/components/ui/reusable-button';
 import { useAppSelector } from '@/store';
+import { useMessage } from '@/components/ui/reusable-message';
 
 const AllRequests = () => {
   const navigate=useNavigate();
   const companyId=useAppSelector(state=>state.projects.companyId);
+  const branch=useAppSelector(state=>state.projects.branch);
   const dispatch=useAppDispatch();
   const { toast } = useToast();
+  const msg=useMessage();
   const [dateRange, setDateRange] = useState<{ from: Date; to: Date } | null>(null);
   const [requests, setRequests] = useState<Request[]>([]);
   const [filteredRequests, setFilteredRequests] = useState<Request[]>([]);
@@ -79,10 +82,11 @@ const AllRequests = () => {
     };
   }, [requests]);
   useEffect(()=>{
-    if(companyId){
+    if(companyId && branch){
       fetchAllServiceRequests();
+      setDateRange({ from: undefined, to: undefined });
     }
-  },[companyId])
+  },[companyId,branch])
   // Enhanced action handlers with audit trail
   const handleRefresh = useCallback(() => {
     setDateRange({ from: undefined, to: undefined });
@@ -94,10 +98,13 @@ const AllRequests = () => {
   //fetch all tickets
   async function fetchAllServiceRequests() {
       dispatch(setLoading(true))
-      await getAllSRDetailsList('All', companyId, 'All').then(res => {
+      await getAllSRDetailsList(branch, companyId, 'All').then(res => {
         if (res.success && res.data.status === undefined) {
           if (Array.isArray(res.data)) {
-            let data = res.data.map(item => ({ ...item, AssignedTo: item.AssigneeSelectedUsers || '' + '' + item.AssigneeSelectedUserGroups || '' }));
+            let data = res.data.map(item => ({
+              ...item,
+              AssignedTo: (item.AssigneeSelectedUsers ?? '') + (item.AssigneeSelectedUserGroups ?? '')
+            }));
             setRequests([...data].reverse());
             setFilteredRequests([...data].reverse());
           } else {
@@ -105,6 +112,9 @@ const AllRequests = () => {
             setFilteredRequests([]);
           }
         } else {
+            msg.warning(res.data.message || "No Data Found");
+            setRequests([]);
+            setFilteredRequests([]);
         }
       }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
   }

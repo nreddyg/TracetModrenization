@@ -1,10 +1,8 @@
 import ReusableTable from '@/components/ui/reusable-table';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Button } from '@/components/ui/button'; // Fixed: Correct import
 import { getManageAssetsList } from '@/services/ticketServices';
 import { ColumnDef } from '@tanstack/react-table';
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { FaSearch } from 'react-icons/fa';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useLocation, useNavigate } from "react-router-dom";
 import { ReusableButton } from '@/components/ui/reusable-button';
 import { useDispatch } from 'react-redux';
@@ -14,21 +12,20 @@ import { useAppSelector } from '@/store';
  
 const AssetCodeTable = () => {
     const location = useLocation();
-    const companyId=useAppSelector(state=>state.projects.companyId)
+    const companyId=useAppSelector(state=>state.projects.companyId);
+    const branch=useAppSelector(state=>state.projects.branch) || '';
     const navigate = useNavigate();
     const dispatch=useDispatch();
      const msg = useMessage()
     const [dataSource, setDataSource] = useState([]);
     const [selectedRecords, setSelectedRecords] = useState([]); // Will contain full row data
     const [selectedRecordIds, setSelectedRecordIds] = useState([]); // Will contain just IDs
- 
-    const { flag } = location.state;
- 
+  
     useEffect(() => {
-        if (companyId) {
-            fetchAssetList("All", companyId)
+        if (companyId && branch) {
+            fetchAssetList(branch, companyId)
         }
-    }, [companyId])
+    }, [companyId,branch])
  
     // Removed the problematic useEffect that was causing infinite loops
     // useEffect(() => {
@@ -121,12 +118,18 @@ const AssetCodeTable = () => {
         <>
             <div className='bg-white p-5 h-[85vh]'>
                 <div className='px-2' style={{display:'flex',justifyContent:"space-between",}}>
-                    <h1>Asset Codes List</h1>
+                    <h1 className='text-lg font-semibold'>Assets Data</h1>
                     <div>
                         <ReusableButton
-                        title='Submit'
-                        onClick={()=>navigateBacktoMain()}
-                        >Submit</ReusableButton>
+                            htmlType="button"
+                            variant="default"
+                            onClick={()=>navigateBacktoMain()}
+                            iconPosition="left"
+                            size="middle"
+                            className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+                        >
+                            Submit
+                        </ReusableButton>
                     </div>
                 </div>
                 <div className='mt-4'>

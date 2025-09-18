@@ -20,16 +20,19 @@ import { Controller, useForm } from 'react-hook-form';
 import { MyRequest_Filter_DB, workbench_Filter_DB } from '@/Local_DB/Form_JSON_Data/MyWorkbenchandRequestsDB';
 import { getRequestTypeById } from '@/_Helper_Functions/HelperFunctions';
 import { useAppSelector } from '@/store';
+import { useMessage } from '@/components/ui/reusable-message';
 interface Filters {
   TicketCategory: string;
   CreatedDate: any[]; // Assuming these are ISO date strings
 }
 const MyWorkbench = () => {
   const navigate = useNavigate();
-  const companyId=useAppSelector(state=>state.projects.companyId)
+  const companyId=useAppSelector(state=>state.projects.companyId);
+  const branch=useAppSelector(state=>state.projects.branch) || '';
   const dispatch = useAppDispatch();
   const location=useLocation()
   const { toast } = useToast();
+  const msg=useMessage()
   const [dataSource, setDataSource] = useState<Request[]>([]);
   const [dataSourceToShow, setDataSourceToShow] = useState<Request[]>([]);
   const [isMyRequest,setMyRequest]=useState(location.pathname==="/service-desk/my-requests")
@@ -152,13 +155,13 @@ const MyWorkbench = () => {
   };
 
   useEffect(() => {
-    if(companyId){
+    if(companyId && branch){
       fetchAllServiceRequests(getRequestTypeById(filters.TicketCategory), false);
     }
-  }, [companyId])
+  }, [companyId,branch])
   async function fetchAllServiceRequests(requestType: string, isDateSelected: boolean, filtersCopy?: Filters) {
     dispatch(setLoading(true))
-    await getAllSRDetailsList('All',companyId, requestType).then(res => {
+    await getAllSRDetailsList(branch,companyId, requestType).then(res => {
       if (res.success && res.data.status === undefined) {
         if (Array.isArray(res.data)) {
           let getData = res.data.map(item => ({ ...item, AssignedTo: item.AssigneeSelectedUsers || '' + '' + item.AssigneeSelectedUserGroups || '' }))
@@ -173,6 +176,7 @@ const MyWorkbench = () => {
           setDataSourceToShow([])
         }
       } else {
+        msg.warning(res.data.message || "No Data Found")
         setDataSource([])
         setDataSourceToShow([])
       }

@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { useAppSelector } from '@/store/reduxStore';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
@@ -7,30 +6,132 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { ReusableDropdown } from '@/components/ui/reusable-dropdown';
-import { Home, MapPin, User, Settings, LogOut, Bell, ChevronDown, Building2, Menu } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Home, User, Settings, LogOut, Bell, Menu } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { GetBranchListBasedonCompanyId, GetCompanyListBasedonUserId } from '@/services/headerServices';
+import { useAppDispatch } from '@/store';
+import { setBranch, setBranchId, setCompanyId, setLoading } from '@/store/slices/projectsSlice';
 
 const FixedHeader: React.FC = () => {
-  const breadcrumbs = useAppSelector(state => state.ui.currentBreadcrumb);
-  const [selectedLocation, setSelectedLocation] = useState('Mumbai Office');
-  const [selectedCompany, setSelectedCompany] = useState('Tracet Technologies');
+  const navigate=useNavigate();
+  const breadcrumbs = useAppSelector((state) => state.ui.currentBreadcrumb);
+  const dispatch = useAppDispatch();
+  const storeData= useAppSelector((state) => state.projects);
+  const userId = storeData.userId || JSON.parse(localStorage.getItem("LoggedInUser") || "{}")?.UserId;
+  const LoggedInUser= JSON.parse(localStorage.getItem("LoggedInUser") || "{}");
+  const [companyList, setCompanyList] = useState<{ value: number; label: string }[]>([]);
+  const [branchList, setBranchList] = useState<{ value: string; label: string;id?:string }[]>([]);
+  const [selectedCompany, setSelectedCompany] = useState<number | null>(
+    localStorage.getItem("CompanyId") ? parseInt(localStorage.getItem("CompanyId")!, 10) : null
+  );
+  const [selectedBranch, setSelectedBranch] = useState<string>(
+    localStorage.getItem("Branch") || ''
+  );
+  useEffect(() => {
+    if (userId) {
+      fetchCompanyList();
+    }
+  }, [userId]);
 
-  const companyOptions = [
-    { value: 'Tracet Technologies', label: 'Tracet Technologies' },
-    { value: 'Tracet Solutions', label: 'Tracet Solutions' },
-    { value: 'Tracet Consulting', label: 'Tracet Consulting' },
-    { value: 'Tracet Innovations', label: 'Tracet Innovations' }
-  ];
+  useEffect(() => {
+    if (selectedCompany) {
+      fetchBranchList(selectedCompany);
+    }
+  }, [selectedCompany]);
 
-  const locationOptions = [
-    { value: 'Mumbai Office', label: 'Mumbai Office' },
-    { value: 'Delhi Office', label: 'Delhi Office' },
-    { value: 'Bangalore Office', label: 'Bangalore Office' },
-    { value: 'Chennai Office', label: 'Chennai Office' },
-    { value: 'Hyderabad Office', label: 'Hyderabad Office' }
-  ];
+  const fetchCompanyList = async () => {
+    dispatch(setLoading(true));
+    try {
+      const res = await GetCompanyListBasedonUserId(userId);
+      if (res.success && Array.isArray(res.data?.organizations) && res.data.organizations.length > 0) {
+        const lookupData = res.data.organizations.map((item: any) => ({
+          value: item.OrganizationId,
+          label: item.OrganizationName,
+        }));
+        setCompanyList(lookupData);
+        let compId = selectedCompany;
+        if (!compId) {
+          compId = lookupData[0].value;
+          setSelectedCompany(compId);
+          dispatch(setCompanyId(compId));
+          localStorage.setItem("CompanyId", String(compId));
+        }else{
+          dispatch(setCompanyId(compId))
+          setSelectedCompany(compId);
+        }
+      }
+    } catch (err) {
+      console.error("Company fetch error:", err);
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
+
+  const fetchBranchList = async (compId: number) => {
+    dispatch(setLoading(true));
+    try {
+      const res = await GetBranchListBasedonCompanyId(compId);
+      if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+        const updated = [{ id: "0", Name: "All" }, ...res.data.slice(1)];
+        const lookupData = updated.map((item: any) => ({
+          value: item.Name,
+          label: item.Name,
+          id:item.id
+        }));
+        setBranchList(lookupData);
+        let branch = selectedBranch;
+        if (!branch) {
+          branch = lookupData[0].value;
+          setSelectedBranch(branch);
+          dispatch(setBranch(branch));
+          dispatch(setBranchId(lookupData[0].id));
+          localStorage.setItem("Branch", branch);
+        }else{
+          setSelectedBranch(branch);
+          dispatch(setBranch(branch));
+        }
+        if(localStorage.getItem("BranchId")){
+          dispatch(setBranchId(localStorage.getItem("BranchId")))
+        }else{
+          dispatch(setBranchId(lookupData[0].id));
+          localStorage.setItem("BranchId", String(lookupData[0].id));
+        }
+      }
+    } catch (err) {
+      console.error("Branch fetch error:", err);
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
+
+  const handleChange = (name: "CompanyId" | "Branch", value: any) => {
+    if (name === "CompanyId") {
+      setSelectedCompany(Number(value));
+      dispatch(setCompanyId(Number(value)));
+      localStorage.setItem("CompanyId", String(value));
+      setSelectedBranch(null);
+      localStorage.removeItem("Branch");
+      navigate('/service-desk/all-requests');
+    } else if (name === "Branch") {
+      setSelectedBranch(value);
+      dispatch(setBranch(value || 'All'));
+      if(value && branchList.length>0){
+        const branchObj=branchList.find(branch=>branch.value===value);
+        if(branchObj && branchObj.id){
+          dispatch(setBranchId(branchObj.id));
+          localStorage.setItem("BranchId", String(branchObj.id));
+        }else{
+          dispatch(setBranchId("0"));
+          localStorage.setItem("BranchId", "0");
+        }
+      }
+      localStorage.setItem("Branch", value || 'All');
+      navigate('/service-desk/all-requests');
+    }
+  };
+
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -38,13 +139,14 @@ const FixedHeader: React.FC = () => {
     localStorage.clear();
     window.location.href = "/login";
   };
+  const getInitial = (name?: string) =>name && name.length > 0 ? name.charAt(0).toUpperCase() : '';
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 shadow-sm">
       <div className="flex items-center justify-between gap-2 px-4 lg:px-6 py-3">
         {/* Left Section - Sidebar Trigger + Company Logo + Breadcrumbs */}
         <div className="flex items-center gap-2 lg:gap-4 flex-1 min-w-0">
           <SidebarTrigger />
-          
+
           {/* Company Branding */}
           <div className="flex items-center gap-2 lg:gap-3 shrink-0">
             <div className="flex items-center gap-2 px-2 lg:px-3 py-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg">
@@ -55,7 +157,7 @@ const FixedHeader: React.FC = () => {
             </div>
             <div className="hidden md:block h-6 w-px bg-gray-300"></div>
           </div>
-          
+
           {/* Breadcrumbs - Hidden on mobile */}
           <div className="hidden lg:block flex-1 min-w-0">
             <Breadcrumb>
@@ -68,7 +170,7 @@ const FixedHeader: React.FC = () => {
                     </Link>
                   </BreadcrumbLink>
                 </BreadcrumbItem>
-                
+
                 {breadcrumbs.map((breadcrumb, index) => (
                   <React.Fragment key={index}>
                     <BreadcrumbSeparator />
@@ -111,18 +213,18 @@ const FixedHeader: React.FC = () => {
                 <div className="mt-6 space-y-4">
                   <ReusableDropdown
                     label="Company"
-                    options={companyOptions}
+                    options={companyList}
                     value={selectedCompany}
-                    onChange={(value) => setSelectedCompany(value as string)}
+                    onChange={(value) => handleChange('CompanyId', value)}
                     placeholder="Select company"
                     size="middle"
                   />
-                  
+
                   <ReusableDropdown
                     label="Location"
-                    options={locationOptions}
-                    value={selectedLocation}
-                    onChange={(value) => setSelectedLocation(value as string)}
+                    options={branchList}
+                    value={selectedBranch}
+                    onChange={(value) => handleChange('Branch', value)}
                     placeholder="Select location"
                     size="middle"
                   />
@@ -134,18 +236,18 @@ const FixedHeader: React.FC = () => {
           {/* Desktop Dropdowns */}
           <div className="hidden lg:flex items-center gap-3">
             <ReusableDropdown
-              options={companyOptions}
+              options={companyList}
               value={selectedCompany}
-              onChange={(value) => setSelectedCompany(value as string)}
+              onChange={(value,...args) => handleChange('CompanyId', value)}
               placeholder="Select company"
               size="small"
               className="min-w-[120px]"
             />
-            
+
             <ReusableDropdown
-              options={locationOptions}
-              value={selectedLocation}
-              onChange={(value) => setSelectedLocation(value as string)}
+              options={branchList}
+              value={selectedBranch}
+              onChange={(value) => handleChange('Branch', value)}
               placeholder="Select location"
               size="small"
               className="min-w-[120px]"
@@ -167,7 +269,8 @@ const FixedHeader: React.FC = () => {
                 <Avatar className="h-8 w-8 lg:h-9 lg:w-9">
                   <AvatarImage src="/avatars/01.png" alt="Profile" />
                   <AvatarFallback className="bg-blue-100 text-blue-600 font-semibold text-xs lg:text-sm">
-                    JD
+                    {getInitial(LoggedInUser?.FirstName)}
+                    {getInitial(LoggedInUser?.LastName)}
                   </AvatarFallback>
                 </Avatar>
               </Button>
@@ -175,9 +278,9 @@ const FixedHeader: React.FC = () => {
             <DropdownMenuContent className="w-56" align="end" forceMount>
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">John Doe</p>
+                  <p className="text-sm font-medium leading-none">{LoggedInUser?.FirstName} {LoggedInUser?.LastName}</p>
                   <p className="text-xs leading-none text-muted-foreground">
-                    john.doe@tracet.com
+                   {LoggedInUser?.Email}
                   </p>
                 </div>
               </DropdownMenuLabel>
@@ -212,7 +315,7 @@ const FixedHeader: React.FC = () => {
                 </Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
-            
+
             {breadcrumbs.slice(-2).map((breadcrumb, index) => (
               <React.Fragment key={index}>
                 <BreadcrumbSeparator />

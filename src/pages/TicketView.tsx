@@ -746,8 +746,8 @@ const TicketView = () => {
                     additionalFields[field.FieldName] = formatDateToDDMMYYYY(field.FieldValue);
           });
         }
-       fieldData["AssigneeSelectedUsers"] = {  "Users":fieldData["AssigneeSelectedUsers"].split(","),"User Group": fieldData["AssigneeSelectedUserGroups"].split(",")};
-        fieldData["CCListSelectedUsers"] = {  "Users":fieldData["CCListSelectedUsers"].split(","),"User Group": fieldData["CCListSelectedUserGroups"].split(",")};
+       fieldData["AssigneeSelectedUsers"] = {  "Users":fieldData["AssigneeSelectedUsers"]?fieldData["AssigneeSelectedUsers"].split(","):[],"User Group":fieldData["AssigneeSelectedUserGroups"]? fieldData["AssigneeSelectedUserGroups"].split(","):[]};
+        fieldData["CCListSelectedUsers"] = {  "Users":fieldData["CCListSelectedUsers"]?fieldData["CCListSelectedUsers"].split(","):[],"User Group":fieldData["CCListSelectedUserGroups"]? fieldData["CCListSelectedUserGroups"].split(","):[]};
         // fieldData['RequestedBy'] = fieldData['RequestedBy']?.replace(/\s*\(/g, " (");
         fieldData['RequestedDate'] = formatDateToDDMMYYYY(fieldData['RequestedDate']);
         form.reset({ ...fieldData, ...additionalFields,...notifyValues });
@@ -1376,7 +1376,12 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
                           {ticket.Status}
                         </Badge>
                         <span>•</span>
-                        <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={ticket.AssigneeSelectedUsers + '' + ticket.AssigneeSelectedUserGroups}>{ticket.AssigneeSelectedUsers + '' + ticket.AssigneeSelectedUserGroups}</span>
+                        <span
+                          style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                          title={`${ticket.AssigneeSelectedUsers || ''}${ticket.AssigneeSelectedUserGroups || ''}`}
+                        >
+                          {`${ticket.AssigneeSelectedUsers || ''}${ticket.AssigneeSelectedUserGroups || ''}`}
+                        </span>
                       </div>
                     </div>
                   ))}

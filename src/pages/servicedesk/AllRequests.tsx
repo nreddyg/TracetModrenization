@@ -101,7 +101,10 @@ const AllRequests = () => {
       await getAllSRDetailsList(branch, companyId, 'All').then(res => {
         if (res.success && res.data.status === undefined) {
           if (Array.isArray(res.data)) {
-            let data = res.data.map(item => ({ ...item, AssignedTo: item.AssigneeSelectedUsers || '' + '' + item.AssigneeSelectedUserGroups || '' }));
+            let data = res.data.map(item => ({
+              ...item,
+              AssignedTo: (item.AssigneeSelectedUsers ?? '') + (item.AssigneeSelectedUserGroups ?? '')
+            }));
             setRequests([...data].reverse());
             setFilteredRequests([...data].reverse());
           } else {

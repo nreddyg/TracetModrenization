@@ -74,7 +74,7 @@ const FixedHeader: React.FC = () => {
     try {
       const res = await GetBranchListBasedonCompanyId(compId);
       if (res.success && Array.isArray(res.data) && res.data.length > 0) {
-        const updated = [{ id: 0, Name: "All" }, ...res.data.slice(1)];
+        const updated = [{ id: "0", Name: "All" }, ...res.data.slice(1)];
         const lookupData = updated.map((item: any) => ({
           value: item.Name,
           label: item.Name,
@@ -123,8 +123,8 @@ const FixedHeader: React.FC = () => {
           dispatch(setBranchId(branchObj.id));
           localStorage.setItem("BranchId", String(branchObj.id));
         }else{
-          dispatch(setBranchId(""));
-          localStorage.setItem("BranchId", "");
+          dispatch(setBranchId("0"));
+          localStorage.setItem("BranchId", "0");
         }
       }
       localStorage.setItem("Branch", value || '');

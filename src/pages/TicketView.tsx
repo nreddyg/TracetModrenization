@@ -179,7 +179,7 @@ const TicketView = () => {
   let LoggedInUserData=JSON.parse(localStorage.getItem('LoggedInUser'));
   const companyId=useAppSelector(state=>state.projects.companyId);
   const branch=useAppSelector(state=>state.projects.branch) || '';
-  const branchId=useAppSelector(state=>state.projects.branchId) || '';
+  const branchId=useAppSelector(state=>state.projects.branchId) || localStorage.getItem('BranchId');
 
   // Add ref to track previous ServiceRequestType to prevent infinite loops
   const prevServiceRequestTypeRef = useRef<string>('');

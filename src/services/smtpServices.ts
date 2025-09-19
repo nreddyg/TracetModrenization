@@ -20,7 +20,7 @@ export const getSMTPConfig = async (compId: number): Promise<APIResponse<any>> =
 
 //save service request configuration
 
-export const postServiceRequestConfiguration = async (compId: number, data: any): Promise<APIResponse<any>> => {
+export const postSMTPconfiguration = async (compId: number, data: any): Promise<APIResponse<any>> => {
     try {
         const response = await api.post(URL_POST_ADD_OR_UPDATE_SMTP_CONFIG, data, { params: { CompanyID: compId} });
         return { success: true, data: response.data };

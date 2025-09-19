@@ -103,3 +103,6 @@ export const URL_GET_USER_LIST='/api/Masters/GetUserDetailsByCompanyId';
 
 //Vendor Master
 export const URL_GET_VENDOR_LIST='/api/Masters/GetVendorDetailsByCompanyId';
+
+//Organization Master
+export const URL_GET_ORGANIZATION_LIST='/api/Masters/GetOrganizations';

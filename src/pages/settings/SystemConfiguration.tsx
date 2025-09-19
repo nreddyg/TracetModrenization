@@ -21,11 +21,12 @@ import { useAppDispatch, useAppSelector } from '@/store';
 import { getSMTPConfig, postSMTPconfiguration } from '@/services/smtpServices';
 import { setLoading } from '@/store/slices/projectsSlice';
 import { useMessage } from '@/components/ui/reusable-message';
+import { ReusableButton } from '@/components/ui/reusable-button';
 
 const SystemConfiguration = () => {
-  const dispatch=useAppDispatch();
-  const companyId=useAppSelector((state)=>state.projects.companyId);
-  const message=useMessage();
+  const dispatch = useAppDispatch();
+  const companyId = useAppSelector((state) => state.projects.companyId);
+  const message = useMessage();
   const [smtpFields, setSmtpFields] = useState(SMTP_DB);
   const [passwordPolicy, setPasswordPolicy] = useState({
     minLength: 8,
@@ -47,36 +48,37 @@ const SystemConfiguration = () => {
   const { control, register, handleSubmit, trigger, watch, setValue, reset, formState: { errors } } = form;
 
 
-  useEffect(()=>{
-    if(companyId)fetchSMTPSettings();
-  },[companyId])
+  useEffect(() => {
+    if (companyId) fetchSMTPSettings();
+  }, [companyId])
   //fetch SMTP settings
-  const fetchSMTPSettings=async()=>{
+  const fetchSMTPSettings = async () => {
     dispatch(setLoading(true))
-    await getSMTPConfig(companyId).then(res=>{
-      if(res.success && res.data && res.data.SMTPConfigurationDetails){
-        form.reset({...res.data.SMTPConfigurationDetails});
-      }else{
+    await getSMTPConfig(companyId).then(res => {
+      if (res.success && res.data && res.data.SMTPConfigurationDetails) {
+        form.reset({ ...res.data.SMTPConfigurationDetails });
+      } else {
         message.warning(res.data.message || 'No SMTP configuration found');
       }
-    }).catch(err=>{}).finally(()=>{dispatch(setLoading(false))});
+    }).catch(err => { }).finally(() => { dispatch(setLoading(false)) });
   }
   //save smtp settings
   const handleSave = async (data: GenericObject, configType: string) => {
     if (configType === "SMTPSettings") {
       const payload = {
         "SMTPDetails": [
-          {"SMTPHost": watch('SMTPHost'),"SMTPPort": watch('SMTPPort'),
-            "SMTPFromMail": watch('SMTPFromMail'),"SMTPFromPassword": watch('SMTPFromPassword'),
+          {
+            "SMTPHost": watch('SMTPHost'), "SMTPPort": watch('SMTPPort'),
+            "SMTPFromMail": watch('SMTPFromMail'), "SMTPFromPassword": watch('SMTPFromPassword'),
             "IsSSL": watch('SSLApplicable').toString(),
           }
         ]
       }
       dispatch(setLoading(true));
       await postSMTPconfiguration(companyId, payload).then(res => {
-        if(res.success && res.data.status){
+        if (res.success && res.data.status) {
           message.success(res.data.message)
-        }else{
+        } else {
           message.warning(res.data.message || 'Invalid SMTP configuration');
         }
       }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
@@ -239,13 +241,23 @@ const SystemConfiguration = () => {
                   <Input id="hierarchyNames" defaultValue="Company, Division, Department, Team, Individual" />
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Switch id="autoAssign" />
+                  <Switch
+                    id="autoAssign"
+                    checkedClassName="data-[state=checked]:bg-blue-600"
+                    uncheckedClassName="data-[state=unchecked]:bg-gray-200"
+                  />
                   <Label htmlFor="autoAssign">Auto-assign hierarchy on user creation</Label>
                 </div>
-                <Button className="w-full">
-                  <Save className="h-4 w-4 mr-2" />
+                <ReusableButton
+                  htmlType="button"
+                  variant="default"
+                  onClick={handleSubmit((data) => { handleSave(data, "HierarchyConfiguration") })}
+                  iconPosition="left"
+                  size="middle"
+                  className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white w-full"
+                >
                   Save Hierarchy Configuration
-                </Button>
+                </ReusableButton>
               </CardContent>
             </Card>
           </TabsContent>
@@ -272,10 +284,16 @@ const SystemConfiguration = () => {
                   })}
                 </div>
                 <div className="flex gap-2">
-                  <Button className="flex-1" onClick={handleSubmit((data) => { handleSave(data, "SMTPSettings") })}>
-                    <Save className="h-4 w-4 mr-2" />
+                  <ReusableButton
+                    htmlType="button"
+                    variant="default"
+                    onClick={handleSubmit((data) => { handleSave(data, "SMTPSettings") })}
+                    iconPosition="left"
+                    size="middle"
+                    className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white w-full"
+                  >
                     Save SMTP Settings
-                  </Button>
+                  </ReusableButton>
                 </div>
               </CardContent>
             </Card>
@@ -313,10 +331,16 @@ const SystemConfiguration = () => {
                   <Label htmlFor="systemMessage">System Maintenance Message</Label>
                   <Textarea id="systemMessage" placeholder="Enter message to display during maintenance..." />
                 </div>
-                <Button className="w-full">
-                  <Save className="h-4 w-4 mr-2" />
+                <ReusableButton
+                  htmlType="button"
+                  variant="default"
+                  onClick={handleSubmit((data) => { handleSave(data, "Parameters") })}
+                  iconPosition="left"
+                  size="middle"
+                  className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white w-full"
+                >
                   Save Parameters
-                </Button>
+                </ReusableButton>
               </CardContent>
             </Card>
           </TabsContent>
@@ -343,6 +367,8 @@ const SystemConfiguration = () => {
                       id="requireUppercase"
                       checked={passwordPolicy.requireUppercase}
                       onCheckedChange={(checked) => setPasswordPolicy({ ...passwordPolicy, requireUppercase: checked })}
+                      checkedClassName="data-[state=checked]:bg-blue-600"
+                      uncheckedClassName="data-[state=unchecked]:bg-gray-200"
                     />
                     <Label htmlFor="requireUppercase">Require uppercase letters</Label>
                   </div>
@@ -351,6 +377,8 @@ const SystemConfiguration = () => {
                       id="requireLowercase"
                       checked={passwordPolicy.requireLowercase}
                       onCheckedChange={(checked) => setPasswordPolicy({ ...passwordPolicy, requireLowercase: checked })}
+                      checkedClassName="data-[state=checked]:bg-blue-600"
+                      uncheckedClassName="data-[state=unchecked]:bg-gray-200"
                     />
                     <Label htmlFor="requireLowercase">Require lowercase letters</Label>
                   </div>
@@ -359,6 +387,8 @@ const SystemConfiguration = () => {
                       id="requireNumbers"
                       checked={passwordPolicy.requireNumbers}
                       onCheckedChange={(checked) => setPasswordPolicy({ ...passwordPolicy, requireNumbers: checked })}
+                      checkedClassName="data-[state=checked]:bg-blue-600"
+                      uncheckedClassName="data-[state=unchecked]:bg-gray-200"
                     />
                     <Label htmlFor="requireNumbers">Require numbers</Label>
                   </div>
@@ -367,6 +397,8 @@ const SystemConfiguration = () => {
                       id="requireSpecialChars"
                       checked={passwordPolicy.requireSpecialChars}
                       onCheckedChange={(checked) => setPasswordPolicy({ ...passwordPolicy, requireSpecialChars: checked })}
+                      checkedClassName="data-[state=checked]:bg-blue-600"
+                      uncheckedClassName="data-[state=unchecked]:bg-gray-200"
                     />
                     <Label htmlFor="requireSpecialChars">Require special characters</Label>
                   </div>
@@ -380,10 +412,16 @@ const SystemConfiguration = () => {
                     onChange={(e) => setPasswordPolicy({ ...passwordPolicy, expiryDays: parseInt(e.target.value) })}
                   />
                 </div>
-                <Button className="w-full">
-                  <Save className="h-4 w-4 mr-2" />
+                <ReusableButton
+                  htmlType="button"
+                  variant="default"
+                  onClick={handleSubmit((data) => { handleSave(data, "PasswordPolicy") })}
+                  iconPosition="left"
+                  size="middle"
+                  className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white w-full"
+                >
                   Save Password Policy
-                </Button>
+                </ReusableButton>
               </CardContent>
             </Card>
           </TabsContent>

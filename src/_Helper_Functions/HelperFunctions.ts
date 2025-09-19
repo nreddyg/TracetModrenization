@@ -93,4 +93,27 @@ export const byteArrayToFile = (
         return "";
     }
   };
- 
+
+// Common style groups
+const GREEN ='bg-green-50 text-green-700 border-green-200 hover:bg-green-600 hover:text-white';
+const YELLOW ='bg-yellow-50 text-yellow-700 border-yellow-200 hover:bg-yellow-500 hover:text-white';
+const RED ='bg-red-50 text-red-700 border-red-200 hover:bg-red-600 hover:text-white';
+const BLUE ='bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-600 hover:text-white';
+const PURPLE ='bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-600 hover:text-white';
+const EMERALD ='bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-600 hover:text-white';
+const AMBER ='bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-500 hover:text-white';
+const GRAY ='bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-600 hover:text-white';
+const statusColors: Record<string, string> = {
+  Low: GREEN,
+  Active: GREEN,
+  Open: GREEN,
+  Medium: YELLOW,
+  High: RED,
+  Deactive: RED,
+  'In Progress': BLUE,
+  Resolved: PURPLE,
+  'Re-Open': EMERALD,
+  Hold: AMBER,
+  Closed: GRAY,
+};
+export const getColorForStatus = (status: string): string => statusColors[status] || GRAY;

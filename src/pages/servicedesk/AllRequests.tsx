@@ -16,6 +16,7 @@ import { Ticket as Request } from '../TicketView';
 import { ReusableButton } from '@/components/ui/reusable-button';
 import { useAppSelector } from '@/store';
 import { useMessage } from '@/components/ui/reusable-message';
+import { getColorForStatus } from '@/_Helper_Functions/HelperFunctions';
 
 const AllRequests = () => {
   const navigate=useNavigate();
@@ -118,35 +119,35 @@ const AllRequests = () => {
         }
       }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
   }
-  const getColorForStatus = (status: string): string => {
-    switch (status) {
-      // === Priorities ===
-      case 'Low':
-        return 'bg-green-50 text-green-700 border-green-200 hover:bg-green-600 hover:text-white';
-      case 'Medium':
-        return 'bg-yellow-50 text-yellow-700 border-yellow-200 hover:bg-yellow-500 hover:text-white';
-      case 'High':
-        return 'bg-red-50 text-red-700 border-red-200 hover:bg-red-600 hover:text-white';
+  // const getColorForStatus = (status: string): string => {
+  //   switch (status) {
+  //     // === Priorities ===
+  //     case 'Low':
+  //       return 'bg-green-50 text-green-700 border-green-200 hover:bg-green-600 hover:text-white';
+  //     case 'Medium':
+  //       return 'bg-yellow-50 text-yellow-700 border-yellow-200 hover:bg-yellow-500 hover:text-white';
+  //     case 'High':
+  //       return 'bg-red-50 text-red-700 border-red-200 hover:bg-red-600 hover:text-white';
 
-      // === Service Request Statuses ===
-      case 'In Progress':
-        return 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-600 hover:text-white';
-      case 'Resolved':
-        return 'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-600 hover:text-white';
-      case 'Re-Open':
-        return 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-600 hover:text-white';
-      case 'Hold':
-        return 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-500 hover:text-white';
-      case 'Open':
-        return 'bg-green-50 text-green-700 border-green-200 hover:bg-green-600 hover:text-white';
-      case 'Closed':
-        return 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-600 hover:text-white';
+  //     // === Service Request Statuses ===
+  //     case 'In Progress':
+  //       return 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-600 hover:text-white';
+  //     case 'Resolved':
+  //       return 'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-600 hover:text-white';
+  //     case 'Re-Open':
+  //       return 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-600 hover:text-white';
+  //     case 'Hold':
+  //       return 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-500 hover:text-white';
+  //     case 'Open':
+  //       return 'bg-green-50 text-green-700 border-green-200 hover:bg-green-600 hover:text-white';
+  //     case 'Closed':
+  //       return 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-600 hover:text-white';
 
-      // === Default ===
-      default:
-        return 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-600 hover:text-white';
-    }
-  };
+  //     // === Default ===
+  //     default:
+  //       return 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-600 hover:text-white';
+  //   }
+  // };
   //handle change
   const handleChange = (value: any) => {
     if(value){

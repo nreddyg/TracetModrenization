@@ -36,7 +36,8 @@ interface UserData {
   Password: string,
   ConfirmPassword: string
 }
-
+const Positive='border font-medium text-xs px-2 py-0.5 bg-green-50 text-green-700 border-green-200 hover:bg-green-600 hover:text-white transition-colors';
+const Negative='border font-medium text-xs px-2 py-0.5 bg-red-50 text-red-700 border-red-200 hover:bg-red-600 hover:text-white transition-colors'
 const User = () => {
   const { toast } = useToast();
   const dispatch = useAppDispatch();
@@ -51,11 +52,11 @@ const User = () => {
     { id: 'Email', accessorKey: "Email", header: "Email ID" },
     { id: 'PhoneNumber', accessorKey: "PhoneNumber", header: "Mobile Number" },
     { id: 'Status', accessorKey: "Status", header: "Status", cell: ({ row }) => (
-      row.original.Deactive ? <Badge variant="destructive" className="h-6">Deactive</Badge> : <Badge variant="default" className="h-6">Active</Badge>
+      row.original.Deactive ? <Badge title='Status' className={Negative}>Deactive</Badge> : <Badge title='Status' className={Positive}>Active</Badge>
     ) },
     { id: 'IsServiceDesk', accessorKey: "IsServiceDesk", header: "Is Service Desk User",
       cell: ({ row }) => (
-        row.original.IsServiceDesk ? <Badge variant="default" className="h-6">Yes</Badge> : <Badge variant="destructive" className="h-6">No</Badge>
+        row.original.IsServiceDesk ? <Badge title='Is Service Desk User' className={Positive}>Yes</Badge> : <Badge title='Is Service Desk User' variant="destructive" className={Negative}>No</Badge>
       )
      },
   ])

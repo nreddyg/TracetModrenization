@@ -48,7 +48,7 @@ const User = () => {
     { id: 'UserName', accessorKey: "UserName", header: "User Name" },
     { id: 'RoleName', accessorKey: "RoleName", header: "Role Name" },
     { id: 'EmployeeId', accessorKey: "EmployeeId", header: "Employee ID" },
-    { id: 'Email', accessorKey: "Email", header: "Email" },
+    { id: 'Email', accessorKey: "Email", header: "Email ID" },
     { id: 'PhoneNumber', accessorKey: "PhoneNumber", header: "Mobile Number" },
     { id: 'Status', accessorKey: "Status", header: "Status", cell: ({ row }) => (
       row.original.Deactive ? <Badge variant="destructive" className="h-6">Deactive</Badge> : <Badge variant="default" className="h-6">Active</Badge>
@@ -145,7 +145,7 @@ const User = () => {
               enableColumnVisibility={true} enablePagination={true}
               enableSorting={true} enableFiltering={true}
               pageSize={10} emptyMessage="No Data found"
-              rowHeight="normal" storageKey="service-request-type-list-table"
+              rowHeight="normal" storageKey="user-master-list-table"
               actions={tableActions}
               enableColumnPinning
             />

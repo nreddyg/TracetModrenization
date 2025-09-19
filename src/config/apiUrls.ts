@@ -104,5 +104,8 @@ export const URL_GET_USER_LIST='/api/Masters/GetUserDetailsByCompanyId';
 //Vendor Master
 export const URL_GET_VENDOR_LIST='/api/Masters/GetVendorDetailsByCompanyId';
 
+//SMTP URLS
+export const URL_GET_SMTP_CONFIG="/api/Settings/GetSMTPConfigurationDetails";
+export const URL_POST_ADD_OR_UPDATE_SMTP_CONFIG="/api/Settings/AddOrUpdateSMTPConfiguration";
 //Organization Master
 export const URL_GET_ORGANIZATION_LIST='/api/Masters/GetOrganizations';

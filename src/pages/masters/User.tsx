@@ -146,8 +146,6 @@ const User = () => {
               enableSorting={true} enableFiltering={true}
               pageSize={10} emptyMessage="No Data found"
               rowHeight="normal" storageKey="service-request-type-list-table"
-              enableRowReordering
-              onRowReorder={(newData) => setDataSource(newData)}
               actions={tableActions}
               enableColumnPinning
             />

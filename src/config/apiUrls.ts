@@ -100,3 +100,6 @@ export const URL_DUPLICATE_UPDATE_CHECK_NO='/api/ServiceDeskAPI/CheckUpdateDupli
 
 //User Master
 export const URL_GET_USER_LIST='/api/Masters/GetUserDetailsByCompanyId';
+
+//Vendor Master
+export const URL_GET_VENDOR_LIST='/api/Masters/GetVendorDetailsByCompanyId';

@@ -83,8 +83,6 @@ export const URL_POST_UPDATE_SR_STATUS="/api/ServiceDeskAPI/UpdateServiceRequest
 export const URL_POST_DELETE_SR_STATUS="/api/ServiceDeskAPI/DeleteServiceRequestStatusById";
 export const URL_POST_UPDATE_SR_STATUS_SEQUENCE="/api/ServiceDeskAPI/UpdateIndexSequence";
 
-
-
 //Subscription screen 
 export const URL_GET_SUBSCRIPTION_LIST='/api/ServiceDeskAPI/GetSubscription';
 export const URL_GET_PRODUCT_LIST='/api/Masters/GetProductMasterDetailsByCompanyId';
@@ -95,8 +93,6 @@ export const UPDATE_SUBSCRIPTION='/api/ServiceDeskAPI/UpdateSubscription';
 export const URL_SUBSCRIPTION_BY_ID='/api/ServiceDeskAPI/GetSubscriptionById';
 export const URL_DUPLICATE_ADD_CHECK_NO='/api/ServiceDeskAPI/CheckAddDuplicateCheque';
 export const URL_DUPLICATE_UPDATE_CHECK_NO='/api/ServiceDeskAPI/CheckUpdateDuplicateCheque'
-
-
 
 //User Master
 export const URL_GET_USER_LIST='/api/Masters/GetUserDetailsByCompanyId';

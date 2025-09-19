@@ -10,15 +10,16 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { ReusableDropdown } from '@/components/ui/reusable-dropdown';
 import { Save, Server, Mail, Settings2, Lock } from 'lucide-react';
+import { ReusableTextarea } from '@/components/ui/reusable-textarea';
+import ReusableSingleCheckbox from '@/components/ui/reusable-single-checkbox';
+import { Controller, useForm } from 'react-hook-form';
+import { ReusableMultiSelect } from '@/components/ui/reusable-multi-select';
+import { ReusableInput } from '@/components/ui/reusable-input';
+import { BaseField, GenericObject } from '@/Local_DB/types/types';
+import { SMTP_DB } from '@/Local_DB/Form_JSON_Data/SMTPDB';
 
 const SystemConfiguration = () => {
-  const [smtpSettings, setSmtpSettings] = useState({
-    host: '',
-    port: '587',
-    username: '',
-    password: '',
-    encryption: 'tls'
-  });
+  const [smtpFields, setSmtpFields] = useState(SMTP_DB);
 
   const [passwordPolicy, setPasswordPolicy] = useState({
     minLength: 8,
@@ -29,8 +30,115 @@ const SystemConfiguration = () => {
     expiryDays: 90
   });
 
+    const form = useForm<GenericObject>({
+      defaultValues: smtpFields.reduce((acc, f) => {
+        acc[f.name!] = f.defaultChecked ?? '';
+        return acc;
+      }, {} as GenericObject),
+      mode: 'onChange',
+      reValidateMode: "onChange"
+    });
+    const { control, register, handleSubmit, trigger, watch, setValue, reset, formState: { errors } } = form;
+   const renderField = (field: BaseField) => {
+      const { name, label, fieldType, isRequired, validationPattern, patternErrorMessage, dependsOn, show = true } = field;
+      if (!show && dependsOn) {
+        return null;
+      }
+   
+      switch (fieldType) {
+        case 'text':
+          return (
+            <Controller
+              name={name}
+              control={control}
+              // rules={validationRules}
+              render={({ field: ctrl, fieldState }) => (
+                <ReusableInput
+                  {...field}
+                  value={ctrl.value}
+                  onChange={ctrl.onChange}
+                  error={fieldState.error?.message}
+                />
+              )}
+            />
+          );
+        case 'dropdown':
+          return (
+            <Controller
+              key={name}
+              name={name}
+              control={control}
+              // rules={validationRules}
+              render={({ field: ctrl }) => (
+                <ReusableDropdown
+                  {...field}
+                  value={ctrl.value}
+                  onChange={ctrl.onChange}
+                  error={errors[name]?.message as string}
+                />
+              )}
+            />
+          );
+        case 'multiselect':
+          return (
+            <div>
+              <Controller
+                key={name}
+                name={name}
+                control={control}
+                // rules={validationRules}
+                render={({ field: ctrl }) => (
+                  <ReusableMultiSelect
+                    label={label!}
+                    {...field}
+                    value={ctrl.value}
+                    onChange={ctrl.onChange}
+                    error={errors[name]?.message as string}
+                  />
+                )}
+              />
+            </div>
+          );
+        case 'checkbox':
+          return (
+            <Controller
+              name={name}
+              control={control}
+              render={({ field: ctrl }) => (
+                <ReusableSingleCheckbox
+                  label={label}
+                  onChange={ctrl.onChange}
+                  value={ctrl.value}
+                  className="text-orange-500"
+                  {...field}
+                />
+              )}
+            />
+          );
+        case 'textarea':
+          return (
+            <Controller
+              key={name}
+              name={name}
+              control={control}
+              // rules={validationRules}
+              render={({ field: ctrl }) => (
+                <ReusableTextarea
+                  {...field}
+                  value={ctrl.value}
+                  onChange={ctrl.onChange}
+                  error={errors[name]?.message as string}
+                />
+              )}
+            />
+          );
+        default:
+          return null;
+      }
+    };
+  const getFieldsByNames = (names: string[]) => smtpFields.filter(f => names.includes(f.name!));
   return (
-    <div className="min-h-screen bg-gray-50 transition-all duration-300 ease-in-out">
+    <div className="overflow-y-scroll h-full bg-gray-50 transition-all duration-300 ease-in-out">
       <header className="bg-white border-b px-6 py-4 shadow-sm">
         <div className="flex items-center gap-4">
           <SidebarTrigger />
@@ -106,7 +214,7 @@ const SystemConfiguration = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
+                  {/* <div className="space-y-2">
                     <Label htmlFor="smtpHost">SMTP Host</Label>
                     <Input 
                       id="smtpHost" 
@@ -122,10 +230,15 @@ const SystemConfiguration = () => {
                       value={smtpSettings.port}
                       onChange={(e) => setSmtpSettings({...smtpSettings, port: e.target.value})}
                     />
-                  </div>
+                  </div> */}
+                   {getFieldsByNames(['SMTPHost','SMTPPort']).map((field) => {
+                    return <>
+                      {renderField(field)}
+                    </>;
+                  })}
                 </div>
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
+                  {/* <div className="space-y-2">
                     <Label htmlFor="smtpUsername">Username</Label>
                     <Input 
                       id="smtpUsername" 
@@ -141,9 +254,14 @@ const SystemConfiguration = () => {
                       value={smtpSettings.password}
                       onChange={(e) => setSmtpSettings({...smtpSettings, password: e.target.value})}
                     />
-                  </div>
+                  </div> */}
+                   {getFieldsByNames(['SMTPFromMail','SMTPFromPassword',"SSLApplicable"]).map((field) => {
+                    return <>
+                      {renderField(field)}
+                    </>;
+                  })}
                 </div>
-                <div className="space-y-2">
+                {/* <div className="space-y-2">
                   <Label htmlFor="encryption">Encryption</Label>
                   <ReusableDropdown
                     value={smtpSettings.encryption}
@@ -154,9 +272,9 @@ const SystemConfiguration = () => {
                       { value: 'ssl', label: 'SSL' }
                     ]}
                   />
-                </div>
+                </div> */}
                 <div className="flex gap-2">
-                  <Button variant="outline" className="flex-1">Test Connection</Button>
+                  {/* <Button variant="outline" className="flex-1">Test Connection</Button> */}
                   <Button className="flex-1">
                     <Save className="h-4 w-4 mr-2" />
                     Save SMTP Settings

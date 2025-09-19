@@ -1,13 +1,48 @@
 
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
-import { ReusableTable } from '@/components/ui/reusable-table';
-import { Edit2, Trash2, Plus } from 'lucide-react';
+import { ReusableTable, TableAction, TablePermissions } from '@/components/ui/reusable-table';
+import { Edit2, Trash2, Plus, Edit } from 'lucide-react';
+import { ReusableButton } from '@/components/ui/reusable-button';
+import { ColumnDef } from '@tanstack/react-table';
+import { toast } from 'sonner';
+import { useAppDispatch, useAppSelector } from '@/store';
+import { setLoading } from '@/store/slices/projectsSlice';
+import { GetCustomersList } from '@/services/customerServices';
+import { useToast } from '@/hooks/use-toast';
 
+interface CustomerData {
+  CustomerID: Number,
+  CustomerName: string,
+  CustomerTypeID: number,
+  CustomerType: string,
+  PAN: string,
+  GSTIN: string,
+  AddOnAddressID: 12350,
+  AddOnAddress: string,
+  City: string,
+  State: string,
+  Country: string,
+  ZipCode: string,
+  PhoneNo: string,
+  MobileNo: string,
+  EmailId: string,
+  MainLocationId: 0,
+  MainLocation: string,
+  SubLocationId: 0,
+  SubLocation: string,
+  Description: string,
+  ContactPerson: string,
+  BillingAddress: string,
+  BranchName: string,
+  Attachment1: string,
+  Attachment2: string,
+  Attachment3: string
+}
 interface OrganizationData {
   id: string;
   assetCode: string;
@@ -76,10 +111,22 @@ const mockData: OrganizationData[] = [
   },
 ];
 
+  const CustomerColumns = [
+    { id: 'CustomerName', accessorKey: "CustomerName", header: "Customer Name" },
+    { id: 'EmailId', accessorKey: "EmailId", header: "Email Id" },
+    { id: 'MobileNo', accessorKey: "MobileNo", header: "MobileNo" },
+    { id: 'FirstName', accessorKey: "FirstName", header: "First Name" },
+  ]
 const Customer = () => {
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const companyId = useAppSelector(state => state.projects.companyId)
+  const branchName = useAppSelector(state => state.projects.branch);
+  const { toast } = useToast();
   const itemsPerPage = 7;
+  const [dataSource, setDataSource] = useState<CustomerData[]>([]);
+  const [columns, setColumns] = useState<ColumnDef<CustomerData>[]>(CustomerColumns);
+  const dispatch = useAppDispatch();
 
   const toggleSelectAll = () => {
     if (selectedItems.length === mockData.length) {
@@ -90,15 +137,71 @@ const Customer = () => {
   };
 
   const toggleSelectItem = (id: string) => {
-    setSelectedItems(prev => 
-      prev.includes(id) 
+    setSelectedItems(prev =>
+      prev.includes(id)
         ? prev.filter(item => item !== id)
         : [...prev, id]
     );
   };
 
+  useEffect(() => {
+    if (companyId && branchName) {
+      fetchAllCustomerList();
+    }
+  }, [companyId, branchName])
+
+  const fetchAllCustomerList = async () => {
+    // console.log("kjhg")
+    dispatch(setLoading(true));
+    await GetCustomersList(companyId, branchName).then(res => {
+      console.log("oiuhj")
+      if (res.data && res.data.Customers.length > 0) {
+        console.log("res",res.data);
+        setDataSource(res.data.Customers);
+      } else {
+        setDataSource([]);
+      }
+    }).catch(err => console.log(err)).finally(() => {
+      dispatch(setLoading(false));
+    });
+  }
+  console.log("dataSource", dataSource);
+
+  const handleDelete = (data: CustomerData): void => {
+  }
+  const handleEdit = (data: CustomerData): void => {
+  }
+  const tableActions: TableAction<CustomerData>[] = [
+    {
+      label: 'Edit',
+      icon: Edit,
+      onClick: handleEdit,
+      variant: 'default',
+    },
+    {
+      label: 'Delete',
+      icon: Trash2,
+      onClick: handleDelete,
+      variant: 'destructive',
+    },
+  ];
+  // handle refresh
+  const handleRefresh = useCallback(() => {
+    toast({ title: "Data Refreshed", description: "All users data has been updated", });
+    fetchAllCustomerList();
+  }, [toast]);
+  // Define table permissions
+  const tablePermissions: TablePermissions = {
+    canEdit: true,
+    canDelete: true,
+    canView: true,
+    canExport: false,
+    canAdd: true,
+    canManageColumns: true,
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 transition-all duration-300 ease-in-out">
+    <div className="h-full overflow-y-scroll bg-gray-50 transition-all duration-300 ease-in-out">
       <header className="bg-white border-b px-6 py-4 shadow-sm">
         <div className="flex items-center gap-4">
           <SidebarTrigger />
@@ -115,116 +218,41 @@ const Customer = () => {
       <div className="p-6 space-y-6 animate-fade-in">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-gray-900">Customers</h1>
-          <Button className="bg-orange-500 hover:bg-orange-600 text-white">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Customer
-          </Button>
+          <ReusableButton
+            htmlType="button"
+            variant="default"
+            onClick={null}
+            iconPosition="left"
+            size="middle"
+            className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+          >
+            <div className='flex items-center'><Plus className="h-4 w-4 mr-2" />Add Customer</div>
+          </ReusableButton>
         </div>
-
         <Card className="shadow-sm">
           <CardHeader className="pb-4">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-lg font-semibold">
-                Customers List:
-                {selectedItems.length > 0 && (
-                  <span className="ml-2 text-blue-600">{selectedItems.length} selected</span>
-                )}
-              </CardTitle>
-              {selectedItems.length > 0 && (
-                <Button variant="destructive" size="sm">
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete
-                </Button>
-              )}
-              <div className="text-sm text-gray-600">
-                Showing 1 to 7 of 7 entries
-              </div>
-            </div>
           </CardHeader>
           <CardContent>
             <ReusableTable
-              data={mockData}
-              columns={[
-                {
-                  id: 'select',
-                  header: ({ table }: any) => (
-                    <Checkbox
-                      checked={selectedItems.length === mockData.length}
-                      onCheckedChange={toggleSelectAll}
-                    />
-                  ),
-                  cell: ({ row }: any) => (
-                    <Checkbox
-                      checked={selectedItems.includes(row.original.id)}
-                      onCheckedChange={() => toggleSelectItem(row.original.id)}
-                    />
-                  )
-                },
-                {
-                  accessorKey: 'assetCode',
-                  header: 'ASSET CODE'
-                },
-                {
-                  accessorKey: 'assetName',
-                  header: 'ASSET NAME'
-                },
-                {
-                  accessorKey: 'customerAssetNo',
-                  header: 'CUSTOMER ASSET NO'
-                },
-                {
-                  accessorKey: 'barcodeNo',
-                  header: 'BARCODE NO'
-                },
-                {
-                  accessorKey: 'acquisition',
-                  header: 'ACQUISITION',
-                  cell: ({ getValue }: any) => (
-                    <Badge 
-                      variant={getValue() === 'Purchased' ? 'default' : 'secondary'}
-                      className={getValue() === 'Purchased' 
-                        ? 'bg-green-100 text-green-800 hover:bg-green-100' 
-                        : 'bg-blue-100 text-blue-800 hover:bg-blue-100'
-                      }
-                    >
-                      {getValue()}
-                    </Badge>
-                  )
-                },
-                {
-                  id: 'actions',
-                  header: 'ACTIONS',
-                  cell: () => (
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                      <Edit2 className="h-4 w-4 text-gray-600" />
-                    </Button>
-                  )
-                }
-              ] as any}
+              data={dataSource} columns={columns}
+              // permissions={""}
+              permissions={tablePermissions}
+              title="Customers List"
+              onRefresh={handleRefresh}
+              enableSearch={true}
+              enableSelection={false}
+              enableExport={true}
+              enableColumnVisibility={true}
+              enablePagination={true}
+              enableSorting={true}
+              enableFiltering={true}
+              pageSize={10}
+              emptyMessage="No Data found"
+              rowHeight="normal"
+              storageKey="service-request-type-list-table"
+              actions={tableActions}
+              enableColumnPinning
             />
-            
-            <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
-              <div className="text-sm text-gray-600">
-                Showing 1 to 7 of 7 entries
-              </div>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" disabled>
-                  Previous
-                </Button>
-                <Button variant="default" size="sm" className="bg-indigo-600 hover:bg-indigo-700">
-                  1
-                </Button>
-                <Button variant="outline" size="sm">
-                  2
-                </Button>
-                <Button variant="outline" size="sm">
-                  3
-                </Button>
-                <Button variant="outline" size="sm">
-                  Next
-                </Button>
-              </div>
-            </div>
           </CardContent>
         </Card>
       </div>

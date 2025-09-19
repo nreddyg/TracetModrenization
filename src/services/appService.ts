@@ -26,3 +26,4 @@ export const getUserDetailsByUserName = async (userName: string): Promise<APIRes
         return { success: false, message: err.response?.data?.message || err.message, status: err.response?.status };
     }
 }
+

@@ -6,7 +6,11 @@ import { ReusableDropdown } from '@/components/ui/reusable-dropdown';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Eye, Settings2,RefreshCw, Search, Save } from 'lucide-react';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { CalendarIcon, Filter, Eye, Settings2, Download, RefreshCw, Search, Check, ChevronDown, Save } from 'lucide-react';
+import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import FilterCard from '@/components/common/FilterCard';
@@ -24,7 +28,7 @@ import { ReusableMultiSelect } from '@/components/ui/reusable-multi-select';
 import ReusableRangePicker from '@/components/ui/reusable-range-picker';
 import { ReusableDatePicker } from '@/components/ui/reusable-datepicker';
 import { ReusableInput } from '@/components/ui/reusable-input';
-import { GetServiceRequestAssignToLookups, getSRBranchList, getSRCustomerLookupsList, getSRLinkToLookupsList, getSRRequestByLookupsList, getStatusLookups, ServiceRequestTypeLookups } from '@/services/ticketServices';
+import { GetServiceRequestAssignToLookups, getSRBranchList, getSRCustomerLookupsList, getSRLinkToLookupsList, getSRRequestByLookupsList, getStatusLookups, postServiceRequest, ServiceRequestTypeLookups } from '@/services/ticketServices';
 import ReusableTable from '@/components/ui/reusable-table';
 import dayjs from 'dayjs';
 import { ReusableButton } from '@/components/ui/reusable-button';
@@ -43,6 +47,7 @@ interface MultiSelectConfig {
   errorMsgClass?: string;
   showSearch?: boolean; // New prop for inline search
 }
+
 interface OptionItem {
   [key: string]: any;
   label?: string;
@@ -121,6 +126,7 @@ const ServiceDeskReports = () => {
 
   const [activeTab, setActiveTab] = useState('Service Request Details');
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
+
   const [showReport, setShowReport] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [fields, setFields] = useState<BaseField[]>(SERVICE_DESK_DB);
@@ -130,6 +136,7 @@ const ServiceDeskReports = () => {
   const companyId=useAppSelector(state=>state.projects.companyId);
   const branch = useAppSelector(state=>state.projects.branch);
   const branchId = useAppSelector(state=>state.projects.branchId);
+  // const dispatch =useDispatch();
   const msg = useMessage()
   const [dataSource, setDataSourse] = useState([])
   const [cols, setCols] = useState([])
@@ -268,6 +275,25 @@ function buildColumnsFromApi<T extends Record<string, any>>(
       } as ColumnDef<T>;
     });
 
+    // if (includeActions) {
+    //   columns.push({
+    //     id: 'actions',
+    //     header: 'Actions',
+    //     cell: ({ row }) => (
+    //       <Button
+    //         size="sm"
+    //         onClick={() => handleHistoryClick(row.original)}
+    //         className="flex items-center gap-1"
+    //         style={{ backgroundColor: "#fb8420" }}
+    //       >
+    //         History
+    //       </Button>
+    //     ),
+    //     enableSorting: false,
+    //     enableHiding: false,
+    //   });
+    // }
+
     return columns;
   }
 
@@ -292,7 +318,7 @@ function buildColumnsFromApi<T extends Record<string, any>>(
         const tabData = res.data.ServiceRequestDetailsReport
         setDataSourse(tabData)
       } else {
-        
+
       }
     }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
   }

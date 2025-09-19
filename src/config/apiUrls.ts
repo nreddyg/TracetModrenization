@@ -96,3 +96,7 @@ export const URL_SUBSCRIPTION_BY_ID='/api/ServiceDeskAPI/GetSubscriptionById';
 export const URL_DUPLICATE_ADD_CHECK_NO='/api/ServiceDeskAPI/CheckAddDuplicateCheque';
 export const URL_DUPLICATE_UPDATE_CHECK_NO='/api/ServiceDeskAPI/CheckUpdateDuplicateCheque'
 
+
+
+//User Master
+export const URL_GET_USER_LIST='/api/Masters/GetUserDetailsByCompanyId';

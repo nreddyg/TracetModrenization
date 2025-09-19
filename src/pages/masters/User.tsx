@@ -1,230 +1,156 @@
 
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { useCallback, useEffect, useState } from 'react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ReusableTable } from '@/components/ui/reusable-table';
-import { Edit2, Trash2, Plus } from 'lucide-react';
-
-interface OrganizationData {
-  id: string;
-  assetCode: string;
-  assetName: string;
-  customerAssetNo: string;
-  barcodeNo: string;
-  acquisition: 'Purchased' | 'Leased';
+import { ReusableTable, TableAction, TablePermissions } from '@/components/ui/reusable-table';
+import { Trash2, Plus, Edit } from 'lucide-react';
+import { ColumnDef } from '@tanstack/react-table';
+import { useToast } from '@/hooks/use-toast';
+import { ReusableButton } from '@/components/ui/reusable-button';
+import { GetUsersList } from '@/services/userServices';
+import { useAppDispatch, useAppSelector } from '@/store';
+import { setLoading } from '@/store/slices/projectsSlice';
+interface UserData {
+  UserId: number,
+  FirstName: string,
+  LastName: string,
+  Email: string,
+  EmployeeId: string,
+  MobileNumber: string,
+  PhoneNumber: string,
+  UserName: string,
+  DeviceName: string,
+  RoleTypeId: number,
+  RoleName: string,
+  DepartmentIds: string,
+  Department: string,
+  AssetCategoryIds: string,
+  Categories: string,
+  BranchIds: string,
+  Branch: string,
+  Deactive: boolean,
+  DeactiveDate: string,
+  IsServiceDesk: boolean,
+  JoinDate: string,
+  Password: string,
+  ConfirmPassword: string
 }
 
-const mockData: OrganizationData[] = [
-  {
-    id: '1',
-    assetCode: 'AI/904/924/000128',
-    assetName: 'Test Mob2',
-    customerAssetNo: 'wer23r32r_1',
-    barcodeNo: 'AI/904/924/000128',
-    acquisition: 'Purchased'
-  },
-  {
-    id: '2',
-    assetCode: 'AI/904/111/000002',
-    assetName: 'Test Mob',
-    customerAssetNo: 'gsdrg_2',
-    barcodeNo: 'AI/904/111/000002',
-    acquisition: 'Purchased'
-  },
-  {
-    id: '3',
-    assetCode: 'AI/904/111/000001',
-    assetName: 'Test Mob',
-    customerAssetNo: 'gsdrg_1',
-    barcodeNo: 'AI/904/111/000001',
-    acquisition: 'Purchased'
-  },
-  {
-    id: '4',
-    assetCode: 'AI/IT/LP/000002',
-    assetName: 'Printer',
-    customerAssetNo: '123456',
-    barcodeNo: '123456',
-    acquisition: 'Leased'
-  },
-  {
-    id: '5',
-    assetCode: 'ITC/IT/TB/000001',
-    assetName: 'Tablet',
-    customerAssetNo: 'ITC/IT/TB/000001',
-    barcodeNo: '3600001586',
-    acquisition: 'Purchased'
-  },
-  {
-    id: '6',
-    assetCode: 'ITC/IT/COM/000003',
-    assetName: 'COMPUTER',
-    customerAssetNo: 'ITC/IT/COM/000003',
-    barcodeNo: '3800001751',
-    acquisition: 'Purchased'
-  },
-  {
-    id: '7',
-    assetCode: 'ITC/IT/COM/000002',
-    assetName: 'COMPUTER',
-    customerAssetNo: 'ITC/IT/COM/000002',
-    barcodeNo: '3800008370',
-    acquisition: 'Purchased'
-  },
-];
-
 const User = () => {
-  const [selectedItems, setSelectedItems] = useState<string[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 7;
+  const { toast } = useToast();
+  const dispatch = useAppDispatch();
+  const companyId = useAppSelector(state => state.projects.companyId)
+  const [dataSource, setDataSource] = useState<UserData[]>([]);
+  const [columns, setColumns] = useState<ColumnDef<UserData>[]>([
+    { id: 'FirstName', accessorKey: "FirstName", header: "First Name" },
+    { id: 'LastName', accessorKey: "LastName", header: "Last Name" },
+    { id: 'UserName', accessorKey: "UserName", header: "User Name" },
+    { id: 'RoleName', accessorKey: "RoleName", header: "Role Name" },
+    { id: 'EmployeeId', accessorKey: "EmployeeId", header: "Employee ID" },
+    { id: 'Email', accessorKey: "Email", header: "Email" },
+    { id: 'PhoneNumber', accessorKey: "PhoneNumber", header: "Mobile Number" },
+    { id: 'Status', accessorKey: "Status", header: "Status", cell: ({ row }) => (
+      row.original.Deactive ? <Badge variant="destructive" className="h-6">Deactive</Badge> : <Badge variant="default" className="h-6">Active</Badge>
+    ) },
+    { id: 'IsServiceDesk', accessorKey: "IsServiceDesk", header: "Is Service Desk User",
+      cell: ({ row }) => (
+        row.original.IsServiceDesk ? <Badge variant="default" className="h-6">Yes</Badge> : <Badge variant="destructive" className="h-6">No</Badge>
+      )
+     },
+  ])
 
-  const toggleSelectAll = () => {
-    if (selectedItems.length === mockData.length) {
-      setSelectedItems([]);
-    } else {
-      setSelectedItems(mockData.map(item => item.id));
-    }
+  useEffect(() => {
+    if (companyId) fetchAllUsersList();
+  }, [companyId]);
+  //fetch all users list
+  const fetchAllUsersList = async () => {
+    dispatch(setLoading(true));
+    await GetUsersList(companyId).then(res => {
+      if (res.success && res.data && Array.isArray(res.data)) {
+        setDataSource(res.data);
+      }else{
+        setDataSource([]);
+      }
+    }).catch(err => console.log(err)).finally(() => {
+      dispatch(setLoading(false));
+    });
+  }
+  const handleDelete = (data: UserData): void => {
+  }
+  const handleEdit = (data: UserData): void => {
+  }
+  const tableActions: TableAction<UserData>[] = [
+    {
+      label: 'Edit',
+      icon: Edit,
+      onClick: handleEdit,
+      variant: 'default',
+    },
+    {
+      label: 'Delete',
+      icon: Trash2,
+      onClick: handleDelete,
+      variant: 'destructive',
+    },
+  ];
+  // handle refresh
+  const handleRefresh = useCallback(() => {
+      toast({ title: "Data Refreshed", description: "All users data has been updated", });
+      fetchAllUsersList();
+  }, [toast]);
+  // Define table permissions
+  const tablePermissions: TablePermissions = {
+    canEdit: true,
+    canDelete: true,
+    canView: true,
+    canExport: false,
+    canAdd: true,
+    canManageColumns: true,
   };
-
-  const toggleSelectItem = (id: string) => {
-    setSelectedItems(prev => 
-      prev.includes(id) 
-        ? prev.filter(item => item !== id)
-        : [...prev, id]
-    );
-  };
-
   return (
-    <div className="min-h-screen bg-gray-50 transition-all duration-300 ease-in-out">
+    <div className="h-full overflow-y-scroll bg-gray-50 transition-all duration-300 ease-in-out">
       <header className="bg-white border-b px-6 py-4 shadow-sm">
         <div className="flex items-center gap-4">
           <SidebarTrigger />
           <div className="flex items-center gap-2 text-sm text-gray-600">
-            <span>Masters</span>
-            <span>/</span>
-            <span>Company</span>
-            <span>/</span>
-            <span className="text-gray-900 font-medium">User</span>
+            <span>Masters</span><span>/</span><span>Company</span><span>/</span><span className="text-gray-900 font-medium">User</span>
           </div>
         </div>
       </header>
-
       <div className="p-6 space-y-6 animate-fade-in">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-gray-900">Users</h1>
-          <Button className="bg-orange-500 hover:bg-orange-600 text-white">
-            <Plus className="h-4 w-4 mr-2" />
-            Add User
-          </Button>
+          <ReusableButton
+            htmlType="button"
+            variant="default"
+            onClick={null}
+            iconPosition="left"
+            size="middle"
+            className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+          >
+            <div className='flex items-center'><Plus className="h-4 w-4 mr-2" />Add User</div>
+          </ReusableButton>
         </div>
-
         <Card className="shadow-sm">
           <CardHeader className="pb-4">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-lg font-semibold">
-                Users List:
-                {selectedItems.length > 0 && (
-                  <span className="ml-2 text-blue-600">{selectedItems.length} selected</span>
-                )}
-              </CardTitle>
-              {selectedItems.length > 0 && (
-                <Button variant="destructive" size="sm">
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete
-                </Button>
-              )}
-              <div className="text-sm text-gray-600">
-                Showing 1 to 7 of 7 entries
-              </div>
-            </div>
           </CardHeader>
           <CardContent>
             <ReusableTable
-              data={mockData}
-              columns={[
-                {
-                  id: 'select',
-                  header: ({ table }: any) => (
-                    <Checkbox
-                      checked={selectedItems.length === mockData.length}
-                      onCheckedChange={toggleSelectAll}
-                    />
-                  ),
-                  cell: ({ row }: any) => (
-                    <Checkbox
-                      checked={selectedItems.includes(row.original.id)}
-                      onCheckedChange={() => toggleSelectItem(row.original.id)}
-                    />
-                  )
-                },
-                {
-                  accessorKey: 'assetCode',
-                  header: 'ASSET CODE'
-                },
-                {
-                  accessorKey: 'assetName',
-                  header: 'ASSET NAME'
-                },
-                {
-                  accessorKey: 'customerAssetNo',
-                  header: 'CUSTOMER ASSET NO'
-                },
-                {
-                  accessorKey: 'barcodeNo',
-                  header: 'BARCODE NO'
-                },
-                {
-                  accessorKey: 'acquisition',
-                  header: 'ACQUISITION',
-                  cell: ({ getValue }: any) => (
-                    <Badge 
-                      variant={getValue() === 'Purchased' ? 'default' : 'secondary'}
-                      className={getValue() === 'Purchased' 
-                        ? 'bg-green-100 text-green-800 hover:bg-green-100' 
-                        : 'bg-blue-100 text-blue-800 hover:bg-blue-100'
-                      }
-                    >
-                      {getValue()}
-                    </Badge>
-                  )
-                },
-                {
-                  id: 'actions',
-                  header: 'ACTIONS',
-                  cell: () => (
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                      <Edit2 className="h-4 w-4 text-gray-600" />
-                    </Button>
-                  )
-                }
-              ] as any}
+              data={dataSource} columns={columns}
+              permissions={tablePermissions}
+              title="Users List"
+              onRefresh={handleRefresh} enableSearch={true}
+              enableSelection={false} enableExport={true}
+              enableColumnVisibility={true} enablePagination={true}
+              enableSorting={true} enableFiltering={true}
+              pageSize={10} emptyMessage="No Data found"
+              rowHeight="normal" storageKey="service-request-type-list-table"
+              enableRowReordering
+              onRowReorder={(newData) => setDataSource(newData)}
+              actions={tableActions}
+              enableColumnPinning
             />
-            
-            <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
-              <div className="text-sm text-gray-600">
-                Showing 1 to 7 of 7 entries
-              </div>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" disabled>
-                  Previous
-                </Button>
-                <Button variant="default" size="sm" className="bg-indigo-600 hover:bg-indigo-700">
-                  1
-                </Button>
-                <Button variant="outline" size="sm">
-                  2
-                </Button>
-                <Button variant="outline" size="sm">
-                  3
-                </Button>
-                <Button variant="outline" size="sm">
-                  Next
-                </Button>
-              </div>
-            </div>
           </CardContent>
         </Card>
       </div>

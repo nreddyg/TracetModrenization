@@ -116,11 +116,11 @@ const navigation: NavItem[] = [
         icon: FileText,
         link: '/service-desk/all-requests',
       },
-      // {
-      //   label: 'Ticket Progress Dashboard',
-      //   icon: TrendingUp,
-      //   link: '/service-desk/ticket-progress',
-      // },
+      {
+        label: 'Ticket Progress Dashboard',
+        icon: TrendingUp,
+        link: '/service-desk/ticket-progress',
+      },
 
       // {
       //   label: 'Create Work Order',

@@ -109,3 +109,6 @@ export const URL_POST_ADD_OR_UPDATE_SMTP_CONFIG="/api/Settings/AddOrUpdateSMTPCo
 
 //Organization Master
 export const URL_GET_ORGANIZATION_LIST='/api/Masters/GetOrganizations';
+
+//Ticket Progress Dashboard
+export const URL_GET_TICKET_PROGRESS_DASHBOARD_DATA = '/api/ServiceDeskAPI/GetServiceRequestDashboardData';

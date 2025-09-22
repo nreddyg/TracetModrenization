@@ -57,6 +57,7 @@ import { ReusableMultiSelect } from '@/components/ui/reusable-multi-select';
 import { ReusableButton } from '@/components/ui/reusable-button';
 import { GetServiceRequestAssignToLookups } from '@/services/ticketServices';
 import { useAppSelector } from '@/store';
+import { getAnalyticsData } from '@/services/ticketProgressDashboardServices';
 
 interface Ticket {
   id: string;
@@ -472,10 +473,36 @@ const TicketProgressDashboard = () => {
     })
   );
 }
+let payload={
+    "FiltersPayloadDetails":[
+        {
+            "projectids":"",
+            "statusids":"",
+            "categoryids":"",
+            "startdate":"",
+            "enddate":"",
+            "assigneeids":"",
+            "usergroupids":""
+        }
+
+    ]
+}
+  const fetchAnalyticsData=async()=>{
+    await getAnalyticsData(111,'All','statuspie',payload).then(res=>{
+      console.log('res',res)
+
+    })
+
+  }
 
   useEffect(() => {
+    fetchAnalyticsData()
     fetchLookups();
   }, [])
+
+
+
+  
 
   return (
     <div className="h-full overflow-y-scroll bg-gray-50">
@@ -496,69 +523,6 @@ const TicketProgressDashboard = () => {
       </header>
 
       <div className="p-4 sm:p-6">
-        {/* Dashboard Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 sm:gap-4 mb-4 sm:mb-6">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Total Tickets</p>
-                  <p className="text-2xl font-bold text-gray-900">{totalTickets}</p>
-                </div>
-                <ClipboardList className="h-8 w-8 text-blue-600" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Open</p>
-                  <p className="text-2xl font-bold text-blue-600">{openTickets}</p>
-                </div>
-                <ClipboardList className="h-8 w-8 text-blue-600" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">In Progress</p>
-                  <p className="text-2xl font-bold text-orange-600">{inProgressTickets}</p>
-                </div>
-                <Clock className="h-8 w-8 text-orange-600" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Resolved</p>
-                  <p className="text-2xl font-bold text-green-600">{resolvedTickets}</p>
-                </div>
-                <CheckCircle className="h-8 w-8 text-green-600" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Closed</p>
-                  <p className="text-2xl font-bold text-gray-600">{closedTickets}</p>
-                </div>
-                <CheckCircle className="h-8 w-8 text-gray-600" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
         {/* Enhanced Filters Section */}
         <Card className="mb-6">
           <CardHeader className="pb-4">
@@ -572,22 +536,7 @@ const TicketProgressDashboard = () => {
             <Form {...form}>
               <form onSubmit={form.handleSubmit(() => { })} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {getFieldsByNames(['Project', 'Status', 'Category']).map((field) => (
-                    <div key={field.name}>
-                      {renderField(field)}
-                    </div>
-                  ))}
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {getFieldsByNames(['Search', 'StartDate', 'EndDate']).map((field) => (
-                    <div key={field.name}>
-                      {renderField(field)}
-                    </div>
-                  ))}
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {getFieldsByNames(['Assignees']).map((field) => (
+                  {getFieldsByNames(['Status', 'ServiceRequestType', 'Assignees','StartDate', 'EndDate']).map((field) => (
                     <div key={field.name}>
                       {renderField(field)}
                     </div>
@@ -622,156 +571,6 @@ const TicketProgressDashboard = () => {
                 </div>
               </form>
             </Form>
-            {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700">Project</label>
-                <Select value={selectedProject} onValueChange={setSelectedProject}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select project" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {projects.map(project => (
-                      <SelectItem key={project} value={project}>{project}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700">Status</label>
-                <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {statuses.map(status => (
-                      <SelectItem key={status} value={status}>{status}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700">Category</label>
-                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map(category => (
-                      <SelectItem key={category} value={category}>{category}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700">Search</label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input
-                    placeholder="Search tickets..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700">Start Date</label>
-                <Input
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                  className="w-full"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700">End Date</label>
-                <Input
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                  className="w-full"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700">Assignees</label>
-                <Popover open={assigneePopoverOpen} onOpenChange={setAssigneePopoverOpen}>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      aria-expanded={assigneePopoverOpen}
-                      className="w-full justify-between text-left font-normal"
-                    >
-                      {selectedAssignees.length > 0
-                        ? `${selectedAssignees.length} selected`
-                        : "Select assignees..."}
-                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-full p-0">
-                    <Command>
-                      <CommandInput placeholder="Search assignees..." />
-                      <CommandList>
-                        <CommandEmpty>No assignee found.</CommandEmpty>
-                        <CommandGroup>
-                          {assignees.map((assignee) => (
-                            <CommandItem
-                              key={assignee}
-                              value={assignee}
-                              onSelect={() => handleAssigneeToggle(assignee)}
-                            >
-                              <Check
-                                className={`mr-2 h-4 w-4 ${
-                                  selectedAssignees.includes(assignee) ? "opacity-100" : "opacity-0"
-                                }`}
-                              />
-                              <Users className="mr-2 h-4 w-4" />
-                              {assignee}
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </CommandList>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-                
-                {selectedAssignees.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mt-2">
-                    {selectedAssignees.map(assignee => (
-                      <Badge key={assignee} variant="secondary" className="text-xs">
-                        {assignee}
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-auto p-0 ml-1 hover:bg-transparent"
-                          onClick={() => removeAssignee(assignee)}
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </Badge>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="flex justify-between items-center pt-4 border-t">
-              <Button variant="outline" onClick={clearAllFilters} className="flex items-center gap-2">
-                <X className="h-4 w-4" />
-                Clear All Filters
-              </Button>
-              <div className="text-sm text-gray-600 bg-gray-50 px-3 py-1 rounded-md">
-                Showing <span className="font-semibold">{filteredTickets.length}</span> of <span className="font-semibold">{tickets.length}</span> tickets
-              </div>
-            </div> */}
           </CardContent>
         </Card>
 
@@ -780,11 +579,7 @@ const TicketProgressDashboard = () => {
           <CardHeader>
             <Tabs value={activeView} onValueChange={setActiveView} className="w-full">
               <TabsList className="grid w-full grid-cols-2 h-auto">
-                <TabsTrigger value="records" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4 py-2">
-                  <TableIcon className="h-3 w-3 sm:h-4 sm:w-4" />
-                  <span className="hidden sm:inline">Records View</span>
-                  <span className="sm:hidden">Records</span>
-                </TabsTrigger>
+                
                 <TabsTrigger value="graphs" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4 py-2">
                   <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4" />
                   <span className="hidden sm:inline">Analytics Dashboard</span>
@@ -795,9 +590,6 @@ const TicketProgressDashboard = () => {
           </CardHeader>
           <CardContent>
             <Tabs value={activeView} className="w-full">
-              <TabsContent value="records">
-                <TicketRecordsView tickets={filteredTickets} />
-              </TabsContent>
               <TabsContent value="graphs">
                 <TicketGraphsView tickets={filteredTickets} />
               </TabsContent>

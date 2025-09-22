@@ -91,6 +91,9 @@ const SystemConfiguration = () => {
       return null;
     }
 
+    const validationRules = {
+      required: isRequired ? `${label} is Required` : false,
+    };
     switch (fieldType) {
       case 'text':
         case 'password':
@@ -98,7 +101,7 @@ const SystemConfiguration = () => {
           <Controller
             name={name}
             control={control}
-            // rules={validationRules}
+            rules={validationRules}
             render={({ field: ctrl, fieldState }) => (
               <ReusableInput
                 {...field}
@@ -115,7 +118,7 @@ const SystemConfiguration = () => {
             key={name}
             name={name}
             control={control}
-            // rules={validationRules}
+            rules={validationRules}
             render={({ field: ctrl }) => (
               <ReusableDropdown
                 {...field}

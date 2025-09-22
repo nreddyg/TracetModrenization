@@ -93,6 +93,7 @@ const SystemConfiguration = () => {
 
     switch (fieldType) {
       case 'text':
+        case 'password':
         return (
           <Controller
             name={name}

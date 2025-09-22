@@ -32,7 +32,7 @@ export const SMTP_DB: BaseField[] = [
     {
         name: 'SMTPFromPassword',
         label: 'SMTP From Password',
-        fieldType: 'text',
+        fieldType: 'password',
         placeholder: 'Enter SMTP From Password',
         isRequired: true,
         className: '',

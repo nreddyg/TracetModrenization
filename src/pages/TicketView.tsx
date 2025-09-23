@@ -288,7 +288,7 @@ const TicketView = () => {
   }
 
   //assets lisat get for edit
-   const assetListAPICall=async(id:string,compId:number)=>{
+   const assetListAPICall=async(id:string,compId:string)=>{
    await getSRAssetsList(id,compId).then(res => {
 
         if (res.success && res.data && res.data !== undefined) {
@@ -547,7 +547,7 @@ const TicketView = () => {
     }
     return columns;
   }
-  async function getCommentApi(ServiceRequestId: string, compId: number) {
+  async function getCommentApi(ServiceRequestId: string, compId: string) {
     dispatch(setLoading(true))
     try {
       const res = await getCommentsAPI(ServiceRequestId, compId);
@@ -558,7 +558,7 @@ const TicketView = () => {
     } catch (err) {}finally{dispatch(setLoading(false))}
   }
   //subscription table api call
-  async function fetchSubscriptionByCustomer(CustomerName: string, compId: number, BranchName: string) {
+  async function fetchSubscriptionByCustomer(CustomerName: string, compId: string, BranchName: string) {
     dispatch(setLoading(true))
     await getSubscriptionByCustomer(CustomerName, compId, BranchName).then(res => {
       if (res.success && res.data.status === undefined) {
@@ -640,7 +640,7 @@ const TicketView = () => {
     navigate("/service-desk/new-request/assetcode-table", { state: { data: form.getValues() } })
   }
   //history table api call
-  async function fetchSubscriptionHistoryByCustomer(CustomerName: string, compId: number, BranchName: string, ProductId: number) {
+  async function fetchSubscriptionHistoryByCustomer(CustomerName: string, compId: string, BranchName: string, ProductId: number) {
     dispatch(setLoading(true));
     await getSubscriptionHistoryByCustomer(CustomerName, compId, BranchName, ProductId).then(res => {
       if (res.success && res.data) {
@@ -654,7 +654,7 @@ const TicketView = () => {
       })
   }
   // Fetch additional fields - only clear values, preserve all field configs and options
-  async function fetchAdditionalFieldsData(name: string, compId: number, fieldData?: any,setDefaultAssignee?:string) {
+  async function fetchAdditionalFieldsData(name: string, compId: string, fieldData?: any,setDefaultAssignee?:string) {
     dispatch(setLoading(true));
     let additionalCheckBoxNames = []
     let additionalDateNames=[]

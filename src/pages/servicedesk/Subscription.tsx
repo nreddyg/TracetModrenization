@@ -957,7 +957,7 @@ const SubscriptionManagement = () => {
   };
 
   //table data api integration
-  async function getSubscriptionData(compId: number, BranchName: string) {
+  async function getSubscriptionData(compId: string, BranchName: string) {
     dispatch(setLoading(true))
     await getSubscriptionTableData(compId, BranchName).then(res => {
       if (res.success && res.data) {

@@ -61,7 +61,7 @@ const UserGroups = () => {
   }, [selectedRecord, companyId])
 
   //table data api integration
-  async function getUserGroupTableData(compId: number, BranchName: string) {
+  async function getUserGroupTableData(compId: string, BranchName: string) {
     dispatch(setLoading(true));
     await getUserGroupData(compId, BranchName).then(res => {
       if (res.success && res.data) {
@@ -80,7 +80,7 @@ const UserGroups = () => {
   }
 
   //get usergroupby id api integration
-  async function getUserGroupDataById(compId: number, usergroupid: number) {
+  async function getUserGroupDataById(compId: string, usergroupid: number) {
     dispatch(setLoading(true))
     await getUserGroupById(compId, usergroupid).then(res => {
       if (res.success && res.data) {
@@ -103,7 +103,7 @@ const UserGroups = () => {
   }
 
   //delete usergroup api integration
-  async function deleteUserGroupData(compId: number, usergroupid: number) {
+  async function deleteUserGroupData(compId: string, usergroupid: number) {
     dispatch(setLoading(true));
     await deleteUserGroup(compId, usergroupid).then(res => {
       if (res.success && res.data) {
@@ -125,7 +125,7 @@ const UserGroups = () => {
 
   //users lookup integartion 
 
-  async function SelectUsersLookup(compid: number, branchname: string) {
+  async function SelectUsersLookup(compid: string, branchname: string) {
     dispatch(setLoading(true));
     await GetServiceRequestAssignToLookups(compid, branchname)
       .then((res) => {

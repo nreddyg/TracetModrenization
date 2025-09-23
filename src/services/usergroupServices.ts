@@ -9,7 +9,7 @@ interface APIResponse<T> {
 }
 
 //GetUserGroupTable
-export const getUserGroupData=async(compId:number,BranchName:string):Promise<APIResponse<any>>=>{
+export const getUserGroupData=async(compId:string,BranchName:string):Promise<APIResponse<any>>=>{
     try{
         const response=await api.get(URL_GET_USER_GROUP_TABLE_DATA,{params:{CompId:compId,branchName:BranchName}})
         return {success:true,data:response.data}
@@ -21,7 +21,7 @@ export const getUserGroupData=async(compId:number,BranchName:string):Promise<API
 
 //GetUserGroupById
 
-export const getUserGroupById=async(compId:number,usergroupid:number):Promise<APIResponse<any>>=>{
+export const getUserGroupById=async(compId:string,usergroupid:number):Promise<APIResponse<any>>=>{
     try{
         const response=await api.get(URL_GET_USER_GROUP_BY_ID,{params:{CompId:compId,userGroupId:usergroupid}})
         return {success:true,data:response.data}
@@ -33,7 +33,7 @@ export const getUserGroupById=async(compId:number,usergroupid:number):Promise<AP
 
 //AddUserGroup
 
-export const addUserGroup=async(compId:number,BranchName:string,data:any):Promise<APIResponse<any>>=>{
+export const addUserGroup=async(compId:string,BranchName:string,data:any):Promise<APIResponse<any>>=>{
     try{
         const response=await api.post(URL_ADD_USER_GROUP,data,{params:{CompId:compId,branchName:BranchName}})
         return {success:true,data:response.data}
@@ -45,7 +45,7 @@ export const addUserGroup=async(compId:number,BranchName:string,data:any):Promis
 
 //UpdateUserGroup
 
-export const updateUserGroup=async(compId:number,BranchName:string,usergroupid:number,data:any):Promise<APIResponse<any>>=>{
+export const updateUserGroup=async(compId:string,BranchName:string,usergroupid:number,data:any):Promise<APIResponse<any>>=>{
     try{
         const response=await api.post(URL_UPDATE_USER_GROUP,data,{params:{CompId:compId,branchName:BranchName,UserGroupId:usergroupid}})
         return {success:true,data:response.data}
@@ -57,7 +57,7 @@ export const updateUserGroup=async(compId:number,BranchName:string,usergroupid:n
 
 //delete UserGroup
 
-export const deleteUserGroup=async(compId:number,usergroupid:number):Promise<APIResponse<any>>=>{
+export const deleteUserGroup=async(compId:string,usergroupid:number):Promise<APIResponse<any>>=>{
     try{
         const response=await api.post(URL_DELETE_USER_GROUP,"",{params:{UserGroupId:usergroupid,CompId:compId}})
         return {success:true,data:response.data}

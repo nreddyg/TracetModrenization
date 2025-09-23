@@ -97,6 +97,7 @@ const FixedHeader: React.FC = () => {
           let branch = lookupData.length>1?lookupData[1].value: lookupData[0].value;
           setSelectedBranch(branch);
           dispatch(setBranch(branch));
+          localStorage.setItem("Branch",branch);
         }else{
           setSelectedBranch(localStorage.getItem("Branch"))
           dispatch(setBranch(localStorage.getItem("Branch")));
@@ -123,6 +124,7 @@ const FixedHeader: React.FC = () => {
       localStorage.setItem("CompanyId", value);
       setSelectedBranch(null);
       localStorage.removeItem("Branch");
+      localStorage.removeItem("BranchId");
       navigate('/service-desk/all-requests');
     } else if (name === "Branch") {
       setSelectedBranch(value);
@@ -249,6 +251,7 @@ const FixedHeader: React.FC = () => {
               onChange={(value,...args) => handleChange('CompanyId', value)}
               placeholder="Select company"
               size="small"
+              disabled={!(LoggedInUser.RoleName==="Root Admin")}
               className="min-w-[120px]"
             />
 

@@ -33,7 +33,7 @@ const ServiceRequestReport: React.FC = () => {
     fetchServiceRequestDetailsHistoryReport(companyId,branch,JSON.parse(storedData || "{}").id || "");
   }, [branch]);
 
-  async function fetchServiceRequestDetailsHistoryReport(compId: number | string, BranchName: string, srID: string) {
+  async function fetchServiceRequestDetailsHistoryReport(compId: string , BranchName: string, srID: string) {
     dispatch(setLoading(true));
     await getServiceRequestDetailsHistoryReport(compId, BranchName, srID)
       .then((res) => {

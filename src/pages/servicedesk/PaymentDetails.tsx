@@ -335,7 +335,7 @@ const PaymentDetails = () => {
         dispatch(setLoading(false))
       })
   }
-  async function getNextAMCDate(customerName: string, productname: string, branchname: string, compid: number) {
+  async function getNextAMCDate(customerName: string, productname: string, branchname: string, compid: string) {
     dispatch(setLoading(true));
     await getNextAmcFromDate(customerName, productname, branchname, compid)
       .then((res) => {
@@ -404,7 +404,7 @@ const PaymentDetails = () => {
 
   //subscription By Id
 
-  async function getsubscriptionById(id: number, compid: number) {
+  async function getsubscriptionById(id: number, compid: string) {
     dispatch(setLoading(true))
     await getSubscriptionById(id, compid).then(res => {
       if (res.success && res.data) {

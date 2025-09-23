@@ -24,16 +24,16 @@ const FixedHeader: React.FC = () => {
   const [companyList, setCompanyList] = useState<{ value: number; label: string }[]>([]);
   const [branchList, setBranchList] = useState<{ value: string; label: string;id?:string }[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<number | null>(
-    localStorage.getItem("CompanyId") ? parseInt(localStorage.getItem("CompanyId")!, 10) : null
+    localStorage.getItem("CompanyId") ? parseInt(localStorage.getItem("CompanyId")) : null
   );
   const [selectedBranch, setSelectedBranch] = useState<string>(
     localStorage.getItem("Branch") || ''
   );
   useEffect(() => {
-    if (userId) {
+    if (userId && selectedCompany) {
       fetchCompanyList();
     }
-  }, [userId]);
+  }, [userId,selectedCompany]);
 
   useEffect(() => {
     if (selectedCompany) {
@@ -51,16 +51,7 @@ const FixedHeader: React.FC = () => {
           label: item.OrganizationName,
         }));
         setCompanyList(lookupData);
-        let compId = selectedCompany;
-        if (!compId) {
-          compId = lookupData[0].value;
-          setSelectedCompany(compId);
-          dispatch(setCompanyId(compId));
-          localStorage.setItem("CompanyId", String(compId));
-        }else{
-          dispatch(setCompanyId(compId))
-          setSelectedCompany(compId);
-        }
+        dispatch(setCompanyId(selectedCompany))        
       }
     } catch (err) {
       console.error("Company fetch error:", err);

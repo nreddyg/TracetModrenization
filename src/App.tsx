@@ -141,12 +141,16 @@ const AnimatedRoutes = () => {
     );
   }
   let userName=JSON.parse(localStorage.getItem('UserName'));
+  let companyId=localStorage.getItem('CompanyId');
   useEffect(()=>{
+    console.log('uswr',userName,'comp',companyId)
     if(userName){
       fetchUserDetailsByUserName()
-      fetchOrganizationDetailsByToken();
     }
-  },[userName])
+    if((!companyId || companyId==='') && (userName && userName!=='')){
+        fetchOrganizationDetailsByToken();
+    }
+  },[userName,companyId])
   //get organization details by token
   const fetchOrganizationDetailsByToken=async()=>{
     dispatch(setLoading(true));
@@ -155,6 +159,10 @@ const AnimatedRoutes = () => {
         if(res.data && res.data.organizations && Array.isArray(res.data.organizations)){
           if(res.data.organizations.length!==0){
             dispatch(setCompanyId(res.data.organizations[0]['OrganizationId'] || null));
+            localStorage.setItem('CompanyId',res.data.organizations[0]['OrganizationId'] || '');
+          }else{
+            dispatch(setCompanyId(null));
+            localStorage.setItem('CompanyId','');
           }
         }
       }

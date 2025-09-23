@@ -112,6 +112,11 @@ const ProcessConfiguration = WrapperLazyComponent(() => import("./pages/settings
 const AdvancedSetup = WrapperLazyComponent(() => import("./pages/settings/AdvancedSetup"));
 const NotFound = WrapperLazyComponent(() => import("./pages/NotFound"));
 
+// software assets
+const AssetRegistry = WrapperLazyComponent(()=> import("./pages/softwareAssets/AssetRegistry"))
+const LicenseAssignment = WrapperLazyComponent(()=> import("./pages/softwareAssets/LicenseAssignment"))
+const UsageTracking = WrapperLazyComponent(()=> import("./pages/softwareAssets/UsageTracking"))
+
 const queryClient = new QueryClient();
 
 const AnimatedRoutes = () => {
@@ -291,6 +296,11 @@ const AnimatedRoutes = () => {
                   <Route path="/settings/process-configuration" element={<ProcessConfiguration />} />
                   <Route path="/settings/advanced-setup" element={<AdvancedSetup />} />
                   <Route path="*" element={<NotFound />} />
+
+                  {/* Software Assets */}
+                  <Route path="/software-assets/asset-registry" element={<AssetRegistry />} />
+                  <Route path="/software-assets/license-assignment" element={<LicenseAssignment />} />
+                  <Route path="/software-assets/usage-tracking" element={<UsageTracking />} />
                 </Routes>
               </Suspense>
             </div>

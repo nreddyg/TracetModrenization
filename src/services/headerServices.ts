@@ -18,7 +18,7 @@ export const GetCompanyListBasedonUserId= async (UserId:number): Promise<APIResp
     }
 }
 //All Branch List Based on CompanyId
-export const GetBranchListBasedonCompanyId= async (CompId:number): Promise<APIResponse<any>> => {
+export const GetBranchListBasedonCompanyId= async (CompId:string): Promise<APIResponse<any>> => {
     try {
         const response = await api.get(URL_GET_BRANCH_LIST, { params: { CompId: CompId } })
         return {success: true,data: response.data,}

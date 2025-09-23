@@ -7,16 +7,13 @@ import { Provider } from 'react-redux';
 import { store } from '@/store/reduxStore';
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import AppSidebar from "@/components/AppSidebar";
-import { Suspense, useEffect } from "react";
+import { Suspense } from "react";
 import FixedHeader from "@/components/layout/FixedHeader";
 import { ReusableLoader } from "@/components/ui/reusable-loader";
 import { MessageProvider } from "./components/ui/reusable-message";
 import WrapperLazyComponent from "./components/common/WrapperLazyComponent";
 import AssetCodeTable from "./pages/servicedesk/AssetCodeTable";
 import ServiceRequestReport from "./pages/servicedesk/ServiceRequestDetailsHistory";
-import { getOrganizationDetailsByToken, getUserDetailsByUserName } from "./services/appService";
-import { useAppDispatch } from "./store";
-import { setCompanyId, setLoading, setUserId } from "./store/slices/projectsSlice";
 
 // Lazy load all pages
 const Index = WrapperLazyComponent(() => import("./pages/Index"));
@@ -112,12 +109,9 @@ const NotFound = WrapperLazyComponent(() => import("./pages/NotFound"));
 const queryClient = new QueryClient();
 
 const AnimatedRoutes = () => {
-  const dispatch=useAppDispatch();
   const location = useLocation();
   const isLoginPage = location.pathname === '/login';
-  const ticketId = /^\/tickets\/([^/]+)$/.test(location.pathname)? location.pathname.split("/").pop():'';
   const cleanRoutes = ["/service-desk/srdetailshistoryview"];
-
   if (isLoginPage) {
     return (
       <div className="w-full h-full">
@@ -139,48 +133,6 @@ const AnimatedRoutes = () => {
         />
       </Routes>
     );
-  }
-  let userName=JSON.parse(localStorage.getItem('UserName'));
-  let companyId=localStorage.getItem('CompanyId');
-  useEffect(()=>{
-    console.log('uswr',userName,'comp',companyId)
-    if(userName){
-      fetchUserDetailsByUserName()
-    }
-    if((!companyId || companyId==='') && (userName && userName!=='')){
-        fetchOrganizationDetailsByToken();
-    }
-  },[userName,companyId])
-  //get organization details by token
-  const fetchOrganizationDetailsByToken=async()=>{
-    dispatch(setLoading(true));
-    await getOrganizationDetailsByToken().then(res=>{
-      if(res.success){
-        if(res.data && res.data.organizations && Array.isArray(res.data.organizations)){
-          if(res.data.organizations.length!==0){
-            dispatch(setCompanyId(res.data.organizations[0]['OrganizationId'] || null));
-            localStorage.setItem('CompanyId',res.data.organizations[0]['OrganizationId'] || '');
-          }else{
-            dispatch(setCompanyId(null));
-            localStorage.setItem('CompanyId','');
-          }
-        }
-      }
-    }).catch(err=>{}).finally(()=>{dispatch(setLoading(false))})
-  }
-  const fetchUserDetailsByUserName=async()=>{
-    dispatch(setLoading(true));
-    await getUserDetailsByUserName(userName).then(res=>{
-      if(res.success && Array.isArray(res.data)){
-         if(res.data.length!==0){
-          localStorage.setItem('LoggedInUser',JSON.stringify(res.data[0]));
-          dispatch(setUserId(res.data[0]['UserId'] || null));
-        }else{
-           localStorage.setItem('LoggedInUser',JSON.stringify({}));
-           dispatch(setUserId(null));
-        }
-      }
-    }).catch(err=>{}).finally(()=>{dispatch(setLoading(false))})
   }
   return (
     <MessageProvider duration={3} maxCount={5} offset={24}>

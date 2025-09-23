@@ -18,7 +18,7 @@ interface ProjectsState {
   projects: Project[];
   loading: boolean;
   error: string | null;
-  companyId:number | null;
+  companyId:string | null;
   userId?:number | null;
   branch?:string;
   branchId?:string;
@@ -28,7 +28,7 @@ const initialState: ProjectsState = {
   projects: [],
   loading: false,
   error: null,
-  companyId:null,
+  companyId:'',
   userId:null,
   branch:'',
   branchId:""
@@ -56,7 +56,7 @@ const projectsSlice = createSlice({
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.loading = action.payload;
     },
-    setCompanyId:(state,action:PayloadAction<number | null>)=>{
+    setCompanyId:(state,action:PayloadAction<string | null>)=>{
       state.companyId=action.payload
     },
     setBranch:(state,action:PayloadAction<string>)=>{

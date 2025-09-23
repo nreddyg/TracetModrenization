@@ -12,7 +12,8 @@ import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { GetBranchListBasedonCompanyId, GetCompanyListBasedonUserId } from '@/services/headerServices';
 import { useAppDispatch } from '@/store';
-import { setBranch, setBranchId, setCompanyId, setLoading } from '@/store/slices/projectsSlice';
+import { setBranch, setBranchId, setCompanyId, setLoading, setUserId } from '@/store/slices/projectsSlice';
+import { getOrganizationDetailsByToken, getUserDetailsByUserName } from '@/services/appService';
 
 const FixedHeader: React.FC = () => {
   const navigate=useNavigate();
@@ -23,44 +24,64 @@ const FixedHeader: React.FC = () => {
   const LoggedInUser= JSON.parse(localStorage.getItem("LoggedInUser") || "{}");
   const [companyList, setCompanyList] = useState<{ value: number; label: string }[]>([]);
   const [branchList, setBranchList] = useState<{ value: string; label: string;id?:string }[]>([]);
-  const [selectedCompany, setSelectedCompany] = useState<number | null>(
-    localStorage.getItem("CompanyId") ? parseInt(localStorage.getItem("CompanyId")) : null
-  );
-  const [selectedBranch, setSelectedBranch] = useState<string>(
-    localStorage.getItem("Branch") || ''
-  );
-  useEffect(() => {
-    if (userId && selectedCompany) {
-      fetchCompanyList();
-    }
-  }, [userId,selectedCompany]);
+  const [selectedCompany, setSelectedCompany] = useState<string | null>('');
+  const [selectedBranch, setSelectedBranch] = useState<string>();
 
-  useEffect(() => {
-    if (selectedCompany) {
-      fetchBranchList(selectedCompany);
-    }
-  }, [selectedCompany]);
+  useEffect(()=>{
+   fetchUserDetailsByUserName()
+  },[])
+  useEffect(()=>{
+   if(userId){
+     apiCalls()
+   }
+  },[userId])
+  useEffect(()=>{
+    if(selectedCompany)
+      fetchBranchList(selectedCompany)
 
-  const fetchCompanyList = async () => {
+  },[selectedCompany])
+  const fetchUserDetailsByUserName = async () => {
+    dispatch(setLoading(true));
+    await getUserDetailsByUserName(JSON.parse(localStorage.getItem('UserName'))).then(res => {
+      if (res.success && Array.isArray(res.data)) {
+        if (res.data.length !== 0) {
+          localStorage.setItem('LoggedInUser', JSON.stringify(res.data[0]));
+          dispatch(setUserId(res.data[0]['UserId'] || null));
+        } else {
+          localStorage.setItem('LoggedInUser', JSON.stringify({}));
+          dispatch(setUserId(null));
+        }
+      }
+    }).catch(err => { }).finally(() => {
+      dispatch(setLoading(false))
+    })
+  }
+  const apiCalls = async () => {
     dispatch(setLoading(true));
     try {
-      const res = await GetCompanyListBasedonUserId(userId);
-      if (res.success && Array.isArray(res.data?.organizations) && res.data.organizations.length > 0) {
-        const lookupData = res.data.organizations.map((item: any) => ({
-          value: item.OrganizationId,
-          label: item.OrganizationName,
-        }));
-        setCompanyList(lookupData);
-        dispatch(setCompanyId(selectedCompany))        
+      let [CompaniesList, LoggedInCompany] = await Promise.allSettled([GetCompanyListBasedonUserId(userId), getOrganizationDetailsByToken()]);
+      let companyData = {
+        Options: CompaniesList.status === 'fulfilled' && CompaniesList.value.data && CompaniesList.value.data.organizations ? CompaniesList.value.data.organizations : [],
+        OrgData: LoggedInCompany.status === 'fulfilled' && LoggedInCompany.value.data && LoggedInCompany.value.data.organizations && LoggedInCompany.value.data.organizations.length !== 0 ? LoggedInCompany.value.data.organizations[0] : {}
       }
-    } catch (err) {
-      console.error("Company fetch error:", err);
-    } finally {
+      const lookupData = companyData?.Options?.map((item: any) => ({
+        value: item.OrganizationId?item.OrganizationId.toString():'',
+        label: item.OrganizationName,
+      }));
+      setCompanyList(lookupData);
+      if(!localStorage.getItem("CompanyId")){
+        setSelectedCompany(companyData?.OrgData?.OrganizationId.toString())
+        dispatch(setCompanyId(companyData?.OrgData?.OrganizationId.toString()))
+        localStorage.setItem('CompanyId', companyData?.OrgData?.OrganizationId);
+      }else{
+        dispatch(setCompanyId(localStorage.getItem("CompanyId")))
+        setSelectedCompany(localStorage.getItem("CompanyId"))
+      }
+    } catch {}finally {
       dispatch(setLoading(false));
     }
-  };
-
-  const fetchBranchList = async (compId: number) => {
+  }
+  const fetchBranchList = async (compId: string) => {
     dispatch(setLoading(true));
     try {
       const res = await GetBranchListBasedonCompanyId(compId);
@@ -72,22 +93,21 @@ const FixedHeader: React.FC = () => {
           id:item.id
         }));
         setBranchList(lookupData);
-        let branch = selectedBranch;
-        if (!branch) {
-          branch = lookupData[0].value;
+        if(!localStorage.getItem("Branch")){
+          let branch = lookupData.length>1?lookupData[1].value: lookupData[0].value;
           setSelectedBranch(branch);
           dispatch(setBranch(branch));
-          dispatch(setBranchId(lookupData[0].id));
-          localStorage.setItem("Branch", branch);
         }else{
-          setSelectedBranch(branch);
-          dispatch(setBranch(branch));
+          setSelectedBranch(localStorage.getItem("Branch"))
+          dispatch(setBranch(localStorage.getItem("Branch")));
         }
+       
         if(localStorage.getItem("BranchId")){
           dispatch(setBranchId(localStorage.getItem("BranchId")))
         }else{
-          dispatch(setBranchId(lookupData[0].id));
-          localStorage.setItem("BranchId", String(lookupData[0].id));
+          let branchId=lookupData.length>1?lookupData[1].id:lookupData[0].id;
+          dispatch(setBranchId(branchId));
+          localStorage.setItem("BranchId",branchId);
         }
       }
     } catch (err) {
@@ -96,12 +116,11 @@ const FixedHeader: React.FC = () => {
       dispatch(setLoading(false));
     }
   };
-
   const handleChange = (name: "CompanyId" | "Branch", value: any) => {
     if (name === "CompanyId") {
-      setSelectedCompany(Number(value));
-      dispatch(setCompanyId(Number(value)));
-      localStorage.setItem("CompanyId", String(value));
+      setSelectedCompany(value);
+      dispatch(setCompanyId(value));
+      localStorage.setItem("CompanyId", value);
       setSelectedBranch(null);
       localStorage.removeItem("Branch");
       navigate('/service-desk/all-requests');
@@ -122,8 +141,6 @@ const FixedHeader: React.FC = () => {
       navigate('/service-desk/all-requests');
     }
   };
-
-
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const logoutFunction = () => {

@@ -2,7 +2,7 @@ import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import ReusableTable, { TableAction, TablePermissions } from '@/components/ui/reusable-table';
 import { ScrollArea } from '@radix-ui/react-scroll-area';
 import { Button } from '@/components/ui/button';
-import { Edit, Plus, Search, Trash2 } from 'lucide-react';
+import { Activity, CircleCheckBig, Clock4, Edit, Monitor, Plus, Search, Shield, Trash2, TriangleAlert } from 'lucide-react';
 import React, { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ReusableButton } from '@/components/ui/reusable-button';
@@ -19,6 +19,7 @@ import { BaseField, GenericObject } from '@/Local_DB/types/types';
 import { ReusableDatePicker } from '@/components/ui/reusable-datepicker';
 import { AUDIT_AND_COMPLIANCE_DB } from '@/Local_DB/Form_JSON_Data/ComplianceAndAuditDB';
 import { ReusableUpload } from '@/components/ui/reusable-upload';
+import { Badge } from '@/components/ui/badge';
 
 interface AuditsComp {
     AuditID: string,
@@ -29,6 +30,29 @@ interface AuditsComp {
     InUse: string,
     Compliance: string
 }
+
+const cardData = [
+    {
+        label: 'Total Audits',
+        value: "3",
+    },
+    {
+        label: 'Complaint',
+        value: "1h",
+    },
+    {
+        label: 'Non Complaint',
+        value: "2",
+    },
+    {
+        label: 'Avg Compliance',
+        value: "74%",
+    },
+]
+const icons = [<Shield color="#29279b" strokeWidth={2} size={'48px'} />,
+<CircleCheckBig color='#058a14' strokeWidth={2} size={'48px'} />,
+<TriangleAlert color='#cf0707' strokeWidth={2} size={'48px'} />
+]
 
 const AuditRecordsCols = [
     { id: 'AuditID', accessorKey: "AuditID", header: "Audit ID" },
@@ -58,6 +82,8 @@ const ComplianceAndAudit = () => {
     const [fields, setFields] = useState<BaseField[]>(AUDIT_AND_COMPLIANCE_DB);
     const [isOpenLicenseCard, setIsOpenLicenseCard] = useState(false);
     const [dataSource, setDataSource] = useState(AuditData);
+    const [cardNamesArray, setCardNamesArray] = useState(cardData)
+
     const { toast } = useToast();
 
 
@@ -210,6 +236,32 @@ const ComplianceAndAudit = () => {
         <div className="h-full overflow-y-scroll bg-gray-50/30">
             <div className="p-4 sm:p-4 space-y-4 sm:space-y-4">
                 {/* Header Section */}
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+                    {cardNamesArray.map((card, i) => {
+                        console.log(card);
+                        return (
+                            <Card className="border-0 shadow-sm bg-gradient-to-br">
+                                <CardContent className="p-3 sm:p-4 lg:p-5">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="text-xs md:text-sm font-medium  mb-1 text-[#64748b]">{card.label}</p>
+                                            <p className="text-lg sm:text-xl lg:text-2xl font-bold ">{card.value}</p>
+                                        </div>
+                                        <div className="p-2 sm:p-0">
+                                            {card.label === "Avg Compliance" ? (
+                                                <Badge className='text-[#166534] bg-[#dcfce7]'>Good</Badge>
+                                            ) : (
+                                                icons[i]
+                                            )}
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+
+                        )
+                    })}
+
+                </div>
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />

@@ -17,6 +17,7 @@ import ServiceRequestReport from "./pages/servicedesk/ServiceRequestDetailsHisto
 import { getOrganizationDetailsByToken, getUserDetailsByUserName } from "./services/appService";
 import { useAppDispatch } from "./store";
 import { setCompanyId, setLoading, setUserId } from "./store/slices/projectsSlice";
+import ComplianceAndAudit from "./pages/softwareAssets/ComplianceAndAudit";
 
 // Lazy load all pages
 const Index = WrapperLazyComponent(() => import("./pages/Index"));
@@ -111,6 +112,11 @@ const UserManagement = WrapperLazyComponent(() => import("./pages/settings/UserM
 const ProcessConfiguration = WrapperLazyComponent(() => import("./pages/settings/ProcessConfiguration"));
 const AdvancedSetup = WrapperLazyComponent(() => import("./pages/settings/AdvancedSetup"));
 const NotFound = WrapperLazyComponent(() => import("./pages/NotFound"));
+
+// software assets
+const AssetRegistry = WrapperLazyComponent(()=> import("./pages/softwareAssets/AssetRegistry"))
+const LicenseAssignment = WrapperLazyComponent(()=> import("./pages/softwareAssets/LicenseAssignment"))
+const UsageTracking = WrapperLazyComponent(()=> import("./pages/softwareAssets/UsageTracking"))
 
 const queryClient = new QueryClient();
 
@@ -291,6 +297,12 @@ const AnimatedRoutes = () => {
                   <Route path="/settings/process-configuration" element={<ProcessConfiguration />} />
                   <Route path="/settings/advanced-setup" element={<AdvancedSetup />} />
                   <Route path="*" element={<NotFound />} />
+
+                  {/* Software Assets */}
+                  <Route path="/software-assets/asset-registry" element={<AssetRegistry />} />
+                  <Route path="/software-assets/license-assignment" element={<LicenseAssignment />} />
+                  <Route path="/software-assets/usage-tracking" element={<UsageTracking />} />
+                  <Route path="/software-assets/compliance&audit" element={<ComplianceAndAudit />} />
                 </Routes>
               </Suspense>
             </div>

@@ -151,12 +151,9 @@ const Customer = () => {
   }, [companyId, branchName])
 
   const fetchAllCustomerList = async () => {
-    // console.log("kjhg")
     dispatch(setLoading(true));
     await GetCustomersList(companyId, branchName).then(res => {
-      console.log("oiuhj")
       if (res.data && res.data.Customers.length > 0) {
-        console.log("res",res.data);
         setDataSource(res.data.Customers);
       } else {
         setDataSource([]);

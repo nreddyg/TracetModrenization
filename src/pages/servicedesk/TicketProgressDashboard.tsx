@@ -1,50 +1,9 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from '@/components/ui/command';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import {
-  Calendar,
-  Filter,
-  Download,
-  Eye,
-  Edit,
-  Search,
-  X,
-  Users,
-  ClipboardList,
-  CheckCircle,
-  Clock,
-  AlertTriangle,
-  Check,
-  ChevronsUpDown,
-  BarChart3,
-  Table as TableIcon
-} from 'lucide-react';
-import TicketRecordsView from '@/components/tickets/TicketRecordsView';
+import { Filter, X, BarChart3 } from 'lucide-react';
 import TicketGraphsView from '@/components/tickets/TicketGraphsView';
 import { Form } from '@/components/ui/form';
 import { Controller, useForm } from 'react-hook-form';
@@ -55,278 +14,217 @@ import { ReusableDropdown } from '@/components/ui/reusable-dropdown';
 import { ReusableDatePicker } from '@/components/ui/reusable-datepicker';
 import { ReusableMultiSelect } from '@/components/ui/reusable-multi-select';
 import { ReusableButton } from '@/components/ui/reusable-button';
-import { GetServiceRequestAssignToLookups } from '@/services/ticketServices';
-import { useAppSelector } from '@/store';
+import { GetServiceRequestAssignToLookups, getStatusLookups, ServiceRequestTypeLookups } from '@/services/ticketServices';
+import { useAppDispatch, useAppSelector } from '@/store';
 import { getAnalyticsData } from '@/services/ticketProgressDashboardServices';
+import { setLoading } from '@/store/slices/projectsSlice';
 
-interface Ticket {
-  id: string;
-  title: string;
-  type: 'Bug' | 'Feature' | 'Request' | 'Other';
-  priority: 'Low' | 'Medium' | 'High' | 'Critical';
-  status: 'Open' | 'In Progress' | 'Resolved' | 'Closed';
-  assignedTo: string;
-  createdBy: string;
-  createdOn: string;
-  estimatedTime: string;
-  sprintNo?: string;
-  project: string;
-  description: string;
-  dueDate?: string;
-  resolution?: string;
-  category: string;
-  slaBreached?: boolean;
-  firstResponseTime?: string;
-  resolutionTime?: string;
-  reopenCount?: number;
-  escalated?: boolean;
-  csatScore?: number;
-}
-
-const mockTickets: Ticket[] = [
-  {
-    id: 'TCK-10245',
-    title: 'Fix UI inconsistencies in Login Form',
-    type: 'Bug',
-    priority: 'High',
-    status: 'In Progress',
-    assignedTo: 'John Doe',
-    createdBy: 'Jane Smith',
-    createdOn: '2025-06-10',
-    estimatedTime: '4h',
-    sprintNo: 'Sprint-14',
-    project: 'ERP System Upgrade',
-    description: 'Login form has UI inconsistencies across different browsers',
-    dueDate: '2025-06-20',
-    category: 'UI/UX',
-    slaBreached: false,
-    firstResponseTime: '2h',
-    resolutionTime: '6h',
-    reopenCount: 0,
-    escalated: false,
-    csatScore: 4
-  },
-  {
-    id: 'TCK-10246',
-    title: 'Add Dashboard Analytics Feature',
-    type: 'Feature',
-    priority: 'Medium',
-    status: 'Open',
-    assignedTo: 'Alice Johnson',
-    createdBy: 'Bob Wilson',
-    createdOn: '2025-06-11',
-    estimatedTime: '8h',
-    sprintNo: 'Sprint-15',
-    project: 'Mobile App Development',
-    description: 'Implement comprehensive analytics dashboard for user insights',
-    dueDate: '2025-06-25',
-    category: 'Analytics',
-    slaBreached: false,
-    firstResponseTime: '1h',
-    resolutionTime: '',
-    reopenCount: 0,
-    escalated: false
-  },
-  {
-    id: 'TCK-10247',
-    title: 'Update User Profile Settings',
-    type: 'Request',
-    priority: 'Low',
-    status: 'Resolved',
-    assignedTo: 'Mike Brown',
-    createdBy: 'Sarah Davis',
-    createdOn: '2025-06-09',
-    estimatedTime: '2h',
-    project: 'Security Audit',
-    description: 'Users need ability to update profile settings',
-    dueDate: '2025-06-15',
-    resolution: 'Profile settings updated with new fields',
-    category: 'User Management',
-    slaBreached: false,
-    firstResponseTime: '30m',
-    resolutionTime: '2h',
-    reopenCount: 1,
-    escalated: false,
-    csatScore: 5
-  },
-  {
-    id: 'TCK-10248',
-    title: 'Database Performance Optimization',
-    type: 'Bug',
-    priority: 'Critical',
-    status: 'Open',
-    assignedTo: 'David Lee',
-    createdBy: 'Emma Wilson',
-    createdOn: '2025-06-12',
-    estimatedTime: '12h',
-    project: 'ERP System Upgrade',
-    description: 'Database queries are running slower than expected',
-    dueDate: '2025-06-18',
-    category: 'Performance',
-    slaBreached: true,
-    firstResponseTime: '4h',
-    resolutionTime: '',
-    reopenCount: 0,
-    escalated: true
-  },
-  {
-    id: 'TCK-10249',
-    title: 'Mobile App Push Notifications',
-    type: 'Feature',
-    priority: 'Medium',
-    status: 'In Progress',
-    assignedTo: 'Carol Davis',
-    createdBy: 'Alice Johnson',
-    createdOn: '2025-06-13',
-    estimatedTime: '6h',
-    sprintNo: 'Sprint-15',
-    project: 'Mobile App Development',
-    description: 'Implement push notification system for mobile app',
-    dueDate: '2025-06-22',
-    category: 'Mobile',
-    slaBreached: false,
-    firstResponseTime: '1h',
-    resolutionTime: '',
-    reopenCount: 0,
-    escalated: false
-  },
-  {
-    id: 'TCK-10250',
-    title: 'Security Vulnerability Assessment',
-    type: 'Other',
-    priority: 'High',
-    status: 'Closed',
-    assignedTo: 'David Lee',
-    createdBy: 'System Admin',
-    createdOn: '2025-06-05',
-    estimatedTime: '16h',
-    project: 'Security Audit',
-    description: 'Comprehensive security assessment of all systems',
-    dueDate: '2025-06-14',
-    resolution: 'Security assessment completed, recommendations implemented',
-    category: 'Security',
-    slaBreached: false,
-    firstResponseTime: '2h',
-    resolutionTime: '14h',
-    reopenCount: 0,
-    escalated: false,
-    csatScore: 5
-  }
-];
-
-const projects = ['All Projects', 'ERP System Upgrade', 'Mobile App Development', 'Security Audit'];
-const assignees = ['John Doe', 'Alice Johnson', 'Mike Brown', 'David Lee', 'Carol Davis', 'Jane Smith', 'Bob Wilson', 'Sarah Davis', 'Emma Wilson'];
-const statuses = ['All Status', 'Open', 'In Progress', 'Resolved', 'Closed'];
-const categories = ['All Categories', 'UI/UX', 'Analytics', 'User Management', 'Performance', 'Mobile', 'Security'];
 
 const TicketProgressDashboard = () => {
   const navigate = useNavigate();
-  const [tickets] = useState<Ticket[]>(mockTickets);
-  const [selectedProject, setSelectedProject] = useState('All Projects');
-  const [selectedAssignees, setSelectedAssignees] = useState<string[]>([]);
-  const [selectedStatus, setSelectedStatus] = useState('All Status');
-  const [selectedCategory, setSelectedCategory] = useState('All Categories');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [assigneePopoverOpen, setAssigneePopoverOpen] = useState(false);
-  const [activeView, setActiveView] = useState('records');
+  const dispatch = useAppDispatch();
+  const roleName=JSON.parse(localStorage.getItem('LoggedInUser'))?.RoleName;
   const [fields, setFields] = useState(TICKET_PROGRESS_DB);
-  const companyId=useAppSelector(state=>state.projects.companyId);
-  
-
-  const filteredTickets = useMemo(() => {
-    return tickets.filter(ticket => {
-      const matchProject = selectedProject === 'All Projects' || ticket.project === selectedProject;
-      const matchAssignee = selectedAssignees.length === 0 || selectedAssignees.includes(ticket.assignedTo);
-      const matchStatus = selectedStatus === 'All Status' || ticket.status === selectedStatus;
-      const matchCategory = selectedCategory === 'All Categories' || ticket.category === selectedCategory;
-      const matchSearch = searchTerm === '' ||
-        ticket.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        ticket.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        ticket.description.toLowerCase().includes(searchTerm.toLowerCase());
-
-      let matchDate = true;
-      if (startDate && endDate) {
-        const ticketDate = new Date(ticket.createdOn);
-        const start = new Date(startDate);
-        const end = new Date(endDate);
-        matchDate = ticketDate >= start && ticketDate <= end;
-      }
-
-      return matchProject && matchAssignee && matchStatus && matchCategory && matchSearch && matchDate;
-    });
-  }, [tickets, selectedProject, selectedAssignees, selectedStatus, selectedCategory, startDate, endDate, searchTerm]);
-
-  const handleAssigneeToggle = (assignee: string) => {
-    setSelectedAssignees(prev =>
-      prev.includes(assignee)
-        ? prev.filter(a => a !== assignee)
-        : [...prev, assignee]
-    );
-  };
-
-  const removeAssignee = (assignee: string) => {
-    setSelectedAssignees(prev => prev.filter(a => a !== assignee));
-  };
-
-  const clearAllFilters = () => {
-    setSelectedProject('All Projects');
-    setSelectedAssignees([]);
-    setSelectedStatus('All Status');
-    setSelectedCategory('All Categories');
-    setStartDate('');
-    setEndDate('');
-    setSearchTerm('');
-  };
-
-  const handleDownload = () => {
-    const csvContent = [
-      ['Ticket ID', 'Title', 'Type', 'Priority', 'Status', 'Assigned To', 'Created By', 'Created On', 'Est. Time', 'Project', 'Category', 'Due Date'],
-      ...filteredTickets.map(ticket => [
-        ticket.id,
-        ticket.title,
-        ticket.type,
-        ticket.priority,
-        ticket.status,
-        ticket.assignedTo,
-        ticket.createdBy,
-        ticket.createdOn,
-        ticket.estimatedTime,
-        ticket.project,
-        ticket.category,
-        ticket.dueDate || 'N/A'
-      ])
-    ].map(row => row.join(',')).join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'ticket-progress-dashboard.csv';
-    a.click();
-    window.URL.revokeObjectURL(url);
-  };
-
-  // Dashboard stats
-  const totalTickets = filteredTickets.length;
-  const openTickets = filteredTickets.filter(t => t.status === 'Open').length;
-  const inProgressTickets = filteredTickets.filter(t => t.status === 'In Progress').length;
-  const resolvedTickets = filteredTickets.filter(t => t.status === 'Resolved').length;
-  const closedTickets = filteredTickets.filter(t => t.status === 'Closed').length;
-
   const form = useForm<GenericObject>({
     defaultValues: fields.reduce((acc, f) => {
       acc[f.name!] = f.defaultValue ?? ''
       return acc;
     }, {} as GenericObject),
-
   });
   const { control, register, handleSubmit, trigger, watch, setValue, getValues, reset, formState: { errors } } = form;
 
+  const [activeView, setActiveView] = useState('graphs');
+  const companyId = useAppSelector(state => state.projects.companyId);
+  const branchName = useAppSelector(state => state.projects.branch);
+  const branchId = useAppSelector(state => state.projects.branchId);
+  const [analyticsData,setAnalyticsData]=useState({
+    TicketsByStatusData: [],StatusByGroups:[],CreatedVsClosed:[],TicketsHandledPerAgent:[],
+    TicketsByIssueType:[],TicketsByPriority:[],OpenHighPriorityTickets:[],ReOpenTrend:[]
+  })
+
+  function getColor(type:string){
+    switch(type){
+      case 'Open':
+        return '#3b82f6'
+      case 'In Progress':
+        return '#f97316'
+      case 'Resolved':
+        return '#22c55e'
+      case 'Closed':
+        return '#6b7280' 
+      case 'Low':
+        return '#16a34a' 
+      case 'Medium':
+        return  '#ca8a04'
+      case 'High':
+        return '#ea580c'
+      default:
+        return '#eaf916ff'
+    }
+
+  }
+  //helper function
+  function generateData(data:any,type:string){
+    switch(type){
+      case 'pie':
+        return data.length!==0 ? Object.keys(data[0]).map(key=>({name:key,value:data[0][key],color:getColor(key)})):[]
+      case 'createdvsclosed':
+        return data.length!==0 ? data.map(obj=>({...obj,created:parseInt(obj.created),closed:parseInt(obj.closed)})):[]
+      case 'issuetype':
+        return data.length!==0 ? Object.keys(key=>({name:key,count:data[0][key]})):[] 
+      case 'priority':
+        return data.length!==0 ? Object.keys(key=>({name:key,vaalue:data[0][key],color:getColor(key)})):[]
+      default:
+        return data
+      }
+  }
+  const clearAllFilters = () => {
+    form.reset();
+  };
+  //getAnalyticsData(111, 'All', 'statusgrouppie', payload),
+
+const payload = useMemo(() => ({
+  FiltersPayloadDetails: [
+    {
+      projectids: "",
+      statusids: watch("Status"),
+      categoryids: watch("ServiceRequestType"),
+      startdate: watch("StartDate"),
+      enddate: watch("EndDate"),
+      assigneeids: watch("Assignees").join(),
+      usergroupids: watch("UserGroups").join(),
+    },
+  ],
+}), [watch, form]);
+
+  const fetchAnalyticsData = async () => {
+    try {
+      dispatch(setLoading(true));
+      const [TicketsByStatusData, CreatedVsClosed, TicketsHandledPerAgent, TicketsByIssueType, TicketsByPriority, OpenHighPriorityTickets, ReOpenTrend] = await Promise.allSettled([
+        getAnalyticsData(companyId, branchId, 'statuspie', payload),
+        getAnalyticsData(companyId, branchId, 'createdvsclosedbar', payload),
+        getAnalyticsData(companyId, branchId, 'handledperagentbar', payload),
+        getAnalyticsData(companyId, branchId, 'issuetypebar', payload),
+        getAnalyticsData(companyId, branchId, 'prioritybar', payload),
+        getAnalyticsData(companyId, branchId, 'openhighprioritybar', payload),
+        getAnalyticsData(companyId, branchId, 'reopenratetrendbar', payload),
+      ]);
+      let allChartsData = {
+        TicketsByStatusData: TicketsByStatusData.status === 'fulfilled' && TicketsByStatusData.value.data.data ? generateData(TicketsByStatusData.value.data.data, 'pie') : [],
+        CreatedVsClosed: CreatedVsClosed.status === 'fulfilled' && CreatedVsClosed.value.data.data ? generateData(CreatedVsClosed.value.data.data, 'createdvsclosed') : [],
+        TicketsHandledPerAgent: TicketsHandledPerAgent.status === 'fulfilled' && TicketsHandledPerAgent.value.data.data ? TicketsHandledPerAgent.value.data.data : [],
+        TicketsByIssueType: TicketsByIssueType.status === 'fulfilled' && TicketsByIssueType.value.data.data ? generateData(TicketsByIssueType.value.data.data, 'issuetype') : [],
+        TicketsByPriority: TicketsByPriority.status === 'fulfilled' && TicketsByPriority.value.data.data ? generateData(TicketsByPriority.value.data.data, 'priority') : [],
+        OpenHighPriorityTickets: OpenHighPriorityTickets.status === 'fulfilled' && OpenHighPriorityTickets.value.data.data ? OpenHighPriorityTickets.value.data.data : [],
+        ReOpenTrend: ReOpenTrend.status === 'fulfilled' && ReOpenTrend.value.data.data ? ReOpenTrend.value.data.data : []
+      }
+      setAnalyticsData({...allChartsData,StatusByGroups:[]})
+    } catch {} finally {
+      dispatch(setLoading(false))
+    }
+
+  }
+const userGroups = watch("UserGroups");
+
+useEffect(() => {
+  const fetchData = async () => {
+    dispatch(setLoading(true));
+    await getAnalyticsData(companyId, branchId, "statusgrouppie", payload).then(res=>{
+      if(res.success && res.data && res.data.data){
+        setAnalyticsData(prev=>({...prev,StatusByGroups:generateData(res.data.data,'pie')}))
+      }else{
+        setAnalyticsData(prev=>({...prev,StatusByGroups:[]}))
+      }
+    }).catch(err=>{}).finally(()=>{dispatch(setLoading(false))})
+  };
+  if (userGroups) {
+    fetchData();
+  }
+}, [userGroups]);
+
+  useEffect(() => {
+    if (companyId && branchId && branchName) fetchAllLookupsAndChartsData();
+    // if (companyId && branchName) fetchAnalyticsData();
+  }, [companyId, branchId, branchName])
+
+  //store lookups data in json
+  const setLookupsDataInJson = (lookupsData: any): void => {
+    const arr = Object.keys(lookupsData)
+    const opts: { [key: string]: any } = {}
+    arr.forEach((obj) => {
+      let ret = []
+      ret = lookupsData[obj].data.map(element => {
+        return { label: element[lookupsData[obj].label], value: element[lookupsData[obj].value] }
+      });
+      opts[obj] = ret
+    })
+    const data = structuredClone(fields);
+    data.forEach(obj => {
+      if (arr.includes(obj.name)) {
+        obj.options = opts[obj.name]
+      }
+    })
+    setFields(data);
+  }
+  //all lookups data api calls
+  const fetchAllLookupsAndChartsData = async () => {
+    dispatch(setLoading(true))
+    let payload={
+    "FiltersPayloadDetails":[
+        {
+            "projectids":"",
+            "statusids":"",
+            "categoryids":"",
+            "startdate":"",
+            "enddate":"",
+            "assigneeids":"",
+            "usergroupids":""
+        }
+    ]
+  }
+    try {
+      let [statusValues, assigneesValues, serviceRequestTypeValues, TicketsByStatusData,
+        CreatedVsClosed, TicketsHandledPerAgent, TicketsByIssueType, TicketsByPriority,
+        OpenHighPriorityTickets, ReOpenTrend] = await Promise.allSettled([
+          getStatusLookups(companyId), GetServiceRequestAssignToLookups(companyId, branchName),
+          ServiceRequestTypeLookups(companyId, branchId),
+          getAnalyticsData(companyId, branchId, 'statuspie', payload),
+          getAnalyticsData(companyId, branchId, 'createdvsclosedbar', payload),
+          getAnalyticsData(companyId, branchId, 'handledperagentbar', payload),
+          getAnalyticsData(companyId, branchId, 'issuetypebar', payload),
+          getAnalyticsData(companyId, branchId, 'prioritybar', payload),
+          getAnalyticsData(companyId, branchId, 'openhighprioritybar', payload),
+          getAnalyticsData(companyId, branchId, 'reopenratetrendbar', payload),]);
+      let allLookupsData = {
+        Status: { data: statusValues.status === "fulfilled" && statusValues.value.data.ServiceRequestStatusLookup ? statusValues.value.data.ServiceRequestStatusLookup : [], label: 'ServiceRequestStatusName', value: 'ServiceRequestStatusId' },
+        Assignees: { data: assigneesValues.status === "fulfilled" && assigneesValues.value.data.ServiceRequestAssignToUsersLookup ? assigneesValues.value.data.ServiceRequestAssignToUsersLookup : [], label: 'UserName', value: 'UserId' },
+        ServiceRequestType: { data: serviceRequestTypeValues.status === "fulfilled" && serviceRequestTypeValues.value.data.ServiceRequestTypesLookup ? serviceRequestTypeValues.value.data.ServiceRequestTypesLookup : [], label: 'ServiceRequestTypeName', value: 'ServiceRequestTypeId' },
+        UserGroups: { data: assigneesValues.status === "fulfilled" && assigneesValues.value.data.ServiceRequestAssignToUserGroupLookup ? assigneesValues.value.data.ServiceRequestAssignToUserGroupLookup : [], label: 'UserGroupName', value: 'UserGroupId' },
+      }
+      setLookupsDataInJson(allLookupsData);
+      let allChartsData = {
+        TicketsByStatusData: TicketsByStatusData.status === 'fulfilled' && TicketsByStatusData.value.data.data ? generateData(TicketsByStatusData.value.data.data, 'pie') : [],
+        CreatedVsClosed: CreatedVsClosed.status === 'fulfilled' && CreatedVsClosed.value.data.data ? generateData(CreatedVsClosed.value.data.data, 'createdvsclosed') : [],
+        TicketsHandledPerAgent: TicketsHandledPerAgent.status === 'fulfilled' && TicketsHandledPerAgent.value.data.data ? TicketsHandledPerAgent.value.data.data : [],
+        TicketsByIssueType: TicketsByIssueType.status === 'fulfilled' && TicketsByIssueType.value.data.data ? generateData(TicketsByIssueType.value.data.data, 'issuetype') : [],
+        TicketsByPriority: TicketsByPriority.status === 'fulfilled' && TicketsByPriority.value.data.data ? generateData(TicketsByPriority.value.data.data, 'priority') : [],
+        OpenHighPriorityTickets: OpenHighPriorityTickets.status === 'fulfilled' && OpenHighPriorityTickets.value.data.data ? OpenHighPriorityTickets.value.data.data : [],
+        ReOpenTrend: ReOpenTrend.status === 'fulfilled' && ReOpenTrend.value.data.data ? ReOpenTrend.value.data.data : []
+      }
+      setAnalyticsData({ ...allChartsData, StatusByGroups: [] })
+    } catch (err) {
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }
+  //search data by using filters
+  const handleSearch=()=>{
+    fetchAnalyticsData();
+  }
+  //render fields based on field type
   const renderField = (field: BaseField) => {
     const { name, label, fieldType, isRequired, show = true } = field;
-    if (!name || !show) return null;
+    if (!name || !show || (roleName!=='Root Admin' && name==='Assignees' )) return null;
     const validationRules = {
       required: isRequired ? `${label} is required` : false,
     };
@@ -406,104 +304,6 @@ const TicketProgressDashboard = () => {
   // Helper function to get fields by names (similar to TicketView)
   const getFieldsByNames = (names: string[]) => fields.filter(f => names.includes(f.name!));
 
-  //fetch lookup data
-
-  // async function fetchLookups() {
-  //   const [assigneesValues] = await Promise.allSettled([
-  //     GetServiceRequestAssignToLookups(companyId, 'All').then(res => res.data),
-  //   ]);
-
-  //   setFields(prev =>
-  //     prev.map(field => {
-  //       if (field.name === "Assignees" && assigneesValues.status === "fulfilled") {
-  //         console.log(assigneesValues.value.ServiceRequestAssignToUsersLookup,"415")
-  //         return {
-  //           ...field,
-  //           options: assigneesValues.value.ServiceRequestAssignToUsersLookup.map(item => ({
-  //             label: item.UserName,
-  //             value: item.UserName,
-  //           })),
-  //           groupedOptions:assigneesValues.value.ServiceRequestAssignToUserGroupLookup.map(item => ({
-  //             label: item.UserGroupName,
-  //             value: item.UserGroupName,
-  //           })),
-  //         };
-  //       }
-
-  //       return field;
-  //     })
-  //   );
-  //   // reset({
-  //   //   Assignees:
-  //   //     assigneesValues.status === "fulfilled" ? custResult.value[0].CustomerName : '',
-  //   // });
-  // }
-
-  async function fetchLookups() {
-  const [assigneesValues] = await Promise.allSettled([
-    GetServiceRequestAssignToLookups(companyId, 'All').then(res => res.data),
-  ]);
-
-  setFields(prev =>
-    prev.map(field => {
-      if (field.name === "Assignees" && assigneesValues.status === "fulfilled") {
-        const users = assigneesValues.value.ServiceRequestAssignToUsersLookup;
-        const groups = assigneesValues.value.ServiceRequestAssignToUserGroupLookup;
-        
-        // Create grouped options by associating users with groups
-        const groupedOptions = groups.map(group => ({
-          label: group.UserGroupName,
-          options: users
-            .filter(user => user.UserGroupId === group.UserGroupId) // Assuming there's a group association
-            .map(user => ({
-              label: user.UserName,
-              value: user.UserName,
-            }))
-        }));
-
-        return {
-          ...field,
-          // Don't set both options and groupedOptions - choose one
-          groupedOptions: groupedOptions,
-          // Remove or comment out the options line if using groupedOptions
-          // options: users.map(user => ({ label: user.UserName, value: user.UserName })),
-        };
-      }
-      return field;
-    })
-  );
-}
-let payload={
-    "FiltersPayloadDetails":[
-        {
-            "projectids":"",
-            "statusids":"",
-            "categoryids":"",
-            "startdate":"",
-            "enddate":"",
-            "assigneeids":"",
-            "usergroupids":""
-        }
-
-    ]
-}
-  const fetchAnalyticsData=async()=>{
-    await getAnalyticsData(111,'All','statuspie',payload).then(res=>{
-      console.log('res',res)
-
-    })
-
-  }
-
-  useEffect(() => {
-    fetchAnalyticsData()
-    fetchLookups();
-  }, [])
-
-
-
-  
-
   return (
     <div className="h-full overflow-y-scroll bg-gray-50">
       <header className="bg-white border-b px-4 sm:px-6 py-3 sm:py-4">
@@ -511,13 +311,6 @@ let payload={
           <div className="flex items-center gap-2 sm:gap-4">
             <SidebarTrigger />
             <h1 className="text-lg sm:text-2xl font-bold text-gray-900">Ticket Progress Dashboard</h1>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={handleDownload} size="sm" className="text-xs sm:text-sm">
-              <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-              <span className="hidden sm:inline">Export CSV</span>
-              <span className="sm:hidden">Export</span>
-            </Button>
           </div>
         </div>
       </header>
@@ -536,11 +329,7 @@ let payload={
             <Form {...form}>
               <form onSubmit={form.handleSubmit(() => { })} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {getFieldsByNames(['Status', 'ServiceRequestType', 'Assignees','StartDate', 'EndDate']).map((field) => (
-                    <div key={field.name}>
-                      {renderField(field)}
-                    </div>
-                  ))}
+                  {getFieldsByNames(['Status', 'ServiceRequestType', 'Assignees', 'StartDate', 'EndDate']).map(renderField)}
                 </div>
                 {/* Action Buttons */}
                 <div className='flex justify-between items-center'>
@@ -548,11 +337,12 @@ let payload={
                     <ReusableButton
                       htmlType="submit"
                       variant="default"
-                      className="bg-orange-500 border-orange-500 text-white hover:bg-orange-600 hover:border-orange-600"
+                      className="bg-orange-500 border-orange-500 text-white hover:bg-orange-600 hover:border-orange-600 hover:text-white"
                       // icon={<Save className="h-4 w-4" />}
                       iconPosition="left"
+                      onClick={handleSearch}
                     >
-                      Submit
+                      Search
                     </ReusableButton>
                     <ReusableButton
                       htmlType="button"
@@ -565,9 +355,6 @@ let payload={
                       Clear Filters
                     </ReusableButton>
                   </div>
-                  <div className="text-sm text-gray-600 bg-gray-50 px-3 py-1 rounded-md">
-                    Showing <span className="font-semibold">{filteredTickets.length}</span> of <span className="font-semibold">{tickets.length}</span> tickets
-                  </div>
                 </div>
               </form>
             </Form>
@@ -579,7 +366,7 @@ let payload={
           <CardHeader>
             <Tabs value={activeView} onValueChange={setActiveView} className="w-full">
               <TabsList className="grid w-full grid-cols-2 h-auto">
-                
+
                 <TabsTrigger value="graphs" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4 py-2">
                   <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4" />
                   <span className="hidden sm:inline">Analytics Dashboard</span>
@@ -591,7 +378,10 @@ let payload={
           <CardContent>
             <Tabs value={activeView} className="w-full">
               <TabsContent value="graphs">
-                <TicketGraphsView tickets={filteredTickets} />
+                <div className="grid grid-cols-1 gap-0 sm:grid-cols-2 sm:gap-6 mb-4">
+                  {getFieldsByNames(['UserGroups']).map(renderField)}
+                </div>
+                <TicketGraphsView data={analyticsData} groupsPie={watch('UserGroups')}/>
               </TabsContent>
             </Tabs>
           </CardContent>

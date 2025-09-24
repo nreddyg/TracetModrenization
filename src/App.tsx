@@ -17,6 +17,7 @@ import ServiceRequestReport from "./pages/servicedesk/ServiceRequestDetailsHisto
 import { getOrganizationDetailsByToken, getUserDetailsByUserName } from "./services/appService";
 import { useAppDispatch } from "./store";
 import { setCompanyId, setLoading, setUserId } from "./store/slices/projectsSlice";
+import ComplianceAndAudit from "./pages/softwareAssets/ComplianceAndAudit";
 
 // Lazy load all pages
 const Index = WrapperLazyComponent(() => import("./pages/Index"));
@@ -301,6 +302,7 @@ const AnimatedRoutes = () => {
                   <Route path="/software-assets/asset-registry" element={<AssetRegistry />} />
                   <Route path="/software-assets/license-assignment" element={<LicenseAssignment />} />
                   <Route path="/software-assets/usage-tracking" element={<UsageTracking />} />
+                  <Route path="/software-assets/compliance&audit" element={<ComplianceAndAudit />} />
                 </Routes>
               </Suspense>
             </div>

@@ -452,11 +452,11 @@ const navigation: NavItem[] = [
         icon: HardHat,
         link: '/software-assets/usage-tracking',
       },
-      // {
-      //   label: 'Process Configuration',
-      //   icon: Cog,
-      //   link: '/settings/process-configuration',
-      // },
+      {
+        label: 'Compliance & Audit',
+        icon: Cog,
+        link: '/software-assets/compliance&audit',
+      },
       // {
       //   label: 'Advanced Setup',
       //   icon: Settings,

@@ -74,9 +74,10 @@ const ChangePassword = () => {
         dispatch(setLoading(true))
         await postLatestPassword(data).then(res => {
             console.log(res);
-            if (res.status && res.data?.status === true) {
+            if (res.data.status && res.data.status === true) {
                 console.log("success")
                 message.success(`${res.data.message}`);
+                localStorage.removeItem('Token');
                 navigate('/login');
             } else {
                 console.log("no")

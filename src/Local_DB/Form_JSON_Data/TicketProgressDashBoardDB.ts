@@ -80,7 +80,7 @@ export const TICKET_PROGRESS_DB: BaseField[] = [
 
     // },
     {
-        label: "Assignees",
+        label: "Assigned to",
         fieldType: "multiselect",
         name: "Assignees",
         placeholder: "Select Asignees",
@@ -89,8 +89,6 @@ export const TICKET_PROGRESS_DB: BaseField[] = [
         defaultValue: [],
         value: [],
         selectAll: true,
-        groupSelectAll: true,
-        groupedOptions: [],
     },
     {
         label: 'Start Date',
@@ -110,5 +108,17 @@ export const TICKET_PROGRESS_DB: BaseField[] = [
         format: 'DD/MM/YYYY',
         isRequired: false,
         defaultValue: '',
+    },
+    {
+        label: "Filter By User Groups",
+        fieldType: "multiselect",
+        name: "UserGroups",
+        placeholder: "Select User Group",
+        isRequired: false,
+        visible: false,
+        options: [],
+        defaultValue: [],
+        selectAll: true,
+        labelInfo:'Filter tickets by user group. The pie chart shows their status breakdown ( max:10 groups )'
     },
 ];

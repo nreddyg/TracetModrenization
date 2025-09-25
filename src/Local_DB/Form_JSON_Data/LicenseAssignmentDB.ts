@@ -1,7 +1,7 @@
 import { BaseField } from "../types/types";
 
 export const SOFTWARE_DB: BaseField[] = [
-    {
+      {
         label: "Employee ID",
         fieldType: "dropdown",
         name: "employeeID",
@@ -49,8 +49,7 @@ export const SOFTWARE_DB: BaseField[] = [
         format: "DD-MM-YYYY",
         disabled: false,
     },
-
-        {
+    {
         label: 'Description',
         placeholder: "Enter Description",
         defaultValue: '',
@@ -58,6 +57,6 @@ export const SOFTWARE_DB: BaseField[] = [
         name: "description",
         fieldType: 'textarea',
         maxLength: 500,
+        className: "border-[rgb(226, 232, 240)]"
     }
-
 ]

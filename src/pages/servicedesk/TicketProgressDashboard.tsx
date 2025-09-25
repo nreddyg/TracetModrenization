@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -17,6 +17,7 @@ import { GetServiceRequestAssignToLookups, getStatusLookups, ServiceRequestTypeL
 import { useAppDispatch, useAppSelector } from '@/store';
 import { getAnalyticsData } from '@/services/ticketProgressDashboardServices';
 import { setLoading } from '@/store/slices/projectsSlice';
+import { formatDate } from '@/_Helper_Functions/HelperFunctions';
 
 
 const TicketProgressDashboard = () => {
@@ -77,23 +78,9 @@ const TicketProgressDashboard = () => {
   const clearAllFilters = () => {
     form.reset();
   };
-  const payload = useMemo(() => ({
-    FiltersPayloadDetails: [
-      {
-        projectids: "",
-        statusids: watch("Status"),
-        categoryids: watch("ServiceRequestType"),
-        startdate: watch("StartDate"),
-        enddate: watch("EndDate"),
-        assigneeids: watch("Assignees").join(),
-        usergroupids: watch("UserGroups").join(),
-      },
-    ],
-  }), [watch, form]);
-  const fetchAnalyticsData = async () => {
+  const fetchAnalyticsData = async (payload:any) => {
     try {
       dispatch(setLoading(true));
-
       const results = await Promise.allSettled([
         getAnalyticsData(companyId, branchId, 'statuspie', payload),
         getAnalyticsData(companyId, branchId, 'createdvsclosedbar', payload),
@@ -103,17 +90,8 @@ const TicketProgressDashboard = () => {
         getAnalyticsData(companyId, branchId, 'openhighprioritybar', payload),
         getAnalyticsData(companyId, branchId, 'reopenratetrendbar', payload),
       ]);
-
-      const [
-        TicketsByStatusData,
-        CreatedVsClosed,
-        TicketsHandledPerAgent,
-        TicketsByIssueType,
-        TicketsByPriority,
-        OpenHighPriorityTickets,
-        ReOpenTrend
-      ] = results;
-
+      const [TicketsByStatusData,CreatedVsClosed,TicketsHandledPerAgent,TicketsByIssueType,TicketsByPriority,
+        OpenHighPriorityTickets,ReOpenTrend] = results;
       let allChartsData = {
         TicketsByStatusData:
           TicketsByStatusData.status === "fulfilled"
@@ -150,7 +128,6 @@ const TicketProgressDashboard = () => {
             ? ReOpenTrend.value?.data?.data ?? []
             : []
       };
-
       setAnalyticsData({ ...allChartsData, StatusByGroups: [] });
     } catch (err) {
       console.error("Unexpected error:", err);
@@ -160,7 +137,15 @@ const TicketProgressDashboard = () => {
   };
   const userGroups = watch("UserGroups");
   useEffect(() => {
-    const fetchData = async () => {
+    if (userGroups) {
+      handleSearch('UserGroups')
+    }
+  }, [userGroups]);
+  useEffect(() => {
+    if (companyId && branchId && branchName) fetchAllLookupsAndChartsData();
+  }, [companyId, branchId, branchName])
+
+   const fetchStatusDataByUserGroups = async (payload:any) => {
       dispatch(setLoading(true));
       await getAnalyticsData(companyId, branchId, "statusgrouppie", payload).then(res => {
         if (res.success && res.data && res.data.data) {
@@ -170,13 +155,6 @@ const TicketProgressDashboard = () => {
         }
       }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
     };
-    if (userGroups) {
-      fetchData();
-    }
-  }, [userGroups]);
-  useEffect(() => {
-    if (companyId && branchId && branchName) fetchAllLookupsAndChartsData();
-  }, [companyId, branchId, branchName])
   //store lookups data in json
   const setLookupsDataInJson = (lookupsData: any): void => {
     const arr = Object.keys(lookupsData)
@@ -249,8 +227,25 @@ const TicketProgressDashboard = () => {
   };
 
   //search data by using filters
-  const handleSearch = () => {
-    fetchAnalyticsData();
+  const handleSearch=(type:string)=>{
+    let payload = {
+      FiltersPayloadDetails: [
+        {
+          projectids: "",
+          statusids: watch("Status"),
+          categoryids: watch("ServiceRequestType"),
+          startdate: watch("StartDate") ? formatDate(watch('StartDate'), 'DD/MM/YYYY') : "",
+          enddate: watch("EndDate") ? formatDate(watch("EndDate"), 'DD/MM/YYYY') : "",
+          assigneeids: watch("Assignees").join(),
+          usergroupids: watch("UserGroups").join(),
+        },
+      ],
+    }
+    if(type==='UserGroups'){
+      fetchStatusDataByUserGroups(payload)
+    }else if(type==='FetchAll'){
+      fetchAnalyticsData(payload);
+    }
   }
   //render fields based on field type
   const renderField = (field: BaseField) => {
@@ -371,7 +366,7 @@ const TicketProgressDashboard = () => {
                       className="bg-orange-500 border-orange-500 text-white hover:bg-orange-600 hover:border-orange-600 hover:text-white"
                       // icon={<Save className="h-4 w-4" />}
                       iconPosition="left"
-                      onClick={handleSearch}
+                      onClick={()=>handleSearch('FetchAll')}
                     >
                       Search
                     </ReusableButton>

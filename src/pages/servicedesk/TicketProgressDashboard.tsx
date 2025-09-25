@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -21,9 +20,8 @@ import { setLoading } from '@/store/slices/projectsSlice';
 
 
 const TicketProgressDashboard = () => {
-  const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const roleName=JSON.parse(localStorage.getItem('LoggedInUser'))?.RoleName;
+  const roleName = JSON.parse(localStorage.getItem('LoggedInUser'))?.RoleName;
   const [fields, setFields] = useState(TICKET_PROGRESS_DB);
   const form = useForm<GenericObject>({
     defaultValues: fields.reduce((acc, f) => {
@@ -32,18 +30,16 @@ const TicketProgressDashboard = () => {
     }, {} as GenericObject),
   });
   const { control, register, handleSubmit, trigger, watch, setValue, getValues, reset, formState: { errors } } = form;
-
   const [activeView, setActiveView] = useState('graphs');
   const companyId = useAppSelector(state => state.projects.companyId);
   const branchName = useAppSelector(state => state.projects.branch);
   const branchId = useAppSelector(state => state.projects.branchId);
-  const [analyticsData,setAnalyticsData]=useState({
-    TicketsByStatusData: [],StatusByGroups:[],CreatedVsClosed:[],TicketsHandledPerAgent:[],
-    TicketsByIssueType:[],TicketsByPriority:[],OpenHighPriorityTickets:[],ReOpenTrend:[]
+  const [analyticsData, setAnalyticsData] = useState({
+    TicketsByStatusData: [], StatusByGroups: [], CreatedVsClosed: [], TicketsHandledPerAgent: [],
+    TicketsByIssueType: [], TicketsByPriority: [], OpenHighPriorityTickets: [], ReOpenTrend: []
   })
-
-  function getColor(type:string){
-    switch(type){
+  function getColor(type: string) {
+    switch (type) {
       case 'Open':
         return '#3b82f6'
       case 'In Progress':
@@ -51,11 +47,11 @@ const TicketProgressDashboard = () => {
       case 'Resolved':
         return '#22c55e'
       case 'Closed':
-        return '#6b7280' 
+        return '#6b7280'
       case 'Low':
-        return '#16a34a' 
+        return '#16a34a'
       case 'Medium':
-        return  '#ca8a04'
+        return '#ca8a04'
       case 'High':
         return '#ea580c'
       default:
@@ -64,43 +60,41 @@ const TicketProgressDashboard = () => {
 
   }
   //helper function
-  function generateData(data:any,type:string){
-    switch(type){
+  function generateData(data: any, type: string) {
+    switch (type) {
       case 'pie':
-        return data.length!==0 ? Object.keys(data[0]).map(key=>({name:key,value:data[0][key],color:getColor(key)})):[]
+        return data.length !== 0 ? Object.keys(data[0]).map(key => ({ name: key, value: data[0][key], color: getColor(key) })) : []
       case 'createdvsclosed':
-        return data.length!==0 ? data.map(obj=>({...obj,created:parseInt(obj.created),closed:parseInt(obj.closed)})):[]
+        return data.length !== 0 ? data.map(obj => ({ ...obj, created: parseInt(obj.created), closed: parseInt(obj.closed) })) : []
       case 'issuetype':
-        return data.length!==0 ? Object.keys(key=>({name:key,count:data[0][key]})):[] 
+        return data.length !== 0 ? Object.keys(key => ({ name: key, count: data[0][key] })) : []
       case 'priority':
-        return data.length!==0 ? Object.keys(key=>({name:key,vaalue:data[0][key],color:getColor(key)})):[]
+        return data.length !== 0 ? Object.keys(key => ({ name: key, vaalue: data[0][key], color: getColor(key) })) : []
       default:
         return data
-      }
+    }
   }
   const clearAllFilters = () => {
     form.reset();
   };
-  //getAnalyticsData(111, 'All', 'statusgrouppie', payload),
-
-const payload = useMemo(() => ({
-  FiltersPayloadDetails: [
-    {
-      projectids: "",
-      statusids: watch("Status"),
-      categoryids: watch("ServiceRequestType"),
-      startdate: watch("StartDate"),
-      enddate: watch("EndDate"),
-      assigneeids: watch("Assignees").join(),
-      usergroupids: watch("UserGroups").join(),
-    },
-  ],
-}), [watch, form]);
-
+  const payload = useMemo(() => ({
+    FiltersPayloadDetails: [
+      {
+        projectids: "",
+        statusids: watch("Status"),
+        categoryids: watch("ServiceRequestType"),
+        startdate: watch("StartDate"),
+        enddate: watch("EndDate"),
+        assigneeids: watch("Assignees").join(),
+        usergroupids: watch("UserGroups").join(),
+      },
+    ],
+  }), [watch, form]);
   const fetchAnalyticsData = async () => {
     try {
       dispatch(setLoading(true));
-      const [TicketsByStatusData, CreatedVsClosed, TicketsHandledPerAgent, TicketsByIssueType, TicketsByPriority, OpenHighPriorityTickets, ReOpenTrend] = await Promise.allSettled([
+
+      const results = await Promise.allSettled([
         getAnalyticsData(companyId, branchId, 'statuspie', payload),
         getAnalyticsData(companyId, branchId, 'createdvsclosedbar', payload),
         getAnalyticsData(companyId, branchId, 'handledperagentbar', payload),
@@ -109,44 +103,80 @@ const payload = useMemo(() => ({
         getAnalyticsData(companyId, branchId, 'openhighprioritybar', payload),
         getAnalyticsData(companyId, branchId, 'reopenratetrendbar', payload),
       ]);
+
+      const [
+        TicketsByStatusData,
+        CreatedVsClosed,
+        TicketsHandledPerAgent,
+        TicketsByIssueType,
+        TicketsByPriority,
+        OpenHighPriorityTickets,
+        ReOpenTrend
+      ] = results;
+
       let allChartsData = {
-        TicketsByStatusData: TicketsByStatusData.status === 'fulfilled' && TicketsByStatusData.value.data.data ? generateData(TicketsByStatusData.value.data.data, 'pie') : [],
-        CreatedVsClosed: CreatedVsClosed.status === 'fulfilled' && CreatedVsClosed.value.data.data ? generateData(CreatedVsClosed.value.data.data, 'createdvsclosed') : [],
-        TicketsHandledPerAgent: TicketsHandledPerAgent.status === 'fulfilled' && TicketsHandledPerAgent.value.data.data ? TicketsHandledPerAgent.value.data.data : [],
-        TicketsByIssueType: TicketsByIssueType.status === 'fulfilled' && TicketsByIssueType.value.data.data ? generateData(TicketsByIssueType.value.data.data, 'issuetype') : [],
-        TicketsByPriority: TicketsByPriority.status === 'fulfilled' && TicketsByPriority.value.data.data ? generateData(TicketsByPriority.value.data.data, 'priority') : [],
-        OpenHighPriorityTickets: OpenHighPriorityTickets.status === 'fulfilled' && OpenHighPriorityTickets.value.data.data ? OpenHighPriorityTickets.value.data.data : [],
-        ReOpenTrend: ReOpenTrend.status === 'fulfilled' && ReOpenTrend.value.data.data ? ReOpenTrend.value.data.data : []
-      }
-      setAnalyticsData({...allChartsData,StatusByGroups:[]})
-    } catch {} finally {
-      dispatch(setLoading(false))
+        TicketsByStatusData:
+          TicketsByStatusData.status === "fulfilled"
+            ? generateData(TicketsByStatusData.value?.data?.data ?? [], "pie")
+            : [],
+
+        CreatedVsClosed:
+          CreatedVsClosed.status === "fulfilled"
+            ? generateData(CreatedVsClosed.value?.data?.data ?? [], "createdvsclosed")
+            : [],
+
+        TicketsHandledPerAgent:
+          TicketsHandledPerAgent.status === "fulfilled"
+            ? TicketsHandledPerAgent.value?.data?.data ?? []
+            : [],
+
+        TicketsByIssueType:
+          TicketsByIssueType.status === "fulfilled"
+            ? generateData(TicketsByIssueType.value?.data?.data ?? [], "issuetype")
+            : [],
+
+        TicketsByPriority:
+          TicketsByPriority.status === "fulfilled"
+            ? generateData(TicketsByPriority.value?.data?.data ?? [], "priority")
+            : [],
+
+        OpenHighPriorityTickets:
+          OpenHighPriorityTickets.status === "fulfilled"
+            ? OpenHighPriorityTickets.value?.data?.data ?? []
+            : [],
+
+        ReOpenTrend:
+          ReOpenTrend.status === "fulfilled"
+            ? ReOpenTrend.value?.data?.data ?? []
+            : []
+      };
+
+      setAnalyticsData({ ...allChartsData, StatusByGroups: [] });
+    } catch (err) {
+      console.error("Unexpected error:", err);
+    } finally {
+      dispatch(setLoading(false));
     }
-
-  }
-const userGroups = watch("UserGroups");
-
-useEffect(() => {
-  const fetchData = async () => {
-    dispatch(setLoading(true));
-    await getAnalyticsData(companyId, branchId, "statusgrouppie", payload).then(res=>{
-      if(res.success && res.data && res.data.data){
-        setAnalyticsData(prev=>({...prev,StatusByGroups:generateData(res.data.data,'pie')}))
-      }else{
-        setAnalyticsData(prev=>({...prev,StatusByGroups:[]}))
-      }
-    }).catch(err=>{}).finally(()=>{dispatch(setLoading(false))})
   };
-  if (userGroups) {
-    fetchData();
-  }
-}, [userGroups]);
-
+  const userGroups = watch("UserGroups");
+  useEffect(() => {
+    const fetchData = async () => {
+      dispatch(setLoading(true));
+      await getAnalyticsData(companyId, branchId, "statusgrouppie", payload).then(res => {
+        if (res.success && res.data && res.data.data) {
+          setAnalyticsData(prev => ({ ...prev, StatusByGroups: generateData(res.data.data, 'pie') }))
+        } else {
+          setAnalyticsData(prev => ({ ...prev, StatusByGroups: [] }))
+        }
+      }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
+    };
+    if (userGroups) {
+      fetchData();
+    }
+  }, [userGroups]);
   useEffect(() => {
     if (companyId && branchId && branchName) fetchAllLookupsAndChartsData();
-    // if (companyId && branchName) fetchAnalyticsData();
   }, [companyId, branchId, branchName])
-
   //store lookups data in json
   const setLookupsDataInJson = (lookupsData: any): void => {
     const arr = Object.keys(lookupsData)
@@ -166,65 +196,66 @@ useEffect(() => {
     })
     setFields(data);
   }
+  const getSettledValue = (result, path, fallback = []) => {
+    if (result.status !== "fulfilled") return fallback;
+    return path?.split(".").reduce((acc, key) => acc?.[key], result.value) ?? fallback;
+  };
   //all lookups data api calls
   const fetchAllLookupsAndChartsData = async () => {
-    dispatch(setLoading(true))
-    let payload={
-    "FiltersPayloadDetails":[
-        {
-            "projectids":"",
-            "statusids":"",
-            "categoryids":"",
-            "startdate":"",
-            "enddate":"",
-            "assigneeids":"",
-            "usergroupids":""
-        }
-    ]
-  }
+    dispatch(setLoading(true));
+    let payload = {
+      FiltersPayloadDetails: [
+        {projectids: "",statusids: "",categoryids: "",startdate: "",enddate: "",assigneeids: "",usergroupids: ""}
+      ]
+    };
     try {
-      let [statusValues, assigneesValues, serviceRequestTypeValues, TicketsByStatusData,
-        CreatedVsClosed, TicketsHandledPerAgent, TicketsByIssueType, TicketsByPriority,
-        OpenHighPriorityTickets, ReOpenTrend] = await Promise.allSettled([
-          getStatusLookups(companyId), GetServiceRequestAssignToLookups(companyId, branchName),
-          ServiceRequestTypeLookups(companyId, branchId),
-          getAnalyticsData(companyId, branchId, 'statuspie', payload),
-          getAnalyticsData(companyId, branchId, 'createdvsclosedbar', payload),
-          getAnalyticsData(companyId, branchId, 'handledperagentbar', payload),
-          getAnalyticsData(companyId, branchId, 'issuetypebar', payload),
-          getAnalyticsData(companyId, branchId, 'prioritybar', payload),
-          getAnalyticsData(companyId, branchId, 'openhighprioritybar', payload),
-          getAnalyticsData(companyId, branchId, 'reopenratetrendbar', payload),]);
+      const [statusValues,assigneesValues,serviceRequestTypeValues,TicketsByStatusData,CreatedVsClosed,
+        TicketsHandledPerAgent,TicketsByIssueType,TicketsByPriority,OpenHighPriorityTickets,ReOpenTrend
+      ] = await Promise.allSettled([
+        getStatusLookups(companyId),
+        GetServiceRequestAssignToLookups(companyId, branchName),
+        ServiceRequestTypeLookups(companyId, branchId),
+        getAnalyticsData(companyId, branchId, "statuspie", payload),
+        getAnalyticsData(companyId, branchId, "createdvsclosedbar", payload),
+        getAnalyticsData(companyId, branchId, "handledperagentbar", payload),
+        getAnalyticsData(companyId, branchId, "issuetypebar", payload),
+        getAnalyticsData(companyId, branchId, "prioritybar", payload),
+        getAnalyticsData(companyId, branchId, "openhighprioritybar", payload),
+        getAnalyticsData(companyId, branchId, "reopenratetrendbar", payload)
+      ]);
       let allLookupsData = {
-        Status: { data: statusValues.status === "fulfilled" && statusValues.value.data.ServiceRequestStatusLookup ? statusValues.value.data.ServiceRequestStatusLookup : [], label: 'ServiceRequestStatusName', value: 'ServiceRequestStatusId' },
-        Assignees: { data: assigneesValues.status === "fulfilled" && assigneesValues.value.data.ServiceRequestAssignToUsersLookup ? assigneesValues.value.data.ServiceRequestAssignToUsersLookup : [], label: 'UserName', value: 'UserId' },
-        ServiceRequestType: { data: serviceRequestTypeValues.status === "fulfilled" && serviceRequestTypeValues.value.data.ServiceRequestTypesLookup ? serviceRequestTypeValues.value.data.ServiceRequestTypesLookup : [], label: 'ServiceRequestTypeName', value: 'ServiceRequestTypeId' },
-        UserGroups: { data: assigneesValues.status === "fulfilled" && assigneesValues.value.data.ServiceRequestAssignToUserGroupLookup ? assigneesValues.value.data.ServiceRequestAssignToUserGroupLookup : [], label: 'UserGroupName', value: 'UserGroupId' },
-      }
+        Status: {data: getSettledValue(statusValues, "data.ServiceRequestStatusLookup"),label: "ServiceRequestStatusName",value: "ServiceRequestStatusId"},
+        Assignees: {data: getSettledValue(assigneesValues, "data.ServiceRequestAssignToUsersLookup"),label: "UserName",value: "UserId"},
+        ServiceRequestType: {data: getSettledValue(serviceRequestTypeValues, "data.ServiceRequestTypesLookup"),label: "ServiceRequestTypeName",value: "ServiceRequestTypeId"},
+        UserGroups: {data: getSettledValue(assigneesValues, "data.ServiceRequestAssignToUserGroupLookup"),label: "UserGroupName",value: "UserGroupId"}
+      };
       setLookupsDataInJson(allLookupsData);
       let allChartsData = {
-        TicketsByStatusData: TicketsByStatusData.status === 'fulfilled' && TicketsByStatusData.value.data.data ? generateData(TicketsByStatusData.value.data.data, 'pie') : [],
-        CreatedVsClosed: CreatedVsClosed.status === 'fulfilled' && CreatedVsClosed.value.data.data ? generateData(CreatedVsClosed.value.data.data, 'createdvsclosed') : [],
-        TicketsHandledPerAgent: TicketsHandledPerAgent.status === 'fulfilled' && TicketsHandledPerAgent.value.data.data ? TicketsHandledPerAgent.value.data.data : [],
-        TicketsByIssueType: TicketsByIssueType.status === 'fulfilled' && TicketsByIssueType.value.data.data ? generateData(TicketsByIssueType.value.data.data, 'issuetype') : [],
-        TicketsByPriority: TicketsByPriority.status === 'fulfilled' && TicketsByPriority.value.data.data ? generateData(TicketsByPriority.value.data.data, 'priority') : [],
-        OpenHighPriorityTickets: OpenHighPriorityTickets.status === 'fulfilled' && OpenHighPriorityTickets.value.data.data ? OpenHighPriorityTickets.value.data.data : [],
-        ReOpenTrend: ReOpenTrend.status === 'fulfilled' && ReOpenTrend.value.data.data ? ReOpenTrend.value.data.data : []
-      }
-      setAnalyticsData({ ...allChartsData, StatusByGroups: [] })
+        TicketsByStatusData: generateData(getSettledValue(TicketsByStatusData, "data.data"),"pie"),
+        CreatedVsClosed: generateData(getSettledValue(CreatedVsClosed,"data.data"),"createdvsclosed"),
+        TicketsHandledPerAgent: getSettledValue(TicketsHandledPerAgent,"data.data"),
+        TicketsByIssueType: generateData(getSettledValue(TicketsByIssueType, "data.data"),"issuetype"),
+        TicketsByPriority: generateData(getSettledValue(TicketsByPriority, "data.data"),"priority"),
+        OpenHighPriorityTickets: getSettledValue(OpenHighPriorityTickets,"data.data"),
+        ReOpenTrend: getSettledValue(ReOpenTrend, "data.data")
+      };
+
+      setAnalyticsData({ ...allChartsData, StatusByGroups: [] });
     } catch (err) {
+      console.error("Unexpected error:", err);
     } finally {
       dispatch(setLoading(false));
     }
-  }
+  };
+
   //search data by using filters
-  const handleSearch=()=>{
+  const handleSearch = () => {
     fetchAnalyticsData();
   }
   //render fields based on field type
   const renderField = (field: BaseField) => {
     const { name, label, fieldType, isRequired, show = true } = field;
-    if (!name || !show || (roleName!=='Root Admin' && name==='Assignees' )) return null;
+    if (!name || !show || (roleName !== 'Root Admin' && name === 'Assignees')) return null;
     const validationRules = {
       required: isRequired ? `${label} is required` : false,
     };
@@ -381,7 +412,7 @@ useEffect(() => {
                 <div className="grid grid-cols-1 gap-0 sm:grid-cols-2 sm:gap-6 mb-4">
                   {getFieldsByNames(['UserGroups']).map(renderField)}
                 </div>
-                <TicketGraphsView data={analyticsData} groupsPie={watch('UserGroups')}/>
+                <TicketGraphsView data={analyticsData} groupsPie={watch('UserGroups')} />
               </TabsContent>
             </Tabs>
           </CardContent>

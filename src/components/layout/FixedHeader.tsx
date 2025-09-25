@@ -135,6 +135,10 @@ const FixedHeader: React.FC = () => {
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  const changePassword = () => {
+    navigate('/changePassword');
+  }
+
   const logoutFunction = () => {
     localStorage.clear();
     window.location.href = "/login";
@@ -285,9 +289,9 @@ const FixedHeader: React.FC = () => {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="cursor-pointer">
+              <DropdownMenuItem className="cursor-pointer" onClick={changePassword}>
                 <User className="mr-2 h-4 w-4" />
-                <span>Profile</span>
+                <span>Change Password</span>
               </DropdownMenuItem>
               <DropdownMenuItem className="cursor-pointer">
                 <Settings className="mr-2 h-4 w-4" />

@@ -303,6 +303,7 @@ const AnimatedRoutes = () => {
                   <Route path="/software-assets/license-assignment" element={<LicenseAssignment />} />
                   <Route path="/software-assets/usage-tracking" element={<UsageTracking />} />
                   <Route path="/software-assets/compliance&audit" element={<ComplianceAndAudit />} />
+                  <Route path="/software-assets/reports" element={<ComplianceAndAudit />} />
                 </Routes>
               </Suspense>
             </div>

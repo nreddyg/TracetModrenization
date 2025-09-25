@@ -457,6 +457,11 @@ const navigation: NavItem[] = [
         icon: Cog,
         link: '/software-assets/compliance&audit',
       },
+        {
+        label: 'Reports',
+        icon: Cog,
+        link: '/software-assets/reports',
+      },
       // {
       //   label: 'Advanced Setup',
       //   icon: Settings,

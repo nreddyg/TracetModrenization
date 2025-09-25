@@ -91,7 +91,7 @@ const TicketGraphsView: React.FC<TicketGraphsViewProps> = ({ data,groupsPie }) =
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={data.CreatedVsClosed}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
+                  <XAxis dataKey="date" interval={0} tick={{ fontSize: 10 }} tickFormatter={(value) => value.slice(5)} angle={-45} textAnchor="end"/>
                   <YAxis />
                   <ChartTooltip content={<ChartTooltipContent />} />
                   <Bar dataKey="created" fill="#3b82f6" name="Created" />

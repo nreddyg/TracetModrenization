@@ -39,6 +39,8 @@ const TicketProgressDashboard = () => {
     TicketsByStatusData: [], StatusByGroups: [], CreatedVsClosed: [], TicketsHandledPerAgent: [],
     TicketsByIssueType: [], TicketsByPriority: [], OpenHighPriorityTickets: [], ReOpenTrend: []
   })
+
+  console.log('analyrics data',analyticsData)
   function getColor(type: string) {
     switch (type) {
       case 'Open':

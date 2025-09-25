@@ -1,6 +1,6 @@
 import React, { forwardRef, useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { Check, X, ChevronDown, Plus, Loader2, AlertCircle } from 'lucide-react';
+import { Check, X, ChevronDown, Plus, Loader2, AlertCircle, Info } from 'lucide-react';
 import { Label } from './label';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './tooltip';
 import { Checkbox } from './checkbox';
@@ -55,6 +55,7 @@ interface PopupPosition {
 export interface ReusableMultiSelectProps {
   // Basic props
   label?: string;
+  labelInfo?:string;
   tooltip?: string;
   isRequired?: boolean;
   error?: string;
@@ -132,6 +133,7 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
   ({ 
     // Basic props
     label, 
+    labelInfo,
     tooltip, 
     isRequired = false,
     error, 
@@ -432,13 +434,27 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
       if (!label) return null;
 
       const labelContent = (
-        <Label className={"text-sm font-medium text-slate-700"}>
-          {label}{isRequired ? <span className='text-red-500'> *</span> : ''}
+        <Label className="text-sm font-medium text-slate-700 inline-flex items-center gap-1">
+          {label}
+          {isRequired && <span className="text-red-500">*</span>}
           {showCount && normalizedValue.length > 0 && (
-            <span className="ml-1 text-xs text-gray-500">({normalizedValue.length})</span>
+            <span className="text-xs text-gray-500">({normalizedValue.length})</span>
+          )}
+          {labelInfo && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="text-gray-500 cursor-pointer">
+                  <Info className="w-4 h-4" />
+                </span>
+              </TooltipTrigger>
+              <TooltipContent side="right">
+                {labelInfo}
+              </TooltipContent>
+            </Tooltip>
           )}
         </Label>
       );
+
 
       if (tooltip) {
         return (

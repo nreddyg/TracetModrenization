@@ -109,15 +109,15 @@ const TicketGraphsView: React.FC<TicketGraphsViewProps> = ({ data,groupsPie }) =
               Tickets Handled per Agent
             </CardTitle>
           </CardHeader>
-          <CardContent className="flex justify-center items-center overflow-auto">
+          <CardContent className="flex justify-center items-center overflow-hidden">
             <ChartContainer config={chartConfig} className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={data.TicketsHandledPerAgent} layout="horizontal">
+                <BarChart data={data.TicketsHandledPerAgent}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis type="number" />
-                  <YAxis dataKey="name" type="category" width={100} />
+                  <XAxis dataKey="name" interval={0} tick={{ fontSize: 10 }} tickFormatter={(value) => value.slice(5)} angle={-45} textAnchor="end"/>
+                  <YAxis />
                   <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey="tickets" fill="#3b82f6" />
+                  <Bar dataKey="tickets" fill="#22c55e" name="Tickets" barSize={50}/>
                 </BarChart>
               </ResponsiveContainer>
             </ChartContainer>
@@ -136,7 +136,7 @@ const TicketGraphsView: React.FC<TicketGraphsViewProps> = ({ data,groupsPie }) =
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={data.TicketsByIssueType}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
+                  <XAxis dataKey="name" interval={0}/>
                   <YAxis />
                   <ChartTooltip content={<ChartTooltipContent />} />
                   <Bar dataKey="count" fill="#8884d8" />

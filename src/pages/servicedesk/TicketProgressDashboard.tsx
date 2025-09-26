@@ -139,10 +139,10 @@ const TicketProgressDashboard = () => {
   };
   const userGroups = watch("UserGroups");
   useEffect(() => {
-    if (userGroups) {
+    if (userGroups && userGroups?.length!==0 && companyId && branchId) {
       handleSearch('UserGroups')
     }
-  }, [userGroups]);
+  }, [userGroups,companyId,branchId]);
   useEffect(() => {
     if (companyId && branchId && branchName) fetchAllLookupsAndChartsData();
   }, [companyId, branchId, branchName])

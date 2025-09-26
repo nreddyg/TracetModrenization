@@ -112,3 +112,6 @@ export const URL_GET_ORGANIZATION_LIST='/api/Masters/GetOrganizations';
 
 //Ticket Progress Dashboard
 export const URL_GET_TICKET_PROGRESS_DASHBOARD_DATA = '/api/ServiceDeskAPI/GetServiceRequestDashboardData';
+
+// Change password
+export const URL_CHANGE_PASSWORD = '/api/PasswordAPI/ChangePassword';

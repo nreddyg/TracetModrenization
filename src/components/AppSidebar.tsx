@@ -432,6 +432,11 @@ const navigation: NavItem[] = [
       // },
     ],
   },
+  // {
+  //   label:'Change Password',
+  //   icon: Package,
+  //   link: '/changepassword'
+  // },  
    {
     label: 'Software assets',
     icon: Package,

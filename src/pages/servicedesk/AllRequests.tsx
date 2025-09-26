@@ -27,12 +27,12 @@ const AllRequests = () => {
   const [dateRange, setDateRange] = useState<{ from: Date; to: Date } | null>(null);
   const [requests, setRequests] = useState<Request[]>([]);
   const [filteredRequests, setFilteredRequests] = useState<Request[]>([]);
-  const [columns,setColumns]=useState<ColumnDef<Request>[]>([
+  const columns=useMemo<ColumnDef<Request>[]>(()=>[
     {accessorKey: "ServiceRequestNo", header: "Service Request No",
       cell:({row})=>(
-        <Link to={`/service-desk/all-requests/tickets/106/${row.original.ServiceRequestId}`} className='text-blue-500 '>
+       <span onClick={()=>{  localStorage.setItem("editBranchFromParent", branch)}}> <Link to={`/service-desk/all-requests/tickets/106/${row.original.ServiceRequestId}`} className='text-blue-500 '>
           {row.getValue('ServiceRequestNo')}
-        </Link>
+        </Link></span>
       )
     },
     {accessorKey: "Title", header: "Title"},
@@ -68,7 +68,7 @@ const AllRequests = () => {
       ),
     },
     {accessorKey: "Customer", header: "Customer"},
-  ]);
+  ],[branch]);
   // Stats calculations
   const stats = useMemo(() => {
     const InProgressTicketsCount = requests.filter(req => req.Status === 'In Progress').length;

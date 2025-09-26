@@ -45,13 +45,15 @@ const MyWorkbench = () => {
     {
       accessorKey: "ServiceRequestNo", header: "Service Request No",
       cell: ({ row }) => (
-        <Link
+              <span onClick={()=>{localStorage.setItem("editBranchFromParent", branch)}}> 
+              <Link
           to={(isMyRequest) ? `/service-desk/my-requests/tickets/${filters.TicketCategory}/${row.original.ServiceRequestId}` : `/service-desk/my-workbench/tickets/${filters.TicketCategory}/${row.original.ServiceRequestId}`}
           className="text-blue-500"
 
         >
           {row.getValue('ServiceRequestNo')}
         </Link>
+        </span>
       )
     },
     { accessorKey: "Title", header: "Title" },
@@ -91,7 +93,7 @@ const MyWorkbench = () => {
       ),
     },
     { accessorKey: "Customer", header: "Customer" },
-  ], [filters.TicketCategory]);
+  ], [filters.TicketCategory,branch]);
 
   const form = useForm<GenericObject>({
     defaultValues: fields.reduce((acc, f) => {

@@ -1957,7 +1957,7 @@ useEffect(() => {
   }
 
   return (
-    <div className={cn("space-y-4", className)}>
+    <div className={cn("space-y-2", className)}>
       {/* Header */}
       {(title || onAdd || onRefresh || customActions) && (
         <div className="flex justify-between items-center">

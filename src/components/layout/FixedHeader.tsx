@@ -140,7 +140,6 @@ const FixedHeader: React.FC = () => {
         }
       }
       localStorage.setItem("Branch", value || 'All');
-      navigate('/service-desk/all-requests');
     }
   };
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);

@@ -420,7 +420,8 @@ const UserGroups = () => {
 
   // Handle refresh
   const handleRefresh = () => {
-    message.info("Refreshing user groups...");
+    // message.info("Refreshing user groups...");
+    getUserGroupTableData(companyId, branchName);
     // Add refresh logic here
   };
 
@@ -505,7 +506,7 @@ const UserGroups = () => {
 
         {/* User Group List with ReusableTable */}
         <Card className="border-0 shadow-sm">
-          <CardHeader className="pb-3">
+          <CardHeader className="pb-2 pt-2">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
               <CardTitle className="text-base font-semibold">
                 User Group List

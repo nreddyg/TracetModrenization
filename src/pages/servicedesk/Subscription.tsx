@@ -952,7 +952,8 @@ const SubscriptionManagement = () => {
 
   // Handle refresh
   const handleRefresh = () => {
-    message.info("Refreshing Subscriptions...");
+    // message.info("Refreshing Subscriptions...");
+       getSubscriptionData(companyId, branchName);
     // Add refresh logic here
   };
 
@@ -1078,7 +1079,7 @@ const SubscriptionManagement = () => {
               size="small"
               variant="primary"
               icon={<></>}
-              iconPosition="left"
+              // iconPosition="left"
               onClick={() => downloadExcel(dataSource, columns)}
               className="whitespace-nowrap"
             >
@@ -1090,7 +1091,7 @@ const SubscriptionManagement = () => {
         {/* Subscription Form */}
 
         <Card className="border-0 shadow-sm">
-          <CardHeader className="pb-3">
+          <CardHeader className="pb-3 pt-4">
             <CardTitle className="text-base font-semibold">
               Add Subscription
             </CardTitle>
@@ -1113,7 +1114,7 @@ const SubscriptionManagement = () => {
 
         {/* User Group List with ReusableTable */}
         <Card className="border-0 shadow-sm">
-          <CardHeader className="pb-3">
+          <CardHeader className="pb-3 pt-2">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
               <CardTitle className="text-base font-semibold">Subscription List</CardTitle>
               <div className="w-full sm:w-64">

@@ -239,7 +239,17 @@ const TicketView = () => {
     if(location?.state?.formData){
      form.reset(location?.state?.formData)
     }
+  
   }, [companyId,branch]);
+
+
+  useEffect(() => {
+    if (branch) {
+      if (branch !== localStorage.getItem("editBranchFromParent")) {
+        navigate(-1)
+      }
+    }
+  }, [branch])
   useEffect(() => {
     if (watch('Customer') && companyId && branch) fetchSubscriptionByCustomer(watch('Customer'), companyId, branch);
   }, [watch('Customer'),companyId,branch])
@@ -1431,7 +1441,7 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
                     onClick={() => handleEdit('cancel')}
                     icon={<X className="h-4 w-4" />}
                   >
-                    Cancel
+                   {isCreateMode? "Clear":"Cancel"}
                   </ReusableButton>
                   <ReusableButton
                     size="small"
@@ -1448,7 +1458,7 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
                     }
                     icon={<Save className="h-4 w-4" />}
                   >
-                    Save
+                   {isCreateMode?"Save":"Update"}
                   </ReusableButton>
                 </>
               )}

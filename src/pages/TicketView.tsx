@@ -1078,7 +1078,7 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
           "CCListSelectedUsers": watch('CCListSelectedUsers')["Users"] ? watch('CCListSelectedUsers')["Users"].join(',') : "",
           "Severity": watch('Severity'),
           "Priority":watch('Priority'),
-          "AssetIds": watch('AssetId').join(','),
+          "AssetIds": watch('AssetId')?watch('AssetId')?.join(','):'',
           "IsDraft": false,
           "RequestedDate": formatDate(watch('RequestedDate'), 'DD-MM-YYYY'),
           "RequestedBy": watch('RequestedById'),

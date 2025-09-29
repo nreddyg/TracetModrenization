@@ -244,7 +244,7 @@ const TicketView = () => {
 
 
   useEffect(() => {
-    if (branch) {
+    if (branch && localStorage.getItem("editBranchFromParent")) {
       if (branch !== localStorage.getItem("editBranchFromParent")) {
         navigate(-1)
       }

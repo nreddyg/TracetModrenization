@@ -34,6 +34,10 @@ const TicketGraphsView: React.FC<TicketGraphsViewProps> = ({ data, groupsPie }) 
           <CardContent>
             <ChartContainer config={chartConfig} className='h-[300px] sm:h[250px]'>
               <ResponsiveContainer width="60%" height="60%">
+                {data?.TicketsByStatusData?.length===0?
+                <div className='text-sm font-semibold'>
+                  No Data Found !!
+                </div>:
                 <PieChart>
                   <Pie data={data.TicketsByStatusData} cx="50%" cy="50%" outerRadius="70%" dataKey="value"
                     label={({ name, value }) => window.innerWidth > 640 ? `${name}: ${value}` : value.toString()}
@@ -44,7 +48,7 @@ const TicketGraphsView: React.FC<TicketGraphsViewProps> = ({ data, groupsPie }) 
                     ))}
                   </Pie>
                   <ChartTooltip content={<ChartTooltipContent />} />
-                </PieChart>
+                </PieChart>}
               </ResponsiveContainer>
             </ChartContainer>
           </CardContent>
@@ -61,6 +65,10 @@ const TicketGraphsView: React.FC<TicketGraphsViewProps> = ({ data, groupsPie }) 
             <CardContent>
               <ChartContainer config={chartConfig} className="h-[300px] sm:h[250px]">
                 <ResponsiveContainer width="60%" height="60%">
+                  {data?.StatusByGroups?.length===0
+                    ?<div className='text-sm font-semibold'>
+                  No Data Found !!
+                </div>:
                   <PieChart>
                     <Pie data={data.StatusByGroups} cx="50%" cy="50%" outerRadius="70%" dataKey="value"
                       label={({ name, value }) => window.innerWidth > 640 ? `${name}: ${value}` : value.toString()}
@@ -71,7 +79,7 @@ const TicketGraphsView: React.FC<TicketGraphsViewProps> = ({ data, groupsPie }) 
                       ))}
                     </Pie>
                     <ChartTooltip content={<ChartTooltipContent />} />
-                  </PieChart>
+                  </PieChart>}
                 </ResponsiveContainer>
               </ChartContainer>
             </CardContent>
@@ -86,12 +94,14 @@ const TicketGraphsView: React.FC<TicketGraphsViewProps> = ({ data, groupsPie }) 
               Tickets Created vs Closed
             </CardTitle>
           </CardHeader>
-          <CardContent className='mt-4'>
+          <CardContent className={`${data?.CreatedVsClosed?.length === 0 ? 'mt-0' : 'mt-4'}`}>
             <ChartContainer config={chartConfig} className="h-[350px] sm:h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
+                {data?.CreatedVsClosed?.length===0?<div className='text-sm font-semibold'>
+                  No Data Found !!
+                </div>:
                 <BarChart data={data.CreatedVsClosed}
                   // margin={{ top: 20, right: 10, bottom: 20, left: 15 }}
-
                 >
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="date" interval={0} tick={{ fontSize: 10 }} angle={-45} textAnchor="end" height={60}
@@ -108,7 +118,7 @@ const TicketGraphsView: React.FC<TicketGraphsViewProps> = ({ data, groupsPie }) 
                   <ChartTooltip content={<ChartTooltipContent />} />
                   <Bar dataKey="created" fill="#3b82f6" name="Created" />
                   <Bar dataKey="closed" fill="#22c55e" name="Closed" />
-                </BarChart>
+                </BarChart>}
               </ResponsiveContainer>
             </ChartContainer>
           </CardContent>
@@ -121,10 +131,14 @@ const TicketGraphsView: React.FC<TicketGraphsViewProps> = ({ data, groupsPie }) 
               Tickets Handled per Agent
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-6
-          ">
+          <CardContent className="p-6">
             <ChartContainer config={chartConfig} className="h-[350px]">
               <ResponsiveContainer width="100%" height="100%">
+                {
+                  data?.TicketsHandledPerAgent?.length===0?
+                  <div className='text-sm font-semibold'>
+                  No Data Found !!
+                </div>:
                 <BarChart
                   data={data.TicketsHandledPerAgent}
                   margin={{ top: 10, right: 0, left: 0, bottom: 40 }}
@@ -158,6 +172,7 @@ const TicketGraphsView: React.FC<TicketGraphsViewProps> = ({ data, groupsPie }) 
                     radius={[4, 4, 0, 0]}
                   />
                 </BarChart>
+}
               </ResponsiveContainer>
             </ChartContainer>
           </CardContent>
@@ -173,6 +188,10 @@ const TicketGraphsView: React.FC<TicketGraphsViewProps> = ({ data, groupsPie }) 
           <CardContent className="p-6">
             <ChartContainer config={chartConfig} className="h-[350px] w-full">
               <ResponsiveContainer width="100%" height="100%">
+                {data?.TicketsByIssueType?.length===0?
+                <div className='text-sm font-semibold'>
+                  No Data Found !!
+                </div>:
                 <BarChart
                   data={data.TicketsByIssueType}
                   margin={{ top: 10, right: 0, left: -30, bottom: 20 }}
@@ -204,6 +223,7 @@ const TicketGraphsView: React.FC<TicketGraphsViewProps> = ({ data, groupsPie }) 
                     radius={[4, 4, 0, 0]}
                   />
                 </BarChart>
+}
               </ResponsiveContainer>
             </ChartContainer>
           </CardContent>
@@ -219,6 +239,10 @@ const TicketGraphsView: React.FC<TicketGraphsViewProps> = ({ data, groupsPie }) 
           <CardContent>
             <ChartContainer config={chartConfig} className="h-[350px] sm:h-[300px]">
               <ResponsiveContainer width="50%" height="60%">
+                {data?.TicketsByPriority?.length===0?
+                <div className='text-sm font-semibold'>
+                  No Data Found !!
+                </div>:
                 <BarChart data={data.TicketsByPriority} margin={{ top: 10, right: 0, left: -10, bottom: 10 }}>
                   <CartesianGrid strokeDasharray="3 3" />
 
@@ -236,7 +260,7 @@ const TicketGraphsView: React.FC<TicketGraphsViewProps> = ({ data, groupsPie }) 
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Bar>
-                </BarChart>
+                </BarChart>}
               </ResponsiveContainer>
             </ChartContainer>
           </CardContent>
@@ -249,8 +273,13 @@ const TicketGraphsView: React.FC<TicketGraphsViewProps> = ({ data, groupsPie }) 
               Open High-Priority Tickets
             </CardTitle>
           </CardHeader>
-          <CardContent className="flex justify-center items-center
-          ">
+<CardContent
+  className={`flex  ${data?.OpenHighPriorityTickets?.length === 0 ? 'flex-start' : 'items-center justify-center'}`}
+>
+
+            {data?.OpenHighPriorityTickets?.length===0?<div className='text-sm font-semibold flex-start'>
+                  No Data Found !!
+                </div>:
             <div className="space-y-2 w-full overflow-auto h-[300px] ">
               {data.OpenHighPriorityTickets.slice(0, 5).map(ticket =>
               {
@@ -269,7 +298,7 @@ const TicketGraphsView: React.FC<TicketGraphsViewProps> = ({ data, groupsPie }) 
               )
             }
               )}
-            </div>
+            </div>}
           </CardContent>
         </Card>
  
@@ -281,9 +310,12 @@ const TicketGraphsView: React.FC<TicketGraphsViewProps> = ({ data, groupsPie }) 
               Reopen Rate Trend
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-6">
+          <CardContent   className={`flex  ${data?.ReOpenTrend?.length === 0 ? 'p-0 ps-6' : 'p-6'}`}>
             <ChartContainer config={chartConfig} className="h-[350px] w-full">
               <ResponsiveContainer width="100%" height="100%">
+                {data?.ReOpenTrend?.length===0? <div className='text-sm font-semibold'>
+                  No Data Found !!
+                </div>:
                 <LineChart
                   data={data.ReOpenTrend}
                   margin={{ top: 10, right: 10, left: 10, bottom: 20 }}
@@ -339,6 +371,7 @@ const TicketGraphsView: React.FC<TicketGraphsViewProps> = ({ data, groupsPie }) 
                     activeDot={{ r: 6 }}
                   />
                 </LineChart>
+}
               </ResponsiveContainer>
             </ChartContainer>
           </CardContent>

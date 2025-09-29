@@ -40,7 +40,6 @@ const TicketProgressDashboard = () => {
     TicketsByIssueType: [], TicketsByPriority: [], OpenHighPriorityTickets: [], ReOpenTrend: []
   })
 
-  console.log('analyrics data',analyticsData)
   function getColor(type: string) {
     switch (type) {
       case 'Open':
@@ -70,9 +69,9 @@ const TicketProgressDashboard = () => {
       case 'createdvsclosed':
         return data.length !== 0 ? data.map(obj => ({ ...obj, created: parseInt(obj.created), closed: parseInt(obj.closed) })) : []
       case 'issuetype':
-        return data.length !== 0 ? Object.keys(key => ({ name: key, count: data[0][key] })) : []
+        return data.length !== 0 ? Object.keys(data[0]).map(key => ({ name: key, count: data[0][key] })) : []
       case 'priority':
-        return data.length !== 0 ? Object.keys(key => ({ name: key, vaalue: data[0][key], color: getColor(key) })) : []
+        return data.length !== 0 ? Object.keys(data[0]).map(key => ({ name: key, count: data[0][key], color: getColor(key) })) : []
       default:
         return data
     }
@@ -209,6 +208,7 @@ const TicketProgressDashboard = () => {
         ServiceRequestType: {data: getSettledValue(serviceRequestTypeValues, "data.ServiceRequestTypesLookup"),label: "ServiceRequestTypeName",value: "ServiceRequestTypeId"},
         UserGroups: {data: getSettledValue(assigneesValues, "data.ServiceRequestAssignToUserGroupLookup"),label: "UserGroupName",value: "UserGroupId"}
       };
+      
       setLookupsDataInJson(allLookupsData);
       let allChartsData = {
         TicketsByStatusData: generateData(getSettledValue(TicketsByStatusData, "data.data"),"pie"),

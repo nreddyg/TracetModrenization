@@ -53,19 +53,23 @@ const TicketProgressDashboard = () => {
       case 'Low':
         return '#16a34a'
       case 'Medium':
-        return '#ca8a04'
+        return '#ffa000'
       case 'High':
-        return '#ea580c'
+        return '#f70000'
       default:
         return '#eaf916ff'
     }
 
   }
+  function generateHSLColor(index: number, total: number): string {
+  const hue = Math.floor((360 / total) * index); // Spread hues evenly
+  return `hsl(${hue}, 70%, 60%)`; // Keep saturation and lightness constant
+}
   //helper function
   function generateData(data: any, type: string) {
     switch (type) {
       case 'pie':
-        return data.length !== 0 ? Object.keys(data[0]).map(key => ({ name: key, value: data[0][key], color: getColor(key) })) : []
+        return data.length !== 0 ? Object.keys(data[0]).map((key,index) => ({ name: key, value: data[0][key], color: generateHSLColor(index, Object.keys(data[0]).length) })) : []
       case 'createdvsclosed':
         return data.length !== 0 ? data.map(obj => ({ ...obj, created: parseInt(obj.created), closed: parseInt(obj.closed) })) : []
       case 'issuetype':

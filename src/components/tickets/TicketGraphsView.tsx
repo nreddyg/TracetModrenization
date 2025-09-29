@@ -121,12 +121,13 @@ const TicketGraphsView: React.FC<TicketGraphsViewProps> = ({ data, groupsPie }) 
               Tickets Handled per Agent
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-6">
-            <ChartContainer config={chartConfig} className="h-[350px] w-full">
+          <CardContent className="p-6
+          ">
+            <ChartContainer config={chartConfig} className="h-[350px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={data.TicketsHandledPerAgent}
-                  margin={{ top: 10, right: 0, left: 0, bottom: 50 }}
+                  margin={{ top: 10, right: 0, left: 0, bottom: 40 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                   <XAxis
@@ -174,7 +175,7 @@ const TicketGraphsView: React.FC<TicketGraphsViewProps> = ({ data, groupsPie }) 
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={data.TicketsByIssueType}
-                  margin={{ top: 10, right: 0, left: -30, bottom: 10 }}
+                  margin={{ top: 10, right: 0, left: -30, bottom: 20 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                   <XAxis
@@ -289,7 +290,7 @@ const TicketGraphsView: React.FC<TicketGraphsViewProps> = ({ data, groupsPie }) 
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                   <XAxis
-                    dataKey="month"
+                    dataKey="Month"
                     interval={0}
                     tick={{ fontSize: data.ReOpenTrend.length > 15 ? 8 : 10, fill: '#6b7280' }}
                     angle={-60}
@@ -330,7 +331,7 @@ const TicketGraphsView: React.FC<TicketGraphsViewProps> = ({ data, groupsPie }) 
                   <ChartTooltip content={<ChartTooltipContent />} />
                   <Line
                     type="monotone"
-                    dataKey="reopenRate"
+                    dataKey="ReopenRate"
                     stroke="#f97316"
                     strokeWidth={2}
                     name="Reopen Rate"

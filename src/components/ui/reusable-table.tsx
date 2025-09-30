@@ -2063,8 +2063,9 @@ useEffect(() => {
       {/* Table */}
       <div className="border rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
+          <div className="max-h-[500px] overflow-y-auto">
           <table ref={tableRef} className="w-full  table-fixed">
-            <thead className="bg-muted/50">
+            <thead className="sticky top-0 bg-muted/50 z-10">
               {table.getHeaderGroups().map(headerGroup => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map(header => (
@@ -2299,6 +2300,7 @@ useEffect(() => {
             )}
 
           </table>
+          </div>
         </div>
 
         {/* Pagination */}

@@ -228,14 +228,14 @@ const PaymentDetails = () => {
 
   // Effect to handle automatic AMCExpiryDate setting
   useEffect(() => {
-    if (watchAMCToDate) {
+    if (watchAMCToDate && !subData) {
       setValue("AMCExpiryDate", watchAMCToDate, { shouldValidate: true });
     }
   }, [watchAMCToDate, setValue]);
 
   // Effect to sync Amount with CurrencyAmount
   useEffect(() => {
-    if (watchAmount) {
+    if (watchAmount && !subData) {
       setValue("CurrencyAmount", watchAmount, { shouldValidate: true });
     }
   }, [watchAmount, setValue]);

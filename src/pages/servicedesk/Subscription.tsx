@@ -909,13 +909,13 @@ const SubscriptionManagement = () => {
         <span className="text-gray-700 text-sm">{row.getValue('SubscriptionType')}</span>
       ),
     },
-    // {
-    //   accessorKey: 'SubscriptionStatus',
-    //   header: 'Subscription Status',
-    //   cell: ({ row }) => (
-    //     <span className="text-gray-700 text-sm">{row.getValue('SubscriptionStatus')}</span>
-    //   ),
-    // },
+    {
+      accessorKey: 'Amount',
+      header: 'Amount',
+      cell: ({ row }) => (
+        <span className="text-gray-700 text-sm">{row.getValue('Amount')}</span>
+      ),
+    },
     {
       accessorKey: "SubscriptionStatus", header: "Subscription Status",
       cell: ({ row }) => (

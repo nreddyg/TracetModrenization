@@ -19,7 +19,6 @@ import { getAnalyticsData } from '@/services/ticketProgressDashboardServices';
 import { setLoading } from '@/store/slices/projectsSlice';
 import { formatDate } from '@/_Helper_Functions/HelperFunctions';
 
-
 const TicketProgressDashboard = () => {
   const dispatch = useAppDispatch();
   const roleName = JSON.parse(localStorage.getItem('LoggedInUser'))?.RoleName;
@@ -149,17 +148,16 @@ const TicketProgressDashboard = () => {
   useEffect(() => {
     if (companyId && branchId && branchName) fetchAllLookupsAndChartsData();
   }, [companyId, branchId, branchName])
-
-   const fetchStatusDataByUserGroups = async (payload:any) => {
-      dispatch(setLoading(true));
-      await getAnalyticsData(companyId, branchId, "statusgrouppie", payload).then(res => {
-        if (res.success && res.data && res.data.data) {
-          setAnalyticsData(prev => ({ ...prev, StatusByGroups: generateData(res.data.data, 'pie') }))
-        } else {
-          setAnalyticsData(prev => ({ ...prev, StatusByGroups: [] }))
-        }
-      }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
-    };
+  const fetchStatusDataByUserGroups = async (payload: any) => {
+    dispatch(setLoading(true));
+    await getAnalyticsData(companyId, branchId, "statusgrouppie", payload).then(res => {
+      if (res.success && res.data && res.data.data) {
+        setAnalyticsData(prev => ({ ...prev, StatusByGroups: generateData(res.data.data, 'pie') }))
+      } else {
+        setAnalyticsData(prev => ({ ...prev, StatusByGroups: [] }))
+      }
+    }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
+  };
   //store lookups data in json
   const setLookupsDataInJson = (lookupsData: any): void => {
     const arr = Object.keys(lookupsData)
@@ -231,7 +229,6 @@ const TicketProgressDashboard = () => {
       dispatch(setLoading(false));
     }
   };
-
   //search data by using filters
   const handleSearch=(type:string)=>{
     let payload = {
@@ -335,7 +332,6 @@ const TicketProgressDashboard = () => {
   };
   // Helper function to get fields by names (similar to TicketView)
   const getFieldsByNames = (names: string[]) => fields.filter(f => names.includes(f.name!));
-
   return (
     <div className="h-full overflow-y-scroll bg-gray-50">
       <header className="bg-white border-b px-4 sm:px-6 py-3 sm:py-4">
@@ -359,7 +355,12 @@ const TicketProgressDashboard = () => {
           <CardContent className="space-y-6">
 
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(() => { })} className="space-y-6">
+              <form onSubmit={(e) => e.preventDefault()}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                  }
+                }} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {getFieldsByNames(['Status', 'ServiceRequestType', 'Assignees', 'StartDate', 'EndDate']).map(renderField)}
                 </div>
@@ -372,7 +373,7 @@ const TicketProgressDashboard = () => {
                       className="bg-orange-500 border-orange-500 text-white hover:bg-orange-600 hover:border-orange-600 hover:text-white"
                       // icon={<Save className="h-4 w-4" />}
                       iconPosition="left"
-                      onClick={()=>handleSearch('FetchAll')}
+                      onClick={() => handleSearch('FetchAll')}
                     >
                       Search
                     </ReusableButton>

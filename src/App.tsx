@@ -19,6 +19,7 @@ import { useAppDispatch } from "./store";
 import { setCompanyId, setLoading, setUserId } from "./store/slices/projectsSlice";
 import ComplianceAndAudit from "./pages/softwareAssets/ComplianceAndAudit";
 import SoftwareAssetsReports from "./pages/softwareAssets/SoftwareAssetsReports";
+import ChangePassword from "./pages/changePassword/ChangePassword";
 
 // Lazy load all pages
 const Index = WrapperLazyComponent(() => import("./pages/Index"));
@@ -125,6 +126,7 @@ const AnimatedRoutes = () => {
   const dispatch=useAppDispatch();
   const location = useLocation();
   const isLoginPage = location.pathname === '/login';
+  const isChangePassword=location.pathname==='/changePassword'
   const ticketId = /^\/tickets\/([^/]+)$/.test(location.pathname)? location.pathname.split("/").pop():'';
   const cleanRoutes = ["/service-desk/srdetailshistoryview"];
 
@@ -135,6 +137,19 @@ const AnimatedRoutes = () => {
           <Routes location={location}>
             <Route path="/" element={<Navigate to="/login" replace />} />
             <Route path="/login" element={<Login />} />
+            {/* <Route path="/changePassword" element={<ChangePassword />}/> */}
+
+          </Routes>
+        </MessageProvider>
+      </div>
+    );
+  }
+    if (isChangePassword) {
+    return (
+      <div className="w-full h-full">
+        <MessageProvider duration={3} maxCount={5} offset={24}>
+          <Routes location={location}>
+            <Route path="/changePassword" element={<ChangePassword />}/>
           </Routes>
         </MessageProvider>
       </div>

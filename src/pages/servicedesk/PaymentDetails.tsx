@@ -18,7 +18,7 @@ import { setLoading } from '@/store/slices/projectsSlice';
 import { ReusableButton } from '@/components/ui/reusable-button';
 import { useMessage } from '@/components/ui/reusable-message';
 import { useAppSelector } from '@/store';
-import { formatDate } from '@/_Helper_Functions/HelperFunctions';
+import { formatDate, formatDates } from '@/_Helper_Functions/HelperFunctions';
 
 
 const PaymentDetails = () => {
@@ -116,14 +116,14 @@ const PaymentDetails = () => {
               "PaymentMode": data.PaymentDetails,
               "BankName": data.BankName,
               "ChequeNo": data.ChequeNo,
-              "ChequeDate":  formatDate(data.ChequeDate , 'DD-MM-YYYY'),
+              "ChequeDate":  formatDates(data.ChequeDate , 'DD/MM/YYYY'),
               "Amount": data.Amount,
               "TDSAmount": "",
               "Type": data.Type,
-              "AMCFromDate":formatDate(data.AMCFromDate, 'DD-MM-YYYY'),
+              "AMCFromDate":formatDates(data.AMCFromDate, 'DD/MM/YYYY'),
               "AMCToDate": data.AMCToDate,
-              "AMCPaidDate": formatDate(data.AMCPaidDate, 'DD-MM-YYYY'),
-              "AMCExpiryDate": formatDate(data.AMCExpiryDate , 'DD-MM-YYYY'),
+              "AMCPaidDate": formatDates(data.AMCPaidDate, 'DD/MM/YYYY'),
+              "AMCExpiryDate": formatDates(data.AMCExpiryDate , 'DD/MM/YYYY'),
               "Currency": data.Currency?.toString(),
               "CurrencyAmount": data.CurrencyAmount,
               "NoofAPICalls": data.NoOfCountDetails?.toString() || 0,

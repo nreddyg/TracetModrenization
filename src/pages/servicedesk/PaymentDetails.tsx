@@ -18,6 +18,8 @@ import { setLoading } from '@/store/slices/projectsSlice';
 import { ReusableButton } from '@/components/ui/reusable-button';
 import { useMessage } from '@/components/ui/reusable-message';
 import { useAppSelector } from '@/store';
+import { formatDate } from '@/_Helper_Functions/HelperFunctions';
+
 
 const PaymentDetails = () => {
   const companyId=useAppSelector(state=>state.projects.companyId)
@@ -114,14 +116,14 @@ const PaymentDetails = () => {
               "PaymentMode": data.PaymentDetails,
               "BankName": data.BankName,
               "ChequeNo": data.ChequeNo,
-              "ChequeDate": data.ChequeDate,
+              "ChequeDate":  formatDate(data.ChequeDate , 'DD-MM-YYYY'),
               "Amount": data.Amount,
               "TDSAmount": "",
               "Type": data.Type,
-              "AMCFromDate":data.AMCFromDate,
+              "AMCFromDate":formatDate(data.AMCFromDate, 'DD-MM-YYYY'),
               "AMCToDate": data.AMCToDate,
-              "AMCPaidDate": data.AMCPaidDate,
-              "AMCExpiryDate": data.AMCExpiryDate,
+              "AMCPaidDate": formatDate(data.AMCPaidDate, 'DD-MM-YYYY'),
+              "AMCExpiryDate": formatDate(data.AMCExpiryDate , 'DD-MM-YYYY'),
               "Currency": data.Currency?.toString(),
               "CurrencyAmount": data.CurrencyAmount,
               "NoofAPICalls": data.NoOfCountDetails?.toString() || 0,

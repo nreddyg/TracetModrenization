@@ -157,43 +157,43 @@ const navigation: NavItem[] = [
       // },
     ],
   },
-  // {
-  //   label: 'Masters',
-  //   icon: Building2,
-  //   link: '/masters',
-  //   children: [
-  //     {
-  //       label: 'Organization',
-  //       icon: Building2,
-  //       link: '/masters/organization',
-  //     },
-  //     {
-  //       label: 'Company Hierarchy',
-  //       icon: Building2,
-  //       link: '/masters/company-hierarchy',
-  //     },
-  //     {
-  //       label: 'Department',
-  //       icon: Building2,
-  //       link: '/masters/department',
-  //     },
-  //     {
-  //       label: 'Assets & Inventory',
-  //       icon: Package,
-  //       link: '/masters/assets-inventory',
-  //     },
-  //     {
-  //       label: 'Maintenance',
-  //       icon: Wrench,
-  //       link: '/masters/maintenance',
-  //     },
-  //     {
-  //       label: 'Reports',
-  //       icon: FileText,
-  //       link: '/masters/reports',
-  //     },
-  //   ],
-  // },
+  {
+    label: 'Masters',
+    icon: Building2,
+    link: '/masters',
+    children: [
+      {
+        label: 'Organization',
+        icon: Building2,
+        link: '/masters/organization',
+      },
+      {
+        label: 'Company Hierarchy',
+        icon: Building2,
+        link: '/masters/company-hierarchy',
+      },
+      {
+        label: 'Department',
+        icon: Building2,
+        link: '/masters/department',
+      },
+      {
+        label: 'Assets & Inventory',
+        icon: Package,
+        link: '/masters/assets-inventory',
+      },
+      {
+        label: 'Maintenance',
+        icon: Wrench,
+        link: '/masters/maintenance',
+      },
+      {
+        label: 'Reports',
+        icon: FileText,
+        link: '/masters/reports',
+      },
+    ],
+  },
   // {
   //   label: 'CWIP',
   //   icon: HardHat,

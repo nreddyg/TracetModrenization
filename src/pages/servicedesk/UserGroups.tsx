@@ -61,7 +61,7 @@ const UserGroups = () => {
   }, [selectedRecord, companyId])
 
   //table data api integration
-  async function getUserGroupTableData(compId: number, BranchName: string) {
+  async function getUserGroupTableData(compId: string, BranchName: string) {
     dispatch(setLoading(true));
     await getUserGroupData(compId, BranchName).then(res => {
       if (res.success && res.data) {
@@ -80,7 +80,7 @@ const UserGroups = () => {
   }
 
   //get usergroupby id api integration
-  async function getUserGroupDataById(compId: number, usergroupid: number) {
+  async function getUserGroupDataById(compId: string, usergroupid: number) {
     dispatch(setLoading(true))
     await getUserGroupById(compId, usergroupid).then(res => {
       if (res.success && res.data) {
@@ -103,7 +103,7 @@ const UserGroups = () => {
   }
 
   //delete usergroup api integration
-  async function deleteUserGroupData(compId: number, usergroupid: number) {
+  async function deleteUserGroupData(compId: string, usergroupid: number) {
     dispatch(setLoading(true));
     await deleteUserGroup(compId, usergroupid).then(res => {
       if (res.success && res.data) {
@@ -125,7 +125,7 @@ const UserGroups = () => {
 
   //users lookup integartion 
 
-  async function SelectUsersLookup(compid: number, branchname: string) {
+  async function SelectUsersLookup(compid: string, branchname: string) {
     dispatch(setLoading(true));
     await GetServiceRequestAssignToLookups(compid, branchname)
       .then((res) => {
@@ -420,7 +420,8 @@ const UserGroups = () => {
 
   // Handle refresh
   const handleRefresh = () => {
-    message.info("Refreshing user groups...");
+    // message.info("Refreshing user groups...");
+    getUserGroupTableData(companyId, branchName);
     // Add refresh logic here
   };
 
@@ -505,7 +506,7 @@ const UserGroups = () => {
 
         {/* User Group List with ReusableTable */}
         <Card className="border-0 shadow-sm">
-          <CardHeader className="pb-3">
+          <CardHeader className="pb-2 pt-2">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
               <CardTitle className="text-base font-semibold">
                 User Group List

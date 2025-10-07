@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { ColumnDef } from '@tanstack/react-table';
 import { useToast } from '@/hooks/use-toast';
 import { SOFTWARE_DB } from '@/Local_DB/Form_JSON_Data/LicenseAssignmentDB';
+import { REGISTRY_DB } from '@/Local_DB/Form_JSON_Data/AssetRegistryDB';
 import { ReusableTextarea } from '@/components/ui/reusable-textarea';
 import { Controller, useForm } from 'react-hook-form';
 import ReusableSingleCheckbox from '@/components/ui/reusable-single-checkbox';
@@ -45,7 +46,7 @@ const AssetRegistry = () => {
  const [search, setSearch] = useState('');
     const navigate = useNavigate();
     const [columns, setColumns] = useState<ColumnDef<SoftwareData>[]>(SoftwareDataColumns);
-    const [fields, setFields] = useState<BaseField[]>(SOFTWARE_DB);
+    const [fields, setFields] = useState<BaseField[]>(REGISTRY_DB);
     const [isOpenLicenseCard, setIsOpenLicenseCard] = useState(false);
     const { toast } = useToast();
 
@@ -245,7 +246,7 @@ const AssetRegistry = () => {
                             <div className="space-y-4">
                                 <span className='text-2xl'>Add New Software Asset</span>
                                 <div className={`grid xxs:grid-cols-1 xs2:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-6`}>
-                                    {getFieldsByNames(['employeeID', 'department', 'software', 'assignmentDate']).map((field) => {
+                                    {getFieldsByNames(['SoftwareName', 'Version', 'VendorId', 'CategoryId','LicenseType','NumberOfLicenses']).map((field) => {
                                         return <div className="flex-1 items-center space-x-2">
                                             {renderField(field)}
                                         </div>;

@@ -181,7 +181,7 @@ const Configuration = () => {
   }, [companyId, branch])
   const fetchAllServiceRequests = async () => {
     dispatch(setLoading(true));
-    await getServiceRequestTypes(companyId).then(res => {
+    await getServiceRequestTypes(companyId,branch).then(res => {
       if (res.success && res.data) {
         setServiceRequestTypeData(res.data)
       } else {

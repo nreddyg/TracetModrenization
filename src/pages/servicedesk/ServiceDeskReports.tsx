@@ -311,7 +311,7 @@ function buildColumnsFromApi<T extends Record<string, any>>(
   // }
 
 
-  async function fetchServiceRequestDetailsReport(compId: number, BranchID: string, srType: string, srNo: string, srStatus: string, requestedBy: string, fromDate: string, toDate: string, customer: string, AssigneeUsers: string, AssigneeGroups: string, severity: string, priority: string, SLAStatus: string, dept: string, mainCategory: string, subCategory: string, assetCode: string) {
+  async function fetchServiceRequestDetailsReport(compId: string, BranchID: string, srType: string, srNo: string, srStatus: string, requestedBy: string, fromDate: string, toDate: string, customer: string, AssigneeUsers: string, AssigneeGroups: string, severity: string, priority: string, SLAStatus: string, dept: string, mainCategory: string, subCategory: string, assetCode: string) {
     // dispatch(setLoading(true))
     await getServiceRequestDetailsReport(compId, BranchID, srType, srNo, srStatus, requestedBy, fromDate, toDate, customer, AssigneeUsers, AssigneeGroups, severity, priority, SLAStatus, dept, mainCategory, subCategory, assetCode).then(res => {
       if (res.success && res.data.status === undefined) {
@@ -323,7 +323,7 @@ function buildColumnsFromApi<T extends Record<string, any>>(
     }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
   }
 
-  async function fetchServiceRequestSLAmetViolatedReport(compId: number, BranchID: string, srType: string, srNo: string, srStatus: string, requestedBy: string, fromDate: string, toDate: string, customer: string, AssigneeUsers: string, AssigneeGroups: string, severity: string, priority: string, SLAStatus: string, dept: string, mainCategory: string, subCategory: string, assetCode: string) {
+  async function fetchServiceRequestSLAmetViolatedReport(compId: string, BranchID: string, srType: string, srNo: string, srStatus: string, requestedBy: string, fromDate: string, toDate: string, customer: string, AssigneeUsers: string, AssigneeGroups: string, severity: string, priority: string, SLAStatus: string, dept: string, mainCategory: string, subCategory: string, assetCode: string) {
     dispatch(setLoading(true))
     await getServiceRequestSLAMetViolatedReport(compId, BranchID, srType, srNo, srStatus, requestedBy, fromDate, toDate, customer, AssigneeUsers, AssigneeGroups, severity, priority, SLAStatus, dept, mainCategory, subCategory, assetCode).then(res => {
       if (res.success && res.data.status === undefined) {
@@ -352,7 +352,7 @@ function buildColumnsFromApi<T extends Record<string, any>>(
   //     }
   //   }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
   // }
-  async function fetchAdditionalFieldConfigurationDetails(compId: number) {
+  async function fetchAdditionalFieldConfigurationDetails(compId: string) {
     dispatch(setLoading(true))
     await getAdditionaliFieldsConfigurationDetails(compId).then(res => {
       if (res.success && res.data.status === undefined) {
@@ -365,7 +365,7 @@ function buildColumnsFromApi<T extends Record<string, any>>(
       }
     }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
   }
-  async function fetchServiceRequestDetailsColumns(compId: number) {
+  async function fetchServiceRequestDetailsColumns(compId: string) {
     dispatch(setLoading(true))
     await getServiceRequestDetailsColumns(compId).then(res => {
       if (res.success && res.data.status === undefined) {
@@ -382,7 +382,7 @@ function buildColumnsFromApi<T extends Record<string, any>>(
       fetchServiceRequestDetailsReport(companyId, formatToString(watch("LevelFiveCompany")), formatToString(watch("ServiceRequestType")), formatToString(watch("ServiceRequest")), formatToString(watch("Status")), formatToString(watch("RequestedBy")), "", "", formatToString(watch("Customer")), formatToString(watch("AssignTo")["Users"]), formatToString(watch("AssignTo")["User Group"]), formatToString(watch("Severity")), formatToString(watch("Priority")), formatToString(watch("slastatus")), formatToString(watch("LevelFiveDepartment")), formatToString(watch("MainCategory")), formatToString(watch("SubCategory")), formatToString(watch("AssetCode")))
     })
   }
-  async function fetchServiceRequestSLAViolatedColumns(compId: number) {
+  async function fetchServiceRequestSLAViolatedColumns(compId: string) {
     dispatch(setLoading(true))
     await getServiceRequestSLAMetViolatedColumns(compId).then(res => {
       if (res.success && res.data.status === undefined) {
@@ -578,7 +578,7 @@ function buildColumnsFromApi<T extends Record<string, any>>(
 
 
   // fetching SubCategories list based on main Asset selected
-  async function getSubCategoryDetails(compId: number, id: number | null) {
+  async function getSubCategoryDetails(compId: string, id: number | null) {
     dispatch(setLoading(true));
     try {
       if (id == null) {
@@ -907,7 +907,7 @@ function buildColumnsFromApi<T extends Record<string, any>>(
   // }
 
   //postServiceRequestDetailsColumns met violated post api integration
-  async function postServiceRequestColumns(compId: number, data: any) {
+  async function postServiceRequestColumns(compId: string, data: any) {
     dispatch(setLoading(true));
     await postServiceRequestDetailsColumns(compId, data).then(res => {
       if (res.data.status === true) {
@@ -924,7 +924,7 @@ function buildColumnsFromApi<T extends Record<string, any>>(
   }
 
   //SLA met violated post api integration
-  async function postSLAMetViolatedColumns(compId: number, data: any) {
+  async function postSLAMetViolatedColumns(compId: string, data: any) {
     dispatch(setLoading(true));
     await postServiceRequestMetViolatedColumns(compId, data).then(res => {
       if (res.data.status === true) {

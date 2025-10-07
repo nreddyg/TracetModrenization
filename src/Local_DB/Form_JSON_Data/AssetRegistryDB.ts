@@ -2,7 +2,7 @@ import { BaseField } from "../types/types";
 
 export const REGISTRY_DB: BaseField[] = [
     {
-    name: 'Software Name',
+    name: 'SoftwareName',
     label: 'Software Name',
     fieldType: 'text',
     placeholder: 'Enter Software Name',
@@ -20,18 +20,26 @@ export const REGISTRY_DB: BaseField[] = [
     disabled:false
   },
        {
-    name: 'Vendor',
+
     label: 'Vendor/Publisher',
-    fieldType: 'text',
-    placeholder: 'Enter Vendor/Publisher',
+    fieldType: "dropdown",
+    name: 'VendorId',
+    placeholder: "Select Category",
     isRequired: true,
-    // className:'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background',
-    disabled:false
+    options: [],
+    allowClear: true,
+    disabled:false,
+
+    // fieldType: 'text',
+    // placeholder: 'Enter Vendor/Publisher',
+    // isRequired: true,
+    // // className:'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background',
+    // disabled:false
   },
      {
     label: "Category",
     fieldType: "dropdown",
-    name: "Category",
+    name: "CategoryId",
     placeholder: "Select Category",
     isRequired: true,
     options: [],
@@ -43,7 +51,7 @@ export const REGISTRY_DB: BaseField[] = [
   {
     label: "License Type",
     fieldType: "dropdown",
-    name: "License Type",
+    name: "LicenseType",
     placeholder: "Select License Type",
     isRequired: true,
     options: [],
@@ -53,7 +61,7 @@ export const REGISTRY_DB: BaseField[] = [
       // containerClassName: "w-full h-10 rounded-md"
   },
        {
-    name: 'Number of Licenses',
+    name: 'NumberOfLicenses',
     label: 'Number of Licenses',
     fieldType: 'text',
     placeholder: 'Enter Number of Licenses',

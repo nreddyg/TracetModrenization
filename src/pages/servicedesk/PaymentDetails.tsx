@@ -18,6 +18,8 @@ import { setLoading } from '@/store/slices/projectsSlice';
 import { ReusableButton } from '@/components/ui/reusable-button';
 import { useMessage } from '@/components/ui/reusable-message';
 import { useAppSelector } from '@/store';
+import { formatDate, formatDates } from '@/_Helper_Functions/HelperFunctions';
+
 
 const PaymentDetails = () => {
   const companyId=useAppSelector(state=>state.projects.companyId)
@@ -114,14 +116,14 @@ const PaymentDetails = () => {
               "PaymentMode": data.PaymentDetails,
               "BankName": data.BankName,
               "ChequeNo": data.ChequeNo,
-              "ChequeDate": data.ChequeDate,
+              "ChequeDate":  formatDates(data.ChequeDate , 'DD/MM/YYYY'),
               "Amount": data.Amount,
               "TDSAmount": "",
               "Type": data.Type,
-              "AMCFromDate":data.AMCFromDate,
+              "AMCFromDate":formatDates(data.AMCFromDate, 'DD/MM/YYYY'),
               "AMCToDate": data.AMCToDate,
-              "AMCPaidDate": data.AMCPaidDate,
-              "AMCExpiryDate": data.AMCExpiryDate,
+              "AMCPaidDate": formatDates(data.AMCPaidDate, 'DD/MM/YYYY'),
+              "AMCExpiryDate": formatDates(data.AMCExpiryDate , 'DD/MM/YYYY'),
               "Currency": data.Currency?.toString(),
               "CurrencyAmount": data.CurrencyAmount,
               "NoofAPICalls": data.NoOfCountDetails?.toString() || 0,
@@ -228,14 +230,14 @@ const PaymentDetails = () => {
 
   // Effect to handle automatic AMCExpiryDate setting
   useEffect(() => {
-    if (watchAMCToDate) {
+    if (watchAMCToDate && !subData) {
       setValue("AMCExpiryDate", watchAMCToDate, { shouldValidate: true });
     }
   }, [watchAMCToDate, setValue]);
 
   // Effect to sync Amount with CurrencyAmount
   useEffect(() => {
-    if (watchAmount) {
+    if (watchAmount && !subData) {
       setValue("CurrencyAmount", watchAmount, { shouldValidate: true });
     }
   }, [watchAmount, setValue]);
@@ -335,7 +337,7 @@ const PaymentDetails = () => {
         dispatch(setLoading(false))
       })
   }
-  async function getNextAMCDate(customerName: string, productname: string, branchname: string, compid: number) {
+  async function getNextAMCDate(customerName: string, productname: string, branchname: string, compid: string) {
     dispatch(setLoading(true));
     await getNextAmcFromDate(customerName, productname, branchname, compid)
       .then((res) => {
@@ -404,7 +406,7 @@ const PaymentDetails = () => {
 
   //subscription By Id
 
-  async function getsubscriptionById(id: number, compid: number) {
+  async function getsubscriptionById(id: number, compid: string) {
     dispatch(setLoading(true))
     await getSubscriptionById(id, compid).then(res => {
       if (res.success && res.data) {

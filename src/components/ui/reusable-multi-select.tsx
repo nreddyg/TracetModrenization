@@ -150,7 +150,7 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
     selectAll = true,
     groupSelectAll = true,
     maxTagCount = 1,
-    maxTagTextLength = 2,
+    maxTagTextLength = 20,
     showCount = false,
     showArrow = true,
     suffixIcon,

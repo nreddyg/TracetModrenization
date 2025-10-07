@@ -13,6 +13,21 @@ export function formatDateToDDMMYYYY(dateTimeStr: string) {
   );
 }
 
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+
+dayjs.extend(customParseFormat);
+//you can format the dates into various formats like dd/mm/yyyy || dd-mm-yyyy || dd-mm-yy || mm-dd-yyyy || yyyy-mm-dd etc other formats and also accepts String in in given format
+
+export const formatDates = (date: Date | string | number, format: string = 'YYYY-MM-DD'): string => {
+  if (!date) return '';
+  // If the input is a string, parse it using a specific format
+  if (typeof date === 'string') {
+    return dayjs(date, format, true).format(format);  // true => strict parsing
+  }
+  // For Date objects or timestamps
+  return dayjs(date).format(format);
+};
+
 
 //upload helper function 
  export const fileToByteArray = (blob: Blob): Promise<Uint8Array> => {

@@ -8,7 +8,7 @@ interface APIResponse<T> {
     status?: number;
 }
 
-export const getSubscriptionTableData=async(compId:number,BranchName:string):Promise<APIResponse<any>>=>{
+export const getSubscriptionTableData=async(compId:string,BranchName:string):Promise<APIResponse<any>>=>{
     try{
         const response=await api.get(URL_GET_SUBSCRIPTION_LIST,{params:{CompId:compId,BranchName:BranchName}})
         return {success:true,data:response.data}
@@ -18,7 +18,7 @@ export const getSubscriptionTableData=async(compId:number,BranchName:string):Pro
    }
 }
 
-export const getProductName=async(compId:number):Promise<APIResponse<any>>=>{
+export const getProductName=async(compId:string):Promise<APIResponse<any>>=>{
     try{
         const response=await api.get(URL_GET_PRODUCT_LIST,{params:{CompId:compId}})
         return {success:true,data:response.data}
@@ -38,7 +38,7 @@ export const getSubscriptionCurrency=async():Promise<APIResponse<any>>=>{
    }
 }
 
-export const getNextAmcFromDate=async(customerName:string,ProductName:string,branchName:string,CompId:number):Promise<APIResponse<any>>=>{
+export const getNextAmcFromDate=async(customerName:string,ProductName:string,branchName:string,CompId:string):Promise<APIResponse<any>>=>{
     try{
         const response=await api.get(SUBSCRIPTION_NEXT_AMC_FROM_DATE,{params:{customerName:customerName,ProductName:ProductName,branchName:branchName,CompId:CompId}})
         return {success:true,data:response.data}
@@ -48,7 +48,7 @@ export const getNextAmcFromDate=async(customerName:string,ProductName:string,bra
    }
 }
 
-export const addSubscription=async(BranchName:string,CompId:number,data:any):Promise<APIResponse<any>>=>{
+export const addSubscription=async(BranchName:string,CompId:string,data:any):Promise<APIResponse<any>>=>{
     try{
         const response=await api.post(ADD_SUBSCRIPTION,data,{params:{BranchName:BranchName,CompId:CompId}})
         return {success:true,data:response.data}
@@ -58,7 +58,7 @@ export const addSubscription=async(BranchName:string,CompId:number,data:any):Pro
    }
 }
 
-export const updateSubscription=async(branchName:string,CompId:number,SubscriptionId:number,CustomerName:string,ProductName:string,data:any):Promise<APIResponse<any>>=>{
+export const updateSubscription=async(branchName:string,CompId:string,SubscriptionId:number,CustomerName:string,ProductName:string,data:any):Promise<APIResponse<any>>=>{
     try{
         const response=await api.post(UPDATE_SUBSCRIPTION,data,{params:{branchName:branchName,CompId:CompId,SubscriptionId:SubscriptionId,CustomerName:CustomerName,ProductName:ProductName}})
         return {success:true,data:response.data}
@@ -69,7 +69,7 @@ export const updateSubscription=async(branchName:string,CompId:number,Subscripti
 
 }
 
-export const getSubscriptionById=async(Id:number,CompId:number):Promise<APIResponse<any>>=>{
+export const getSubscriptionById=async(Id:number,CompId:string):Promise<APIResponse<any>>=>{
     try{
         const response=await api.get(URL_SUBSCRIPTION_BY_ID,{params:{Id:Id,CompId:CompId}})
         return {success:true,data:response.data}
@@ -79,7 +79,7 @@ export const getSubscriptionById=async(Id:number,CompId:number):Promise<APIRespo
    }
 }
 
-export const getAddChequeList=async(chequeNo:number,CompId:number):Promise<APIResponse<any>>=>{
+export const getAddChequeList=async(chequeNo:number,CompId:string):Promise<APIResponse<any>>=>{
     try{
         const response=await api.get(URL_DUPLICATE_ADD_CHECK_NO,{params:{chequeNo:chequeNo,CompId:CompId}})
         return {success:true,data:response.data}
@@ -89,7 +89,7 @@ export const getAddChequeList=async(chequeNo:number,CompId:number):Promise<APIRe
    }
 }
 
-export const getUpdateChequeList=async(chequeNo:number,id:number,CompId:number):Promise<APIResponse<any>>=>{
+export const getUpdateChequeList=async(chequeNo:number,id:number,CompId:string):Promise<APIResponse<any>>=>{
     try{
         const response=await api.get(URL_DUPLICATE_UPDATE_CHECK_NO,{params:{chequeNo:chequeNo,id:id,CompId:CompId}})
         return {success:true,data:response.data}

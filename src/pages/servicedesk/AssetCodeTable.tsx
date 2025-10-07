@@ -32,7 +32,7 @@ const AssetCodeTable = () => {
     //     recordSelection(selectedRecords)
     // }, [selectedRecords])
  
-    async function fetchAssetList(BranchName: string, compId: number) {
+    async function fetchAssetList(BranchName: string, compId: string) {
         dispatch(setLoading(true))
         try {
             const res = await getManageAssetsList(BranchName, compId);

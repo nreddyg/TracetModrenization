@@ -13,7 +13,7 @@ interface APIResponse<T> {
 //   [key: string]: any;
 // };
 //Service Request Assign To Lookup
-export const GetServiceRequestAssignToLookups = async (CompId: number, branchName: string): Promise<APIResponse<any>> => {
+export const GetServiceRequestAssignToLookups = async (CompId: string, branchName: string): Promise<APIResponse<any>> => {
     try {
         const response = await api.get(URL_GET_SR_ASSIGN_TO_LOOKUPS, { params: { CompId: CompId, branchname: branchName } })
         return {success: true,data: response.data,}
@@ -22,7 +22,7 @@ export const GetServiceRequestAssignToLookups = async (CompId: number, branchNam
     }
 }
 //SRConfiguration list
-export const getSRConfigList = async (CompId: number, branchName: string): Promise<APIResponse<any>> => {
+export const getSRConfigList = async (CompId: string, branchName: string): Promise<APIResponse<any>> => {
     try {
         const response = await api.get(URL_GET_SRCONFIG_LIST, { params: { CompId: CompId, branchName: branchName } })
         return {success: true,data: response.data,}
@@ -32,7 +32,7 @@ export const getSRConfigList = async (CompId: number, branchName: string): Promi
 }
 
 //Status Lookup Data
-export const getStatusLookups = async (compId: number): Promise<APIResponse<any>> => {
+export const getStatusLookups = async (compId: string): Promise<APIResponse<any>> => {
     try {
         const response = await api.get(URL_GET_STATUS_LOOKUP_API, { params: { CompId: compId } });
         return { success: true, data: response.data };
@@ -40,7 +40,7 @@ export const getStatusLookups = async (compId: number): Promise<APIResponse<any>
         return { success: false, message: err.response?.data?.message || err.message, status: err.response?.status };
     }
 };
-export const getStatusLookupsForSLA = async (compId: number): Promise<APIResponse<any>> => {
+export const getStatusLookupsForSLA = async (compId: string): Promise<APIResponse<any>> => {
     try {
         const response = await api.get(URL_GET_STATUS_LOOKUP_FOR_CALCULATE_SLA_API, { params: { CompId: compId } });
         return { success: true, data: response.data };
@@ -51,7 +51,7 @@ export const getStatusLookupsForSLA = async (compId: number): Promise<APIRespons
 
 //save service request configuration
 
-export const postServiceRequestConfiguration = async (compId: number, SerReqConfigurationId: number, data: any): Promise<APIResponse<any>> => {
+export const postServiceRequestConfiguration = async (compId: string, SerReqConfigurationId: number, data: any): Promise<APIResponse<any>> => {
     try {
         const response = await api.post(URL_POST_SERVICE_REQUEST_CONFIGURATION, data, { params: { CompId: compId, SerReqConfigurationId: SerReqConfigurationId } });
         return { success: true, data: response.data };
@@ -61,7 +61,7 @@ export const postServiceRequestConfiguration = async (compId: number, SerReqConf
 };
 
 //post service request type
-export const postServiceRequestType = async (compId: number, branchName: string, data: any): Promise<APIResponse<any>> => {
+export const postServiceRequestType = async (compId: string, branchName: string, data: any): Promise<APIResponse<any>> => {
     try {
         const response = await api.post(URL_POST_SERVICE_REQUEST_TYPE, data, { params: { CompId: compId, branchName: branchName } });
         return { success: true, data: response.data };
@@ -71,9 +71,9 @@ export const postServiceRequestType = async (compId: number, branchName: string,
 };
 
 //getServiceRequestType List 
-export const getServiceRequestTypes = async (CompId: number): Promise<APIResponse<any>> => {
+export const getServiceRequestTypes = async (CompId: string,branchName:string): Promise<APIResponse<any>> => {
     try {
-        const response = await api.get(URL_GET_SERVICE_REQUEST_TYPES, { params: { CompId: CompId, } })
+        const response = await api.get(URL_GET_SERVICE_REQUEST_TYPES, { params: { CompId: CompId,branchName:branchName } })
         return { success: true, data: response.data, }
     } catch (err: any) {
         return { success: false, message: err.response?.data?.message || err.message, status: err.response?.status };
@@ -82,7 +82,7 @@ export const getServiceRequestTypes = async (CompId: number): Promise<APIRespons
 
 
 //vendor details for look up
-export const getVendorDetails = async (CompId: number): Promise<APIResponse<any>> => {
+export const getVendorDetails = async (CompId: string): Promise<APIResponse<any>> => {
     try {
         const response = await api.get(URL_GET_VENDOR_DETAILS_BY_COMPID, { params: { CompId: CompId } })
         return { success: true, data: response.data, }
@@ -92,7 +92,7 @@ export const getVendorDetails = async (CompId: number): Promise<APIResponse<any>
 }
 
 //get service request lookup
-export const GetServiceRequestStatus = async (CompId: number): Promise<APIResponse<any>> => {
+export const GetServiceRequestStatus = async (CompId: string): Promise<APIResponse<any>> => {
     try {
         const response = await api.get(URL_GET_SERVICE_REQUEST_STATUS, { params: { CompId: CompId } })
         return { success: true, data: response.data, }
@@ -112,7 +112,7 @@ export const GetNotifyTypeLookup = async (): Promise<APIResponse<any>> => {
 }
 
 //GetServiceRequestRequestedByLookups 
-export const getSRRequestByLookupsList = async (compId: number, branchName: string): Promise<APIResponse<any>> => {
+export const getSRRequestByLookupsList = async (compId: string, branchName: string): Promise<APIResponse<any>> => {
     try {
         const response = await api.get(URL_GET_SR_REQUESTED_BY_LOOKUPS, { params: { CompId: compId, branchname: branchName } })
         return { success: true, data: response.data }
@@ -122,7 +122,7 @@ export const getSRRequestByLookupsList = async (compId: number, branchName: stri
 }
 
 //getSRTypesById
-export const getSRTypesById = async (compId: number, Id: number): Promise<APIResponse<any>> => {
+export const getSRTypesById = async (compId: string, Id: number): Promise<APIResponse<any>> => {
     try {
         const response = await api.get(URL_GET_SERVICE_REQUEST_TYPES_BY_ID, { params: { CompId: compId, Id: Id } })
         return { success: true, data: response.data }
@@ -133,7 +133,7 @@ export const getSRTypesById = async (compId: number, Id: number): Promise<APIRes
 
 
 //delete Service Request Type
-export const deleteSRType = async (Id: number, compId: number): Promise<APIResponse<any>> => {
+export const deleteSRType = async (Id: number, compId: string): Promise<APIResponse<any>> => {
     try {
         const response = await api.post(URL_POST_DELETE_SR_TYPE_BY_ID, "", { params: { Id: Id, CompId: compId } });
         return { success: true, data: response.data };
@@ -144,7 +144,7 @@ export const deleteSRType = async (Id: number, compId: number): Promise<APIRespo
 
 
 //post service request status
-export const postServiceRequestStatus = async (compId: number, data: any): Promise<APIResponse<any>> => {
+export const postServiceRequestStatus = async (compId: string, data: any): Promise<APIResponse<any>> => {
     try {
         const response = await api.post(URL_POST_ADD_SR_STATUS, data, { params: { CompId: compId } });
         return { success: true, data: response.data };
@@ -155,7 +155,7 @@ export const postServiceRequestStatus = async (compId: number, data: any): Promi
 
 
 //post for update service request status
-export const postUpdateServiceRequestStatus = async (compId: number, Id: number, data: any): Promise<APIResponse<any>> => {
+export const postUpdateServiceRequestStatus = async (compId: string, Id: number, data: any): Promise<APIResponse<any>> => {
     try {
         const response = await api.post(URL_POST_UPDATE_SR_STATUS, data, { params: { CompId: compId, Id: Id } });
         return { success: true, data: response.data };
@@ -166,7 +166,7 @@ export const postUpdateServiceRequestStatus = async (compId: number, Id: number,
 
 
 // delete service request status
-export const postDeleteServiceRequestStatus = async (compId: number, Id: number): Promise<APIResponse<any>> => {
+export const postDeleteServiceRequestStatus = async (compId: string, Id: number): Promise<APIResponse<any>> => {
     try {
         const response = await api.post(URL_POST_DELETE_SR_STATUS, "", { params: { CompId: compId, Id: Id } });
         return { success: true, data: response.data };
@@ -176,7 +176,7 @@ export const postDeleteServiceRequestStatus = async (compId: number, Id: number)
 };
 
 //post for update service request type
-export const postUpdateServiceRequesttype = async (compId: number, Id: number, branchName: string, data: any): Promise<APIResponse<any>> => {
+export const postUpdateServiceRequesttype = async (compId: string, Id: number, branchName: string, data: any): Promise<APIResponse<any>> => {
     try {
         const response = await api.post(URL_POST_UPDATE_SR_TYPE, data, { params: { CompId: compId, Id: Id, branchName: branchName } });
         return { success: true, data: response.data };
@@ -186,7 +186,7 @@ export const postUpdateServiceRequesttype = async (compId: number, Id: number, b
 };
 
 //service for updating sequence
-export const postUpdateStatusSequence = async (compId: number, ServiceRequestStatusSequence:string): Promise<APIResponse<any>> => {
+export const postUpdateStatusSequence = async (compId: string, ServiceRequestStatusSequence:string): Promise<APIResponse<any>> => {
     try {
         const response = await api.post(URL_POST_UPDATE_SR_STATUS_SEQUENCE, '', { params: { CompId: compId,serReqStatus:ServiceRequestStatusSequence } });
         return { success: true, data: response.data };

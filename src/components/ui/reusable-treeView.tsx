@@ -179,11 +179,10 @@ const TreeNode: React.FC<TreeNodeProps> = ({
     
     if (hasChildren) {
       return isExpanded ? 
-        <FolderOpen className="w-4 h-4 text-blue-500" /> : 
-        <Folder className="w-4 h-4 text-blue-500" />;
+        <FolderOpen className="h-4 w-4 text-yellow-600" /> : 
+        <Folder className="h-4 w-4 text-yellow-600" />;
     }
-    
-    return <File className="w-4 h-4 text-gray-500" />;
+    return <File className="h-4 w-4 text-yellow-600" />;
   };
 
   const renderTitle = () => {

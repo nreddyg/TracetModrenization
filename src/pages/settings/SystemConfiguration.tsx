@@ -203,24 +203,24 @@ const SystemConfiguration = () => {
       <div className="p-6 space-y-6 animate-fade-in">
         <h1 className="text-2xl font-bold text-gray-900">System Configuration</h1>
 
-        <Tabs defaultValue="hierarchy" className="space-y-6">
+        <Tabs defaultValue="smtp" className="space-y-6">
           <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="hierarchy" className="flex items-center gap-2">
+            {/* <TabsTrigger value="hierarchy" className="flex items-center gap-2">
               <Server className="h-4 w-4" />
               Hierarchy
-            </TabsTrigger>
+            </TabsTrigger> */}
             <TabsTrigger value="smtp" className="flex items-center gap-2">
               <Mail className="h-4 w-4" />
               SMTP
             </TabsTrigger>
-            <TabsTrigger value="parameters" className="flex items-center gap-2">
+            {/* <TabsTrigger value="parameters" className="flex items-center gap-2">
               <Settings2 className="h-4 w-4" />
               Parameters
             </TabsTrigger>
             <TabsTrigger value="password" className="flex items-center gap-2">
               <Lock className="h-4 w-4" />
               Password Policy
-            </TabsTrigger>
+            </TabsTrigger> */}
           </TabsList>
 
           <TabsContent value="hierarchy" className="space-y-6">

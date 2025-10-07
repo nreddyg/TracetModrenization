@@ -159,58 +159,58 @@ const navigation: NavItem[] = [
       // },
     ],
   },
-  {
-    label: 'Masters',
-    icon: Building2,
-    link: '/masters',
-    children: [
-      {
-        label: 'Organization',
-        icon: Building2,
-        link: '/masters/organization',
-      },
-      {
-        label: 'User',
-        icon: Users,
-        link: '/masters/user',
-      },
-      {
-        label: 'Vendor',
-        icon: UserRoundCheckIcon,
-        link: '/masters/vendor',
-      },
-      {
-        label: 'Customer',
-        icon: UserPlus,
-        link: '/masters/customer',
-      },
-      // {
-      //   label: 'Company Hierarchy',
-      //   icon: Building2,
-      //   link: '/masters/company-hierarchy',
-      // },
-      // {
-      //   label: 'Department',
-      //   icon: Building2,
-      //   link: '/masters/department',
-      // },
-      // {
-      //   label: 'Assets & Inventory',
-      //   icon: Package,
-      //   link: '/masters/assets-inventory',
-      // },
-      // {
-      //   label: 'Maintenance',
-      //   icon: Wrench,
-      //   link: '/masters/maintenance',
-      // },
-      // {
-      //   label: 'Reports',
-      //   icon: FileText,
-      //   link: '/masters/reports',
-      // },
-    ],
-  },
+  // {
+  //   label: 'Masters',
+  //   icon: Building2,
+  //   link: '/masters',
+  //   children: [
+  //     {
+  //       label: 'Organization',
+  //       icon: Building2,
+  //       link: '/masters/organization',
+  //     },
+  //     {
+  //       label: 'User',
+  //       icon: Users,
+  //       link: '/masters/user',
+  //     },
+  //     {
+  //       label: 'Vendor',
+  //       icon: UserRoundCheckIcon,
+  //       link: '/masters/vendor',
+  //     },
+  //     {
+  //       label: 'Customer',
+  //       icon: UserPlus,
+  //       link: '/masters/customer',
+  //     },
+  //     // {
+  //     //   label: 'Company Hierarchy',
+  //     //   icon: Building2,
+  //     //   link: '/masters/company-hierarchy',
+  //     // },
+  //     // {
+  //     //   label: 'Department',
+  //     //   icon: Building2,
+  //     //   link: '/masters/department',
+  //     // },
+  //     // {
+  //     //   label: 'Assets & Inventory',
+  //     //   icon: Package,
+  //     //   link: '/masters/assets-inventory',
+  //     // },
+  //     // {
+  //     //   label: 'Maintenance',
+  //     //   icon: Wrench,
+  //     //   link: '/masters/maintenance',
+  //     // },
+  //     // {
+  //     //   label: 'Reports',
+  //     //   icon: FileText,
+  //     //   link: '/masters/reports',
+  //     // },
+  //   ],
+  // },
   // {
   //   label: 'CWIP',
   //   icon: HardHat,
@@ -437,43 +437,43 @@ const navigation: NavItem[] = [
   //   icon: Package,
   //   link: '/changepassword'
   // },  
-   {
-    label: 'Software assets',
-    icon: Package,
-    link: '/software-assets',
-    children: [
-      {
-        label: 'Asset Registry',
-        icon: Package,
-        link: '/software-assets/asset-registry',
-      },
-       {
-        label: 'License Assignment',
-        icon: Settings,
-        link: '/software-assets/license-assignment',
-      },
-      {
-        label: 'Usage Tracking',
-        icon: HardHat,
-        link: '/software-assets/usage-tracking',
-      },
-      {
-        label: 'Compliance & Audit',
-        icon: Cog,
-        link: '/software-assets/compliance&audit',
-      },
-        {
-        label: 'Reports',
-        icon: Cog,
-        link: '/software-assets/reports',
-      },
-      // {
-      //   label: 'Advanced Setup',
-      //   icon: Settings,
-      //   link: '/settings/advanced-setup',
-      // },
-    ],
-  },
+  //  {
+  //   label: 'Software assets',
+  //   icon: Package,
+  //   link: '/software-assets',
+  //   children: [
+  //     {
+  //       label: 'Asset Registry',
+  //       icon: Package,
+  //       link: '/software-assets/asset-registry',
+  //     },
+  //      {
+  //       label: 'License Assignment',
+  //       icon: Settings,
+  //       link: '/software-assets/license-assignment',
+  //     },
+  //     {
+  //       label: 'Usage Tracking',
+  //       icon: HardHat,
+  //       link: '/software-assets/usage-tracking',
+  //     },
+  //     {
+  //       label: 'Compliance & Audit',
+  //       icon: Cog,
+  //       link: '/software-assets/compliance&audit',
+  //     },
+  //       {
+  //       label: 'Reports',
+  //       icon: Cog,
+  //       link: '/software-assets/reports',
+  //     },
+  //     // {
+  //     //   label: 'Advanced Setup',
+  //     //   icon: Settings,
+  //     //   link: '/settings/advanced-setup',
+  //     // },
+  //   ],
+  // },
 ];
 
 const AppSidebar: React.FC = () => {

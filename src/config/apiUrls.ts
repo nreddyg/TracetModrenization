@@ -101,3 +101,8 @@ export const URL_DUPLICATE_UPDATE_CHECK_NO='/api/ServiceDeskAPI/CheckUpdateDupli
 // export const URL_POST_DEPARTMENT_DATA=`/api/Masters/GetDepartmentDetailsByCompanyId`;
 export const URL_GET_DEPARTMENT_DATA = `/api/Masters/GetDepartmentDetailsByCompanyId`;
 export const URL_POST_DEPARTMENT_DATA = `/api/Masters/SubmitdepartmentLevels`;
+
+// Master's Company Hierarchy Screen
+
+export const URL_GET_COMPANY_HIERARCHY_DATA = `/api/Masters/GetHeirarchyDetailsByCompanyId`
+export const URL_POST_COMPANY_HIERARCHY_DATA=`/api/Masters/GetHeirarchyDetailsByCompanyId`;

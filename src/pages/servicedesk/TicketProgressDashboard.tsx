@@ -27,7 +27,9 @@ const TicketProgressDashboard = () => {
     defaultValues: fields.reduce((acc, f) => {
       acc[f.name!] = f.defaultValue ?? ''
       return acc;
-    }, {} as GenericObject),
+    },{} as GenericObject),
+    mode: 'onChange',
+    reValidateMode: "onChange"
   });
   const { control, register, handleSubmit, trigger, watch, setValue, getValues, reset, formState: { errors } } = form;
   const [activeView, setActiveView] = useState('graphs');
@@ -230,7 +232,7 @@ const TicketProgressDashboard = () => {
     }
   };
   //search data by using filters
-  const handleSearch=(type:string)=>{
+  const handleSearch = (type: string) => {
     let payload = {
       FiltersPayloadDetails: [
         {
@@ -239,15 +241,17 @@ const TicketProgressDashboard = () => {
           categoryids: watch("ServiceRequestType"),
           startdate: watch("StartDate") ? formatDate(watch('StartDate'), 'DD/MM/YYYY') : "",
           enddate: watch("EndDate") ? formatDate(watch("EndDate"), 'DD/MM/YYYY') : "",
-          assigneeids: watch("Assignees").join(),
-          usergroupids: watch("UserGroups").join(),
+          assigneeids: watch("Assignees") ? watch("Assignees").join() : '',
+          usergroupids: watch("UserGroups") ? watch("UserGroups").join() : '',
         },
       ],
     }
-    if(type==='UserGroups'){
-      fetchStatusDataByUserGroups(payload)
-    }else if(type==='FetchAll'){
-      fetchAnalyticsData(payload);
+    if (!watch('Assignees') || (watch('Assignees') && watch('Assignees')?.length <= 10)) {
+      if (type === 'UserGroups') {
+        fetchStatusDataByUserGroups(payload)
+      } else if (type === 'FetchAll') {
+        fetchAnalyticsData(payload);
+      }
     }
   }
   //render fields based on field type
@@ -256,7 +260,16 @@ const TicketProgressDashboard = () => {
     if (!name || !show || (roleName !== 'Root Admin' && name === 'Assignees')) return null;
     const validationRules = {
       required: isRequired ? `${label} is required` : false,
+      ...(name === 'Assignees' && {
+        validate: {
+          maxAllowedTen: (value: any) => {
+            const count = Array.isArray(value) ? value.length : 0;
+            return count <= 10 || 'You can select up to 10 users only';
+          },
+        },
+      }),
     };
+
     switch (fieldType) {
       case 'text':
         return (

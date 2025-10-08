@@ -1123,7 +1123,7 @@ const getSelectedValuesText = () => {
               {loading && <Loader2 className="h-4 w-4 animate-spin text-gray-400" />}
               {status === 'error' && <AlertCircle className="h-4 w-4 text-red-500" />}
               {status === 'warning' && <AlertCircle className="h-4 w-4 text-yellow-500" />}
-              {allowClear && normalizedValue.length > 0 && !loading && (
+              {allowClear && normalizedValue.length > 0 && !loading && !disabled && (
                 <button
                   type="button"
                   onClick={(e) => {

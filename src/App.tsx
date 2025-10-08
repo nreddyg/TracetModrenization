@@ -35,6 +35,7 @@ const TicketCreate = WrapperLazyComponent(() => import("./pages/TicketCreate"));
 const Organization = WrapperLazyComponent(() => import("./pages/masters/Organization"));
 const CompanyHierarchy = WrapperLazyComponent(() => import("./pages/masters/CompanyHierarchy"));
 const Department = WrapperLazyComponent(() => import("./pages/masters/Department"));
+const CostCenter=WrapperLazyComponent(() => import("./pages/masters/CostCenter"));
 const AssetsMasters = WrapperLazyComponent(() => import("./pages/masters/AssetsMasters"));
 const MaintenanceMasters = WrapperLazyComponent(() => import("./pages/masters/MaintenanceMasters"));
 const ReportsMasters = WrapperLazyComponent(() => import("./pages/masters/ReportsMasters"));
@@ -168,6 +169,7 @@ const AnimatedRoutes = () => {
                   <Route path="/masters/organization" element={<Organization />} />
                   <Route path="/masters/company-hierarchy" element={<CompanyHierarchy />} />
                   <Route path="/masters/department" element={<Department />} />
+                  <Route path='/masters/costcenter' element={<CostCenter/>}/>
                   <Route path="/masters/assets-inventory" element={<AssetsMasters />} />
                   <Route path="/masters/maintenance" element={<MaintenanceMasters />} />
                   <Route path="/masters/reports" element={<ReportsMasters />} />

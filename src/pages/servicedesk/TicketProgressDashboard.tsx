@@ -335,6 +335,7 @@ const TicketProgressDashboard = () => {
                 value={ctrl.value}
                 onChange={ctrl.onChange}
                 error={errors[name]?.message as string}
+                maxTagTextLength={12}
               />
             )}
           />

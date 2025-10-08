@@ -72,6 +72,7 @@ const tablePermissions: TablePermissions = {
 const Configuration = () => {
   const companyId = useAppSelector(state => state.projects.companyId);
   const branch=useAppSelector(state => state.projects.branch) || '';
+    const branchId=useAppSelector(state=>state.projects.branchId) || localStorage.getItem('BranchId');
   const [fields, setFields] = useState<BaseField[]>(CONFIGURATION_DB);
   const dispatch = useDispatch()
   const msg = useMessage()
@@ -181,7 +182,7 @@ const Configuration = () => {
   }, [companyId, branch])
   const fetchAllServiceRequests = async () => {
     dispatch(setLoading(true));
-    await getServiceRequestTypes(companyId,branch).then(res => {
+    await getServiceRequestTypes(companyId,branchId).then(res => {
       if (res.success && res.data) {
         setServiceRequestTypeData(res.data)
       } else {
@@ -519,6 +520,8 @@ const Configuration = () => {
                   value={ctrl.value}
                   onChange={ctrl.onChange}
                   error={errors[name]?.message as string}
+                  maxTagCount={2}
+                  maxTagTextLength = {15}
                 />
               )}
             />

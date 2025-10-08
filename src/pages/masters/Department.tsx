@@ -15,6 +15,7 @@ import { ReusableInput } from '@/components/ui/reusable-input';
 import { setLoading } from '@/store/slices/projectsSlice';
 import { getDepartmentData } from '@/services/departmentServices';
 import { useAppSelector } from '@/store';
+import { TreeConfig, TreeView } from '@/components/ui/reusable-treeView';
 
 
 interface TreeNode {
@@ -24,6 +25,14 @@ interface TreeNode {
   children?: TreeNode[];
   type: 'company' | 'department' | 'unit';
 }
+
+export const treeConfig: TreeConfig = {
+  isCheckable: false,
+  showIcon: true,     // ✅ Enables automatic icons
+  showLine: false,
+  Multiple: true,
+  expandAll: true,
+};
 
 const mockData: TreeNode = {
   id: '1',
@@ -98,6 +107,8 @@ const Department = () => {
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set(['1', '2', '3', '4', '5']));
   const [selectedNode, setSelectedNode] = useState<TreeNode | null>(mockData);
   const [fields, setFields] = useState<BaseField[]>(DEPARTMENT_DB);
+    const [departrmentData, setDepartmentData]=useState([])
+
   const companyId = useAppSelector(state => state.projects.companyId);
   const dispatch = useDispatch()
   const msg = useMessage()
@@ -134,15 +145,15 @@ const Department = () => {
 
     return (
       <div key={node.id} className=''>
-        <div
+        {/* <div
           className={cn(
             "flex items-center gap-2 py-1.5 px-2 hover:bg-accent/50 cursor-pointer rounded-sm transition-colors",
             isSelected && "bg-accent"
           )}
           style={{ paddingLeft: `${level * 20 + 8}px` }}
           onClick={() => setSelectedNode(node)}
-        >
-          {hasChildren ? (
+        > */}
+          {/* {hasChildren ? (
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -162,11 +173,12 @@ const Department = () => {
           <Folder className="h-4 w-4 text-yellow-600" />
           <span className="text-sm">
             {node.name}({node.code})
-          </span>
-        </div>
+          </span> */}
+        {/* </div> */}
         {hasChildren && isExpanded && (
           <div>
-            {node.children?.map(child => renderTreeNode(child, level + 1))}
+            {/* {node.children?.map(child => renderTreeNode(child, level + 1))} */}
+            <TreeView treeData={departrmentData} config={treeConfig} />
           </div>
         )}
       </div>
@@ -205,11 +217,30 @@ const Department = () => {
     }
   }
 
+    const treefun = (data, id) => {
+    const treeData = [];
+    const keys =[];
+    data.forEach((item) => {
+      keys.push(item.key)
+      if (item.parent === id) {
+        item.title = item.text;
+        item.key = item.id;
+        item.value = item[item.name];
+        const child = treefun(data, item.id);
+        item.children = child;
+        treeData.push(item);
+      }
+    });
+    // setExpandedKeys(keys);
+    return treeData;
+  };
   async function fetchDepartmentGetData(companyId) {
     dispatch(setLoading(true))
     await getDepartmentData(companyId).then(res => {
       if (res.data && res.data.length > 0) {
         console.log("res",res);
+         const result=treefun(res.data,"#")
+        setDepartmentData(result)
       } else {
         msg.warning(res.data.message || "No Data Found")
       }

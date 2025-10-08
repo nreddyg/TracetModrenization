@@ -196,6 +196,8 @@ const TicketView = () => {
       acc[f.name!] = f.defaultValue ?? '';
       if(f.name==="RequestedById"){
         acc[f.name!]=LoggedInUserData?.UserId || ''
+      }else if(f.name==='Branch'){
+        acc[f.name!]=branch || ''
       }
       return acc;
     }, {} as GenericObject),
@@ -207,8 +209,6 @@ const TicketView = () => {
     }
   });
   const { control, register, handleSubmit, trigger, watch, setValue, reset, formState: { errors } } = form;
-
-
   //api calls to be made in edit mode
   useEffect(() => {
     if (!isCreateMode) {
@@ -219,6 +219,11 @@ const TicketView = () => {
     }
   }, [isCreateMode,requestTypeId])
 
+  useEffect(()=>{
+    if(isCreateMode && branch){
+      form.setValue('Branch',branch)
+    }
+  },[isCreateMode,branch])
   // Function to clear all form values but preserve all field configurations and options
   const clearAllFormValues = useCallback(() => {
     const currentFields = fields;

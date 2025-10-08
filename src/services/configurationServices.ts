@@ -71,9 +71,9 @@ export const postServiceRequestType = async (compId: string, branchName: string,
 };
 
 //getServiceRequestType List 
-export const getServiceRequestTypes = async (CompId: string,branchName:string): Promise<APIResponse<any>> => {
+export const getServiceRequestTypes = async (CompId: string,branchId:string): Promise<APIResponse<any>> => {
     try {
-        const response = await api.get(URL_GET_SERVICE_REQUEST_TYPES, { params: { CompId: CompId,branchName:branchName } })
+        const response = await api.get(URL_GET_SERVICE_REQUEST_TYPES, { params: { CompId: CompId,BranchId:branchId } })
         return { success: true, data: response.data, }
     } catch (err: any) {
         return { success: false, message: err.response?.data?.message || err.message, status: err.response?.status };

@@ -982,6 +982,7 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
                   onChange={ctrl.onChange}
                   error={errors[name]?.message as string}
                   {...(name === 'AssetId' ? { suffixIcon: <FaSearch onClick={() => navigateToAssetTable()} style={{ fontSize: "16px", color: "#617ce7", cursor: 'pointer' }} color="white" /> } : {})}
+                   {...(!isCreateMode?{maxTagTextLength:10}:{})}
                 />
               )}
             />

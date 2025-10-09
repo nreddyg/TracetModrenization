@@ -176,7 +176,7 @@ const TicketView = () => {
   const storeData = useAppSelector(state => state);
   const [srtLookupData,setSrtLookupData]=useState<any[]>([]);
   const [assetsData,setAssetData]=useState([])
-  let LoggedInUserData=JSON.parse(localStorage.getItem('LoggedInUser'));
+  let LoggedInUserData=JSON.parse(localStorage.getItem('LoggedInUser')) || {};
   const companyId=useAppSelector(state=>state.projects.companyId);
   const branch=useAppSelector(state=>state.projects.branch) || '';
   const branchId=useAppSelector(state=>state.projects.branchId) || localStorage.getItem('BranchId');
@@ -612,7 +612,7 @@ const TicketView = () => {
           Assets = res.success ? res.data.AssetsListDetails ? res.data.AssetsListDetails : [] : []
         }).catch(err => { }).finally(() => { })
       }
-      let AssetsData: GenericObject[] = [...selectedAssetCodesData, ...Assets.filter((item: any) => item.EmpId == 'AIPL1693')]
+      const AssetsData: GenericObject[] = Array.from(new Map([...selectedAssetCodesData, ...Assets.filter((i:any) => i.EmpId === LoggedInUserData?.EmployeeId)].map(item => [item.AssetCode, item])).values());
       const allResponses = {
         ServiceRequestType: { data: SRTLookUp.status === 'fulfilled' && SRTLookUp.value.success && SRTLookUp.value.data.ServiceRequestTypesLookup ? SRTLookUp.value.data.ServiceRequestTypesLookup : [], label: 'ServiceRequestTypeName', value: 'ServiceRequestTypeName' },
         AssigneeSelectedUsers: {

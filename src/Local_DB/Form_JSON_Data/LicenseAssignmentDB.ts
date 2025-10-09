@@ -12,7 +12,6 @@ export const SOFTWARE_DB: BaseField[] = [
         defaultValue: [],
         selectAll: true,
         show: true,
-        jsontype: 'employeeID'
     },
     {
         label: "Department",
@@ -25,7 +24,6 @@ export const SOFTWARE_DB: BaseField[] = [
         defaultValue: [],
         selectAll: true,
         show: true,
-        jsontype: 'department'
     },
     {
         label: "Software",
@@ -33,12 +31,21 @@ export const SOFTWARE_DB: BaseField[] = [
         name: "software",
         placeholder: "Select Software",
         isRequired: true,
-        visible: false,
         options: [],
         defaultValue: [],
         selectAll: true,
         show: true,
-        jsontype: 'software'
+    },
+    {
+        label: "Available Licenses",
+        fieldType: "dropdown",
+        name: "Licenses",
+        placeholder: "Select License",
+        isRequired: true,
+        options: [],
+        defaultValue: [],
+        selectAll: true,
+        show: true,
     },
     {
         label: "Assignment Date",

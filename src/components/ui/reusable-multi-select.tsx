@@ -868,7 +868,7 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
                     
                     return (
                       <div key={groupIndex}>
-                        <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50/50 sticky top-0">
+                        <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider bg-white sticky top-0 z-10 border-b border-gray-100">
                           {group.label}
                         </div>
                         {groupSelectAll && renderGroupSelectAll(groupFilteredOptions, group.label)}

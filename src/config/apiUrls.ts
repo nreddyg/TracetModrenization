@@ -115,3 +115,21 @@ export const URL_GET_TICKET_PROGRESS_DASHBOARD_DATA = '/api/ServiceDeskAPI/GetSe
 
 // Change password
 export const URL_CHANGE_PASSWORD = '/api/PasswordAPI/ChangePassword';
+
+
+//Software Assets Module
+//Software Asset Categories
+export const URL_ADD_OR_UPDATE_CATEGORY='/api/ITAssetAPI/AddUpdateSoftwareAssetCategories';
+export const URL_GET_ALL_CATEGORIES='/api/ITAssetAPI/GetSoftwareAssetCategories';
+export const URL_DELETE_CATEGORY_BY_ID='/api/ITAssetAPI/DeleteSoftwareAssetCategories';
+
+//Asset Registry
+export const URL_ADD_OR_UPDATE_SOFTWARE_LICENSE='/api/ITAssetAPI/AddUpdateSoftwareLicenses';
+export const URL_GET_SOFTWARES_LICENSES_LIST='/api/ITAssetAPI/GetSoftwareLicenses';
+export const URL_DELETE_SOFTWARE_BY_ID='/api/ITAssetAPI/DeleteSoftwareLicenses';
+export const URL_DELETE_SOFTWARE_LICENSE_BY_ID='/api/ITAssetAPI/DeleteSoftwareLicensesDetails';
+
+//LICENSE ASSIGNMENT
+export const URL_ADD_OR_UPDATE_LICENSE_ASIGNMENT='/api/ITAssetAPI/AddUpdateLicenseAssignment';
+export const URL_GET_LICENSE_ASSIGNMENT_LIST='/api/ITAssetAPI/GetLicenseAssignment';
+export const URL_DELETE_LICENSE_ASSIGNMENT_BY_ID='/api/ITAssetAPI/DeleteLicenseAssignment';

@@ -257,7 +257,7 @@ const LicenseAssignment = () => {
                             <div className="space-y-4">
                                 <span className='text-2xl'>Assign License To Employee</span>
                                 <div className={`grid xxs:grid-cols-1 xs2:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-6`}>
-                                    {getFieldsByNames(['employeeID', 'department', 'software', 'assignmentDate']).map((field) => {
+                                    {getFieldsByNames(['employeeID', 'department', 'software','Licenses','assignmentDate']).map((field) => {
                                         return <div className="flex-1 items-center space-x-2">
                                             {renderField(field)}
                                         </div>;

@@ -3,14 +3,14 @@ import ReusableTable, { TableAction, TablePermissions } from '@/components/ui/re
 import { ScrollArea } from '@radix-ui/react-scroll-area';
 import { Button } from '@/components/ui/button';
 import { Edit, Plus, Search, Trash2 } from 'lucide-react';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ReusableButton } from '@/components/ui/reusable-button';
 import { Input } from '@/components/ui/input';
 import { ColumnDef } from '@tanstack/react-table';
 import { useToast } from '@/hooks/use-toast';
 import { SOFTWARE_DB } from '@/Local_DB/Form_JSON_Data/LicenseAssignmentDB';
-import { REGISTRY_DB } from '@/Local_DB/Form_JSON_Data/AssetRegistryDB';
+import { cellsData, REGISTRY_DB } from '@/Local_DB/Form_JSON_Data/AssetRegistryDB';
 import { ReusableTextarea } from '@/components/ui/reusable-textarea';
 import { Controller, useForm } from 'react-hook-form';
 import ReusableSingleCheckbox from '@/components/ui/reusable-single-checkbox';
@@ -42,6 +42,7 @@ const SoftwareDataColumns = [
     // { id: 'S Date', accessorKey: "Expiry Date", header: "Expiry Date" },
 ]
 
+
 const AssetRegistry = () => {
  const [search, setSearch] = useState('');
     const navigate = useNavigate();
@@ -51,10 +52,123 @@ const AssetRegistry = () => {
     const { toast } = useToast();
 
 
+ const defaultRow = {
+    key: 0,
+    LicenseKey:'' ,
+LicenseDetailId:"",
+LicenseCost: "",
+ExpiryDate: "",
+Status: ""
+    // cellsData: cellsData,
+  };
+    const [dataSource, setDatasource] = useState([defaultRow,{...defaultRow,key:1},{...defaultRow,key:2}]);
+
     const getFieldsByNames = (names: string[]) => {
         return fields.filter(f => names.includes(f.name!));
     }
 
+
+      const tableColumns =  [
+    {
+      accessorKey:"LicenseKey",
+     header:"License Key",
+      cell: ({ row }) => (
+        
+              <span > 
+                <ReusableInput
+                value={row.original.LicenseKey}
+             onChange={(e)=>handleChange(e.target.value,row.id,"LicenseKey")}
+                name='LicenseKey'
+                isRequired={true}
+                className='m-2 mt-0 bg-white border-2'
+                size='small'
+                ></ReusableInput>
+
+            </span>
+      )
+    },
+     {
+      accessorKey:"LicenseCost",
+     header:"Cost per License",
+      cell: ({ row }) => (
+        
+              <span > 
+                <ReusableInput
+                value={row.original.LicenseCost}
+            onChange={(e)=>handleChange(e.target.value,row.id,"LicenseCost")}
+                name='LicenseCost'
+                isRequired={true}
+                className='m-2  mt-0 bg-white border-2'
+                     size='small'
+                ></ReusableInput>
+
+            </span>
+      )
+    },
+     {
+      accessorKey:"ExpiryDate",
+     header:"Expiry/Renewal Date",
+      cell: ({ row }) => (
+        
+              <span > 
+                <ReusableDatePicker
+                value={row.original.ExpiryDate}
+            onChange={(e)=>handleChange(e,row.id,"ExpiryDate")}
+            placeholder=' '
+                size="sm"
+                isRequired={true}
+                className='m-2 bg-white border-2'
+                wrapperClassName='m-2 ms-0  me-3'
+                backgroundColor="white"
+                ></ReusableDatePicker>
+
+            </span>
+      )
+    },
+       {
+      accessorKey:"Status",
+     header:"Status",
+      cell: ({ row }) => (
+        
+              <span onClick={()=>{console.log(row)}}> 
+               <ReusableDropdown 
+                containerClassName=" p-2"
+                className='h-8 border-2 '
+    placeholder=" "
+    options={[
+        { label: "Active", value: "Active" }, { label: "Expired", value: "Expired" },{ label: "Suspended", value: "Suspended" },
+    ]}
+    allowClear={true}
+      defaultValue={row.original.Status }
+                onChange={(e)=>handleChange(e,row.id,"Status")}
+                  backgroundColor="white"
+                  size={"small"}
+              
+   >
+                  
+               </ReusableDropdown>
+
+            </span>
+      )
+    },
+ 
+  ]
+
+  function handleChange(val,id,accessorKey){
+let data=dataSource
+//  data.forEach((obj)=>{
+//     if(obj.key==id){
+//         obj[accessorKey]=val
+//     }
+//  })
+data[parseInt(id)][accessorKey]=val
+
+   setDatasource(data)
+
+  }
+  useEffect(()=>{
+console.log(dataSource)
+  },[dataSource])
     const form = useForm<GenericObject>({
         defaultValues: fields.reduce((acc, f) => {
             acc[f.name!] = f.defaultValue ?? '';
@@ -247,17 +361,35 @@ const AssetRegistry = () => {
                                 <span className='text-2xl'>Add New Software Asset</span>
                                 <div className={`grid xxs:grid-cols-1 xs2:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-6`}>
                                     {getFieldsByNames(['SoftwareName', 'Version', 'VendorId', 'CategoryId','LicenseType','NumberOfLicenses']).map((field) => {
-                                        return <div className="flex-1 items-center space-x-2">
+                                        return<> <div className="flex-1 items-center space-x-2">
                                             {renderField(field)}
-                                        </div>;
+                                             {(field.name==='NumberOfLicenses') && <div className='mt-2 float-right'><ReusableButton
+                                htmlType="button"
+                                variant="default"
+                                // onClick={()=>{ console.log(dataSource);  setDatasource([...dataSource, { ...defaultRow, key: dataSource.length + 1 }]);}}
+                                iconPosition="left"
+                                size="middle"
+                                className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+                            > {'Click To Enter license Details'}
+                            </ReusableButton></div>}   
+                                        </div>
+                                     </>
                                     })}
+                                  
                                 </div>
                                 <div className={`grid xxs:grid-cols-1 xs2:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-1 gap-6 mb-6`}>
-                                    {getFieldsByNames(['description']).map((field) => {
+                                    {/* {getFieldsByNames(['description']).map((field) => {
                                         return <div className="flex-1 items-center space-x-2">
                                             {renderField(field)}
                                         </div>;
-                                    })}
+                                    })} */}
+                                     
+                                                   <ReusableTable data={dataSource} columns={tableColumns}   enableSearch = {false}
+  enableColumnVisibility = {false}
+  enableExport = {false}
+   enableSorting = {false}
+  enableFiltering = {false}/>
+
                                 </div>
                             </div>
                         </div>
@@ -265,7 +397,7 @@ const AssetRegistry = () => {
                             <ReusableButton
                                 htmlType="button"
                                 variant="default"
-                                onClick={null}
+                                onClick={()=>{ console.log(dataSource);  setDatasource([...dataSource, { ...defaultRow, key: dataSource.length + 1 }]);}}
                                 iconPosition="left"
                                 size="middle"
                                 className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"

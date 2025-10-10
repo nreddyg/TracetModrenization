@@ -34,6 +34,7 @@ export interface SelectProps {
   size?: 'small' | 'middle' | 'large';
   status?: 'error' | 'warning';
   error?: string;
+  backgroundColor?:string
   maxTagCount?: number;
   containerClassName?: string;
   filterOption?: boolean | ((input: string, option: SelectOption) => boolean);
@@ -73,6 +74,7 @@ export const ReusableDropdown: React.FC<SelectProps> = ({
   containerClassName,
   isRequired = false,
   error,
+  backgroundColor,
   maxTagCount,
   filterOption = true,
   notFoundContent = 'No data',
@@ -580,8 +582,8 @@ export const ReusableDropdown: React.FC<SelectProps> = ({
   };
 
   return (
-    <div ref={selectRef} className={cn("relative w-full")}>
-      <div className="flex items-center gap-1 mb-2">{renderLabel()}</div>
+    <div ref={selectRef} className={cn("relative w-full",containerClassName)}>
+     {label&&<div className="flex items-center gap-1 mb-2">{renderLabel()}</div>}
 
       <div className="relative " >
         <div
@@ -593,7 +595,7 @@ export const ReusableDropdown: React.FC<SelectProps> = ({
             className
           )}
           style={{ 
-            backgroundColor: disabled ? '#f3f4f6' : 'hsl(240deg 73.33% 97.06%)', 
+            backgroundColor: disabled ? '#f3f4f6' : backgroundColor?backgroundColor:'hsl(240deg 73.33% 97.06%)', 
             borderColor: 'hsl(214.29deg 31.82% 91.37%)' 
           }}
           title={

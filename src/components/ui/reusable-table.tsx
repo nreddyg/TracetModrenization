@@ -191,7 +191,7 @@ export interface ReusableTableProps<T = any> {
   title?: string;
   permissions?: TablePermissions;
   actions?: TableAction<T>[];
-  onAdd?: () => void;
+  onAdd?: (dat:any) => void;
   onRefresh?: () => void;
   onBulkDelete?: (selectedRows: T[]) => void;
   onBulkEdit?: (selectedRows: T[]) => void;
@@ -1485,7 +1485,7 @@ export function ReusableTable<T = any>({
   enableSorting = true,
   enableFiltering = true,
   enableGrouping = false,
-  enableInlineEdit = false,
+  enableInlineEdit = true,
   enableKeyboardNav = false,
   enableVirtualScrolling = false,
   enableAdvancedFilters = false,
@@ -1521,6 +1521,7 @@ export function ReusableTable<T = any>({
   const [grouping, setGrouping] = useLocalStorage<GroupingState>(`${storageKey}-grouping`, []);
   const [expanded, setExpanded] = useState<ExpandedState>({});
   const [globalFilter, setGlobalFilter] = useState('');
+  const [newRow, setNewRow] = useState<T | null>(null);
   const [columnOrder, setColumnOrder] = useLocalStorage<ColumnOrderState>(`${storageKey}-column-order`, []);
   const [columnSizing, setColumnSizing] = useLocalStorage<ColumnSizingState>(`${storageKey}-column-sizing`, {});
   const [pagination, setPagination] = useLocalStorage<PaginationState>(`${storageKey}-pagination`, {
@@ -1770,9 +1771,9 @@ useEffect(() => {
           setOpenColumnId(open ? column.id : null);
         }}>
           <PopoverTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+          {(enableFiltering || enableSorting) ? <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
               <MoreVertical className="h-4 w-4 text-muted-foreground" />
-            </Button>
+            </Button>:<span className="h-6 w-6 p-0"></span>}
           </PopoverTrigger>
           <PopoverContent
             className="w-60 p-4 space-y-4"
@@ -1970,12 +1971,31 @@ useEffect(() => {
                 Refresh
               </Button>
             )}
-            {onAdd && permissions.canAdd && (
+            {/* {onAdd && permissions.canAdd && (
               <Button onClick={onAdd}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add New
               </Button>
-            )}
+            )} */}
+            {onAdd && permissions.canAdd && (
+<Button
+  onClick={() => {
+    const emptyRecord: any = {};
+    columns.forEach((col: any) => {
+      const colId = col.id || col.accessorKey || (col.accessorFn ? col.header : null);
+      if (colId && colId !== "actions" && colId !== "select") {
+        emptyRecord[colId] = "";
+      }
+    });
+    setNewRow(emptyRecord);
+  }}
+>
+<Plus className="w-4 h-4 mr-2" />
+  Add New
+</Button>
+
+)}
+ 
           </div>
         </div>
       )}
@@ -2151,7 +2171,119 @@ useEffect(() => {
                   items={table.getRowModel().rows.map(r => r.id)}
                   strategy={verticalListSortingStrategy}
                 >
+
                   <tbody className="bg-background divide-y divide-border">
+{newRow && (
+<tr className="bg-muted/30">
+
+    {table.getAllLeafColumns().map((column) => {
+
+      const colId = column.id;
+
+      const colMeta = column.columnDef.meta as any;
+ 
+      // Skip non-data columns
+
+      if (colId === "select" || colId === "actions") {
+
+        return <td key={colId}></td>;
+
+      }
+ 
+      const inputType = colMeta?.editType || "text";
+
+      const options = colMeta?.options || [];
+ 
+      return (
+<td key={colId} className="p-2">
+
+          {inputType === "select" ? (
+<Select
+
+              onValueChange={(val) =>
+
+                setNewRow((prev) => ({ ...prev!, [colId]: val }))
+
+              }
+>
+<SelectTrigger className="h-8">
+<SelectValue placeholder="Select..." />
+</SelectTrigger>
+<SelectContent>
+
+                {options.map((opt: any) => (
+<SelectItem key={opt.value} value={opt.value}>
+
+                    {opt.label}
+</SelectItem>
+
+                ))}
+</SelectContent>
+</Select>
+
+          ) : (
+<Input
+
+              type={inputType}
+
+              value={(newRow as any)[colId] || ""}
+
+              onChange={(e) =>
+
+                setNewRow((prev) => ({
+
+                  ...prev!,
+
+                  [colId]: e.target.value,
+
+                }))
+
+              }
+
+              className="h-8"
+
+            />
+
+          )}
+</td>
+
+      );
+
+    })}
+ 
+    {/* Save / Cancel buttons */}
+<td className="p-2 flex gap-2">
+<Button
+
+        size="sm"
+
+        variant="default"
+
+        onClick={() => {
+
+          if (onAdd) onAdd(newRow);
+
+          setNewRow(null);
+
+        }}
+>
+<Check className="w-4 h-4" />
+</Button>
+<Button
+
+        size="sm"
+
+        variant="ghost"
+
+        onClick={() => setNewRow(null)}
+>
+<X className="w-4 h-4" />
+</Button>
+</td>
+</tr>
+
+)}
+ 
                     {table.getRowModel().rows.map(row => {
                       const rowId = getRowId(row.original, row.index);
                       const isSelected = rowSelection[rowId] || false;

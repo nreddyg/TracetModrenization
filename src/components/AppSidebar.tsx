@@ -437,43 +437,43 @@ const navigation: NavItem[] = [
   //   icon: Package,
   //   link: '/changepassword'
   // },  
-  //  {
-  //   label: 'Software assets',
-  //   icon: Package,
-  //   link: '/software-assets',
-  //   children: [
-  //     {
-  //       label: 'Asset Registry',
-  //       icon: Package,
-  //       link: '/software-assets/asset-registry',
-  //     },
-  //      {
-  //       label: 'License Assignment',
-  //       icon: Settings,
-  //       link: '/software-assets/license-assignment',
-  //     },
-  //     {
-  //       label: 'Usage Tracking',
-  //       icon: HardHat,
-  //       link: '/software-assets/usage-tracking',
-  //     },
-  //     {
-  //       label: 'Compliance & Audit',
-  //       icon: Cog,
-  //       link: '/software-assets/compliance&audit',
-  //     },
-  //       {
-  //       label: 'Reports',
-  //       icon: Cog,
-  //       link: '/software-assets/reports',
-  //     },
-  //     // {
-  //     //   label: 'Advanced Setup',
-  //     //   icon: Settings,
-  //     //   link: '/settings/advanced-setup',
-  //     // },
-  //   ],
-  // },
+   {
+    label: 'Software assets',
+    icon: Package,
+    link: '/software-assets',
+    children: [
+      {
+        label: 'Asset Registry',
+        icon: Package,
+        link: '/software-assets/asset-registry',
+      },
+       {
+        label: 'License Assignment',
+        icon: Settings,
+        link: '/software-assets/license-assignment',
+      },
+      {
+        label: 'Usage Tracking',
+        icon: HardHat,
+        link: '/software-assets/usage-tracking',
+      },
+      {
+        label: 'Compliance & Audit',
+        icon: Cog,
+        link: '/software-assets/compliance&audit',
+      },
+        {
+        label: 'Reports',
+        icon: Cog,
+        link: '/software-assets/reports',
+      },
+      // {
+      //   label: 'Advanced Setup',
+      //   icon: Settings,
+      //   link: '/settings/advanced-setup',
+      // },
+    ],
+  },
 ];
 
 const AppSidebar: React.FC = () => {

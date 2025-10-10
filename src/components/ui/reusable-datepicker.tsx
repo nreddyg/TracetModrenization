@@ -1961,6 +1961,7 @@ const cn = (...classes: (string | undefined | null | boolean)[]) => {
 export interface DatePickerProps {
   value?: Date | string;
   defaultValue?: Date | string;
+  backgroundColor?:string;
   onChange?: (date: Date | undefined) => void;
   placeholder?: string;
   disabled?: boolean;
@@ -2397,6 +2398,7 @@ export const ReusableDatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
     {
       value,
       defaultValue,
+      backgroundColor,
       onChange,
       placeholder,
       disabled = false,
@@ -2974,11 +2976,11 @@ const isDateDisabled = (date: Date): boolean => {
               sizeClasses[size],
               disabled ? "opacity-50 bg-gray-100 cursor-not-allowed" : "bg-background",
               actualOpen && !disabled && "ring-2 border-blue-500 bg-background",
-              getStatusClasses(),
+              getStatusClasses(),"bg-background",
               className
             )}
             style={{ 
-              backgroundColor: disabled ? '#f3f4f6' : 'hsl(240deg 73.33% 97.06%)', 
+              backgroundColor: disabled ? '#f3f4f6' :(backgroundColor)?backgroundColor: 'hsl(240deg 73.33% 97.06%)', 
               borderColor: disabled ? undefined : 'hsl(214.29deg 31.82% 91.37%)' 
             }}
             onClick={handleWrapperClick}

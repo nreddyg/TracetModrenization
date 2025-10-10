@@ -1,9 +1,9 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Plus, Trash2, ChevronRight, ChevronDown, Folder, Info } from 'lucide-react';
+import { Search, Plus, Trash2, ChevronRight, ChevronDown, Folder, Info, HelpCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ReusableButton } from '@/components/ui/reusable-button';
 import { BaseField, GenericObject } from '@/Local_DB/types/types';
@@ -13,9 +13,11 @@ import { useMessage } from '@/components/ui/reusable-message';
 import { useDispatch } from 'react-redux';
 import { ReusableInput } from '@/components/ui/reusable-input';
 import { setLoading } from '@/store/slices/projectsSlice';
-import { getDepartmentData } from '@/services/departmentServices';
+import { deleteDepartmentData, getDepartmentData, getDepartmentDataByID, getHierarchyLevelsdata, postOrUpdateDepartmentData } from '@/services/departmentServices';
 import { useAppSelector } from '@/store';
 import { TreeConfig, TreeView } from '@/components/ui/reusable-treeView';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { MenubarShortcut } from '@/components/ui/menubar';
 
 
 interface TreeNode {
@@ -102,32 +104,97 @@ const mockData: TreeNode = {
   ]
 };
 
+
+const SearchButton = {
+  type: "text",
+  name: "searchValue",
+  value: "",
+  placeholder: "Search...",
+};
+interface SelectedNode {
+  id?: string | number;
+  parent?: string | number;
+  type?: string | number;
+  TypeId?: string | number;
+  // add other fields if needed
+}
 const Department = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set(['1', '2', '3', '4', '5']));
-  const [selectedNode, setSelectedNode] = useState<TreeNode | null>(mockData);
-  const [fields, setFields] = useState<BaseField[]>(DEPARTMENT_DB);
-    const [departrmentData, setDepartmentData]=useState([])
-
+  const [selectedLevel, setSelectedLevel] = useState(99);
+  const [selectedNodeParents, setSelectedNodeParents] = useState([]);
+  const [fields, setFields] = useState(DEPARTMENT_DB);
+  const [selectedNode, setSelectedNode] = useState({
+    BranchName: "",
+    BranchCode: "",
+    TypeId: 0,
+    id: 99999,
+    parent: 0,
+    type: ''
+  });
+  const [departrmentData, setDepartmentData] = useState<BaseField[]>(fields[selectedLevel]);
+  const [recordToEditId, setRecordToEditId] = useState(null);
+  // const [selectedNode, setSelectedNode] = useState<SelectedNode>({});
+  const [selectedId, setSelectedId] = useState('');
+  const [treeView, setTreeview] = useState([]);
+  const [tree, setTree] = useState([]);
+  const [lastLevel, setLastLevel] = useState(null);
+  const [level, setLevel] = useState([]);
+  const [nextLevel, setNextLevel] = useState("");
+  const [search, setSearch] = useState(SearchButton);
+  const [breadCrumb, setBreadCrumb] = useState(["Company"]);
   const companyId = useAppSelector(state => state.projects.companyId);
+  const [isClearDisable, setIsClearDisable] = useState(true);
+  const [disable, setDisable] = useState(true);
+  // const branch = useAppSelector(state=>state.projects.branchId)
   const dispatch = useDispatch()
   const msg = useMessage()
 
+  // const branch = 
+
+  useEffect(() => {
+    let name = []
+    for (let i = 0; i <= level.length; i++) {
+      if (selectedLevel !== 99) {
+        name.push(level[i]?.LevelName)
+        setNextLevel(level[i + 1]?.LevelName)
+        if (selectedLevel === level[i]?.Id) {
+          setBreadCrumb(["Company", ...name])
+          return;
+        }
+      } else {
+        setBreadCrumb(["Company"]);
+        setNextLevel(level[0]?.LevelName);
+      }
+    }
+  }, [selectedLevel])
 
   useEffect(() => {
     if (companyId) {
-      fetchDepartmentGetData(companyId)
+      fetchDepartmentGetData(companyId);
     }
   }, [companyId])
 
+  useEffect(() => {
+    if (companyId && selectedLevel) getlevels();
+    console.log(selectedLevel, "Nag")
+  }, [companyId, selectedLevel])
+
+  useEffect(() => {
+    if (recordToEditId !== null) {
+      getIndDepartDataByID(recordToEditId, companyId)
+    }
+  }, [recordToEditId])
+
   const form = useForm<GenericObject>({
-    defaultValues: fields.reduce((acc, f) => {
+    defaultValues: departrmentData.reduce((acc, f) => {
       acc[f.name!] = f.defaultChecked ?? '';
       return acc;
     }, {} as GenericObject),
     // mode: 'onChange',
     // reValidateMode: "onChange"
   });
+
   const toggleNode = (nodeId: string) => {
     const newExpanded = new Set(expandedNodes);
     if (newExpanded.has(nodeId)) {
@@ -141,44 +208,19 @@ const Department = () => {
   const renderTreeNode = (node: TreeNode, level: number = 0): React.ReactNode => {
     const hasChildren = node.children && node.children.length > 0;
     const isExpanded = expandedNodes.has(node.id);
-    const isSelected = selectedNode?.id === node.id;
+    // const isSelected = selectedNode?.id === node.id;
 
     return (
       <div key={node.id} className=''>
-        {/* <div
-          className={cn(
-            "flex items-center gap-2 py-1.5 px-2 hover:bg-accent/50 cursor-pointer rounded-sm transition-colors",
-            isSelected && "bg-accent"
-          )}
-          style={{ paddingLeft: `${level * 20 + 8}px` }}
-          onClick={() => setSelectedNode(node)}
-        > */}
-          {/* {hasChildren ? (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleNode(node.id);
-              }}
-              className="p-0.5 hover:bg-muted rounded"
-            >
-              {isExpanded ? (
-                <ChevronDown className="h-4 w-4 text-muted-foreground" />
-              ) : (
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
-              )}
-            </button>
-          ) : (
-            <div className="w-5" />
-          )}
-          <Folder className="h-4 w-4 text-yellow-600" />
-          <span className="text-sm">
-            {node.name}({node.code})
-          </span> */}
-        {/* </div> */}
         {hasChildren && isExpanded && (
           <div>
             {/* {node.children?.map(child => renderTreeNode(child, level + 1))} */}
-            <TreeView treeData={departrmentData} config={treeConfig} />
+            <TreeView
+              treeData={mainTreeData}
+              config={treeConfig}
+              onSelect={onSelect}
+            // onExpand={onExpand}
+            />
           </div>
         )}
       </div>
@@ -186,13 +228,11 @@ const Department = () => {
   };
 
   const { control, register, handleSubmit, trigger, watch, setValue, reset, formState: { errors } } = form;
-  const getFieldsByNames = (names: string[]) => fields.filter(f => names.includes(f.name!));
+  const getFieldsByNames = (names: string[]) => departrmentData.filter(f => names.includes(f.name!));
 
   const renderField = (field: BaseField) => {
-    const { name, label, fieldType, isRequired, validationPattern, patternErrorMessage, dependsOn, show = true } = field;
-    if (!show && dependsOn && !watch(dependsOn)) {
-      return null;
-    }
+    const { name, label, fieldType, isRequired, dependsOn, show = true } = field;
+    if (!name || !show) return null;
     const validationRules = {
       required: isRequired ? `${label} is Required` : false,
     };
@@ -204,12 +244,12 @@ const Department = () => {
             name={name}
             control={control}
             rules={validationRules}
-            render={({ field: ctrl, fieldState }) => (
+            render={({ field: ctrl }) => (
               <ReusableInput
                 {...field}
                 value={ctrl.value}
                 onChange={ctrl.onChange}
-                error={fieldState.error?.message}
+                error={errors[name]?.message as string}
               />
             )}
           />
@@ -217,9 +257,40 @@ const Department = () => {
     }
   }
 
-    const treefun = (data, id) => {
+  const mainTreeData = useMemo(() => {
+    const loop = (data) =>
+      data.map((item) => {
+        const title = item.title.toLowerCase().includes(search.value.toLowerCase()) ? (
+          <span key={item.key}>
+            <span className={`${search.value === "" ? "" : "site-tree-search-value"}`}>{item.title}</span>
+          </span>
+        ) : (
+          <span key={item.key}>{item.title}</span>
+        )
+        if (item.children) {
+          return {
+            type: item.type,
+            id: item.id,
+            title,
+            name: item.Name,
+            key: item.key,
+            children: loop(item.children),
+          };
+        }
+        return {
+          type: item.type,
+          id: item.id,
+          title,
+          name: item.Name,
+          key: item.key,
+        };
+      });
+    return loop(treeView);
+  }, [treeView]);
+
+  const treefun = (data, id) => {
     const treeData = [];
-    const keys =[];
+    const keys = [];
     data.forEach((item) => {
       keys.push(item.key)
       if (item.parent === id) {
@@ -234,18 +305,216 @@ const Department = () => {
     // setExpandedKeys(keys);
     return treeData;
   };
+
   async function fetchDepartmentGetData(companyId) {
     dispatch(setLoading(true))
     await getDepartmentData(companyId).then(res => {
       if (res.data && res.data.length > 0) {
-        console.log("res",res);
-         const result=treefun(res.data,"#")
-        setDepartmentData(result)
+        setTree(res.data);
+        const latestTreeData = treefun(res.data, "#");
+        setTreeview(latestTreeData);
+        if (selectedLevel === 99) {
+          let data = departrmentData;
+          data[selectedLevel][0].value = res.data[0].Name;
+          data[selectedLevel][1].value = res.data[0].Code;
+          setDepartmentData(data)
+        }
       } else {
         msg.warning(res.data.message || "No Data Found")
       }
     }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
   }
+
+  // 103 level conatins labels for departmeent module in the departmentApi
+  const getlevels = async () => {
+    dispatch(setLoading(true))
+    await getHierarchyLevelsdata(103, companyId).then((res) => {
+      if (res.data) {
+        getjsonMapping(res.data["Department/Unit"][0].LevelName);
+        fetchDepartmentGetData(companyId);
+        setLastLevel(res.data["Department/Unit"][0].LevelName.at(-1)["Id"]);
+        setNextLevel(res.data["Department/Unit"][0].LevelName[0].LevelName)
+        setLevel(res.data["Department/Unit"][0].LevelName);
+      }
+    })
+      .catch((err) => { }).finally(() => { dispatch(setLoading(false)) })
+  };
+
+  // assigning labels to the JSONdata of departmentDB
+  const getjsonMapping = (leveldata) => {
+    let Labels = Object.keys(fields);
+    Labels.forEach((element) => {
+      var index = leveldata.findIndex((x) => x.Id === parseInt(element));
+      if (index !== -1) {
+        fields[parseInt(element)].forEach((item) => {
+          if (item.name === "Name") {
+            item.label = `${leveldata[index].LevelName} Name`;
+            item.heading = `${leveldata[index].LevelName} Details`;
+          }
+          if (item.name === "Code") {
+            item.label = `${leveldata[index].LevelName} Code`;
+          }
+        });
+      }
+    });
+  };
+
+  // getting departmentDataByID
+  async function getIndDepartDataByID(id, companyId) {
+    dispatch(setLoading(true))
+    await getDepartmentDataByID(id, companyId).then(res => {
+      if (res.data && res.data.length > 0) {
+        console.log("resdddd", res.data[0])
+        const details = res.data[0];
+        if (details) {
+          reset({
+            Name: details.Name,
+            Code: details.Code
+          })
+        }
+      } else {
+        msg.warning(res.data.message || "No Data Found")
+      }
+    }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
+  }
+
+  const getParents = (node, id, parents = []) => {
+    if (node.id === id || node.id === 99999) return parents;
+    for (let child of node.children) {
+      const result = getParents(child, id, [...parents, node]);
+      if (result) return result;
+    }
+    return null;
+  };
+
+  const handleRoute = () => {
+    // handleReset();
+    setRecordToEditId(null);
+    const treeData = structuredClone(tree);
+    const tempObj = {
+      BranchName: "",
+      BranchCode: "",
+      TypeId: selectedLevel + 1,
+      id: 99999,
+      parent: selectedNode?.id,
+      type: ''
+    };
+
+    treeData.push(tempObj);
+    const latestTreeData = treefun(treeData, "#");
+
+    let selectId =
+      selectedNode["children"].length >= 1
+        ? selectedNode["children"][0].id
+        : 99999;
+    const findroots = getParents(latestTreeData[0], selectId);
+    setSelectedNodeParents(findroots);
+    setSelectedLevel((prev) => 1 + +prev);
+    setSelectedNode(tempObj);
+    setDepartmentData(fields[selectedLevel + 1])
+  };
+
+  const onSelect = (selectedKeys, info) => {
+    const findroots = getParents(treeView[0], info.node.id);
+    setSelectedNodeParents(findroots);
+    setSelectedId(info.node.id)
+    setDisable(false);
+    setRecordToEditId(info.node.id);
+    setSelectedNode(info.node);
+    setDepartmentData(fields[info.node.type])
+    setSelectedLevel(parseInt(info.node.type));
+  };
+
+  const handleDelete = () => {
+    if (selectedId && companyId) {
+      delBranch(selectedId, companyId);
+    }
+  }
+
+  //    delete based on Id
+  const delBranch = async (leafId, companyId) => {
+    dispatch(setLoading(true))
+    await deleteDepartmentData(leafId, companyId, "")
+      .then((res) => {
+        if (res.data !== undefined) {
+          if (res.data.status === true) {
+            // clearFields(0);
+            setRecordToEditId(null);
+            msg.success(res.data.message);
+            fetchDepartmentGetData(companyId);
+          } else {
+            msg.warning(res.data.message);
+          }
+        }
+      })
+      .catch((err) => {
+        // TracetMessage("error","65vh","Failed to Delete Department","departmentdelete");
+      })
+      .finally(() => { dispatch(setLoading(false)) })
+  }
+  const name = watch('Name');
+  const code = watch('Code');
+
+  const onSubmit = () => {
+    updateTreeData();
+  }
+
+  const updateTreeData = async () => {
+    const submitedData = [];
+    const parentNodes = structuredClone(selectedNodeParents);
+    const result = await Promise.all(
+      parentNodes.map(async (parent) => {
+        try {
+          if (parent.id !== 0) {
+            const response = await getDepartmentDataByID(parent.id, companyId);
+            return response.data[0];
+          }
+        } catch (error) {
+          msg.warning("Failed to Fetch Data");
+        }
+      })
+    );
+    submitedData.push(...result, selectedNode);
+    submit(submitedData);
+  };
+
+  const submit = async (submitedData: any[]) => {
+    dispatch(setLoading(true));
+    let payload = {
+      "Details": [
+        {
+          "ParentId": recordToEditId ? selectedNode.id || '' : selectedNode?.parent || '',
+          "TypeId": recordToEditId ? selectedNode?.type || '' : selectedNode?.TypeId || '',
+          "Name": name,
+          "Code": code,
+        }]
+    }
+    // let branchId = recordToEditId ? selectedNode?.id : 0
+    console.log("payload", payload);
+    const branchId = Number(recordToEditId ? selectedNode?.id : 0);
+    await postOrUpdateDepartmentData(branchId, companyId, payload).then(res => {
+      if (res.data.status) {
+        fetchDepartmentGetData(companyId);
+        msg.success(`${res.data.message}`);
+        if (recordToEditId === null) {
+          handleReset();
+          msg.success(`${res.data.message}`);
+        }
+        // dispatch(isbranchlistupdate(true));
+      } else {
+        msg.warning(`${res.data.message}`);
+      }
+    }).catch(err => { })
+      .finally(() => { dispatch(setLoading(false)) })
+  }
+
+  const handleReset = () => {
+    reset({
+      Name: "",
+      Code: ""
+    })
+    // form.reset()
+  };
 
   return (
     <div className="bg-hsl(214.3 31.8% 91.4%) overflow-y-auto">
@@ -262,7 +531,7 @@ const Department = () => {
           <ReusableButton
             htmlType="button"
             variant="default"
-            onClick={null}
+            onClick={handleReset}
             iconPosition="left"
             size="middle"
             className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
@@ -272,12 +541,12 @@ const Department = () => {
           <ReusableButton
             htmlType="button"
             variant="default"
-            onClick={null}
+            onClick={handleSubmit(onSubmit)}
             iconPosition="left"
             size="middle"
             className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
           >
-            Save
+            {selectedLevel <= 99 || recordToEditId === null ? "Save" : "Update"}
           </ReusableButton>
         </div>
       </header>
@@ -295,13 +564,54 @@ const Department = () => {
                 className="pl-9 "
               />
             </div>
-            <div className="flex gap-2 flex items-center justify-center">
-              <Button size="sm" variant="outline" className="h-8">
-                <Plus className="h-4 w-4" />
-              </Button>
-              <Button size="sm" variant="outline" className="h-8">
-                <Trash2 className="h-4 w-4 text-destructive" />
-              </Button>
+            <div className="flex gap-3 flex items-center justify-center">
+              <div>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <ReusableButton
+                        size="small"
+                        className="bg-primary h-[2rem] hover:bg-blue-700 text-white"
+                        style={{
+                          cursor: selectedLevel >= 99 + level.length || disable ? "not-allowed" : "pointer",
+                        }}
+                        disabled={selectedLevel >= 99 + level.length || disable}
+                        onClick={() => {
+                          if (!(selectedLevel >= 99 + level.length || disable)) {
+                            handleRoute();
+                            handleReset();
+                            setDisable(true);
+                          }
+                        }}
+                      >
+                        <Plus className="h-4 w-4" />
+                      </ReusableButton>
+                    </TooltipTrigger>
+                    {selectedLevel !== lastLevel && recordToEditId && (
+                      <TooltipContent>
+                        Add {nextLevel ? nextLevel : "Department/Unit"}
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+              <div>
+                <ReusableButton
+                  size="small"
+                  // className="border border-0 h-8 w-8 flex items-center justify-center"
+                  className="bg-primary h-[2rem] hover:bg-blue-700 text-white"
+                  style={{
+                    cursor: disable || selectedLevel === 99 ? "not-allowed" : "pointer",
+                  }}
+                  onClick={() => {
+                    if (!disable && selectedLevel !== 99) {
+                      handleDelete();
+                    }
+                  }}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </ReusableButton>
+              </div>
             </div>
           </div>
           <div className="min-h-20 max-h-[27rem] overflow-y-auto p-2">
@@ -312,21 +622,44 @@ const Department = () => {
         {/* Details Panel */}
         <div className="flex-1 overflow-y-auto">
           <div className="p-6 space-y-6">
-            <div className="flex items-center gap-2">
-              <h2 className="text-lg font-semibold">Department</h2>
-              <Info className="h-4 w-4 text-muted-foreground" />
+            <div className="flex flex-col gap-2">
+              <div>
+                <h4 className="master-heading mb-2 flex items-center gap-2">
+                  {!recordToEditId
+                    ? selectedLevel === 99
+                      ? "Department"
+                      : "Add Department"
+                    : selectedLevel === 99
+                      ? "Department"
+                      : "Update Department"}
+                  {selectedLevel !== lastLevel && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button type="button">
+                            <Info className="mb-1 cursor-pointer" fontSize={22} />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          To Add {nextLevel || "Department/Unit"} to{" "}
+                          {breadCrumb?.at(-1) || "the selected department"}, click on{" "}
+                          {breadCrumb?.at(-1) || "the name"} and then click on the plus icon.
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+                </h4>
+              </div>
+              <div className="text-sm text-primary">
+                <h6 className="breadCrumb">{breadCrumb.map(x => { return `${x} >` })}</h6>
+              </div>
             </div>
-
-            <div className="text-sm text-primary">
-              Department &gt;
-            </div>
-
             <div className="space-y-6">
-              <h3 className="text-base font-semibold">Department Details</h3>
-
+              {/* <h5 className="text-base font-semibold">Department Details</h5> */}
+              <h5>{recordToEditId && selectedLevel !== 99 ? `Update ${departrmentData[0].heading}` : `${selectedLevel !== 99 ? "Enter" : ""} ${departrmentData[0].heading}`}</h5>
               <div className="px-1">
                 <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4">
-                  {getFieldsByNames(['depname', 'depcode']).map((field) => {
+                  {getFieldsByNames(['Name', 'Code']).map((field) => {
                     return <div className="flex items-center space-x-2">
                       {renderField(field)}
                     </div>;

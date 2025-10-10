@@ -7,7 +7,7 @@ import { Search, Plus, Trash2, ChevronRight, ChevronDown, Folder, Info, File } f
 import { cn } from '@/lib/utils';
 import { ReusableButton } from '@/components/ui/reusable-button';
 import { BaseField, GenericObject } from '@/Local_DB/types/types';
-import { DEPARTMENT_DB } from '@/Local_DB/Form_JSON_Data/departmentDB';
+// import { DEPARTMENT_DB } from '@/Local_DB/Form_JSON_Data/departmentDB';
 import { Controller, useForm } from 'react-hook-form';
 import { useMessage } from '@/components/ui/reusable-message';
 import { useDispatch } from 'react-redux';
@@ -240,7 +240,7 @@ const CompanyHierarchy = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set(['1', '2', '3', '4', '5']));
   const [selectedNode, setSelectedNode] = useState<TreeNode | null>(mockData);
-  const [fields, setFields] = useState<BaseField[]>(DEPARTMENT_DB);
+  const [fields, setFields] = useState<BaseField[]>([]);
   const companyId = useAppSelector(state => state.projects.companyId);
   const [companyData,setCompanyData]=useState([])
   const dispatch = useDispatch()

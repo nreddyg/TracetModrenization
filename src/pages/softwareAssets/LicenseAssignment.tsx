@@ -121,9 +121,15 @@ const LicenseAssignment = () => {
     }
     // fetch all license assignments
     async function fetchAllLicenseAssignments() {
+        dispatch(setLoading(true));
         await getLicenseAssigmentsList(companyId).then(res=>{
             console.log('res',res)
-        })
+            if(res.success && res.data.status===undefined){
+                setDataSource(res.data);
+            }else{
+                msg.warning(res.data.message || 'Failed to fetch license assignments')
+            }
+        }).catch(err=>{}).finally(()=>{dispatch(setLoading(false));})
     }
 
     // handle save
@@ -134,7 +140,7 @@ const LicenseAssignment = () => {
     // handle refresh
     const handleRefresh = useCallback(() => {
         toast({ title: "Data Refreshed", description: "All users data has been updated", });
-        // fetchAllLicenseAssignments();
+        fetchAllLicenseAssignments();
     }, [toast]);
 
     const handleReset = () => {

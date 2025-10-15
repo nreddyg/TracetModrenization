@@ -108,8 +108,22 @@ export const URL_GET_DEPARTMENT_DATA_BY_DEPId = `/api/Masters/GetDepartmentDetai
 export const HIERARCHY_LEVEL_DATA = `/api/Settings/GetHierarchyLevelsData`;
 // Master's Company Hierarchy Screen
 
-export const URL_GET_COMPANY_HIERARCHY_DATA = `/api/Masters/GetHeirarchyDetailsByCompanyId`
-export const URL_POST_COMPANY_HIERARCHY_DATA=`/api/Masters/GetHeirarchyDetailsByCompanyId`;
+export const URL_GET_COMPANY_HIERARCHY_DATA = `/api/Masters/GetHeirarchyDetailsByCompanyId`;
+export const URL_GET_STATE_LOOKUP_DATA = `/api/Masters/StateLookup`;
+export const URL_GET_HIERARCHY_LEVELS_DATA = `/api/Settings/GetHierarchyLevelsData`
+export const URL_POST_COMPANY_HIERARCHY_DATA=`/api/Masters/SubmitBrachLevels`;
+export const URL_DELETE_COMPANY_HIERARCHY_DATA=`/api/Masters/DeleteHeirachyDetailsById`;
+export const URL_GET_COMPANY_HIERARCHY_DATA_BY_BRANCHID=`/api/Masters/GetHeirarchyDetailsByCompanyId`;
+
+// Store Screen
+
+export const URL_GET_STORE_DATA = `/api/Masters/GetStoreDetails`;
+export const URL_DELETE_STORE = `/api/Masters/DeleteStoreDetailsById`;
+export const URL_POST_NEW_STORE = `/api/Masters/AddStoreDetails`;
+export const URL_POST_UPDATE_STORE = `/api/Masters/UpdateStoreDetails`;
+// export const URL_GET_EDIT_STORE_DATA = `/api/Masters/GetStoreDetails`;
+// export const URL_GET_COMPANY_HIERARCHY_DATA = `/api/Masters/GetHeirarchyDetailsByCompanyId`
+// export const URL_POST_COMPANY_HIERARCHY_DATA=`/api/Masters/GetHeirarchyDetailsByCompanyId`;
 
 
 // Master's AssetLocation API's

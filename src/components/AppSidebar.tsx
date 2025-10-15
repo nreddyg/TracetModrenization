@@ -155,6 +155,7 @@ const navigation: NavItem[] = [
       //   icon: BarChart,
       //   link: '/service-desk/mis-reports',
       // },
+    
     ],
   },
   {
@@ -202,7 +203,13 @@ const navigation: NavItem[] = [
         icon: FileText,
         link: '/masters/reports',
       },
+        {
+        label: 'Store',
+        icon: BarChart,
+        link: '/masters/store',
+      },
     ],
+    
   },
   // {
   //   label: 'CWIP',

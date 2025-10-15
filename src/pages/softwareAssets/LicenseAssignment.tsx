@@ -75,8 +75,6 @@ const LicenseAssignment = () => {
     const [deletingRecord,setDeletingRecord]=useState<SoftwareData|null>(null);
     const [isDelModalOpen, setIsDelModalOpen] = useState(false);
     
-
-    
     const form = useForm<GenericObject>({
         defaultValues: fields.reduce((acc, f) => {
             acc[f.name!] = f.defaultValue ?? '';
@@ -84,12 +82,34 @@ const LicenseAssignment = () => {
         }, {} as GenericObject),
     });
 
+    const { control, register, handleSubmit, trigger, watch, setValue, reset, formState: { errors } } = form;
+
+
     useEffect(() => {
         if (companyId && branch) {
             fetchAllLookups()
             fetchAllLicenseAssignments()
         }
     }, [companyId, branch])
+    useEffect(()=>{
+        if(watch('SoftwareId') && companyId){
+            async function fetchSoftwareLicenses() {
+                const softwareId = watch('SoftwareId');
+                dispatch(setLoading(true));
+                await getSoftwaresList(companyId,softwareId).then(res=>{
+                    if(res.success && Array.isArray(res.data) && res.data?.length>0){
+                        if(res.data[0].LicenseDetails && Array.isArray(res.data[0].LicenseDetails) && res.data[0].LicenseDetails?.length>0){
+                            // let LicenseOptions=
+
+                        }
+                        console.log('res',res)
+                    }
+
+                }).catch(err=>{}).finally(()=>{dispatch(setLoading(false));})
+            }
+            fetchSoftwareLicenses();
+        }
+    },[watch('SoftwareId'),companyId])
     //store lookup data in json
     function setLookupsDataInJson(lookupData:any){
         let keys=Object.keys(lookupData);
@@ -123,7 +143,6 @@ const LicenseAssignment = () => {
     async function fetchAllLicenseAssignments() {
         dispatch(setLoading(true));
         await getLicenseAssigmentsList(companyId).then(res=>{
-            console.log('res',res)
             if(res.success && res.data.status===undefined){
                 setDataSource(res.data);
             }else{
@@ -180,7 +199,6 @@ const LicenseAssignment = () => {
         canAdd: true,
         canManageColumns: true,
     };
-    const { control, register, handleSubmit, trigger, watch, setValue, reset, formState: { errors } } = form;
     const getFieldsByNames = (names: string[]) => fields.filter(f => names.includes(f.name!))
     const renderField = (field: BaseField) => {
         const { name, label, fieldType, isRequired, validationPattern, patternErrorMessage, show = true } = field;
@@ -335,7 +353,7 @@ const LicenseAssignment = () => {
                                 <div className="space-y-4">
                                     <span className='text-2xl'>Assign License To Employee</span>
                                     <div className={`grid xxs:grid-cols-1 xs2:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-6`}>
-                                        {getFieldsByNames(['EmployeeId', 'DepartmentId', 'SoftwareId', 'Licenses', 'AssignmentDate']).map((field) => {
+                                        {getFieldsByNames(['EmployeeId', 'DepartmentId', 'SoftwareId', 'LicenseKey', 'AssignmentDate']).map((field) => {
                                             return <div className="flex-1 items-center space-x-2">
                                                 {renderField(field)}
                                             </div>;

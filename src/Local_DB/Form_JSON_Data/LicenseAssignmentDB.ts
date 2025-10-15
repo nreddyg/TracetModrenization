@@ -39,10 +39,10 @@ export const SOFTWARE_DB: BaseField[] = [
     {
         label: "Available Licenses",
         fieldType: "dropdown",
-        name: "Licenses",
+        name: "LicenseKey",
         placeholder: "Select License",
         isRequired: true,
-        options: [{label:'bvevevewebgh',value:'bvevevewebgh'}],
+        options: [],
         defaultValue: [],
         selectAll: true,
         show: true,

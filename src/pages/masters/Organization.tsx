@@ -373,7 +373,7 @@ const Organization = () => {
                       {org?.OrganizationName}
                     </h3>
 
-                    <div className="flex items-center gap-1.5 text-[11px] text-gray-500">
+                    <div className="flex items-center justify-between gap-1.5 text-[11px] text-gray-500">
                       <Badge
                         title="Organization Type"
                         variant="outline"
@@ -381,13 +381,16 @@ const Organization = () => {
                       >
                         {org.OrganizationType}
                       </Badge>
-                      <span>•</span>
+                      <div>
                       <span
                         title={org.CountryName}
                         className="block max-w-[90px] truncate text-[11px] text-gray-500"
                       >
+                        •{' '}
                         {org.CountryName}
                       </span>
+                      </div>
+                      
                     </div>
                   </div>
                 ))}

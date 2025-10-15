@@ -9,7 +9,7 @@ interface APIResponse<T> {
 }
 
 //All Company List Based on UserId
-export const GetOrganizationsList= async (compId:number): Promise<APIResponse<any>> => {
+export const GetOrganizationsList= async (compId:string): Promise<APIResponse<any>> => {
     try {
         const response = await api.get(URL_GET_ORGANIZATION_LIST, { params: { CompId: compId } })
         return {success: true,data: response.data,}

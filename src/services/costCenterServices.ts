@@ -20,9 +20,9 @@ export const getCostCenterData = async (CompId: string): Promise<APIResponse<any
 }
 
 
-export const postCostCenter = async (CompId: string,costcenterId:number): Promise<APIResponse<any>> => {
+export const postCostCenter = async (CompId: string,costcenterId:number,data:any): Promise<APIResponse<any>> => {
     try {
-        const response = await api.post(URL_POST_COSTCENTER, { params: { CompId: CompId ,costcenterId:costcenterId} })
+        const response = await api.post(URL_POST_COSTCENTER,data, { params: { CompId: CompId ,costcenterId:costcenterId} })
         return {success: true,data: response.data,}
     } catch (err: any) {
         return {success: false,message: err.response?.data?.message || err.message,status: err.response?.status};
@@ -38,9 +38,9 @@ export const getCostcenterById=async (CompId: string,id:number): Promise<APIResp
     }
 }
 
-export const deleteCostCenter=async (CompId: string,id:number): Promise<APIResponse<any>> => {
+export const deleteCostCenter=async (CompId: string,id:number,data: any): Promise<APIResponse<any>> => {
     try {
-        const response = await api.get(URL_DELETE_COSTCENTER, { params: {Id:id,CompId:CompId} })
+        const response = await api.post(URL_DELETE_COSTCENTER,data, { params: {Id:id,CompId:CompId} })
         return {success: true,data: response.data,}
     } catch (err: any) {
         return {success: false,message: err.response?.data?.message || err.message,status: err.response?.status};

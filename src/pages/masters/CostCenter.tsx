@@ -1,24 +1,25 @@
 
-import React, { useEffect, useState } from 'react';
+
+
+import React, { useEffect, useMemo, useState } from 'react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Search, Plus, Trash2, ChevronRight, ChevronDown, Folder, Info, File } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Search, Plus, Trash2,  Info, } from 'lucide-react';
 import { ReusableButton } from '@/components/ui/reusable-button';
 import { BaseField, GenericObject } from '@/Local_DB/types/types';
-import { DEPARTMENT_DB } from '@/Local_DB/Form_JSON_Data/departmentDB';
 import { Controller, useForm } from 'react-hook-form';
 import { useMessage } from '@/components/ui/reusable-message';
 import { useDispatch } from 'react-redux';
 import { ReusableInput } from '@/components/ui/reusable-input';
 import { setLoading } from '@/store/slices/projectsSlice';
-import { getDepartmentData } from '@/services/departmentServices';
+import { getHierarchyLevelsdata } from '@/services/departmentServices';
 import { useAppSelector } from '@/store';
-import { TreeConfig, TreeNodeData, TreeView } from '@/components/ui/reusable-treeView';
-import { getCompanyData } from '@/services/companyHierarchyServices';
+import { TreeConfig, TreeView } from '@/components/ui/reusable-treeView';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { deleteCostCenter, getCostcenterById, getCostCenterData, postCostCenter } from '@/services/costCenterServices';
 import { CostCenter_DB } from '@/Local_DB/Form_JSON_Data/CostCenterDB';
-import { getCostCenterData } from '@/services/costCenterServices';
+
+
 interface TreeNode {
   id: string;
   name: string;
@@ -34,6 +35,7 @@ export const treeConfig: TreeConfig = {
   Multiple: true,
   expandAll: true,
 };
+
 const mockData: TreeNode = {
   id: '1',
   name: 'Zoho corporataion',
@@ -101,224 +103,126 @@ const mockData: TreeNode = {
     }
   ]
 };
-// sampleTreeData.ts
 
-export const sampleTreeData: TreeNodeData[] = [
-  {
-    key: "1",
-    title: "Root Folder",
-    children: [
-      {
-        key: "1-1",
-        title: "Documents",
-        children: [
-          {
-            key: "1-1-1",
-            title: "Reports",
-            children: [
-              {
-                key: "1-1-1-1",
-                title: "2025",
-                children: [
-                  { key: "1-1-1-1-1", title: "Q1_Report.pdf", isLeaf: true },
-                  { key: "1-1-1-1-2", title: "Q2_Report.pdf", isLeaf: true },
-                ],
-              },
-              {
-                key: "1-1-1-2",
-                title: "2024",
-                children: [
-                  { key: "1-1-1-2-1", title: "Q1_Report.pdf", isLeaf: true },
-                  { key: "1-1-1-2-2", title: "Q2_Report.pdf", isLeaf: true },
-                ],
-              },
-            ],
-          },
-          {
-            key: "1-1-2",
-            title: "Invoices",
-            children: [
-              { key: "1-1-2-1", title: "Invoice_001.pdf", isLeaf: true },
-              { key: "1-1-2-2", title: "Invoice_002.pdf", isLeaf: true },
-            ],
-          },
-        ],
-      },
-      {
-        key: "1-2",
-        title: "Projects",
-        children: [
-          {
-            key: "1-2-1",
-            title: "React App",
-            children: [
-              {
-                key: "1-2-1-1",
-                title: "src",
-                children: [
-                  {
-                    key: "1-2-1-1-1",
-                    title: "components",
-                    children: [
-                      { key: "1-2-1-1-1-1", title: "Header.tsx", isLeaf: true },
-                      { key: "1-2-1-1-1-2", title: "Footer.tsx", isLeaf: true },
-                    ],
-                  },
-                  {
-                    key: "1-2-1-1-2",
-                    title: "pages",
-                    children: [
-                      { key: "1-2-1-1-2-1", title: "Home.tsx", isLeaf: true },
-                      { key: "1-2-1-1-2-2", title: "About.tsx", isLeaf: true },
-                    ],
-                  },
-                ],
-              },
-              {
-                key: "1-2-1-2",
-                title: "public",
-                children: [
-                  { key: "1-2-1-2-1", title: "index.html", isLeaf: true },
-                  { key: "1-2-1-2-2", title: "favicon.ico", isLeaf: true },
-                ],
-              },
-            ],
-          },
-        ],
-      },
-      {
-        key: "1-3",
-        title: "Images",
-        children: [
-          {
-            key: "1-3-1",
-            title: "Vacation",
-            children: [
-              {
-                key: "1-3-1-1",
-                title: "2024",
-                children: [
-                  { key: "1-3-1-1-1", title: "beach.png", isLeaf: true },
-                  { key: "1-3-1-1-2", title: "mountain.jpg", isLeaf: true },
-                ],
-              },
-            ],
-          },
-        ],
-      },
-      {
-        key: "1-4",
-        title: "System",
-        children: [
-          {
-            key: "1-4-1",
-            title: "Config",
-            children: [
-              {
-                key: "1-4-1-1",
-                title: "App",
-                children: [
-                  {
-                    key: "1-4-1-1-1",
-                    title: "settings.json",
-                    isLeaf: true,
-                  },
-                ],
-              },
-            ],
-          },
-        ],
-      },
-      {
-        key: "1-5",
-        title: "Readme.txt",
-        isLeaf: true,
-      },
-    ],
-  },
-];
 
+const SearchButton = {
+  type: "text",
+  name: "searchValue",
+  value: "",
+  placeholder: "Search...",
+};
+interface SelectedNode {
+  id?: string | number;
+  parent?: string | number;
+  type?: string | number;
+  TypeId?: string | number;
+  // add other fields if needed
+}
 const CostCenter = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set(['1', '2', '3', '4', '5']));
-  const [selectedNode, setSelectedNode] = useState<TreeNode | null>(mockData);
-  // const [fields, setFields] = useState<BaseField[]>(CostCenter_DB);
+  const [selectedLevel, setSelectedLevel] = useState(99);
+  const [selectedNodeParents, setSelectedNodeParents] = useState([]);
+  const [fields, setFields] = useState(CostCenter_DB);
+  const [selectedNode, setSelectedNode] = useState({
+    BranchName: "",
+    BranchCode: "",
+    TypeId: 0,
+    id: 99999,
+    parent: 0,
+    type: ''
+  });
+  const [costCenterData, setCostCenterData] = useState<BaseField[]>(fields[selectedLevel]);
+  const [recordToEditId, setRecordToEditId] = useState(null);
+  console.log("138",recordToEditId)
+  const [selectedId, setSelectedId] = useState('');
+  const [treeView, setTreeview] = useState([]);
+  const [tree, setTree] = useState([]);
+  const [lastLevel, setLastLevel] = useState(null);
+  const [level, setLevel] = useState([]);
+  const [nextLevel, setNextLevel] = useState("");
+  const [search, setSearch] = useState(SearchButton);
+  const [breadCrumb, setBreadCrumb] = useState(["Company"]);
   const companyId = useAppSelector(state => state.projects.companyId);
-  const [companyData,setCompanyData]=useState([])
+  const [isClearDisable, setIsClearDisable] = useState(true);
+  const [disable, setDisable] = useState(true);
+  const [expandedKeys, setExpandedKeys] = useState<Set<string>>(new Set());
+  // const branch = useAppSelector(state=>state.projects.branchId)
   const dispatch = useDispatch()
   const msg = useMessage()
-   const [selectedLevel,setSelectedLevel]=useState(99)
-  const [allLevelsJson,setAllLevelsJson]=useState(CostCenter_DB)
-  const [fields, setFields] = useState<BaseField[]>(allLevelsJson[99]);
-      const [costcenterData, setCostcenterData]=useState([])
-  
 
+  // const branch = 
+
+  useEffect(() => {
+    let name = []
+    for (let i = 0; i <= level.length; i++) {
+      if (selectedLevel !== 99) {
+        name.push(level[i]?.LevelName)
+        setNextLevel(level[i + 1]?.LevelName)
+        if (selectedLevel === level[i]?.Id) {
+          setBreadCrumb(["Company", ...name])
+          return;
+        }
+      } else {
+        setBreadCrumb(["Company"]);
+        setNextLevel(level[0]?.LevelName);
+      }
+    }
+  }, [selectedLevel])
 
   useEffect(() => {
     if (companyId) {
-      fetchCompanyGetData(companyId)
+      fetchCostCenterGetData(companyId);
     }
   }, [companyId])
 
+  useEffect(() => {
+    if (companyId && selectedLevel) getlevels();
+    console.log(selectedLevel, "Nag")
+  }, [companyId, selectedLevel])
+
+  useEffect(() => {
+    if (recordToEditId !== null) {
+      getIndCostCenterById( companyId,recordToEditId,)
+    }
+  }, [recordToEditId])
+
   const form = useForm<GenericObject>({
-    defaultValues: fields.reduce((acc, f) => {
+    defaultValues: costCenterData.reduce((acc, f) => {
       acc[f.name!] = f.defaultChecked ?? '';
       return acc;
     }, {} as GenericObject),
     // mode: 'onChange',
     // reValidateMode: "onChange"
   });
-  const toggleNode = (nodeId: string) => {
-    const newExpanded = new Set(expandedNodes);
-    if (newExpanded.has(nodeId)) {
-      newExpanded.delete(nodeId);
-    } else {
-      newExpanded.add(nodeId);
-    }
-    setExpandedNodes(newExpanded);
-  };
+
+const handleToggleNode = (
+  newExpandedKeys: string[],
+  info: { expanded: boolean; node: any }
+) => {
+  setExpandedKeys(new Set(newExpandedKeys));
+};
+
+
 
   const renderTreeNode = (node: TreeNode, level: number = 0): React.ReactNode => {
     const hasChildren = node.children && node.children.length > 0;
     const isExpanded = expandedNodes.has(node.id);
-    const isSelected = selectedNode?.id === node.id;
+    // const isSelected = selectedNode?.id === node.id;
 
     return (
       <div key={node.id} className=''>
-        {/* <div
-          className={cn(
-            "flex items-center gap-2 py-1.5 px-2 hover:bg-accent/50 cursor-pointer rounded-sm transition-colors",
-            isSelected && "bg-accent"
-          )}
-          style={{ paddingLeft: `${level * 20 + 8}px` }}
-          onClick={() => setSelectedNode(node)}
-        > */}
-          {/* {hasChildren ? (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleNode(node.id);
-              }}
-              className="p-0.5 hover:bg-muted rounded"
-            >
-              {isExpanded ? (
-                <ChevronDown className="h-4 w-4 text-muted-foreground" />
-              ) : (
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
-              )}
-            </button>
-          ) : (
-            <div className="w-5" />
-          )}
-          <Folder className="h-4 w-4 text-yellow-600" />
-          <span className="text-sm">
-            {node.name}({node.code})
-          </span> */}
-        {/* </div> */}
         {hasChildren && isExpanded && (
           <div>
             {/* {node.children?.map(child => renderTreeNode(child, level + 1))} */}
-            <TreeView treeData={costcenterData} config={treeConfig} />
+            <TreeView
+              treeData={mainTreeData}
+              config={treeConfig}
+              onSelect={onSelect}
+            onExpand={handleToggleNode}
+             expandedKeys={Array.from(expandedKeys)}
+             
+            />
           </div>
         )}
       </div>
@@ -326,13 +230,11 @@ const CostCenter = () => {
   };
 
   const { control, register, handleSubmit, trigger, watch, setValue, reset, formState: { errors } } = form;
-  const getFieldsByNames = (names: string[]) => fields.filter(f => names.includes(f.name!));
+  const getFieldsByNames = (names: string[]) => costCenterData.filter(f => names.includes(f.name!));
 
   const renderField = (field: BaseField) => {
-    const { name, label, fieldType, isRequired, validationPattern, patternErrorMessage, dependsOn, show = true } = field;
-    if (!show && dependsOn && !watch(dependsOn)) {
-      return null;
-    }
+    const { name, label, fieldType, isRequired, dependsOn, show = true } = field;
+    if (!name || !show) return null;
     const validationRules = {
       required: isRequired ? `${label} is Required` : false,
     };
@@ -344,21 +246,98 @@ const CostCenter = () => {
             name={name}
             control={control}
             rules={validationRules}
-            render={({ field: ctrl, fieldState }) => (
+            render={({ field: ctrl }) => (
               <ReusableInput
                 {...field}
                 value={ctrl.value}
                 onChange={ctrl.onChange}
-                error={fieldState.error?.message}
+                error={errors[name]?.message as string}
               />
             )}
           />
         );
     }
   }
+
+  // const mainTreeData = useMemo(() => {
+  //   const loop = (data) =>
+  //     data.map((item) => {
+  //       const title = item.title.toLowerCase().includes(search.value.toLowerCase()) ? (
+  //         <span key={item.key}>
+  //           <span className={`${search.value === "" ? "" : "site-tree-search-value"}`}>{item.title}</span>
+  //         </span>
+  //       ) : (
+  //         <span key={item.key}>{item.title}</span>
+  //       )
+  //       if (item.children) {
+  //         return {
+  //           type: item.type,
+  //           id: item.id,
+  //           title,
+  //           name: item.Name,
+  //           key: item.key,
+  //           children: loop(item.children),
+  //         };
+  //       }
+  //       return {
+  //         type: item.type,
+  //         id: item.id,
+  //         title,
+  //         name: item.Name,
+  //         key: item.key,
+  //       };
+  //     });
+  //   return loop(treeView);
+  // }, [treeView]);
+
+  const mainTreeData = useMemo(() => {
+  const loop = (data) =>
+    data.map((item) => {
+      const titleStr = item.title || item.name || '';
+      const searchVal = search.value.trim().toLowerCase();
+
+      if (!searchVal) {
+        return {
+          ...item,
+          title: <span key={item.key}>{titleStr}</span>,
+          children: item.children ? loop(item.children) : [],
+        };
+      }
+
+      const index = titleStr.toLowerCase().indexOf(searchVal);
+      if (index === -1) {
+        return {
+          ...item,
+          title: <span key={item.key}>{titleStr}</span>,
+          children: item.children ? loop(item.children) : [],
+        };
+      }
+
+      const beforeStr = titleStr.substring(0, index);
+      const matchStr = titleStr.substring(index, index + searchVal.length); // ✅ keep original case
+      const afterStr = titleStr.substring(index + searchVal.length);
+
+      const title = (
+        <span key={item.key}>
+          {beforeStr}
+          <span className="text-blue-500 font-medium">{matchStr}</span>
+          {afterStr}
+        </span>
+      );
+
+      return {
+        ...item,
+        title,
+        children: item.children ? loop(item.children) : [],
+      };
+    });
+
+  return loop(treeView);
+}, [treeView, search.value]);
+
   const treefun = (data, id) => {
     const treeData = [];
-    const keys =[];
+    const keys = [];
     data.forEach((item) => {
       keys.push(item.key)
       if (item.parent === id) {
@@ -374,37 +353,280 @@ const CostCenter = () => {
     return treeData;
   };
 
-  async function fetchCompanyGetData(companyId) {
+  async function fetchCostCenterGetData(companyId) {
     dispatch(setLoading(true))
-    await getCompanyData(companyId).then(res => {
+    await getCostCenterData(companyId).then(res => {
       if (res.data && res.data.length > 0) {
-        const result=treefun(res.data,"#")
-        setCompanyData(result)
+        setTree(res.data);
+        const latestTreeData = treefun(res.data, "#");
+        setTreeview(latestTreeData);
+        if (selectedLevel === 99) {
+          let data = costCenterData;
+          data[selectedLevel][0].value = res.data[0].Name;
+          data[selectedLevel][1].value = res.data[0].Code;
+          setCostCenterData(data)
+        }
       } else {
         msg.warning(res.data.message || "No Data Found")
       }
     }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
   }
 
-   async function fetchCostcenterData(companyId) {
-      dispatch(setLoading(true))
-      await getCostCenterData(companyId).then(res => {
-        if (res.data && res.data.length > 0) {
-          console.log("res",res);
-           const result=treefun(res.data,"#")
-          setCostcenterData(result)
-        } else {
-          msg.warning(res.data.message || "No Data Found")
-        }
-      }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
-    }
+  // 103 level conatins labels for costcenter module in the costcenter api
+  const getlevels = async () => {
+    dispatch(setLoading(true))
+    await getHierarchyLevelsdata(102, companyId).then((res) => {
+      if (res.data) {
+        getjsonMapping(res.data[ "Cost Center"][0].LevelName);
+        fetchCostCenterGetData(companyId);
+        setLastLevel(res.data[ "Cost Center"][0].LevelName.at(-1)["Id"]);
+        setNextLevel(res.data[ "Cost Center"][0].LevelName[0].LevelName)
+        setLevel(res.data[ "Cost Center"][0].LevelName);
+      }
+    })
+      .catch((err) => { }).finally(() => { dispatch(setLoading(false)) })
+  };
 
-    
-      useEffect(() => {
-        if (companyId) {
-          fetchCostcenterData(companyId)
+  // assigning labels to the JSONdata of costcenterDB
+  const getjsonMapping = (leveldata) => {
+    let Labels = Object.keys(fields);
+    Labels.forEach((element) => {
+      var index = leveldata.findIndex((x) => x.Id === parseInt(element));
+      if (index !== -1) {
+        fields[parseInt(element)].forEach((item) => {
+          if (item.name === "Name") {
+            item.label = `${leveldata[index].LevelName} Name`;
+            item.heading = `${leveldata[index].LevelName} Details`;
+          }
+          if (item.name === "Code") {
+            item.label = `${leveldata[index].LevelName} Code`;
+          }
+        });
+      }
+    });
+  };
+
+  // getting costCenterById
+  async function getIndCostCenterById(companyId,id) {
+    dispatch(setLoading(true))
+    await getCostcenterById( companyId,id).then(res => {
+      if (res.data && res.data.length > 0) {
+        console.log("resdddd", res.data[0])
+        const details = res.data[0];
+        if (details) {
+          reset({
+            Name: details.Name,
+            Code: details.Code
+          })
         }
-      }, [companyId])
+      } else {
+        msg.warning(res.data.message || "No Data Found")
+      }
+    }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
+  }
+
+  const getParents = (node, id, parents = []) => {
+    if (node.id === id || node.id === 99999) return parents;
+    for (let child of node.children) {
+      const result = getParents(child, id, [...parents, node]);
+      if (result) return result;
+    }
+    return null;
+  };
+
+  const handleRoute = () => {
+    // handleReset();
+    setRecordToEditId(null);
+    const treeData = structuredClone(tree);
+    const tempObj = {
+      BranchName: "",
+      BranchCode: "",
+      TypeId: selectedLevel + 1,
+      id: 99999,
+      parent: selectedNode?.id,
+      type: ''
+    };
+
+    treeData.push(tempObj);
+    const latestTreeData = treefun(treeData, "#");
+
+    let selectId =
+      selectedNode["children"].length >= 1
+        ? selectedNode["children"][0].id
+        : 99999;
+    const findroots = getParents(latestTreeData[0], selectId);
+    setSelectedNodeParents(findroots);
+    setSelectedLevel((prev) => 1 + +prev);
+    setSelectedNode(tempObj);
+    setCostCenterData(fields[selectedLevel + 1])
+  };
+
+  const onSelect = (selectedKeys, info) => {
+    const findroots = getParents(treeView[0], info.node.id);
+    setSelectedNodeParents(findroots);
+    setSelectedId(info.node.id)
+    setDisable(false);
+    setRecordToEditId(info.node.id);
+    setSelectedNode(info.node);
+    setCostCenterData(fields[info.node.type])
+    setSelectedLevel(parseInt(info.node.type));
+  };
+
+  const handleDelete = () => {
+    if (selectedId && companyId) {
+      delBranch( companyId,selectedId);
+    }
+  }
+
+  //    delete based on Id
+  const delBranch = async (companyId,leafId, ) => {
+    dispatch(setLoading(true))
+    await deleteCostCenter(companyId,leafId,  "")
+      .then((res) => {
+        if (res.data !== undefined) {
+          if (res.data.status === true) {
+            // clearFields(0);
+            setRecordToEditId(null);
+            msg.success(res.data.message);
+            fetchCostCenterGetData(companyId);
+          } else {
+            msg.warning(res.data.message);
+          }
+        }
+      })
+      .catch((err) => {
+        
+      })
+      .finally(() => { dispatch(setLoading(false)) })
+  }
+  const name = watch('Name');
+  const code = watch('Code');
+
+  const onSubmit = () => {
+    updateTreeData();
+  }
+
+  const updateTreeData = async () => {
+    const submitedData = [];
+    const parentNodes = structuredClone(selectedNodeParents);
+    const result = await Promise.all(
+      parentNodes.map(async (parent) => {
+        try {
+          if (parent.id !== 0) {
+            const response = await getCostcenterById( companyId,parent.id,);
+            return response.data[0];
+          }
+        } catch (error) {
+          msg.warning("Failed to Fetch Data");
+        }
+      })
+    );
+    submitedData.push(...result, selectedNode);
+    submit(submitedData);
+  };
+
+  const submit = async (submitedData: any[]) => {
+    dispatch(setLoading(true));
+    let payload = {
+      "Details": [
+        {
+          "ParentId": recordToEditId ? selectedNode.id || '' : selectedNode?.parent || '',
+          "TypeId": recordToEditId ? selectedNode?.type || '' : selectedNode?.TypeId || '',
+          "Name": name,
+          "Code": code,
+        }]
+    }
+    // let branchId = recordToEditId ? selectedNode?.id : 0
+    console.log("payload", payload);
+    const branchId = Number(recordToEditId ? selectedNode?.id : 0);
+    await postCostCenter( companyId,branchId,payload).then(res => {
+      if (res.data.status) {
+        fetchCostCenterGetData(companyId);
+        msg.success(`${res.data.message}`);
+        if (recordToEditId === null) {
+          handleReset();
+        }
+      } else {
+        msg.warning(`${res.data.message}`);
+      }
+    }).catch(err => { })
+      .finally(() => { dispatch(setLoading(false)) })
+  }
+
+  const handleReset = () => {
+    reset({
+      Name: "",
+      Code: ""
+    })
+    setRecordToEditId(null);
+  };
+
+
+const handleSearch = (val: string) => {
+  setSearch((prev) => ({ ...prev, value: val }));
+
+  if (!val) {
+    const allKeys: string[] = [];
+    const collectKeys = (nodes: any[]) => {
+      nodes.forEach((node) => {
+        allKeys.push(node.key);
+        if (node.children?.length) collectKeys(node.children);
+      });
+    };
+    collectKeys(treeView);
+    setExpandedKeys(new Set(allKeys));
+    return;
+  }
+
+  const matchedKeys: string[] = [];
+
+  const findMatchingNodes = (nodes: any[]) => {
+    nodes.forEach((node) => {
+      const title = (node.title || node.name || '').toLowerCase();
+      if (title.includes(val.toLowerCase())) matchedKeys.push(node.key);
+      if (node.children?.length) findMatchingNodes(node.children);
+    });
+  };
+  findMatchingNodes(treeView);
+
+  const parentKeys = new Set<string>();
+  const findParentKeys = (nodes: any[], targets: string[]) => {
+    nodes.forEach((node) => {
+      if (node.children?.some((child) => targets.includes(child.key))) {
+        parentKeys.add(node.key);
+        findParentKeys(treeView, [node.key]);
+      } else if (node.children) {
+        findParentKeys(node.children, targets);
+      }
+    });
+  };
+  findParentKeys(treeView, matchedKeys);
+
+  // ✅ Collapse all, then expand only matched + parents
+  const newExpanded = new Set([...matchedKeys, ...parentKeys]);
+  setExpandedKeys(newExpanded);
+};
+
+
+useEffect(() => {
+  if (treeView?.length) {
+    const allKeys: string[] = [];
+
+    const collectKeys = (nodes: any[]) => {
+      nodes.forEach((node) => {
+        allKeys.push(node.key);
+        if (node.children?.length) {
+          collectKeys(node.children);
+        }
+      });
+    };
+
+    collectKeys(treeView);
+    setExpandedKeys(new Set(allKeys)); // expand everything initially
+  }
+}, [treeView]);
+
+
 
   return (
     <div className="bg-hsl(214.3 31.8% 91.4%) overflow-y-auto">
@@ -417,11 +639,11 @@ const CostCenter = () => {
             <span className="text-foreground font-medium">Cost Center</span>
           </div>
         </div>
-        <div className='flex gap-2'>
+        <div className={`flex gap-2 ${selectedLevel===99 ? "hidden":""}`}>
           <ReusableButton
             htmlType="button"
             variant="default"
-            onClick={null}
+            onClick={handleReset}
             iconPosition="left"
             size="middle"
             className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
@@ -431,12 +653,12 @@ const CostCenter = () => {
           <ReusableButton
             htmlType="button"
             variant="default"
-            onClick={null}
+            onClick={handleSubmit(onSubmit)}
             iconPosition="left"
             size="middle"
             className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
           >
-            Save
+            {selectedLevel <= 99 || recordToEditId === null ? "Save" : "Update"}
           </ReusableButton>
         </div>
       </header>
@@ -450,20 +672,61 @@ const CostCenter = () => {
               <Input
                 placeholder="Search..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {setSearchQuery(e.target.value);handleSearch(e.target.value)}}
                 className="pl-9 "
               />
             </div>
-            <div className="flex gap-2 flex items-center justify-center">
-              <Button size="sm" variant="outline" className="h-8">
-                <Plus className="h-4 w-4" />
-              </Button>
-              <Button size="sm" variant="outline" className="h-8">
-                <Trash2 className="h-4 w-4 text-destructive" />
-              </Button>
+            <div className="flex gap-3 flex items-center justify-center">
+              <div>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <ReusableButton
+                        size="small"
+                        className="bg-primary h-[2rem] hover:bg-blue-700 text-white"
+                        style={{
+                          cursor: selectedLevel >= 99 + level.length || disable ? "not-allowed" : "pointer",
+                        }}
+                        disabled={selectedLevel >= 99 + level.length || disable}
+                        onClick={() => {
+                          if (!(selectedLevel >= 99 + level.length || disable)) {
+                            handleRoute();
+                            handleReset();
+                            setDisable(true);
+                          }
+                        }}
+                      >
+                        <Plus className="h-4 w-4" />
+                      </ReusableButton>
+                    </TooltipTrigger>
+                    {selectedLevel !== lastLevel && recordToEditId && (
+                      <TooltipContent>
+                        Add {nextLevel ? nextLevel : "Cost Center"}
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+              <div>
+                <ReusableButton
+                  size="small"
+                  // className="border border-0 h-8 w-8 flex items-center justify-center"
+                  className="bg-primary h-[2rem] hover:bg-blue-700 text-white"
+                  style={{
+                    cursor: disable || selectedLevel === 99 ? "not-allowed" : "pointer",
+                  }}
+                  onClick={() => {
+                    if (!disable && selectedLevel !== 99) {
+                      handleDelete();
+                    }
+                  }}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </ReusableButton>
+              </div>
             </div>
           </div>
-          <div className="min-h-20 max-h-[27rem] overflow-y-auto p-2">
+          <div className="h-[370px] overflow-y-scroll p-2">
             {renderTreeNode(mockData)}
           </div>
         </div>
@@ -471,18 +734,40 @@ const CostCenter = () => {
         {/* Details Panel */}
         <div className="flex-1 overflow-y-auto">
           <div className="p-6 space-y-6">
-            <div className="flex items-center gap-2">
-              <h2 className="text-lg font-semibold">Cost Center</h2>
-              <Info className="h-4 w-4 text-muted-foreground" />
+            <div className="flex flex-col gap-2">
+              <div>
+                <h4 className="master-heading mb-2 flex items-center gap-2">
+                  {!recordToEditId
+                    ? selectedLevel === 99
+                      ? "Cost Center"
+                      : "Add Cost Center"
+                    : selectedLevel === 99
+                      ? "Cost Center"
+                      : "Update Cost Center"}
+                  {selectedLevel !== lastLevel && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button type="button">
+                            <Info className="mb-1 cursor-pointer" fontSize={22} />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          To Add {nextLevel || "Cost Center"} to{" "}
+                          {breadCrumb?.at(-1) || "the selected costcenter"}, click on{" "}
+                          {breadCrumb?.at(-1) || "the name"} and then click on the plus icon.
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+                </h4>
+              </div>
+              <div className="text-sm text-primary">
+                <h6 className="breadCrumb">{breadCrumb.map(x => { return `${x} >` })}</h6>
+              </div>
             </div>
-
-            <div className="text-sm text-primary">
-              Cost Center &gt;
-            </div>
-
             <div className="space-y-6">
-              <h3 className="text-base font-semibold">Cost Center</h3>
-
+              <h5>{recordToEditId && selectedLevel !== 99 ? `Update ${costCenterData[0].heading}` : `${selectedLevel !== 99 ? "Enter" : ""} ${costCenterData[0].heading}`}</h5>
               <div className="px-1">
                 <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4">
                   {getFieldsByNames(['Name', 'Code']).map((field) => {
@@ -501,3 +786,4 @@ const CostCenter = () => {
 };
 
 export default CostCenter;
+

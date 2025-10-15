@@ -7,16 +7,15 @@ type FormConfig = {
 export const CostCenter_DB: FormConfig = {
     99: [
         {
-            // heading: 'Company Details',
+            heading: 'Company Details',
             label: 'Company Name',
             fieldType: 'text',
             name: 'Name',
             value: "",
             placeholder: "",
             isRequired: false,
- 
             disabled: false,
-            className: 'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background',
+            className: 'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background', 
  
         },
         {

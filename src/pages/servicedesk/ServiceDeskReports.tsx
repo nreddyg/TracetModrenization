@@ -130,19 +130,19 @@ const ServiceDeskReports = () => {
   const [showReport, setShowReport] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [fields, setFields] = useState<BaseField[]>(SERVICE_DESK_DB);
+  const [fieldsCopy, setFieldsCopy] = useState<BaseField[]>(fields);
   const [slaDB, setSLADB] = useState<BaseField[]>()
   const [serviceHistoryDetail, setServiceHistoryDetail] = useState<BaseField[]>()
   const [columnVisibility, setColumnVisibility] = useState({});
-  const companyId=useAppSelector(state=>state.projects.companyId);
-  const branch = useAppSelector(state=>state.projects.branch);
-  const branchId = useAppSelector(state=>state.projects.branchId);
+  const companyId = useAppSelector(state => state.projects.companyId);
+  const branch = useAppSelector(state => state.projects.branch);
+  const branchId = useAppSelector(state => state.projects.branchId);
   // const dispatch =useDispatch();
   const msg = useMessage()
   const [dataSource, setDataSourse] = useState([])
   const [cols, setCols] = useState([])
   let additionalFields = useRef([]);
 
-  // let data = activeTab === "Service Request SLA Met/SLA Violated" ? slaDB : activeTab === "Service Request Detail History" ? serviceHistoryDetail : fields;
   const form = useForm<GenericObject>({
     defaultValues: fields.reduce((acc, f) => {
       acc[f.name!] = f.defaultValue ?? '';
@@ -164,69 +164,75 @@ const ServiceDeskReports = () => {
   }, [activeTab]);
 
   useEffect(() => {
+    let jsonCopy = [];
+    if (activeTab) {
+      if (activeTab === "Service Request Details") {
+        jsonCopy = fieldsCopy.filter(f => f.jsontype === "servicerequestDetails");
+      } else if (activeTab === "Service Request SLA Met/SLA Violated") {
+        jsonCopy = fieldsCopy.filter(f => f.jsontype === "slaViolated");
+      } else if (activeTab === "Service Request Detail History") {
+        jsonCopy = fieldsCopy.filter(f => f.jsontype === "serviceReqHistoryDetail");
+      }
+      setFields(jsonCopy);
+    }
+  }, [activeTab])
+
+  useEffect(() => {
   }, [columnVisibility])
   useEffect(() => {
-    if (companyId) {
-      fetchAdditionalFieldConfigurationDetails(companyId)
-      fetchAllLookUps();
-    }
-  }, [companyId,branch])
+    if (companyId) fetchAdditionalFieldConfigurationDetails(companyId)
+    if (companyId && branch && branchId) fetchAllLookUps();
+  }, [companyId, branch, branchId])
+
   const multiSelectFilter: FilterFn<any> = (row, columnId, filterValue) => {
-
     const selected = Array.isArray(filterValue) ? filterValue : [];
-
     if (selected.length === 0) return true;
-
     const cell = row.getValue(columnId);
-
     if (cell == null) return false;
-
     if (Array.isArray(cell)) return cell.some(v => selected.includes(String(v)));
-
     return selected.includes(String(cell));
-
   };
-function buildColumnsFromApi<T extends Record<string, any>>(
-  apiResponse: ColumnApiResponse,
-  editableColumns: string[] = [],
-  typeMapper: Record<string, "text" | "number" | "date" | "select"> = {}
-): { columns: ColumnDef<T>[]; initialVisibility: VisibilityState } {
-  const [_, columnsMeta] = Object.entries(apiResponse)[0];
 
-  const columns: ColumnDef<T>[] = Object.entries(columnsMeta).map(
-    ([colName], index) => {
-      // Ensure we have a valid column name
-      if (!colName || !colName.trim()) {
-        console.warn(`Column at index ${index} has empty name, skipping`);
-        return null;
+  function buildColumnsFromApi<T extends Record<string, any>>(
+    apiResponse: ColumnApiResponse,
+    editableColumns: string[] = [],
+    typeMapper: Record<string, "text" | "number" | "date" | "select"> = {}
+  ): { columns: ColumnDef<T>[]; initialVisibility: VisibilityState } {
+    const [_, columnsMeta] = Object.entries(apiResponse)[0];
+
+    const columns: ColumnDef<T>[] = Object.entries(columnsMeta).map(
+      ([colName], index) => {
+        // Ensure we have a valid column name
+        if (!colName || !colName.trim()) {
+          console.warn(`Column at index ${index} has empty name, skipping`);
+          return null;
+        }
+        return {
+          accessorKey: colName,
+          id: colName,
+          header: colName,
+          cell: (info) => info.getValue() ?? "",
+          enableHiding: true,
+          enableColumnFilter: true,
+          filterFn: multiSelectFilter,
+          meta: {
+            editable: editableColumns.includes(colName),
+            editType: typeMapper[colName] || "text",
+          },
+        } as ColumnDef<T>;
       }
-      
-      return {
-        accessorKey: colName,
-        id: colName,
-        header: colName,
-        cell: (info) => info.getValue() ?? "",
-        enableHiding: true,
-        enableColumnFilter: true,
-        filterFn: multiSelectFilter,
-        meta: {
-          editable: editableColumns.includes(colName),
-          editType: typeMapper[colName] || "text",
-        },
-      } as ColumnDef<T>;
-    }
-  ).filter(Boolean) as ColumnDef<T>[]; // Remove null entries
+    ).filter(Boolean) as ColumnDef<T>[]; // Remove null entries
 
-  // build VisibilityState (true/false per column)
-  const initialVisibility: VisibilityState = {};
-  Object.entries(columnsMeta).forEach(([colName, visible]) => {
-    if (colName && colName.trim()) {
-      initialVisibility[colName] = visible === "true";
-    }
-  });
+    // build VisibilityState (true/false per column)
+    const initialVisibility: VisibilityState = {};
+    Object.entries(columnsMeta).forEach(([colName, visible]) => {
+      if (colName && colName.trim()) {
+        initialVisibility[colName] = visible === "true";
+      }
+    });
 
-  return { columns, initialVisibility };
-}
+    return { columns, initialVisibility };
+  }
 
   const selectedMainCategory = watch("MainCategory");
   const selectedMainCategoryforSLA = watch("maincategoryinSLA");
@@ -245,8 +251,6 @@ function buildColumnsFromApi<T extends Record<string, any>>(
       getSubCategoryDetails(companyId, null)
     }
   }, [selectedMainCategoryforSLA, companyId])
-
-
 
   //method for generating columns based on data
   function generateColumnsFromData<T extends Record<string, any>>(
@@ -274,26 +278,6 @@ function buildColumnsFromApi<T extends Record<string, any>>(
         },
       } as ColumnDef<T>;
     });
-
-    // if (includeActions) {
-    //   columns.push({
-    //     id: 'actions',
-    //     header: 'Actions',
-    //     cell: ({ row }) => (
-    //       <Button
-    //         size="sm"
-    //         onClick={() => handleHistoryClick(row.original)}
-    //         className="flex items-center gap-1"
-    //         style={{ backgroundColor: "#fb8420" }}
-    //       >
-    //         History
-    //       </Button>
-    //     ),
-    //     enableSorting: false,
-    //     enableHiding: false,
-    //   });
-    // }
-
     return columns;
   }
 
@@ -312,13 +296,13 @@ function buildColumnsFromApi<T extends Record<string, any>>(
 
 
   async function fetchServiceRequestDetailsReport(compId: string, BranchID: string, srType: string, srNo: string, srStatus: string, requestedBy: string, fromDate: string, toDate: string, customer: string, AssigneeUsers: string, AssigneeGroups: string, severity: string, priority: string, SLAStatus: string, dept: string, mainCategory: string, subCategory: string, assetCode: string) {
-    // dispatch(setLoading(true))
+    dispatch(setLoading(true))
     await getServiceRequestDetailsReport(compId, BranchID, srType, srNo, srStatus, requestedBy, fromDate, toDate, customer, AssigneeUsers, AssigneeGroups, severity, priority, SLAStatus, dept, mainCategory, subCategory, assetCode).then(res => {
       if (res.success && res.data.status === undefined) {
         const tabData = res.data.ServiceRequestDetailsReport
         setDataSourse(tabData)
       } else {
-
+        setDataSourse([]);
       }
     }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
   }
@@ -329,9 +313,8 @@ function buildColumnsFromApi<T extends Record<string, any>>(
       if (res.success && res.data.status === undefined) {
         const tabData = res.data.ServiceRequestDetails.ServiceRequestDetailsReport
         setDataSourse(tabData)
-
       } else {
-
+        setDataSourse([]);
       }
     }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
   }
@@ -357,14 +340,12 @@ function buildColumnsFromApi<T extends Record<string, any>>(
     await getAdditionaliFieldsConfigurationDetails(compId).then(res => {
       if (res.success && res.data.status === undefined) {
         additionalFields.current = res.data.AdditionalFieldConfigurationDetails.filter(x => x.TransactionTypeId === 105 || x.TransactionType === "Service request");
-
-
       } else {
         additionalFields.current = [];
-
       }
     }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
   }
+
   async function fetchServiceRequestDetailsColumns(compId: string) {
     dispatch(setLoading(true))
     await getServiceRequestDetailsColumns(compId).then(res => {
@@ -372,10 +353,8 @@ function buildColumnsFromApi<T extends Record<string, any>>(
         const tempCols = buildColumnsFromApi(res.data)
         setColumnVisibility(tempCols.initialVisibility)
         setCols(tempCols.columns)
-
       } else {
         msg.warning(`${res.data.message}`)
-
       }
     }).catch(err => { }).finally(() => {
       //  dispatch(setLoading(false)) 
@@ -391,7 +370,7 @@ function buildColumnsFromApi<T extends Record<string, any>>(
         setCols(tempCols.columns)
 
       } else {
-
+        setCols([])
       }
     }).catch(err => { }).finally(() => {
       // dispatch(setLoading(false)) 
@@ -436,6 +415,8 @@ function buildColumnsFromApi<T extends Record<string, any>>(
     }
   }
 
+
+  
 
   const handleViewReport = async () => {
     setIsGeneratingReport(true);
@@ -650,8 +631,7 @@ function buildColumnsFromApi<T extends Record<string, any>>(
       }
       opts[obj] = ret
     })
-    let jsonCopy = activeTab === "Service Request SLA Met/SLA Violated" ? slaDB : activeTab === "Service Request Detail History" ? serviceHistoryDetail : SERVICE_DESK_DB
-    const data = structuredClone(jsonCopy);
+    const data = structuredClone(SERVICE_DESK_DB);
     data.forEach((obj) => {
       if (arr.includes(obj.name)) {
         if (groupNames.includes(obj.name)) {
@@ -664,6 +644,7 @@ function buildColumnsFromApi<T extends Record<string, any>>(
       }
     });
     setFields(data);
+    setFieldsCopy(data);
   }
 
   // fetch all lookUps

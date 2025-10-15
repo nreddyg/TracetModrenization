@@ -1,10 +1,10 @@
 import { BaseField } from "../types/types";
-
+ 
 type FormConfig = {
     [key: number]: BaseField[];
 };
-
-export const DEPARTMENT_DB: FormConfig = {
+ 
+export const CostCenter_DB: FormConfig = {
     99: [
         {
             heading: 'Company Details',
@@ -13,10 +13,10 @@ export const DEPARTMENT_DB: FormConfig = {
             name: 'Name',
             value: "",
             placeholder: "",
-            isRequired: true,
+            isRequired: false,
             disabled: false,
-            className: 'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background',
-
+            className: 'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background', 
+ 
         },
         {
             label: 'Company Code',
@@ -24,14 +24,15 @@ export const DEPARTMENT_DB: FormConfig = {
             name: 'Code',
             placeholder: "",
             value: "",
-            isRequired: true,
+            isRequired: false,
             className: 'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background',
+ 
             disabled: false
         }
     ],
     100: [
         {
-            heading: "",
+            // heading: "",
             label: '',
             fieldType: 'text',
             name: 'Name',
@@ -39,7 +40,7 @@ export const DEPARTMENT_DB: FormConfig = {
             placeholder: "",
             isRequired: true,
             className: 'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background',
-
+ 
         },
         {
             label: '',
@@ -49,12 +50,11 @@ export const DEPARTMENT_DB: FormConfig = {
             value: "",
             isRequired: true,
             className: 'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background',
-
+ 
         }
     ],
     101: [
         {
-            heading: "",
             label: '',
             fieldType: 'text',
             name: 'Name',
@@ -62,7 +62,7 @@ export const DEPARTMENT_DB: FormConfig = {
             placeholder: "",
             isRequired: true,
             className: 'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background',
-
+ 
         },
         {
             label: '',
@@ -72,11 +72,10 @@ export const DEPARTMENT_DB: FormConfig = {
             value: "",
             isRequired: true,
             className: 'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background',
-
+ 
         }
     ],
     102: [{
-            heading: "",
         label: '',
         fieldType: 'text',
         name: 'Name',
@@ -84,7 +83,7 @@ export const DEPARTMENT_DB: FormConfig = {
         placeholder: "",
         isRequired: true,
         className: 'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background',
-
+ 
     },
     {
         label: '',
@@ -94,12 +93,11 @@ export const DEPARTMENT_DB: FormConfig = {
         value: "",
         isRequired: true,
         className: 'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background',
-
+ 
     }
     ],
     103: [
         {
-            heading: "",
             label: '',
             fieldType: 'text',
             name: 'Name',
@@ -107,7 +105,7 @@ export const DEPARTMENT_DB: FormConfig = {
             placeholder: "",
             isRequired: true,
             className: 'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background',
-
+ 
         },
         {
             label: '',
@@ -117,12 +115,11 @@ export const DEPARTMENT_DB: FormConfig = {
             value: "",
             isRequired: true,
             className: 'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background',
-
+ 
         }
     ],
     104: [
         {
-            heading: "",
             label: '',
             fieldType: 'text',
             name: 'Name',
@@ -130,7 +127,7 @@ export const DEPARTMENT_DB: FormConfig = {
             placeholder: "",
             isRequired: true,
             className: 'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background',
-
+ 
         },
         {
             label: '',
@@ -140,8 +137,10 @@ export const DEPARTMENT_DB: FormConfig = {
             value: "",
             isRequired: true,
             className: 'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background',
-
+ 
         }
     ]
 }
-
+ 
+ 
+ 

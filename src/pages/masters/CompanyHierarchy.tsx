@@ -16,7 +16,11 @@ import { setLoading } from '@/store/slices/projectsSlice';
 import { getDepartmentData } from '@/services/departmentServices';
 import { useAppSelector } from '@/store';
 import { TreeConfig, TreeNodeData, TreeView } from '@/components/ui/reusable-treeView';
-import { getCompanyData } from '@/services/companyHierarchyServices';
+import { addOrUpdateHierarchyLevel, deleteHierarchyLevel, getCompanyData, getCompanyDataBybranchId, getHierarchyLevelsData, getStateData } from '@/services/companyHierarchyServices';
+import { COMPANY_DB } from '@/Local_DB/Form_JSON_Data/CompanyHierarchyDB';
+import { Popover, PopoverContent, PopoverTrigger } from '@radix-ui/react-popover';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { ReusableDropdown } from '@/components/ui/reusable-dropdown';
 interface TreeNode {
   id: string;
   name: string;
@@ -28,222 +32,134 @@ interface TreeNode {
 export const treeConfig: TreeConfig = {
   isCheckable: false,
   showIcon: true,     // ✅ Enables automatic icons
-  showLine: false,
   Multiple: true,
   expandAll: true,
 };
-const mockData: TreeNode = {
-  id: '1',
-  name: 'Zoho corporataion',
-  code: 'ZHC',
-  type: 'company',
-  children: [
-    {
-      id: '2',
-      name: 'Infras',
-      code: 'INFD',
-      type: 'department',
-      children: [
-        {
-          id: '3',
-          name: 'Manage',
-          code: 'MN',
-          type: 'unit',
-          children: [
-            {
-              id: '4',
-              name: 'Securities',
-              code: 'SC',
-              type: 'unit',
-              children: [
-                {
-                  id: '5',
-                  name: 'Acquisition',
-                  code: 'ACQ',
-                  type: 'unit',
-                  children: [
-                    { id: '6', name: 'test1', code: 'TS', type: 'unit' },
-                    { id: '7', name: 'ACQ', code: 'TG', type: 'unit' },
-                    { id: '8', name: 'Tests', code: 'TR', type: 'unit' },
-                    { id: '9', name: 'test08', code: 'T08', type: 'unit' },
-                    { id: '10', name: 'test014', code: 'T014', type: 'unit' },
-                    // { id: '11', name: 'abc_test', code: 'testabc', type: 'unit' },
-                    // { id: '12', name: 'test2553', code: 'tsrerf33', type: 'unit' },
-                  ]
-                }
-              ]
-            },
-            {
-              id: '13',
-              name: 'Talent',
-              code: 'TT',
-              type: 'unit',
-              children: [
-                { id: '14', name: 'Minimum', code: 'MIN', type: 'unit' },
-                { id: '15', name: 'Maximuew', code: 'MX', type: 'unit' },
-              ]
-            },
-            {
-              id: '16',
-              name: 'NOTalent',
-              code: 'nt',
-              type: 'unit',
-              children: [
-                { id: '17', name: 'Minimums', code: 'MINS', type: 'unit' },
-                { id: '18', name: 'Maximuews', code: 'MXS', type: 'unit' },
-              ]
-            }
-          ]
-        }
-      ]
-    }
-  ]
-};
-// sampleTreeData.ts
-
-export const sampleTreeData: TreeNodeData[] = [
+let lastLevelData:BaseField[] = [
   {
-    key: "1",
-    title: "Root Folder",
-    children: [
-      {
-        key: "1-1",
-        title: "Documents",
-        children: [
-          {
-            key: "1-1-1",
-            title: "Reports",
-            children: [
-              {
-                key: "1-1-1-1",
-                title: "2025",
-                children: [
-                  { key: "1-1-1-1-1", title: "Q1_Report.pdf", isLeaf: true },
-                  { key: "1-1-1-1-2", title: "Q2_Report.pdf", isLeaf: true },
-                ],
-              },
-              {
-                key: "1-1-1-2",
-                title: "2024",
-                children: [
-                  { key: "1-1-1-2-1", title: "Q1_Report.pdf", isLeaf: true },
-                  { key: "1-1-1-2-2", title: "Q2_Report.pdf", isLeaf: true },
-                ],
-              },
-            ],
-          },
-          {
-            key: "1-1-2",
-            title: "Invoices",
-            children: [
-              { key: "1-1-2-1", title: "Invoice_001.pdf", isLeaf: true },
-              { key: "1-1-2-2", title: "Invoice_002.pdf", isLeaf: true },
-            ],
-          },
-        ],
-      },
-      {
-        key: "1-2",
-        title: "Projects",
-        children: [
-          {
-            key: "1-2-1",
-            title: "React App",
-            children: [
-              {
-                key: "1-2-1-1",
-                title: "src",
-                children: [
-                  {
-                    key: "1-2-1-1-1",
-                    title: "components",
-                    children: [
-                      { key: "1-2-1-1-1-1", title: "Header.tsx", isLeaf: true },
-                      { key: "1-2-1-1-1-2", title: "Footer.tsx", isLeaf: true },
-                    ],
-                  },
-                  {
-                    key: "1-2-1-1-2",
-                    title: "pages",
-                    children: [
-                      { key: "1-2-1-1-2-1", title: "Home.tsx", isLeaf: true },
-                      { key: "1-2-1-1-2-2", title: "About.tsx", isLeaf: true },
-                    ],
-                  },
-                ],
-              },
-              {
-                key: "1-2-1-2",
-                title: "public",
-                children: [
-                  { key: "1-2-1-2-1", title: "index.html", isLeaf: true },
-                  { key: "1-2-1-2-2", title: "favicon.ico", isLeaf: true },
-                ],
-              },
-            ],
-          },
-        ],
-      },
-      {
-        key: "1-3",
-        title: "Images",
-        children: [
-          {
-            key: "1-3-1",
-            title: "Vacation",
-            children: [
-              {
-                key: "1-3-1-1",
-                title: "2024",
-                children: [
-                  { key: "1-3-1-1-1", title: "beach.png", isLeaf: true },
-                  { key: "1-3-1-1-2", title: "mountain.jpg", isLeaf: true },
-                ],
-              },
-            ],
-          },
-        ],
-      },
-      {
-        key: "1-4",
-        title: "System",
-        children: [
-          {
-            key: "1-4-1",
-            title: "Config",
-            children: [
-              {
-                key: "1-4-1-1",
-                title: "App",
-                children: [
-                  {
-                    key: "1-4-1-1-1",
-                    title: "settings.json",
-                    isLeaf: true,
-                  },
-                ],
-              },
-            ],
-          },
-        ],
-      },
-      {
-        key: "1-5",
-        title: "Readme.txt",
-        isLeaf: true,
-      },
-    ],
+    label: "Branch Name",
+    fieldType: "text",
+    name: "Name",
+    // value: "",
+   
+    isRequired: true,
+  },
+  {
+    label: "Branch Code",
+    fieldType: "text",
+    name: "Code",
+    value: "",
+    // error: false,
+    // errormsg: "",
+    isRequired: true,
+  },
+  {
+    label: "Reg/PAN",
+    fieldType: "text",
+    name: "PAN",
+    value: "",
+    // error: false,
+    // errormsg: "",
+    isRequired: false,
+  },
+  {
+    label: "GSTIN/UIN",
+    fieldType: "text",
+    name: "GSTIN",
+    value: "",
+    // error: false,
+    // errormsg: "",
+    isRequired: false,
+  },
+  {
+    label: "Address",
+    fieldType: "text",
+    name: "Address",
+    value: "",
+    // error: false,
+    // errormsg: "",
+    isRequired: false,
+  },
+  {
+    label: "State",
+    fieldType: "dropdown",
+    name: "State",
+    value: "",
+    options: [],
+    default: "Select State",
+    // error: false,
+    // errormsg: "",
+    isRequired: true,
+  },
+  {
+    label: "City",
+    fieldType: "text",
+    name: "City",
+    value: "",
+    // error: false,
+    // errormsg: "",
+    isRequired: false,
+  },
+  {
+    label: "Zip Code",
+    fieldType: "text",
+    name: "ZipCode",
+    value: "",
+    // error: false,
+    // errormsg: "",
+    isRequired: false,
+  },
+  {
+    label: "Email Id",
+    fieldType: "text",
+    name: "EmailId",
+    value: "",
+    // error: false,
+    // errormsg: "",
+    isRequired: false,
+  },
+  {
+    label: "Mobile Number",
+    fieldType: "text",
+    name: "MobileNo",
+    value: "",
+    // error: false,
+    // errormsg: "",
+    isRequired: false,
   },
 ];
 
+
+
 const CompanyHierarchy = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set(['1', '2', '3', '4', '5']));
-  const [selectedNode, setSelectedNode] = useState<TreeNode | null>(mockData);
-  const [fields, setFields] = useState<BaseField[]>(DEPARTMENT_DB);
+  const [expandedKeys, setExpandedKeys] = useState(["0"]);
+  const [selectedKeys, setSelectedKeys] = useState([]);
+  const [lastLevel, setLastLevel] = useState(null);
+  const [level, setLevel] = useState([]);
+  const [nextLevel, setNextLevel] = useState("");
+  const [selectedLevel, setSelectedLevel] = useState(99)
+  const [allLevelsJson, setAllLevelsJson] = useState(COMPANY_DB)
+  const [branchData, setBranchData] = useState(allLevelsJson[lastLevel]);
+  const [fields, setFields] = useState<BaseField[]>(allLevelsJson[99]);
   const companyId = useAppSelector(state => state.projects.companyId);
-  const [companyData,setCompanyData]=useState([])
+  const [selectedId, setSelectedId] = useState(null)
+  const [tree, setTree] = useState([])
+  const [treeViewData,setTreeViewData]=useState([])
+  const [disable, setDisable] = useState(true);
   const dispatch = useDispatch()
+    const [selectedNodeParents, setSelectedNodeParents] = useState([]);
+    const [selectedNode, setSelectedNode] = useState({
+      BranchName: "",
+      BranchCode: "",
+      TypeId: 0,
+      id: 99999,
+      parent: 0,});
+    const [recordToEditId, setRecordToEditId] = useState(null);
+  const [breadCrumb, setBreadCrumb] = useState(["Company"]);
+  const [open, setOpen] = useState(false)
+ 
+ 
   const msg = useMessage()
 
 
@@ -252,7 +168,33 @@ const CompanyHierarchy = () => {
       fetchCompanyGetData(companyId)
     }
   }, [companyId])
-
+  useEffect(()=>{
+    if(companyId && selectedLevel){
+      fetchHierarchyLevelsData(companyId)
+      // console.log(selectedLevel,"Nag")
+    }  
+  },[companyId,selectedLevel])
+  useEffect(() => {
+    if (recordToEditId) {
+      fetchCompanyGetDataByBranchId(companyId, recordToEditId)
+    }
+  }, [recordToEditId])
+ useEffect(() => {
+    let name = []
+    for (let i = 0; i <= level.length; i++) {
+      if (selectedLevel !== 99) {
+        name.push(level[i]?.LevelName)
+        setNextLevel(level[i + 1]?.LevelName)
+        if (selectedLevel === level[i]?.Id) {
+          setBreadCrumb(["Company", ...name])
+          return;
+        }
+      } else {
+        setBreadCrumb(["Company"]);
+        setNextLevel(level[0]?.LevelName);
+      }
+    }
+  }, [selectedLevel])
   const form = useForm<GenericObject>({
     defaultValues: fields.reduce((acc, f) => {
       acc[f.name!] = f.defaultChecked ?? '';
@@ -261,62 +203,6 @@ const CompanyHierarchy = () => {
     // mode: 'onChange',
     // reValidateMode: "onChange"
   });
-  const toggleNode = (nodeId: string) => {
-    const newExpanded = new Set(expandedNodes);
-    if (newExpanded.has(nodeId)) {
-      newExpanded.delete(nodeId);
-    } else {
-      newExpanded.add(nodeId);
-    }
-    setExpandedNodes(newExpanded);
-  };
-
-  const renderTreeNode = (node: TreeNode, level: number = 0): React.ReactNode => {
-    const hasChildren = node.children && node.children.length > 0;
-    const isExpanded = expandedNodes.has(node.id);
-    const isSelected = selectedNode?.id === node.id;
-
-    return (
-      <div key={node.id} className=''>
-        {/* <div
-          className={cn(
-            "flex items-center gap-2 py-1.5 px-2 hover:bg-accent/50 cursor-pointer rounded-sm transition-colors",
-            isSelected && "bg-accent"
-          )}
-          style={{ paddingLeft: `${level * 20 + 8}px` }}
-          onClick={() => setSelectedNode(node)}
-        > */}
-          {/* {hasChildren ? (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleNode(node.id);
-              }}
-              className="p-0.5 hover:bg-muted rounded"
-            >
-              {isExpanded ? (
-                <ChevronDown className="h-4 w-4 text-muted-foreground" />
-              ) : (
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
-              )}
-            </button>
-          ) : (
-            <div className="w-5" />
-          )}
-          <Folder className="h-4 w-4 text-yellow-600" />
-          <span className="text-sm">
-            {node.name}({node.code})
-          </span> */}
-        {/* </div> */}
-        {hasChildren && isExpanded && (
-          <div>
-            {/* {node.children?.map(child => renderTreeNode(child, level + 1))} */}
-            <TreeView treeData={companyData} config={treeConfig} />
-          </div>
-        )}
-      </div>
-    );
-  };
 
   const { control, register, handleSubmit, trigger, watch, setValue, reset, formState: { errors } } = form;
   const getFieldsByNames = (names: string[]) => fields.filter(f => names.includes(f.name!));
@@ -347,11 +233,41 @@ const CompanyHierarchy = () => {
             )}
           />
         );
+        case 'dropdown':
+                return (
+                  <Controller
+                    key={name}
+                    name={name}
+                    control={control}
+                    rules={validationRules}
+                    render={({ field: ctrl }) => (
+                      <ReusableDropdown
+                        {...field}
+                        value={ctrl.value}
+                        onChange={ctrl.onChange}
+                        error={errors[name]?.message as string}
+                      />
+                    )}
+                  />
+                );
     }
   }
+  const handleExpand = (keys: string[]) => {
+    setExpandedKeys(keys);
+  };
+  const handleSelect = (selectedKeys, info) => {
+    setRecordToEditId(info.node.id)
+    setSelectedKeys(selectedKeys)
+    setSelectedNode(info.node)
+    setDisable(false)
+    setSelectedLevel(Number(info.node.type))
+    setSelectedId(info.node.id)
+    setFields(allLevelsJson[Number(info.node.type)])
+
+  };
   const treefun = (data, id) => {
     const treeData = [];
-    const keys =[];
+    const keys = [];
     data.forEach((item) => {
       keys.push(item.key)
       if (item.parent === id) {
@@ -366,17 +282,250 @@ const CompanyHierarchy = () => {
     // setExpandedKeys(keys);
     return treeData;
   };
+    const getParents = (node, id, parents = []) => {
+    if (node.id === id || node.id === 99999) return parents;
+    for (let child of node.children) {
+      const result = getParents(child, id, [...parents, node]);
+      if (result) return result;
+    }
+    return null;
+  };
+    const submit = async () => {
+    dispatch(setLoading(true));
+    let payload = {
+      "Details": [
+        {
+          "ParentId": recordToEditId ? selectedNode.id || '' : selectedNode?.parent || '',
+          "TypeId": selectedLevel,
+          "Name": watch("Name"),
+          "Code": watch("Code"),
+           "RegPan": watch('PAN') || "", 
+        "GstinUin": watch('GSTIN') || "", 
+        "Address": watch('Address') || "", 
+        "StateId": watch('State') || "", 
+        "City": watch('City') || "", 
+        "ZipCode": watch('ZipCode') || "", 
+        "EmailId": watch('EmailId') || "",
+        "MobileNo": watch('MobileNo') || ""
+        }]
+    }
+    // let branchId = recordToEditId ? selectedNode?.id : 0
+    const branchId = Number(recordToEditId ? selectedNode?.id : 0);
+    await addOrUpdateHierarchyLevel( companyId,branchId, payload).then(res => {
+      if (res.data.status) {
+        fetchCompanyGetData(companyId);
+        msg.success(`${res.data.message}`);
+        if (recordToEditId === null) {
+          // handleReset(0);
+        }
+        // dispatch(isbranchlistupdate(true));
+      } else {
+        msg.warning(`${res.data.message}`);
+      }
+    }).catch(err => { })
+      .finally(() => { dispatch(setLoading(false)) })
+  }
+   const handleRoute = () => {
+    setRecordToEditId(null);
+    handleReset()
+    const treeData = structuredClone(tree);
+    const tempObj = {
+      BranchName: "",
+      BranchCode: "",
+      TypeId: selectedLevel + 1,
+      id: 99999,
+      parent: selectedNode?.id,
+    };
+    treeData.push(tempObj);
+    const latestTreeData = treefun(treeData, "#");
+    let selectId =
+      selectedNode["children"].length >= 1
+        ? selectedNode["children"][0].id
+        : 99999;
+    const findroots = getParents(latestTreeData[0], selectId);
+    setSelectedNodeParents(findroots);
+    setSelectedLevel(tempObj.TypeId);
+    setSelectedNode(tempObj);
+    setFields(allLevelsJson[selectedLevel+1])
+  };
+
 
   async function fetchCompanyGetData(companyId) {
     dispatch(setLoading(true))
     await getCompanyData(companyId).then(res => {
       if (res.data && res.data.length > 0) {
-        const result=treefun(res.data,"#")
-        setCompanyData(result)
+        setTree(res.data)
+
+        const result = treefun(res.data, "#")
+          // if (selectedLevel === 99) {
+          //   let data = allLevelsJson;
+          //   data[selectedLevel][0].value = res.data[0].Name;
+          //   data[selectedLevel][1].value = res.data[0].Code;
+          //   setAllLevelsJson(data);
+          // }
+           if (selectedLevel === 99) {
+          const { Name, Code } = res.data[0];
+          reset({
+            Name: Name || "",
+            Code: Code || "",
+          });
+ 
+          const data = fields;
+          console.log("data",data);
+          data[0].disabled = true
+          data[1].disabled = true
+          setFields(data)
+        }
+ 
+          setTreeViewData(result)
       } else {
         msg.warning(res.data.message || "No Data Found")
       }
     }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
+  }
+   async function fetchStateLookUpData(companyId) {
+    dispatch(setLoading(true))
+   await getStateData( companyId)
+      .then((res) => {
+        if (res.data ) {
+          res.data.Details?.forEach((element) => {
+            element["label"] = element.StateName;
+            element["value"] = element.Id;
+          });
+          // let data = lastLevelData;
+          if (lastLevel !== null) {
+            let last = allLevelsJson;
+            let lastData = last[lastLevel];
+            const stateIndex = lastData.findIndex((x) => x.name === "State");
+            console.log(stateIndex,'Nag')
+            lastData[stateIndex].options = res.data.Details;
+
+            setAllLevelsJson({ ...last,lastLevel:lastData });
+          }
+        } else {
+          // TracetMessage("warning", "65vh", "Please Add Company Hierarchy Levels in Hierarchy configuration", "comapnyHierarchyLevels");
+        }
+      }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
+  }
+    async function fetchHierarchyLevelsData(companyId) {
+    dispatch(setLoading(true))
+   await getHierarchyLevelsData( companyId,100)
+      .then((res) => {
+        if (res.data && typeof res.data === "object") {
+          setLevel(res.data["Company Hierarchy"][0].LevelName); 
+          setNextLevel(res.data["Company Hierarchy"][0].LevelName[0].LevelName);
+          setLastLevel(res.data["Company Hierarchy"][0].LevelName.at(-1)["Id"]);
+          let lastData = allLevelsJson;
+          lastData[res.data["Company Hierarchy"][0].LevelName.at(-1)["Id"]] = lastLevelData;
+          // console.log(lastData)  
+          setAllLevelsJson(lastData);
+          // getStates.current = true;
+          getjsonMapping(res.data["Company Hierarchy"][0].LevelName);
+        } else {
+          // TracetMessage("warning", "65vh", "Please Add Company Hierarchy Levels in Hierarchy configuration", "comapnyHierarchyLevels");
+        }
+      }).catch(err => { }).finally(() => { 
+        fetchStateLookUpData(companyId)
+        dispatch(setLoading(false)) })
+  }
+    const getjsonMapping = (leveldata) => {
+    let Labels = Object.keys(allLevelsJson);
+    Labels.forEach((element) => {
+      var index = leveldata.findIndex((x) => x.Id === parseInt(element));
+      if (index !== -1) {
+        allLevelsJson[parseInt(element)].forEach((item) => {
+          if (item.name === "Name") {
+            item.label = `${leveldata[index].LevelName} Name`;
+            item.heading = `${leveldata[index].LevelName} Details`;
+          }
+          if (item.name === "Code") {
+            item.label = `${leveldata[index].LevelName} Code`;
+          }
+        });
+      }
+    });
+  };
+  const handleReset = () => {
+      if(selectedLevel!==lastLevel){
+  reset({
+            Name: "",
+            Code: ""
+          })
+          }
+          else{
+              reset({
+            Name: "",
+            Code: "",
+            PAN:"",
+            GSTIN : "",
+            Address : "",
+            State : "",
+            City : "",
+            ZipCode : "",
+            EmailId : "",
+            MobileNo : ""
+          })
+          }
+    // form.reset()
+  };
+
+  async function fetchCompanyGetDataByBranchId(companyId: any, branchid: any) {
+    dispatch(setLoading(true))
+    await getCompanyDataBybranchId(companyId, branchid).then(res => {
+      if (res.data && res.data.length > 0) {
+        // const result = treefun(res.data, "#")
+        // setTree(result)
+        console.log(res.data,"Nag")
+        const details = res.data[0];
+        if (details) {
+          if(selectedLevel!==lastLevel){
+  reset({
+            Name: details.BranchName,
+            Code: details.BranchCode
+          })
+          }
+          else{
+              reset({
+            Name: details.BranchName,
+            Code: details.BranchCode,
+            PAN:details.PAN,
+            GSTIN : details.GSTIN,
+            Address : details.Address,
+            State : details.State,
+            City : details.City,
+            ZipCode : details.ZipCode,
+            EmailId : details.EmailId,
+            MobileNo : details.MobileNo
+          })
+          }
+        
+        }
+      } else {
+        msg.warning(res.data.message || "No Data Found")
+      }
+    }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
+  }
+
+  async function deleteLevel(compId: string, id: any, data: any) {
+    dispatch(setLoading(true));
+    await deleteHierarchyLevel(compId, id, data).then(res => {
+      if (res.data.status === true) {
+        msg.success(res.data.message)
+        fetchCompanyGetData(companyId)
+      }
+      else {
+        msg.error(res.data.message)
+      }
+    })
+      .catch(err => {
+      }).finally(() => {
+        dispatch(setLoading(false))
+      })
+  }
+  function handleDelete() {
+    if (selectedId) {
+      deleteLevel(companyId, selectedId, "")
+    }
   }
 
   return (
@@ -394,7 +543,7 @@ const CompanyHierarchy = () => {
           <ReusableButton
             htmlType="button"
             variant="default"
-            onClick={null}
+            onClick={()=>handleReset()}
             iconPosition="left"
             size="middle"
             className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
@@ -404,7 +553,7 @@ const CompanyHierarchy = () => {
           <ReusableButton
             htmlType="button"
             variant="default"
-            onClick={null}
+            onClick={submit}
             iconPosition="left"
             size="middle"
             className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
@@ -428,37 +577,104 @@ const CompanyHierarchy = () => {
               />
             </div>
             <div className="flex gap-2 flex items-center justify-center">
-              <Button size="sm" variant="outline" className="h-8">
-                <Plus className="h-4 w-4" />
-              </Button>
-              <Button size="sm" variant="outline" className="h-8">
-                <Trash2 className="h-4 w-4 text-destructive" />
-              </Button>
+                        <ReusableButton
+                        size="small"
+                        className="bg-primary h-[2rem] hover:bg-blue-700 text-white"
+                        style={{
+                          cursor: selectedLevel >= 99 + level.length || disable ? "not-allowed" : "pointer",
+                        }}
+                        disabled={selectedLevel >= 99 + level.length || disable}
+                        onClick={() => {
+                          if (!(selectedLevel >= 99 + level.length || disable)) {
+                            handleRoute();
+                            setDisable(true);
+                          }
+                        }}
+                      >
+                        <Plus className="h-4 w-4" />
+                      </ReusableButton>
+              {/* <Popover open={open} onOpenChange={setOpen}>
+                <PopoverTrigger asChild> */}
+                  <Button size="sm" variant="outline" className="h-8" onClick={handleDelete}>
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                  </Button>
+                {/* </PopoverTrigger>
+                <PopoverContent
+                  align="center"
+                  className="w-72 p-4 space-y-4"
+                >
+                  <div className="space-y-1">
+                    <h4 className="font-semibold text-sm text-destructive">Confirm Deletion</h4>
+                    <p className="text-sm text-muted-foreground">Are you sure want to delete</p>
+                  </div>
+
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setOpen(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={handleDelete}
+                    >
+                      Delete
+                    </Button>
+                  </div>
+                </PopoverContent>
+              </Popover> */}
+
             </div>
           </div>
           <div className="min-h-20 max-h-[27rem] overflow-y-auto p-2">
-            {renderTreeNode(mockData)}
+            <TreeView treeData={treeViewData} config={treeConfig} onSelect={handleSelect} selectKeys={selectedKeys} expandedKeys={expandedKeys} onExpand={setExpandedKeys} />
           </div>
         </div>
 
         {/* Details Panel */}
-        <div className="flex-1 overflow-y-auto">
+         <div className="flex-1 overflow-y-scroll">
           <div className="p-6 space-y-6">
-            <div className="flex items-center gap-2">
-              <h2 className="text-lg font-semibold">CompanyHierarchy</h2>
-              <Info className="h-4 w-4 text-muted-foreground" />
+            <div className="flex flex-col gap-2">
+              <div>
+              <h4 className="master-heading mb-2 flex items-center gap-2">
+                {!recordToEditId
+                  ? selectedLevel === 99
+                    ? "Company Hierarchy"
+                    : "Add Company Hierarchy"
+                  : selectedLevel === 99
+                    ? "Company Hierarchy"
+                    : "Update Company Hierarchy"}
+                {selectedLevel !== lastLevel && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button type="button">
+                          <Info className="mb-1 cursor-pointer" fontSize={22} />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        To Add {nextLevel || "Department/Unit"} to{" "}
+                        {breadCrumb?.at(-1) || "the selected department"}, click on{" "}
+                        {breadCrumb?.at(-1) || "the name"} and then click on the plus icon.
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
+              </h4>
+             </div>
+              <div className="text-sm text-primary">
+                <h6 className="breadCrumb">{breadCrumb.map(x => { return `${x} >` })}</h6>
+              </div>
             </div>
-
-            <div className="text-sm text-primary">
-              CompanyHierarchy &gt;
-            </div>
-
             <div className="space-y-6">
-              <h3 className="text-base font-semibold">CompanyHierarchy Details</h3>
-
+              {/* <h5 className="text-base font-semibold">Department Details</h5> */}
+              <h5>{recordToEditId && selectedLevel !== 99 ? `Update ${fields[0].heading}` : `${selectedLevel !== 99 ? "Enter" : ""} ${fields[0].heading}`}</h5>
               <div className="px-1">
                 <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4">
-                  {getFieldsByNames(['depname', 'depcode']).map((field) => {
+                  {getFieldsByNames((selectedLevel!=lastLevel)?['Name', 'Code']:['Name', 'Code',"PAN","GSTIN","Address","State","City","ZipCode","EmailId","MobileNo"]).map((field) => {
                     return <div className="flex items-center space-x-2">
                       {renderField(field)}
                     </div>;
@@ -468,6 +684,7 @@ const CompanyHierarchy = () => {
             </div>
           </div>
         </div>
+ 
       </div>
     </div>
   );

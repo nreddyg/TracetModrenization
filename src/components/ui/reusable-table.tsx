@@ -1509,7 +1509,7 @@ export function ReusableTable<T = any>({
   onRowReorder,
 }: ReusableTableProps<T>) {
   // State management
-  const [sorting, setSorting] = useLocalStorage<SortingState>(`${storageKey}-sorting`, []);
+  const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   // const [columnVisibility, setColumnVisibility] = useLocalStorage<VisibilityState>(`${storageKey}-visibility`, {});
   const [uncontrolledColumnVisibility, setUncontrolledColumnVisibility] = useState<VisibilityState>({});
@@ -1785,29 +1785,66 @@ useEffect(() => {
             }}
           >
             {/* Sorting */}
-            {enableSorting && column.getCanSort() && (
-              <div className="space-y-2">
-                <p className="text-sm font-medium">Sort</p>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => column.toggleSorting(false)}
-                    className="flex-1"
-                  >
-                    Asc
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => column.toggleSorting(true)}
-                    className="flex-1"
-                  >
-                    Desc
-                  </Button>
-                </div>
-              </div>
-            )}
+{enableSorting && column.getCanSort() && (
+  <div className="space-y-2">
+    <p className="text-sm font-medium">Sort</p>
+    <div className="flex gap-2">
+      {/* Ascending Button */}
+      <Button
+        variant={
+          column.getIsSorted() === 'asc'
+            ? 'default' // active
+            : 'outline' // inactive
+        }
+        size="sm"
+        className={cn(
+          "flex-1",
+          column.getIsSorted() === 'asc'
+            ? "bg-primary text-white hover:bg-primary/90"
+            : "text-foreground"
+        )}
+        onClick={() => {
+          if (column.getIsSorted() === 'asc') {
+            column.clearSorting(); // reset to original
+          } else {
+            column.toggleSorting(false); // sort asc
+          }
+        }}
+      >
+        <ArrowUp className="w-4 h-4 mr-1" />
+        Asc
+      </Button>
+
+      {/* Descending Button */}
+      <Button
+        variant={
+          column.getIsSorted() === 'desc'
+            ? 'default'
+            : 'outline'
+        }
+        size="sm"
+        className={cn(
+          "flex-1",
+          column.getIsSorted() === 'desc'
+            ? "bg-primary text-white hover:bg-primary/90"
+            : "text-foreground"
+        )}
+        onClick={() => {
+          if (column.getIsSorted() === 'desc') {
+            column.clearSorting(); // reset to original
+          } else {
+            column.toggleSorting(true); // sort desc
+          }
+        }}
+      >
+        <ArrowDown className="w-4 h-4 mr-1" />
+        Desc
+      </Button>
+    </div>
+  </div>
+)}
+
+
 
             {/* Filtering */}
             {enableFiltering && column.getCanFilter() && (

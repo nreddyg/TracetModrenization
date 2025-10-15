@@ -14,6 +14,7 @@ import { MessageProvider } from "./components/ui/reusable-message";
 import WrapperLazyComponent from "./components/common/WrapperLazyComponent";
 import AssetCodeTable from "./pages/servicedesk/AssetCodeTable";
 import ServiceRequestReport from "./pages/servicedesk/ServiceRequestDetailsHistory";
+import Store from "./pages/masters/Store";
 
 // Lazy load all pages
 const Index = WrapperLazyComponent(() => import("./pages/Index"));
@@ -171,6 +172,7 @@ const AnimatedRoutes = () => {
                   <Route path="/masters/assets-inventory" element={<AssetsMasters />} />
                   <Route path="/masters/maintenance" element={<MaintenanceMasters />} />
                   <Route path="/masters/reports" element={<ReportsMasters />} />
+                  <Route path="/masters/store" element={<Store/>} />
 
                   {/* CWIP */}
                   <Route path="/cwip/project-management" element={<ProjectManagement />} />

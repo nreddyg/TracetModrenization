@@ -55,77 +55,19 @@ interface OrganizationData {
 }
 
 const Organization = () => {
-  const { toast } = useToast();
   const dispatch = useAppDispatch();
   const companyId = useAppSelector(state => state.projects.companyId)
   const [dataSource, setDataSource] = useState<OrganizationData[]>([]);
-  const [columns, setColumns] = useState<ColumnDef<OrganizationData>[]>([
-    { id: 'OrganizationName', accessorKey: "OrganizationName", header: "Organization Name" },
-    { id: 'CompanyCode', accessorKey: "CompanyCode", header: "Company Code" },
-    { id: 'OrganizationKnownAs', accessorKey: "OrganizationKnownAs", header: "Known As" },
-    { id:'City', accessorKey:"City", header:"City" },
-    { id:'State', accessorKey:"State", header:"State" },   
-  ])
-  const [fields,setFields]=useState<BaseField[]>(ORGANIZATION_DETAILS);
+  const [fields, setFields] = useState<BaseField[]>(ORGANIZATION_DETAILS);
   const form = useForm<GenericObject>({
-      defaultValues: fields.reduce((acc, f) => {
-        acc[f.name!] = f.defaultValue ?? '';
-        return acc;
-      }, {} as GenericObject),
-      mode: 'onChange'
-    });
-    const { control, register, handleSubmit, trigger, watch, setValue, reset, formState: { errors } } = form;
+    defaultValues: fields.reduce((acc, f) => {
+      acc[f.name!] = f.defaultValue ?? '';
+      return acc;
+    }, {} as GenericObject),
+    mode: 'onChange'
+  });
+  const { control, register, handleSubmit, trigger, watch, setValue, reset, formState: { errors } } = form;
   const [selectedOrganization, setSelectedOrganization] = useState<OrganizationData | null>(null);
-
-  useEffect(() => {
-    if (companyId) fetchAllOrganizationsList();
-  }, [companyId]);
-  //fetch all users list
-  const fetchAllOrganizationsList = async () => {
-    dispatch(setLoading(true));
-    await GetOrganizationsList(companyId).then(res => {
-      if (res.success && res.data && res.data.organizations && Array.isArray(res.data.organizations)) {
-        setDataSource(res.data.organizations);
-      }else{
-        setDataSource([]);
-      }
-    }).catch(err => console.log(err)).finally(() => {
-      dispatch(setLoading(false));
-    });
-  }
-  const handleDelete = (data: OrganizationData): void => {
-  }
-  const handleEdit = (data: OrganizationData): void => {
-  }
-  const tableActions: TableAction<OrganizationData>[] = [
-    {
-      label: 'Edit',
-      icon: Edit,
-      onClick: handleEdit,
-      variant: 'default',
-    },
-    {
-      label: 'Delete',
-      icon: Trash2,
-      onClick: handleDelete,
-      variant: 'destructive',
-    },
-  ];
-  // handle refresh
-  const handleRefresh = useCallback(() => {
-      toast({ title: "Data Refreshed", description: "All organizations data has been updated", });
-      fetchAllOrganizationsList();
-  }, [toast]);
-  // Define table permissions
-  const tablePermissions: TablePermissions = {
-    canEdit: true,
-    canDelete: true,
-    canView: true,
-    canExport: false,
-    canAdd: true,
-    canManageColumns: true,
-  };
-
   const [searchTerm, setSearchTerm] = useState('');
   const filteredOrgs = dataSource.filter(org => {
     const matchesSearch = org.OrganizationName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -137,169 +79,44 @@ const Organization = () => {
     return matchesSearch;
   });
   const [isInboxCollapsed, setIsInboxCollapsed] = useState(false);
-    const renderField = (field: BaseField) => {
-      const { name, label, fieldType, isRequired, show = true } = field;
-      if (!name) {
-        return null;
+  useEffect(() => {
+    if (companyId) fetchAllOrganizationsList();
+  }, [companyId]);
+  //fetch all users list
+  const fetchAllOrganizationsList = async () => {
+    dispatch(setLoading(true));
+    await GetOrganizationsList(companyId).then(res => {
+      if (res.success && res.data && res.data.organizations && Array.isArray(res.data.organizations)) {
+        setDataSource(res.data.organizations);
+      } else {
+        setDataSource([]);
       }
-      const validationRules = {
-        required: isRequired ? `${label} is Required` : false,
-      };
-  
-      switch (fieldType) {
-        case 'text':
-          return (
-            <Controller
-              key={name}
-              name={name}
-              control={control}
-              rules={validationRules}
-              render={({ field: ctrl }) => (
-                <ReusableInput
-                  {...field}
-                  value={ctrl.value}
-                  onChange={ctrl.onChange}
-                  error={errors[name]?.message as string}
-                />
-              )}
-            />
-          );
-        case 'textarea':
-          return (
-            <Controller
-              key={name}
-              name={name}
-              control={control}
-              rules={validationRules}
-              render={({ field: ctrl }) => (
-                <ReusableTextarea
-                  {...field}
-                  value={ctrl.value}
-                  onChange={ctrl.onChange}
-                  error={errors[name]?.message as string}
-                />
-              )}
-            />
-          );
-        case 'dropdown':
-          return (
-            <Controller
-              key={name}
-              name={name}
-              control={control}
-              rules={validationRules}
-              render={({ field: ctrl }) => (
-                <ReusableDropdown
-                  {...field}
-                  value={ctrl.value}
-                  onChange={ctrl.onChange}
-                  error={errors[name]?.message as string}
-                  dropdownClassName={true ? 'z-[10001]' : ''}
-                />
-              )}
-            />
-          );
-        case 'date':
-          return (
-            <Controller
-              key={name}
-              name={name}
-              control={control}
-              rules={validationRules}
-              render={({ field: ctrl }) => (
-                <ReusableDatePicker
-                  {...field}
-                  value={ctrl.value}
-                  onChange={ctrl.onChange}
-                  error={errors[name]?.message as string}
-                />
-              )}
-            />
-          );
-        case 'multiselect':
-          return (
-            <div>
-              <Controller
-                key={name}
-                name={name}
-                control={control}
-                rules={validationRules}
-                render={({ field: ctrl }) => (
-                  <ReusableMultiSelect
-                    label={label!}
-                    {...field}
-                    value={ctrl.value}
-                    onChange={ctrl.onChange}
-                    error={errors[name]?.message as string}
-                  />
-                )}
-              />
-            </div>
-          );
-  
-        case 'upload':
-          return (
-            <Controller
-              key={name}
-              name={name}
-              control={control}
-              rules={validationRules}
-              render={({ field: ctrl }) => (
-                <ReusableUpload
-                  {...field}
-                  value={ctrl.value}
-                  onChange={ctrl.onChange}
-                  error={errors[name]?.message as string}
-                  dragAndDrop={false}
-                  fieldClassName="w-full"
-                />
-              )}
-            />
-          );
-        case 'numeric':
-          return (
-            <Controller
-              key={name}
-              name={name}
-              control={control}
-              rules={validationRules}
-              render={({ field: ctrl }) => (
-                <ReusableInput
-                  {...field}
-                  type="number"
-                  value={ctrl.value}
-                  onChange={ctrl.onChange}
-                  error={errors[name]?.message as string}
-                />
-              )}
-            />
-          );
-  
-        case 'checkbox':
-          return (
-            <Controller
-              key={name}
-              name={name}
-              control={control}
-              rules={validationRules}
-              render={({ field: ctrl }) => (
-                <ReusableCheckbox
-                  {...field}
-                  value={ctrl.value}
-                  onChange={ctrl.onChange}
-                  error={errors[name]?.message as string}
-                />
-              )}
-            />
-          );
-        case 'radiobutton': return (
+    }).catch(err => console.log(err)).finally(() => {
+      dispatch(setLoading(false));
+    });
+  }
+  const handleSelect = (data: OrganizationData) => {
+    setSelectedOrganization(data);
+  }
+  const renderField = (field: BaseField) => {
+    const { name, label, fieldType, isRequired, show = true } = field;
+    if (!name) {
+      return null;
+    }
+    const validationRules = {
+      required: isRequired ? `${label} is Required` : false,
+    };
+
+    switch (fieldType) {
+      case 'text':
+        return (
           <Controller
             key={name}
             name={name}
             control={control}
             rules={validationRules}
             render={({ field: ctrl }) => (
-              <ReusableRadio
+              <ReusableInput
                 {...field}
                 value={ctrl.value}
                 onChange={ctrl.onChange}
@@ -308,10 +125,154 @@ const Organization = () => {
             )}
           />
         );
-        default:
-          return null;
-      }
-    };
+      case 'textarea':
+        return (
+          <Controller
+            key={name}
+            name={name}
+            control={control}
+            rules={validationRules}
+            render={({ field: ctrl }) => (
+              <ReusableTextarea
+                {...field}
+                value={ctrl.value}
+                onChange={ctrl.onChange}
+                error={errors[name]?.message as string}
+              />
+            )}
+          />
+        );
+      case 'dropdown':
+        return (
+          <Controller
+            key={name}
+            name={name}
+            control={control}
+            rules={validationRules}
+            render={({ field: ctrl }) => (
+              <ReusableDropdown
+                {...field}
+                value={ctrl.value}
+                onChange={ctrl.onChange}
+                error={errors[name]?.message as string}
+                dropdownClassName={true ? 'z-[10001]' : ''}
+              />
+            )}
+          />
+        );
+      case 'date':
+        return (
+          <Controller
+            key={name}
+            name={name}
+            control={control}
+            rules={validationRules}
+            render={({ field: ctrl }) => (
+              <ReusableDatePicker
+                {...field}
+                value={ctrl.value}
+                onChange={ctrl.onChange}
+                error={errors[name]?.message as string}
+              />
+            )}
+          />
+        );
+      case 'multiselect':
+        return (
+          <div>
+            <Controller
+              key={name}
+              name={name}
+              control={control}
+              rules={validationRules}
+              render={({ field: ctrl }) => (
+                <ReusableMultiSelect
+                  label={label!}
+                  {...field}
+                  value={ctrl.value}
+                  onChange={ctrl.onChange}
+                  error={errors[name]?.message as string}
+                />
+              )}
+            />
+          </div>
+        );
+
+      case 'upload':
+        return (
+          <Controller
+            key={name}
+            name={name}
+            control={control}
+            rules={validationRules}
+            render={({ field: ctrl }) => (
+              <ReusableUpload
+                {...field}
+                value={ctrl.value}
+                onChange={ctrl.onChange}
+                error={errors[name]?.message as string}
+                dragAndDrop={false}
+                fieldClassName="w-full"
+              />
+            )}
+          />
+        );
+      case 'numeric':
+        return (
+          <Controller
+            key={name}
+            name={name}
+            control={control}
+            rules={validationRules}
+            render={({ field: ctrl }) => (
+              <ReusableInput
+                {...field}
+                type="number"
+                value={ctrl.value}
+                onChange={ctrl.onChange}
+                error={errors[name]?.message as string}
+              />
+            )}
+          />
+        );
+
+      case 'checkbox':
+        return (
+          <Controller
+            key={name}
+            name={name}
+            control={control}
+            rules={validationRules}
+            render={({ field: ctrl }) => (
+              <ReusableCheckbox
+                {...field}
+                value={ctrl.value}
+                onChange={ctrl.onChange}
+                error={errors[name]?.message as string}
+              />
+            )}
+          />
+        );
+      case 'radiobutton': return (
+        <Controller
+          key={name}
+          name={name}
+          control={control}
+          rules={validationRules}
+          render={({ field: ctrl }) => (
+            <ReusableRadio
+              {...field}
+              value={ctrl.value}
+              onChange={ctrl.onChange}
+              error={errors[name]?.message as string}
+            />
+          )}
+        />
+      );
+      default:
+        return null;
+    }
+  };
   return (
     <div className="h-full   bg-gray-50 flex flex-col ">
       <div className="flex flex-1 overflow-hidden   ">
@@ -353,7 +314,7 @@ const Organization = () => {
                         ? 'bg-blue-50 border-l-4 border-blue-500'
                         : 'border border-gray-200'
                       }`}
-                    onClick={null}
+                    onClick={() => handleSelect(org)}
                   >
                     <div className="flex items-center justify-between mb-1.5">
                       <span className="text-xs font-medium text-blue-600 me-2">{org.CompanyCode}</span>

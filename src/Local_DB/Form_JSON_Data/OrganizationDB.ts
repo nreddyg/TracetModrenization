@@ -126,13 +126,13 @@ export const ORGANIZATION_DETAILS: BaseField[] = [
         "text": "Address Details"
     },
     {
-        label: 'Address Line1',
+        label: 'Address Line 1',
         fieldType: 'text',
         name: 'AddressLine1',
         isRequired: true,
     },
     {
-        label: 'Address Line2',
+        label: 'Address Line 2',
         fieldType: 'text',
         name: 'AddressLine2',
         isRequired: false,

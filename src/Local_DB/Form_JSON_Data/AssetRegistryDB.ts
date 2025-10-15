@@ -54,7 +54,7 @@ export const REGISTRY_DB: BaseField[] = [
     name: "LicenseType",
     placeholder: "Select License Type",
     isRequired: true,
-    options: [],
+    options: [{label:"Perpetual",value:"Perpetual"},{label:"Subscription",value:"Subscription"},{label:"Trial",value:"Trial"},{label:"Open Source",value:"Open Source"}],
     allowClear: true,
     disabled:false,
       // className: " min-h-[40px]",
@@ -63,36 +63,11 @@ export const REGISTRY_DB: BaseField[] = [
        {
     name: 'NumberOfLicenses',
     label: 'Number of Licenses',
-    fieldType: 'text',
+    fieldType:'numeric',
     placeholder: 'Enter Number of Licenses',
     isRequired: true,
     // className:'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background',
     disabled:false
   },
-
-]
-export const cellsData: BaseField[] =[
-     {
-    name: 'SoftwareName',
-    label: 'Software Name',
-    fieldType: 'text',
-    placeholder: 'Enter Software Name',
-    isRequired: true,
-    // className:'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background',
-    disabled:false
-  },
-  {
-   
-    fieldType: "dropdown",
-    name: "New",
-    placeholder: "Select License Type",
-    isRequired: true,
-    options: [],
-    allowClear: true,
-      // className: " min-h-[40px]",
-      // containerClassName: "w-full h-10 rounded-md"
-  },
-     
- 
 
 ]

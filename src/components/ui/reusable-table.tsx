@@ -1,81 +1,13 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef, RefObject } from 'react';
 import {
-  useReactTable,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  getGroupedRowModel,
-  getExpandedRowModel,
-  flexRender,
-  createColumnHelper,
-  Row,
-  Column,
-  Table as TanstackTable,
-  ColumnDef,
-  SortingState,
-  ColumnFiltersState,
-  VisibilityState,
-  RowSelectionState,
-  GroupingState,
-  ExpandedState,
-  PaginationState,
-  OnChangeFn,
-  ColumnOrderState,
-  ColumnSizingState,
-  ColumnPinningState,
-  FilterFn,
-  getFacetedRowModel,
-  getFacetedUniqueValues,
+  useReactTable, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, getGroupedRowModel, getExpandedRowModel, flexRender, createColumnHelper, Row, Column,
+  Table as TanstackTable, ColumnDef, SortingState, ColumnFiltersState, VisibilityState, RowSelectionState, GroupingState, ExpandedState, PaginationState, OnChangeFn, ColumnOrderState, ColumnSizingState, ColumnPinningState, FilterFn, getFacetedRowModel, getFacetedUniqueValues,
 } from '@tanstack/react-table';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import {
-  ChevronDown,
-  ChevronRight,
-  Search,
-  Filter,
-  Download,
-  Edit,
-  Trash2,
-  Eye,
-  Settings,
-  MoreHorizontal,
-  ArrowUpDown,
-  ArrowUp,
-  ArrowDown,
-  Plus,
-  X,
-  Check,
-  AlertCircle,
-  Loader2,
-  Moon,
-  Sun,
-  Columns,
-  RefreshCw,
-  PrinterIcon,
-  FileSpreadsheet,
-  FileImage,
-  Keyboard,
-  Volume2,
-  Calendar,
-  Users,
-  Shield,
-  History,
-  Globe,
-  Save,
-  Undo,
-  Redo,
-  Maximize2,
-  Minimize2,
-  Pin,
-  PinOff,
-  FileText,
-  Group,
-  CheckSquare,
-  Square,
-  MoreVertical
+  ChevronDown, ChevronRight, Search, Filter, Download, Edit, Trash2, Eye, Settings, MoreHorizontal, ArrowUpDown, ArrowUp, ArrowDown, Plus, X, Check, AlertCircle, Loader2, Moon, Sun, Columns, RefreshCw, PrinterIcon, FileSpreadsheet, FileImage, Keyboard, Volume2, Calendar, Users, Shield, History, Globe, Save, Undo, Redo, Maximize2, Minimize2, Pin, PinOff, FileText, Group, CheckSquare, Square, MoreVertical
 } from 'lucide-react';
 import { Button } from './button';
 import { Input } from './input';
@@ -85,23 +17,10 @@ import { Badge } from './badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './dropdown-menu';
 import { Popover, PopoverContent, PopoverTrigger } from './popover';
 import { cn } from '@/lib/utils';
-import {
-  DndContext,
-  closestCenter,
-  MouseSensor,
-  TouchSensor,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
-import {
-  arrayMove,
-  SortableContext,
-  useSortable,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
+import { DndContext, closestCenter, MouseSensor, TouchSensor, useSensor, useSensors, } from "@dnd-kit/core";
+import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy, } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { ReusableMultiSelect } from './reusable-multi-select';
-
 // Enhanced types for enterprise features
 export interface TablePermissions {
   canEdit: boolean;
@@ -162,7 +81,6 @@ export interface TablePreferences {
   filters: AdvancedFilter[];
   pageSize: number;
 }
-
 // NEW: Enhanced Selection interfaces
 export interface SelectionInfo<T = any> {
   selectedRows: T[];
@@ -171,7 +89,6 @@ export interface SelectionInfo<T = any> {
   isAllSelected: boolean;
   isPartiallySelected: boolean;
 }
-
 export interface SelectionActions<T = any> {
   selectRow: (rowId: string) => void;
   deselectRow: (rowId: string) => void;
@@ -182,7 +99,6 @@ export interface SelectionActions<T = any> {
   deselectMultiple: (rowIds: string[]) => void;
   invertSelection: () => void;
 }
-
 export interface ReusableTableProps<T = any> {
   data: T[];
   columns: ColumnDef<T>[];
@@ -191,7 +107,7 @@ export interface ReusableTableProps<T = any> {
   title?: string;
   permissions?: TablePermissions;
   actions?: TableAction<T>[];
-  onAdd?: (dat:any) => void;
+  onAdd?: () => void;
   onRefresh?: () => void;
   onBulkDelete?: (selectedRows: T[]) => void;
   onBulkEdit?: (selectedRows: T[]) => void;
@@ -210,33 +126,10 @@ export interface ReusableTableProps<T = any> {
   enableSelectAll?: boolean; // Enable/disable select all functionality
   maxSelectable?: number; // Maximum number of rows that can be selected
   selectableRowFilter?: (row: T) => boolean; // Filter which rows can be selected
-
-  enableSelection?: boolean;
-  enableSearch?: boolean;
-  enableColumnVisibility?: boolean;
-  enableExport?: boolean;
-  enablePagination?: boolean;
-  enableSorting?: boolean;
-  enableFiltering?: boolean;
-  enableGrouping?: boolean;
-  enableInlineEdit?: boolean;
-  enableKeyboardNav?: boolean;
-  enableVirtualScrolling?: boolean;
-  enableAdvancedFilters?: boolean;
-  enableAuditTrail?: boolean;
-  enablePrintMode?: boolean;
-  enableColumnPinning?: boolean;
-  enableTreeData?: boolean;
-  pageSize?: number;
-  virtualItemHeight?: number;
-  className?: string;
-  storageKey?: string;
-  customActions?: React.ReactNode;
-  emptyMessage?: string;
-  theme?: TableTheme;
-  locale?: string;
-  timezone?: string;
-  rowHeight?: 'compact' | 'normal' | 'comfortable';
+  headerContentClassName?: string
+  enableSelection?: boolean; enableSearch?: boolean; enableColumnVisibility?: boolean; enableExport?: boolean; enablePagination?: boolean; enableSorting?: boolean; enableFiltering?: boolean; enableGrouping?: boolean; enableInlineEdit?: boolean; enableKeyboardNav?: boolean;
+  enableVirtualScrolling?: boolean; enableAdvancedFilters?: boolean; enableAuditTrail?: boolean; enablePrintMode?: boolean; enableColumnPinning?: boolean; enableTreeData?: boolean; pageSize?: number;
+  virtualItemHeight?: number; className?: string; storageKey?: string; customActions?: React.ReactNode; emptyMessage?: string; theme?: TableTheme; locale?: string; timezone?: string; rowHeight?: 'compact' | 'normal' | 'comfortable';
   aggregationFunctions?: Record<string, (values: any[]) => any>;
   getSubRows?: (originalRow: T, index: number) => T[] | undefined;
 }
@@ -1485,7 +1378,7 @@ export function ReusableTable<T = any>({
   enableSorting = true,
   enableFiltering = true,
   enableGrouping = false,
-  enableInlineEdit = true,
+  enableInlineEdit = false,
   enableKeyboardNav = false,
   enableVirtualScrolling = false,
   enableAdvancedFilters = false,
@@ -1507,9 +1400,10 @@ export function ReusableTable<T = any>({
   getSubRows,
   enableRowReordering = false,
   onRowReorder,
+  headerContentClassName
 }: ReusableTableProps<T>) {
   // State management
-  const [sorting, setSorting] = useLocalStorage<SortingState>(`${storageKey}-sorting`, []);
+  const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   // const [columnVisibility, setColumnVisibility] = useLocalStorage<VisibilityState>(`${storageKey}-visibility`, {});
   const [uncontrolledColumnVisibility, setUncontrolledColumnVisibility] = useState<VisibilityState>({});
@@ -1521,7 +1415,6 @@ export function ReusableTable<T = any>({
   const [grouping, setGrouping] = useLocalStorage<GroupingState>(`${storageKey}-grouping`, []);
   const [expanded, setExpanded] = useState<ExpandedState>({});
   const [globalFilter, setGlobalFilter] = useState('');
-  const [newRow, setNewRow] = useState<T | null>(null);
   const [columnOrder, setColumnOrder] = useLocalStorage<ColumnOrderState>(`${storageKey}-column-order`, []);
   const [columnSizing, setColumnSizing] = useLocalStorage<ColumnSizingState>(`${storageKey}-column-sizing`, {});
   const [pagination, setPagination] = useLocalStorage<PaginationState>(`${storageKey}-pagination`, {
@@ -1684,17 +1577,17 @@ export function ReusableTable<T = any>({
     isOpen: boolean
     onOpenChange: (open: boolean) => void
   }
-const headerRef = React.useRef<HTMLDivElement>(null);
-const [calculatedMinWidth, setCalculatedMinWidth] = React.useState<number>(150);
-function getMinWidthFromChars(charCount: number, font: string = '12px Arial'): number {
-  const canvas = document.createElement('canvas');
-  const context = canvas.getContext('2d');
-  if (!context) return 48; // fallback minimum width
+  const headerRef = React.useRef<HTMLDivElement>(null);
+  const [calculatedMinWidth, setCalculatedMinWidth] = React.useState<number>(150);
+  function getMinWidthFromChars(charCount: number, font: string = '12px Arial'): number {
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    if (!context) return 48; // fallback minimum width
 
-  context.font = font;
-  const avgCharWidth = context.measureText('M').width; // Use 'M' as average char width
-  return Math.ceil(avgCharWidth * charCount + 32); // +32 for padding
-}
+    context.font = font;
+    const avgCharWidth = context.measureText('M').width; // Use 'M' as average char width
+    return Math.ceil(avgCharWidth * charCount + 32); // +32 for padding
+  }
   function DataTableColumnHeader<TData, TValue>({
     column,
     table,
@@ -1702,16 +1595,16 @@ function getMinWidthFromChars(charCount: number, font: string = '12px Arial'): n
     enableSorting,
     enableFiltering,
   }: DataTableColumnHeaderProps<TData, TValue>) {
-useEffect(() => {
-  if (headerRef.current) {
-    const actualWidth = headerRef.current.offsetWidth + 16;
+    useEffect(() => {
+      if (headerRef.current) {
+        const actualWidth = headerRef.current.offsetWidth + 16;
 
-    const minCharsWidth = getMinWidthFromChars(10);  // Minimum width based on 4 chars
-    const calculated = Math.max(actualWidth, minCharsWidth);
+        const minCharsWidth = getMinWidthFromChars(10);  // Minimum width based on 4 chars
+        const calculated = Math.max(actualWidth, minCharsWidth);
 
-    setCalculatedMinWidth(calculated);
-  }
-}, [title]);
+        setCalculatedMinWidth(calculated);
+      }
+    }, [title]);
     const [tempFilter, setTempFilter] = React.useState<string[]>(
       Array.isArray(column.getFilterValue()) ? (column.getFilterValue() as string[]) : []
     );
@@ -1771,9 +1664,11 @@ useEffect(() => {
           setOpenColumnId(open ? column.id : null);
         }}>
           <PopoverTrigger asChild>
-          {(enableFiltering || enableSorting) ? <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+
+            {(enableFiltering || enableSorting) && <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
               <MoreVertical className="h-4 w-4 text-muted-foreground" />
-            </Button>:<span className="h-6 w-6 p-0"></span>}
+            </Button>
+            }
           </PopoverTrigger>
           <PopoverContent
             className="w-60 p-4 space-y-4"
@@ -1790,25 +1685,62 @@ useEffect(() => {
               <div className="space-y-2">
                 <p className="text-sm font-medium">Sort</p>
                 <div className="flex gap-2">
+                  {/* Ascending Button */}
                   <Button
-                    variant="outline"
+                    variant={
+                      column.getIsSorted() === 'asc'
+                        ? 'default' // active
+                        : 'outline' // inactive
+                    }
                     size="sm"
-                    onClick={() => column.toggleSorting(false)}
-                    className="flex-1"
+                    className={cn(
+                      "flex-1",
+                      column.getIsSorted() === 'asc'
+                        ? "bg-primary text-white hover:bg-primary/90"
+                        : "text-foreground"
+                    )}
+                    onClick={() => {
+                      if (column.getIsSorted() === 'asc') {
+                        column.clearSorting(); // reset to original
+                      } else {
+                        column.toggleSorting(false); // sort asc
+                      }
+                    }}
                   >
+                    <ArrowUp className="w-4 h-4 mr-1" />
                     Asc
                   </Button>
+
+                  {/* Descending Button */}
                   <Button
-                    variant="outline"
+                    variant={
+                      column.getIsSorted() === 'desc'
+                        ? 'default'
+                        : 'outline'
+                    }
                     size="sm"
-                    onClick={() => column.toggleSorting(true)}
-                    className="flex-1"
+                    className={cn(
+                      "flex-1",
+                      column.getIsSorted() === 'desc'
+                        ? "bg-primary text-white hover:bg-primary/90"
+                        : "text-foreground"
+                    )}
+                    onClick={() => {
+                      if (column.getIsSorted() === 'desc') {
+                        column.clearSorting(); // reset to original
+                      } else {
+                        column.toggleSorting(true); // sort desc
+                      }
+                    }}
                   >
+                    <ArrowDown className="w-4 h-4 mr-1" />
                     Desc
                   </Button>
                 </div>
               </div>
             )}
+
+
 
             {/* Filtering */}
             {enableFiltering && column.getCanFilter() && (
@@ -1971,31 +1903,12 @@ useEffect(() => {
                 Refresh
               </Button>
             )}
-            {/* {onAdd && permissions.canAdd && (
+            {onAdd && permissions.canAdd && (
               <Button onClick={onAdd}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add New
               </Button>
-            )} */}
-            {onAdd && permissions.canAdd && (
-<Button
-  onClick={() => {
-    const emptyRecord: any = {};
-    columns.forEach((col: any) => {
-      const colId = col.id || col.accessorKey || (col.accessorFn ? col.header : null);
-      if (colId && colId !== "actions" && colId !== "select") {
-        emptyRecord[colId] = "";
-      }
-    });
-    setNewRow(emptyRecord);
-  }}
->
-<Plus className="w-4 h-4 mr-2" />
-  Add New
-</Button>
-
-)}
- 
+            )}
           </div>
         </div>
       )}
@@ -2083,13 +1996,13 @@ useEffect(() => {
       {/* Table */}
       <div className="border rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
-          <div className="max-h-[500px] overflow-y-auto">
           <table ref={tableRef} className="w-full  table-fixed">
-            <thead className="sticky top-0 bg-muted/50 z-10">
+            <thead className="bg-muted/50">
               {table.getHeaderGroups().map(headerGroup => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map(header => (
                     <th
+                      onClick={() => { console.log(header) }}
                       key={header.id}
                       className="ps-4 px-2 py-1 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider border-b relative bg-background z-10"
                       style={{
@@ -2105,7 +2018,7 @@ useEffect(() => {
                     >
                       {header.isPlaceholder ? null : (
                         <div className="flex flex-col gap-2">
-                          <div className="flex items-center gap-2">
+                          <div className={cn("flex items-center  py-1  gap-2", headerContentClassName)}>
                             {/* {enableSorting && header.column.getCanSort() ? (
                               <Button
                                 variant="ghost"
@@ -2171,119 +2084,7 @@ useEffect(() => {
                   items={table.getRowModel().rows.map(r => r.id)}
                   strategy={verticalListSortingStrategy}
                 >
-
                   <tbody className="bg-background divide-y divide-border">
-{newRow && (
-<tr className="bg-muted/30">
-
-    {table.getAllLeafColumns().map((column) => {
-
-      const colId = column.id;
-
-      const colMeta = column.columnDef.meta as any;
- 
-      // Skip non-data columns
-
-      if (colId === "select" || colId === "actions") {
-
-        return <td key={colId}></td>;
-
-      }
- 
-      const inputType = colMeta?.editType || "text";
-
-      const options = colMeta?.options || [];
- 
-      return (
-<td key={colId} className="p-2">
-
-          {inputType === "select" ? (
-<Select
-
-              onValueChange={(val) =>
-
-                setNewRow((prev) => ({ ...prev!, [colId]: val }))
-
-              }
->
-<SelectTrigger className="h-8">
-<SelectValue placeholder="Select..." />
-</SelectTrigger>
-<SelectContent>
-
-                {options.map((opt: any) => (
-<SelectItem key={opt.value} value={opt.value}>
-
-                    {opt.label}
-</SelectItem>
-
-                ))}
-</SelectContent>
-</Select>
-
-          ) : (
-<Input
-
-              type={inputType}
-
-              value={(newRow as any)[colId] || ""}
-
-              onChange={(e) =>
-
-                setNewRow((prev) => ({
-
-                  ...prev!,
-
-                  [colId]: e.target.value,
-
-                }))
-
-              }
-
-              className="h-8"
-
-            />
-
-          )}
-</td>
-
-      );
-
-    })}
- 
-    {/* Save / Cancel buttons */}
-<td className="p-2 flex gap-2">
-<Button
-
-        size="sm"
-
-        variant="default"
-
-        onClick={() => {
-
-          if (onAdd) onAdd(newRow);
-
-          setNewRow(null);
-
-        }}
->
-<Check className="w-4 h-4" />
-</Button>
-<Button
-
-        size="sm"
-
-        variant="ghost"
-
-        onClick={() => setNewRow(null)}
->
-<X className="w-4 h-4" />
-</Button>
-</td>
-</tr>
-
-)}
- 
                     {table.getRowModel().rows.map(row => {
                       const rowId = getRowId(row.original, row.index);
                       const isSelected = rowSelection[rowId] || false;
@@ -2409,14 +2210,7 @@ useEffect(() => {
                                 type={columnMeta.editType || "text"}
                                 options={columnMeta.options || []}
                               />
-                            ) : <div
-                              className="overflow-hidden"
-                              style={{
-                                display: '-webkit-box',
-                                WebkitLineClamp: 2,
-                                WebkitBoxOrient: 'vertical',
-                                textOverflow: 'ellipsis',
-                              }}
+                            ) : <div className="overflow-hidden" style={{   display: '-webkit-box',   WebkitLineClamp: 2,   WebkitBoxOrient: 'vertical',   textOverflow: 'ellipsis', }}
                               title={String(cell.getValue())}
                             >
                               {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -2432,7 +2226,6 @@ useEffect(() => {
             )}
 
           </table>
-          </div>
         </div>
 
         {/* Pagination */}
@@ -2441,7 +2234,6 @@ useEffect(() => {
     </div>
   );
 }
-
 // NEW: Export additional types and hooks for external use
 // export { useTableSelection, type SelectionInfo, type SelectionActions };
 export default ReusableTable;

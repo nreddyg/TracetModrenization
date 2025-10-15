@@ -45,6 +45,7 @@ export interface UploadProps {
   accept?: string;
   maxSize?: number; // in MB
   maxFiles?: number;
+  fieldClassName?:string;
   value?: UploadFile[];
   disabled?: boolean;
   showPreview?: boolean; // Shows preview thumbnails for images
@@ -100,6 +101,7 @@ export const ReusableUpload = forwardRef<HTMLInputElement, UploadProps>(
     directory = false,
     listType = 'text',
     isRequired=false,
+    fieldClassName='',
     action,
     method = 'POST',
     headers,
@@ -778,13 +780,13 @@ export const ReusableUpload = forwardRef<HTMLInputElement, UploadProps>(
       if (!dragAndDrop) {
         // Button-style upload similar to Ant Design
         return (
-          <div className="space-y-2">
+          <div className="space-y-1">
             <Button
               type="button"
               variant="outline"
               onClick={() => inputRef.current?.click()}
               disabled={disabled}
-              className="flex items-center gap-2"
+              className={`flex items-center gap-2 ${fieldClassName}`}
             >
               <Upload className="h-4 w-4" />
               {multiple ? 'Select Files' : 'Select File'}
@@ -832,7 +834,7 @@ export const ReusableUpload = forwardRef<HTMLInputElement, UploadProps>(
     };
 
     return (
-      <div className={cn("space-y-2", containerClassName)}>
+      <div className={cn("space-y-1", containerClassName)}>
         {renderLabel()}
         
         <input
@@ -857,7 +859,7 @@ export const ReusableUpload = forwardRef<HTMLInputElement, UploadProps>(
             {renderUploadArea()}
             {showUploadList && value.length > 0 && (
               <div className={cn(
-                listType === 'text' ? "border rounded-lg p-2" : "space-y-2"
+                listType === 'text' ? "border rounded-lg p-2" : "space-y-1"
               )}>
                 {value.map(renderFileItem)}
               </div>

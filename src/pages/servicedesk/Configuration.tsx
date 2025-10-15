@@ -105,7 +105,9 @@ const Configuration = () => {
   const [serviceRequestTypeData, setServiceRequestTypeData] = useState<serviceRequestType[]>([]);
   const [isDelModalOpen, setIsDelModalOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<serviceRequestType | null>(null);
+  const [deletingRecord,setDeletingRecord]=useState<serviceRequestType|null>(null);
   const [selectedStatusRec, setSelectedStatusRec] = useState<Status | null>(null);
+  const [deletingStatusRec,setDeletingStatusRec]=useState<Status|null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isEditStatusMode, setIsEditStatusMode] = useState(false);
   const { toast } = useToast();
@@ -117,11 +119,11 @@ const Configuration = () => {
   };
   const handleDelete = (data: serviceRequestType): void => {
     setIsDelModalOpen(true);
-    setSelectedRecord(data);
+    setDeletingRecord(data);
   };
   const handleDeleteStatus = (data: Status): void => {
     setIsDelModalOpen(true);
-    setSelectedStatusRec(data);
+    setDeletingStatusRec(data);
   }
   const handleEditStatus = (data: Status): void => {
     dispatch(setLoading(true));
@@ -430,7 +432,7 @@ const Configuration = () => {
     if (type) {
       form.reset({ ...form.getValues(), Status: '' });
       setIsEditStatusMode(false);
-      setSelectedStatusRec(null)
+      setSelectedStatusRec(null);
     } else {
       form.reset({ ...form.getValues(), ServiceRequestType: '', UserGroups: [], Vendors: [], SLAHoursMinutes: '', ReminderForSLAHoursMinutes: '', EscalationTo: [], StatusToCalculate: '', ServiceRequestTypeAdmin: [], Branches: [], Description: '' });
       setIsEditMode(false);
@@ -626,6 +628,7 @@ const Configuration = () => {
   }
   //delete status
   const deleteStatus = async (id: number) => {
+    dispatch(setLoading(true));
     await postDeleteServiceRequestStatus(companyId, id).then(res => {
       if (res.success) {
         if (res.data.status) {
@@ -640,9 +643,7 @@ const Configuration = () => {
       } else {
         msg.warning('Failed to delete status !!')
       }
-    }).catch(err => { }).finally(() => {
-
-    })
+    }).catch(err => { }).finally(() => {dispatch(setLoading(false))})
   }
   //update service request status sequence
   const handleUpdateStatusSequence = async () => {
@@ -866,8 +867,8 @@ const Configuration = () => {
               <DialogDescription>
                 Are you sure you want to delete{" "}
                 {currentTab === "service-request-type"
-                  ? `${selectedRecord?.ServiceRequestType || "this"} Service Request Type`
-                  : `${selectedStatusRec?.StatusType || "this"} Status`
+                  ? `${deletingRecord?.ServiceRequestType || "this"} Service Request Type`
+                  : `${deletingStatusRec?.StatusType || "this"} Status`
                 }
               </DialogDescription>
             </DialogHeader>
@@ -881,7 +882,7 @@ const Configuration = () => {
               <ReusableButton
                 variant="primary"
                 danger={true}
-                onClick={currentTab === "service-request-type" ? () => { deleteServiceRequestType(selectedRecord?.Id); setIsDelModalOpen(false) } : () => { deleteStatus(selectedStatusRec?.Id); setIsDelModalOpen(false) }}
+                onClick={currentTab === "service-request-type" ? () => { deleteServiceRequestType(deletingRecord?.Id); setIsDelModalOpen(false) } : () => { deleteStatus(deletingStatusRec?.Id); setIsDelModalOpen(false) }}
               >
                 Delete
               </ReusableButton>

@@ -1,4 +1,4 @@
-import { URL_GET_ORGANIZATION_LIST} from "@/config/apiUrls";
+import { URL_ADD_ORGANIZATION, URL_GET_COUNTRY_LIST, URL_GET_CURRENCY_LIST, URL_GET_ORGANIZATION_LIST, URL_UPDATE_ORGANIZATION} from "@/config/apiUrls";
 import api from "./api";
 
 interface APIResponse<T> {
@@ -9,9 +9,45 @@ interface APIResponse<T> {
 }
 
 //All Company List Based on UserId
-export const GetOrganizationsList= async (compId:number): Promise<APIResponse<any>> => {
+export const GetOrganizationsList= async (CompId:string,OrgId?:number): Promise<APIResponse<any>> => {
     try {
-        const response = await api.get(URL_GET_ORGANIZATION_LIST, { params: { CompId: compId } })
+        const response = await api.get(URL_GET_ORGANIZATION_LIST, { params: { CompId, OrgId} })
+        return {success: true,data: response.data,}
+    } catch (err: any) {
+        return { success: false,message: err.response?.data?.message || err.message,status: err.response?.status};
+    }
+}
+//get country list
+export const GetCountryList= async (): Promise<APIResponse<any>> => {
+    try {
+        const response = await api.get(URL_GET_COUNTRY_LIST, { params: {} })
+        return {success: true,data: response.data,}
+    } catch (err: any) {
+        return { success: false,message: err.response?.data?.message || err.message,status: err.response?.status};
+    }
+}
+//get currency list
+export const GetCurrencyList= async (Country:string): Promise<APIResponse<any>> => {
+    try {
+        const response = await api.get(URL_GET_CURRENCY_LIST, { params: { Country } })
+        return {success: true,data: response.data,}
+    } catch (err: any) {
+        return { success: false,message: err.response?.data?.message || err.message,status: err.response?.status};
+    }
+}
+//Add Organization
+export const AddOrganization= async (data:any): Promise<APIResponse<any>> => {
+    try {
+        const response = await api.post(URL_ADD_ORGANIZATION, data)
+        return {success: true,data: response.data,}
+    } catch (err: any) {
+        return { success: false,message: err.response?.data?.message || err.message,status: err.response?.status};
+    }
+}
+//Update Organization
+export const UpdateOrganization= async (data:any): Promise<APIResponse<any>> => {
+    try {
+        const response = await api.put(URL_UPDATE_ORGANIZATION, data)
         return {success: true,data: response.data,}
     } catch (err: any) {
         return { success: false,message: err.response?.data?.message || err.message,status: err.response?.status};

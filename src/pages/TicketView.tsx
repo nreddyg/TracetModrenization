@@ -173,14 +173,13 @@ const TicketView = () => {
   const [triggerAccordionValidations,setTriggerAccordionValidations]=useState(false);
   const msg = useMessage()
   const dispatch = useAppDispatch();
-  const storeData = useAppSelector(state => state);
+  const lastLevelsData = useAppSelector(state => state.projects.lastLevelsData);
   const [srtLookupData,setSrtLookupData]=useState<any[]>([]);
   const [assetsData,setAssetData]=useState([])
   let LoggedInUserData=JSON.parse(localStorage.getItem('LoggedInUser')) || {};
   const companyId=useAppSelector(state=>state.projects.companyId);
   const branch=useAppSelector(state=>state.projects.branch) || '';
   const branchId=useAppSelector(state=>state.projects.branchId) || localStorage.getItem('BranchId');
-
   // Add ref to track previous ServiceRequestType to prevent infinite loops
   const prevServiceRequestTypeRef = useRef<string>('');
   const filteredTickets = tickets?.filter(ticket => {
@@ -190,7 +189,6 @@ const TicketView = () => {
     return matchesSearch && matchesStatus;
   });
   const [fields, setFields] = useState<BaseField[]>(CREATE_TICKET_DB);
-
   const form = useForm<GenericObject>({
     defaultValues: fields.reduce((acc, f) => {
       acc[f.name!] = f.defaultValue ?? '';
@@ -249,7 +247,7 @@ const TicketView = () => {
 
 
   useEffect(() => {
-    if (branch && localStorage.getItem("editBranchFromParent")) {
+    if (branch && localStorage.getItem("editBranchFromParent") && !isCreateMode) {
       if (branch !== localStorage.getItem("editBranchFromParent")) {
         navigate(-1)
       }
@@ -872,6 +870,7 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
     let fieldsToShowInEdit:string[]=['Status','Notify']
     const { name, label, fieldType, isRequired, show = true } = field;
     const overrideShow = !show && fieldsToShowInEdit.includes(name) && !isCreateMode;
+    const branchLabel=lastLevelsData?.Branch
     if (!name || (!overrideShow && (!show || (fieldsToShowInEdit.includes(name) && !isCreateMode)))) {
       return null;
     }
@@ -944,7 +943,8 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
                 value={ctrl.value}
                 onChange={ctrl.onChange}
                 error={errors[name]?.message as string}
-                  dropdownClassName={true ? 'z-[10001]' : ''}
+                dropdownClassName={true ? 'z-[10001]' : ''}
+                {...(name==='Branch'?{label:branchLabel || label,placeholder:`Select ${branchLabel || label}` }:{})}
               />
             )}
           />

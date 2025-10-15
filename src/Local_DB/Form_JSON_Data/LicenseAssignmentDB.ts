@@ -2,9 +2,9 @@ import { BaseField } from "../types/types";
 
 export const SOFTWARE_DB: BaseField[] = [
       {
-        label: "Employee ID",
+        label: "Employee",
         fieldType: "dropdown",
-        name: "employeeID",
+        name: "EmployeeId",
         placeholder: "Select Employee",
         isRequired: true,
         visible: false,
@@ -16,7 +16,7 @@ export const SOFTWARE_DB: BaseField[] = [
     {
         label: "Department",
         fieldType: "dropdown",
-        name: "department",
+        name: "DepartmentId",
         placeholder: "Select Department",
         isRequired: true,
         visible: false,
@@ -28,7 +28,7 @@ export const SOFTWARE_DB: BaseField[] = [
     {
         label: "Software",
         fieldType: "dropdown",
-        name: "software",
+        name: "SoftwareId",
         placeholder: "Select Software",
         isRequired: true,
         options: [],
@@ -39,7 +39,7 @@ export const SOFTWARE_DB: BaseField[] = [
     {
         label: "Available Licenses",
         fieldType: "dropdown",
-        name: "Licenses",
+        name: "LicenseKey",
         placeholder: "Select License",
         isRequired: true,
         options: [],
@@ -50,7 +50,7 @@ export const SOFTWARE_DB: BaseField[] = [
     {
         label: "Assignment Date",
         fieldType: "date",
-        name: "assignmentDate",
+        name: "AssignmentDate",
         placeholder: "Pick a date",
         isRequired: true,
         format: "DD-MM-YYYY",
@@ -61,7 +61,7 @@ export const SOFTWARE_DB: BaseField[] = [
         placeholder: "Enter Description",
         defaultValue: '',
         isRequired: false,
-        name: "description",
+        name: "Notes",
         fieldType: 'textarea',
         maxLength: 500,
         className: "border-[rgb(226, 232, 240)]"

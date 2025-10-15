@@ -12,8 +12,8 @@ import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { GetBranchListBasedonCompanyId, GetCompanyListBasedonUserId } from '@/services/headerServices';
 import { useAppDispatch } from '@/store';
-import { setBranch, setBranchId, setCompanyId, setLoading, setUserId } from '@/store/slices/projectsSlice';
-import { getOrganizationDetailsByToken, getUserDetailsByUserName } from '@/services/appService';
+import { setAllLevelsData, setBranch, setBranchId, setCompanyId, setLastLevelsData, setLoading, setUserId } from '@/store/slices/projectsSlice';
+import { getHierarchyLevelsData, getOrganizationDetailsByToken, getUserDetailsByUserName } from '@/services/appService';
 
 const FixedHeader: React.FC = () => {
   const navigate=useNavigate();
@@ -36,9 +36,10 @@ const FixedHeader: React.FC = () => {
    }
   },[userId])
   useEffect(()=>{
-    if(selectedCompany)
+    if(selectedCompany){
+      getHierarchyLevels();
       fetchBranchList(selectedCompany)
-
+    }
   },[selectedCompany])
   const fetchUserDetailsByUserName = async () => {
     dispatch(setLoading(true));
@@ -116,6 +117,50 @@ const FixedHeader: React.FC = () => {
     } finally {
       dispatch(setLoading(false));
     }
+  };
+  const getHierarchyLevels = async () => {
+    dispatch(setLoading(true));
+    await getHierarchyLevelsData(selectedCompany, 0).then((res) => {
+      if (res.data !== undefined && typeof res.data === 'object') {
+        if (res.data["Hierarchy Levels Data"]?.length !== 0) {
+          const extractedLevelNames = {
+            Branch:
+              res.data["Hierarchy Levels Data"][0]?.LevelName.at(-1).LevelName,
+            branchId: res.data["Hierarchy Levels Data"][0]?.LevelName.at(-1).Id,
+            AssetLocation:
+              res.data["Hierarchy Levels Data"][1]?.LevelName.at(-1).LevelName,
+            AssetLocationId:
+              res.data["Hierarchy Levels Data"][1]?.LevelName.at(-1).Id,
+            CostCenter:
+              res.data["Hierarchy Levels Data"][2]?.LevelName.at(-1)?.LevelName,
+            CostCenterId:
+              res.data["Hierarchy Levels Data"][2]?.LevelName.at(-1)?.Id,
+            Department:
+              res.data["Hierarchy Levels Data"][3]?.LevelName.at(-1).LevelName,
+            DepartmentId:
+              res.data["Hierarchy Levels Data"][3]?.LevelName.at(-1).Id,
+          };
+          dispatch(setLastLevelsData(extractedLevelNames));
+          dispatch(setAllLevelsData(res.data["Hierarchy Levels Data"]));
+        }
+      } else {
+        const LevelNames = {
+          Branch: "Branch",
+          branchId: 100,
+          AssetLocation: "Asset Location",
+          AssetLocationId: 100,
+          CostCenter: "Cost Center",
+          CostCenterId: 100,
+          Department: "Department/Unit",
+          DepartmentId: 100
+        };
+        dispatch(setLastLevelsData(LevelNames));
+        dispatch(setAllLevelsData([]));
+      }
+    })
+      .catch(() => { }).finally(() => {
+        dispatch(setLoading(false));
+      })
   };
   const handleChange = (name: "CompanyId" | "Branch", value: any) => {
     if (name === "CompanyId") {

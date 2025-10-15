@@ -109,7 +109,7 @@ const navigation: NavItem[] = [
         icon: FileText,
         link: '/service-desk/my-requests',
       },
-            {
+      {
         label: 'All Service Requests',
         icon: FileText,
         link: '/service-desk/all-requests',
@@ -181,6 +181,11 @@ const navigation: NavItem[] = [
         label: 'Asset Location',
         icon: Building2,
         link: '/masters/asset-location',
+      },
+      {
+        label: 'Cost Center',
+        icon: Building2,
+        link: '/masters/costcenter',
       },
       {
         label: 'Assets & Inventory',
@@ -538,8 +543,8 @@ const AppSidebar: React.FC = () => {
                                     <Link to={grandChild.link} className="flex items-center space-x-2">
                                       <grandChild.icon className="h-3 w-3" />
                                       <span
-                                       className="truncate"
-                                    title={String(grandChild.label)}
+                                        className="truncate"
+                                        title={String(grandChild.label)}
                                       >{grandChild.label}</span>
                                     </Link>
                                   </SidebarMenuSubButton>
@@ -557,8 +562,8 @@ const AppSidebar: React.FC = () => {
                         <Link to={child.link} className="flex items-center space-x-2">
                           <child.icon className="h-3 w-3" />
                           <span
-                           className="truncate"
-                           title={String(child.label)}
+                            className="truncate"
+                            title={String(child.label)}
                           >{child.label}</span>
                         </Link>
                       </SidebarMenuSubButton>

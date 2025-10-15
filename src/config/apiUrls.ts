@@ -117,3 +117,10 @@ export const URL_ASSET_LOCATION_DETAILS = `/api/Masters/GetAssetLocationDetailsB
 export const URL_ASSET_LOCATION_BY_LOC_ID = `/api/Masters/GetAssetLocationDetailsByCompanyId`
 export const URL_POST_ASSET_LOC_DATA =`/api/Masters/SubmitLocationLevels`;
 export const URL_DELETE_LOC = `/api/Masters/DeleteAssetLocationDetailsById`;
+//Masters Cost center Screen
+
+export const URL_GET_COSTCENTER_DATA=`/api/Masters/GetCostCenterDetailsByCompanyId`;
+export const URL_POST_COSTCENTER=`/api/Masters/SubmitCostCenterLevels`;
+export const URL_GET_COSTCENTER_BY_ID=`/api/Masters/GetCostCenterDetailsByCompanyId`;
+export const URL_DELETE_COSTCENTER=`/api/Masters/DeleteCostCenterDetailsById`;
+

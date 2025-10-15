@@ -163,41 +163,66 @@ const navigation: NavItem[] = [
     link: '/masters',
     children: [
       {
-        label: 'Organization',
+        label: 'Company',
         icon: Building2,
-        link: '/masters/organization',
+        link: '/company',
+        children: [
+          {
+            label: 'Organization',
+            icon: Building2,
+            link: '/masters/company/organization',
+          },
+          {
+            label: 'Company Hierarchy',
+            icon: Building2,
+            link: '/masters/company/company-hierarchy',
+          },
+          {
+            label: 'Department',
+            icon: Building2,
+            link: '/masters/company/department',
+          },
+          {
+            label: 'Cost Center',
+            icon: DollarSign,
+            link: '/masters/company/costcenter',
+          },
+          {
+            label: 'Assets & Inventory',
+            icon: Package,
+            link: '/masters/company/assets-inventory',
+          },
+          {
+            label: 'Maintenance',
+            icon: Wrench,
+            link: '/masters/company/maintenance',
+          },
+          {
+            label: 'Reports',
+            icon: FileText,
+            link: '/masters/reports',
+          },
+        ],
       },
       {
-        label: 'Company Hierarchy',
-        icon: Building2,
-        link: '/masters/company-hierarchy',
-      },
-      {
-        label: 'Department',
-        icon: Building2,
-        link: '/masters/department',
-      },
-      {
-        label: 'Cost Center',
-        icon: Building2,
-        link: '/masters/costcenter',
-      },
-      {
-        label: 'Assets & Inventory',
-        icon: Package,
-        link: '/masters/assets-inventory',
-      },
-      {
-        label: 'Maintenance',
-        icon: Wrench,
-        link: '/masters/maintenance',
-      },
-      {
-        label: 'Reports',
-        icon: FileText,
-        link: '/masters/reports',
-      },
-    ],
+        label:'Service Maintenance',
+        icon:Building2,
+        link:'/servicemaintenance',
+        children:[
+          {
+            label: 'Service Locations',
+            icon: Building2,
+            link: '/masters/servicemaintenance/servicelocations',
+          },
+           {
+            label: 'Product Masters',
+            icon: Building2,
+            link: '/masters/servicemaintenance/productmaster',
+          },
+        ],
+
+      }
+    ]
   },
   // {
   //   label: 'CWIP',

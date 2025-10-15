@@ -124,6 +124,7 @@ const Department = () => {
   const [selectedLevel, setSelectedLevel] = useState(99);
   const [selectedNodeParents, setSelectedNodeParents] = useState([]);
   const [fields, setFields] = useState(DEPARTMENT_DB);
+  const [expandedKeys, setExpandedKeys] = useState<Set<string>>(new Set());
   const [selectedNode, setSelectedNode] = useState({
     BranchName: "",
     BranchCode: "",
@@ -219,7 +220,8 @@ const Department = () => {
               treeData={mainTreeData}
               config={treeConfig}
               onSelect={onSelect}
-            // onExpand={onExpand}
+              expandedKeys={Array.from(expandedKeys)}
+              onExpand={handleToggleNode}
             />
           </div>
         )}
@@ -260,33 +262,47 @@ const Department = () => {
   const mainTreeData = useMemo(() => {
     const loop = (data) =>
       data.map((item) => {
-        const title = item.title.toLowerCase().includes(search.value.toLowerCase()) ? (
-          <span key={item.key}>
-            <span className={`${search.value === "" ? "" : "site-tree-search-value"}`}>{item.title}</span>
-          </span>
-        ) : (
-          <span key={item.key}>{item.title}</span>
-        )
-        if (item.children) {
+        const titleStr = item.title || item.name || '';
+        const searchVal = search.value.trim().toLowerCase();
+
+        if (!searchVal) {
           return {
-            type: item.type,
-            id: item.id,
-            title,
-            name: item.Name,
-            key: item.key,
-            children: loop(item.children),
+            ...item,
+            title: <span key={item.key}>{titleStr}</span>,
+            children: item.children ? loop(item.children) : [],
           };
         }
+
+        const index = titleStr.toLowerCase().indexOf(searchVal);
+        if (index === -1) {
+          return {
+            ...item,
+            title: <span key={item.key}>{titleStr}</span>,
+            children: item.children ? loop(item.children) : [],
+          };
+        }
+
+        const beforeStr = titleStr.substring(0, index);
+        const matchStr = titleStr.substring(index, index + searchVal.length); // ✅ keep original case
+        const afterStr = titleStr.substring(index + searchVal.length);
+
+        const title = (
+          <span key={item.key}>
+            {beforeStr}
+            <span className="text-blue-500 font-medium">{matchStr}</span>
+            {afterStr}
+          </span>
+        );
+
         return {
-          type: item.type,
-          id: item.id,
+          ...item,
           title,
-          name: item.Name,
-          key: item.key,
+          children: item.children ? loop(item.children) : [],
         };
       });
+
     return loop(treeView);
-  }, [treeView]);
+  }, [treeView, search.value]);
 
   const treefun = (data, id) => {
     const treeData = [];
@@ -314,9 +330,15 @@ const Department = () => {
         const latestTreeData = treefun(res.data, "#");
         setTreeview(latestTreeData);
         if (selectedLevel === 99) {
-          let data = departrmentData;
-          data[selectedLevel][0].value = res.data[0].Name;
-          data[selectedLevel][1].value = res.data[0].Code;
+          const { Name, Code } = res.data[0];
+          reset({
+            Name: Name || "",
+            Code: Code || "",
+          });
+
+          const data = departrmentData;
+          data[0].disabled = true
+          data[1].disabled = true
           setDepartmentData(data)
         }
       } else {
@@ -513,8 +535,78 @@ const Department = () => {
       Name: "",
       Code: ""
     })
-    // form.reset()
+    setRecordToEditId(null);
   };
+
+  const handleSearch = (val: string) => {
+    setSearch((prev) => ({ ...prev, value: val }));
+
+    if (!val) {
+      const allKeys: string[] = [];
+      const collectKeys = (nodes: any[]) => {
+        nodes.forEach((node) => {
+          allKeys.push(node.key);
+          if (node.children?.length) collectKeys(node.children);
+        });
+      };
+      collectKeys(treeView);
+      setExpandedKeys(new Set(allKeys));
+      return;
+    }
+
+    const matchedKeys: string[] = [];
+
+    const findMatchingNodes = (nodes: any[]) => {
+      nodes.forEach((node) => {
+        const title = (node.title || node.name || '').toLowerCase();
+        if (title.includes(val.toLowerCase())) matchedKeys.push(node.key);
+        if (node.children?.length) findMatchingNodes(node.children);
+      });
+    };
+    findMatchingNodes(treeView);
+
+    const parentKeys = new Set<string>();
+    const findParentKeys = (nodes: any[], targets: string[]) => {
+      nodes.forEach((node) => {
+        if (node.children?.some((child) => targets.includes(child.key))) {
+          parentKeys.add(node.key);
+          findParentKeys(treeView, [node.key]);
+        } else if (node.children) {
+          findParentKeys(node.children, targets);
+        }
+      });
+    };
+    findParentKeys(treeView, matchedKeys);
+
+    // ✅ Collapse all, then expand only matched + parents
+    const newExpanded = new Set([...matchedKeys, ...parentKeys]);
+    setExpandedKeys(newExpanded);
+  };
+
+  const handleToggleNode = (
+    newExpandedKeys: string[],
+    info: { expanded: boolean; node: any }
+  ) => {
+    setExpandedKeys(new Set(newExpandedKeys));
+  };
+
+  useEffect(() => {
+    if (treeView?.length) {
+      const allKeys: string[] = [];
+
+      const collectKeys = (nodes: any[]) => {
+        nodes.forEach((node) => {
+          allKeys.push(node.key);
+          if (node.children?.length) {
+            collectKeys(node.children);
+          }
+        });
+      };
+
+      collectKeys(treeView);
+      setExpandedKeys(new Set(allKeys));
+    }
+  }, [treeView]);
 
   return (
     <div className="bg-hsl(214.3 31.8% 91.4%) overflow-y-auto">
@@ -560,7 +652,7 @@ const Department = () => {
               <Input
                 placeholder="Search..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => { setSearchQuery(e.target.value); handleSearch(e.target.value) }}
                 className="pl-9 "
               />
             </div>
@@ -614,7 +706,7 @@ const Department = () => {
               </div>
             </div>
           </div>
-          <div className="min-h-20 max-h-[27rem] overflow-y-auto p-2">
+          <div className="h-[370px] overflow-y-scroll p-2">
             {renderTreeNode(mockData)}
           </div>
         </div>

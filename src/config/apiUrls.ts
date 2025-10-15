@@ -97,7 +97,7 @@ export const URL_DUPLICATE_ADD_CHECK_NO='/api/ServiceDeskAPI/CheckAddDuplicateCh
 export const URL_DUPLICATE_UPDATE_CHECK_NO='/api/ServiceDeskAPI/CheckUpdateDuplicateCheque'
 
 
-// Master's Department Screen
+// Master's Department API's
 // export const URL_POST_DEPARTMENT_DATA=`/api/Masters/GetDepartmentDetailsByCompanyId`;
 export const URL_GET_DEPARTMENT_DATA = `/api/Masters/GetDepartmentDetailsByCompanyId`;
 export const URL_POST_DEPARTMENT_DATA = `/api/Masters/SubmitdepartmentLevels`;
@@ -110,3 +110,10 @@ export const HIERARCHY_LEVEL_DATA = `/api/Settings/GetHierarchyLevelsData`;
 
 export const URL_GET_COMPANY_HIERARCHY_DATA = `/api/Masters/GetHeirarchyDetailsByCompanyId`
 export const URL_POST_COMPANY_HIERARCHY_DATA=`/api/Masters/GetHeirarchyDetailsByCompanyId`;
+
+
+// Master's AssetLocation API's
+export const URL_ASSET_LOCATION_DETAILS = `/api/Masters/GetAssetLocationDetailsByCompanyId`
+export const URL_ASSET_LOCATION_BY_LOC_ID = `/api/Masters/GetAssetLocationDetailsByCompanyId`
+export const URL_POST_ASSET_LOC_DATA =`/api/Masters/SubmitLocationLevels`;
+export const URL_DELETE_LOC = `/api/Masters/DeleteAssetLocationDetailsById`;

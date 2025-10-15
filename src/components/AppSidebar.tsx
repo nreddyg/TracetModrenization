@@ -178,6 +178,11 @@ const navigation: NavItem[] = [
         link: '/masters/department',
       },
       {
+        label: 'Asset Location',
+        icon: Building2,
+        link: '/masters/asset-location',
+      },
+      {
         label: 'Assets & Inventory',
         icon: Package,
         link: '/masters/assets-inventory',

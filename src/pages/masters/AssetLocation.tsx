@@ -1,0 +1,671 @@
+import React, { useEffect, useMemo, useState } from 'react';
+import { SidebarTrigger } from '@/components/ui/sidebar';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Search, Plus, Trash2,Info} from 'lucide-react';
+import { ReusableButton } from '@/components/ui/reusable-button';
+import { BaseField, GenericObject } from '@/Local_DB/types/types';
+import { Controller, useForm } from 'react-hook-form';
+import { useMessage } from '@/components/ui/reusable-message';
+import { useDispatch } from 'react-redux';
+import { ReusableInput } from '@/components/ui/reusable-input';
+import { setLoading } from '@/store/slices/projectsSlice';
+import { getHierarchyLevelsdata } from '@/services/departmentServices';
+import { useAppSelector } from '@/store';
+import { TreeConfig, TreeView } from '@/components/ui/reusable-treeView';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { ASSET_LOCATION_DB } from '@/Local_DB/Form_JSON_Data/AssetLocationDB';
+import { deleteAssetLocData, getAssetLocationDataByLocID, getAssetLocationDetals, postOrUpdateAssetLocationDetails } from '@/services/assetLocationServices';
+
+interface TreeNode {
+    id: string;
+    name: string;
+    code: string;
+    children?: TreeNode[];
+    type: 'company' | 'department' | 'unit';
+}
+
+export const treeConfig: TreeConfig = {
+    isCheckable: false,
+    showIcon: true,
+    showLine: false,
+    Multiple: true,
+    expandAll: true,
+};
+
+const mockData: TreeNode = {
+    id: '1',
+    name: 'Zoho corporataion',
+    code: 'ZHC',
+    type: 'company',
+    children: [
+        {
+            id: '2',
+            name: 'Infras',
+            code: 'INFD',
+            type: 'department',
+            children: [
+                {
+                    id: '3',
+                    name: 'Manage',
+                    code: 'MN',
+                    type: 'unit',
+                    children: [
+                        {
+                            id: '4',
+                            name: 'Securities',
+                            code: 'SC',
+                            type: 'unit',
+                            children: [
+                                {
+                                    id: '5',
+                                    name: 'Acquisition',
+                                    code: 'ACQ',
+                                    type: 'unit',
+                                    children: [
+                                        { id: '6', name: 'test1', code: 'TS', type: 'unit' },
+                                        { id: '7', name: 'ACQ', code: 'TG', type: 'unit' },
+                                        { id: '8', name: 'Tests', code: 'TR', type: 'unit' },
+                                        { id: '9', name: 'test08', code: 'T08', type: 'unit' },
+                                        { id: '10', name: 'test014', code: 'T014', type: 'unit' },
+                                        // { id: '11', name: 'abc_test', code: 'testabc', type: 'unit' },
+                                        // { id: '12', name: 'test2553', code: 'tsrerf33', type: 'unit' },
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            id: '13',
+                            name: 'Talent',
+                            code: 'TT',
+                            type: 'unit',
+                            children: [
+                                { id: '14', name: 'Minimum', code: 'MIN', type: 'unit' },
+                                { id: '15', name: 'Maximuew', code: 'MX', type: 'unit' },
+                            ]
+                        },
+                        {
+                            id: '16',
+                            name: 'NOTalent',
+                            code: 'nt',
+                            type: 'unit',
+                            children: [
+                                { id: '17', name: 'Minimums', code: 'MINS', type: 'unit' },
+                                { id: '18', name: 'Maximuews', code: 'MXS', type: 'unit' },
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+};
+
+
+const SearchButton = {
+    type: "text",
+    name: "searchValue",
+    value: "",
+    placeholder: "Search...",
+};
+interface SelectedNode {
+    id?: string | number;
+    parent?: string | number;
+    type?: string | number;
+    TypeId?: string | number;
+    // add other fields if needed
+}
+
+const AssetLocation = () => {
+    const [searchQuery, setSearchQuery] = useState('');
+    const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set(['1', '2', '3', '4', '5']));
+    const [selectedLevel, setSelectedLevel] = useState(99);
+    const [selectedNodeParents, setSelectedNodeParents] = useState([]);
+    const [fields, setFields] = useState(ASSET_LOCATION_DB);
+    const [selectedNode, setSelectedNode] = useState({
+        BranchName: "",
+        BranchCode: "",
+        TypeId: 0,
+        id: 99999,
+        parent: 0,
+        type: '',
+        orginalId: 0,
+        branchId: ''
+    });
+    const [assetLocData, setAssetLocData] = useState<BaseField[]>(fields[selectedLevel]);
+    const [recordToEditId, setRecordToEditId] = useState(null);
+    // const [selectedNode, setSelectedNode] = useState<SelectedNode>({});
+    const [selectedId, setSelectedId] = useState('');
+    const [treeView, setTreeview] = useState([]);
+    const [tree, setTree] = useState([]);
+    const [lastLevel, setLastLevel] = useState(null);
+    const [level, setLevel] = useState([]);
+    const [nextLevel, setNextLevel] = useState("");
+    const [search, setSearch] = useState(SearchButton);
+    const [breadCrumb, setBreadCrumb] = useState(["Company"]);
+    const companyId = useAppSelector(state => state.projects.companyId);
+    const branchName = useAppSelector(state => state.projects.branch);
+    const [isClearDisable, setIsClearDisable] = useState(true);
+    const [disable, setDisable] = useState(true);
+    // const branch = useAppSelector(state=>state.projects.branchId)
+    const dispatch = useDispatch()
+    const msg = useMessage()
+
+    useEffect(() => {
+        if (companyId && branchName) {
+            fetchAssetLocationGetData(companyId, branchName);
+        }
+    }, [companyId, branchName])
+
+
+    useEffect(() => {
+        if (recordToEditId !== null) {
+            getIndAssetLocDataByID(branchName, recordToEditId, companyId)
+        }
+    }, [recordToEditId])
+
+    useEffect(() => {
+        let name = []
+        for (let i = 0; i <= level.length; i++) {
+            if (selectedLevel !== 99) {
+                name.push(level[i]?.LevelName)
+                setNextLevel(level[i + 1]?.LevelName)
+                if (selectedLevel === level[i]?.Id) {
+                    setBreadCrumb(["Company", ...name])
+                    return;
+                }
+            } else {
+                setBreadCrumb(["Company"]);
+                setNextLevel(level[0]?.LevelName);
+            }
+        }
+    }, [selectedLevel])
+
+    useEffect(() => {
+        if (companyId && selectedLevel) getlevels();
+    }, [companyId, selectedLevel])
+
+    const form = useForm<GenericObject>({
+        defaultValues: assetLocData.reduce((acc, f) => {
+            acc[f.name!] = f.defaultChecked ?? '';
+            return acc;
+        }, {} as GenericObject),
+        // mode: 'onChange',
+        // reValidateMode: "onChange"
+    });
+
+    const onSelect = (selectedKeys, info) => {
+        const findroots = getParents(treeView[0], info.node.id);
+        setSelectedNodeParents(findroots);
+        setSelectedId(info.node.orginalId);
+        setDisable(false);
+        setRecordToEditId(info.node.orginalId);
+        setSelectedNode(info.node);
+        setAssetLocData(fields[info.node.type])
+        setSelectedLevel(parseInt(info.node.type));
+    };
+
+    const mainTreeData = useMemo(() => {
+        const loop = (data) =>
+            data?.map((item) => {
+                const title = item.title?.toLowerCase()?.includes(search.value?.toLowerCase()) ? (
+                    <span key={item.key}>
+                        <span className={`${search.value === "" ? "" : "site-tree-search-value"}`}>{item.title}</span>
+                    </span>
+                ) : (
+                    <span key={item.key}>{item.title}</span>
+                )
+                if (item.children) {
+                    return {
+                        type: item.type,
+                        id: item.id,
+                        title,
+                        name: item.Name,
+                        key: item.key,
+                        branchId: item.branchId,
+                        orginalId: item.orginalId,
+                        children: loop(item.children),
+                    };
+                }
+                return {
+                    type: item.type,
+                    id: item.id,
+                    title,
+                    name: item.Name,
+                    key: item.key,
+                    branchId: item.branchId,
+                    orginalId: item.orginalId,
+                };
+            });
+        return loop(treeView);
+    }, [search, treeView]);
+
+    // Tree Data functionality
+    const treefun = (data, id) => {
+        const treeData = [];
+        const keys = [];
+        data?.forEach((item) => {
+            keys.push(item.key)
+            if (item.parent === id) {
+                item.title = item.text;
+                item.key = item.id;
+                item.value = item[item.name];
+                const child = treefun(data, item.id);
+                item.children = child;
+                treeData.push(item);
+            }
+        });
+        // setExpandedKeys(keys);
+        return treeData;
+    };
+
+    // getAssetLocationDetals
+    async function fetchAssetLocationGetData(companyId, branchName) {
+        dispatch(setLoading(true))
+        await getAssetLocationDetals(companyId, branchName).then(res => {
+            if (res.data && res.data.length > 0) {
+                setTree(res.data);
+                const latestTreeData = treefun(res.data, "#");
+                setTreeview(latestTreeData);
+                if (selectedLevel === 99) {
+                    let data = assetLocData;
+                    data[selectedLevel][0].value = res.data[0].Name;
+                    data[selectedLevel][1].value = res.data[0].Code;
+                    setAssetLocData(data)
+                }
+            } else {
+                msg.warning(res.data.message || "No Data Found")
+            }
+        }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
+    }
+
+    // 103 level conatins labels for departmeent module in the assetlocationAPI
+    const getlevels = async () => {
+        dispatch(setLoading(true))
+        await getHierarchyLevelsdata(101, companyId).then((res) => {
+            if (res.data && typeof res.data === "object") {
+                getjsonMapping(res.data["Asset Location"][0].LevelName);
+                fetchAssetLocationGetData(companyId, branchName);
+                setLastLevel(res.data["Asset Location"][0].LevelName.at(-1)["Id"]);
+                setNextLevel(res.data["Asset Location"][0].LevelName[0].LevelName)
+                setLevel(res.data["Asset Location"][0].LevelName);
+            }
+        })
+            .catch((err) => { }).finally(() => { dispatch(setLoading(false)) })
+    };
+
+    // assigning labels to the JSONdata of AssetLocationnDB
+    const getjsonMapping = (leveldata) => {
+        let Labels = Object.keys(fields);
+        Labels.forEach((element) => {
+            var index = leveldata.findIndex((x) => x.Id === parseInt(element));
+            if (index !== -1) {
+                fields[parseInt(element)].forEach((item) => {
+                    if (item.name === "Name") {
+                        item.label = `${leveldata[index].LevelName} Name`;
+                        item.heading = `${leveldata[index].LevelName} Details`;
+                    }
+                    if (item.name === "Code") {
+                        item.label = `${leveldata[index].LevelName} Code`;
+                    }
+                });
+            }
+        });
+    };
+
+    const renderTreeNode = (node: TreeNode, level: number = 0): React.ReactNode => {
+        const hasChildren = node.children && node.children.length > 0;
+        const isExpanded = expandedNodes.has(node.id);
+        // const isSelected = selectedNode?.id === node.id;
+
+        return (
+            <div key={node.id} className=''>
+                {hasChildren && isExpanded && (
+                    <div>
+                        {/* {node.children?.map(child => renderTreeNode(child, level + 1))} */}
+                        <TreeView
+                            treeData={mainTreeData}
+                            config={treeConfig}
+                            onSelect={onSelect}
+                        // onExpand={onExpand}
+                        />
+                    </div>
+                )}
+            </div>
+        );
+    };
+
+    const { control, register, handleSubmit, trigger, watch, setValue, reset, formState: { errors } } = form;
+    const getFieldsByNames = (names: string[]) => assetLocData.filter(f => names.includes(f.name!));
+
+    const renderField = (field: BaseField) => {
+        const { name, label, fieldType, isRequired, dependsOn, show = true } = field;
+        if (!name || !show) return null;
+        const validationRules = {
+            required: isRequired ? `${label} is Required` : false,
+        };
+
+        switch (fieldType) {
+            case 'text':
+                return (
+                    <Controller
+                        name={name}
+                        control={control}
+                        rules={validationRules}
+                        render={({ field: ctrl }) => (
+                            <ReusableInput
+                                {...field}
+                                value={ctrl.value}
+                                onChange={ctrl.onChange}
+                                error={errors[name]?.message as string}
+                            />
+                        )}
+                    />
+                );
+        }
+    }
+
+    const getParents = (node, id, parents = []) => {
+        if (node.id === id || node.id === 99999) return parents;
+        for (let child of node.children) {
+            const result = getParents(child, id, [...parents, node]);
+            if (result) return result;
+        }
+        return null;
+    };
+
+    const handleRoute = () => {
+        // handleReset();
+        setRecordToEditId(null);
+        const treeData = structuredClone(tree);
+        const tempObj = {
+            BranchName: "",
+            BranchCode: "",
+            TypeId: selectedLevel + 1,
+            id: 99999,
+            parent: selectedNode?.id,
+            type: '',
+            orginalId: 0,
+            branchId: ''
+        };
+
+        treeData.push(tempObj);
+        const latestTreeData = treefun(treeData, "#");
+
+        let selectId =
+            selectedNode["children"].length >= 1
+                ? selectedNode["children"][0].id
+                : 99999;
+        const findroots = getParents(latestTreeData[0], selectId);
+        setSelectedNodeParents(findroots);
+        setSelectedLevel((prev) => 1 + prev);
+        setSelectedNode(tempObj);
+        setAssetLocData(fields[selectedLevel + 1])
+    };
+
+    const handleReset = () => {
+        reset({
+            Name: "",
+            Code: ""
+        })
+    };
+
+    // getting assetlocationBYId
+    async function getIndAssetLocDataByID(branchName, id, companyId) {
+        dispatch(setLoading(true))
+        console.log("branchName", branchName, "id", id, "companyId", companyId);
+        await getAssetLocationDataByLocID(branchName, id, companyId).then(res => {
+            if (res.data && res.data.length > 0) {
+                const details = res.data[0];
+                if (details) {
+                    reset({
+                        Name: details.Name,
+                        Code: details.Code
+                    })
+                }
+            } else {
+                msg.warning(res.data.message || "No Data Found")
+            }
+        }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
+    }
+
+    const addOrUpdateAssetLocation = async (locId, brName, companyId, payload) => {
+        dispatch(setLoading(true));
+        await postOrUpdateAssetLocationDetails(locId, brName, companyId, payload).then(res => {
+            if (res.data.status) {
+                fetchAssetLocationGetData(companyId, branchName);
+                if (recordToEditId === null) {
+                    handleReset();
+                    msg.success(`${res.data.message}`);
+                }
+                // dispatch(isbranchlistupdate(true));
+            } else {
+                msg.warning(`${res.data.message}`);
+            }
+        }).catch(err => { })
+            .finally(() => { dispatch(setLoading(false)) })
+    }
+
+    const name = watch('Name');
+    const code = watch('Code');
+
+    const onSubmit = () => {
+        submit();
+    }
+
+    const submit = async () => {
+        const locID = recordToEditId ? recordToEditId : 0;
+        console.log("loc", locID);
+        if (recordToEditId === null) {
+            let payload = {
+                "Details": [
+                    {
+                        "SelectedBranchId": selectedNodeParents.at(-1)?.type === "99" ? `${selectedNodeParents.at(-1)?.orginalId}` : selectedNodeParents.at(-1)?.branchId,
+                        "ParentId": selectedNodeParents.at(-1)?.type === "99" ? selectedNodeParents.at(-1)?.branchId : `${selectedNodeParents.at(-1)?.orginalId}`,
+                        "TypeId": `${+selectedNodeParents.at(-1)?.type + 1}`,
+                        "Name": name,
+                        "Code": code
+                    }]
+            }
+            console.log("payload", payload);
+            addOrUpdateAssetLocation(locID, branchName, companyId, payload);
+        }
+        if (recordToEditId !== null) {
+            const payload =
+            {
+                "Details": [{
+                    "SelectedBranchId": selectedNode.branchId,
+                    "ParentId": `${selectedNode.orginalId}`,
+                    "TypeId": `${selectedNode.type}`,
+                    "Name": name,
+                    "Code": code
+                }]
+            }
+            addOrUpdateAssetLocation(locID, branchName, companyId, payload)
+        }
+    }
+
+    const handleDelete = () => {
+        if (selectedId && companyId) {
+            delBranch(selectedId, companyId);
+        }
+    }
+
+    //    delete based on Id
+    const delBranch = async (leafId, companyId) => {
+        dispatch(setLoading(true))
+        await deleteAssetLocData(leafId, companyId, "")
+            .then((res) => {
+                if (res.data !== undefined) {
+                    if (res.data.status === true) {
+                        // clearFields(0);
+                        setRecordToEditId(null);
+                        msg.success(res.data.message);
+                        fetchAssetLocationGetData(companyId, branchName);
+                    } else {
+                        msg.warning(res.data.message);
+                    }
+                }
+            })
+            .catch((err) => { })
+            .finally(() => { dispatch(setLoading(false)) })
+    }
+
+    return (
+        <div className="bg-hsl(214.3 31.8% 91.4%) overflow-y-auto">
+            <header className="bg-card flex justify-between border-b px-6 py-4 shadow-sm">
+                <div className="flex items-center gap-4">
+                    <SidebarTrigger />
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <span>Masters</span>
+                        <span>/</span>
+                        <span className="text-foreground font-medium">Asset Location</span>
+                    </div>
+                </div>
+                <div className='flex gap-2'>
+                    <ReusableButton
+                        htmlType="button"
+                        variant="default"
+                        onClick={handleReset}
+                        iconPosition="left"
+                        size="middle"
+                        className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+                    >
+                        Reset
+                    </ReusableButton>
+                    <ReusableButton
+                        htmlType="button"
+                        variant="default"
+                        onClick={handleSubmit(onSubmit)}
+                        iconPosition="left"
+                        size="middle"
+                        className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+                    >
+                        {selectedLevel <= 99 || recordToEditId === null ? "Save" : "Update"}
+                    </ReusableButton>
+                </div>
+            </header>
+
+            <div className="flex h-[calc(100vh-73px)]">
+                {/* Tree Structure Panel */}
+                <div className="w-[400px] border-r bg-card flex flex-col">
+                    <div className=" flex items-center justify-center pt-4 pb-4 ps-0 ms-0 border-b gap-3">
+                        <div className="relative">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                placeholder="Search..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="pl-9 "
+                            />
+                        </div>
+                        <div className="flex gap-3 flex items-center justify-center">
+                            <div>
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <ReusableButton
+                                                size="small"
+                                                className="bg-primary h-[2rem] hover:bg-blue-700 text-white"
+                                                style={{
+                                                    cursor: selectedLevel >= 99 + level.length || disable ? "not-allowed" : "pointer",
+                                                }}
+                                                disabled={selectedLevel >= 99 + level.length || disable}
+                                                onClick={() => {
+                                                    if (!(selectedLevel >= 99 + level.length || disable)) {
+                                                        handleRoute();
+                                                        handleReset();
+                                                        setDisable(true);
+                                                    }
+                                                }}
+                                            >
+                                                <Plus className="h-4 w-4" />
+                                            </ReusableButton>
+                                        </TooltipTrigger>
+                                        {selectedLevel !== lastLevel && recordToEditId && (
+                                            <TooltipContent>
+                                                Add {nextLevel ? nextLevel : "Department/Unit"}
+                                            </TooltipContent>
+                                        )}
+                                    </Tooltip>
+                                </TooltipProvider>
+                            </div>
+                            <div>
+                                <ReusableButton
+                                    size="small"
+                                    className="bg-primary h-[2rem] hover:bg-blue-700 text-white"
+                                    style={{
+                                        cursor: disable || selectedLevel === 99 ? "not-allowed" : "pointer",
+                                    }}
+                                    onClick={() => {
+                                        if (!disable && selectedLevel !== 99) {
+                                            handleDelete();
+                                        }
+                                    }}
+                                >
+                                    <Trash2 className="h-4 w-4" />
+                                </ReusableButton>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="min-h-20 max-h-[27rem] overflow-y-auto p-2">
+                        {renderTreeNode(mockData)}
+                    </div>
+                </div>
+
+                {/* Details Panel */}
+                <div className="flex-1 overflow-y-auto">
+                    <div className="p-6 space-y-6">
+                        <div className="flex flex-col gap-2">
+                            <div>
+                                <h4 className="master-heading mb-2 flex items-center gap-2">
+                                    {!recordToEditId
+                                        ? selectedLevel === 99
+                                            ? "Asset Location"
+                                            : "Add Location"
+                                        : selectedLevel === 99
+                                            ? "Asset Location"
+                                            : "Update Location"}
+                                    {selectedLevel !== lastLevel && (
+                                        <TooltipProvider>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <button type="button">
+                                                        <Info className="mb-1 cursor-pointer" fontSize={22} />
+                                                    </button>
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                    To Add {nextLevel || "Asset Location"} to{" "}
+                                                    {breadCrumb?.at(-1) || "the selected asset location"}, click on{" "}
+                                                    {breadCrumb?.at(-1) || "the name"} and then click on the plus icon.
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </TooltipProvider>
+                                    )}
+                                </h4>
+                            </div>
+                            <div className="text-sm text-primary">
+                                <h6 className="breadCrumb">{breadCrumb.map(x => { return `${x} >` })}</h6>
+                            </div>
+                        </div>
+                        <div className="space-y-6">
+                            {/* <h5 className="text-base font-semibold">Department Details</h5> */}
+                            <h5>{recordToEditId && selectedLevel !== 99 ? `Update ${assetLocData[0].heading}` : `${selectedLevel !== 99 ? "Enter" : ""} ${assetLocData[0].heading}`}</h5>
+                            <div className="px-1">
+                                <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4">
+                                    {getFieldsByNames(['Name', 'Code']).map((field) => {
+                                        return <div className="flex items-center space-x-2">
+                                            {renderField(field)}
+                                        </div>;
+                                    })}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+export default AssetLocation

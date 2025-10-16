@@ -132,3 +132,27 @@ const statusColors: Record<string, string> = {
   Closed: GRAY,
 };
 export const getColorForStatus = (status: string): string => statusColors[status] || GRAY;
+
+
+export const convertOrgLogoFromApi = async (apiData: {
+  OrganizationLogo: string;
+  OrganizationLogoName: string;
+  OrganizationLogoType: string;
+  OrganizationLogoConversionType: string;
+}) => {
+  try {
+    const byteArray = new Uint8Array(JSON.parse(apiData.OrganizationLogo));
+    const blob = new Blob([byteArray], { type: apiData.OrganizationLogoConversionType });
+    const blobUrl = URL.createObjectURL(blob);
+    return {
+      uid: crypto.randomUUID(),
+      name: apiData.OrganizationLogoName,
+      type: apiData.OrganizationLogoConversionType,
+      status: "done",
+      url: blobUrl,
+    };
+  } catch (error) {
+    console.error("Failed to reconstruct uploaded file:", error);
+    return null;
+  }
+};

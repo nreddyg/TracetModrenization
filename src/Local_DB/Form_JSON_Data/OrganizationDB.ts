@@ -80,29 +80,17 @@ export const ORGANIZATION_DETAILS: BaseField[] = [
         fieldType: "dropdown",
         name: "CountryName",
         defaultValue: "INDIA",
-        options: [
-            {
-                label: "India",
-                value: "india",
-            },
-            {
-                label: "Japan",
-                value: "japan",
-            },
-            {
-                label: "England",
-                value: "england",
-            }
-        ],
+        options: [],
         placeholder: "Select Country",
         isRequired: true,
+        allowClear:true
     },
     {
         label: 'Currency',
         fieldType: 'text',
         name: 'Currency',
         isRequired: false,
-        disabled: true
+        disabled: true,
     },
     {
         label: 'Currency Symbol',
@@ -152,7 +140,7 @@ export const ORGANIZATION_DETAILS: BaseField[] = [
 
     {
         label: 'Zip Code',
-        fieldType: 'number',
+        fieldType: 'text',
         name: 'ZipCode',
         isRequired: true,
     },

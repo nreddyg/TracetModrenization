@@ -1,22 +1,16 @@
-
-
-import { useCallback, useEffect, useState } from 'react';
-import { SidebarTrigger } from '@/components/ui/sidebar';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { ReusableTable, TableAction, TablePermissions } from '@/components/ui/reusable-table';
-import { Trash2, Plus, Edit, ChevronRight, ChevronLeft, Search, ArrowLeft, X, Save } from 'lucide-react';
-import { ColumnDef } from '@tanstack/react-table';
-import { useToast } from '@/hooks/use-toast';
+import {useEffect, useState } from 'react';
+import { Card, CardContent} from '@/components/ui/card';
+import { ChevronRight, ChevronLeft, Search, X, Save } from 'lucide-react';
 import { ReusableButton } from '@/components/ui/reusable-button';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { setLoading } from '@/store/slices/projectsSlice';
-import { GetOrganizationsList } from '@/services/organizationServices';
+import { AddOrganization, GetCountryList, GetCurrency, GetOrganizationsList, UpdateOrganization } from '@/services/organizationServices';
 import { ReusableDropdown } from '@/components/ui/reusable-dropdown';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Controller, useForm } from 'react-hook-form';
-import { BaseField, GenericObject } from '@/Local_DB/types/types';
+import { BaseField, GenericObject, UploadFileInput } from '@/Local_DB/types/types';
 import { ReusableInput } from '@/components/ui/reusable-input';
 import { ReusableTextarea } from '@/components/ui/reusable-textarea';
 import { ReusableDatePicker } from '@/components/ui/reusable-datepicker';
@@ -25,11 +19,14 @@ import { ReusableUpload } from '@/components/ui/reusable-upload';
 import { ReusableCheckbox } from '@/components/ui/reusable-checkbox';
 import { ReusableRadio } from '@/components/ui/reusable-radio';
 import { ORGANIZATION_DETAILS } from '@/Local_DB/Form_JSON_Data/OrganizationDB';
+import { useMessage } from '@/components/ui/reusable-message';
+import { convertOrgLogoFromApi, fileToByteArray } from '@/_Helper_Functions/HelperFunctions';
+import axios from 'axios';
 interface OrganizationData {
   OrganizationId: number,
   OrganizationName: string,
   ParentId: number | null,
-  OrganizationKnownAs:string,
+  OrganizationKnownAs: string,
   CompanyCode: string,
   OrganizationTypeId: number,
   OrganizationType: string,
@@ -47,15 +44,24 @@ interface OrganizationData {
   Website: string | null,
   CurrencyId: number,
   Currency: string,
-  CurrencySymbol:string,
+  CurrencySymbol: string,
   OrganizationLogo: string | null,
-  OrganizationLogoName:  string | null,
-  OrganizationLogoType:  string | null,
+  OrganizationLogoName: string | null,
+  OrganizationLogoType: string | null,
   OrganizationLogoConversionType: string | null
 }
 
+type UploadedFileOutput = {
+  OrganizationLogo: string,
+  OrganizationLogoName: string,
+  OrganizationLogoType: string,
+  OrganizationLogoConversionType: string
+};
+
+
 const Organization = () => {
   const dispatch = useAppDispatch();
+  const msg = useMessage();
   const companyId = useAppSelector(state => state.projects.companyId)
   const [dataSource, setDataSource] = useState<OrganizationData[]>([]);
   const [fields, setFields] = useState<BaseField[]>(ORGANIZATION_DETAILS);
@@ -68,7 +74,15 @@ const Organization = () => {
   });
   const { control, register, handleSubmit, trigger, watch, setValue, reset, formState: { errors } } = form;
   const [selectedOrganization, setSelectedOrganization] = useState<OrganizationData | null>(null);
+  const [selectedOrganizationData, setSelectedOrganizationData] = useState<OrganizationData | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [uploadedData, setUploadedData] = useState<UploadedFileOutput[]>([{
+    OrganizationLogo: "",
+    OrganizationLogoName: "",
+    OrganizationLogoType: "",
+    OrganizationLogoConversionType: ""
+  }]);
+
   const filteredOrgs = dataSource.filter(org => {
     const matchesSearch = org.OrganizationName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       org.CompanyCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -81,23 +95,219 @@ const Organization = () => {
   const [isInboxCollapsed, setIsInboxCollapsed] = useState(false);
   useEffect(() => {
     if (companyId) fetchAllOrganizationsList();
+    fetchCountryList();
   }, [companyId]);
+  useEffect(() => {
+    if (watch("CountryName")) {
+      fetchCurrencyBasedOnCountry(watch("CountryName"));
+    }
+  }, [watch("CountryName")])
+  useEffect(() => {
+    if (form.watch("OrganizationLogo")) {
+      const process = async () => {
+        const result = await multipleFileUpload(form.watch("OrganizationLogo"));
+      };
+      process();
+    }
+  }, [form.watch("OrganizationLogo")]);
+  useEffect(() => {
+    if (selectedOrganizationData?.OrganizationLogo) {
+      const loadFile = async () => {
+        const file = await convertOrgLogoFromApi(selectedOrganizationData);
+        if (file) {
+          form.setValue("OrganizationLogo", [file]);
+          setUploadedData([
+            {
+              OrganizationLogo: selectedOrganizationData.OrganizationLogo,
+              OrganizationLogoName: selectedOrganizationData.OrganizationLogoName,
+              OrganizationLogoType: selectedOrganizationData.OrganizationLogoType,
+              OrganizationLogoConversionType: selectedOrganizationData.OrganizationLogoConversionType,
+            },
+          ]);
+        }
+      };
+      loadFile();
+    }
+  }, [selectedOrganizationData]);
+
+
+  const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> => {
+    const fileArray = Array.isArray(filelist) ? filelist : [];
+    if (fileArray.length === 0) {
+      return;
+    }
+    const files: (UploadedFileOutput | null)[] = await Promise.all(
+      fileArray.map(async (file, index) => {
+        try {
+          if (!file.url) throw new Error(`Missing file URL for file at index ${index}`);
+          const response = await axios.get<Blob>(file.url, { responseType: "blob" });
+          const byteArray = await fileToByteArray(response.data);
+          const byteArrayAsArray = Array.from(byteArray);
+          const jsonArrayString = JSON.stringify(byteArrayAsArray);
+          const fileType = file.name.split(".").pop() || "";
+          return {
+            OrganizationLogo: jsonArrayString,
+            OrganizationLogoName: file.name,
+            OrganizationLogoType: fileType,
+            OrganizationLogoConversionType: file.type,
+          };
+        } catch (error) {
+          console.error(`Failed to process file ${file.name}:`, error);
+          return null;
+        }
+      })
+    );
+    const validFiles = files.filter(
+      (file): file is UploadedFileOutput => file !== null
+    );
+    setUploadedData(validFiles);
+  };
   //fetch all users list
-  const fetchAllOrganizationsList = async () => {
+  const fetchAllOrganizationsList = async (orgId?: number) => {
     dispatch(setLoading(true));
-    await GetOrganizationsList(companyId).then(res => {
+    await GetOrganizationsList(orgId).then(res => {
       if (res.success && res.data && res.data.organizations && Array.isArray(res.data.organizations)) {
-        setDataSource(res.data.organizations);
+        if (orgId) {
+          form.reset({ ...res.data.organizations[0], OrganizationLogo: [] });
+          setUploadedData([{
+            OrganizationLogo: res.data.organizations[0].OrganizationLogo || "",
+            OrganizationLogoName: res.data.organizations[0].OrganizationLogoName || "",
+            OrganizationLogoType: res.data.organizations[0].OrganizationLogoType || "",
+            OrganizationLogoConversionType: res.data.organizations[0].OrganizationLogoConversionType || ""
+          }])
+          setSelectedOrganizationData(res.data.organizations[0]);
+        } else {
+          setDataSource(res.data.organizations);
+        }
       } else {
-        setDataSource([]);
+        if (orgId) {
+          form.reset();
+          setSelectedOrganizationData(null);
+        } else {
+          setDataSource([]);
+        }
+      }
+    }).catch(err => console.log(err)).finally(() => {
+      dispatch(setLoading(false));
+    });
+  }
+  function setLookupsDataInJson(data: any, key: string) {
+    const updatedFields = fields.map(field => {
+      if (field.name === key) {
+        return { ...field, options: data };
+      }
+      return field;
+    });
+    setFields(updatedFields);
+  }
+  const fetchCountryList = async () => {
+    dispatch(setLoading(true));
+    await GetCountryList().then(res => {
+      if (res.success && res.data && Array.isArray(res.data.CountryList)) {
+        const countryOptions = res.data.CountryList.map((country: any) => ({
+          label: country.CountryName,
+          value: country.CountryName,
+        }));
+        setLookupsDataInJson(countryOptions, "CountryName");
+      } else {
+        msg.warning("No Country Data Found !!");
+      }
+    }).catch(err => console.log(err)).finally(() => {
+      dispatch(setLoading(false));
+    });
+  }
+  const fetchCurrencyBasedOnCountry = async (Country: string) => {
+    dispatch(setLoading(true));
+    await GetCurrency(Country).then(res => {
+      if (res.success && res.data && Array.isArray(res.data) && res.data.length > 0) {
+        const currencyData = res.data[0];
+        setValue("Currency", currencyData.CurrencyName);
+        setValue("CurrencySymbol", currencyData.CurrencySymbol);
+      } else {
+        setValue("Currency", "");
+        setValue("CurrencySymbol", "");
+        msg.warning("No Currency Data Found For This Country !!");
       }
     }).catch(err => console.log(err)).finally(() => {
       dispatch(setLoading(false));
     });
   }
   const handleSelect = (data: OrganizationData) => {
+    // handleReset();
     setSelectedOrganization(data);
+    fetchAllOrganizationsList(data.OrganizationId);
   }
+  const handleSave = async (formData: GenericObject) => {
+    const isValid = await trigger();
+    if (!isValid) {
+      msg.error("Please fix the validation errors before submitting.");
+      return;
+    }
+    let uploadData = uploadedData[0];
+    let payload = {
+      "OrganizationDetails": [
+        {
+          "OrganizationName": watch("OrganizationName"),
+          "OrganizationKnownAs": watch("OrganizationKnownAs"),
+          "OrganizationType": watch("OrganizationType"),
+          "OrganizationDomain": watch("OrganizationDomain"),
+          "PanNumber": watch("PanNumber"),
+          "AddressLine1": watch("AddressLine1"),
+          "AddressLine2": watch("AddressLine2"),
+          "City": watch("City"),
+          "State": watch("State"),
+          "CountryName": watch("CountryName"),
+          "ZipCode": watch("ZipCode"),
+          "OrganizationEmail": watch("OrganizationEmail"),
+          "OrganizationPhone": watch("OrganizationPhone"),
+          "Website": watch("Website"),
+          ...uploadData,
+        }
+      ]
+    }
+    if (selectedOrganizationData) {
+      dispatch(setLoading(true));
+      await UpdateOrganization(payload).then(res => {
+        if (res.success) {
+          if (res.data.status) {
+            msg.success(res.data.message || "Organization Updated Successfully !!");
+            fetchAllOrganizationsList();
+            handleReset();
+          } else if (res.data.ErrorDetails && Array.isArray(res.data.ErrorDetails) && res.data.ErrorDetails.length > 0) {
+            msg.warning(res.data.ErrorDetails[0]['Error Message'] || 'Failed to update organization !!');
+          } else {
+            msg.warning('Failed to update organization !!')
+          }
+        }
+      }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
+    } else {
+      dispatch(setLoading(true));
+      await AddOrganization(payload).then(res => {
+        if (res.success) {
+          if (res.data.status) {
+            msg.success(res.data.message || "Organization Added Successfully !!");
+            fetchAllOrganizationsList();
+            handleReset();
+          } else if (res.data.ErrorDetails && Array.isArray(res.data.ErrorDetails) && res.data.ErrorDetails.length > 0) {
+            msg.warning(res.data.ErrorDetails[0]['Error Message'] || 'Failed to add organization !!');
+          } else {
+            msg.warning('Failed to add organization !!')
+          }
+        }
+      }).catch(err => console.log(err)).finally(() => { dispatch(setLoading(false)) })
+    }
+  }
+  const handleReset = () => {
+    setSelectedOrganization(null);
+    setSelectedOrganizationData(null);
+    setUploadedData([{ OrganizationLogo: "", OrganizationLogoName: "", OrganizationLogoType: "", OrganizationLogoConversionType: "" }]);
+    form.reset({
+      OrganizationName: '', OrganizationKnownAs: '', OrganizationType: '', PanNumber: '',
+      OrganizationEmail: '', OrganizationPhone: '', OrganizationDomain: '', Website: '', CountryName: '',
+      Currency: '', CurrencySymbol: '', OrganizationLogo: [], AddressLine1: '', AddressLine2: '', City: '', State: '', ZipCode: ''
+    });
+  };
+
   const renderField = (field: BaseField) => {
     const { name, label, fieldType, isRequired, show = true } = field;
     if (!name) {
@@ -200,22 +410,26 @@ const Organization = () => {
 
       case 'upload':
         return (
-          <Controller
-            key={name}
-            name={name}
-            control={control}
-            rules={validationRules}
-            render={({ field: ctrl }) => (
-              <ReusableUpload
-                {...field}
-                value={ctrl.value}
-                onChange={ctrl.onChange}
-                error={errors[name]?.message as string}
-                dragAndDrop={false}
-                fieldClassName="w-full"
-              />
-            )}
-          />
+          <>
+            <Controller
+              key={name}
+              name={name}
+              control={control}
+              rules={validationRules}
+              render={({ field: ctrl }) => (
+                <ReusableUpload
+                  {...field}
+                  value={ctrl.value}
+                  onChange={ctrl.onChange}
+                  error={errors[name]?.message as string}
+                  dragAndDrop={false}
+                  fieldClassName="w-full"
+                  multiple={false}
+                  fieldInfo={'Files allowed to upload are .png, .jpg, .jpeg'}
+                />
+              )}
+            />
+          </>
         );
       case 'numeric':
         return (
@@ -311,8 +525,8 @@ const Organization = () => {
                   <div
                     key={org.OrganizationId}
                     className={`p-2.5 py-2 rounded-lg mb-2 cursor-pointer transition-all hover:bg-gray-50 ${selectedOrganization?.OrganizationId === org.OrganizationId
-                        ? 'bg-blue-50 border-l-4 border-blue-500'
-                        : 'border border-gray-200'
+                      ? 'bg-blue-50 border-l-4 border-blue-500'
+                      : 'border border-gray-200'
                       }`}
                     onClick={() => handleSelect(org)}
                   >
@@ -343,15 +557,15 @@ const Organization = () => {
                         {org.OrganizationType}
                       </Badge>
                       <div>
-                      <span
-                        title={org.CountryName}
-                        className="block max-w-[90px] truncate text-[11px] text-gray-500"
-                      >
-                        •{' '}
-                        {org.CountryName}
-                      </span>
+                        <span
+                          title={org.CountryName}
+                          className="block max-w-[90px] truncate text-[11px] text-gray-500"
+                        >
+                          •{' '}
+                          {org.CountryName}
+                        </span>
                       </div>
-                      
+
                     </div>
                   </div>
                 ))}
@@ -380,18 +594,18 @@ const Organization = () => {
               <ReusableButton
                 variant="text"
                 size="small"
-                onClick={null}
+                onClick={handleReset}
                 icon={<X className="h-4 w-4" />}
               >
-                Cancel
+                {selectedOrganizationData ? "Cancel" : "Reset"}
               </ReusableButton>
               <ReusableButton
                 size="small"
                 variant="primary"
-                onClick={null}
+                onClick={(data) => handleSubmit(handleSave)(data)}
                 icon={<Save className="h-4 w-4" />}
               >
-                Save
+                {selectedOrganizationData ? "Update" : "Save"}
               </ReusableButton>
             </div>
           </div>
@@ -435,40 +649,6 @@ const Organization = () => {
 };
 
 export default Organization;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // import { useCallback, useEffect, useState } from 'react';
 // import { SidebarTrigger } from '@/components/ui/sidebar';

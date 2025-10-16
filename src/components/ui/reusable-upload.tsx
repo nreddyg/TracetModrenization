@@ -46,6 +46,7 @@ export interface UploadProps {
   maxSize?: number; // in MB
   maxFiles?: number;
   fieldClassName?:string;
+  fieldInfo?:string;
   value?: UploadFile[];
   disabled?: boolean;
   showPreview?: boolean; // Shows preview thumbnails for images
@@ -91,6 +92,7 @@ export const ReusableUpload = forwardRef<HTMLInputElement, UploadProps>(
     maxSize = 10,
     maxFiles = 5,
     value = [],
+    fieldInfo='',
     disabled = false,
     showPreview = true,
     showUploadList = true,
@@ -405,6 +407,7 @@ export const ReusableUpload = forwardRef<HTMLInputElement, UploadProps>(
     }
   }
 };
+
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       handleFileSelect(e.target.files);
       // Reset input value to allow selecting the same file again
@@ -461,6 +464,7 @@ export const ReusableUpload = forwardRef<HTMLInputElement, UploadProps>(
       }
     };
 
+
     const handleDownload = (file: UploadFile) => {
       if (onDownload) {
         onDownload(file);
@@ -497,6 +501,7 @@ export const ReusableUpload = forwardRef<HTMLInputElement, UploadProps>(
 
     const formatFileSize = (bytes: number) => {
       if (bytes === 0) return '0 Bytes';
+      if(!bytes) return '';
       const k = 1024;
       const sizes = ['Bytes', 'KB', 'MB', 'GB'];
       const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -605,7 +610,7 @@ export const ReusableUpload = forwardRef<HTMLInputElement, UploadProps>(
                   {getStatusIcon(file.status)}
                 </div>
                 <div className="flex items-center gap-4 text-xs text-gray-500">
-                  <span>{formatFileSize(file.size)}</span>
+                  <span>{formatFileSize(file.size) ? formatFileSize(file.size) : 'Unknown size'}</span>
                   {file.status === 'uploading' && file.percent !== undefined && (
                     <span>{file.percent}%</span>
                   )}
@@ -791,9 +796,7 @@ export const ReusableUpload = forwardRef<HTMLInputElement, UploadProps>(
               <Upload className="h-4 w-4" />
               {multiple ? 'Select Files' : 'Select File'}
             </Button>
-            <p className="text-xs text-gray-500">
-              Max {maxSize}MB per file{multiple ? `, up to ${maxFiles} files` : ''}
-            </p>
+              {fieldInfo ?<p className="text-xs text-gray-500">{fieldInfo}</p>: <p className="text-xs text-gray-500">Max {maxSize}MB per file{multiple ? `, up to ${maxFiles} files` : ''}</p>}
           </div>
         );
       }

@@ -9,9 +9,9 @@ interface APIResponse<T> {
 }
 
 //All Company List Based on UserId
-export const GetOrganizationsList= async (CompId:string,OrgId?:number): Promise<APIResponse<any>> => {
+export const GetOrganizationsList= async (OrgId?:number): Promise<APIResponse<any>> => {
     try {
-        const response = await api.get(URL_GET_ORGANIZATION_LIST, { params: { CompId, OrgId} })
+        const response = await api.get(URL_GET_ORGANIZATION_LIST, { params: { OrgId} })
         return {success: true,data: response.data,}
     } catch (err: any) {
         return { success: false,message: err.response?.data?.message || err.message,status: err.response?.status};
@@ -27,7 +27,7 @@ export const GetCountryList= async (): Promise<APIResponse<any>> => {
     }
 }
 //get currency list
-export const GetCurrencyList= async (Country:string): Promise<APIResponse<any>> => {
+export const GetCurrency= async (Country:string): Promise<APIResponse<any>> => {
     try {
         const response = await api.get(URL_GET_CURRENCY_LIST, { params: { Country } })
         return {success: true,data: response.data,}
@@ -47,7 +47,7 @@ export const AddOrganization= async (data:any): Promise<APIResponse<any>> => {
 //Update Organization
 export const UpdateOrganization= async (data:any): Promise<APIResponse<any>> => {
     try {
-        const response = await api.put(URL_UPDATE_ORGANIZATION, data)
+        const response = await api.post(URL_UPDATE_ORGANIZATION, data,{})
         return {success: true,data: response.data,}
     } catch (err: any) {
         return { success: false,message: err.response?.data?.message || err.message,status: err.response?.status};

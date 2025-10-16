@@ -491,7 +491,7 @@ const Organization = () => {
     <div className="h-full   bg-gray-50 flex flex-col ">
       <div className="flex flex-1 overflow-hidden   ">
         {/* Left Sidebar - Ticket Inbox */}
-        <div className={`${isInboxCollapsed ? 'w-6 p-1' : 'w-34 p-2 mb-2 rounded-b-[5px]'} bg-white border-r    border-0 shadow-lg flex pb-3 flex-col transition-all duration-300 shrink-0 hidden lg:flex`}>
+        {dataSource.length!==0 && <div className={`${isInboxCollapsed ? 'w-6 p-1' : 'w-34 p-2 mb-2 rounded-b-[5px]'} bg-white border-r    border-0 shadow-lg flex pb-3 flex-col transition-all duration-300 shrink-0 hidden lg:flex`}>
           <div className="pt-1 shrink-0">
             <div className="flex items-center justify-between mb-2">
               <h3 className={`font-semibold text-gray-900 ${isInboxCollapsed ? 'hidden' : ''}`}>
@@ -573,7 +573,7 @@ const Organization = () => {
             </ScrollArea>
 
           )}
-        </div>
+        </div>}
 
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col min-w-0 ">

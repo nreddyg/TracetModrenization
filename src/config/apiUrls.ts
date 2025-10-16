@@ -105,6 +105,10 @@ export const URL_GET_CUSTOMER_LIST = '/api/Masters/GetCustomerDetailsByCompanyId
 
 //Vendor Master
 export const URL_GET_VENDOR_LIST='/api/Masters/GetVendorDetailsByCompanyId';
+export const URL_POST_VENDOR_DETAILS="/api/Masters/AddVendorDetails";
+export const URL_GET_VENDOR_DETAILS="/api/Masters/GetVendorDetailsByCompanyId";
+export const URL_POST_UPDATE_VENDOR_DETAILS="/api/Masters/UpdateVendorDetails";
+export const URL_POST_DELETE_VENDOR="/api/Masters/DeleteVendorById"
 
 //SMTP URLS
 export const URL_GET_SMTP_CONFIG="/api/Settings/GetSMTPConfigurationDetails";

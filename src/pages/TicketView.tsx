@@ -1170,6 +1170,9 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
         msg.success(res.data.message);
 
 
+      }else{
+        let errMsg=(res.data.ErrorDetails && res.data.ErrorDetails[0]['Error Message'])?res.data.ErrorDetails[0]['Error Message']:res.data.message
+        msg.warning(errMsg);
       }
     }).catch(err => {
       msg.error(err.message);

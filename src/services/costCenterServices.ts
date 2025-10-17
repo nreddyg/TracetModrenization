@@ -1,4 +1,4 @@
-// services/customerService.ts
+
 
 import { URL_DELETE_COSTCENTER, URL_GET_COSTCENTER_BY_ID, URL_GET_COSTCENTER_DATA, URL_POST_COSTCENTER } from '@/config/apiUrls';
 import api from './api';

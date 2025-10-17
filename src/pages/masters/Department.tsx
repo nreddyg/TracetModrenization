@@ -725,10 +725,10 @@ const Department = () => {
                     cursor: disable || selectedLevel === 99 ? "not-allowed" : "pointer",
                   }}
                   onClick={() => {
-                    // if (!disable && selectedLevel !== 99) {
-                    //   handleDelete();
-                    // }
+                    if (!disable && selectedLevel !== 99) {
+                      // handleDelete();
                     setIsDelModalOpen(true)
+                    }
                   }}
                 >
                   <Trash2 className="h-4 w-4" />

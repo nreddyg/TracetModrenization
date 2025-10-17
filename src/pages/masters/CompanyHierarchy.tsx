@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -130,11 +130,15 @@ let lastLevelData:BaseField[] = [
   },
 ];
 
-
+const SearchButton = {
+  type: "text",
+  name: "searchValue",
+  value: "",
+  placeholder: "Search...",
+};
 
 const CompanyHierarchy = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [expandedKeys, setExpandedKeys] = useState(["0"]);
   const [selectedKeys, setSelectedKeys] = useState([]);
   const [lastLevel, setLastLevel] = useState(null);
   const [level, setLevel] = useState([]);
@@ -149,6 +153,9 @@ const CompanyHierarchy = () => {
   const [isDelModalOpen, setIsDelModalOpen] = useState(false);
   const [treeViewData,setTreeViewData]=useState([])
   const [disable, setDisable] = useState(true);
+  const [search, setSearch] = useState(SearchButton);
+  const [expandedKeys, setExpandedKeys] = useState<Set<string>>(new Set());
+
   const dispatch = useDispatch()
     const [selectedNodeParents, setSelectedNodeParents] = useState([]);
     const [selectedNode, setSelectedNode] = useState({
@@ -254,9 +261,9 @@ const CompanyHierarchy = () => {
                 );
     }
   }
-  const handleExpand = (keys: string[]) => {
-    setExpandedKeys(keys);
-  };
+  // const handleExpand = (keys: string[]) => {
+  //   setExpandedKeys(keys);
+  // };
   const handleSelect = (selectedKeys, info) => {
     setRecordToEditId(info.node.id)
     setSelectedKeys(selectedKeys)
@@ -535,6 +542,122 @@ const CompanyHierarchy = () => {
     }
   }
 
+  const handleSearch = (val: string) => {
+    setSearch((prev) => ({ ...prev, value: val }));
+  
+    if (!val) {
+      const allKeys: string[] = [];
+      const collectKeys = (nodes: any[]) => {
+        nodes.forEach((node) => {
+          allKeys.push(node.key);
+          if (node.children?.length) collectKeys(node.children);
+        });
+      };
+      collectKeys(treeViewData);
+      setExpandedKeys(new Set(allKeys));
+      return;
+    }
+  
+    const matchedKeys: string[] = [];
+  
+    const findMatchingNodes = (nodes: any[]) => {
+      nodes.forEach((node) => {
+        const title = (node.title || node.name || '').toLowerCase();
+        if (title.includes(val.toLowerCase())) matchedKeys.push(node.key);
+        if (node.children?.length) findMatchingNodes(node.children);
+      });
+    };
+    findMatchingNodes(treeViewData);
+  
+    const parentKeys = new Set<string>();
+    const findParentKeys = (nodes: any[], targets: string[]) => {
+      nodes.forEach((node) => {
+        if (node.children?.some((child) => targets.includes(child.key))) {
+          parentKeys.add(node.key);
+          findParentKeys(treeViewData, [node.key]);
+        } else if (node.children) {
+          findParentKeys(node.children, targets);
+        }
+      });
+    };
+    findParentKeys(treeViewData, matchedKeys);
+  
+    // ✅ Collapse all, then expand only matched + parents
+    const newExpanded = new Set([...matchedKeys, ...parentKeys]);
+    setExpandedKeys(newExpanded);
+  };
+  
+  
+  useEffect(() => {
+    if (treeViewData?.length) {
+      const allKeys: string[] = [];
+  
+      const collectKeys = (nodes: any[]) => {
+        nodes.forEach((node) => {
+          allKeys.push(node.key);
+          if (node.children?.length) {
+            collectKeys(node.children);
+          }
+        });
+      };
+  
+      collectKeys(treeViewData);
+      setExpandedKeys(new Set(allKeys)); // expand everything initially
+    }
+  }, [treeViewData]);
+
+  const mainTreeData = useMemo(() => {
+  const loop = (data) =>
+    data.map((item) => {
+      const titleStr = item.title || item.name || '';
+      const searchVal = search.value.trim().toLowerCase();
+
+      if (!searchVal) {
+        return {
+          ...item,
+          title: <span key={item.key}>{titleStr}</span>,
+          children: item.children ? loop(item.children) : [],
+        };
+      }
+
+      const index = titleStr.toLowerCase().indexOf(searchVal);
+      if (index === -1) {
+        return {
+          ...item,
+          title: <span key={item.key}>{titleStr}</span>,
+          children: item.children ? loop(item.children) : [],
+        };
+      }
+
+      const beforeStr = titleStr.substring(0, index);
+      const matchStr = titleStr.substring(index, index + searchVal.length); // ✅ keep original case
+      const afterStr = titleStr.substring(index + searchVal.length);
+
+      const title = (
+        <span key={item.key}>
+          {beforeStr}
+          <span className="text-blue-500 font-medium">{matchStr}</span>
+          {afterStr}
+        </span>
+      );
+
+      return {
+        ...item,
+        title,
+        children: item.children ? loop(item.children) : [],
+      };
+    });
+
+  return loop(treeViewData);
+}, [treeViewData, search.value]);
+
+const handleToggleNode = (
+  newExpandedKeys: string[],
+  info: { expanded: boolean; node: any }
+) => {
+  setExpandedKeys(new Set(newExpandedKeys));
+};
+
   return (
     <div className="bg-hsl(214.3 31.8% 91.4%) overflow-y-auto">
       <header className="bg-card flex justify-between border-b px-6 py-4 shadow-sm">
@@ -579,7 +702,7 @@ const CompanyHierarchy = () => {
               <Input
                 placeholder="Search..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {setSearchQuery(e.target.value);handleSearch(e.target.value)}}
                 className="pl-9 "
               />
             </div>
@@ -636,7 +759,8 @@ const CompanyHierarchy = () => {
             </div>
           </div>
           <div className="min-h-20 h-[63vh] overflow-y-auto p-2">
-            <TreeView treeData={treeViewData} config={treeConfig} onSelect={handleSelect} selectKeys={selectedKeys} expandedKeys={expandedKeys} onExpand={setExpandedKeys} />
+            <TreeView treeData={mainTreeData} config={treeConfig} onSelect={handleSelect} selectKeys={selectedKeys}   onExpand={handleToggleNode}
+             expandedKeys={Array.from(expandedKeys)} />
           </div>
         </div>
 

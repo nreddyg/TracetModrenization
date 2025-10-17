@@ -203,6 +203,11 @@ const navigation: NavItem[] = [
         icon: BarChart,
         link: '/masters/store',
       },
+       {
+        label: 'Item Master',
+        icon: BarChart,
+        link: '/masters/item-master',
+      },
     ],
     
   },

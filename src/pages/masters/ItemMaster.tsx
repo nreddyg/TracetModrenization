@@ -17,6 +17,8 @@ import { useAppSelector } from '@/store';
 import { Controller, useForm } from 'react-hook-form';
 import { BaseField, GenericObject } from '@/Local_DB/types/types';
 import { STORE_DB } from '@/Local_DB/Form_JSON_Data/StoreDB';
+import { ITEM_MASTER_DB } from '@/Local_DB/Form_JSON_Data/ItemMasterDB';
+import { addNewItemMaster, deleteItemMaster, getEditItemMasterData, getItemMasterData } from '@/services/ItemMasterServices';
 
 
 interface Store {
@@ -25,11 +27,11 @@ interface Store {
     branch: string;
     description: string;
 }
-const Store = () => {
+const ItemMaster = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedStore, setSelectedStore] = useState<Store | null>(null);
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-    const [fields, setFields] = useState<BaseField[]>(STORE_DB);
+    const [fields, setFields] = useState<BaseField[]>(ITEM_MASTER_DB);
     const [dataSource, setDataSource] = useState([])
       const [isDelModalOpen, setIsDelModalOpen] = useState(false);
         const [recordToEditId, setRecordToEditId] = useState(null);
@@ -46,15 +48,11 @@ const Store = () => {
     
 
     useEffect(() => {
-        if (companyId && branch=="All")
+        if (companyId && branch)
         {
-            fetchStoreGetData(companyId)
+            fetchItemMasterData(companyId)
         }
-        if(companyId && branch!="All" && branch!="")
-        {
-            fetchStoreDataByBranchName(companyId,branch)
-        }
-    }, [companyId,branch])
+    }, [companyId])
 
 
     //   const filteredStores = mockStores.filter(store =>
@@ -169,7 +167,7 @@ const Store = () => {
                         variant="text"
                         size="small"
                         //   icon={<Edit className="h-4 w-4" />}
-                        onClick={() => { setSelectedStore(row.original);setRecordToEditId(row.original.StoreId);fetchStoreDataByStoreId(companyId,row.original.StoreId) }}
+                        onClick={() => { setSelectedStore(row.original);setRecordToEditId(row.original.StoreId);fetchItemMasterDataByItemMasterId(companyId,row.original.StoreId) }}
                     >
                         Edit
                     </ReusableButton>
@@ -186,9 +184,9 @@ const Store = () => {
             ),
         },
     ];
-    async function fetchStoreGetData(companyId) {
+    async function fetchItemMasterData(companyId) {
         dispatch(setLoading(true))
-        await getStoreData(companyId).then(res => {
+        await getItemMasterData(companyId).then(res => {
             if (res.data && res.data.status == undefined) {
                 //  console.log(res.data,"Nag")
                 setDataSource(res.data.StoreDetails)
@@ -198,20 +196,9 @@ const Store = () => {
             }
         }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
     }
-       async function fetchStoreDataByBranchName(companyId,branch) {
+      async function fetchItemMasterDataByItemMasterId(companyId,id) {
         dispatch(setLoading(true))
-        await getStoreDataByCompanyIdAndBranchName(companyId,branch).then(res => {
-            if (res.data && res.data.status == undefined) {
-                //  console.log(res.data,"Nag")
-                setDataSource(res.data)
-            } else {
-                msg.warning(res.data.message || "No Data Found")
-            }
-        }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
-    }
-  async function fetchStoreDataByStoreId(companyId,id) {
-        dispatch(setLoading(true))
-        await getEditStoreData(companyId,id).then(res => {
+        await getEditItemMasterData(companyId,id).then(res => {
             if (res.data && res.data.status == undefined) {
                 //  console.log(res.data,"Nag")
                 // setDataSource(res.data.StoreDetails)
@@ -221,8 +208,8 @@ const Store = () => {
             }
         }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
     }
-  const deleteStoreData = async (id: number,data:any) => {
-    await deleteStore(companyId, id,data).then(res => {
+  const deleteItemMasterData = async (id: number,data:any) => {
+    await deleteItemMaster(companyId, id,data).then(res => {
       if (res.success) {
         if (res.data.status) {
           msg.success(res.data.message);
@@ -230,7 +217,7 @@ const Store = () => {
         //     handleReset('DeleteStatus');
         //   }
         //   fetchAllStatusList();
-        fetchStoreGetData(companyId)
+        fetchItemMasterData(companyId)
         } else {
           msg.warning(res.data.message);
         }
@@ -241,8 +228,8 @@ const Store = () => {
 
     })
   }
-   const addNewStoreData = async (branch: any,data:any) => {
-    await addNewStore(companyId, branch,data).then(res => {
+   const addNewItemMasterData = async (data:any) => {
+    await addNewItemMaster(companyId,data).then(res => {
       if (res.success) {
         if (res.data.status) {
           msg.success(res.data.message);
@@ -253,8 +240,8 @@ const Store = () => {
         // if(recordToEditId==null && companyId){
 
         // }
-        // fetchStoreGetData(companyId)
-        fetchStoreDataByBranchName(companyId,branch)
+        fetchItemMasterData(companyId)
+        // fetchStoreDataByBranchName(companyId,branch)
 
         } else {
           msg.warning(res.data.message);
@@ -278,8 +265,8 @@ const Store = () => {
         // if(recordToEditId==null && companyId){
 
         // }
-        // fetchStoreGetData(companyId)
-            fetchStoreDataByBranchName(companyId,branch)
+        fetchItemMasterData(companyId)
+            // fetchStoreDataByBranchName(companyId,branch)
 
         } else {
           msg.warning(res.data.message);
@@ -303,7 +290,7 @@ const Store = () => {
             ]
         }
         if(recordToEditId==null && companyId){
-            addNewStoreData(branch,Payload)
+            addNewItemMasterData(Payload)
             setIsAddDialogOpen(false)
         }
         else if(recordToEditId!==null && companyId){
@@ -352,8 +339,8 @@ const Store = () => {
             allowClear
             containerClassName="w-96"
           /> */}
-                    <h1>Store</h1>
-
+                    <h1>Item Master</h1>
+<div className='flex gap-3'>
                     <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                         <DialogTrigger asChild>
                             <ReusableButton
@@ -364,10 +351,11 @@ const Store = () => {
                             >
                                 Add
                             </ReusableButton>
+                            
                         </DialogTrigger>
                         <DialogContent className="max-w-2xl">
                             <DialogHeader>
-                                <DialogTitle>{recordToEditId?"Update Store":"Add Store"}</DialogTitle>
+                                <DialogTitle>{recordToEditId?"Update Item master":"Add Item master"}</DialogTitle>
                             </DialogHeader>
 
                             {/* <form onSubmit={()=>{}} className="space-y-4">
@@ -413,14 +401,14 @@ const Store = () => {
                 </div>
               </form> */}
                             <div className='grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4'>
-                                {getFieldsByNames(['StoreName', 'Branch']).map((field) => {
+                                {getFieldsByNames(['ItemName', 'ItemCode',"MainCategory","SubCategory","UnitofMeasure","UnitPrice","ReorderLevel"]).map((field) => {
                                     return <div className="flex items-center space-x-2">
                                         {renderField(field)}
                                     </div>;
                                 })}
                             </div>
                             <div className='w-100'>
-                                {getFieldsByNames(['StoreDescription']).map((field) => {
+                                {getFieldsByNames(['ItemDescription']).map((field) => {
                                     return <div className=" space-x-2">
                                         {renderField(field)}
                                     </div>;
@@ -444,12 +432,21 @@ const Store = () => {
                             </div>
                         </DialogContent>
                     </Dialog>
+                    <ReusableButton
+                                variant="primary"
+                                icon={<Plus className="h-4 w-4" />}
+                                className="bg-orange-500 hover:bg-orange-600 border-orange-500"
+                                // onClick={()=>{setRecordToEditId(null);reset({StoreName:"",Branch:"",StoreDescription:""})}}
+                            >
+                            Import
+                            </ReusableButton>
+                            </div>
                     <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>
                               <DialogContent className="sm:max-w-[425px]">
                                 <DialogHeader>
                                   <DialogTitle>Confirm the action</DialogTitle>
                                   <DialogDescription>
-                                    Are you sure you want to delete Store?
+                                    Are you sure you want to delete Item master?
                                     {/* {currentTab === "service-request-type"
                                       ? `${selectedRecord?.ServiceRequestType || "this"} Service Request Type`
                                       : `${selectedStatusRec?.StatusType || "this"} Status`
@@ -466,7 +463,7 @@ const Store = () => {
                                   <ReusableButton
                                     variant="primary"
                                     danger={true}
-                                    onClick={()=>{deleteStoreData(recordToEditId,"");setIsDelModalOpen(false)}}
+                                    onClick={()=>{deleteItemMasterData(recordToEditId,"");setIsDelModalOpen(false)}}
                                     // onClick={currentTab === "service-request-type" ? () => { deleteServiceRequestType(selectedRecord?.Id); setIsDelModalOpen(false) } : () => { deleteStatus(selectedStatusRec?.Id); setIsDelModalOpen(false) }}
                                   >
                                     Delete
@@ -488,4 +485,4 @@ const Store = () => {
     );
 };
 
-export default Store;
+export default ItemMaster;

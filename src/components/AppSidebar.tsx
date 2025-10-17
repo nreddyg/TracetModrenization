@@ -155,7 +155,7 @@ const navigation: NavItem[] = [
       //   icon: BarChart,
       //   link: '/service-desk/mis-reports',
       // },
-    
+
     ],
   },
   {
@@ -206,6 +206,12 @@ const navigation: NavItem[] = [
         ],
       },
       {
+<<<<<<< HEAD
+        label: 'Fixed Assets',
+        icon: Building2,
+        link: '/company',
+        children: [
+=======
         label:'Consumables',
         icon:Building2,
         link:'/consumables',
@@ -228,24 +234,49 @@ const navigation: NavItem[] = [
         icon:Building2,
         link:'/servicemaintenance',
         children:[
+>>>>>>> 5d26e34e853e473c27202658fb19ea77582ff6e7
           {
-            label: 'Service Locations',
+            label: 'Asset Category',
             icon: Building2,
-            link: '/masters/servicemaintenance/servicelocations',
-          },
-           {
-            label: 'Product Masters',
-            icon: Building2,
-            link: '/masters/servicemaintenance/productmaster',
-          },
+            link: 'masters/fixed-assets/asset-category',
+          }
         ],
+<<<<<<< HEAD
+      },
+      {
+        label: 'Store',
+        icon: BarChart,
+        link: '/masters/store',
+      },
+      // masters/fixed-assets/asset-category
+    ],
+=======
 
       },
       
       ,
       
     ]
+>>>>>>> 5d26e34e853e473c27202658fb19ea77582ff6e7
   },
+  {
+    label: 'Service Maintenance',
+    icon: Building2,
+    link: '/servicemaintenance',
+    children: [
+      {
+        label: 'Service Locations',
+        icon: Building2,
+        link: '/masters/servicemaintenance/servicelocations',
+      },
+      {
+        label: 'Product Masters',
+        icon: Building2,
+        link: '/masters/servicemaintenance/productmaster',
+      },
+    ],
+  }
+
   // {
   //   label: 'CWIP',
   //   icon: HardHat,

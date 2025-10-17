@@ -97,7 +97,7 @@ export const URL_DUPLICATE_ADD_CHECK_NO='/api/ServiceDeskAPI/CheckAddDuplicateCh
 export const URL_DUPLICATE_UPDATE_CHECK_NO='/api/ServiceDeskAPI/CheckUpdateDuplicateCheque'
 
 
-// Master's Department Screen
+// Master's Department API's
 // export const URL_POST_DEPARTMENT_DATA=`/api/Masters/GetDepartmentDetailsByCompanyId`;
 export const URL_GET_DEPARTMENT_DATA = `/api/Masters/GetDepartmentDetailsByCompanyId`;
 export const URL_POST_DEPARTMENT_DATA = `/api/Masters/SubmitdepartmentLevels`;
@@ -125,6 +125,12 @@ export const URL_POST_UPDATE_STORE = `/api/Masters/UpdateStoreDetails`;
 // export const URL_GET_COMPANY_HIERARCHY_DATA = `/api/Masters/GetHeirarchyDetailsByCompanyId`
 // export const URL_POST_COMPANY_HIERARCHY_DATA=`/api/Masters/GetHeirarchyDetailsByCompanyId`;
 
+
+// Master's AssetLocation API's
+export const URL_ASSET_LOCATION_DETAILS = `/api/Masters/GetAssetLocationDetailsByCompanyId`
+export const URL_ASSET_LOCATION_BY_LOC_ID = `/api/Masters/GetAssetLocationDetailsByCompanyId`
+export const URL_POST_ASSET_LOC_DATA =`/api/Masters/SubmitLocationLevels`;
+export const URL_DELETE_LOC = `/api/Masters/DeleteAssetLocationDetailsById`;
 //Masters Cost center Screen
 
 export const URL_GET_COSTCENTER_DATA=`/api/Masters/GetCostCenterDetailsByCompanyId`;
@@ -132,6 +138,11 @@ export const URL_POST_COSTCENTER=`/api/Masters/SubmitCostCenterLevels`;
 export const URL_GET_COSTCENTER_BY_ID=`/api/Masters/GetCostCenterDetailsByCompanyId`;
 export const URL_DELETE_COSTCENTER=`/api/Masters/DeleteCostCenterDetailsById`;
 
+// Master's fixed Assets Asset Category
+export const URL_GET_ASSET_CATEGORY_DATA = `/api/Masters/GetAssetCategoriesByCompanyId`;
+export const URL_POST_ASSET_CATEGORY_DATA = `/api/Masters/AddAssetCategoryDetails`;
+export const URL_UPDATE_ASSET_CATEGORY_DATA = `/api/Masters/UpdateAssetCategoryDetails`;
+export const URL_DELETE_ASSET_CATEGORY_REC = `/api/Masters/DeleteAssetCategoryById`;
 // Masters Item Master 
 export const URL_GET_ITEM_MASTER_DATA = `/api/Masters/GetItemMasterDetailsByCompanyId`;
 export const URL_DELETE_ITEM_MASTER = `/api/Masters/DeleteItemMaster`;

@@ -51,9 +51,9 @@ export const addNewStore = async (compId: string, branch: any , data: any): Prom
     }
 };
 
-export const updateStore = async (compId: string, branch: any , data: any): Promise<APIResponse<any>> => {
+export const updateStore = async (compId: string, id: any , data: any): Promise<APIResponse<any>> => {
     try {
-        const response = await api.post(URL_POST_UPDATE_STORE, data, { params: { CompId: compId, BranchName: branch } });
+        const response = await api.post(URL_POST_UPDATE_STORE, data, { params: { CompId: compId, StoreId: id } });
         return {success: true,data: response.data};
     } catch (err: any) {
         return {success: false,message: err.response?.data?.message || err.message,status: err.response?.status,};

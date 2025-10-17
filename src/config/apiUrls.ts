@@ -115,7 +115,7 @@ export const URL_POST_COMPANY_HIERARCHY_DATA=`/api/Masters/SubmitBrachLevels`;
 export const URL_DELETE_COMPANY_HIERARCHY_DATA=`/api/Masters/DeleteHeirachyDetailsById`;
 export const URL_GET_COMPANY_HIERARCHY_DATA_BY_BRANCHID=`/api/Masters/GetHeirarchyDetailsByCompanyId`;
 
-// Store Screen
+// Store Screen`
 
 export const URL_GET_STORE_DATA = `/api/Masters/GetStoreDetails`;
 export const URL_DELETE_STORE = `/api/Masters/DeleteStoreDetailsById`;
@@ -143,3 +143,9 @@ export const URL_GET_ASSET_CATEGORY_DATA = `/api/Masters/GetAssetCategoriesByCom
 export const URL_POST_ASSET_CATEGORY_DATA = `/api/Masters/AddAssetCategoryDetails`;
 export const URL_UPDATE_ASSET_CATEGORY_DATA = `/api/Masters/UpdateAssetCategoryDetails`;
 export const URL_DELETE_ASSET_CATEGORY_REC = `/api/Masters/DeleteAssetCategoryById`;
+// Masters Item Master 
+export const URL_GET_ITEM_MASTER_DATA = `/api/Masters/GetItemMasterDetailsByCompanyId`;
+export const URL_DELETE_ITEM_MASTER = `/api/Masters/DeleteItemMaster`;
+export const URL_POST_NEW_ITEM_MASTER = `/api/Masters/AddItemMasterDetails`;
+export const URL_POST_UPDATE_ITEM_MASTER = `/api/Masters/UpdateItemMasterDetails`;
+

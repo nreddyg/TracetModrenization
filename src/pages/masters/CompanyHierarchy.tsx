@@ -21,6 +21,7 @@ import { COMPANY_DB } from '@/Local_DB/Form_JSON_Data/CompanyHierarchyDB';
 import { Popover, PopoverContent, PopoverTrigger } from '@radix-ui/react-popover';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ReusableDropdown } from '@/components/ui/reusable-dropdown';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 interface TreeNode {
   id: string;
   name: string;
@@ -145,6 +146,7 @@ const CompanyHierarchy = () => {
   const companyId = useAppSelector(state => state.projects.companyId);
   const [selectedId, setSelectedId] = useState(null)
   const [tree, setTree] = useState([])
+  const [isDelModalOpen, setIsDelModalOpen] = useState(false);
   const [treeViewData,setTreeViewData]=useState([])
   const [disable, setDisable] = useState(true);
   const dispatch = useDispatch()
@@ -525,6 +527,8 @@ const CompanyHierarchy = () => {
   function handleDelete() {
     if (selectedId) {
       deleteLevel(companyId, selectedId, "")
+      setSelectedId(null)
+      // recordToEditId(null)
     }
   }
 
@@ -563,9 +567,9 @@ const CompanyHierarchy = () => {
         </div>
       </header>
 
-      <div className="flex h-[calc(100vh-73px)]">
+      <div className="flex h-full">
         {/* Tree Structure Panel */}
-        <div className="w-[400px] border-r bg-card flex flex-col">
+        <div className="w-[26vw] border-r bg-card flex flex-col">
           <div className=" flex items-center justify-center pt-4 pb-4 ps-0 ms-0 border-b gap-3">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -593,50 +597,49 @@ const CompanyHierarchy = () => {
                       >
                         <Plus className="h-4 w-4" />
                       </ReusableButton>
-              {/* <Popover open={open} onOpenChange={setOpen}>
-                <PopoverTrigger asChild> */}
-                  <Button size="sm" variant="outline" className="h-8" onClick={handleDelete}>
+                <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>
+                                              <DialogContent className="sm:max-w-[425px]">
+                                                <DialogHeader>
+                                                  <DialogTitle>Confirm the action</DialogTitle>
+                                                  <DialogDescription>
+                                                    Are you sure you want to delete Hierarchy level?
+                                                    {/* {currentTab === "service-request-type"
+                                                      ? `${selectedRecord?.ServiceRequestType || "this"} Service Request Type`
+                                                      : `${selectedStatusRec?.StatusType || "this"} Status`
+                                                    } */}
+                                                  </DialogDescription>
+                                                </DialogHeader>
+                                                <DialogFooter>
+                                                  <ReusableButton
+                                                    variant="default"
+                                                    onClick={() => setIsDelModalOpen(false)}
+                                                  >
+                                                    Cancel
+                                                  </ReusableButton>
+                                                  <ReusableButton
+                                                    variant="primary"
+                                                    danger={true}
+                                                    onClick={()=>{handleDelete();setIsDelModalOpen(false);setRecordToEditId(null);handleReset()}}
+                                                    // onClick={currentTab === "service-request-type" ? () => { deleteServiceRequestType(selectedRecord?.Id); setIsDelModalOpen(false) } : () => { deleteStatus(selectedStatusRec?.Id); setIsDelModalOpen(false) }}
+                                                  >
+                                                    Delete
+                                                  </ReusableButton>
+                                                </DialogFooter>
+                                              </DialogContent>
+                                            </Dialog>
+                  <Button size="sm" variant="outline" className="h-8" onClick={()=>setIsDelModalOpen(true)}>
                     <Trash2 className="h-4 w-4 text-destructive" />
                   </Button>
-                {/* </PopoverTrigger>
-                <PopoverContent
-                  align="center"
-                  className="w-72 p-4 space-y-4"
-                >
-                  <div className="space-y-1">
-                    <h4 className="font-semibold text-sm text-destructive">Confirm Deletion</h4>
-                    <p className="text-sm text-muted-foreground">Are you sure want to delete</p>
-                  </div>
-
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setOpen(false)}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={handleDelete}
-                    >
-                      Delete
-                    </Button>
-                  </div>
-                </PopoverContent>
-              </Popover> */}
-
             </div>
           </div>
-          <div className="min-h-20 max-h-[27rem] overflow-y-auto p-2">
+          <div className="min-h-20 h-[63vh] overflow-y-auto p-2">
             <TreeView treeData={treeViewData} config={treeConfig} onSelect={handleSelect} selectKeys={selectedKeys} expandedKeys={expandedKeys} onExpand={setExpandedKeys} />
           </div>
         </div>
 
         {/* Details Panel */}
-         <div className="flex-1 overflow-y-scroll">
-          <div className="p-6 space-y-6">
+         <div className="flex-1 overflow-y-auto">
+          <div className="p-6 space-y-6" style={{height:"77vh",overflowY:"auto"}}>
             <div className="flex flex-col gap-2">
               <div>
               <h4 className="master-heading mb-2 flex items-center gap-2">

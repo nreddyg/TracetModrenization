@@ -206,16 +206,42 @@ const navigation: NavItem[] = [
         ],
       },
       {
+<<<<<<< HEAD
         label: 'Fixed Assets',
         icon: Building2,
         link: '/company',
         children: [
+=======
+        label:'Consumables',
+        icon:Building2,
+        link:'/consumables',
+        children:[
+        {
+        label: 'Store',
+        icon: BarChart,
+        link: '/masters/consumables/store',
+      },
+       {
+        label: 'Item Master',
+        icon: BarChart,
+        link: '/masters/consumables/item-master',
+      },
+        ],
+
+      },
+      {
+        label:'Service Maintenance',
+        icon:Building2,
+        link:'/servicemaintenance',
+        children:[
+>>>>>>> 5d26e34e853e473c27202658fb19ea77582ff6e7
           {
             label: 'Asset Category',
             icon: Building2,
             link: 'masters/fixed-assets/asset-category',
           }
         ],
+<<<<<<< HEAD
       },
       {
         label: 'Store',
@@ -224,6 +250,14 @@ const navigation: NavItem[] = [
       },
       // masters/fixed-assets/asset-category
     ],
+=======
+
+      },
+      
+      ,
+      
+    ]
+>>>>>>> 5d26e34e853e473c27202658fb19ea77582ff6e7
   },
   {
     label: 'Service Maintenance',

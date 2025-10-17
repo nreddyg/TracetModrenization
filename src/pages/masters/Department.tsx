@@ -18,6 +18,7 @@ import { useAppSelector } from '@/store';
 import { TreeConfig, TreeView } from '@/components/ui/reusable-treeView';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { MenubarShortcut } from '@/components/ui/menubar';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 
 interface TreeNode {
@@ -147,6 +148,8 @@ const Department = () => {
   const companyId = useAppSelector(state => state.projects.companyId);
   const [isClearDisable, setIsClearDisable] = useState(true);
   const [disable, setDisable] = useState(true);
+    const [isDelModalOpen, setIsDelModalOpen] = useState(false);
+
   // const branch = useAppSelector(state=>state.projects.branchId)
   const dispatch = useDispatch()
   const msg = useMessage()
@@ -684,6 +687,36 @@ const Department = () => {
                 </TooltipProvider>
               </div>
               <div>
+                   <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>
+                                                              <DialogContent className="sm:max-w-[425px]">
+                                                                <DialogHeader>
+                                                                  <DialogTitle>Confirm the action</DialogTitle>
+                                                                  <DialogDescription>
+                                                                    Are you sure you want to delete Hierarchy level?
+                                                                    {/* {currentTab === "service-request-type"
+                                                                      ? `${selectedRecord?.ServiceRequestType || "this"} Service Request Type`
+                                                                      : `${selectedStatusRec?.StatusType || "this"} Status`
+                                                                    } */}
+                                                                  </DialogDescription>
+                                                                </DialogHeader>
+                                                                <DialogFooter>
+                                                                  <ReusableButton
+                                                                    variant="default"
+                                                                    onClick={() => setIsDelModalOpen(false)}
+                                                                  >
+                                                                    Cancel
+                                                                  </ReusableButton>
+                                                                  <ReusableButton
+                                                                    variant="primary"
+                                                                    danger={true}
+                                                                    onClick={()=>{handleDelete();setIsDelModalOpen(false);setRecordToEditId(null);handleReset()}}
+                                                                    // onClick={currentTab === "service-request-type" ? () => { deleteServiceRequestType(selectedRecord?.Id); setIsDelModalOpen(false) } : () => { deleteStatus(selectedStatusRec?.Id); setIsDelModalOpen(false) }}
+                                                                  >
+                                                                    Delete
+                                                                  </ReusableButton>
+                                                                </DialogFooter>
+                                                              </DialogContent>
+                                                            </Dialog>
                 <ReusableButton
                   size="small"
                   // className="border border-0 h-8 w-8 flex items-center justify-center"
@@ -692,9 +725,10 @@ const Department = () => {
                     cursor: disable || selectedLevel === 99 ? "not-allowed" : "pointer",
                   }}
                   onClick={() => {
-                    if (!disable && selectedLevel !== 99) {
-                      handleDelete();
-                    }
+                    // if (!disable && selectedLevel !== 99) {
+                    //   handleDelete();
+                    // }
+                    setIsDelModalOpen(true)
                   }}
                 >
                   <Trash2 className="h-4 w-4" />

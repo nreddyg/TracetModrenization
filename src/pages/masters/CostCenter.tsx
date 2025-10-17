@@ -18,6 +18,8 @@ import { TreeConfig, TreeView } from '@/components/ui/reusable-treeView';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { deleteCostCenter, getCostcenterById, getCostCenterData, postCostCenter } from '@/services/costCenterServices';
 import { CostCenter_DB } from '@/Local_DB/Form_JSON_Data/CostCenterDB';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+
 
 
 interface TreeNode {
@@ -146,6 +148,7 @@ const CostCenter = () => {
   const companyId = useAppSelector(state => state.projects.companyId);
   const [isClearDisable, setIsClearDisable] = useState(true);
   const [disable, setDisable] = useState(true);
+  const [isDelModalOpen, setIsDelModalOpen] = useState(false);
   const [expandedKeys, setExpandedKeys] = useState<Set<string>>(new Set());
   // const branch = useAppSelector(state=>state.projects.branchId)
   const dispatch = useDispatch()
@@ -713,6 +716,36 @@ const CostCenter = () => {
                 </TooltipProvider>
               </div>
               <div>
+                <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>
+                                                                              <DialogContent className="sm:max-w-[425px]">
+                                                                                <DialogHeader>
+                                                                                  <DialogTitle>Confirm the action</DialogTitle>
+                                                                                  <DialogDescription>
+                                                                                    Are you sure you want to delete Hierarchy level?
+                                                                                    {/* {currentTab === "service-request-type"
+                                                                                      ? `${selectedRecord?.ServiceRequestType || "this"} Service Request Type`
+                                                                                      : `${selectedStatusRec?.StatusType || "this"} Status`
+                                                                                    } */}
+                                                                                  </DialogDescription>
+                                                                                </DialogHeader>
+                                                                                <DialogFooter>
+                                                                                  <ReusableButton
+                                                                                    variant="default"
+                                                                                    onClick={() => setIsDelModalOpen(false)}
+                                                                                  >
+                                                                                    Cancel
+                                                                                  </ReusableButton>
+                                                                                  <ReusableButton
+                                                                                    variant="primary"
+                                                                                    danger={true}
+                                                                                    onClick={()=>{handleDelete();setIsDelModalOpen(false);setRecordToEditId(null);handleReset()}}
+                                                                                    // onClick={currentTab === "service-request-type" ? () => { deleteServiceRequestType(selectedRecord?.Id); setIsDelModalOpen(false) } : () => { deleteStatus(selectedStatusRec?.Id); setIsDelModalOpen(false) }}
+                                                                                  >
+                                                                                    Delete
+                                                                                  </ReusableButton>
+                                                                                </DialogFooter>
+                                                                              </DialogContent>
+                                                                            </Dialog>
                 <ReusableButton
                   size="small"
                   // className="border border-0 h-8 w-8 flex items-center justify-center"
@@ -722,7 +755,8 @@ const CostCenter = () => {
                   }}
                   onClick={() => {
                     if (!disable && selectedLevel !== 99) {
-                      handleDelete();
+                    //   handleDelete();
+                    setIsDelModalOpen(true)
                     }
                   }}
                 >

@@ -1204,8 +1204,6 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
       setUpdatedComments("")
       setHasChanges(false);
       setIsEditing(false);
-      fieldsCopy.forEach(field => { field.disabled = true; });
-      setFields(fieldsCopy);
   }
   // Handle cancel edit - only clear form values, preserve all field configs and options
   const handleEdit = (type: string) => {
@@ -1631,11 +1629,13 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
                                         showToolbar={true}
                                         minHeight={120}
                                         maxHeight={300}
+                                        disabled={false}
                                       />
                                     )}
                                   />
                                   <div className="flex justify-end my-4">
                                     <ReusableButton
+                                      disabled={!isEditing}
                                       size="small"
                                       onClick={commentForm.handleSubmit(postComment)}
                                     >

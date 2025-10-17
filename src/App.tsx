@@ -41,6 +41,7 @@ const CostCenter=WrapperLazyComponent(() => import("./pages/masters/CostCenter")
 const AssetsMasters = WrapperLazyComponent(() => import("./pages/masters/AssetsMasters"));
 const MaintenanceMasters = WrapperLazyComponent(() => import("./pages/masters/MaintenanceMasters"));
 const ReportsMasters = WrapperLazyComponent(() => import("./pages/masters/ReportsMasters"));
+const ServiceLocations=WrapperLazyComponent(() => import("./pages/masters/ServiceLocations"));
 
 // CWIP
 const ProjectManagement = WrapperLazyComponent(() => import("./pages/cwip/ProjectManagement"));
@@ -168,15 +169,16 @@ const AnimatedRoutes = () => {
                   <Route path="/tickets/dashboard" element={<TicketsDashboard />} />
 
                   {/* Masters */}
-                  <Route path="/masters/organization" element={<Organization />} />
-                  <Route path="/masters/company-hierarchy" element={<CompanyHierarchy />} />
-                  <Route path="/masters/department" element={<Department />} />
-                  <Route path='/masters/costcenter' element={<CostCenter/>}/>
-                  <Route path="/masters/assets-inventory" element={<AssetsMasters />} />
-                  <Route path="/masters/maintenance" element={<MaintenanceMasters />} />
+                  <Route path="/masters/company/organization" element={<Organization />} />
+                  <Route path="/masters/company/company-hierarchy" element={<CompanyHierarchy />} />
+                  <Route path="/masters/company/department" element={<Department />} />
+                  <Route path='/masters/company/costcenter' element={<CostCenter/>}/>
+                  <Route path="/masters/company/assets-inventory" element={<AssetsMasters />} />
+                  <Route path="/masters/company/maintenance" element={<MaintenanceMasters />} />
                   <Route path="/masters/reports" element={<ReportsMasters />} />
-                  <Route path="/masters/store" element={<Store/>} />
-                  <Route path="/masters/item-master" element={<ItemMaster/>} />
+                  <Route path="/masters/servicemaintenance/servicelocations" element={<ServiceLocations />} />
+                  <Route path="/masters/consumables/store" element={<Store/>} />
+                  <Route path="/masters/consumables/item-master" element={<ItemMaster/>} />
 
                   {/* CWIP */}
                   <Route path="/cwip/project-management" element={<ProjectManagement />} />

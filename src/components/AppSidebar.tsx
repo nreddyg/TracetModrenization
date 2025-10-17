@@ -202,6 +202,7 @@ const navigation: NavItem[] = [
           },
         ],
       },
+
       {
         label: 'Fixed Assets',
         icon: Building2,

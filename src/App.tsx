@@ -16,11 +16,8 @@ import AssetCodeTable from "./pages/servicedesk/AssetCodeTable";
 import ServiceRequestReport from "./pages/servicedesk/ServiceRequestDetailsHistory";
 import AssetLocation from "./pages/masters/AssetLocation";
 import Store from "./pages/masters/Store";
-<<<<<<< HEAD
 import AssetCategory from "./pages/masters/fixedAssets/AssetCategory"
-=======
 import ItemMaster from "./pages/masters/ItemMaster";
->>>>>>> 5d26e34e853e473c27202658fb19ea77582ff6e7
 
 // Lazy load all pages
 const Index = WrapperLazyComponent(() => import("./pages/Index"));
@@ -183,13 +180,10 @@ const AnimatedRoutes = () => {
                   <Route path="/masters/reports" element={<ReportsMasters />} />
                   <Route path="/masters/asset-location" element={<AssetLocation />} />
                   <Route path="/masters/servicemaintenance/servicelocations" element={<ServiceLocations />} />
-<<<<<<< HEAD
-                  <Route path="/masters/store" element={<Store/>} />
+                  {/* <Route path="/masters/store" element={<Store/>} /> */}
                   <Route path="/masters/fixed-assets/asset-category" element={<AssetCategory/>} />
-=======
                   <Route path="/masters/consumables/store" element={<Store/>} />
                   <Route path="/masters/consumables/item-master" element={<ItemMaster/>} />
->>>>>>> 5d26e34e853e473c27202658fb19ea77582ff6e7
 
                   {/* CWIP */}
                   <Route path="/cwip/project-management" element={<ProjectManagement />} />

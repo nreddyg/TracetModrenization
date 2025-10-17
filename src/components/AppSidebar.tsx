@@ -206,10 +206,23 @@ const navigation: NavItem[] = [
         ],
       },
       {
+        label: 'Fixed Assets',
+        icon: Building2,
+        link: '/company',
+        children: [
+          {
+            label: 'Asset Category',
+            icon: Building2,
+            link: 'masters/fixed-assets/asset-category',
+          }
+        ],
+      },
+      {
         label: 'Store',
         icon: BarChart,
         link: '/masters/store',
       },
+      // masters/fixed-assets/asset-category
     ],
   },
   {

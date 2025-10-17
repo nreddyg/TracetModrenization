@@ -512,7 +512,6 @@ const AssetLocation = () => {
 
     const submit = async () => {
         const locID = recordToEditId ? recordToEditId : 0;
-        console.log("loc", locID);
         if (recordToEditId === null) {
             let payload = {
                 "Details": [
@@ -524,7 +523,6 @@ const AssetLocation = () => {
                         "Code": code
                     }]
             }
-            console.log("payload", payload);
             addOrUpdateAssetLocation(locID, branchName, companyId, payload);
         }
         if (recordToEditId !== null) {

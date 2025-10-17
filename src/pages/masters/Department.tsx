@@ -178,7 +178,6 @@ const Department = () => {
 
   useEffect(() => {
     if (companyId && selectedLevel) getlevels();
-    console.log(selectedLevel, "Nag")
   }, [companyId, selectedLevel])
 
   useEffect(() => {
@@ -192,8 +191,6 @@ const Department = () => {
       acc[f.name!] = f.defaultChecked ?? '';
       return acc;
     }, {} as GenericObject),
-    // mode: 'onChange',
-    // reValidateMode: "onChange"
   });
 
   const toggleNode = (nodeId: string) => {
@@ -386,7 +383,6 @@ const Department = () => {
     dispatch(setLoading(true))
     await getDepartmentDataByID(id, companyId).then(res => {
       if (res.data && res.data.length > 0) {
-        console.log("resdddd", res.data[0])
         const details = res.data[0];
         if (details) {
           reset({

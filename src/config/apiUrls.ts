@@ -138,3 +138,8 @@ export const URL_POST_COSTCENTER=`/api/Masters/SubmitCostCenterLevels`;
 export const URL_GET_COSTCENTER_BY_ID=`/api/Masters/GetCostCenterDetailsByCompanyId`;
 export const URL_DELETE_COSTCENTER=`/api/Masters/DeleteCostCenterDetailsById`;
 
+// Master's fixed Assets Asset Category
+export const URL_GET_ASSET_CATEGORY_DATA = `/api/Masters/GetAssetCategoriesByCompanyId`;
+export const URL_POST_ASSET_CATEGORY_DATA = `/api/Masters/AddAssetCategoryDetails`;
+export const URL_UPDATE_ASSET_CATEGORY_DATA = `/api/Masters/UpdateAssetCategoryDetails`;
+export const URL_DELETE_ASSET_CATEGORY_REC = `/api/Masters/DeleteAssetCategoryById`;

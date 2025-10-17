@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -21,6 +21,7 @@ import { COMPANY_DB } from '@/Local_DB/Form_JSON_Data/CompanyHierarchyDB';
 import { Popover, PopoverContent, PopoverTrigger } from '@radix-ui/react-popover';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ReusableDropdown } from '@/components/ui/reusable-dropdown';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 interface TreeNode {
   id: string;
   name: string;
@@ -129,11 +130,15 @@ let lastLevelData:BaseField[] = [
   },
 ];
 
-
+const SearchButton = {
+  type: "text",
+  name: "searchValue",
+  value: "",
+  placeholder: "Search...",
+};
 
 const CompanyHierarchy = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [expandedKeys, setExpandedKeys] = useState(["0"]);
   const [selectedKeys, setSelectedKeys] = useState([]);
   const [lastLevel, setLastLevel] = useState(null);
   const [level, setLevel] = useState([]);
@@ -145,8 +150,12 @@ const CompanyHierarchy = () => {
   const companyId = useAppSelector(state => state.projects.companyId);
   const [selectedId, setSelectedId] = useState(null)
   const [tree, setTree] = useState([])
+  const [isDelModalOpen, setIsDelModalOpen] = useState(false);
   const [treeViewData,setTreeViewData]=useState([])
   const [disable, setDisable] = useState(true);
+  const [search, setSearch] = useState(SearchButton);
+  const [expandedKeys, setExpandedKeys] = useState<Set<string>>(new Set());
+
   const dispatch = useDispatch()
     const [selectedNodeParents, setSelectedNodeParents] = useState([]);
     const [selectedNode, setSelectedNode] = useState({
@@ -252,9 +261,9 @@ const CompanyHierarchy = () => {
                 );
     }
   }
-  const handleExpand = (keys: string[]) => {
-    setExpandedKeys(keys);
-  };
+  // const handleExpand = (keys: string[]) => {
+  //   setExpandedKeys(keys);
+  // };
   const handleSelect = (selectedKeys, info) => {
     setRecordToEditId(info.node.id)
     setSelectedKeys(selectedKeys)
@@ -525,8 +534,126 @@ const CompanyHierarchy = () => {
   function handleDelete() {
     if (selectedId) {
       deleteLevel(companyId, selectedId, "")
+      setSelectedId(null)
+      // recordToEditId(null)
     }
   }
+
+  const handleSearch = (val: string) => {
+    setSearch((prev) => ({ ...prev, value: val }));
+  
+    if (!val) {
+      const allKeys: string[] = [];
+      const collectKeys = (nodes: any[]) => {
+        nodes.forEach((node) => {
+          allKeys.push(node.key);
+          if (node.children?.length) collectKeys(node.children);
+        });
+      };
+      collectKeys(treeViewData);
+      setExpandedKeys(new Set(allKeys));
+      return;
+    }
+  
+    const matchedKeys: string[] = [];
+  
+    const findMatchingNodes = (nodes: any[]) => {
+      nodes.forEach((node) => {
+        const title = (node.title || node.name || '').toLowerCase();
+        if (title.includes(val.toLowerCase())) matchedKeys.push(node.key);
+        if (node.children?.length) findMatchingNodes(node.children);
+      });
+    };
+    findMatchingNodes(treeViewData);
+  
+    const parentKeys = new Set<string>();
+    const findParentKeys = (nodes: any[], targets: string[]) => {
+      nodes.forEach((node) => {
+        if (node.children?.some((child) => targets.includes(child.key))) {
+          parentKeys.add(node.key);
+          findParentKeys(treeViewData, [node.key]);
+        } else if (node.children) {
+          findParentKeys(node.children, targets);
+        }
+      });
+    };
+    findParentKeys(treeViewData, matchedKeys);
+  
+    // ✅ Collapse all, then expand only matched + parents
+    const newExpanded = new Set([...matchedKeys, ...parentKeys]);
+    setExpandedKeys(newExpanded);
+  };
+  
+  
+  useEffect(() => {
+    if (treeViewData?.length) {
+      const allKeys: string[] = [];
+  
+      const collectKeys = (nodes: any[]) => {
+        nodes.forEach((node) => {
+          allKeys.push(node.key);
+          if (node.children?.length) {
+            collectKeys(node.children);
+          }
+        });
+      };
+  
+      collectKeys(treeViewData);
+      setExpandedKeys(new Set(allKeys)); // expand everything initially
+    }
+  }, [treeViewData]);
+
+  const mainTreeData = useMemo(() => {
+  const loop = (data) =>
+    data.map((item) => {
+      const titleStr = item.title || item.name || '';
+      const searchVal = search.value.trim().toLowerCase();
+
+      if (!searchVal) {
+        return {
+          ...item,
+          title: <span key={item.key}>{titleStr}</span>,
+          children: item.children ? loop(item.children) : [],
+        };
+      }
+
+      const index = titleStr.toLowerCase().indexOf(searchVal);
+      if (index === -1) {
+        return {
+          ...item,
+          title: <span key={item.key}>{titleStr}</span>,
+          children: item.children ? loop(item.children) : [],
+        };
+      }
+
+      const beforeStr = titleStr.substring(0, index);
+      const matchStr = titleStr.substring(index, index + searchVal.length); // ✅ keep original case
+      const afterStr = titleStr.substring(index + searchVal.length);
+
+      const title = (
+        <span key={item.key}>
+          {beforeStr}
+          <span className="text-blue-500 font-medium">{matchStr}</span>
+          {afterStr}
+        </span>
+      );
+
+      return {
+        ...item,
+        title,
+        children: item.children ? loop(item.children) : [],
+      };
+    });
+
+  return loop(treeViewData);
+}, [treeViewData, search.value]);
+
+const handleToggleNode = (
+  newExpandedKeys: string[],
+  info: { expanded: boolean; node: any }
+) => {
+  setExpandedKeys(new Set(newExpandedKeys));
+};
 
   return (
     <div className="bg-hsl(214.3 31.8% 91.4%) overflow-y-auto">
@@ -563,16 +690,16 @@ const CompanyHierarchy = () => {
         </div>
       </header>
 
-      <div className="flex h-[calc(100vh-73px)]">
+      <div className="flex h-full">
         {/* Tree Structure Panel */}
-        <div className="w-[400px] border-r bg-card flex flex-col">
+        <div className="w-[26vw] border-r bg-card flex flex-col">
           <div className=" flex items-center justify-center pt-4 pb-4 ps-0 ms-0 border-b gap-3">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {setSearchQuery(e.target.value);handleSearch(e.target.value)}}
                 className="pl-9 "
               />
             </div>
@@ -593,50 +720,50 @@ const CompanyHierarchy = () => {
                       >
                         <Plus className="h-4 w-4" />
                       </ReusableButton>
-              {/* <Popover open={open} onOpenChange={setOpen}>
-                <PopoverTrigger asChild> */}
-                  <Button size="sm" variant="outline" className="h-8" onClick={handleDelete}>
+                <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>
+                                              <DialogContent className="sm:max-w-[425px]">
+                                                <DialogHeader>
+                                                  <DialogTitle>Confirm the action</DialogTitle>
+                                                  <DialogDescription>
+                                                    Are you sure you want to delete Hierarchy level?
+                                                    {/* {currentTab === "service-request-type"
+                                                      ? `${selectedRecord?.ServiceRequestType || "this"} Service Request Type`
+                                                      : `${selectedStatusRec?.StatusType || "this"} Status`
+                                                    } */}
+                                                  </DialogDescription>
+                                                </DialogHeader>
+                                                <DialogFooter>
+                                                  <ReusableButton
+                                                    variant="default"
+                                                    onClick={() => setIsDelModalOpen(false)}
+                                                  >
+                                                    Cancel
+                                                  </ReusableButton>
+                                                  <ReusableButton
+                                                    variant="primary"
+                                                    danger={true}
+                                                    onClick={()=>{handleDelete();setIsDelModalOpen(false);setRecordToEditId(null);handleReset()}}
+                                                    // onClick={currentTab === "service-request-type" ? () => { deleteServiceRequestType(selectedRecord?.Id); setIsDelModalOpen(false) } : () => { deleteStatus(selectedStatusRec?.Id); setIsDelModalOpen(false) }}
+                                                  >
+                                                    Delete
+                                                  </ReusableButton>
+                                                </DialogFooter>
+                                              </DialogContent>
+                                            </Dialog>
+                  <Button size="sm" variant="outline" className="h-8" onClick={()=>setIsDelModalOpen(true)}>
                     <Trash2 className="h-4 w-4 text-destructive" />
                   </Button>
-                {/* </PopoverTrigger>
-                <PopoverContent
-                  align="center"
-                  className="w-72 p-4 space-y-4"
-                >
-                  <div className="space-y-1">
-                    <h4 className="font-semibold text-sm text-destructive">Confirm Deletion</h4>
-                    <p className="text-sm text-muted-foreground">Are you sure want to delete</p>
-                  </div>
-
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setOpen(false)}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={handleDelete}
-                    >
-                      Delete
-                    </Button>
-                  </div>
-                </PopoverContent>
-              </Popover> */}
-
             </div>
           </div>
-          <div className="min-h-20 max-h-[27rem] overflow-y-auto p-2">
-            <TreeView treeData={treeViewData} config={treeConfig} onSelect={handleSelect} selectKeys={selectedKeys} expandedKeys={expandedKeys} onExpand={setExpandedKeys} />
+          <div className="min-h-20 h-[63vh] overflow-y-auto p-2">
+            <TreeView treeData={mainTreeData} config={treeConfig} onSelect={handleSelect} selectKeys={selectedKeys}   onExpand={handleToggleNode}
+             expandedKeys={Array.from(expandedKeys)} />
           </div>
         </div>
 
         {/* Details Panel */}
-         <div className="flex-1 overflow-y-scroll">
-          <div className="p-6 space-y-6">
+         <div className="flex-1 overflow-y-auto">
+          <div className="p-6 space-y-6" style={{height:"77vh",overflowY:"auto"}}>
             <div className="flex flex-col gap-2">
               <div>
               <h4 className="master-heading mb-2 flex items-center gap-2">

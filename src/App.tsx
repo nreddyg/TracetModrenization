@@ -15,6 +15,7 @@ import WrapperLazyComponent from "./components/common/WrapperLazyComponent";
 import AssetCodeTable from "./pages/servicedesk/AssetCodeTable";
 import ServiceRequestReport from "./pages/servicedesk/ServiceRequestDetailsHistory";
 import Store from "./pages/masters/Store";
+import ItemMaster from "./pages/masters/ItemMaster";
 
 // Lazy load all pages
 const Index = WrapperLazyComponent(() => import("./pages/Index"));
@@ -176,7 +177,8 @@ const AnimatedRoutes = () => {
                   <Route path="/masters/company/maintenance" element={<MaintenanceMasters />} />
                   <Route path="/masters/reports" element={<ReportsMasters />} />
                   <Route path="/masters/servicemaintenance/servicelocations" element={<ServiceLocations />} />
-                  <Route path="/masters/store" element={<Store/>} />
+                  <Route path="/masters/consumables/store" element={<Store/>} />
+                  <Route path="/masters/consumables/item-master" element={<ItemMaster/>} />
 
                   {/* CWIP */}
                   <Route path="/cwip/project-management" element={<ProjectManagement />} />

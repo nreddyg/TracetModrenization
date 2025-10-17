@@ -206,6 +206,24 @@ const navigation: NavItem[] = [
         ],
       },
       {
+        label:'Consumables',
+        icon:Building2,
+        link:'/consumables',
+        children:[
+        {
+        label: 'Store',
+        icon: BarChart,
+        link: '/masters/consumables/store',
+      },
+       {
+        label: 'Item Master',
+        icon: BarChart,
+        link: '/masters/consumables/item-master',
+      },
+        ],
+
+      },
+      {
         label:'Service Maintenance',
         icon:Building2,
         link:'/servicemaintenance',
@@ -222,7 +240,10 @@ const navigation: NavItem[] = [
           },
         ],
 
-      }
+      },
+      
+      ,
+      
     ]
   },
   // {

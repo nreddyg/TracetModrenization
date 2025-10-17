@@ -111,7 +111,7 @@ const navigation: NavItem[] = [
         icon: FileText,
         link: '/service-desk/my-requests',
       },
-            {
+      {
         label: 'All Service Requests',
         icon: FileText,
         link: '/service-desk/all-requests',
@@ -157,6 +157,7 @@ const navigation: NavItem[] = [
       //   icon: BarChart,
       //   link: '/service-desk/mis-reports',
       // },
+    
     ],
   },
   {
@@ -165,51 +166,87 @@ const navigation: NavItem[] = [
     link: '/masters',
     children: [
       {
-        label: 'Organization',
+        label: 'Company',
         icon: Building2,
-        link: '/masters/organization',
+        link: '/company',
+        children: [
+          {
+            label: 'Organization',
+            icon: Building2,
+            link: '/masters/company/organization',
+          },
+          {
+            label: 'Company Hierarchy',
+            icon: Building2,
+            link: '/masters/company/company-hierarchy',
+          },
+          {
+            label: 'Department',
+            icon: Building2,
+            link: '/masters/company/department',
+          },
+          {
+            label: 'Cost Center',
+            icon: DollarSign,
+            link: '/masters/company/costcenter',
+          },
+          {
+            label: 'Assets & Inventory',
+            icon: Package,
+            link: '/masters/company/assets-inventory',
+          },
+          {
+            label: 'Maintenance',
+            icon: Wrench,
+            link: '/masters/company/maintenance',
+          },
+        ],
       },
       {
-        label: 'User',
-        icon: Users,
-        link: '/masters/user',
+        label:'Consumables',
+        icon:Building2,
+        link:'/consumables',
+        children:[
+        {
+        label: 'Store',
+        icon: BarChart,
+        link: '/masters/consumables/store',
+      },
+      //  {
+      //   label: 'Item Master',
+      //   icon: BarChart,
+      //   link: '/masters/consumables/item-master',
+      // },
+        ],
+
       },
       {
-        label: 'Vendor',
-        icon: UserRoundCheckIcon,
-        link: '/masters/vendor',
-      },
-      {
-        label: 'Customer',
-        icon: UserPlus,
-        link: '/masters/customer',
+        label: 'Reports',
+        icon: FileText,
+        link: '/masters/reports',
       },
       // {
-      //   label: 'Company Hierarchy',
-      //   icon: Building2,
-      //   link: '/masters/company-hierarchy',
+      //   label:'Service Maintenance',
+      //   icon:Building2,
+      //   link:'/servicemaintenance',
+      //   children:[
+      //     {
+      //       label: 'Service Locations',
+      //       icon: Building2,
+      //       link: '/masters/servicemaintenance/servicelocations',
+      //     },
+      //      {
+      //       label: 'Product Masters',
+      //       icon: Building2,
+      //       link: '/masters/servicemaintenance/productmaster',
+      //     },
+      //   ],
+
       // },
-      // {
-      //   label: 'Department',
-      //   icon: Building2,
-      //   link: '/masters/department',
-      // },
-      // {
-      //   label: 'Assets & Inventory',
-      //   icon: Package,
-      //   link: '/masters/assets-inventory',
-      // },
-      // {
-      //   label: 'Maintenance',
-      //   icon: Wrench,
-      //   link: '/masters/maintenance',
-      // },
-      // {
-      //   label: 'Reports',
-      //   icon: FileText,
-      //   link: '/masters/reports',
-      // },
-    ],
+      
+      ,
+      
+    ]
   },
   // {
   //   label: 'CWIP',
@@ -592,8 +629,8 @@ const AppSidebar: React.FC = () => {
                                     <Link to={grandChild.link} className="flex items-center space-x-2">
                                       <grandChild.icon className="h-3 w-3" />
                                       <span
-                                       className="truncate"
-                                    title={String(grandChild.label)}
+                                        className="truncate"
+                                        title={String(grandChild.label)}
                                       >{grandChild.label}</span>
                                     </Link>
                                   </SidebarMenuSubButton>
@@ -611,8 +648,8 @@ const AppSidebar: React.FC = () => {
                         <Link to={child.link} className="flex items-center space-x-2">
                           <child.icon className="h-3 w-3" />
                           <span
-                           className="truncate"
-                           title={String(child.label)}
+                            className="truncate"
+                            title={String(child.label)}
                           >{child.label}</span>
                         </Link>
                       </SidebarMenuSubButton>

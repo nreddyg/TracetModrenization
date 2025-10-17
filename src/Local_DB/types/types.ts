@@ -73,6 +73,7 @@ export interface field {
   validationPattern?:string;
   patternErrorMessage?:string;
   labelInfo?:string;
+  heading?:string
 }
  
 export type BaseField = field;

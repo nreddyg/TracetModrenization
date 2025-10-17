@@ -14,12 +14,11 @@ import { MessageProvider } from "./components/ui/reusable-message";
 import WrapperLazyComponent from "./components/common/WrapperLazyComponent";
 import AssetCodeTable from "./pages/servicedesk/AssetCodeTable";
 import ServiceRequestReport from "./pages/servicedesk/ServiceRequestDetailsHistory";
-import { getOrganizationDetailsByToken, getUserDetailsByUserName } from "./services/appService";
-import { useAppDispatch } from "./store";
-import { setCompanyId, setLoading, setUserId } from "./store/slices/projectsSlice";
 import ComplianceAndAudit from "./pages/softwareAssets/ComplianceAndAudit";
 import SoftwareAssetsReports from "./pages/softwareAssets/SoftwareAssetsReports";
 import ChangePassword from "./pages/changePassword/ChangePassword";
+import Store from "./pages/masters/Store";
+import ItemMaster from "./pages/masters/ItemMaster";
 
 // Lazy load all pages
 const Index = WrapperLazyComponent(() => import("./pages/Index"));
@@ -44,9 +43,11 @@ const Vendor = WrapperLazyComponent(() => import("./pages/masters/Vendor"));
 const Customer = WrapperLazyComponent(() => import("./pages/masters/Customer"));
 const CompanyHierarchy = WrapperLazyComponent(() => import("./pages/masters/CompanyHierarchy"));
 const Department = WrapperLazyComponent(() => import("./pages/masters/Department"));
+const CostCenter=WrapperLazyComponent(() => import("./pages/masters/CostCenter"));
 const AssetsMasters = WrapperLazyComponent(() => import("./pages/masters/AssetsMasters"));
 const MaintenanceMasters = WrapperLazyComponent(() => import("./pages/masters/MaintenanceMasters"));
 const ReportsMasters = WrapperLazyComponent(() => import("./pages/masters/ReportsMasters"));
+const ServiceLocations=WrapperLazyComponent(() => import("./pages/masters/ServiceLocations"));
 
 // CWIP
 const ProjectManagement = WrapperLazyComponent(() => import("./pages/cwip/ProjectManagement"));
@@ -194,15 +195,19 @@ const AnimatedRoutes = () => {
                   <Route path="/tickets/dashboard" element={<TicketsDashboard />} />
 
                   {/* Masters */}
-                  <Route path="/masters/organization" element={<Organization />} />
-                  <Route path="/masters/customer" element={<Customer />} />
-                  <Route path="/masters/vendor" element={<Vendor />} />
-                  <Route path="/masters/user" element={<User />} />
-                  <Route path="/masters/company-hierarchy" element={<CompanyHierarchy />} />
-                  <Route path="/masters/department" element={<Department />} />
-                  <Route path="/masters/assets-inventory" element={<AssetsMasters />} />
-                  <Route path="/masters/maintenance" element={<MaintenanceMasters />} />
+                  <Route path="/masters/company/customer" element={<Customer />} />
+                  <Route path="/masters/company/vendor" element={<Vendor />} />
+                  <Route path="/masters/company/user" element={<User />} />
+                  <Route path="/masters/company/organization" element={<Organization />} />
+                  <Route path="/masters/company/company-hierarchy" element={<CompanyHierarchy />} />
+                  <Route path="/masters/company/department" element={<Department />} />
+                  <Route path='/masters/company/costcenter' element={<CostCenter/>}/>
+                  <Route path="/masters/company/assets-inventory" element={<AssetsMasters />} />
+                  <Route path="/masters/company/maintenance" element={<MaintenanceMasters />} />
                   <Route path="/masters/reports" element={<ReportsMasters />} />
+                  <Route path="/masters/servicemaintenance/servicelocations" element={<ServiceLocations />} />
+                  <Route path="/masters/consumables/store" element={<Store/>} />
+                  <Route path="/masters/consumables/item-master" element={<ItemMaster/>} />
 
                   {/* CWIP */}
                   <Route path="/cwip/project-management" element={<ProjectManagement />} />

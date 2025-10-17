@@ -155,7 +155,7 @@ const navigation: NavItem[] = [
       //   icon: BarChart,
       //   link: '/service-desk/mis-reports',
       // },
-    
+
     ],
   },
   {
@@ -205,47 +205,62 @@ const navigation: NavItem[] = [
           },
         ],
       },
+
       {
-        label:'Consumables',
-        icon:Building2,
-        link:'/consumables',
-        children:[
-        {
+        label: 'Fixed Assets',
+        icon: Building2,
+        link: '/company',
+        children: [
+          {
+            label: 'Asset Category',
+            icon: Building2,
+            link: 'masters/fixed-assets/asset-category',
+          }
+        ]
+      },
+      {
+        label: 'Consumables',
+        icon: Building2,
+        link: '/consumables',
+        children: [
+          {
+            label: 'Store',
+            icon: BarChart,
+            link: '/masters/consumables/store',
+          },
+          {
+            label: 'Item Master',
+            icon: BarChart,
+            link: '/masters/consumables/item-master',
+          },
+        ],
+      },
+      {
         label: 'Store',
         icon: BarChart,
-        link: '/masters/consumables/store',
+        link: '/masters/store',
       },
-       {
-        label: 'Item Master',
-        icon: BarChart,
-        link: '/masters/consumables/item-master',
-      },
-        ],
-
+      // masters/fixed-assets/asset-category
+    ],
+  },
+  {
+    label: 'Service Maintenance',
+    icon: Building2,
+    link: '/servicemaintenance',
+    children: [
+      {
+        label: 'Service Locations',
+        icon: Building2,
+        link: '/masters/servicemaintenance/servicelocations',
       },
       {
-        label:'Service Maintenance',
-        icon:Building2,
-        link:'/servicemaintenance',
-        children:[
-          {
-            label: 'Service Locations',
-            icon: Building2,
-            link: '/masters/servicemaintenance/servicelocations',
-          },
-           {
-            label: 'Product Masters',
-            icon: Building2,
-            link: '/masters/servicemaintenance/productmaster',
-          },
-        ],
-
+        label: 'Product Masters',
+        icon: Building2,
+        link: '/masters/servicemaintenance/productmaster',
       },
-      
-      ,
-      
-    ]
-  },
+    ],
+  }
+
   // {
   //   label: 'CWIP',
   //   icon: HardHat,

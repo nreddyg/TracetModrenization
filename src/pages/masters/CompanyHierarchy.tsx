@@ -521,6 +521,10 @@ const CompanyHierarchy = () => {
       if (res.data.status === true) {
         msg.success(res.data.message)
         fetchCompanyGetData(companyId)
+        handleReset()
+        setRecordToEditId(null);
+      setSelectedId(null)
+
       }
       else {
         msg.error(res.data.message)
@@ -534,7 +538,6 @@ const CompanyHierarchy = () => {
   function handleDelete() {
     if (selectedId) {
       deleteLevel(companyId, selectedId, "")
-      setSelectedId(null)
       // recordToEditId(null)
     }
   }
@@ -742,7 +745,7 @@ const handleToggleNode = (
                                                   <ReusableButton
                                                     variant="primary"
                                                     danger={true}
-                                                    onClick={()=>{handleDelete();setIsDelModalOpen(false);setRecordToEditId(null);handleReset()}}
+                                                    onClick={()=>{handleDelete();setIsDelModalOpen(false);}}
                                                     // onClick={currentTab === "service-request-type" ? () => { deleteServiceRequestType(selectedRecord?.Id); setIsDelModalOpen(false) } : () => { deleteStatus(selectedStatusRec?.Id); setIsDelModalOpen(false) }}
                                                   >
                                                     Delete

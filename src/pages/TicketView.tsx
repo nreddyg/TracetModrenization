@@ -1,5 +1,3 @@
-
-
 import { useState, useEffect, useCallback, useRef, ReactNode } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';

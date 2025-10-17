@@ -41,7 +41,6 @@ export const getDepartmentDataByID = async (departid: number, CompId: string): P
 
 // Delete department Data
 export const deleteDepartmentData = async (id: any, compId: string, data: any): Promise<APIResponse<any>> => {
-    console.log("services");
     try {
         const response = await api.post(URL_DELETE_DEPARTMENT_DATA, data, { params: { Id: id, CompId: compId } });
         return { success: true, data: response.data };

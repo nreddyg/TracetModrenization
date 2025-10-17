@@ -4,7 +4,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Input } from '@/components/ui/input';
-import { Search, Plus, Trash2,  Info, } from 'lucide-react';
+import { Search, Plus, Trash2, Info, } from 'lucide-react';
 import { ReusableButton } from '@/components/ui/reusable-button';
 import { BaseField, GenericObject } from '@/Local_DB/types/types';
 import { Controller, useForm } from 'react-hook-form';
@@ -134,7 +134,7 @@ const CostCenter = () => {
   });
   const [costCenterData, setCostCenterData] = useState<BaseField[]>(fields[selectedLevel]);
   const [recordToEditId, setRecordToEditId] = useState(null);
-  console.log("138",recordToEditId)
+  console.log("138", recordToEditId)
   const [selectedId, setSelectedId] = useState('');
   const [treeView, setTreeview] = useState([]);
   const [tree, setTree] = useState([]);
@@ -183,7 +183,7 @@ const CostCenter = () => {
 
   useEffect(() => {
     if (recordToEditId !== null) {
-      getIndCostCenterById( companyId,recordToEditId,)
+      getIndCostCenterById(companyId, recordToEditId,)
     }
   }, [recordToEditId])
 
@@ -196,12 +196,12 @@ const CostCenter = () => {
     // reValidateMode: "onChange"
   });
 
-const handleToggleNode = (
-  newExpandedKeys: string[],
-  info: { expanded: boolean; node: any }
-) => {
-  setExpandedKeys(new Set(newExpandedKeys));
-};
+  const handleToggleNode = (
+    newExpandedKeys: string[],
+    info: { expanded: boolean; node: any }
+  ) => {
+    setExpandedKeys(new Set(newExpandedKeys));
+  };
 
 
 
@@ -219,9 +219,9 @@ const handleToggleNode = (
               treeData={mainTreeData}
               config={treeConfig}
               onSelect={onSelect}
-            onExpand={handleToggleNode}
-             expandedKeys={Array.from(expandedKeys)}
-             
+              onExpand={handleToggleNode}
+              expandedKeys={Array.from(expandedKeys)}
+
             />
           </div>
         )}
@@ -291,49 +291,49 @@ const handleToggleNode = (
   // }, [treeView]);
 
   const mainTreeData = useMemo(() => {
-  const loop = (data) =>
-    data.map((item) => {
-      const titleStr = item.title || item.name || '';
-      const searchVal = search.value.trim().toLowerCase();
+    const loop = (data) =>
+      data.map((item) => {
+        const titleStr = item.title || item.name || '';
+        const searchVal = search.value.trim().toLowerCase();
 
-      if (!searchVal) {
+        if (!searchVal) {
+          return {
+            ...item,
+            title: <span key={item.key}>{titleStr}</span>,
+            children: item.children ? loop(item.children) : [],
+          };
+        }
+
+        const index = titleStr.toLowerCase().indexOf(searchVal);
+        if (index === -1) {
+          return {
+            ...item,
+            title: <span key={item.key}>{titleStr}</span>,
+            children: item.children ? loop(item.children) : [],
+          };
+        }
+
+        const beforeStr = titleStr.substring(0, index);
+        const matchStr = titleStr.substring(index, index + searchVal.length); // ✅ keep original case
+        const afterStr = titleStr.substring(index + searchVal.length);
+
+        const title = (
+          <span key={item.key}>
+            {beforeStr}
+            <span className="text-blue-500 font-medium">{matchStr}</span>
+            {afterStr}
+          </span>
+        );
+
         return {
           ...item,
-          title: <span key={item.key}>{titleStr}</span>,
+          title,
           children: item.children ? loop(item.children) : [],
         };
-      }
+      });
 
-      const index = titleStr.toLowerCase().indexOf(searchVal);
-      if (index === -1) {
-        return {
-          ...item,
-          title: <span key={item.key}>{titleStr}</span>,
-          children: item.children ? loop(item.children) : [],
-        };
-      }
-
-      const beforeStr = titleStr.substring(0, index);
-      const matchStr = titleStr.substring(index, index + searchVal.length); // ✅ keep original case
-      const afterStr = titleStr.substring(index + searchVal.length);
-
-      const title = (
-        <span key={item.key}>
-          {beforeStr}
-          <span className="text-blue-500 font-medium">{matchStr}</span>
-          {afterStr}
-        </span>
-      );
-
-      return {
-        ...item,
-        title,
-        children: item.children ? loop(item.children) : [],
-      };
-    });
-
-  return loop(treeView);
-}, [treeView, search.value]);
+    return loop(treeView);
+  }, [treeView, search.value]);
 
   const treefun = (data, id) => {
     const treeData = [];
@@ -361,9 +361,14 @@ const handleToggleNode = (
         const latestTreeData = treefun(res.data, "#");
         setTreeview(latestTreeData);
         if (selectedLevel === 99) {
-          let data = costCenterData;
-          data[selectedLevel][0].value = res.data[0].Name;
-          data[selectedLevel][1].value = res.data[0].Code;
+          const { Name, Code } = res.data[0];
+          reset({
+            Name: Name || "",
+            Code: Code || "",
+          });
+          const data = costCenterData;
+          data[0].disabled = true
+          data[1].disabled = true
           setCostCenterData(data)
         }
       } else {
@@ -377,11 +382,11 @@ const handleToggleNode = (
     dispatch(setLoading(true))
     await getHierarchyLevelsdata(102, companyId).then((res) => {
       if (res.data) {
-        getjsonMapping(res.data[ "Cost Center"][0].LevelName);
+        getjsonMapping(res.data["Cost Center"][0].LevelName);
         fetchCostCenterGetData(companyId);
-        setLastLevel(res.data[ "Cost Center"][0].LevelName.at(-1)["Id"]);
-        setNextLevel(res.data[ "Cost Center"][0].LevelName[0].LevelName)
-        setLevel(res.data[ "Cost Center"][0].LevelName);
+        setLastLevel(res.data["Cost Center"][0].LevelName.at(-1)["Id"]);
+        setNextLevel(res.data["Cost Center"][0].LevelName[0].LevelName)
+        setLevel(res.data["Cost Center"][0].LevelName);
       }
     })
       .catch((err) => { }).finally(() => { dispatch(setLoading(false)) })
@@ -407,9 +412,9 @@ const handleToggleNode = (
   };
 
   // getting costCenterById
-  async function getIndCostCenterById(companyId,id) {
+  async function getIndCostCenterById(companyId, id) {
     dispatch(setLoading(true))
-    await getCostcenterById( companyId,id).then(res => {
+    await getCostcenterById(companyId, id).then(res => {
       if (res.data && res.data.length > 0) {
         console.log("resdddd", res.data[0])
         const details = res.data[0];
@@ -474,14 +479,14 @@ const handleToggleNode = (
 
   const handleDelete = () => {
     if (selectedId && companyId) {
-      delBranch( companyId,selectedId);
+      delBranch(companyId, selectedId);
     }
   }
 
   //    delete based on Id
-  const delBranch = async (companyId,leafId, ) => {
+  const delBranch = async (companyId, leafId,) => {
     dispatch(setLoading(true))
-    await deleteCostCenter(companyId,leafId,  "")
+    await deleteCostCenter(companyId, leafId, "")
       .then((res) => {
         if (res.data !== undefined) {
           if (res.data.status === true) {
@@ -495,7 +500,7 @@ const handleToggleNode = (
         }
       })
       .catch((err) => {
-        
+
       })
       .finally(() => { dispatch(setLoading(false)) })
   }
@@ -513,7 +518,7 @@ const handleToggleNode = (
       parentNodes.map(async (parent) => {
         try {
           if (parent.id !== 0) {
-            const response = await getCostcenterById( companyId,parent.id,);
+            const response = await getCostcenterById(companyId, parent.id,);
             return response.data[0];
           }
         } catch (error) {
@@ -539,7 +544,7 @@ const handleToggleNode = (
     // let branchId = recordToEditId ? selectedNode?.id : 0
     console.log("payload", payload);
     const branchId = Number(recordToEditId ? selectedNode?.id : 0);
-    await postCostCenter( companyId,branchId,payload).then(res => {
+    await postCostCenter(companyId, branchId, payload).then(res => {
       if (res.data.status) {
         fetchCostCenterGetData(companyId);
         msg.success(`${res.data.message}`);
@@ -562,69 +567,69 @@ const handleToggleNode = (
   };
 
 
-const handleSearch = (val: string) => {
-  setSearch((prev) => ({ ...prev, value: val }));
+  const handleSearch = (val: string) => {
+    setSearch((prev) => ({ ...prev, value: val }));
 
-  if (!val) {
-    const allKeys: string[] = [];
-    const collectKeys = (nodes: any[]) => {
+    if (!val) {
+      const allKeys: string[] = [];
+      const collectKeys = (nodes: any[]) => {
+        nodes.forEach((node) => {
+          allKeys.push(node.key);
+          if (node.children?.length) collectKeys(node.children);
+        });
+      };
+      collectKeys(treeView);
+      setExpandedKeys(new Set(allKeys));
+      return;
+    }
+
+    const matchedKeys: string[] = [];
+
+    const findMatchingNodes = (nodes: any[]) => {
       nodes.forEach((node) => {
-        allKeys.push(node.key);
-        if (node.children?.length) collectKeys(node.children);
+        const title = (node.title || node.name || '').toLowerCase();
+        if (title.includes(val.toLowerCase())) matchedKeys.push(node.key);
+        if (node.children?.length) findMatchingNodes(node.children);
       });
     };
-    collectKeys(treeView);
-    setExpandedKeys(new Set(allKeys));
-    return;
-  }
+    findMatchingNodes(treeView);
 
-  const matchedKeys: string[] = [];
-
-  const findMatchingNodes = (nodes: any[]) => {
-    nodes.forEach((node) => {
-      const title = (node.title || node.name || '').toLowerCase();
-      if (title.includes(val.toLowerCase())) matchedKeys.push(node.key);
-      if (node.children?.length) findMatchingNodes(node.children);
-    });
-  };
-  findMatchingNodes(treeView);
-
-  const parentKeys = new Set<string>();
-  const findParentKeys = (nodes: any[], targets: string[]) => {
-    nodes.forEach((node) => {
-      if (node.children?.some((child) => targets.includes(child.key))) {
-        parentKeys.add(node.key);
-        findParentKeys(treeView, [node.key]);
-      } else if (node.children) {
-        findParentKeys(node.children, targets);
-      }
-    });
-  };
-  findParentKeys(treeView, matchedKeys);
-
-  // ✅ Collapse all, then expand only matched + parents
-  const newExpanded = new Set([...matchedKeys, ...parentKeys]);
-  setExpandedKeys(newExpanded);
-};
-
-
-useEffect(() => {
-  if (treeView?.length) {
-    const allKeys: string[] = [];
-
-    const collectKeys = (nodes: any[]) => {
+    const parentKeys = new Set<string>();
+    const findParentKeys = (nodes: any[], targets: string[]) => {
       nodes.forEach((node) => {
-        allKeys.push(node.key);
-        if (node.children?.length) {
-          collectKeys(node.children);
+        if (node.children?.some((child) => targets.includes(child.key))) {
+          parentKeys.add(node.key);
+          findParentKeys(treeView, [node.key]);
+        } else if (node.children) {
+          findParentKeys(node.children, targets);
         }
       });
     };
+    findParentKeys(treeView, matchedKeys);
 
-    collectKeys(treeView);
-    setExpandedKeys(new Set(allKeys)); // expand everything initially
-  }
-}, [treeView]);
+    // ✅ Collapse all, then expand only matched + parents
+    const newExpanded = new Set([...matchedKeys, ...parentKeys]);
+    setExpandedKeys(newExpanded);
+  };
+
+
+  useEffect(() => {
+    if (treeView?.length) {
+      const allKeys: string[] = [];
+
+      const collectKeys = (nodes: any[]) => {
+        nodes.forEach((node) => {
+          allKeys.push(node.key);
+          if (node.children?.length) {
+            collectKeys(node.children);
+          }
+        });
+      };
+
+      collectKeys(treeView);
+      setExpandedKeys(new Set(allKeys)); // expand everything initially
+    }
+  }, [treeView]);
 
 
 
@@ -639,7 +644,7 @@ useEffect(() => {
             <span className="text-foreground font-medium">Cost Center</span>
           </div>
         </div>
-        <div className={`flex gap-2 ${selectedLevel===99 ? "hidden":""}`}>
+        <div className={`flex gap-2 ${selectedLevel === 99 ? "hidden" : ""}`}>
           <ReusableButton
             htmlType="button"
             variant="default"
@@ -672,7 +677,7 @@ useEffect(() => {
               <Input
                 placeholder="Search..."
                 value={searchQuery}
-                onChange={(e) => {setSearchQuery(e.target.value);handleSearch(e.target.value)}}
+                onChange={(e) => { setSearchQuery(e.target.value); handleSearch(e.target.value) }}
                 className="pl-9 "
               />
             </div>

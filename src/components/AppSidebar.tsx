@@ -157,7 +157,7 @@ const navigation: NavItem[] = [
       //   icon: BarChart,
       //   link: '/service-desk/mis-reports',
       // },
-    
+
     ],
   },
   {
@@ -203,245 +203,289 @@ const navigation: NavItem[] = [
         ],
       },
       {
-        label:'Consumables',
-        icon:Building2,
-        link:'/consumables',
-        children:[
-        {
-        label: 'Store',
-        icon: BarChart,
-        link: '/masters/consumables/store',
-      },
-      //  {
-      //   label: 'Item Master',
-      //   icon: BarChart,
-      //   link: '/masters/consumables/item-master',
-      // },
-        ],
+        label: 'Fixed Assets',
+        icon: Building2,
+        link: '/company',
+        children: [
+          {
+            label: 'Consumables',
+            icon: Building2,
+            link: '/consumables',
+            children: [
+              {
+                label: 'Store',
+                icon: BarChart,
+                link: '/masters/consumables/store',
+              },
+              //  {
+              //   label: 'Item Master',
+              //   icon: BarChart,
+              //   link: '/masters/consumables/item-master',
+              // },
+            ],
 
+          },
+          {
+            label: 'Service Maintenance',
+            icon: Building2,
+            link: '/servicemaintenance',
+            children: [
+              {
+                label: 'Service Locations',
+                icon: Building2,
+                link: '/masters/servicemaintenance/servicelocations',
+              },
+              {
+                label: 'Product Masters',
+                icon: Building2,
+                link: '/masters/servicemaintenance/productmaster',
+              },
+            ],
+
+          },
+
+          ,
+
+        ]
+      },
+      // {
+      //   label: 'CWIP',
+      //   icon: HardHat,
+      //   link: '/cwip',
+      //   children: [
+      //     {
+      //       label: 'Project Management',
+      //       icon: HardHat,
+      //       link: '/cwip/project-management',
+      //     },
+      //     {
+      //       label: 'Asset Operations',
+      //       icon: Package,
+      //       link: '/cwip/asset-operations',
+      //     },
+      //     {
+      //       label: 'Verification Tracking',
+      //       icon: Search,
+      //       link: '/cwip/verification-tracking',
+      //     },
+      //     {
+      //       label: 'Data Management',
+      //       icon: FileText,
+      //       link: '/cwip/data-management',
+      //     },
+      //     {
+      //       label: 'Reports',
+      //       icon: FileText,
+      //       link: '/cwip/reports',
+      //     },
+      //   ],
+      // },
+      // {
+      //   label: 'Procurement',
+      //   icon: ShoppingCart,
+      //   link: '/procurement',
+      //   children: [
+      //     {
+      //       label: 'Purchase Requests',
+      //       icon: FileText,
+      //       link: '/procurement/purchase-requests',
+      //     },
+      //     {
+      //       label: 'Purchase Orders',
+      //       icon: ShoppingCart,
+      //       link: '/procurement/purchase-orders',
+      //     },
+      //     {
+      //       label: 'Goods Management',
+      //       icon: Package,
+      //       link: '/procurement/goods-management',
+      //     },
+      //     {
+      //       label: 'Reports',
+      //       icon: FileText,
+      //       link: '/procurement/reports',
+      //     },
+      //   ],
+      // },
+      // {
+      //   label: 'Fixed Assets',
+      //   icon: Package,
+      //   link: '/fixed-assets',
+      //   children: [
+      //     {
+      //       label: 'Asset Management',
+      //       icon: Package,
+      //       link: '/fixed-assets/asset-management',
+      //     },
+      //     {
+      //       label: 'Asset Operations',
+      //       icon: Wrench,
+      //       link: '/fixed-assets/asset-operations',
+      //     },
+      //     {
+      //       label: 'Asset Maintenance',
+      //       icon: Wrench,
+      //       link: '/fixed-assets/asset-maintenance',
+      //     },
+      //     {
+      //       label: 'Reports',
+      //       icon: FileText,
+      //       link: '/fixed-assets/reports',
+      //     },
+      //   ],
+      // },
+      // {
+      //   label: 'Depreciation',
+      //   icon: DollarSign,
+      //   link: '/depreciation',
+      //   children: [
+      //     {
+      //       label: 'Process',
+      //       icon: DollarSign,
+      //       link: '/depreciation/process',
+      //     },
+      //     {
+      //       label: 'Adjustments',
+      //       icon: DollarSign,
+      //       link: '/depreciation/adjustments',
+      //     },
+      //     {
+      //       label: 'Analysis',
+      //       icon: DollarSign,
+      //       link: '/depreciation/analysis',
+      //     },
+      //     {
+      //       label: 'Reports',
+      //       icon: FileText,
+      //       link: '/depreciation/reports',
+      //     },
+      //   ],
+      // },
+      // {
+      //   label: 'Consumables',
+      //   icon: Package,
+      //   link: '/consumables',
+      //   children: [
+      //     {
+      //       label: 'Receiving',
+      //       icon: Package,
+      //       link: '/consumables/receiving',
+      //     },
+      //     {
+      //       label: 'Inventory Operations',
+      //       icon: Package,
+      //       link: '/consumables/inventory-operations',
+      //     },
+      //     {
+      //       label: 'Verification',
+      //       icon: Search,
+      //       link: '/consumables/verification',
+      //     },
+      //     {
+      //       label: 'Reports',
+      //       icon: FileText,
+      //       link: '/consumables/reports',
+      //     },
+      //   ],
+      // },
+      // {
+      //   label: 'Physical Verification',
+      //   icon: Search,
+      //   link: '/physical-verification',
+      //   children: [
+      //     {
+      //       label: 'Audit Planning',
+      //       icon: Search,
+      //       link: '/physical-verification/audit-planning',
+      //     },
+      //     {
+      //       label: 'Verification Methods',
+      //       icon: Search,
+      //       link: '/physical-verification/verification-methods',
+      //     },
+      //     {
+      //       label: 'Reconciliation',
+      //       icon: Search,
+      //       link: '/physical-verification/reconciliation',
+      //     },
+      //     {
+      //       label: 'Category Management',
+      //       icon: Search,
+      //       link: '/physical-verification/category-management',
+      //     },
+      //   ],
+      // },
+      // {
+      //   label: 'Utilities',
+      //   icon: Cog,
+      //   link: '/utilities',
+      //   children: [
+      //     {
+      //       label: 'Printing Codes',
+      //       icon: Cog,
+      //       link: '/utilities/printing-codes',
+      //     },
+      //     {
+      //       label: 'Data Management',
+      //       icon: FileText,
+      //       link: '/utilities/data-management',
+      //     },
+      //     {
+      //       label: 'Tracking Monitoring',
+      //       icon: Search,
+      //       link: '/utilities/tracking-monitoring',
+      //     },
+      //     {
+      //       label: 'Notifications',
+      //       icon: AlertCircle,
+      //       link: '/utilities/notifications',
+      //     },
+      //   ],
+      // },
+      // {
+      //   label:'Change Password',
+      //   icon: Package,
+      //   link: '/changepassword'
+      // },  
+    ]
+  },
+  {
+    label: 'Software assets',
+    icon: Package,
+    link: '/software-assets',
+    children: [
+      {
+        label: 'Asset Registry',
+        icon: Package,
+        link: '/software-assets/asset-registry',
+      },
+      {
+        label: 'License Assignment',
+        icon: Settings,
+        link: '/software-assets/license-assignment',
+      },
+      {
+        label: 'Usage Tracking',
+        icon: HardHat,
+        link: '/software-assets/usage-tracking',
+      },
+      {
+        label: 'Compliance & Audit',
+        icon: Cog,
+        link: '/software-assets/compliance&audit',
       },
       {
         label: 'Reports',
-        icon: FileText,
-        link: '/masters/reports',
+        icon: Cog,
+        link: '/software-assets/reports',
       },
       // {
-      //   label:'Service Maintenance',
-      //   icon:Building2,
-      //   link:'/servicemaintenance',
-      //   children:[
-      //     {
-      //       label: 'Service Locations',
-      //       icon: Building2,
-      //       link: '/masters/servicemaintenance/servicelocations',
-      //     },
-      //      {
-      //       label: 'Product Masters',
-      //       icon: Building2,
-      //       link: '/masters/servicemaintenance/productmaster',
-      //     },
-      //   ],
-
+      //   label: 'Advanced Setup',
+      //   icon: Settings,
+      //   link: '/settings/advanced-setup',
       // },
-      
-      ,
-      
-    ]
+    ],
   },
-  // {
-  //   label: 'CWIP',
-  //   icon: HardHat,
-  //   link: '/cwip',
-  //   children: [
-  //     {
-  //       label: 'Project Management',
-  //       icon: HardHat,
-  //       link: '/cwip/project-management',
-  //     },
-  //     {
-  //       label: 'Asset Operations',
-  //       icon: Package,
-  //       link: '/cwip/asset-operations',
-  //     },
-  //     {
-  //       label: 'Verification Tracking',
-  //       icon: Search,
-  //       link: '/cwip/verification-tracking',
-  //     },
-  //     {
-  //       label: 'Data Management',
-  //       icon: FileText,
-  //       link: '/cwip/data-management',
-  //     },
-  //     {
-  //       label: 'Reports',
-  //       icon: FileText,
-  //       link: '/cwip/reports',
-  //     },
-  //   ],
-  // },
-  // {
-  //   label: 'Procurement',
-  //   icon: ShoppingCart,
-  //   link: '/procurement',
-  //   children: [
-  //     {
-  //       label: 'Purchase Requests',
-  //       icon: FileText,
-  //       link: '/procurement/purchase-requests',
-  //     },
-  //     {
-  //       label: 'Purchase Orders',
-  //       icon: ShoppingCart,
-  //       link: '/procurement/purchase-orders',
-  //     },
-  //     {
-  //       label: 'Goods Management',
-  //       icon: Package,
-  //       link: '/procurement/goods-management',
-  //     },
-  //     {
-  //       label: 'Reports',
-  //       icon: FileText,
-  //       link: '/procurement/reports',
-  //     },
-  //   ],
-  // },
-  // {
-  //   label: 'Fixed Assets',
-  //   icon: Package,
-  //   link: '/fixed-assets',
-  //   children: [
-  //     {
-  //       label: 'Asset Management',
-  //       icon: Package,
-  //       link: '/fixed-assets/asset-management',
-  //     },
-  //     {
-  //       label: 'Asset Operations',
-  //       icon: Wrench,
-  //       link: '/fixed-assets/asset-operations',
-  //     },
-  //     {
-  //       label: 'Asset Maintenance',
-  //       icon: Wrench,
-  //       link: '/fixed-assets/asset-maintenance',
-  //     },
-  //     {
-  //       label: 'Reports',
-  //       icon: FileText,
-  //       link: '/fixed-assets/reports',
-  //     },
-  //   ],
-  // },
-  // {
-  //   label: 'Depreciation',
-  //   icon: DollarSign,
-  //   link: '/depreciation',
-  //   children: [
-  //     {
-  //       label: 'Process',
-  //       icon: DollarSign,
-  //       link: '/depreciation/process',
-  //     },
-  //     {
-  //       label: 'Adjustments',
-  //       icon: DollarSign,
-  //       link: '/depreciation/adjustments',
-  //     },
-  //     {
-  //       label: 'Analysis',
-  //       icon: DollarSign,
-  //       link: '/depreciation/analysis',
-  //     },
-  //     {
-  //       label: 'Reports',
-  //       icon: FileText,
-  //       link: '/depreciation/reports',
-  //     },
-  //   ],
-  // },
-  // {
-  //   label: 'Consumables',
-  //   icon: Package,
-  //   link: '/consumables',
-  //   children: [
-  //     {
-  //       label: 'Receiving',
-  //       icon: Package,
-  //       link: '/consumables/receiving',
-  //     },
-  //     {
-  //       label: 'Inventory Operations',
-  //       icon: Package,
-  //       link: '/consumables/inventory-operations',
-  //     },
-  //     {
-  //       label: 'Verification',
-  //       icon: Search,
-  //       link: '/consumables/verification',
-  //     },
-  //     {
-  //       label: 'Reports',
-  //       icon: FileText,
-  //       link: '/consumables/reports',
-  //     },
-  //   ],
-  // },
-  // {
-  //   label: 'Physical Verification',
-  //   icon: Search,
-  //   link: '/physical-verification',
-  //   children: [
-  //     {
-  //       label: 'Audit Planning',
-  //       icon: Search,
-  //       link: '/physical-verification/audit-planning',
-  //     },
-  //     {
-  //       label: 'Verification Methods',
-  //       icon: Search,
-  //       link: '/physical-verification/verification-methods',
-  //     },
-  //     {
-  //       label: 'Reconciliation',
-  //       icon: Search,
-  //       link: '/physical-verification/reconciliation',
-  //     },
-  //     {
-  //       label: 'Category Management',
-  //       icon: Search,
-  //       link: '/physical-verification/category-management',
-  //     },
-  //   ],
-  // },
-  // {
-  //   label: 'Utilities',
-  //   icon: Cog,
-  //   link: '/utilities',
-  //   children: [
-  //     {
-  //       label: 'Printing Codes',
-  //       icon: Cog,
-  //       link: '/utilities/printing-codes',
-  //     },
-  //     {
-  //       label: 'Data Management',
-  //       icon: FileText,
-  //       link: '/utilities/data-management',
-  //     },
-  //     {
-  //       label: 'Tracking Monitoring',
-  //       icon: Search,
-  //       link: '/utilities/tracking-monitoring',
-  //     },
-  //     {
-  //       label: 'Notifications',
-  //       icon: AlertCircle,
-  //       link: '/utilities/notifications',
-  //     },
-  //   ],
-  // },
   {
     label: 'Settings',
     icon: Settings,
@@ -469,50 +513,7 @@ const navigation: NavItem[] = [
       // },
     ],
   },
-  // {
-  //   label:'Change Password',
-  //   icon: Package,
-  //   link: '/changepassword'
-  // },  
-   {
-    label: 'Software assets',
-    icon: Package,
-    link: '/software-assets',
-    children: [
-      {
-        label: 'Asset Registry',
-        icon: Package,
-        link: '/software-assets/asset-registry',
-      },
-       {
-        label: 'License Assignment',
-        icon: Settings,
-        link: '/software-assets/license-assignment',
-      },
-      {
-        label: 'Usage Tracking',
-        icon: HardHat,
-        link: '/software-assets/usage-tracking',
-      },
-      {
-        label: 'Compliance & Audit',
-        icon: Cog,
-        link: '/software-assets/compliance&audit',
-      },
-        {
-        label: 'Reports',
-        icon: Cog,
-        link: '/software-assets/reports',
-      },
-      // {
-      //   label: 'Advanced Setup',
-      //   icon: Settings,
-      //   link: '/settings/advanced-setup',
-      // },
-    ],
-  },
-];
-
+]
 const AppSidebar: React.FC = () => {
   const location = useLocation();
   const [searchTerm, setSearchTerm] = useState('');

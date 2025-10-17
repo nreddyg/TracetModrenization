@@ -343,15 +343,6 @@ const Store = () => {
             <div className="space-y-6 p-5">
                 {/* Search and Actions */}
                 <div className="flex justify-between items-center">
-                    {/* <ReusableInput
-            size="middle"
-            placeholder="Search stores..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            prefixIcon={<Search className="h-4 w-4 text-muted-foreground" />}
-            allowClear
-            containerClassName="w-96"
-          /> */}
                     <h1>Store</h1>
 
                     <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
@@ -369,49 +360,6 @@ const Store = () => {
                             <DialogHeader>
                                 <DialogTitle>{recordToEditId?"Update Store":"Add Store"}</DialogTitle>
                             </DialogHeader>
-
-                            {/* <form onSubmit={()=>{}} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <ReusableInput
-                    label="Store Name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    required
-                  />
-                  <div>
-                    <Label htmlFor="branch">Branch *</Label>
-                    <ReusableDropdown
-                      options={branchOptions}
-                      value={formData.branch}
-                      onChange={(value) => setFormData({ ...formData, branch: value as string })}
-                      placeholder="Select Branch"
-                    />
-                  </div>
-                </div>
-                
-                <ReusableTextarea
-                  label="Store Description"
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  numberOfRows={3}
-                />
-                
-                <div className="flex justify-end gap-2">
-                  <ReusableButton 
-                    variant="default" 
-                    onClick={() => setIsAddDialogOpen(false)}
-                  >
-                    Cancel
-                  </ReusableButton>
-                  <ReusableButton 
-                    htmlType="submit" 
-                    variant="primary"
-                    className="bg-orange-500 hover:bg-orange-600 border-orange-500"
-                  >
-                    Save Store
-                  </ReusableButton>
-                </div>
-              </form> */}
                             <div className='grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4'>
                                 {getFieldsByNames(['StoreName', 'Branch']).map((field) => {
                                     return <div className="flex items-center space-x-2">

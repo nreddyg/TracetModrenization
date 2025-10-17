@@ -99,6 +99,12 @@ export const URL_DUPLICATE_UPDATE_CHECK_NO='/api/ServiceDeskAPI/CheckUpdateDupli
 
 //User Master
 export const URL_GET_USER_LIST='/api/Masters/GetUserDetailsByCompanyId';
+export const URL_GET_DEPARTMENTS='/api/Masters/GetDepartmentLookups';
+export const URL_GET_ROLES='/api/Masters/GetUserRoleNameLookups';
+export const URL_GET_CATEGORIES='/api/Masters/GetCategoryLookups';
+export const URL_POST_NEW_USER='/api/Masters/AddUserDetails';
+export const URL_DELETE_USER='/api/Masters/DeleteUserById';
+export const URL_POST_UPDATE_USER='/api/Masters/UpdateUserDetails';
 
 //Customer Master
 export const URL_GET_CUSTOMER_LIST = '/api/Masters/GetCustomerDetailsByCompanyId';

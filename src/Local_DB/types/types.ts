@@ -4,7 +4,7 @@ import { TreeNode } from "@/components/ui/reusable-treeSelect";
  
 export type FieldType = 'text' | 'dropdown' | 'multiselect' | 'textarea' | 'heading' | "date" | "upload"
   | "richtext" | "checkbox" | "table" | "separator" | 'radiobutton' | 'numeric'|"rangepicker" | 
-  "timepicker" | 'password' | 'treeselect' | 'number';
+  "timepicker" | 'password' | 'treeselect' | 'number' | 'email' | 'space';
 
 export interface DropdownOption {
     label: string;

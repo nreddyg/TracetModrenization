@@ -132,3 +132,7 @@ export const URL_POST_COSTCENTER=`/api/Masters/SubmitCostCenterLevels`;
 export const URL_GET_COSTCENTER_BY_ID=`/api/Masters/GetCostCenterDetailsByCompanyId`;
 export const URL_DELETE_COSTCENTER=`/api/Masters/DeleteCostCenterDetailsById`;
 
+//Masters Service locations
+ export const URL_GET_SERVICELOCATIONS_LIST=`/api/Masters/GetServiceLocationDetailsByCompanyId`;
+ export const URL_POST_SERVICELOCATIONS=`/api/Masters/AddServiceMaintenaceLocations`;
+

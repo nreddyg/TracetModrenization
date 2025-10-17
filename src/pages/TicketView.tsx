@@ -1350,7 +1350,7 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
                     onChange={(value) => setStatusFilter(value as string)}
                     placeholder="Filter by status..."
                     className=" min-h-[10px] rounded-md"
-                    containerClassName="w-full h-8 rounded-md"
+                    containerClassName="w-full h-8 rounded-md mb-4"
 
                     showSearch={false}
                   />

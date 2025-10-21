@@ -24,6 +24,7 @@ import { setLoading } from '@/store/slices/projectsSlice';
 import { useDispatch } from 'react-redux';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
+import { Progress } from '@/components/ui/progress';
 
 interface SoftwareData {
     SoftwareID: Number,
@@ -33,7 +34,7 @@ interface SoftwareData {
     Software: string,
     Licensekey: string,
     AssignmentDate: string,
-    ExpiryDate: string
+    LicenseExpiryDate: string
 }
 interface OptionItem {
     [key: string]: any;
@@ -50,24 +51,13 @@ interface allResponsesType {
     CategoryId: OptType
 }
 
-const SoftwareDataColumns = [
-    { id: 'SoftwareId', accessorKey: "SoftwareId", header: "Software ID" },
-    { id: 'SoftwareName', accessorKey: "SoftwareName", header: "Software Name" },
-    { id: 'Version', accessorKey: "Version", header: "Version" },
-    { id: 'VendorId', accessorKey: "VendorId", header: "Vendor" },
-    { id: 'CategoryId', accessorKey: "CategoryId", header: "Category" },
-    { id: 'AssignmentDate', accessorKey: "LicenseType", header: "License Type" },
-    { id: 'NumberOfLicenses', accessorKey: "NumberOfLicenses", header: "Total Licenses" },
-    { id: 'Assigned', accessorKey: "Assigned", header: "Assigned" },
-    { id: 'Status', accessorKey: "Status", header: "Status" },
-    { id: 'Total Cost', accessorKey: "Total Cost", header: "Total Cost" },
-]
+
 const defaultRow = {
     key: 0,
     LicenseKey: '',
     LicenseDetailId: "",
     LicenseCost: "",
-    ExpiryDate: "",
+    LicenseExpiryDate: "",
     Status: "Active"
     // cellsData: cellsData,
 };
@@ -86,7 +76,6 @@ const AssetRegistry = () => {
     const msg = useMessage()
     const dispatch = useDispatch()
     const companyId = useAppSelector(state => state.projects.companyId);
-    const [columns, setColumns] = useState<ColumnDef<SoftwareData>[]>(SoftwareDataColumns);
     const [fields, setFields] = useState<BaseField[]>(REGISTRY_DB);
     const [isOpenLicenseCard, setIsOpenLicenseCard] = useState(false);
     const [getAllTableData, setGetAllTableData] = useState([])
@@ -108,7 +97,38 @@ const AssetRegistry = () => {
         if (companyId)
             fetchAllLookups()
     }, [companyId])
-
+const SoftwareDataColumns = [
+    { id: 'SoftwareId', accessorKey: "SoftwareId", header: "Software ID" },
+    { id: 'SoftwareName', accessorKey: "SoftwareName", header: "Software Name" },
+    { id: 'Version', accessorKey: "Version", header: "Version" },
+    { id: 'VendorId', accessorKey: "VendorId", header: "Vendor" },
+    { id: 'CategoryId', accessorKey: "CategoryId", header: "Category" },
+    { id: 'AssignmentDate', accessorKey: "LicenseType", header: "License Type" },
+    { id: 'NumberOfLicenses', accessorKey: "NumberOfLicenses", header: "Total Licenses" },
+    { id: 'AssignedLicenseCount', accessorKey: "AssignedLicenseCount", header: "Assigned" ,
+        cell: ({ row }: any) => {
+            console.log(row.original)
+        const assigned = row.original.NumberOfLicenses as number;
+        const total = row.original.NumberOfLicenses;
+        const percentage = (assigned / total) * 100;
+        return (
+          <div className="flex items-center gap-2">
+            <span>{assigned}</span>
+            <div className="w-16 h-2 bg-muted rounded-full">
+              <div 
+                className="h-full bg-primary rounded-full" 
+                style={{ width: `${percentage}%` }}
+              />
+            </div>
+          </div>
+        );
+    }
+     },
+    // { id: 'Status', accessorKey: "Status", header: "Status" },
+    { id: 'AssignedLicenseTotalCost', accessorKey: "AssignedLicenseTotalCost", header: "Total Cost",  }
+      
+]
+ const [columns, setColumns] = useState<ColumnDef<SoftwareData>[]>(SoftwareDataColumns);
     const tableColumnsData = [
         {
             accessorKey: "LicenseKey",
@@ -153,14 +173,14 @@ const AssetRegistry = () => {
         },
         ...(form.watch("LicenseType") !== "Perpetual" ? [
             {
-                accessorKey: "ExpiryDate",
+                accessorKey: "LicenseExpiryDate",
                 header: "Expiry/Renewal Date",
                 cell: ({ row }) => (
 
                     <span className='flex' >
                         <ReusableDatePicker
-                            value={row.original.ExpiryDate}
-                            onChange={(e) => handleChange(e, row.id, "ExpiryDate")}
+                            value={row.original.LicenseExpiryDate}
+                            onChange={(e) => handleChange(e, row.id, "LicenseExpiryDate")}
                             placeholder=' '
                             disabled={form.watch("LicenseType") !== "Perpetual" ? false : true}
                             size="sm"
@@ -238,7 +258,7 @@ const AssetRegistry = () => {
             if (category.status === "fulfilled" && category.value.data && category.value.success && category.value.data) {
                 data["CategoryId"] = { data: category.value.data, label: "CategoryName", value: "CategoryId" }
             }
-            if (getAllTableData.status === "fulfilled" && getAllTableData.value.success && getAllTableData.value.data && !getAllTableData.value.data.status) {
+            if (getAllTableData.status === "fulfilled" && getAllTableData.value.success && getAllTableData.value.data && (getAllTableData.value.data.status==undefined)) {
                 setGetAllTableData((getAllTableData.value.data).reverse())
             }
             setLookupsDataInJson(data)
@@ -251,6 +271,7 @@ const AssetRegistry = () => {
 
 
     const setLookupsDataInJson = (lookupsData: allResponsesType): void => {
+        console.log("look",lookupsData)
         const arr = Object.keys(lookupsData)
         const opts: { [key: string]: any } = {}
         arr.forEach((obj) => {
@@ -292,7 +313,7 @@ const AssetRegistry = () => {
                     LicenseKey: data[i]["LicenseKey"],
                     LicenseDetailId: data[i]["LicenseDetailId"],
                     LicenseCost: data[i]["LicenseCost"],
-                    ExpiryDate: data[i]["ExpiryDate"],
+                    LicenseExpiryDate: data[i]["LicenseExpiryDate"],
                     Status: data[i]["Status"]
                 });
             }
@@ -303,7 +324,7 @@ const AssetRegistry = () => {
                     LicenseKey: '',
                     LicenseDetailId: '',
                     LicenseCost: '',
-                    ExpiryDate: '',
+                    LicenseExpiryDate: '',
                     Status: 'Active'
                 });
             }
@@ -480,6 +501,13 @@ const AssetRegistry = () => {
     }
     const handleEdit = (data: any): void => {
         form.reset({ ...form.getValues(), ...data })
+             let fieldsData = [...fields]
+                fieldsData.forEach((obj) => {
+                    if (obj.name == "NumberOfLicenses" || obj.name == "LicenseType") {
+                        obj.disabled = true
+                    }
+                })
+                setFields(fieldsData)
         setDatasource(generateRowsInTable(0, 0, data.LicenseDetails))
         setIsOpenLicenseCard(true)
         setEditRecordId(data.SoftwareId)
@@ -494,7 +522,7 @@ const AssetRegistry = () => {
             }
         })
         setFields(fieldsData)
-
+setEditRecordId("")
 
     }
     const deleteSoftwareAsset = async (id: string) => {
@@ -545,14 +573,15 @@ const AssetRegistry = () => {
         dataSource.some((obj) => {
             let licenseKey = obj.LicenseKey
             let licenseCost = obj.LicenseCost
-            let expiryDate = obj.ExpiryDate
+            let expiryDate = obj.LicenseExpiryDate
 
             if (licenseKey && licenseCost && (watch("LicenseType") == "Perpetual") ||(expiryDate && watch("LicenseType") !== "Perpetual") ){
                 licenseDetails.push({
                     "LicenseDetailId": id ? obj.LicenseDetailId : "",
                     "LicenseKey": licenseKey,
                     "LicenseCost": licenseCost,
-                    "ExpiryDate": (typeof (expiryDate) == "string") ? expiryDate : formatDates(expiryDate, 'DD/MM/YYYY'),
+                    "ExpiryDate": (typeof (expiryDate) == "string") ? expiryDate : formatDates(expiryDate, 'YYYY/MM/DD'),
+                                   
                     "Status": obj.Status
                 })
               

@@ -10,7 +10,7 @@ export const VENDOR_DETAILS: BaseField[] = [
         label: 'Vendor Type',
         fieldType: 'multiselect',
         name: 'VendorType',
-        defaultValue: "Private Limited",
+        defaultValue:"",
          "options": [
             {
                 label: "Manufacturer",
@@ -151,7 +151,7 @@ export const VENDOR_DETAILS: BaseField[] = [
  ,
     {
         label: 'Zip Code',
-        fieldType: 'number',
+        fieldType: 'text',
         name: 'ZipCode',
         isRequired: false,
     },

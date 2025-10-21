@@ -43,7 +43,10 @@ import {
   TrendingUp,
   Shield,
   UserRoundCheckIcon,
-  UserPlus
+  UserPlus,
+  User,
+  UserCheck,
+  UserCog
 } from 'lucide-react';
 
 interface NavItem {
@@ -479,6 +482,21 @@ const navigation: NavItem[] = [
             label: 'Cost Center',
             icon: DollarSign,
             link: '/masters/company/costcenter',
+          },
+          {
+            label: 'User',
+            icon: User,
+            link: '/masters/company/user',
+          },
+          {
+            label: 'Vendor',
+            icon: UserCheck,
+            link: '/masters/company/vendor',
+          },
+          {
+            label: 'Customer',
+            icon: UserCog,
+            link: '/masters/company/customer',
           },
           {
             label: 'Assets & Inventory',

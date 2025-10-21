@@ -1,24 +1,25 @@
 
+
+
 import React, { useEffect, useMemo, useState } from 'react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Search, Plus, Trash2, ChevronRight, ChevronDown, Folder, Info, HelpCircle } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Search, Plus, Trash2, Info, } from 'lucide-react';
 import { ReusableButton } from '@/components/ui/reusable-button';
 import { BaseField, GenericObject } from '@/Local_DB/types/types';
-import { DEPARTMENT_DB } from '@/Local_DB/Form_JSON_Data/departmentDB';
 import { Controller, useForm } from 'react-hook-form';
 import { useMessage } from '@/components/ui/reusable-message';
 import { useDispatch } from 'react-redux';
 import { ReusableInput } from '@/components/ui/reusable-input';
 import { setLoading } from '@/store/slices/projectsSlice';
-import { deleteDepartmentData, getDepartmentData, getDepartmentDataByID, getHierarchyLevelsdata, postOrUpdateDepartmentData } from '@/services/departmentServices';
+import { getHierarchyLevelsdata } from '@/services/departmentServices';
 import { useAppSelector } from '@/store';
 import { TreeConfig, TreeView } from '@/components/ui/reusable-treeView';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { MenubarShortcut } from '@/components/ui/menubar';
+import { deleteCostCenter, getCostcenterById, getCostCenterData, postCostCenter } from '@/services/costCenterServices';
+import { CostCenter_DB } from '@/Local_DB/Form_JSON_Data/CostCenterDB';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+
 
 
 interface TreeNode {
@@ -119,13 +120,12 @@ interface SelectedNode {
   TypeId?: string | number;
   // add other fields if needed
 }
-const Department = () => {
+const CostCenter = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set(['1', '2', '3', '4', '5']));
   const [selectedLevel, setSelectedLevel] = useState(99);
   const [selectedNodeParents, setSelectedNodeParents] = useState([]);
-  const [fields, setFields] = useState(DEPARTMENT_DB);
-  const [expandedKeys, setExpandedKeys] = useState<Set<string>>(new Set());
+  const [fields, setFields] = useState(CostCenter_DB);
   const [selectedNode, setSelectedNode] = useState({
     BranchName: "",
     BranchCode: "",
@@ -134,9 +134,9 @@ const Department = () => {
     parent: 0,
     type: ''
   });
-  const [departrmentData, setDepartmentData] = useState<BaseField[]>(fields[selectedLevel]);
+  const [costCenterData, setCostCenterData] = useState<BaseField[]>(fields[selectedLevel]);
   const [recordToEditId, setRecordToEditId] = useState(null);
-  // const [selectedNode, setSelectedNode] = useState<SelectedNode>({});
+  console.log("138", recordToEditId)
   const [selectedId, setSelectedId] = useState('');
   const [treeView, setTreeview] = useState([]);
   const [tree, setTree] = useState([]);
@@ -148,8 +148,8 @@ const Department = () => {
   const companyId = useAppSelector(state => state.projects.companyId);
   const [isClearDisable, setIsClearDisable] = useState(true);
   const [disable, setDisable] = useState(true);
-    const [isDelModalOpen, setIsDelModalOpen] = useState(false);
-
+  const [isDelModalOpen, setIsDelModalOpen] = useState(false);
+  const [expandedKeys, setExpandedKeys] = useState<Set<string>>(new Set());
   // const branch = useAppSelector(state=>state.projects.branchId)
   const dispatch = useDispatch()
   const msg = useMessage()
@@ -175,36 +175,38 @@ const Department = () => {
 
   useEffect(() => {
     if (companyId) {
-      fetchDepartmentGetData(companyId);
+      fetchCostCenterGetData(companyId);
     }
   }, [companyId])
 
   useEffect(() => {
     if (companyId && selectedLevel) getlevels();
+    console.log(selectedLevel, "Nag")
   }, [companyId, selectedLevel])
 
   useEffect(() => {
     if (recordToEditId !== null) {
-      getIndDepartDataByID(recordToEditId, companyId)
+      getIndCostCenterById(companyId, recordToEditId,)
     }
   }, [recordToEditId])
 
   const form = useForm<GenericObject>({
-    defaultValues: departrmentData.reduce((acc, f) => {
+    defaultValues: costCenterData.reduce((acc, f) => {
       acc[f.name!] = f.defaultChecked ?? '';
       return acc;
     }, {} as GenericObject),
+    // mode: 'onChange',
+    // reValidateMode: "onChange"
   });
 
-  const toggleNode = (nodeId: string) => {
-    const newExpanded = new Set(expandedNodes);
-    if (newExpanded.has(nodeId)) {
-      newExpanded.delete(nodeId);
-    } else {
-      newExpanded.add(nodeId);
-    }
-    setExpandedNodes(newExpanded);
+  const handleToggleNode = (
+    newExpandedKeys: string[],
+    info: { expanded: boolean; node: any }
+  ) => {
+    setExpandedKeys(new Set(newExpandedKeys));
   };
+
+
 
   const renderTreeNode = (node: TreeNode, level: number = 0): React.ReactNode => {
     const hasChildren = node.children && node.children.length > 0;
@@ -220,8 +222,9 @@ const Department = () => {
               treeData={mainTreeData}
               config={treeConfig}
               onSelect={onSelect}
-              expandedKeys={Array.from(expandedKeys)}
               onExpand={handleToggleNode}
+              expandedKeys={Array.from(expandedKeys)}
+
             />
           </div>
         )}
@@ -230,7 +233,7 @@ const Department = () => {
   };
 
   const { control, register, handleSubmit, trigger, watch, setValue, reset, formState: { errors } } = form;
-  const getFieldsByNames = (names: string[]) => departrmentData.filter(f => names.includes(f.name!));
+  const getFieldsByNames = (names: string[]) => costCenterData.filter(f => names.includes(f.name!));
 
   const renderField = (field: BaseField) => {
     const { name, label, fieldType, isRequired, dependsOn, show = true } = field;
@@ -258,6 +261,37 @@ const Department = () => {
         );
     }
   }
+
+  // const mainTreeData = useMemo(() => {
+  //   const loop = (data) =>
+  //     data.map((item) => {
+  //       const title = item.title.toLowerCase().includes(search.value.toLowerCase()) ? (
+  //         <span key={item.key}>
+  //           <span className={`${search.value === "" ? "" : "site-tree-search-value"}`}>{item.title}</span>
+  //         </span>
+  //       ) : (
+  //         <span key={item.key}>{item.title}</span>
+  //       )
+  //       if (item.children) {
+  //         return {
+  //           type: item.type,
+  //           id: item.id,
+  //           title,
+  //           name: item.Name,
+  //           key: item.key,
+  //           children: loop(item.children),
+  //         };
+  //       }
+  //       return {
+  //         type: item.type,
+  //         id: item.id,
+  //         title,
+  //         name: item.Name,
+  //         key: item.key,
+  //       };
+  //     });
+  //   return loop(treeView);
+  // }, [treeView]);
 
   const mainTreeData = useMemo(() => {
     const loop = (data) =>
@@ -322,9 +356,9 @@ const Department = () => {
     return treeData;
   };
 
-  async function fetchDepartmentGetData(companyId) {
+  async function fetchCostCenterGetData(companyId) {
     dispatch(setLoading(true))
-    await getDepartmentData(companyId).then(res => {
+    await getCostCenterData(companyId).then(res => {
       if (res.data && res.data.length > 0) {
         setTree(res.data);
         const latestTreeData = treefun(res.data, "#");
@@ -335,11 +369,10 @@ const Department = () => {
             Name: Name || "",
             Code: Code || "",
           });
-
-          const data = departrmentData;
+          const data = costCenterData;
           data[0].disabled = true
           data[1].disabled = true
-          setDepartmentData(data)
+          setCostCenterData(data)
         }
       } else {
         msg.warning(res.data.message || "No Data Found")
@@ -347,22 +380,22 @@ const Department = () => {
     }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
   }
 
-  // 103 level conatins labels for departmeent module in the departmentApi
+  // 103 level conatins labels for costcenter module in the costcenter api
   const getlevels = async () => {
     dispatch(setLoading(true))
-    await getHierarchyLevelsdata(103, companyId).then((res) => {
+    await getHierarchyLevelsdata(102, companyId).then((res) => {
       if (res.data) {
-        getjsonMapping(res.data["Department/Unit"][0].LevelName);
-        fetchDepartmentGetData(companyId);
-        setLastLevel(res.data["Department/Unit"][0].LevelName.at(-1)["Id"]);
-        setNextLevel(res.data["Department/Unit"][0].LevelName[0].LevelName)
-        setLevel(res.data["Department/Unit"][0].LevelName);
+        getjsonMapping(res.data["Cost Center"][0].LevelName);
+        fetchCostCenterGetData(companyId);
+        setLastLevel(res.data["Cost Center"][0].LevelName.at(-1)["Id"]);
+        setNextLevel(res.data["Cost Center"][0].LevelName[0].LevelName)
+        setLevel(res.data["Cost Center"][0].LevelName);
       }
     })
       .catch((err) => { }).finally(() => { dispatch(setLoading(false)) })
   };
 
-  // assigning labels to the JSONdata of departmentDB
+  // assigning labels to the JSONdata of costcenterDB
   const getjsonMapping = (leveldata) => {
     let Labels = Object.keys(fields);
     Labels.forEach((element) => {
@@ -381,11 +414,12 @@ const Department = () => {
     });
   };
 
-  // getting departmentDataByID
-  async function getIndDepartDataByID(id, companyId) {
+  // getting costCenterById
+  async function getIndCostCenterById(companyId, id) {
     dispatch(setLoading(true))
-    await getDepartmentDataByID(id, companyId).then(res => {
+    await getCostcenterById(companyId, id).then(res => {
       if (res.data && res.data.length > 0) {
+        console.log("resdddd", res.data[0])
         const details = res.data[0];
         if (details) {
           reset({
@@ -432,7 +466,7 @@ const Department = () => {
     setSelectedNodeParents(findroots);
     setSelectedLevel((prev) => 1 + +prev);
     setSelectedNode(tempObj);
-    setDepartmentData(fields[selectedLevel + 1])
+    setCostCenterData(fields[selectedLevel + 1])
   };
 
   const onSelect = (selectedKeys, info) => {
@@ -442,34 +476,34 @@ const Department = () => {
     setDisable(false);
     setRecordToEditId(info.node.id);
     setSelectedNode(info.node);
-    setDepartmentData(fields[info.node.type])
+    setCostCenterData(fields[info.node.type])
     setSelectedLevel(parseInt(info.node.type));
   };
 
   const handleDelete = () => {
     if (selectedId && companyId) {
-      delBranch(selectedId, companyId);
+      delBranch(companyId, selectedId);
     }
   }
 
   //    delete based on Id
-  const delBranch = async (leafId, companyId) => {
+  const delBranch = async (companyId, leafId,) => {
     dispatch(setLoading(true))
-    await deleteDepartmentData(leafId, companyId, "")
+    await deleteCostCenter(companyId, leafId, "")
       .then((res) => {
         if (res.data !== undefined) {
           if (res.data.status === true) {
             // clearFields(0);
             setRecordToEditId(null);
             msg.success(res.data.message);
-            fetchDepartmentGetData(companyId);
+            fetchCostCenterGetData(companyId);
           } else {
             msg.warning(res.data.message);
           }
         }
       })
       .catch((err) => {
-        // TracetMessage("error","65vh","Failed to Delete Department","departmentdelete");
+
       })
       .finally(() => { dispatch(setLoading(false)) })
   }
@@ -487,7 +521,7 @@ const Department = () => {
       parentNodes.map(async (parent) => {
         try {
           if (parent.id !== 0) {
-            const response = await getDepartmentDataByID(parent.id, companyId);
+            const response = await getCostcenterById(companyId, parent.id,);
             return response.data[0];
           }
         } catch (error) {
@@ -513,15 +547,13 @@ const Department = () => {
     // let branchId = recordToEditId ? selectedNode?.id : 0
     console.log("payload", payload);
     const branchId = Number(recordToEditId ? selectedNode?.id : 0);
-    await postOrUpdateDepartmentData(branchId, companyId, payload).then(res => {
+    await postCostCenter(companyId, branchId, payload).then(res => {
       if (res.data.status) {
-        fetchDepartmentGetData(companyId);
+        fetchCostCenterGetData(companyId);
         msg.success(`${res.data.message}`);
         if (recordToEditId === null) {
           handleReset();
-          msg.success(`${res.data.message}`);
         }
-        // dispatch(isbranchlistupdate(true));
       } else {
         msg.warning(`${res.data.message}`);
       }
@@ -536,6 +568,7 @@ const Department = () => {
     })
     setRecordToEditId(null);
   };
+
 
   const handleSearch = (val: string) => {
     setSearch((prev) => ({ ...prev, value: val }));
@@ -582,12 +615,6 @@ const Department = () => {
     setExpandedKeys(newExpanded);
   };
 
-  const handleToggleNode = (
-    newExpandedKeys: string[],
-    info: { expanded: boolean; node: any }
-  ) => {
-    setExpandedKeys(new Set(newExpandedKeys));
-  };
 
   useEffect(() => {
     if (treeView?.length) {
@@ -603,9 +630,11 @@ const Department = () => {
       };
 
       collectKeys(treeView);
-      setExpandedKeys(new Set(allKeys));
+      setExpandedKeys(new Set(allKeys)); // expand everything initially
     }
   }, [treeView]);
+
+
 
   return (
     <div className="bg-hsl(214.3 31.8% 91.4%) overflow-y-auto">
@@ -615,10 +644,10 @@ const Department = () => {
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <span>Masters</span>
             <span>/</span>
-            <span className="text-foreground font-medium">Department</span>
+            <span className="text-foreground font-medium">Cost Center</span>
           </div>
         </div>
-        <div className='flex gap-2'>
+        <div className={`flex gap-2 ${selectedLevel === 99 ? "hidden" : ""}`}>
           <ReusableButton
             htmlType="button"
             variant="default"
@@ -680,43 +709,43 @@ const Department = () => {
                     </TooltipTrigger>
                     {selectedLevel !== lastLevel && recordToEditId && (
                       <TooltipContent>
-                        Add {nextLevel ? nextLevel : "Department/Unit"}
+                        Add {nextLevel ? nextLevel : "Cost Center"}
                       </TooltipContent>
                     )}
                   </Tooltip>
                 </TooltipProvider>
               </div>
               <div>
-                   <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>
-                                                              <DialogContent className="sm:max-w-[425px]">
-                                                                <DialogHeader>
-                                                                  <DialogTitle>Confirm the action</DialogTitle>
-                                                                  <DialogDescription>
-                                                                    Are you sure you want to delete Hierarchy level?
-                                                                    {/* {currentTab === "service-request-type"
-                                                                      ? `${selectedRecord?.ServiceRequestType || "this"} Service Request Type`
-                                                                      : `${selectedStatusRec?.StatusType || "this"} Status`
-                                                                    } */}
-                                                                  </DialogDescription>
-                                                                </DialogHeader>
-                                                                <DialogFooter>
-                                                                  <ReusableButton
-                                                                    variant="default"
-                                                                    onClick={() => setIsDelModalOpen(false)}
-                                                                  >
-                                                                    Cancel
-                                                                  </ReusableButton>
-                                                                  <ReusableButton
-                                                                    variant="primary"
-                                                                    danger={true}
-                                                                    onClick={()=>{handleDelete();setIsDelModalOpen(false);setRecordToEditId(null);handleReset()}}
-                                                                    // onClick={currentTab === "service-request-type" ? () => { deleteServiceRequestType(selectedRecord?.Id); setIsDelModalOpen(false) } : () => { deleteStatus(selectedStatusRec?.Id); setIsDelModalOpen(false) }}
-                                                                  >
-                                                                    Delete
-                                                                  </ReusableButton>
-                                                                </DialogFooter>
-                                                              </DialogContent>
-                                                            </Dialog>
+                <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>
+                                                                              <DialogContent className="sm:max-w-[425px]">
+                                                                                <DialogHeader>
+                                                                                  <DialogTitle>Confirm the action</DialogTitle>
+                                                                                  <DialogDescription>
+                                                                                    Are you sure you want to delete Hierarchy level?
+                                                                                    {/* {currentTab === "service-request-type"
+                                                                                      ? `${selectedRecord?.ServiceRequestType || "this"} Service Request Type`
+                                                                                      : `${selectedStatusRec?.StatusType || "this"} Status`
+                                                                                    } */}
+                                                                                  </DialogDescription>
+                                                                                </DialogHeader>
+                                                                                <DialogFooter>
+                                                                                  <ReusableButton
+                                                                                    variant="default"
+                                                                                    onClick={() => setIsDelModalOpen(false)}
+                                                                                  >
+                                                                                    Cancel
+                                                                                  </ReusableButton>
+                                                                                  <ReusableButton
+                                                                                    variant="primary"
+                                                                                    danger={true}
+                                                                                    onClick={()=>{handleDelete();setIsDelModalOpen(false);setRecordToEditId(null);handleReset()}}
+                                                                                    // onClick={currentTab === "service-request-type" ? () => { deleteServiceRequestType(selectedRecord?.Id); setIsDelModalOpen(false) } : () => { deleteStatus(selectedStatusRec?.Id); setIsDelModalOpen(false) }}
+                                                                                  >
+                                                                                    Delete
+                                                                                  </ReusableButton>
+                                                                                </DialogFooter>
+                                                                              </DialogContent>
+                                                                            </Dialog>
                 <ReusableButton
                   size="small"
                   // className="border border-0 h-8 w-8 flex items-center justify-center"
@@ -726,7 +755,7 @@ const Department = () => {
                   }}
                   onClick={() => {
                     if (!disable && selectedLevel !== 99) {
-                      // handleDelete();
+                    //   handleDelete();
                     setIsDelModalOpen(true)
                     }
                   }}
@@ -749,11 +778,11 @@ const Department = () => {
                 <h4 className="master-heading mb-2 flex items-center gap-2">
                   {!recordToEditId
                     ? selectedLevel === 99
-                      ? "Department"
-                      : "Add Department"
+                      ? "Cost Center"
+                      : "Add Cost Center"
                     : selectedLevel === 99
-                      ? "Department"
-                      : "Update Department"}
+                      ? "Cost Center"
+                      : "Update Cost Center"}
                   {selectedLevel !== lastLevel && (
                     <TooltipProvider>
                       <Tooltip>
@@ -763,8 +792,8 @@ const Department = () => {
                           </button>
                         </TooltipTrigger>
                         <TooltipContent>
-                          To Add {nextLevel || "Department/Unit"} to{" "}
-                          {breadCrumb?.at(-1) || "the selected department"}, click on{" "}
+                          To Add {nextLevel || "Cost Center"} to{" "}
+                          {breadCrumb?.at(-1) || "the selected costcenter"}, click on{" "}
                           {breadCrumb?.at(-1) || "the name"} and then click on the plus icon.
                         </TooltipContent>
                       </Tooltip>
@@ -777,8 +806,7 @@ const Department = () => {
               </div>
             </div>
             <div className="space-y-6">
-              {/* <h5 className="text-base font-semibold">Department Details</h5> */}
-              <h5>{recordToEditId && selectedLevel !== 99 ? `Update ${departrmentData[0].heading}` : `${selectedLevel !== 99 ? "Enter" : ""} ${departrmentData[0].heading}`}</h5>
+              <h5>{recordToEditId && selectedLevel !== 99 ? `Update ${costCenterData[0].heading}` : `${selectedLevel !== 99 ? "Enter" : ""} ${costCenterData[0].heading}`}</h5>
               <div className="px-1">
                 <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4">
                   {getFieldsByNames(['Name', 'Code']).map((field) => {
@@ -796,4 +824,5 @@ const Department = () => {
   );
 };
 
-export default Department;
+export default CostCenter;
+

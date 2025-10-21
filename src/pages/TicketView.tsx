@@ -1,5 +1,3 @@
-
-
 import { useState, useEffect, useCallback, useRef, ReactNode } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
@@ -1209,8 +1207,6 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
       setUpdatedComments("")
       setHasChanges(false);
       setIsEditing(false);
-      fieldsCopy.forEach(field => { field.disabled = true; });
-      setFields(fieldsCopy);
   }
   // Handle cancel edit - only clear form values, preserve all field configs and options
   const handleEdit = (type: string) => {
@@ -1354,7 +1350,7 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
                     onChange={(value) => setStatusFilter(value as string)}
                     placeholder="Filter by status..."
                     className=" min-h-[10px] rounded-md"
-                    containerClassName="w-full h-8 rounded-md"
+                    containerClassName="w-full h-8 rounded-md mb-4"
 
                     showSearch={false}
                   />
@@ -1636,11 +1632,13 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
                                         showToolbar={true}
                                         minHeight={120}
                                         maxHeight={300}
+                                        disabled={false}
                                       />
                                     )}
                                   />
                                   <div className="flex justify-end my-4">
                                     <ReusableButton
+                                      disabled={!isEditing}
                                       size="small"
                                       onClick={commentForm.handleSubmit(postComment)}
                                     >

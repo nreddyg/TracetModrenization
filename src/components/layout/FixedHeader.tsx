@@ -12,8 +12,8 @@ import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { GetBranchListBasedonCompanyId, GetCompanyListBasedonUserId } from '@/services/headerServices';
 import { useAppDispatch } from '@/store';
-import { setAllLevelsData, setBranch, setBranchId, setCompanyId, setLastLevelsData, setLoading, setUserId } from '@/store/slices/projectsSlice';
 import { getHierarchyLevelsData, getOrganizationDetailsByToken, getUserDetailsByUserName } from '@/services/appService';
+import {setAllLevelsData, setLastLevelsData, setBranch, setBranchCode, setBranchId, setCompanyId, setLoading, setUserId } from '@/store/slices/projectsSlice';
 
 const FixedHeader: React.FC = () => {
   const navigate=useNavigate();
@@ -23,7 +23,7 @@ const FixedHeader: React.FC = () => {
   const userId = storeData.userId || JSON.parse(localStorage.getItem("LoggedInUser") || "{}")?.UserId;
   const LoggedInUser= JSON.parse(localStorage.getItem("LoggedInUser") || "{}");
   const [companyList, setCompanyList] = useState<{ value: number; label: string }[]>([]);
-  const [branchList, setBranchList] = useState<{ value: string; label: string;id?:string }[]>([]);
+  const [branchList, setBranchList] = useState<{ value: string; label: string;id?:string;code?:string }[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<string | null>('');
   const [selectedBranch, setSelectedBranch] = useState<string>();
 
@@ -87,11 +87,12 @@ const FixedHeader: React.FC = () => {
     try {
       const res = await GetBranchListBasedonCompanyId(compId);
       if (res.success && Array.isArray(res.data) && res.data.length > 0) {
-        const updated = [{ id: "0", Name: "All" }, ...res.data.slice(1)];
+        const updated = [{ id: "0", Name: "All",Code:'All' }, ...res.data.slice(1)];
         const lookupData = updated.map((item: any) => ({
           value: item.Name,
           label: item.Name,
-          id:item.id
+          id:item.id,
+          code:item.Code
         }));
         setBranchList(lookupData);
         if(!localStorage.getItem("Branch")){
@@ -110,6 +111,13 @@ const FixedHeader: React.FC = () => {
           let branchId=lookupData.length>1?lookupData[1].id:lookupData[0].id;
           dispatch(setBranchId(branchId));
           localStorage.setItem("BranchId",branchId);
+        }
+        if(localStorage.getItem("BranchCode")){
+          dispatch(setBranchCode(localStorage.getItem("BranchCode")))
+        }else{
+          let branchCode=lookupData.length>1?lookupData[1].code:lookupData[0].code;
+          dispatch(setBranchCode(branchCode));
+          localStorage.setItem("BranchCode",branchCode);
         }
       }
     } catch (err) {
@@ -170,6 +178,7 @@ const FixedHeader: React.FC = () => {
       setSelectedBranch(null);
       localStorage.removeItem("Branch");
       localStorage.removeItem("BranchId");
+      localStorage.removeItem("BranchCode");
       navigate('/service-desk/all-requests');
     } else if (name === "Branch") {
       setSelectedBranch(value);
@@ -182,6 +191,13 @@ const FixedHeader: React.FC = () => {
         }else{
           dispatch(setBranchId("0"));
           localStorage.setItem("BranchId", "0");
+        }
+        if(branchObj && branchObj.code){
+          dispatch(setBranchCode(branchObj.code));
+          localStorage.setItem("BranchCode", String(branchObj.code));
+        }else{
+          dispatch(setBranchCode(""));
+          localStorage.setItem("BranchCode", "");
         }
       }
       localStorage.setItem("Branch", value || 'All');

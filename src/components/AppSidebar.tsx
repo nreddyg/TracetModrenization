@@ -508,14 +508,8 @@ const navigation: NavItem[] = [
             icon: Wrench,
             link: '/masters/company/maintenance',
           },
-          {
-            label: 'Reports',
-            icon: FileText,
-            link: '/masters/reports',
-          },
         ],
       },
- 
       {
         label: 'Fixed Assets',
         icon: Building2,
@@ -546,24 +540,28 @@ const navigation: NavItem[] = [
         ],
       },
       {
-            label: 'Service Maintenance',
+        label: 'Service Maintenance',
+        icon: Building2,
+        link: '/servicemaintenance',
+        children: [
+          {
+            label: 'Service Locations',
             icon: Building2,
-            link: '/servicemaintenance',
-            children: [
-              {
-                label: 'Service Locations',
-                icon: Building2,
-                link: '/masters/servicemaintenance/servicelocations',
-              },
-              {
-                label: 'Product Masters',
-                icon: Building2,
-                link: '/masters/servicemaintenance/productmaster',
-              },
-            ],
-
+            link: '/masters/servicemaintenance/servicelocations',
           },
-     
+          {
+            label: 'Product Masters',
+            icon: Building2,
+            link: '/masters/servicemaintenance/productmaster',
+          },
+        ],
+
+      },
+      {
+        label: 'Reports',
+        icon: FileText,
+        link: '/masters/reports',
+      },
       // masters/fixed-assets/asset-category
     ],
   },

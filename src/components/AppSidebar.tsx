@@ -735,7 +735,7 @@ const AppSidebar: React.FC = () => {
                             <CollapsibleTrigger className="flex items-center justify-between w-full hover:bg-blue-50">
                               <div className="flex items-center space-x-2">
                                 <child.icon className="h-3 w-3" />
-                                <span>{child.label}</span>
+                                <span className="truncate" title={child.label}>{child.label}</span>
                               </div>
                               {isNestedSubMenuOpen(child) ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
                             </CollapsibleTrigger>

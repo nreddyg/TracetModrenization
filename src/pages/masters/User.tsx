@@ -1,25 +1,23 @@
-import {useEffect, useState } from 'react';
-import { Card, CardContent} from '@/components/ui/card';
+import { useEffect, useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
 import { ChevronRight, ChevronLeft, Search, X, Save, Trash2 } from 'lucide-react';
 import { ReusableButton } from '@/components/ui/reusable-button';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { setLoading } from '@/store/slices/projectsSlice';
-import { AddOrganization, GetCountryList, GetCurrency, GetOrganizationsList, UpdateOrganization } from '@/services/organizationServices';
 import { ReusableDropdown } from '@/components/ui/reusable-dropdown';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Controller, useForm } from 'react-hook-form';
-import { BaseField, GenericObject, UploadFileInput } from '@/Local_DB/types/types';
+import { BaseField, GenericObject } from '@/Local_DB/types/types';
 import { ReusableInput } from '@/components/ui/reusable-input';
 import { ReusableTextarea } from '@/components/ui/reusable-textarea';
 import { ReusableDatePicker } from '@/components/ui/reusable-datepicker';
 import ReusableMultiSelect from '@/components/ui/reusable-multi-select';
-import { ReusableCheckbox } from '@/components/ui/reusable-checkbox';
 import { ReusableRadio } from '@/components/ui/reusable-radio';
 import { useMessage } from '@/components/ui/reusable-message';
-import { convertOrgLogoFromApi, fileToByteArray } from '@/_Helper_Functions/HelperFunctions';
-import axios from 'axios';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, } from '@/components/ui/dialog';
+
 interface User {
   UserId: number,
   FirstName: string,
@@ -49,7 +47,7 @@ interface User {
 const User = () => {
   const dispatch = useAppDispatch();
   const msg = useMessage();
-  let LoggedInUser=JSON.parse(localStorage.getItem('LoggedInUser')) || {};
+  let LoggedInUser = JSON.parse(localStorage.getItem('LoggedInUser')) || {};
   const companyId = useAppSelector(state => state.projects.companyId)
   const [dataSource, setDataSource] = useState<User[]>([]);
   const [fields, setFields] = useState<BaseField[]>(USER_DETAILS);
@@ -65,7 +63,7 @@ const User = () => {
   const [selectedUserData, setSelectedUserData] = useState<User | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isInboxCollapsed, setIsInboxCollapsed] = useState(false);
-
+  const [isDelModalOpen, setIsDelModalOpen] = useState(false);
   const filteredUsers = dataSource.filter(user => {
     const matchesSearch = user.FirstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.LastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -84,24 +82,24 @@ const User = () => {
   }, [companyId]);
   //fetch all lookups data
   const fetchAllLookupsData = async () => {
-    try{
+    try {
       dispatch(setLoading(true));
-      const [roleNames, branches,departments,categories] = await Promise.allSettled([
+      const [roleNames, branches, departments, categories] = await Promise.allSettled([
         getRoleNamesList(companyId),
         GetBranchListBasedonCompanyId(companyId),
         getDepartmentList(companyId),
         getCategoryList(companyId)
       ]);
       let allResponses = {
-        RoleName:{data:roleNames.status === 'fulfilled' && roleNames.value.success && roleNames.value.data && roleNames.value.data.Roles ? roleNames.value.data.Roles.slice(1) : [],label:'RoleName',value:'RoleName'},
-        Branch: {data:branches.status === 'fulfilled' && branches.value.success && branches.value.data && branches.value.data ? branches.value.data : [],label:'Name',value:'Name'},
-        Department:{data:departments.status === 'fulfilled' && departments.value.success && departments.value.data && departments.value.data.DepartmentsLookup ? departments.value.data.DepartmentsLookup : [],label:'DepartmentName',value:'DepartmentName'},
-        Categories: {data:categories.status === 'fulfilled' && categories.value.success && categories.value.data && categories.value.data.CategoriesLookup ? categories.value.data.CategoriesLookup : [],label:'CategoryName',value:'CategoryName'},
+        RoleName: { data: roleNames.status === 'fulfilled' && roleNames.value.success && roleNames.value.data && roleNames.value.data.Roles ? roleNames.value.data.Roles : [], label: 'RoleName', value: 'RoleName' },
+        Branch: { data: branches.status === 'fulfilled' && branches.value.success && branches.value.data && branches.value.data ? branches.value.data.slice(1) : [], label: 'Name', value: 'Name' },
+        Department: { data: departments.status === 'fulfilled' && departments.value.success && departments.value.data && departments.value.data.DepartmentsLookup ? departments.value.data.DepartmentsLookup : [], label: 'DepartmentName', value: 'DepartmentName' },
+        Categories: { data: categories.status === 'fulfilled' && categories.value.success && categories.value.data && categories.value.data.CategoriesLookup ? categories.value.data.CategoriesLookup : [], label: 'CategoryName', value: 'CategoryName' },
       };
       setLookupsDataInJson(allResponses);
-    }catch{
+    } catch {
 
-    }finally{
+    } finally {
       dispatch(setLoading(false));
     }
   }
@@ -116,6 +114,7 @@ const User = () => {
             Branch: res.data[0]?.Branch ? res.data[0].Branch.split(',') : [],
             Department: res.data[0]?.Department ? res.data[0].Department.split(',') : [],
             Categories: res.data[0]?.Categories ? res.data[0].Categories.split(',') : [],
+            JoinDate:res.data[0].JoinDate ? res.data[0].JoinDate.split(' ')[0]:''
           });
           setSelectedUserData(res.data[0]);
         } else {
@@ -134,10 +133,10 @@ const User = () => {
     });
   }
   function setLookupsDataInJson(data: any) {
-    let keys=Object.keys(data);
+    let keys = Object.keys(data);
     const updatedFields = fields.map(field => {
       if (keys.includes(field.name)) {
-        let options= data[field.name].data.map((item: any) => ({label: item[data[field.name].label], value: item[data[field.name].value]}));
+        let options = data[field.name].data.map((item: any) => ({ label: item[data[field.name].label], value: item[data[field.name].value] }));
         return { ...field, options };
       }
       return field;
@@ -151,62 +150,151 @@ const User = () => {
   }
   const handleSave = async (formData: GenericObject) => {
     const isValid = await trigger();
-    if (!isValid) {
-      msg.error("Please fix the validation errors before submitting.");
+    if (!isValid) return msg.error("Please fix the validation errors before submitting.");
+    const baseUser = {
+      FirstName: watch("FirstName"),
+      LastName: watch("LastName"),
+      Email: watch("Email"),
+      MobileNumber: "",
+      PhoneNumber: watch("PhoneNumber"),
+      UserName: watch("UserName"),
+      EmployeeId: watch("EmployeeId"),
+      DeviceName: watch("DeviceName"),
+      Password: watch("Password"),
+      ConfirmPassword: watch("ConfirmPassword"),
+      RoleName: watch("RoleName"),
+      Categories: watch("Categories") ? watch("Categories").join() : "",
+      IsServiceDesk: watch("IsServiceDesk")?.toString() || "false",
+      Department: watch("Department") ? watch("Department").join() : "",
+      Branch: watch("Branch") ? watch("Branch").join() : "",
+      JoinDate: watch("JoinDate") || "",
+    };
+    const roleName = watch("RoleName");
+    const isRootAdmin = roleName === "Root Admin";
+    const isUpdate = !!selectedUserData;
+    const isDeactive = watch("Deactive");
+    const deactiveDateVal = watch("DeactiveDate");
+
+    const validateDeactivation = () => {
+      if (isDeactive && !(deactiveDateVal)) {
+        msg.warning("Deactive Date Cannot Be Blank!!!");
+        return false;
+      }
+      return true;
+    };
+    if (isRootAdmin) {
+      const userPayload = {
+        UserDetails: [
+          {
+            ...baseUser,
+            ...(isUpdate
+              ? {
+                IsDeactive: isDeactive?.toString() || "false",
+                DeactiveDate: deactiveDateVal || "",
+                Department: "",
+                Branch: "",
+                Categories:""
+              }
+              : {}),
+          },
+        ],
+      };
+
+      if (isUpdate) {
+        if (validateDeactivation()) updateUserDetails(userPayload);
+      } else {
+        addUser(userPayload);
+      }
       return;
     }
-    let payload = {
-      "UserDetails": [
+    const normalUserPayload = {
+      UserDetails: [
         {
-          "FirstName": watch("FirstName"),
-          "LastName": watch("LastName"),
-          "Email": watch("Email"),
-          "OrganizationDomain": watch("OrganizationDomain"),
-          "PanNumber": watch("PanNumber"),
-          "AddressLine1": watch("AddressLine1"),
-          "AddressLine2": watch("AddressLine2"),
-          "City": watch("City"),
-          "State": watch("State"),
-          "CountryName": watch("CountryName"),
-          "ZipCode": watch("ZipCode"),
-          "OrganizationEmail": watch("OrganizationEmail"),
-          "OrganizationPhone": watch("OrganizationPhone"),
-          "Website": watch("Website"),
-        }
-      ]
-    }
-    if (selectedUserData) {
-      dispatch(setLoading(true));
-      await updateUser(companyId,selectedUserData.UserId, payload).then(res => {
-        if (res.success) {
-          if (res.data.status) {
-            msg.success(res.data.message || "User Updated Successfully !!");
-            fetchAllUsersList();
-            handleReset();
-          } else if (res.data.ErrorDetails && Array.isArray(res.data.ErrorDetails) && res.data.ErrorDetails.length > 0) {
-            msg.warning(res.data.ErrorDetails[0]['Error Message'] || 'Failed to update organization !!');
-          } else {
-            msg.warning('Failed to update organization !!')
-          }
-        }
-      }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
+          ...baseUser,
+          Department: baseUser.Department,
+          Branch: baseUser.Branch,
+        },
+      ],
+    };
+    if (isUpdate && companyId) {
+      const updatePayload = {
+        UserDetails: normalUserPayload.UserDetails.map((user) => ({
+          ...user,
+          IsDeactive: isDeactive?.toString() || "false",
+          DeactiveDate: deactiveDateVal || "",
+        })),
+      };
+      if (validateDeactivation()) updateUserDetails(updatePayload);
     } else {
-      dispatch(setLoading(true));
-      await createUser(companyId, payload).then(res => {
-        if (res.success) {
-          if (res.data.status) {
-            msg.success(res.data.message || "User Added Successfully !!");
-            fetchAllUsersList();
-            handleReset();
-          } else if (res.data.ErrorDetails && Array.isArray(res.data.ErrorDetails) && res.data.ErrorDetails.length > 0) {
-            msg.warning(res.data.ErrorDetails[0]['Error Message'] || 'Failed to add organization !!');
-          } else {
-            msg.warning('Failed to add organization !!')
-          }
-        }
-      }).catch(err => console.log(err)).finally(() => { dispatch(setLoading(false)) })
+      addUser(normalUserPayload);
     }
-  }
+  };
+  const addUser = async (payload: any) => {
+    dispatch(setLoading(true))
+    try {
+      const res = await createUser(companyId, payload);
+      if (res.success && res.data) {
+        if (res.data.status) {
+          handleReset()
+          msg.success(res.data.message);
+          fetchAllUsersList();
+        } else {
+          msg.warning(res.data.ErrorDetails[0]["Error Message"]);
+        }
+      }
+    } catch (error) {
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
+  const updateUserDetails = async (payload: any) => {
+    dispatch(setLoading(true));
+    try {
+      const res = await updateUser(companyId, selectedUserData?.UserId, payload);
+      if (res.data && res.data.status !== undefined) {
+        if (res.data.status) {
+          msg.success(res.data.message);
+          fetchAllUsersList();
+          if (LoggedInUser.UserId && (selectedUserData.UserId === LoggedInUser.UserId) && payload && payload?.UserDetails[0]?.RoleName === 'Asset User') {
+            logoutFunction();
+          }
+          handleReset();
+        } else {
+          msg.warning(res.data.message);
+        }
+      } else {
+        msg.warning(res.data.ErrorDetails[0]["Error Message"]);
+      }
+    } catch (error) {
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
+  const delUser = async () => {
+    dispatch(setLoading(true));
+    try {
+      const res = await deleteUser(companyId, selectedUserData.UserId);
+      if (res.data[0].status !== undefined) {
+        if (res.data[0].status === true) {
+          if (LoggedInUser.UserId && (selectedUserData.UserId === LoggedInUser.UserId)) {
+            logoutFunction();
+          }
+          msg.success(res.data[0].message);
+          handleReset();
+          fetchAllUsersList();
+        } else {
+          msg.warning(res.data[0].message);
+        }
+      } else {
+        msg.warning("Failed to delete user.");
+      }
+    } catch (err) {
+      msg.warning("Failed to Delete User");
+    } finally {
+      setIsDelModalOpen(false);
+      dispatch(setLoading(false));
+    }
+  };
   const handleReset = () => {
     setSelectedUser(null);
     setSelectedUserData(null);
@@ -216,16 +304,51 @@ const User = () => {
       ZipCode: '', OrganizationEmail: '', OrganizationPhone: '', Website: ''
     });
   };
-
+  const logoutFunction = () => {
+    localStorage.clear();
+    window.location.href = "/login";
+  };
+  const password = watch("Password");
+  useEffect(() => {
+    if(password) trigger("ConfirmPassword");
+  }, [password]); 
   const renderField = (field: BaseField) => {
-    const { name, label, fieldType, isRequired, show = true } = field;
-    if (!name) {
-      return null;
+    const { name, label, fieldType, isRequired, dependsOn, show = true } = field;
+    const roleName = watch("RoleName");
+    const isEditMode = !!selectedUserData;
+    const isAssetUser = roleName === "Asset User";
+    const isRootAdmin = roleName === "Root Admin";
+    const isDeactive = watch("Deactive"); 
+    if (!show || (dependsOn && !watch(dependsOn))) return null;
+    if (!isEditMode) {
+      if (name === "Deactive") return null;
+      if (isAssetUser && ["Password", "ConfirmPassword", "IsServiceDesk"].includes(name)) {
+        return null;
+      }
+      if (isRootAdmin && ["Department", "Categories", "Branch"].includes(name)) {
+        return null;
+      }
     }
+    if (isEditMode) {
+      if (["Password", "ConfirmPassword"].includes(name)) {
+        const prevRoleName = selectedUserData?.RoleName;
+        const hasRoleChangedFromAssetUser =
+          prevRoleName === "Asset User" && roleName !== "Asset User";
+        if (!hasRoleChangedFromAssetUser) return null;
+      }
+      if (isRootAdmin && ["Department", "Categories", "Branch"].includes(name)) {
+        return null;
+      }
+      if (isAssetUser && name === "IsServiceDesk") return null;
+    }
+    if (!isDeactive && name === 'DeactiveDate') return null
     const validationRules = {
-      required: isRequired ? `${label} is Required` : false,
+      required: isRequired ? `${label} is required` : false,
+      ...(name === "ConfirmPassword" && {
+        validate: (value: string) =>
+          value === password || "Passwords do not match",
+      }),
     };
-
     switch (fieldType) {
       case 'text':
       case 'password':
@@ -242,23 +365,7 @@ const User = () => {
                 value={ctrl.value}
                 onChange={ctrl.onChange}
                 error={errors[name]?.message as string}
-              />
-            )}
-          />
-        );
-      case 'textarea':
-        return (
-          <Controller
-            key={name}
-            name={name}
-            control={control}
-            rules={validationRules}
-            render={({ field: ctrl }) => (
-              <ReusableTextarea
-                {...field}
-                value={ctrl.value}
-                onChange={ctrl.onChange}
-                error={errors[name]?.message as string}
+                autoComplete="new-password"
               />
             )}
           />
@@ -276,6 +383,7 @@ const User = () => {
                 value={ctrl.value}
                 onChange={ctrl.onChange}
                 error={errors[name]?.message as string}
+                allowClear
                 dropdownClassName={true ? 'z-[10001]' : ''}
               />
             )}
@@ -318,25 +426,6 @@ const User = () => {
             />
           </div>
         );
-      case 'numeric':
-        return (
-          <Controller
-            key={name}
-            name={name}
-            control={control}
-            rules={validationRules}
-            render={({ field: ctrl }) => (
-              <ReusableInput
-                {...field}
-                type="number"
-                value={ctrl.value}
-                onChange={ctrl.onChange}
-                error={errors[name]?.message as string}
-              />
-            )}
-          />
-        );
-
       case 'checkbox':
         return (
           <Controller
@@ -345,31 +434,14 @@ const User = () => {
             control={control}
             rules={validationRules}
             render={({ field: ctrl }) => (
-              <ReusableCheckbox
+              <ReusableSingleCheckbox
                 {...field}
                 value={ctrl.value}
                 onChange={ctrl.onChange}
-                error={errors[name]?.message as string}
               />
             )}
           />
         );
-      case 'radiobutton': return (
-        <Controller
-          key={name}
-          name={name}
-          control={control}
-          rules={validationRules}
-          render={({ field: ctrl }) => (
-            <ReusableRadio
-              {...field}
-              value={ctrl.value}
-              onChange={ctrl.onChange}
-              error={errors[name]?.message as string}
-            />
-          )}
-        />
-      );
       default:
         return null;
     }
@@ -378,7 +450,7 @@ const User = () => {
     <div className="h-full   bg-gray-50 flex flex-col ">
       <div className="flex flex-1 overflow-hidden   ">
         {/* Left Sidebar - Ticket Inbox */}
-        {dataSource.length!==0 && <div className={`${isInboxCollapsed ? 'w-6 p-1' : 'w-34 p-2 mb-2 rounded-b-[5px]'} bg-white border-r    border-0 shadow-lg flex pb-3 flex-col transition-all duration-300 shrink-0 hidden lg:flex`}>
+        {dataSource.length !== 0 && <div className={`${isInboxCollapsed ? 'w-6 p-1' : 'w-34 p-2 mb-2 rounded-b-[5px]'} bg-white border-r    border-0 shadow-lg flex pb-3 flex-col transition-all duration-300 shrink-0 hidden lg:flex`}>
           <div className="pt-1 shrink-0">
             <div className="flex items-center justify-between mb-2">
               <h3 className={`font-semibold text-gray-900 ${isInboxCollapsed ? 'hidden' : ''}`}>
@@ -390,7 +462,6 @@ const User = () => {
             </div>
             {!isInboxCollapsed && (
               <div className="space-y-2 pb-1">
-
                 {/* Search */}
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -404,7 +475,6 @@ const User = () => {
               </div>
             )}
           </div>
-
           {!isInboxCollapsed && (
             <ScrollArea hideScrollbar={true} className="flex-1 min-h-0 mb-2 truncate max-w-[250px] block">
               <div className="py-2">
@@ -415,7 +485,7 @@ const User = () => {
                       ? 'bg-blue-50 border-l-4 border-blue-500'
                       : 'border border-gray-200'
                       }`}
-                    onClick={LoggedInUser?.RoleName !== 'Root Admin' && user.RoleName==='Root Admin' ? undefined : () => handleSelect(user) }
+                    onClick={LoggedInUser?.RoleName !== 'Root Admin' && user.RoleName === 'Root Admin' ? undefined : () => handleSelect(user)}
                   >
                     <div className="flex items-center justify-between mb-1.5">
                       <span className="text-xs font-medium text-blue-600 me-2">{user.UserName}</span>
@@ -434,7 +504,6 @@ const User = () => {
                     >
                       {user?.Email}
                     </h3>
-
                     <div className="flex items-center justify-between gap-1.5 text-[11px] text-gray-500">
                       <Badge
                         title="Organization Type"
@@ -444,27 +513,23 @@ const User = () => {
                         {user?.EmployeeId}
                       </Badge>
                       {
-                        user?.RoleName!=='Root Admin' && 
+                        user?.RoleName !== 'Root Admin' &&
                         <div>
-                        <span
-                        title={user.MobileNumber}
-                        className="block max-w-[90px] truncate text-[11px] text-gray-500"
-                      >
-                        <Trash2 height={18} className='text-red-400'></Trash2>
-                      </span>
-                      </div>
+                          <span
+                            title={user.MobileNumber}
+                            className="block max-w-[90px] truncate text-[11px] text-gray-500"
+                          >
+                            <Trash2 height={18} className='text-red-400' onClick={()=>setIsDelModalOpen(true)}></Trash2>
+                          </span>
+                        </div>
                       }
-                      
-
                     </div>
                   </div>
                 ))}
               </div>
             </ScrollArea>
-
           )}
         </div>}
-
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col min-w-0 ">
           {/* Navigation and Action Bar */}
@@ -516,10 +581,7 @@ const User = () => {
                                 if (obj.fieldType === "heading") {
                                   return <h3 key={obj.text} className='text-lg font-semibold text-gray-900 border-b col-span-full pb-2'>{obj.text}</h3>
                                 }
-                                return (
-                                  <div key={obj.name}>
-                                    {renderField(obj)}
-                                  </div>
+                                return (<>{renderField(obj)}</>
                                 )
                               })
                             }
@@ -534,6 +596,31 @@ const User = () => {
           </div>
         </div>
       </div>
+      <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Confirm the action</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete {selectedUserData?.UserName}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <ReusableButton
+              variant="default"
+              onClick={() => setIsDelModalOpen(false)}
+            >
+              Cancel
+            </ReusableButton>
+            <ReusableButton
+              variant="primary"
+              danger={true}
+              onClick={delUser}
+            >
+              Delete
+            </ReusableButton>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
@@ -552,12 +639,13 @@ import { useCallback } from 'react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { CardHeader } from '@/components/ui/card';
 import { ReusableTable, TableAction, TablePermissions } from '@/components/ui/reusable-table';
-import {  Plus, Edit } from 'lucide-react';
+import { Plus, Edit } from 'lucide-react';
 import { ColumnDef } from '@tanstack/react-table';
 import { useToast } from '@/hooks/use-toast';
-import { createUser, getCategoryList, getDepartmentList, getRoleNamesList, GetUsersList, updateUser } from '@/services/userServices';
+import { createUser, deleteUser, getCategoryList, getDepartmentList, getRoleNamesList, GetUsersList, updateUser } from '@/services/userServices';
 import { USER_DETAILS } from '@/Local_DB/Form_JSON_Data/UserDB';
 import { GetBranchListBasedonCompanyId } from '@/services/headerServices';
+import ReusableSingleCheckbox from '@/components/ui/reusable-single-checkbox';
 
 interface UserData {
   UserId: number,
@@ -584,8 +672,8 @@ interface UserData {
   Password: string,
   ConfirmPassword: string
 }
-const Positive='border font-medium text-xs px-2 py-0.5 bg-green-50 text-green-700 border-green-200 hover:bg-green-600 hover:text-white transition-colors';
-const Negative='border font-medium text-xs px-2 py-0.5 bg-red-50 text-red-700 border-red-200 hover:bg-red-600 hover:text-white transition-colors'
+const Positive = 'border font-medium text-xs px-2 py-0.5 bg-green-50 text-green-700 border-green-200 hover:bg-green-600 hover:text-white transition-colors';
+const Negative = 'border font-medium text-xs px-2 py-0.5 bg-red-50 text-red-700 border-red-200 hover:bg-red-600 hover:text-white transition-colors'
 export const User1 = () => {
   const { toast } = useToast();
   const dispatch = useAppDispatch();
@@ -599,14 +687,17 @@ export const User1 = () => {
     { id: 'EmployeeId', accessorKey: "EmployeeId", header: "Employee ID" },
     { id: 'Email', accessorKey: "Email", header: "Email ID" },
     { id: 'PhoneNumber', accessorKey: "PhoneNumber", header: "Mobile Number" },
-    { id: 'Status', accessorKey: "Status", header: "Status", cell: ({ row }) => (
-      row.original.Deactive ? <Badge title='Status' className={Negative}>Deactive</Badge> : <Badge title='Status' className={Positive}>Active</Badge>
-    ) },
-    { id: 'IsServiceDesk', accessorKey: "IsServiceDesk", header: "Is Service Desk User",
+    {
+      id: 'Status', accessorKey: "Status", header: "Status", cell: ({ row }) => (
+        row.original.Deactive ? <Badge title='Status' className={Negative}>Deactive</Badge> : <Badge title='Status' className={Positive}>Active</Badge>
+      )
+    },
+    {
+      id: 'IsServiceDesk', accessorKey: "IsServiceDesk", header: "Is Service Desk User",
       cell: ({ row }) => (
         row.original.IsServiceDesk ? <Badge title='Is Service Desk User' className={Positive}>Yes</Badge> : <Badge title='Is Service Desk User' variant="destructive" className={Negative}>No</Badge>
       )
-     },
+    },
   ])
 
   useEffect(() => {
@@ -618,7 +709,7 @@ export const User1 = () => {
     await GetUsersList(companyId).then(res => {
       if (res.success && res.data && Array.isArray(res.data)) {
         setDataSource(res.data);
-      }else{
+      } else {
         setDataSource([]);
       }
     }).catch(err => console.log(err)).finally(() => {
@@ -645,8 +736,8 @@ export const User1 = () => {
   ];
   // handle refresh
   const handleRefresh = useCallback(() => {
-      toast({ title: "Data Refreshed", description: "All users data has been updated", });
-      fetchAllUsersList();
+    toast({ title: "Data Refreshed", description: "All users data has been updated", });
+    fetchAllUsersList();
   }, [toast]);
   // Define table permissions
   const tablePermissions: TablePermissions = {

@@ -122,7 +122,7 @@ const navigation: NavItem[] = [
       {
         label: 'Ticket Progress Dashboard',
         icon: TrendingUp,
-        link: '/service-desk/ticket-progress',
+        link: '/service-desk/ticket-progress-dashboard',
       },
 
       // {

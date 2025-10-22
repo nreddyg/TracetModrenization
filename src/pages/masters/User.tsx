@@ -317,8 +317,10 @@ const User = () => {
   const handleReset = () => {
     if(selectedUserData){
       let field=fields.find(f=>f.name==='Branch');
-      if(field){
+      let field1=fields.find(f=>f.name==='Categories');
+      if(field && field1){
         field.options=branchAndCategoriesList.Branch.map(ele=>({label:ele['Name'],value:ele['Name']}))
+        field1.options=branchAndCategoriesList.Categories.map(ele=>({label:ele['CategoryName'],value:ele['CategoryName']}))
       }
     }
     setSelectedUser(null);

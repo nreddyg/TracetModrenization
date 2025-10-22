@@ -64,6 +64,7 @@ const User = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isInboxCollapsed, setIsInboxCollapsed] = useState(false);
   const [isDelModalOpen, setIsDelModalOpen] = useState(false);
+  const [branchAndCategoriesList,setBranchAndCategoriesList]=useState({Branch:[],Categories:[]})
   const filteredUsers = dataSource.filter(user => {
     const matchesSearch = user.FirstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.LastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -91,11 +92,12 @@ const User = () => {
         getCategoryList(companyId)
       ]);
       let allResponses = {
-        RoleName: { data: roleNames.status === 'fulfilled' && roleNames.value.success && roleNames.value.data && roleNames.value.data.Roles ? roleNames.value.data.Roles : [], label: 'RoleName', value: 'RoleName' },
+        RoleName: { data: roleNames.status === 'fulfilled' && roleNames.value.success && roleNames.value.data && roleNames.value.data.Roles ? LoggedInUser?.RoleName==='Root Admin'? roleNames.value.data.Roles :roleNames.value.data.Roles.filter(ele=>ele.RoleName!=='Root Admin')  : [], label: 'RoleName', value: 'RoleName' },
         Branch: { data: branches.status === 'fulfilled' && branches.value.success && branches.value.data && branches.value.data ? branches.value.data.slice(1) : [], label: 'Name', value: 'Name' },
         Department: { data: departments.status === 'fulfilled' && departments.value.success && departments.value.data && departments.value.data.DepartmentsLookup ? departments.value.data.DepartmentsLookup : [], label: 'DepartmentName', value: 'DepartmentName' },
         Categories: { data: categories.status === 'fulfilled' && categories.value.success && categories.value.data && categories.value.data.CategoriesLookup ? categories.value.data.CategoriesLookup : [], label: 'CategoryName', value: 'CategoryName' },
       };
+      setBranchAndCategoriesList({Branch:allResponses.Branch.data,Categories:allResponses.Categories.data});
       setLookupsDataInJson(allResponses);
     } catch {
 
@@ -103,6 +105,23 @@ const User = () => {
       dispatch(setLoading(false));
     }
   }
+
+  useEffect(()=>{
+    if (LoggedInUser?.RoleName !== 'Root Admin' && selectedUserData) {
+      let field = fields.find(obj => obj.name === 'Branch');
+      let field1=fields.find(obj=>obj.name==='Categories');
+      let branchData=branchAndCategoriesList.Branch.map(ele=>ele['Name']);
+      let catData=branchAndCategoriesList.Categories.map(ele=>ele['CategoryName'])
+      field.options = selectedUserData.Branch
+        ? [...new Set([...branchData, ...selectedUserData.Branch.split(',')])]
+          .map(ele => ({ label: ele, value: ele }))
+        : branchData.map(ele=>({ label: ele, value: ele }));
+      field1.options = selectedUserData.Categories
+        ? [...new Set([...catData, ...selectedUserData.Categories.split(',')])]
+          .map(ele => ({ label: ele, value: ele }))
+        : catData.map(ele => ({ label: ele, value: ele }));
+    }
+  },[selectedUserData,LoggedInUser])
   //fetch all users list
   const fetchAllUsersList = async (UserId?: number) => {
     dispatch(setLoading(true));
@@ -296,6 +315,12 @@ const User = () => {
     }
   };
   const handleReset = () => {
+    if(selectedUserData){
+      let field=fields.find(f=>f.name==='Branch');
+      if(field){
+        field.options=branchAndCategoriesList.Branch.map(ele=>({label:ele['Name'],value:ele['Name']}))
+      }
+    }
     setSelectedUser(null);
     setSelectedUserData(null);
     form.reset({
@@ -485,7 +510,7 @@ const User = () => {
                       ? 'bg-blue-50 border-l-4 border-blue-500'
                       : 'border border-gray-200'
                       }`}
-                    onClick={LoggedInUser?.RoleName !== 'Root Admin' && user.RoleName === 'Root Admin' ? undefined : () => handleSelect(user)}
+                    onClick={LoggedInUser?.RoleName !== 'Root Admin' && (user.RoleName === 'Root Admin' || LoggedInUser?.UserId===user.UserId) ? undefined : () => handleSelect(user)}
                   >
                     <div className="flex items-center justify-between mb-1.5">
                       <span className="text-xs font-medium text-blue-600 me-2">{user.UserName}</span>
@@ -513,7 +538,7 @@ const User = () => {
                         {user?.EmployeeId}
                       </Badge>
                       {
-                        user?.RoleName !== 'Root Admin' &&
+                      (user?.RoleName !== 'Root Admin' && LoggedInUser?.UserId!==user.UserId) &&
                         <div>
                           <span
                             title={user.MobileNumber}

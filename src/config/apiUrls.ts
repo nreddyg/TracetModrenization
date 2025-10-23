@@ -199,9 +199,13 @@ export const URL_GET_ASSET_CATEGORY_DATA = `/api/Masters/GetAssetCategoriesByCom
 export const URL_POST_ASSET_CATEGORY_DATA = `/api/Masters/AddAssetCategoryDetails`;
 export const URL_UPDATE_ASSET_CATEGORY_DATA = `/api/Masters/UpdateAssetCategoryDetails`;
 export const URL_DELETE_ASSET_CATEGORY_REC = `/api/Masters/DeleteAssetCategoryById`;
+export const URL_USER_ATTRIBUTES = `/api/Masters/GetUserAttributesByCompanyId`;
+export const URL_COST_BREAKUP_ATTRIBUTES = `/api/Masters/GetCostBreakupAttributesByCompanyId`;
+
 // Masters Item Master 
 export const URL_GET_ITEM_MASTER_DATA = `/api/Masters/GetItemMasterDetailsByCompanyId`;
 export const URL_DELETE_ITEM_MASTER = `/api/Masters/DeleteItemMaster`;
 export const URL_POST_NEW_ITEM_MASTER = `/api/Masters/AddItemMasterDetails`;
 export const URL_POST_UPDATE_ITEM_MASTER = `/api/Masters/UpdateItemMasterDetails`;
+
 

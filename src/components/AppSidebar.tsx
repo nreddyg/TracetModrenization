@@ -525,6 +525,11 @@ const navigation: NavItem[] = [
             icon: BarChart,
             link: '/masters/consumables/item-master',
           },
+          {
+            label: 'Item Category',
+            icon: BarChart,
+            link: '/masters/consumables/item-category',
+          },
         ],
       },
       {

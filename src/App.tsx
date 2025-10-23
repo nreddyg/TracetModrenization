@@ -21,6 +21,7 @@ import AssetLocation from "./pages/masters/AssetLocation";
 import Store from "./pages/masters/Store";
 import AssetCategory from "./pages/masters/fixedAssets/AssetCategory"
 import ItemMaster from "./pages/masters/ItemMaster";
+import ItemCategory from "./pages/masters/ItemCategory";
 
 // Lazy load all pages
 const Index = WrapperLazyComponent(() => import("./pages/Index"));
@@ -213,6 +214,7 @@ const AnimatedRoutes = () => {
                   <Route path="/masters/fixed-assets/asset-category" element={<AssetCategory/>} />
                   <Route path="/masters/consumables/store" element={<Store/>} />
                   <Route path="/masters/consumables/item-master" element={<ItemMaster/>} />
+                  <Route path="/masters/consumables/item-category" element={<ItemCategory/>} />
 
                   {/* CWIP */}
                   <Route path="/cwip/project-management" element={<ProjectManagement />} />

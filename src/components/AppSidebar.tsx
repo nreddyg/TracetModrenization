@@ -43,7 +43,10 @@ import {
   TrendingUp,
   Shield,
   UserRoundCheckIcon,
-  UserPlus
+  UserPlus,
+  User,
+  UserCheck,
+  UserCog
 } from 'lucide-react';
 
 interface NavItem {
@@ -119,7 +122,7 @@ const navigation: NavItem[] = [
       {
         label: 'Ticket Progress Dashboard',
         icon: TrendingUp,
-        link: '/service-desk/ticket-progress',
+        link: '/service-desk/ticket-progress-dashboard',
       },
 
       // {
@@ -481,6 +484,21 @@ const navigation: NavItem[] = [
             link: '/masters/company/costcenter',
           },
           {
+            label: 'User',
+            icon: User,
+            link: '/masters/company/user',
+          },
+          {
+            label: 'Vendor',
+            icon: UserCheck,
+            link: '/masters/company/vendor',
+          },
+          {
+            label: 'Customer',
+            icon: UserCog,
+            link: '/masters/company/customer',
+          },
+          {
             label: 'Assets & Inventory',
             icon: Package,
             link: '/masters/company/assets-inventory',
@@ -490,14 +508,8 @@ const navigation: NavItem[] = [
             icon: Wrench,
             link: '/masters/company/maintenance',
           },
-          {
-            label: 'Reports',
-            icon: FileText,
-            link: '/masters/reports',
-          },
         ],
       },
- 
       {
         label: 'Fixed Assets',
         icon: Building2,
@@ -533,24 +545,28 @@ const navigation: NavItem[] = [
         ],
       },
       {
-            label: 'Service Maintenance',
+        label: 'Service Maintenance',
+        icon: Building2,
+        link: '/servicemaintenance',
+        children: [
+          {
+            label: 'Service Locations',
             icon: Building2,
-            link: '/servicemaintenance',
-            children: [
-              {
-                label: 'Service Locations',
-                icon: Building2,
-                link: '/masters/servicemaintenance/servicelocations',
-              },
-              {
-                label: 'Product Masters',
-                icon: Building2,
-                link: '/masters/servicemaintenance/productmaster',
-              },
-            ],
-
+            link: '/masters/servicemaintenance/servicelocations',
           },
-     
+          {
+            label: 'Product Masters',
+            icon: Building2,
+            link: '/masters/servicemaintenance/productmaster',
+          },
+        ],
+
+      },
+      {
+        label: 'Reports',
+        icon: FileText,
+        link: '/masters/reports',
+      },
       // masters/fixed-assets/asset-category
     ],
   },
@@ -722,7 +738,7 @@ const AppSidebar: React.FC = () => {
                             <CollapsibleTrigger className="flex items-center justify-between w-full hover:bg-blue-50">
                               <div className="flex items-center space-x-2">
                                 <child.icon className="h-3 w-3" />
-                                <span>{child.label}</span>
+                                <span className="truncate" title={child.label}>{child.label}</span>
                               </div>
                               {isNestedSubMenuOpen(child) ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
                             </CollapsibleTrigger>

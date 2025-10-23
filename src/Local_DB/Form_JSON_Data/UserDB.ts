@@ -48,7 +48,6 @@ export const USER_DETAILS:BaseField[] = [
         name: 'ConfirmPassword',
         placeholder: '',
         isRequired: true,
-        dependsOn: "Password",
     },
     {
         label: 'Phone No',
@@ -94,7 +93,8 @@ export const USER_DETAILS:BaseField[] = [
         label: 'Service Desk User',
         fieldType: "checkbox",
         name: "IsServiceDesk",
-        isRequired: false
+        isRequired: false,
+        defaultValue:false
     },
     {
         label: 'Branch',
@@ -125,6 +125,7 @@ export const USER_DETAILS:BaseField[] = [
         fieldType: "checkbox",
         name: "Deactive",
         isRequired: false,
+        defaultValue:false,
     },
     {
         label: 'Deactive Date',
@@ -133,6 +134,5 @@ export const USER_DETAILS:BaseField[] = [
         placeholder: 'DD-MM-YYYY',
         format: 'DD-MM-YYYY',
         isRequired: false,
-        dependsOn: "Deactive",
     },
 ]

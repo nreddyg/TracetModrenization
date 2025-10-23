@@ -50,6 +50,7 @@ const AssetsMasters = WrapperLazyComponent(() => import("./pages/masters/AssetsM
 const MaintenanceMasters = WrapperLazyComponent(() => import("./pages/masters/MaintenanceMasters"));
 const ReportsMasters = WrapperLazyComponent(() => import("./pages/masters/ReportsMasters"));
 const ServiceLocations=WrapperLazyComponent(() => import("./pages/masters/ServiceLocations"));
+const ProductMasters=WrapperLazyComponent(() => import("./pages/masters/ProductMasters"));
 
 // CWIP
 const ProjectManagement = WrapperLazyComponent(() => import("./pages/cwip/ProjectManagement"));
@@ -209,6 +210,7 @@ const AnimatedRoutes = () => {
                   <Route path="/masters/reports" element={<ReportsMasters />} />
                   <Route path="/masters/asset-location" element={<AssetLocation />} />
                   <Route path="/masters/servicemaintenance/servicelocations" element={<ServiceLocations />} />
+                  <Route path='/masters/servicemaintenance/productmaster' element={<ProductMasters/>}/>
                   <Route path="/masters/store" element={<Store/>} />
                   <Route path="/masters/fixed-assets/asset-category" element={<AssetCategory/>} />
                   <Route path="/masters/consumables/store" element={<Store/>} />

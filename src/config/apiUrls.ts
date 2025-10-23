@@ -194,6 +194,8 @@ export const URL_DELETE_COSTCENTER=`/api/Masters/DeleteCostCenterDetailsById`;
 //Masters Service locations
  export const URL_GET_SERVICELOCATIONS_LIST=`/api/Masters/GetServiceLocationDetailsByCompanyId`;
  export const URL_POST_SERVICELOCATIONS=`/api/Masters/AddServiceMaintenaceLocations`;
+ export const URL_DELETE_SERVICELOCATIONS=`/api/Masters/DeleteServiceLocationById`;
+ export const URL_UPDATE_SERVICE_LOCATIONS=`/api/Masters/UpdateServiceMaintenanceLocations`;
 // Master's fixed Assets Asset Category
 export const URL_GET_ASSET_CATEGORY_DATA = `/api/Masters/GetAssetCategoriesByCompanyId`;
 export const URL_POST_ASSET_CATEGORY_DATA = `/api/Masters/AddAssetCategoryDetails`;
@@ -204,4 +206,11 @@ export const URL_GET_ITEM_MASTER_DATA = `/api/Masters/GetItemMasterDetailsByComp
 export const URL_DELETE_ITEM_MASTER = `/api/Masters/DeleteItemMaster`;
 export const URL_POST_NEW_ITEM_MASTER = `/api/Masters/AddItemMasterDetails`;
 export const URL_POST_UPDATE_ITEM_MASTER = `/api/Masters/UpdateItemMasterDetails`;
+//Masters Product masters
+export const URL_PRODUCT_MASTERS=`/api/Masters/GetProductMasterDetailsByCompanyId`;
+export const URL_POST_PRODUCTS=`/api/Masters/AddProductDetails`;
+export const URL_EDIT_PRODUCTS=`/api/Masters/GetProductMasterDetailsByCompanyId`;
+export const URL_UPDATE_PRODUCTS=`/api/Masters/UpdateProductDetails`;
+export const URL_DELETE_PRODUCTS=`/api/Masters/DeleteProductMasterById`;
+
 

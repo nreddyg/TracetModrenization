@@ -274,7 +274,7 @@ const AnimatedRoutes = () => {
                   <Route path="/service-desk/work-management" element={<WorkManagement />} />
                   <Route path="/service-desk/administration" element={<Administration />} />
                   <Route path="/service-desk/reports" element={<ServiceDeskReports />} />
-                  <Route path="/service-desk/ticket-progress" element={<TicketProgressDashboard />} />
+                  <Route path="/service-desk/ticket-progress-dashboard" element={<TicketProgressDashboard />} />
 
                   {/* Utilities */}
                   <Route path="/utilities/printing-codes" element={<PrintingCodes />} />

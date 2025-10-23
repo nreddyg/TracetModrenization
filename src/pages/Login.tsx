@@ -41,7 +41,7 @@ const Login = () => {
 
   useEffect(() => {
     if (localStorage.getItem('Token')) {
-      navigate('/service-desk/all-requests')
+      navigate('/service-desk/ticket-progress-dashboard')
     }
   }, [])
   const renderField = (field: BaseField, icon) => {
@@ -89,7 +89,7 @@ const Login = () => {
         if(res.data.access_token)
         localStorage.setItem('Token',JSON.stringify(res.data.access_token));
         localStorage.setItem('UserName',JSON.stringify(watch('Username')));
-        navigate('/service-desk/all-requests')
+        navigate('/service-desk/ticket-progress-dashboard')
       }
       else{
         localStorage.setItem('UserName','');

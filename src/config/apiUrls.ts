@@ -209,3 +209,6 @@ export const URL_POST_NEW_ITEM_MASTER = `/api/Masters/AddItemMasterDetails`;
 export const URL_POST_UPDATE_ITEM_MASTER = `/api/Masters/UpdateItemMasterDetails`;
 
 
+// Item Cateory
+export const URL_GET_ITEM_CATEGORY = `/api/Masters/GetItemCategoryDetailsByCompanyId`;
+

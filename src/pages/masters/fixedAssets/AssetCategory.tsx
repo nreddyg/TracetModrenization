@@ -311,7 +311,7 @@ const AssetCategory = () => {
         canAdd: true,
         canManageColumns: false,
     };
-console.log("subRecord",subRecord);
+    console.log("subRecord", subRecord);
 
     const getFieldsByNames = (names: string[]) => mainCatfields.filter(f => names.includes(f.name!));
     // const percentage = watch("salvagevalue_unit");
@@ -651,7 +651,7 @@ console.log("subRecord",subRecord);
             setIsSubDialogOpen(true);
             handleSubReset();
             setSubRecID(null);
-            setSubRecord({ Name: '', AssetCategoryId: 0, CostBreakupGroupNames:null });
+            setSubRecord({ Name: '', AssetCategoryId: 0, CostBreakupGroupNames: null });
         } else {
             setIsMainDialogOpen(false);
             setIsSubDialogOpen(false);

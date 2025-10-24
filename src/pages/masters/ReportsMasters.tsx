@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Eye, RefreshCw, Save, Search, Settings2 } from 'lucide-react';
@@ -75,24 +75,31 @@ const ReportsMasters = () => {
   });
   const { control, register, handleSubmit, trigger, watch, setValue, reset, formState: { errors } } = form;
   
+  useEffect(()=>{
+    if(companyId && branchName) fetchAllLookups()
+  },[companyId,branchName])
   const fetchAllLookups=async()=>{
     try{
       dispatch(setLoading(true));
-      // const [CompanyHierarchy,Dept,CostCenter,AssetLoc,AssetCat,User,Vendor,Customer,SL,CL]=Promise.allSettled([
-      // getCompanyHierarchy(companyId),
-      // getDepartmentData(companyId)
-      // getAssetLocationDetals(companyId,branchName),
-      // getCostCenterData(companyId),
-      // getAssetCategoryData(companyId),
-      // GetUsersList(companyId),
-      // getVendorDetails(companyId),
-      // GetCustomersList(companyId,branchName),
-      // getServiceLocationData(companyId),
-      // getCustomerLocations(companyId)
-
-
-      // ])
-
+      const [CompanyHierarchy, Dept, CostCenter, AssetLoc, AssetCat, User, Vendor, Customer, SL, CL] = await Promise.allSettled([
+        getCompanyHierarchy(companyId),getDepartmentData(companyId),getCostCenterData(companyId),
+        getAssetLocationDetals(companyId, branchName),getAssetCategoryData(companyId),GetUsersList(companyId),
+        getVendorDetails(companyId),GetCustomersList(companyId, branchName),getServiceLocationData(companyId),
+        getCustomerLocations(companyId)
+      ])
+      let responses={
+        CompanyHierarchy:{data:CompanyHierarchy.status==='fulfilled' && CompanyHierarchy.value.data && Array.isArray(CompanyHierarchy.value.data) ? CompanyHierarchy.value.data:[],label:'Name',value:'id'},
+        Department:{data:Dept.status==='fulfilled' && Dept.value.data && Array.isArray(Dept.value.data)? Dept.value.data:[],label:'Name',value:'id'},
+        CostCenter:{data:CostCenter.status==='fulfilled' && CostCenter.value.data && Array.isArray(CostCenter.value.data)?CostCenter.value.data:[],label:'Name',value:'id'},
+        AssetLocation:{data:AssetLoc.status==='fulfilled' && AssetLoc.value.data && Array.isArray(AssetLoc.value.data) ? AssetLoc.value.data :[],label:'Name',value:'orginalId'},
+        AssetCategory:{data:AssetCat.status==='fulfilled' && AssetCat.value.data && Array.isArray(AssetCat.value.data)?AssetCat.value.data:[],label:'Name',value:'AssetCategoryId'},
+        User:{data:User.status==='fulfilled' && User.value.data && Array.isArray(User.value.data) ? User.value.data:[],label:'UserName',value:'UserId'},
+        VendorType:{data:Vendor.status==='fulfilled' && Vendor.value.data && Vendor.value.data.Vendors && Array.isArray(Vendor.value.data.Vendors) ? Vendor.value.data.Vendors:[],label:'VendorType',value:'VendorTypeID'},
+        Customer:{data:Customer.status==='fulfilled' && Customer.value.data && Customer.value.data.Customers && Array.isArray(Customer.value.data.Customers) ?Customer.value.data.Customers:[],label:'CustomerName',value:'CustomerID'},
+        ServiceLocations:{data:SL.status==='fulfilled' && SL.value.data && Array.isArray(SL.value.data) ? SL.value.data : [],label:'LocationName',value:'id'},
+        CustomerLocations:{data:CL.status==='fulfilled' && CL.value.data && CL.value.data.CustomerLocation && Array.isArray(CL.value.data.CustomerLocation) ? CL.value.data.CustomerLocation : [],label:'LocationName',value:'LocationId'}
+      }
+      console.log('responses',responses)
     }catch{}finally{ dispatch(setLoading(false)) }
 
   }

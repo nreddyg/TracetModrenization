@@ -211,4 +211,9 @@ export const URL_POST_UPDATE_ITEM_MASTER = `/api/Masters/UpdateItemMasterDetails
 
 // Item Cateory
 export const URL_GET_ITEM_CATEGORY = `/api/Masters/GetItemCategoryDetailsByCompanyId`;
+export const URL_UNIT_OF_MEASURE = `/api/Masters/GetUOMDetailsByCompanyId`;
+export const URL_ADD_ITEM_CATEGORY = `/api/Masters/AddItemCategoryDetails`;
+export const URL_UPDATE_ITEM_CATEGORY = `/api/Masters/UpdateItemCategoryDetails`;
+export const URL_DELETE_ITEM_CATEGORY = `/api/Masters/DeleteItemCategoriesById`;
+export const URL_ITEM_CATEGORY_BY_ID = `/api/Masters/GetItemCategoryDetails`;
 

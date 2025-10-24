@@ -21,9 +21,11 @@ import { BaseField, GenericObject } from '@/Local_DB/types/types';
 import ReusableMultiSelect from '@/components/ui/reusable-multi-select';
 import { FaSearch } from 'react-icons/fa';
 import { ITEM_CATEGORY_DB } from '@/Local_DB/Form_JSON_Data/ItemCategoryDB';
+import { deleteItemCat, getItemCategoryData, getItemtCatByID, getUnitOfMeasure, postItemCatDetails, updateItemCat } from '@/services/itemCategoryServices';
+import { sub } from 'date-fns';
 
 interface MainCategory {
-    Name: string
+    CategoryName: string
 }
 
 interface SubCategory {
@@ -43,22 +45,20 @@ const ItemCategory = () => {
     const [subDataToShow, setSubDataToShow] = useState([]);
     const [recordToEditId, setRecordToEditId] = useState(null);
     const [subRecID, setSubRecID] = useState(null);
-    const [subRecord, setSubRecord] = useState({ Name: '', AssetCategoryId: 0, CostBreakupGroupNames: null });
+    const [subRecord, setSubRecord] = useState({ CategoryName: '', CategoryId: 0 });
     const [itemCatFields, setItemCatFields] = useState<BaseField[]>(ITEM_CATEGORY_DB);
-    const [mainDelRec, setMainDelRec] = useState({ Name: '', AssetCategoryId: 0 });
+    const [mainDelRec, setMainDelRec] = useState({ CategoryName: '', CategoryId: 0 });
     const [isMainEdit, setIsMainEdit] = useState(false);
-    const [selectedParentData, setSelectedParentData] = useState({});
+    const [selectedParentData, setSelectedParentData] = useState({ CategoryId: 0, CategoryName: '', CategoryCode: '', CategoryDescription: '', CategoryUnitOfMeasureName: '' });
     const companyId = useAppSelector(state => state.projects.companyId);
     const branch = useAppSelector(state => state.projects.branch) || '';
     const msg = useMessage()
     const dispatch = useAppDispatch();
-    console.log("selectedParentData", selectedParentData);
 
     useEffect(() => {
         if (companyId) {
-            // getCategoryDetails(companyId);
-            // getuserAttributes(companyId)
-            // getCostBreakUpData(companyId)
+            getItemCategoryDetails(companyId);
+            getUnitOfMeasureDetails(companyId)
         }
     }, [companyId])
 
@@ -70,29 +70,27 @@ const ItemCategory = () => {
         // salvagevalue_unit: '%',
     });
 
-
     const { control, register, handleSubmit, watch, setValue, reset, formState: { errors } } = form;
-    console.log("FORMvALUES", form.getValues());
+
     const parentId = watch('mainCatdropdown');
 
     useEffect(() => {
         if (parentId) {
-            getAssetCategoryByID(parentId, companyId, false)
+            getItemCategoryByID(parentId, companyId, false)
+            // settingSubdata(parentId);
         }
     }, [parentId])
-
     useEffect(() => {
-        if (parentId) settingSubdata(parentId);
+        if (parentId) {
+            // getAssetCategoryByID(parentId, companyId, false)
+            settingSubdata(parentId);
+        }
     }, [parentId, subCategoryData])
-
-    console.log("selectedParentData", selectedParentData)
-
-    // const [subCatgory] = useState<SubCategory[]>([]);
 
     const settingSubdata = (val) => {
         let subdata = []
         subCategoryData.forEach((obj) => {
-            if (val == obj.Parent) {
+            if (val == obj.ParentId) {
                 subdata.push(obj)
             }
         })
@@ -101,50 +99,25 @@ const ItemCategory = () => {
 
     const mainCategoryColumns: ColumnDef<MainCategory>[] = [
         {
-            accessorKey: 'Name',
-            header: 'Name',
+            accessorKey: 'CategoryName',
+            header: 'Category Name',
             cell: ({ row }) => (
-
-                <span className="font-medium text-gray-900 text-sm">{row.getValue('Name')}</span>
+                <span className="font-medium text-gray-900 text-sm">{row.getValue('CategoryName')}</span>
             ),
         },
         {
-            accessorKey: 'Code',
-            header: 'Code',
+            accessorKey: 'CategoryCode',
+            header: 'Category Code',
             cell: ({ row }) => (
-
-                <span className="font-medium text-gray-900 text-sm">{row.getValue('Code')}</span>
+                <span className="font-medium text-gray-900 text-sm">{row.getValue('CategoryCode')}</span>
             ),
         },
         {
-            accessorKey: 'Description',
+            accessorKey: 'CategoryDescription',
             header: 'Description',
             cell: ({ row }) => (
 
-                <span className="font-medium text-gray-900 text-sm">{row.getValue('Description')}</span>
-            ),
-        },
-        {
-            accessorKey: 'AssetAcquisitionAccount',
-            header: 'Asset Acquisition',
-            cell: ({ row }) => (
-
-                <span className="font-medium text-gray-900 text-sm">{row.getValue('AssetAcquisitionAccount')}</span>
-            ),
-        },
-        {
-            accessorKey: 'AssetDepreciationAccount',
-            header: 'Asset Depreciation',
-            cell: ({ row }) => (
-
-                <span className="font-medium text-gray-900 text-sm">{row.getValue('AssetDepreciationAccount')}</span>
-            ),
-        },
-        {
-            accessorKey: 'DepreciationAccount',
-            header: 'Depreciation Account',
-            cell: ({ row }) => (
-                <span className="font-medium text-gray-900 text-sm">{row.getValue('DepreciationAccount')}</span>
+                <span className="font-medium text-gray-900 text-sm">{row.getValue('CategoryDescription')}</span>
             ),
         },
         {
@@ -156,8 +129,8 @@ const ItemCategory = () => {
                     <ReusableButton
                         variant="text"
                         size="small"
-                        //   icon={<Edit className="h-4 w-4" />}
-                        onClick={() => { setRecordToEditId(row.original.AssetCategoryId); getAssetCategoryByID(row.original.AssetCategoryId, companyId, true) }}
+                        // onClick={() => { setRecordToEditId(row.original.AssetCategoryId); getAssetCategoryByID(row.original.AssetCategoryId, companyId, true) }}
+                        onClick={() => { setRecordToEditId(row.original.CategoryId); handleEdit(row.original) }}
                     >
                         Edit
                     </ReusableButton>
@@ -166,7 +139,8 @@ const ItemCategory = () => {
                         size="small"
                         danger
                         icon={<Trash2 className="h-4 w-4" />}
-                        onClick={() => { setRecordToEditId(row.original.AssetCategoryId); setMainDelRec(row.original); setIsMainDelOpen(true) }}
+                        // onClick={() => { setRecordToEditId(row.original.AssetCategoryId); setMainDelRec(row.original); setIsMainDelOpen(true) }}
+                        onClick={() => { setRecordToEditId(row.original.CategoryId); setMainDelRec(row.original); setIsMainDelOpen(true) }}
                     >
                         Delete
                     </ReusableButton>
@@ -175,19 +149,19 @@ const ItemCategory = () => {
         },
     ]
 
-    const subLocationColumns: ColumnDef<SubCategory>[] = [
+    const subItemCategoryColumns: ColumnDef<SubCategory>[] = [
         {
-            accessorKey: 'Name',
+            accessorKey: 'CategoryName',
             header: 'Name',
             cell: ({ row }) => (
-                <span className="font-medium text-gray-900 text-sm">{row.getValue('Name')}</span>
+                <span className="font-medium text-gray-900 text-sm">{row.getValue('CategoryName')}</span>
             ),
         },
         {
-            accessorKey: 'Code',
+            accessorKey: 'CategoryCode',
             header: 'Code',
             cell: ({ row }) => (
-                <span className="font-medium text-gray-900 text-sm">{row.getValue('Code')}</span>
+                <span className="font-medium text-gray-900 text-sm">{row.getValue('CategoryCode')}</span>
             ),
         },
         {
@@ -199,8 +173,8 @@ const ItemCategory = () => {
                     <ReusableButton
                         variant="text"
                         size="small"
-                        //   icon={<Edit className="h-4 w-4" />}
-                        onClick={() => { setSubRecID(row.original.AssetCategoryId); setSubRecord(row.original); handleSubEdit(row.original); }}
+                        // onClick={() => { setSubRecID(row.original.AssetCategoryId); setSubRecord(row.original); handleSubEdit(row.original); }}
+                        onClick={() => { setSubRecID(row.original.CategoryId); setSubRecord(row.original); handleSubEdit(row.original); }}
                     >
                         Edit
                     </ReusableButton>
@@ -209,7 +183,8 @@ const ItemCategory = () => {
                         size="small"
                         danger
                         icon={<Trash2 className="h-4 w-4" />}
-                        onClick={() => { setSubRecID(row.original.AssetCategoryId); setIsSubDelOpen(true) }}
+                        // onClick={() => { setSubRecID(row.original.AssetCategoryId); setIsSubDelOpen(true) }}
+                        onClick={() => { setSubRecID(row.original.CategoryId); setSubRecord(row.original); setIsSubDelOpen(true) }}
                     >
                         Delete
                     </ReusableButton>
@@ -218,46 +193,19 @@ const ItemCategory = () => {
         },
     ];
 
-    console.log("subRec", subRecID);
 
     //userAttributes getCall
-    const getuserAttributes = async (companyId) => {
+    const getUnitOfMeasureDetails = async (companyId) => {
         dispatch(setLoading(true))
-        await getUserAttributes(companyId)
+        await getUnitOfMeasure(companyId)
             .then(res => {
-                if (res.data && res.data.length > 0) {
-                    const options = res.data.map((main: any) => ({
-                        value: main?.GroupName,
-                        label: main?.GroupName,
+                if (res.data && res.data.UOMDetails.length > 0) {
+                    const options = res.data.UOMDetails.map((main: any) => ({
+                        value: main?.Name,
+                        label: main?.Name,
                     }));
                     setItemCatFields((prev) =>
-                        prev.map((f) =>
-                            f.name === "attributegroup" ? { ...f, options } : f
-                        )
-                    );
-                } else {
-                    msg.warning('no data found')
-                }
-            })
-            .catch(err => { })
-            .finally(() => {
-                dispatch(setLoading(false))
-            })
-    }
-
-    //userAttributes getCall
-    const getCostBreakUpData = async (companyId) => {
-        dispatch(setLoading(true))
-        await getCostBreakUpAttribute(companyId)
-            .then(res => {
-                if (res.data && res.data.length > 0) {
-                    const options = res.data.map((main: any) => ({
-                        value: main?.GroupName,
-                        label: main?.GroupName,
-                    }));
-                    setItemCatFields((prev) =>
-                        prev.map((f) => 
-                            f.name === "costbreakgroup" ? { ...f, options } : f
+                        prev.map((f) => ["unitofmeasure", "subunitofmeasure"].includes(f.name) ? { ...f, options } : f
                         )
                     );
                 } else {
@@ -271,19 +219,13 @@ const ItemCategory = () => {
     }
 
     const handleSubEdit = (subData) => {
-        console.log("subData", subData);
         reset({
             ...watch(),
-            subname: subData.Name,
-            subcode: subData.Code,
-            attributegroup: subData?.AttributeGroupNames ? subData?.AttributeGroupNames?.split(',') : [],
-            costbreakgroup: subData.CostBreakupGroupNames ? subData?.CostBreakupGroupNames : [],
-            lifespan: subData.LifeSpan,
-            salvagevalue: subData.SalvageValue,
-            salvagevalue_unit: subData.SalvageValuePercentage,
-            subdescription: subData.Description,
+            subname: subData.CategoryName,
+            subcode: subData.CategoryCode,
+            subunitofmeasure: subData.CategoryUnitOfMeasureName,
+            subdescription: subData.CategoryDescription,
         });
-
         setIsSubDialogOpen(true);
     };
 
@@ -293,10 +235,7 @@ const ItemCategory = () => {
             ...watch(),
             subname: '',
             subcode: '',
-            attributegroup: '',
-            costbreakgroup: '',
-            lifespan: '',
-            salvagevalue: '',
+            subunitofmeasure:'',
             subdescription: '',
         })
     }
@@ -309,7 +248,6 @@ const ItemCategory = () => {
         canAdd: true,
         canManageColumns: false,
     };
-console.log("subRecord",subRecord);
 
     const getFieldsByNames = (names: string[]) => itemCatFields.filter(f => names.includes(f.name!));
     // const percentage = watch("salvagevalue_unit");
@@ -330,7 +268,6 @@ console.log("subRecord",subRecord);
                         rules={validationRules}
                         render={({ field: ctrl }) => (
                             <ReusableInput
-                                disabled={(recordToEditId && name === "code") ? true : (subRecID && name === "subcode") ? true : false}
                                 {...field}
                                 value={ctrl.value}
                                 onChange={ctrl.onChange}
@@ -351,7 +288,7 @@ console.log("subRecord",subRecord);
                                 defaultValue={name === 'salvagevalue_unit' ? '%' : ''}
                                 usePortal={(name === 'mainCatdropdown') ? true : false}
                                 {...field}
-                                disabled={(subRecID && subRecord.CostBreakupGroupNames) ? true : false}
+                                // disabled={(subRecID && subRecord.CostBreakupGroupNames) ? true : false}
                                 value={ctrl.value}
                                 onChange={ctrl.onChange}
                                 error={errors[name]?.message as string}
@@ -385,33 +322,25 @@ console.log("subRecord",subRecord);
     }
 
     // getAll AssetCat Details
-    const getCategoryDetails = async (companyId) => {
+    const getItemCategoryDetails = async (companyId) => {
         dispatch(setLoading(true));
-        await getAssetCategoryData(companyId)
+        await getItemCategoryData(companyId)
             .then((res) => {
-                let mainarr = []
-                let subarr = []
-                if (res.data !== undefined) {
-                    res.data.map((obj) => {
-                        if (obj.Parent === "#") {
-                            mainarr.push(obj)
-                        } else {
-                            subarr.push(obj)
-                        }
-                    })
-                    setGetMainCategoryData(mainarr.reverse());
-                    if (mainarr.length > 0) {
-                        const options = mainarr.map((main: any) => ({
-                            label: main?.Name,
-                            value: main?.AssetCategoryId,
+                if (res.data !== undefined && res.data?.length !== 0) {
+                    setGetMainCategoryData(res.data.MainCategories.reverse());
+                    if (res.data.MainCategories.length > 0) {
+                        const options = res.data.MainCategories.map((main: any) => ({
+                            label: main?.CategoryName,
+                            value: main?.CategoryId,
                         }));
-                        ((prev) =>
+                        setItemCatFields((prev) =>
                             prev.map((f) =>
                                 f.name === "mainCatdropdown" ? { ...f, options } : f
                             )
                         );
+
                     }
-                    setSubCategoryData(subarr.reverse());
+                    setSubCategoryData(res.data.SubCategories);
                 } else {
                     setGetMainCategoryData([]);
                     setSubCategoryData([]);
@@ -424,38 +353,29 @@ console.log("subRecord",subRecord);
     };
 
     //adding Asset Category
-    const addNewCategoryAPI = async (companyId, payload) => {
+    const addNewItemCategoryAPI = async (companyId, payload) => {
         dispatch(setLoading(true))
-        await postAssetCatDetails(companyId, payload).then((res) => {
-            if (res.data.status !== undefined) {
-                if (res.data.status === true) {
-                    msg.success(res.data.message);
-                    getCategoryDetails(companyId);
-                    handleCancel()
-                    setIsMainDialogOpen(false);
-                }
-                else {
-                    // msg.warning(res.data.message);
-                    msg.warning(res.data.ErrorDetails[0]["Error Message"]);
-                }
+        await postItemCatDetails(companyId, payload).then((res) => {
+            if (res.data && res.data.status) {
+                msg.success(res.data.message);
+                getItemCategoryDetails(companyId);
+                handleCancel()
+                setIsMainDialogOpen(false);
             }
             else {
                 msg.warning(res.data.ErrorDetails[0]["Error Message"]);
             }
         }).catch(() => { }).finally(() => { dispatch(setLoading(false)) })
     }
-
     // update MainCategory API
-    const updateAssetCategoryData = async (MainId, subID, companyId, data) => {
-        console.log("data", data);
+    const updateAssetCategoryData = async (ID, companyId, data) => {
         dispatch(setLoading(true))
-        await updateAssetCat(MainId, subID, companyId, data).then((res) => {
+        await updateItemCat(ID, companyId, data).then((res) => {
             if (res.data.status !== undefined) {
                 if (res.data.status === true) {
-
                     handleCancel()
                     msg.success(res.data.message);
-                    getCategoryDetails(companyId);
+                    getItemCategoryDetails(companyId);
                 }
                 else {
                     msg.warning(res.data.message);
@@ -466,117 +386,80 @@ console.log("subRecord",subRecord);
         }).catch(() => { }).finally(() => { dispatch(setLoading(false)) })
     }
 
-    console.log("lifeSpan", watch("lifespan"))
-    // console.log("costbreakUpkjh", watch("costbreakgroup"));
     // post submit function
     const submit = (e, isMain) => {
         e.preventDefault();
         if (isMain) {
             if (recordToEditId === null) {
                 let payload = {
-                    'AssetCategoryDetails': [
+                    'ItemCategoryDetails': [
                         {
                             "Main category name": watch("name"),
                             "Main category code": watch("code"),
-                            "Asset Acquisition Account": watch("assetacquisitionaccount"),
-                            "Asset Depreciation Account": watch("assetdepreciationaccount"),
-                            "Depreciation Account": watch("depreciationaccount"),
+                            "Main Category Unit Of Measure": watch("unitofmeasure"),
                             "Main category description": watch("description"),
                             "Sub category name": "",
                             "Sub category code": "",
                             "Sub category description": "",
-                            "Attribute group": "",
-                            "Costbreakup group": "",
-                            "Life span": "",
-                            "Salvage value percentage": "",
-                            "Salvage value amount": ""
+                            "Sub Category Unit Of Measure": ""
                         }
                     ]
                 }
-                console.log(payload);
-                addNewCategoryAPI(companyId, payload);
+                addNewItemCategoryAPI(companyId, payload);
             } else if (recordToEditId !== null) {
                 let payload = {
-                    'AssetCategoryDetails': [
-                        {
-                            "Main category name": watch("name"),
-                            "Asset Acquisition Account": watch("assetacquisitionaccount"),
-                            "Asset Depreciation Account": watch("assetdepreciationaccount"),
-                            "Depreciation Account": watch("depreciationaccount"),
-                            "Main category description": watch("description"),
-                            "Sub category name": "",
-                            "Sub category description": "",
-                            "Attribute group": "",
-                            "Costbreakup group": "",
-                            "Life span": "",
-                            "Salvage value percentage": "",
-                            "Salvage value amount": ""
-                        }
-                    ]
+                    'CategoryDetails':
+                    {
+                        "CategoryName": watch("name"),
+                        "CategoryCode": watch("code"),
+                        "CategoryUnitOfMeasureName": watch("unitofmeasure"),
+                        "CategoryDescription": watch("description"),
+                    }
                 }
                 // update API here
-                updateAssetCategoryData(recordToEditId, 0, companyId, payload)
+                updateAssetCategoryData(recordToEditId, companyId, payload)
             }
         } else {
             if (subRecID === null) {
-                console.log("Sachin");
                 let payload = {
-                    'AssetCategoryDetails': [
+                    'ItemCategoryDetails': [
                         {
-                            "Main category name": selectedParentData[0]?.Name,
-                            "Main category code": selectedParentData[0].Code,
-                            "Asset Acquisition Account": selectedParentData[0].AssetAcquisitionAccount,
-                            "Asset Depreciation Account": selectedParentData[0].AssetDepreciationAccount,
-                            "Depreciation Account": selectedParentData[0].DepreciationAccount,
-                            "Main category description": selectedParentData[0].Description,
+                            "Main category name": selectedParentData.CategoryName,
+                            "Main category code": selectedParentData.CategoryCode,
+                            "Main Category Unit Of Measure": selectedParentData.CategoryUnitOfMeasureName,
+                            "Main category description": selectedParentData.CategoryDescription,
                             "Sub category name": watch("subname"),
                             "Sub category code": watch("subcode"),
                             "Sub category description": watch("subdescription"),
-                            "Attribute group": Array.isArray(watch("attributegroup")) ? watch("attributegroup").join(',') : watch("attributegroup") || "",
-                            "Costbreakup group": watch("costbreakgroup"),
-                            "Life span": watch("lifespan"),
-                            "Salvage value percentage": watch('salvagevalue_unit'),
-                            "Salvage value amount": watch("salvagevalue")
+                            "Sub Category Unit Of Measure": watch("subunitofmeasure")
                         }
                     ]
                 }
-                addNewCategoryAPI(companyId, payload);
+                addNewItemCategoryAPI(companyId, payload);
             } else if (subRecID !== null) {
-                console.log("kjhgf", watch('costbreakgroup'));
                 let payload = {
-                    'AssetCategoryDetails': [
-                        {
-                            "Main category name": selectedParentData[0].Name,
-                            "Asset Acquisition Account": selectedParentData[0].AssetAcquisitionAccount,
-                            "Asset Depreciation Account": selectedParentData[0].AssetDepreciationAccount,
-                            "Depreciation Account": selectedParentData[0].DepreciationAccount,
-                            "Main category description": selectedParentData[0].Description,
-                            "Sub category name": watch("subname"),
-                            "Sub category description": watch("subdescription"),
-                            "Attribute group": (watch("attributegroup").join()),
-                            "Costbreakup group": watch("costbreakgroup"),
-                            "Life span": watch("lifespan"),
-                            "Salvage value percentage": watch('salvagevalue_unit'),
-                            "Salvage value amount": watch("salvagevalue"),
-                        }
-                    ]
+                    'CategoryDetails':
+                    {
+                        "CategoryName": watch("subname"),
+                        "CategoryCode": watch("subcode"),
+                        "CategoryUnitOfMeasureName": watch("subunitofmeasure"),
+                        "CategoryDescription": watch("subdescription"),
+                    }
                 }
-                updateAssetCategoryData(selectedParentData[0].AssetCategoryId, subRecID, companyId, payload)
+                updateAssetCategoryData(subRecID, companyId, payload)
             }
         }
     }
 
     //getAssetCategory by id
-    const getAssetCategoryByID = async (recordToEditId, companyId, isMainEdit) => {
+    const getItemCategoryByID = async (recordToEditId, companyId, isMainEdit) => {
         dispatch(setLoading(true))
-        await getAssetCatByID(recordToEditId, companyId).then(res => {
-            if (res.data && res.data.length > 0) {
-                if (isMainEdit) {
-                    handleEdit(res.data)
-                }
-                setSelectedParentData(res.data);
+        await getItemtCatByID(recordToEditId, companyId).then(res => {
+            if (res.data.CategoryDetails && res.data.CategoryDetails) {
+                settingSubdata(res.data.CategoryDetails.CategoryId)
+                setSelectedParentData(res.data.CategoryDetails);
             } else {
-                setSelectedParentData({});
+                setSelectedParentData({ CategoryId: 0, CategoryName: '', CategoryCode: '', CategoryDescription: '', CategoryUnitOfMeasureName: '' });
                 msg.warning('no data found')
             }
         }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
@@ -585,16 +468,16 @@ console.log("subRecord",subRecord);
     //Deleting main
     const handleMainDelete = async (ID, companyId, data) => {
         dispatch(setLoading(true));
-        await deleteAssetCat(ID, companyId, data)
+        await deleteItemCat(ID, companyId, data)
             .then((res) => {
-                if (res.data.Status !== undefined) {
-                    if (res.data.Status === true) {
-                        msg.success(res.data.Message);
-                        getCategoryDetails(companyId);
+                if (res.data) {
+                    if (res.data.status === true) {
+                        msg.success(res.data.message);
+                        getItemCategoryDetails(companyId);
                         handleCancel();
                     }
                     else {
-                        msg.warning(res.data.Message);
+                        msg.warning(res.data.message);
                     }
                 } else {
                     msg.warning(res.data.ErrorDetails[0]["Error Message"]);
@@ -609,12 +492,12 @@ console.log("subRecord",subRecord);
     };
 
     function handleCancel() {
-        setRecordToEditId(null);
+        // setRecordToEditId(null);
+        handleReset();
         setIsMainDialogOpen(false);
         setIsSubDialogOpen(false);
         setIsMainDelOpen(false);
         setIsSubDelOpen(false);
-        handleReset();
     }
 
     function subDialogFN() {
@@ -627,18 +510,9 @@ console.log("subRecord",subRecord);
             // ...watch(),
             name: '',
             code: '',
-            assetacquisitionaccount: '',
-            assetdepreciationaccount: '',
+            unitofmeasure: '',
             description: '',
-            depreciationaccount: '',
-            subname: '',
-            subcode: '',
-            attributegroup: '',
-            lifespan: '',
-            salvagevalue: '0.00',
-            salvagevalue_unit: "%",
-            subdescription: '',
-            mainCatdropdown: selectedParentData[0].AssetCategoryId,
+            mainCatdropdown: selectedParentData.CategoryId,
         })
     }
 
@@ -646,10 +520,15 @@ console.log("subRecord",subRecord);
         if (flag === true) {
             setIsMainDialogOpen(true)
         } else if (flag === false) {
-            setIsSubDialogOpen(true);
-            handleSubReset();
-            setSubRecID(null);
-            setSubRecord({ Name: '', AssetCategoryId: 0, CostBreakupGroupNames:null });
+            if (parentId) {
+                setIsSubDialogOpen(true);
+                handleSubReset();
+                setSubRecID(null);
+                setSubRecord({ CategoryName: '', CategoryId: 0 });
+            } else {
+                msg.warning("Please select Main Category ")
+            }
+
         } else {
             setIsMainDialogOpen(false);
             setIsSubDialogOpen(false);
@@ -658,13 +537,11 @@ console.log("subRecord",subRecord);
 
     const handleEdit = (data) => {
         reset({
-            ...watch(),
-            name: data[0].Name,
-            code: data[0].Code,
-            assetacquisitionaccount: data[0].AssetAcquisitionAccount,
-            assetdepreciationaccount: data[0].AssetDepreciationAccount,
-            depreciationaccount: data[0].DepreciationAccount,
-            description: data[0].Description
+            // ...watch(),
+            name: data.CategoryName,
+            code: data.CategoryCode,
+            unitofmeasure: data.CategoryUnitOfMeasureName,
+            description: data.CategoryDescription
         })
         setIsMainDialogOpen(true);
     }
@@ -676,15 +553,15 @@ console.log("subRecord",subRecord);
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <span>Masters</span>
                         <span>/</span>
-                        <span>Fixed Assets</span>
+                        <span>Consumables</span>
                         <span>/</span>
-                        <span className="text-foreground font-medium">Asset Category</span>
+                        <span className="text-foreground font-medium">Item Category</span>
                     </div>
                 </div>
             </header>
             <div className="p-4 space-y-4">
                 <div className='ps-3'>
-                    <h1 className="text-3xl font-bold text-gray-900">Asset Category</h1>
+                    <h1 className="text-3xl font-bold text-gray-900">Item Category</h1>
                 </div>
                 <Card className="border-0 shadow-sm mt-2">
                     <CardHeader className="pb-2 pt-2">
@@ -741,7 +618,7 @@ console.log("subRecord",subRecord);
                                     </div>
                                     <ReusableTable
                                         data={subDataToShow}
-                                        columns={subLocationColumns}
+                                        columns={subItemCategoryColumns}
                                         // actions={tableActions2}
                                         permissions={tablePermissions}
                                         title=""
@@ -771,12 +648,13 @@ console.log("subRecord",subRecord);
                     {/* Search and Actions */}
                     <div className="flex justify-between items-center">
                         <Dialog open={isMainDialogOpen}
-                            onOpenChange={(open) => {
-                                setIsMainDialogOpen(open);
-                                if (!open) {
-                                    handleCancel(); // example: reset form
-                                }
-                            }}
+                            onOpenChange={
+                                (open) => {
+                                    setIsMainDialogOpen(open);
+                                    if (!open) {
+                                        handleCancel(); // example: reset form
+                                    }
+                                }}
                         >
                             <DialogTrigger asChild>
                             </DialogTrigger>
@@ -785,7 +663,7 @@ console.log("subRecord",subRecord);
                                     <DialogTitle>Add Main Category</DialogTitle>
                                 </DialogHeader>
                                 <div className='grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4'>
-                                    {getFieldsByNames(['name', 'code', 'assetacquisitionaccount', 'depreciationaccount', 'assetdepreciationaccount', 'description']).map((field) => {
+                                    {getFieldsByNames(['name', 'code', 'unitofmeasure', 'description']).map((field) => {
                                         return <div className="flex items-center space-x-2">
                                             {renderField(field)}
                                         </div>;
@@ -794,7 +672,7 @@ console.log("subRecord",subRecord);
                                 <div className="flex justify-end gap-2">
                                     <ReusableButton
                                         variant="default"
-                                        onClick={() => { setIsMainDialogOpen(false); setSubRecID(null) }}
+                                        onClick={() => { setIsMainDialogOpen(false); setSubRecID(null); handleCancel() }}
                                     >
                                         Cancel
                                     </ReusableButton>
@@ -804,7 +682,7 @@ console.log("subRecord",subRecord);
                                         className="bg-orange-500 hover:bg-orange-600 border-orange-500"
                                         onClick={(e) => { handleSubmit(() => submit(e, true))(e) }}
                                     >
-                                        {recordToEditId ? "Update" : "Save"}
+                                        {recordToEditId !== null ? "Update" : "Save"}
                                     </ReusableButton>
                                 </div>
                             </DialogContent>
@@ -817,13 +695,13 @@ console.log("subRecord",subRecord);
                                 <DialogTitle>Confirm the action</DialogTitle>
                             </DialogHeader>
                             <div className="space-y-4">
-                                <h4>{`Are you sure want to delete ${mainDelRec?.Name} MainCategory`}</h4>
+                                <h4>{`Are you sure want to delete ${mainDelRec?.CategoryName} MainCategory`}</h4>
                                 <div className="flex justify-end gap-2">
                                     <ReusableButton onClick={() => setIsMainDelOpen(false)}>
                                         Cancel
                                     </ReusableButton>
                                     <ReusableButton variant="primary" onClick={() => handleMainDelete(recordToEditId, companyId, '')}>
-                                        Delete                           \
+                                        Delete
                                     </ReusableButton>
                                 </div>
                             </div>
@@ -837,15 +715,8 @@ console.log("subRecord",subRecord);
                                 <DialogTitle>Add Sub Category</DialogTitle>
                             </DialogHeader>
                             <div className='grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4'>
-                                {getFieldsByNames(['subname', 'subcode', 'attributegroup', 'costbreakgroup', 'lifespan']).map(renderField)}
-                                <div className='flex'>
-                                    <div className='w-[20rem]'>{getFieldsByNames(['salvagevalue']).map(renderField)}</div>
-                                    <div className='flex items-center mt-[28px]'>{getFieldsByNames(['salvagevalue_unit']).map(renderField)}</div>
-                                </div>
-                                {getFieldsByNames(['subdescription']).map(renderField)}
+                                {getFieldsByNames(['subunitofmeasure', 'subname', 'subcode', 'subdescription']).map(renderField)}
                             </div>
-                            {/* <div className="space-y-4"> */}
-
                             <div className="flex justify-end gap-2">
                                 <ReusableButton onClick={() => setIsSubDialogOpen(false)}>
                                     Cancel
@@ -865,7 +736,7 @@ console.log("subRecord",subRecord);
                                 <DialogTitle>Confirm the action</DialogTitle>
                             </DialogHeader>
                             <div className="space-y-4">
-                                <h4>{`Are you sure want to delete ${subRecord?.Name} SubCategory`}</h4>
+                                <h4>{`Are you sure want to delete ${subRecord?.CategoryName} SubCategory`}</h4>
                                 <div className="flex justify-end gap-2">
                                     <ReusableButton onClick={() => setIsSubDelOpen(false)}>
                                         Cancel

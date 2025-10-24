@@ -54,7 +54,6 @@ const AssetCategory = () => {
     const branch = useAppSelector(state => state.projects.branch) || '';
     const msg = useMessage()
     const dispatch = useAppDispatch();
-    console.log("selectedParentData", selectedParentData);
 
     useEffect(() => {
         if (companyId) {
@@ -74,7 +73,6 @@ const AssetCategory = () => {
 
 
     const { control, register, handleSubmit, watch, setValue, reset, formState: { errors } } = form;
-    console.log("FORMvALUES", form.getValues());
     const parentId = watch('mainCatdropdown');
 
     useEffect(() => {
@@ -86,10 +84,6 @@ const AssetCategory = () => {
     useEffect(() => {
         if (parentId) settingSubdata(parentId);
     }, [parentId, subCategoryData])
-
-    console.log("selectedParentData", selectedParentData)
-
-    // const [subCatgory] = useState<SubCategory[]>([]);
 
     const settingSubdata = (val) => {
         let subdata = []
@@ -220,7 +214,6 @@ const AssetCategory = () => {
         },
     ];
 
-    console.log("subRec", subRecID);
 
     //userAttributes getCall
     const getuserAttributes = async (companyId) => {
@@ -273,7 +266,6 @@ const AssetCategory = () => {
     }
 
     const handleSubEdit = (subData) => {
-        console.log("subData", subData);
         reset({
             ...watch(),
             subname: subData.Name,
@@ -311,7 +303,6 @@ const AssetCategory = () => {
         canAdd: true,
         canManageColumns: false,
     };
-    console.log("subRecord", subRecord);
 
     const getFieldsByNames = (names: string[]) => mainCatfields.filter(f => names.includes(f.name!));
     // const percentage = watch("salvagevalue_unit");
@@ -449,12 +440,10 @@ const AssetCategory = () => {
 
     // update MainCategory API
     const updateAssetCategoryData = async (MainId, subID, companyId, data) => {
-        console.log("data", data);
         dispatch(setLoading(true))
         await updateAssetCat(MainId, subID, companyId, data).then((res) => {
             if (res.data.status !== undefined) {
                 if (res.data.status === true) {
-
                     handleCancel()
                     msg.success(res.data.message);
                     getCategoryDetails(companyId);
@@ -468,8 +457,6 @@ const AssetCategory = () => {
         }).catch(() => { }).finally(() => { dispatch(setLoading(false)) })
     }
 
-    console.log("lifeSpan", watch("lifespan"))
-    // console.log("costbreakUpkjh", watch("costbreakgroup"));
     // post submit function
     const submit = (e, isMain) => {
         e.preventDefault();
@@ -495,7 +482,6 @@ const AssetCategory = () => {
                         }
                     ]
                 }
-                console.log(payload);
                 addNewCategoryAPI(companyId, payload);
             } else if (recordToEditId !== null) {
                 let payload = {
@@ -521,7 +507,6 @@ const AssetCategory = () => {
             }
         } else {
             if (subRecID === null) {
-                console.log("Sachin");
                 let payload = {
                     'AssetCategoryDetails': [
                         {
@@ -544,7 +529,6 @@ const AssetCategory = () => {
                 }
                 addNewCategoryAPI(companyId, payload);
             } else if (subRecID !== null) {
-                console.log("kjhgf", watch('costbreakgroup'));
                 let payload = {
                     'AssetCategoryDetails': [
                         {

@@ -522,6 +522,23 @@ const navigation: NavItem[] = [
           }
         ]
       },
+         {
+        label: 'Depreciation',
+        icon: Building2,
+        link: '/depreciation',
+        children: [
+          {
+            label: 'Books',
+            icon: BarChart,
+            link: '/masters/depreciation/book',
+          },
+          // {
+          //   label: 'Item Master',
+          //   icon: BarChart,
+          //   link: '/masters/consumables/item-master',
+          // },
+        ],
+      },
       {
         label: 'Consumables',
         icon: Building2,

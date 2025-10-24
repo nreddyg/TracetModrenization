@@ -362,8 +362,9 @@ const AssetCategory = () => {
                             rules={validationRules}
                             render={({ field: ctrl }) => (
                                 <ReusableMultiSelect
-                                    usePortal={false}
+                                    // usePortal={false}
                                     label={label!}
+                                    usePortal={(name === 'mainCatdropdown') ? true : false} 
                                     {...field}
                                     value={ctrl.value}
                                     onChange={ctrl.onChange}
@@ -632,10 +633,15 @@ const AssetCategory = () => {
         if (flag === true) {
             setIsMainDialogOpen(true)
         } else if (flag === false) {
-            setIsSubDialogOpen(true);
-            handleSubReset();
-            setSubRecID(null);
-            setSubRecord({ Name: '', AssetCategoryId: 0, CostBreakupGroupNames: null });
+            if (parentId) {
+                setIsSubDialogOpen(true);
+                handleSubReset();
+                setSubRecID(null);
+                setSubRecord({ Name: '', AssetCategoryId: 0, CostBreakupGroupNames: null });
+            } else {
+                msg.warning("Please select Main Category ")
+            }
+
         } else {
             setIsMainDialogOpen(false);
             setIsSubDialogOpen(false);

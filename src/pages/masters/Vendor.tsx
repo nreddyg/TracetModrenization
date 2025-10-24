@@ -19,7 +19,7 @@ import ReusableMultiSelect from '@/components/ui/reusable-multi-select';
 import { ReusableUpload } from '@/components/ui/reusable-upload';
 import { ReusableCheckbox } from '@/components/ui/reusable-checkbox';
 import { ReusableRadio } from '@/components/ui/reusable-radio';
-import { deleteVendorByCompanyId, GetCountryList, getEditVendorListByCompanyId, GetVendorList, postNewVendor } from '@/services/vendorServices';
+import { deleteVendorByCompanyId, GetCountryList, getEditVendorListByCompanyId, GetVendorList, postNewVendor, updateVendor } from '@/services/vendorServices';
 import { VENDOR_DETAILS } from '@/Local_DB/Form_JSON_Data/VendorDB';
 import { useMessage } from '@/components/ui/reusable-message';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, } from '@/components/ui/dialog';
@@ -302,7 +302,12 @@ const Vendor = () => {
         }
       ],
     };
-    AddVendorAPI(payload)
+    if(selectedVendorData){
+UpdateVendorAPI(payload,selectedVendorData?.VendorID)
+    }else{
+     AddVendorAPI(payload)
+    }
+    
   }
   //API Calls
   //fetch all vendors list
@@ -352,6 +357,24 @@ const Vendor = () => {
       }
     }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
   }
+  //update Vendor
+  //Add Vendor
+  const UpdateVendorAPI = async (payload,VendorId) => {
+    dispatch(setLoading(true))
+    await updateVendor(companyId, VendorId,payload).then(res => {
+      if (res.success) {
+        if (res.data.status) {
+          msg.success(res.data.message || "Vendor Updated Successfully !!");
+          fetchAllVendorsList();
+          handleReset();
+        } else if (res.data.ErrorDetails && Array.isArray(res.data.ErrorDetails) && res.data.ErrorDetails.length > 0) {
+          msg.warning(res.data.ErrorDetails[0]['Error Message'] || 'Failed to Update Vendor !!');
+        } else {
+          msg.warning('Failed to Update Vendor !!')
+        }
+      }
+    }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
+  }
   //get particular vendor Details
   const getVendorDataAPI = async (Id) => {
     dispatch(setLoading(true));
@@ -362,7 +385,7 @@ const Vendor = () => {
         form.reset({ ...form.getValues(), ...res.data[0], VendorType: res.data[0]["VendorType"]?.split(",") })
 
       } else {
-        msg.warning("No Country Data Found !!");
+        msg.warning("No Vendor Data Found !!");
       }
     }).catch(err => console.log(err)).finally(() => {
       dispatch(setLoading(false));
@@ -388,7 +411,16 @@ const Vendor = () => {
     <div className="h-full   bg-gray-50 flex flex-col ">
       <div className="flex flex-1 overflow-hidden   ">
         {/* Left Sidebar - Ticket Inbox */}
-        <div className={`${isInboxCollapsed ? 'w-6 p-1' : 'w-34 p-2 mb-2 rounded-b-[5px]'} bg-white border-r    border-0 shadow-lg flex pb-3 flex-col transition-all duration-300 shrink-0 hidden lg:flex`}>
+        {/* <div className={`${isInboxCollapsed ? 'w-6 p-1' : 'w-34 p-2 mb-2 rounded-b-[5px]'} bg-white border-r    border-0 shadow-lg flex pb-3 flex-col transition-all duration-300 shrink-0 hidden lg:flex`}> */}
+            <div
+  className={`
+    ${isInboxCollapsed ? 'w-6 p-1' : 'w-64 p-2 mb-2 rounded-b-[5px]'}
+   bg-white border border-gray-200 border-t-0 border-t-transparent shadow-xl flex flex-col pb-3 transition-all duration-300 shrink-0
+    md:relative
+    ${isInboxCollapsed ? 'relative' : 'fixed md:relative'}
+    ${isInboxCollapsed ? '' : 'top-15 left-0 h-full z-50 md:top-auto md:left-auto md:h-auto'}
+  `}
+>
           <div className="pt-1 shrink-0">
             <div className="flex items-center justify-between mb-2">
               <h3 className={`font-semibold text-gray-900 ${isInboxCollapsed ? 'hidden' : ''}`}>

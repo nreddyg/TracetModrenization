@@ -108,6 +108,17 @@ export const URL_POST_UPDATE_USER='/api/Masters/UpdateUserDetails';
 
 //Customer Master
 export const URL_GET_CUSTOMER_LIST = '/api/Masters/GetCustomerDetailsByCompanyId';
+export const URL_POST_ADD_NEW_CUSTOMER="/api/Masters/AddCustomerDetails"
+export const URL_POST_DELETE_CUSTOMER="/api/Masters/DeleteCustomerById"
+export const URL_GET_BRANCH_LOOKUP="/api/Masters/GetBranchLookups"
+export const URL_GET_CUSTOMER_DETAILS="/api/Masters/GetCustomerDetailsByCompanyId"
+export const URL_POST_UPDATE_CUSTOMER="/api/Masters/UpdateCustomerDetails"
+export const URL_GET_CUSTOMER_LOCATION_DATA="/api/Masters/GetCustomerLocationDetailsByCompanyId"
+export const URL_POST_ADD_CUSTOMER_LOCATION="/api/Masters/AddCustomerLocationDetails"
+export const URL_POST_UPDATE_CUSTOMER_LOCATION="/api/Masters/UpdateCustomerLocationDetails"
+export const URL_POST_DELETE_CUSTOMER_LOCATION="/api/Masters/DeleteCustomerLocationByCompanyId"
+
+
 
 //Vendor Master
 export const URL_GET_VENDOR_LIST='/api/Masters/GetVendorDetailsByCompanyId';
@@ -205,3 +216,8 @@ export const URL_DELETE_ITEM_MASTER = `/api/Masters/DeleteItemMaster`;
 export const URL_POST_NEW_ITEM_MASTER = `/api/Masters/AddItemMasterDetails`;
 export const URL_POST_UPDATE_ITEM_MASTER = `/api/Masters/UpdateItemMasterDetails`;
 
+//Masters book 
+export const URL_GET_ADDITIONAL_DEPRECIATION_BOOK="/api/Masters/GetAdditionalDepreciationDetails"
+export const URL_POST_ADD_ADDITIONAL_DEPRECIATION="/api/Masters/AddAdditionalDepreciationDetails"
+export const URL_POST_UPDATE_ADDITIONAL_DEPRECIATION="/api/Masters/UpdateAdditionalDepreciationDetails"
+export const URL_DELETE_ADDITIONAL_DEPRECIATION="/api/Masters/DeleteAdditionalDepreciation"

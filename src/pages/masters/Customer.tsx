@@ -1,6 +1,6 @@
 
 
-import {  useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Trash2, Plus, Edit, ChevronRight, ChevronLeft, Search, ArrowLeft, X, Save } from 'lucide-react';
 import { ReusableButton } from '@/components/ui/reusable-button';
@@ -19,47 +19,60 @@ import ReusableMultiSelect from '@/components/ui/reusable-multi-select';
 import { ReusableUpload } from '@/components/ui/reusable-upload';
 import { ReusableCheckbox } from '@/components/ui/reusable-checkbox';
 import { ReusableRadio } from '@/components/ui/reusable-radio';
-import { deleteVendorByCompanyId, GetCountryList, getEditVendorListByCompanyId, GetVendorList, postNewVendor } from '@/services/vendorServices';
-import { VENDOR_DETAILS } from '@/Local_DB/Form_JSON_Data/VendorDB';
 import { useMessage } from '@/components/ui/reusable-message';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, } from '@/components/ui/dialog';
 import { CUSTOMER_DETAILS } from '@/Local_DB/Form_JSON_Data/CustomerDB';
-interface VendorData {
-  "VendorID": number | string,
-  "VendorName": string,
-  "VendorTypeID": number | string,
-  "VendorType": string,
-  "VendorCode": string,
-  "PanNo": string,
+import { deleteCustomerByCompanyId, getBranchList, GetCountryList, getCustomerLocations, GetCustomersList, getEditCustomerListByCompanyId, postNewCustomer, updateCustomer } from '@/services/customerServices';
+import { NavLink } from 'react-router-dom';
+interface CustomerData {
+  "CustomerID": number | string,
+  "CustomerName": string,
+  "CustomerTypeId": number | string,
+  "CustomerType": string,
+  "PAN": string,
   "GSTIN": string,
-  "AddressID": number,
-  "Address": string,
+  "AddOnAddressId": number,
+  "AddOnAddress": string,
   "City": string,
   "State": string,
   "Country": string,
   "ZipCode": string,
-  "Phone": string,
-  "Mobile": string,
-  "VendorEmailId": string,
+  "PhoneNo": string,
+  "MobileNo": string,
+  "EmailId": string,
+  "MainLocationId": number,
+  "MainLocation": string,
+  "SubLocationId": number,
+  "SubLocation": string,
   "Description": string,
-  "ContactPerson": string
+  "ContactPerson": string,
+  "BillingAddress": string,
+  "BranchName": string,
+  "Attachment1": string,
+  "Attachment2": string,
+  "Attachment3": string
+
 }
 
-const Vendor = () => {
+const Customer = () => {
   const dispatch = useAppDispatch();
   const companyId = useAppSelector(state => state.projects.companyId)
-  const [dataSource, setDataSource] = useState<VendorData[]>([]);
+  const [dataSource, setDataSource] = useState<CustomerData[]>([]);
   const [fields, setFields] = useState<BaseField[]>(CUSTOMER_DETAILS);
-  const [selectedVendorData, setSelectedVendorData] = useState<VendorData | null>(null);
+  const [selectedCustomerData, setSelectedCustomerData] = useState<CustomerData | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isInboxCollapsed, setIsInboxCollapsed] = useState(false);
-  const [isDelModalOpen,setIsDelModalOpen]=useState(false)
-  const [deletingVendorData,setDeletingVendorData]=useState(null)
+  const [isDelModalOpen, setIsDelModalOpen] = useState(false)
+  const [deletingCustomerData, setDeletingCustomerData] = useState(null)
+  const branchName = useAppSelector(state => state.projects.branch);
+  const branchesList = useAppSelector(state => state.projects.branchList);
+  const [subLocOptions,setSubLocOptions]=useState([])
+  const [mainLocOptions,setMainLocOptions]=useState([])
   let msg = useMessage()
-  const filteredOrgs = dataSource.filter(vend => {
-    const matchesSearch = vend.VendorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      vend.VendorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      vend.VendorType.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredOrgs = dataSource.filter(cust => {
+    const matchesSearch = cust.CustomerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      cust.MainLocation.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      cust.EmailId.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesSearch;
   });
   const form = useForm<GenericObject>({
@@ -71,14 +84,41 @@ const Vendor = () => {
   });
   const { control, register, handleSubmit, trigger, watch, setValue, reset, formState: { errors } } = form;
   useEffect(() => {
-    if (companyId) fetchAllVendorsList();
-    fetchCountryList()
-  }, [companyId]);
+    if (companyId && branchName) fetchAllCustomerList();
 
-  const handleSelect = (e,data: VendorData) => {
-    
-    setSelectedVendorData(data);
-    getVendorDataAPI(data.VendorID)
+  }, [companyId, branchName]);
+  useEffect(() => {
+    fetchCountryList()
+
+
+  }, [branchesList])
+  useEffect(()=>{
+    let fieldData=[...fields]
+    let mainLoc=watch("MainLocation")
+    if (mainLoc && selectedCustomerData?.CustomerID) {
+      let mainLocationId = mainLocOptions.filter((o) => (o.value === mainLoc && o.CustomerId == selectedCustomerData.CustomerID))
+      let opts = subLocOptions.filter((o) => o.Parent == (mainLocationId[0].LocationId))
+      let subObjInd = fieldData.findIndex((x) => x.name === "SubLocation");
+      fieldData[subObjInd].options = opts
+      fieldData[subObjInd].value = ""
+       setFields(fieldData)
+    }
+  },[watch("MainLocation")])
+  useEffect(() => {
+    const mainLocation = watch("MainLocation");
+    const isEmpty = !mainLocation || mainLocation.length === 0;
+
+    const updatedFields = fields.map(field =>
+      field.name === "SubLocation"
+        ? { ...field, disabled: isEmpty }
+        : field
+    );
+    setFields(updatedFields);
+  }, [watch("MainLocation")]);
+
+  const handleSelect = (e, data: CustomerData) => {
+    setSelectedCustomerData(data);
+    getCustomerDataAPI(data.CustomerID)
 
   }
   const renderField = (field: BaseField) => {
@@ -239,8 +279,8 @@ const Vendor = () => {
       case 'radiobutton': return (
         <Controller
           key={name}
-          name={name}
-          control={control}
+          name={name} control={control}
+
           rules={validationRules}
           render={({ field: ctrl }) => (
             <ReusableRadio
@@ -256,62 +296,113 @@ const Vendor = () => {
         return null;
     }
   };
-  const setLookupsDataInJson = (data: any, key: string) => {
+  const setLookupsDataInJson = (data: any, key: string,data2?:any,key2?:string) => {
+
     const updatedFields = fields.map(field => {
       if (field.name === key) {
         return { ...field, options: data };
+      }
+      if (field.name === key2) {
+        return { ...field, options: data2 };
       }
       return field;
     });
     setFields(updatedFields);
   }
-  const handleDelete = (e,vend) => {
-     e.stopPropagation();
-     setDeletingVendorData(vend)
-   
-   setIsDelModalOpen(true)
+  const handleDelete = (e, vend) => {
+    e.stopPropagation();
+    setDeletingCustomerData(vend)
+
+    setIsDelModalOpen(true)
 
   }
+
   const handleReset = () => {
-    //       setSelectedVendorData(null);
+    //       setSelectedCustomerData(null);
     // setDataSource([{ OrganizationLogo: "", OrganizationLogoName: "", OrganizationLogoType: "", OrganizationLogoConversionType: "" }]);
-    form.reset({ "VendorName": "", "VendorType": "", "VendorCode": "", "PhoneNo": "", "Address": "", "City": "", "State": "",  "Country": "",  "ZipCode": "", "EmailId": "", "PAN": "",  "GSTIN": "", "Description": "", "ContactPerson": ""});
-    setSelectedVendorData(null)
-    setDeletingVendorData(null)
+    form.reset({ "CustomerName": "", "PAN": "", "GSTIN": "", "EmailId": "", "PhoneNo": "", "ContactPerson": "", "Address": "", "MainLocation": "", "SubLocation": "", "City": "", "State": "", "ZipCode": "", "Description": "" });
+    let formfields=[...fields]
+    formfields.forEach((obj)=>{
+        if(obj.name=="MainLocation"||obj.name=="SubLocation"){
+          obj.fieldType="text"
+          obj.options=[]
+        }
+    })
+    setFields(formfields)
+    setSelectedCustomerData(null)
+    setDeletingCustomerData(null)
   };
 
   const handleSave = (data) => {
-    console.log(data)
     const payload = {
       VendorCustomerDetails: [
         {
-          "Vendor Name": data["VendorName"],
-          "Vendor Type": data["VendorType"] ? data["VendorType"].join(',') : "",
-          "Vendor Code": data["VendorCode"],
-          "Mobile no": "",
-          "Phone no": data["PhoneNo"],
-          Address: data["Address"],
+          "Customer Name": data["CustomerName"],
+          "Reg / PAN": data["PAN"],
+          "GSTIN/UIN": data["GSTIN"],
+          Address: data["AddOnAddress"],
           City: data["City"],
           State: data["State"],
           Country: data["Country"],
           "Zip Code": data["ZipCode"],
+          "Mobile no": "",
+          "Phone no": data["PhoneNo"],
           "Email Id": data["EmailId"],
-          "Reg / PAN": data["PAN"],
-          "GSTIN/UIN": data["GSTIN"],
+          "Main Location": data["MainLocation"],
+          "Sub Location": data["SubLocation"],
           Description: data["Description"],
-          "Contact Person": data["ContactPerson"]
+          "Contact Person": data["ContactPerson"],
+          "Billing Address": "",
+          Branch: data["BranchName"] ? data["BranchName"].join() : "",
+          Attachment1: "",
+          Attachment2: "",
+          Attachment3: "",
         }
       ],
     };
-    AddVendorAPI(payload)
+    if (selectedCustomerData) {
+      UpdateCustomerAPI(payload, selectedCustomerData.CustomerID)
+    } else {
+      AddCustomerAPI(payload)
+    }
+
+  }
+
+    const settingDropOptions = (mainOpts, subOpts,data,id) => {
+      console.log(data,"inside drop")
+    let jsonData = structuredClone(fields);
+    let mainLocOpts = [];
+    let subLocOpts = [];
+    let mainLocationId = [];
+    for (let e of mainOpts) {
+      if (e.CustomerId === id) mainLocOpts.push(e)
+    }
+    for (let e of subOpts) {
+      if (e.CustomerId === id) subLocOpts.push(e)
+    }
+    jsonData.forEach((obj) => {
+      if (obj.name === "MainLocation") {
+        let mainLocationName = data.MainLocation? data.MainLocation:"F"
+        mainLocationId = mainLocOpts.filter((o) => o.value === mainLocationName)
+        obj.options = mainLocOpts
+        obj.fieldType="dropdown"
+      } else if (obj.name === "SubLocation") {
+        let opts = subLocOpts.filter((o) => o.Parent == (mainLocationId[0]?.LocationId))
+            obj.fieldType="dropdown"
+        obj.options = opts
+        obj.disabled=false
+      }
+    })
+    console.log(fields,jsonData)
+   setFields(jsonData)
   }
   //API Calls
-  //fetch all vendors list
-  const fetchAllVendorsList = async () => {
+  //fetch all Customer list
+  const fetchAllCustomerList = async () => {
     dispatch(setLoading(true));
-    await GetVendorList(companyId).then(res => {
-      if (res.success && res.data && res.data.Vendors && Array.isArray(res.data.Vendors)) {
-        setDataSource(res.data?.Vendors?.reverse());
+    await GetCustomersList(companyId, branchName).then(res => {
+      if (res.success && res.data && res.data.Customers && Array.isArray(res.data.Customers)) {
+        setDataSource(res.data?.Customers?.reverse());
       } else {
         setDataSource([]);
       }
@@ -319,6 +410,20 @@ const Vendor = () => {
       dispatch(setLoading(false));
     });
   }
+  // const getCustomerandCstLocationDetails=async (Id)=>{
+  //   try{
+  // let [customerData,CustLocationData]=await Promise.allSettled([getEditCustomerListByCompanyId(companyId, Id, branchName),getCustomerLocations(companyId)])
+  // if (vendors.status === "fulfilled" && vendors.value.data && vendors.value.success && vendors.value.data.Vendors) {
+  //               data["VendorId"] = { data: vendors.value.data.Vendors, label: "VendorName", value: "VendorID", extendedlable: "VendorType" }
+  //      }
+
+  // }catch{
+
+  // }finally{
+
+  // }
+  //   }
+  
   //fetch Country List as dropdown lookup
   const fetchCountryList = async () => {
     dispatch(setLoading(true));
@@ -328,59 +433,133 @@ const Vendor = () => {
           label: country.CountryName,
           value: country.CountryName,
         }));
-        setLookupsDataInJson(countryOptions, "Country");
+
+         
+        let branchopts = branchesList.slice(1)
+        setLookupsDataInJson(countryOptions, "Country",branchopts, "BranchName");
+      
       } else {
         msg.warning("No Country Data Found !!");
+        if (branchesList?.length > 0) {
+        let branchopts = branchesList.slice(1)
+        setLookupsDataInJson(branchopts, "BranchName");
       }
-    }).catch(err => console.log(err)).finally(() => {
+      }
+    }).catch(err => {console.log(err);if (branchesList?.length > 0) {
+        let branchopts = branchesList.slice(1)
+        setLookupsDataInJson(branchopts, "BranchName");
+      }}).finally(() => {
+
+      
       dispatch(setLoading(false));
+
     });
   }
-  //Add Vendor
-  const AddVendorAPI = async (payload) => {
+  //Add Customer
+  const AddCustomerAPI = async (payload) => {
     dispatch(setLoading(true))
-    await postNewVendor(companyId, payload).then(res => {
+    await postNewCustomer(companyId, payload).then(res => {
       if (res.success) {
         if (res.data.status) {
-          msg.success(res.data.message || "Vendor Added Successfully !!");
-          fetchAllVendorsList();
+          msg.success(res.data.message || "Customer Added Successfully !!");
+          fetchAllCustomerList();
           handleReset();
         } else if (res.data.ErrorDetails && Array.isArray(res.data.ErrorDetails) && res.data.ErrorDetails.length > 0) {
-          msg.warning(res.data.ErrorDetails[0]['Error Message'] || 'Failed to Add Vendor !!');
+          msg.warning(res.data.ErrorDetails[0]['Error Message'] || 'Failed to Add Customer !!');
         } else {
-          msg.warning('Failed to Add Vendor !!')
+          msg.warning('Failed to Add Customer !!')
         }
       }
     }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
   }
-  //get particular vendor Details
-  const getVendorDataAPI = async (Id) => {
+  //Update Customer
+  const UpdateCustomerAPI = async (payload, CustomerId) => {
+    dispatch(setLoading(true))
+    await updateCustomer(companyId, CustomerId, payload).then(res => {
+      if (res.success) {
+        if (res.data.status) {
+          msg.success(res.data.message || "Customer Updated Successfully !!");
+          fetchAllCustomerList();
+          handleReset();
+        } else if (res.data.ErrorDetails && Array.isArray(res.data.ErrorDetails) && res.data.ErrorDetails.length > 0) {
+          msg.warning(res.data.ErrorDetails[0]['Error Message'] || 'Failed to Update Customer !!');
+        } else {
+          msg.warning('Failed to Update Customer !!')
+        }
+      }
+    }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
+  }
+  //get particular Customer Details
+  const getCustomerDataAPI = async (Id) => {
     dispatch(setLoading(true));
-    await getEditVendorListByCompanyId(companyId, Id).then(res => {
+    console.log(Id, "ss")
+    await getEditCustomerListByCompanyId(companyId, Id, branchName).then(res => {
       console.log("res", res)
       if (res.success && res.data && res.data.status == undefined) {
-
-        form.reset({ ...form.getValues(), ...res.data[0], VendorType: res.data[0]["VendorType"]?.split(",") })
+        form.reset({ ...form.getValues(), ...res.data[0],BranchName: res.data[0]["BranchName"]?.split(",") })
+        console.log(res.data[0],"dw")
+         getCustomerLocationData(res.data[0],Id)
 
       } else {
-        msg.warning("No Country Data Found !!");
+        msg.warning("No Customer Data Found !!");
       }
     }).catch(err => console.log(err)).finally(() => {
       dispatch(setLoading(false));
     });
   }
-  const deleteVendorAPI= async (id) =>{
-      dispatch(setLoading(true))
-    await deleteVendorByCompanyId(companyId, id).then(res => {
+  // get customer location data
+    const getCustomerLocationData = async (SelectedData,id) => {
+    dispatch(setLoading(true));
+
+    await getCustomerLocations(companyId).then(res => {
+
+      console.log("res", res)
+      if (res.success && res.data && res.data.status == undefined) {
+
+        if(res.data.CustomerLocation){
+           let mainarr = []
+      let subarr = []
+      if (res.data !== undefined) {
+        res.data?.CustomerLocation?.map((obj) => {
+          if (obj.Parent === "#") {
+            mainarr.push({
+              ...obj,
+              label: obj.LocationName,
+              value: obj.LocationName
+            })
+          } else {
+            subarr.push({
+              ...obj,
+              label: obj.LocationName,
+              value: obj.LocationName
+            })
+          }
+        })
+        setSubLocOptions(subarr)
+        setMainLocOptions(mainarr)
+        settingDropOptions(mainarr, subarr,SelectedData,id)
+        }
+      }
+
+      } else {
+        msg.warning("No Customer Data Found !!");
+      }
+    }).catch(err => console.log(err)).finally(() => {
+      dispatch(setLoading(false));
+    });
+  }
+  const deleteCustomerAPI = async (id) => {
+    dispatch(setLoading(true))
+    await deleteCustomerByCompanyId(companyId, id).then(res => {
       if (res.success) {
         if (res.data && res.data[0].status) {
-          msg.success(res.data[0].message || "Vendor Deleted Successfully!!");
-          fetchAllVendorsList();
+          msg.success(res.data[0].message || "Customer Deleted Successfully!!");
+          fetchAllCustomerList();
           handleReset();
         } else if (res.data.ErrorDetails && Array.isArray(res.data.ErrorDetails) && res.data.ErrorDetails.length > 0) {
-          msg.warning(res.data.ErrorDetails[0]['Error Message'] || 'Failed to Delete Vendor !!');
+          msg.warning(res.data.ErrorDetails[0]['Error Message'] || 'Failed to Delete Customer !!');
         } else {
-          msg.warning('Failed to Delete Vendor !!')
+          msg.warning('Failed to Delete Customer !!')
         }
       }
     }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
@@ -389,11 +568,11 @@ const Vendor = () => {
     <div className="h-full   bg-gray-50 flex flex-col ">
       <div className="flex flex-1 overflow-hidden   ">
         {/* Left Sidebar - Ticket Inbox */}
-        <div className={`${isInboxCollapsed ? 'w-6 p-1' : 'w-34 p-2 mb-2 rounded-b-[5px]'} bg-white border-r    border-0 shadow-lg flex pb-3 flex-col transition-all duration-300 shrink-0 hidden lg:flex`}>
+        {/* <div className={`${isInboxCollapsed ? 'w-6 p-1' : 'w-34 p-2 mb-2 rounded-b-[5px]'} bg-white border-r    border-0 shadow-lg flex pb-3 flex-col transition-all duration-300 shrink-0 hidden md:flex`}>
           <div className="pt-1 shrink-0">
             <div className="flex items-center justify-between mb-2">
               <h3 className={`font-semibold text-gray-900 ${isInboxCollapsed ? 'hidden' : ''}`}>
-                Vendors ({dataSource.length})
+                Customers ({dataSource.length})
               </h3>
               <div onClick={() => setIsInboxCollapsed(!isInboxCollapsed)} className={`cursor-pointer transition-colors hover:bg-accent hover:text-accent-foreground  ${isInboxCollapsed ? 'me-2  py-1 ' : 'p-1'}`}>
                 {isInboxCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
@@ -402,11 +581,10 @@ const Vendor = () => {
             {!isInboxCollapsed && (
               <div className="space-y-2 pb-1">
 
-                {/* Search */}
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                   <Input
-                    placeholder="Search Vendors..."
+                    placeholder="Search Customers..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-10"
@@ -419,54 +597,36 @@ const Vendor = () => {
           {!isInboxCollapsed && (
             <ScrollArea hideScrollbar={true} className="flex-1 min-h-0 mb-2 truncate max-w-[250px] block">
               <div className="py-2">
-                {filteredOrgs.map((vend) => (
+                {filteredOrgs.map((cust) => (
                   <div
-                    key={vend.VendorID}
-                    className={`p-2.5 py-2 rounded-lg mb-2 cursor-pointer transition-all hover:bg-gray-50 ${selectedVendorData?.VendorID === vend.VendorID
+                    key={cust.CustomerID}
+                    className={`p-2.5 py-2 rounded-lg mb-2 cursor-pointer transition-all hover:bg-gray-50 ${selectedCustomerData?.CustomerID === cust.CustomerID
                       ? 'bg-blue-50 border-l-4 border-blue-500'
                       : 'border border-gray-200'
                       }`}
-                    onClick={(e) => handleSelect(e,vend)}
+                    onClick={(e) => handleSelect(e, cust)}
                   >
                     <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-xs font-medium text-blue-600 me-2 ms-1">{vend?.VendorName}</span>
-                      {/* <Badge
-                        title={`Vendor Type: ${vend.VendorType}`}
-                        variant="secondary"
-                        className="bg-purple-100 text-purple-800 text-center truncate inline-block w-[90px] text-[11px] px-2 py-0.5"
-                      >
-                        {vend.VendorType}
-                      </Badge> */}
+                      <span className="text-xs font-medium truncate text-blue-600 me-2 ms-1" title={cust?.CustomerName}>{cust?.CustomerName}</span>
                     </div>
 
-                    {/* <h3
-                      className="text-xs font-medium text-gray-900 mb-1 truncate"
-                      title={"next"}
-                    >
-                      {vend?.VendorEmailId}
-                    </h3> */}
 
                     <div className="flex items-center justify-between gap-1.5 text-[11px] text-gray-500">
                       <Badge
-                        title="Vendor Type"
+                        title="Cuatomer EmailId"
                         variant="outline"
                         className="bg-green-100 text-green-800 text-[11px] px-2 py-0.5"
                       >
-                        {vend.VendorType}
+                        {cust?.EmailId}
                       </Badge>
-                      {/* <h3
-                      className="text-xs font-medium text-gray-900 mb-1 truncate"
-                      title={"next"}
-                    >
-                      {vend?.VendorEmailId}
-                    </h3> */}
+
 
                       <div>
                         <span
-                          title={vend.VendorName}
+                          title={cust.CustomerName}
                           className="block max-w-[90px] truncate text-[11px] text-gray-500"
                         >
-                          <Trash2 onClick={(e) => handleDelete(e,vend)} height={18} className='text-red-400'></Trash2>
+                          <Trash2 onClick={(e) => handleDelete(e, cust)} height={18} className='text-red-400'></Trash2>
                         </span>
                       </div>
 
@@ -477,7 +637,189 @@ const Vendor = () => {
             </ScrollArea>
 
           )}
+        </div> */}
+        {/* <div
+  className={`
+    ${isInboxCollapsed ? 'w-6 p-1' : 'w-64 p-2 mb-2 rounded-b-[5px]'}
+    bg-white/95 backdrop-blur-sm border border-gray-200 shadow-xl 
+    flex flex-col pb-3 transition-all duration-300 shrink-0
+  `}
+>
+  <div className="pt-1 shrink-0 sticky top-0 bg-white/95 z-10">
+    <div className="flex items-center justify-between mb-2">
+      <h3
+        className={`font-semibold text-gray-900 ${
+          isInboxCollapsed ? 'hidden' : ''
+        }`}
+      >
+        Customers ({dataSource.length})
+      </h3>
+      <div
+        onClick={() => setIsInboxCollapsed(!isInboxCollapsed)}
+        className={`cursor-pointer transition-colors hover:bg-gray-100 rounded ${
+          isInboxCollapsed ? 'me-2 py-1' : 'p-1'
+        }`}
+      >
+        {isInboxCollapsed ? (
+          <ChevronRight className="h-4 w-4" />
+        ) : (
+          <ChevronLeft className="h-4 w-4" />
+        )}
+      </div>
+    </div>
+
+
+    {!isInboxCollapsed && (
+      <div className="space-y-2 pb-1">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Input
+            placeholder="Search Customers..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
         </div>
+      </div>
+    )}
+  </div>
+  {!isInboxCollapsed && (
+    <ScrollArea hideScrollbar={true} className="flex-1 min-h-0 mb-2 truncate max-w-[250px] block">
+      <div className="py-2">
+        {filteredOrgs.map((cust) => (
+          <div
+            key={cust.CustomerID}
+            className={`p-2.5 py-2 rounded-lg mb-2 cursor-pointer transition-all hover:bg-gray-50 ${
+              selectedCustomerData?.CustomerID === cust.CustomerID
+                ? 'bg-blue-50 border-l-4 border-blue-500'
+                : 'border border-gray-200'
+            }`}
+            onClick={(e) => handleSelect(e, cust)}
+          >
+            <div className="flex items-center justify-between mb-1.5">
+              <span
+                className="text-xs font-medium truncate text-blue-600 me-2 ms-1"
+                title={cust?.CustomerName}
+              >
+                {cust?.CustomerName}
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between gap-1.5 text-[11px] text-gray-500">
+              <Badge
+                title="Customer EmailId"
+                variant="outline"
+                className="bg-green-100 text-green-800 text-[11px] px-2 py-0.5"
+              >
+                {cust?.EmailId}
+              </Badge>
+
+              <Trash2
+                onClick={(e) => handleDelete(e, cust)}
+                height={18}
+                className="text-red-400 cursor-pointer"
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+    </ScrollArea>
+  )}
+</div> */}
+
+
+<div
+  className={`
+    ${isInboxCollapsed ? 'w-6 p-1' : 'w-64 p-2 mb-2 rounded-b-[5px]'}
+   bg-white border border-gray-200 border-t-0 border-t-transparent shadow-xl flex flex-col pb-3 transition-all duration-300 shrink-0
+    md:relative
+    ${isInboxCollapsed ? 'relative' : 'fixed md:relative'}
+    ${isInboxCollapsed ? '' : 'top-15 left-0 h-full z-50 md:top-auto md:left-auto md:h-auto'}
+  `}
+>
+  {/* Header */}
+  <div className="pt-1 shrink-0 sticky top-0 bg-white z-10">
+    <div className="flex items-center justify-between mb-2">
+      <h3
+        className={`font-semibold text-gray-900 ${
+          isInboxCollapsed ? 'hidden' : ''
+        }`}
+      >
+        Customers ({dataSource.length})
+      </h3>
+      <div
+        onClick={() => setIsInboxCollapsed(!isInboxCollapsed)}
+        className={`cursor-pointer transition-colors hover:bg-gray-100 rounded ${
+          isInboxCollapsed ? 'me-2 py-1' : 'p-1'
+        }`}
+      >
+        {isInboxCollapsed ? (
+          <ChevronRight className="h-4 w-4" />
+        ) : (
+          <ChevronLeft className="h-4 w-4" />
+        )}
+      </div>
+    </div>
+
+    {!isInboxCollapsed && (
+      <div className="space-y-2 pb-1">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Input
+            placeholder="Search Customers..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+      </div>
+    )}
+  </div>
+
+  {/* Scrollable area */}
+  {!isInboxCollapsed && (
+    <ScrollArea hideScrollbar={true} className="flex-1 min-h-0 mb-2 truncate max-w-[250px] block">
+      <div className="py-2">
+        {filteredOrgs.map((cust) => (
+          <div
+            key={cust.CustomerID}
+            className={`p-2.5 py-2 rounded-lg mb-2 cursor-pointer transition-all hover:bg-gray-50 ${
+              selectedCustomerData?.CustomerID === cust.CustomerID
+                ? 'bg-blue-50 border-l-4 border-blue-500'
+                : 'border border-gray-200'
+            }`}
+            onClick={(e) => handleSelect(e, cust)}
+          >
+            <div className="flex items-center justify-between mb-1.5">
+              <span
+                className="text-xs font-medium truncate text-blue-600 me-2 ms-1"
+                title={cust?.CustomerName}
+              >
+                {cust?.CustomerName}
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between gap-1.5 text-[11px] text-gray-500">
+              <Badge
+                title="Customer EmailId"
+                variant="outline"
+                className="bg-green-100 text-green-800 text-[11px] px-2 py-0.5"
+              >
+                {cust?.EmailId}
+              </Badge>
+
+              <Trash2
+                onClick={(e) => handleDelete(e, cust)}
+                height={18}
+                className="text-red-400 cursor-pointer"
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+    </ScrollArea>
+  )}
+</div>
 
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col min-w-0 ">
@@ -490,7 +832,7 @@ const Vendor = () => {
                   <span>/</span>
                   <span>Company</span>
                   <span>/</span>
-                  <span className="text-gray-900 font-medium">Vendor</span>
+                  <span className="text-gray-900 font-medium">Customer</span>
                 </div>
               </div>
             </div>
@@ -501,7 +843,7 @@ const Vendor = () => {
                 onClick={() => { handleReset() }}
                 icon={<X className="h-4 w-4" />}
               >
-                {selectedVendorData ? "Cancel" : "Clear"}
+                {selectedCustomerData ? "Cancel" : "Clear"}
               </ReusableButton>
               <ReusableButton
                 size="small"
@@ -509,7 +851,7 @@ const Vendor = () => {
                 onClick={() => { handleSubmit(handleSave)() }}
                 icon={<Save className="h-4 w-4" />}
               >
-                {selectedVendorData ? "Update" : "Save"}
+                {selectedCustomerData ? "Update" : "Save"}
               </ReusableButton>
             </div>
           </div>
@@ -531,6 +873,17 @@ const Vendor = () => {
                                 if (obj.fieldType === "heading") {
                                   return <h3 key={obj.text} className='text-lg font-semibold text-gray-900 border-b col-span-full pb-2'>{obj.text}</h3>
                                 }
+                                if(obj.fieldType === "dropdown" && obj.name === "MainLocation"){
+                                   return (
+                                  <div key={obj.name}>
+                                   
+                                    {renderField(obj)}
+                                     <div className='text-xs text-cyan-500 font-bold flex justify-end'>
+                                       <NavLink to="/masters/company/customer/customerlocation" state={{ selectedCustomerData }} >Add Locations</NavLink>
+                                    </div>
+                                  </div>
+                                )
+                                }
                                 return (
                                   <div key={obj.name}>
                                     {renderField(obj)}
@@ -550,37 +903,37 @@ const Vendor = () => {
           </div>
         </div>
       </div>
-          <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>
-                      <DialogContent className="sm:max-w-[450px]">
-                          <DialogHeader>
-                              <DialogTitle>Confirm the action</DialogTitle>
-                              <DialogDescription>
-                                  Are you sure you want to delete vendor {deletingVendorData?.VendorName}?
-      
-                              </DialogDescription>
-                          </DialogHeader>
-                          <DialogFooter>
-                              <ReusableButton
-                                  variant="default"
-                                  onClick={() => setIsDelModalOpen(false)}
-                              >
-                                  Cancel
-                              </ReusableButton>
-                              <ReusableButton
-                                  variant="primary"
-                                  danger={true}
-                                  onClick={() => { deleteVendorAPI(deletingVendorData.VendorID); setIsDelModalOpen(false) }}
-                              >
-                                  Delete
-                              </ReusableButton>
-                          </DialogFooter>
-                      </DialogContent>
-                  </Dialog>
+      <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>
+        <DialogContent className="sm:max-w-[450px]">
+          <DialogHeader>
+            <DialogTitle>Confirm the action</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete Customer {deletingCustomerData?.CustomerName}?
+
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <ReusableButton
+              variant="default"
+              onClick={() => setIsDelModalOpen(false)}
+            >
+              Cancel
+            </ReusableButton>
+            <ReusableButton
+              variant="primary"
+              danger={true}
+              onClick={() => { deleteCustomerAPI(deletingCustomerData.CustomerID); setIsDelModalOpen(false) }}
+            >
+              Delete
+            </ReusableButton>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
 
-export default Vendor;
+export default Customer;
 
 
 

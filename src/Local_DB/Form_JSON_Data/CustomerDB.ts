@@ -79,10 +79,19 @@ export const CUSTOMER_DETAILS: BaseField[] = [
      {
         label: 'Sub Location',
         fieldType: 'text',
-        name: 'MainLocation',
+        name: 'SubLocation',
         options:[],
         isRequired: true,
         disabled:true
+    },
+    {
+        label: 'Branch',
+        fieldType: "multiselect",
+        name: "BranchName",
+        defaultValue: "INDIA",
+        options: [ ],
+        placeholder: "Select Country",
+        isRequired: false,
     },
 
     {

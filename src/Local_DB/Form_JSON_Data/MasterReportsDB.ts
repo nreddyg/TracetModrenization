@@ -57,7 +57,7 @@ export const MASTER_REPORTS_DB: BaseField[] = [
     },
     {
         name: 'VendorType',
-        label: 'VendorType',
+        label: 'Vendor Type',
         fieldType: 'multiselect',
         isRequired: false,
         jsontype:'Vendor'

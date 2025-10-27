@@ -1,4 +1,4 @@
-import { URL_DELETE_ASSET_CATEGORY_REC, URL_GET_ASSET_CATEGORY_DATA, URL_POST_ASSET_CATEGORY_DATA, URL_UPDATE_ASSET_CATEGORY_DATA } from '@/config/apiUrls';
+import { URL_COST_BREAKUP_ATTRIBUTES, URL_DELETE_ASSET_CATEGORY_REC, URL_GET_ASSET_CATEGORY_DATA, URL_POST_ASSET_CATEGORY_DATA, URL_UPDATE_ASSET_CATEGORY_DATA, URL_USER_ATTRIBUTES } from '@/config/apiUrls';
 import api from './api';
 
 interface APIResponse<T> {
@@ -30,7 +30,7 @@ export const postAssetCatDetails = async (CompId: string, data: any): Promise<AP
 //GET assetCategories based on id and companyID
 export const getAssetCatByID = async (id: number, CompId: string): Promise<APIResponse<any>> => {
     try {
-        const response = await api.get(URL_GET_ASSET_CATEGORY_DATA, { params: {AssetCategoryId:id, CompId: CompId } })
+        const response = await api.get(URL_GET_ASSET_CATEGORY_DATA, { params: { AssetCategoryId: id, CompId: CompId } })
         return { success: true, data: response.data, }
     } catch (err: any) {
         return { success: false, message: err.response?.data?.message || err.message, status: err.response?.status };
@@ -40,7 +40,7 @@ export const getAssetCatByID = async (id: number, CompId: string): Promise<APIRe
 // update asset category data
 export const updateAssetCat = async (mainCatID: number, subCatID: number, CompId: string, data: any): Promise<APIResponse<any>> => {
     try {
-        const response = await api.post(URL_UPDATE_ASSET_CATEGORY_DATA, data, { params: {MainAssetCategoryId: mainCatID, SubAssetCategoryId: subCatID, CompId: CompId } })
+        const response = await api.post(URL_UPDATE_ASSET_CATEGORY_DATA, data, { params: { MainAssetCategoryId: mainCatID, SubAssetCategoryId: subCatID, CompId: CompId } })
         return { success: true, data: response.data, }
     } catch (err: any) {
         return { success: false, message: err.response?.data?.message || err.message, status: err.response?.status };
@@ -48,9 +48,27 @@ export const updateAssetCat = async (mainCatID: number, subCatID: number, CompId
 }
 
 // delete API data
-export const deleteAssetCat = async (AssetCatID: number, CompId: string,data:any): Promise<APIResponse<any>> => {
+export const deleteAssetCat = async (AssetCatID: number, CompId: string, data: any): Promise<APIResponse<any>> => {
     try {
-        const response = await api.post( URL_DELETE_ASSET_CATEGORY_REC, data, { params: {AssetCategoryId: AssetCatID, CompId: CompId } })
+        const response = await api.post(URL_DELETE_ASSET_CATEGORY_REC, data, { params: { AssetCategoryId: AssetCatID, CompId: CompId } })
+        return { success: true, data: response.data, }
+    } catch (err: any) {
+        return { success: false, message: err.response?.data?.message || err.message, status: err.response?.status };
+    }
+}
+// 
+export const getUserAttributes = async (CompId: string): Promise<APIResponse<any>> => {
+    try {
+        const response = await api.get(URL_USER_ATTRIBUTES, { params: { CompId: CompId } })
+        return { success: true, data: response.data, }
+    } catch (err: any) {
+        return { success: false, message: err.response?.data?.message || err.message, status: err.response?.status };
+    }
+}
+// URL_COST_BREAKUP_ATTRIBUTES
+export const getCostBreakUpAttribute = async (CompId: string): Promise<APIResponse<any>> => {
+    try {
+        const response = await api.get(URL_COST_BREAKUP_ATTRIBUTES, { params: { CompId: CompId } })
         return { success: true, data: response.data, }
     } catch (err: any) {
         return { success: false, message: err.response?.data?.message || err.message, status: err.response?.status };

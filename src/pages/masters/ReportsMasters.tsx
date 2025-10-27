@@ -3,7 +3,7 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Eye, RefreshCw, Save, Search, Settings2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { BaseField, GenericObject } from '@/Local_DB/types/types';
+import { BaseField, GenericObject, Options } from '@/Local_DB/types/types';
 import { Controller, useForm } from 'react-hook-form';
 import { cn } from '@/lib/utils';
 import FilterCard from '@/components/common/FilterCard';
@@ -42,6 +42,26 @@ interface MultiSelectConfig {
   errorMsgClass?: string;
   showSearch?: boolean;
 }
+const treefunWithParent = (data, id, idName, assetLocationUnique) => {
+  const treeData = [];
+  const uniqueId = idName ? idName : "id";
+  data.forEach((item) => {
+    if (item["parent"] || item["Parent"]) {
+      let p = item["parent"] ? "parent" : "Parent";
+      if (item[p] == id) {
+        item.title = `${item.text || item.Name || item.LocationName}`;
+        item.key = item[uniqueId];
+        item.value = item[assetLocationUnique] || item[uniqueId] || item[item.Name] || item.Name || item.text || item.LocationName;
+        const children = treefunWithParent(data, item[uniqueId], idName, assetLocationUnique);
+        if (children.length > 0) {
+          item.children = children;
+        }
+        treeData.push(item);
+      }
+    }
+  });
+  return treeData;
+};
 
 const ReportsMasters = () => {
   const dispatch=useAppDispatch();
@@ -57,6 +77,7 @@ const ReportsMasters = () => {
     'Company Hierarchy', 'Department', 'Asset Location', 'Cost Center', 'Asset Category',
     'User', 'Vendor', 'Customer', 'Service Locations', 'Customer Locations', 'User Log'
   ]);
+  const [vendors,setVendors]=useState([]);
   const companyId=useAppSelector(state=>state.projects.companyId);
   const branchId=useAppSelector(state=>state.projects.branchId);
   const branchName=useAppSelector(state=>state.projects.branch);
@@ -78,6 +99,40 @@ const ReportsMasters = () => {
   useEffect(()=>{
     if(companyId && branchName) fetchAllLookups()
   },[companyId,branchName])
+  useEffect(()=>{
+    let vendorsTypes=watch('VendorType')
+    if(vendorsTypes && Array.isArray(vendorsTypes)){
+    const filteredVendors = vendors.filter(v =>vendorsTypes.includes(v.VendorTypeID))
+    setLookupsDataInJson({VendorName:{data:filteredVendors,label:'VendorName',value:'VendorID'}})
+    }
+  },[watch('VendorType')])
+  const setLookupsDataInJson = async (dataset: any) => {
+    let keys = Object.keys(dataset);
+    const updatedFields = fields.map(field => {
+      if (keys.includes(field.name)) {
+        let { data, isTree, id, idName, assetLocationUnique } = dataset[field.name];
+        if (isTree) {
+          let treeData = treefunWithParent(data, id, idName, assetLocationUnique);
+          return { ...field, treeData };
+        } else {
+          let options = Array.from(
+            new Map(
+              dataset[field.name].data.map((item: any) => [
+                item[dataset[field.name].value],
+                {
+                  label: item[dataset[field.name].label],
+                  value: item[dataset[field.name].value],
+                },
+              ])
+            ).values()
+          ) as Options[];
+          return { ...field, options };
+        }
+      }
+      return field;
+    });
+    setFields(updatedFields);
+  }
   const fetchAllLookups=async()=>{
     try{
       dispatch(setLoading(true));
@@ -88,20 +143,20 @@ const ReportsMasters = () => {
         getCustomerLocations(companyId)
       ])
       let responses={
-        CompanyHierarchy:{data:CompanyHierarchy.status==='fulfilled' && CompanyHierarchy.value.data && Array.isArray(CompanyHierarchy.value.data) ? CompanyHierarchy.value.data:[],label:'Name',value:'id'},
-        Department:{data:Dept.status==='fulfilled' && Dept.value.data && Array.isArray(Dept.value.data)? Dept.value.data:[],label:'Name',value:'id'},
-        CostCenter:{data:CostCenter.status==='fulfilled' && CostCenter.value.data && Array.isArray(CostCenter.value.data)?CostCenter.value.data:[],label:'Name',value:'id'},
-        AssetLocation:{data:AssetLoc.status==='fulfilled' && AssetLoc.value.data && Array.isArray(AssetLoc.value.data) ? AssetLoc.value.data :[],label:'Name',value:'orginalId'},
-        AssetCategory:{data:AssetCat.status==='fulfilled' && AssetCat.value.data && Array.isArray(AssetCat.value.data)?AssetCat.value.data:[],label:'Name',value:'AssetCategoryId'},
-        User:{data:User.status==='fulfilled' && User.value.data && Array.isArray(User.value.data) ? User.value.data:[],label:'UserName',value:'UserId'},
-        VendorType:{data:Vendor.status==='fulfilled' && Vendor.value.data && Vendor.value.data.Vendors && Array.isArray(Vendor.value.data.Vendors) ? Vendor.value.data.Vendors:[],label:'VendorType',value:'VendorTypeID'},
-        Customer:{data:Customer.status==='fulfilled' && Customer.value.data && Customer.value.data.Customers && Array.isArray(Customer.value.data.Customers) ?Customer.value.data.Customers:[],label:'CustomerName',value:'CustomerID'},
-        ServiceLocations:{data:SL.status==='fulfilled' && SL.value.data && Array.isArray(SL.value.data) ? SL.value.data : [],label:'LocationName',value:'id'},
-        CustomerLocations:{data:CL.status==='fulfilled' && CL.value.data && CL.value.data.CustomerLocation && Array.isArray(CL.value.data.CustomerLocation) ? CL.value.data.CustomerLocation : [],label:'LocationName',value:'LocationId'}
+        CompanyHierarchy:{data:CompanyHierarchy.status==='fulfilled' && CompanyHierarchy.value.data && Array.isArray(CompanyHierarchy.value.data) ? CompanyHierarchy.value.data:[],isTree:true,id:'#'},
+        Department:{data:Dept.status==='fulfilled' && Dept.value.data && Array.isArray(Dept.value.data)? Dept.value.data:[],isTree:true,id:'#'},
+        CostCenter:{data:CostCenter.status==='fulfilled' && CostCenter.value.data && Array.isArray(CostCenter.value.data)?CostCenter.value.data:[],id:'#',isTree:true},
+        AssetLocation:{data:AssetLoc.status==='fulfilled' && AssetLoc.value.data && Array.isArray(AssetLoc.value.data) ? AssetLoc.value.data :[],isTree:true,id:"#",idName:'',assetLocationUnique:'orginalId'},
+        AssetCategory:{data:AssetCat.status==='fulfilled' && AssetCat.value.data && Array.isArray(AssetCat.value.data)?AssetCat.value.data:[],isTree:true,id:"#",idName:"AssetCategoryId"},
+        User:{data:User.status==='fulfilled' && User.value.data && Array.isArray(User.value.data) ? User.value.data:[],label:'UserName',value:'UserId',isTree:false},
+        VendorType:{data:Vendor.status==='fulfilled' && Vendor.value.data && Vendor.value.data.Vendors && Array.isArray(Vendor.value.data.Vendors) ? Vendor.value.data.Vendors:[],label:'VendorType',value:'VendorTypeID',isTree:false},
+        Customer:{data:Customer.status==='fulfilled' && Customer.value.data && Customer.value.data.Customers && Array.isArray(Customer.value.data.Customers) ?Customer.value.data.Customers:[],label:'CustomerName',value:'CustomerID',isTree:false},
+        ServiceLocations:{data:SL.status==='fulfilled' && SL.value.data && Array.isArray(SL.value.data) ? SL.value.data : [],isTree:true,id:'#',idName:''},
+        CustomerLocations:{data:CL.status==='fulfilled' && CL.value.data && CL.value.data.CustomerLocation && Array.isArray(CL.value.data.CustomerLocation) ? CL.value.data.CustomerLocation : [],isTree:true,id:"#",idName:"LocationId"}
       }
-      console.log('responses',responses)
+      setLookupsDataInJson(responses);
+      setVendors(responses.VendorType.data);
     }catch{}finally{ dispatch(setLoading(false)) }
-
   }
   const multiSelectConfig: MultiSelectConfig = {
     isHierarchy: true,

@@ -173,7 +173,7 @@ export const Asset_Main_Category_DB: BaseField[] = [
     },
     {
         label: 'Life Span',
-        fieldType: 'text',
+        fieldType: 'numeric',
         name: 'lifespan',
         defaultValue: '0.00',
         placeholder: '',

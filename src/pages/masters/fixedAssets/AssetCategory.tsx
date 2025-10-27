@@ -20,6 +20,9 @@ import { Asset_Main_Category_DB } from '@/Local_DB/Form_JSON_Data/AssetCategoryD
 import { BaseField, GenericObject } from '@/Local_DB/types/types';
 import ReusableMultiSelect from '@/components/ui/reusable-multi-select';
 import { FaSearch } from 'react-icons/fa';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from "zod";
+
 
 interface MainCategory {
     Name: string
@@ -37,19 +40,16 @@ const AssetCategory = () => {
     const [isSubDialogOpen, setIsSubDialogOpen] = useState(false);
     const [isMainDelOpen, setIsMainDelOpen] = useState(false)
     const [isSubDelOpen, setIsSubDelOpen] = useState(false);
-    const [mainCategoryName, setMainCategoryName] = useState('');
-    const [subCategoryName, setSubCategoryName] = useState('');
     const [getMainCategoryData, setGetMainCategoryData] = useState([]);
     const [subCategoryData, setSubCategoryData] = useState([]);
     const [subDataToShow, setSubDataToShow] = useState([]);
     const [recordToEditId, setRecordToEditId] = useState(null);
     const [subRecID, setSubRecID] = useState(null);
-    const [subRecord, setSubRecord] = useState({ Name: '', AssetCategoryId: 0, CostBreakupGroupNames: null });
+    const [subRecord, setSubRecord] = useState({ Name: '', AssetCategoryId: 0, CostBreakupGroupNames: null, SalvageValuePercentage: "%" });
     const [mainCatfields, setMainCatFields] = useState<BaseField[]>(Asset_Main_Category_DB);
     const [mainDelRec, setMainDelRec] = useState({ Name: '', AssetCategoryId: 0 });
     const [isMainEdit, setIsMainEdit] = useState(false);
     const [selectedParentData, setSelectedParentData] = useState({});
-    const [dropValue, setDropValue] = useState('')
     const companyId = useAppSelector(state => state.projects.companyId);
     const branch = useAppSelector(state => state.projects.branch) || '';
     const msg = useMessage()
@@ -63,7 +63,23 @@ const AssetCategory = () => {
         }
     }, [companyId])
 
+    // const dynamicSchema = z.object(
+    //     mainCatfields.reduce((acc, f) => {
+    //         let fieldSchema = z.string();
+    //         if (f.fieldType === 'text' && f.name === "name") {
+    //             fieldSchema = z
+    //                 .string()
+    //                 .min(1, `${f.label} is required`)
+    //                 .max(255, `${f.label} too long`)
+    //                 .regex(/^[a-zA-Z0-9&@#$%^()<>?*][a-zA-Z0-9&@#$%^()<>?* ]*$/, `${f.label} cannot start with a space or contain invalid characters`);
+    //         }
+    //         acc[f.name!] = fieldSchema;
+    //         return acc;
+    //     }, {} as Record<string, z.ZodTypeAny>)
+    // );
+
     const form = useForm<GenericObject>({
+        // resolver: zodResolver(dynamicSchema),
         defaultValues: mainCatfields.reduce((acc, f) => {
             acc[f.name!] = f.defaultValue ?? '';
             return acc;
@@ -266,6 +282,7 @@ const AssetCategory = () => {
     }
 
     const handleSubEdit = (subData) => {
+        console.log("subdata", subData);
         reset({
             ...watch(),
             subname: subData.Name,
@@ -280,7 +297,6 @@ const AssetCategory = () => {
 
         setIsSubDialogOpen(true);
     };
-
 
     function handleSubReset() {
         reset({
@@ -311,10 +327,31 @@ const AssetCategory = () => {
         if (!name || !show) return null;
         const validationRules = {
             required: isRequired ? `${label} is Required` : false,
+            ...(["name", "code", "description", "subname", "subcode", "subdescription"].includes(name) && {
+                validate: (value: string) =>
+                    value === undefined || value.trimStart() === value || "Leading spaces are not allowed",
+            })
         };
 
-        // special case for salvagevalue: render a combined visual control
         switch (fieldType) {
+            case 'numeric':
+                return (
+                    <Controller
+                        key={name}
+                        name={name}
+                        control={control}
+                        rules={validationRules}
+                        render={({ field: ctrl }) => (
+                            <ReusableInput
+                                {...field}
+                                type="number"
+                                value={ctrl.value}
+                                onChange={ctrl.onChange}
+                                error={errors[name]?.message as string}
+                            />
+                        )}
+                    />
+                );
             case 'text':
                 return (
                     <Controller
@@ -344,7 +381,7 @@ const AssetCategory = () => {
                                 defaultValue={name === 'salvagevalue_unit' ? '%' : ''}
                                 usePortal={(name === 'mainCatdropdown') ? true : false}
                                 {...field}
-                                disabled={(subRecID && subRecord.CostBreakupGroupNames) ? true : false}
+                                disabled={(name === "costbreakgroup" && subRecord.CostBreakupGroupNames) ? true : false}
                                 value={ctrl.value}
                                 onChange={ctrl.onChange}
                                 error={errors[name]?.message as string}
@@ -364,12 +401,11 @@ const AssetCategory = () => {
                                 <ReusableMultiSelect
                                     // usePortal={false}
                                     label={label!}
-                                    usePortal={(name === 'mainCatdropdown') ? true : false} 
+                                    usePortal={(name === 'mainCatdropdown') ? true : false}
                                     {...field}
                                     value={ctrl.value}
                                     onChange={ctrl.onChange}
                                     error={errors[name]?.message as string}
-                                    suffixIcon={<FaSearch onClick={null} />}
                                 />
                             )}
                         />
@@ -625,7 +661,7 @@ const AssetCategory = () => {
             salvagevalue: '0.00',
             salvagevalue_unit: "%",
             subdescription: '',
-            mainCatdropdown: selectedParentData[0].AssetCategoryId,
+            mainCatdropdown: selectedParentData[0]?.AssetCategoryId,
         })
     }
 
@@ -637,7 +673,7 @@ const AssetCategory = () => {
                 setIsSubDialogOpen(true);
                 handleSubReset();
                 setSubRecID(null);
-                setSubRecord({ Name: '', AssetCategoryId: 0, CostBreakupGroupNames: null });
+                setSubRecord({ Name: '', AssetCategoryId: 0, CostBreakupGroupNames: null, SalvageValuePercentage: "%" });
             } else {
                 msg.warning("Please select Main Category ")
             }
@@ -786,7 +822,7 @@ const AssetCategory = () => {
                                 <div className="flex justify-end gap-2">
                                     <ReusableButton
                                         variant="default"
-                                        onClick={() => { setIsMainDialogOpen(false); setSubRecID(null) }}
+                                        onClick={() => { setIsMainDialogOpen(false); setSubRecID(null); handleCancel(); }}
                                     >
                                         Cancel
                                     </ReusableButton>

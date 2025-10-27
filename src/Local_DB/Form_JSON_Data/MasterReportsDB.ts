@@ -14,7 +14,8 @@ export const MASTER_REPORTS_DB: BaseField[] = [
         fieldType: 'treeselect',
         treeData: [],
         isRequired: false,
-        jsontype:'Company Hierarchy'
+        jsontype:'Company Hierarchy',
+        defaultValue:[]
     },
     {
         name: 'Department',
@@ -22,7 +23,8 @@ export const MASTER_REPORTS_DB: BaseField[] = [
         fieldType: 'treeselect',
         treeData: [],
         isRequired: false,
-        jsontype:'Department'
+        jsontype:'Department',
+        defaultValue:[]
     },
     {
         name: 'AssetLocation',
@@ -30,7 +32,8 @@ export const MASTER_REPORTS_DB: BaseField[] = [
         fieldType: 'treeselect',
         treeData: [],
         isRequired: false,
-        jsontype:'Asset Location'
+        jsontype:'Asset Location',
+        defaultValue:[]
     },
     {
         name: 'CostCenter',
@@ -38,7 +41,8 @@ export const MASTER_REPORTS_DB: BaseField[] = [
         fieldType: 'treeselect',
         treeData: [],
         isRequired: false,
-        jsontype:'Cost Center'
+        jsontype:'Cost Center',
+        defaultValue:[]
     },
     {
         name: 'AssetCategory',
@@ -46,35 +50,40 @@ export const MASTER_REPORTS_DB: BaseField[] = [
         fieldType: 'treeselect',
         treeData: [],
         isRequired: false,
-        jsontype:'Asset Category'
+        jsontype:'Asset Category',
+        defaultValue:[]
     },
     {
         name: 'User',
         label: 'User',
         fieldType: 'multiselect',
         isRequired: false,
-        jsontype:'User'
+        jsontype:'User',
+        defaultValue:[]
     },
     {
         name: 'VendorType',
         label: 'Vendor Type',
         fieldType: 'multiselect',
         isRequired: false,
-        jsontype:'Vendor'
+        jsontype:'Vendor',
+        defaultValue:[]
     },
     {
         name: 'VendorName',
         label: 'Vendor Name',
         fieldType: 'multiselect',
         isRequired: false,
-        jsontype:'Vendor'
+        jsontype:'Vendor',
+        defaultValue:[]
     },
     {
         name: 'Customer',
         label: 'Customer',
         fieldType: 'multiselect',
         isRequired: false,
-        jsontype:'Customer'
+        jsontype:'Customer',
+        defaultValue:[]
     },
     {
         name: 'ServiceLocations',
@@ -82,7 +91,8 @@ export const MASTER_REPORTS_DB: BaseField[] = [
         fieldType: 'treeselect',
         treeData: [],
         isRequired: false,
-        jsontype:'Service Locations'
+        jsontype:'Service Locations',
+        defaultValue:[]
     },
     {
         name: 'CustomerLocations',
@@ -90,6 +100,7 @@ export const MASTER_REPORTS_DB: BaseField[] = [
         fieldType: 'treeselect',
         treeData: [],
         isRequired: false,
-        jsontype:'Customer Locations'
+        jsontype:'Customer Locations',
+        defaultValue:[]
     },
 ]

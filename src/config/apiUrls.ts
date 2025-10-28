@@ -210,11 +210,37 @@ export const URL_GET_ASSET_CATEGORY_DATA = `/api/Masters/GetAssetCategoriesByCom
 export const URL_POST_ASSET_CATEGORY_DATA = `/api/Masters/AddAssetCategoryDetails`;
 export const URL_UPDATE_ASSET_CATEGORY_DATA = `/api/Masters/UpdateAssetCategoryDetails`;
 export const URL_DELETE_ASSET_CATEGORY_REC = `/api/Masters/DeleteAssetCategoryById`;
+export const URL_USER_ATTRIBUTES = `/api/Masters/GetUserAttributesByCompanyId`;
+export const URL_COST_BREAKUP_ATTRIBUTES = `/api/Masters/GetCostBreakupAttributesByCompanyId`;
+
 // Masters Item Master 
 export const URL_GET_ITEM_MASTER_DATA = `/api/Masters/GetItemMasterDetailsByCompanyId`;
 export const URL_DELETE_ITEM_MASTER = `/api/Masters/DeleteItemMaster`;
 export const URL_POST_NEW_ITEM_MASTER = `/api/Masters/AddItemMasterDetails`;
 export const URL_POST_UPDATE_ITEM_MASTER = `/api/Masters/UpdateItemMasterDetails`;
+
+
+// Item Cateory
+export const URL_GET_ITEM_CATEGORY = `/api/Masters/GetItemCategoryDetailsByCompanyId`;
+export const URL_UNIT_OF_MEASURE = `/api/Masters/GetUOMDetailsByCompanyId`;
+export const URL_ADD_ITEM_CATEGORY = `/api/Masters/AddItemCategoryDetails`;
+export const URL_UPDATE_ITEM_CATEGORY = `/api/Masters/UpdateItemCategoryDetails`;
+export const URL_DELETE_ITEM_CATEGORY = `/api/Masters/DeleteItemCategoriesById`;
+export const URL_ITEM_CATEGORY_BY_ID = `/api/Masters/GetItemCategoryDetails`;
+
+//Master Reports
+export const URL_GET_CUSTOMER_LOCATIONS_DATA='/api/Masters/GetCustomerLocationDetailsByCompanyId';
+export const URL_GET_COMPANY_HIERARCHY_MASTER_REPORT='api/Masters/GetCompanyHierarchyMasterReport';
+export const URL_GET_DEPARTMENT_MASTER_REPORT='/api/Masters/GetDepartmentMasterReport';
+export const URL_GET_COST_CENTER_MASTER_REPORT='/api/Masters/GetCostCenterDetailsByCompanyId';
+export const URL_GET_ASSET_LOCATION_MASTER_REPORT='/api/Masters/GetAssetLocationMasterReport';
+export const URL_GET_ASSET_CATEGORY_MASTER_REPORT='/api/Masters/GetAssetCategoryMasterReport';
+export const URL_GET_USER_MASTER_REPORT='/api/Masters/GetUserMasterReport';
+export const URL_GET_VENDOR_MASTER_REPORT='/api/Masters/GetVendorMasterReport';
+export const URL_GET_CUSTOMER_MASTER_REPORT='/api/Masters/GetCustomerMasterReport';
+export const URL_GET_USER_LOG_MASTER_REPORT='/api/Masters/GetUserLogMasterReport';
+export const URL_GET_SERVICE_LOCATIONS_MASTER_REPORT='/api/Masters/GetServiceLocationMasterReport';
+export const URL_GET_CUSTOMER_LOCATIONS_MASTER_REPORT='/api/Masters/GetCustomerLocationMasterReport';
 
 //Masters book 
 export const URL_GET_ADDITIONAL_DEPRECIATION_BOOK="/api/Masters/GetAdditionalDepreciationDetails"

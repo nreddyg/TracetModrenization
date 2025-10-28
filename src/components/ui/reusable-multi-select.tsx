@@ -25,12 +25,12 @@ export const flattenGroupedSelections = (groupedSelections: GroupedSelections): 
 // Helper function to convert flat array to grouped selections
 export const convertToGroupedSelections = (flatValues: string[], groupedOptions: OptionGroup[]): GroupedSelections => {
   const grouped: GroupedSelections = {};
-  
+
   // Initialize all groups
   groupedOptions.forEach(group => {
     grouped[group.label] = [];
   });
-  
+
   // Distribute values to their respective groups
   flatValues.forEach(value => {
     for (const group of groupedOptions) {
@@ -41,7 +41,7 @@ export const convertToGroupedSelections = (flatValues: string[], groupedOptions:
       }
     }
   });
-  
+
   return grouped;
 };
 
@@ -55,7 +55,7 @@ interface PopupPosition {
 export interface ReusableMultiSelectProps {
   // Basic props
   label?: string;
-  labelInfo?:string;
+  labelInfo?: string;
   tooltip?: string;
   isRequired?: boolean;
   error?: string;
@@ -65,7 +65,7 @@ export interface ReusableMultiSelectProps {
   placeholder?: string;
   disabled?: boolean;
   loading?: boolean;
-  
+
   // Display props
   allowClear?: boolean;
   searchable?: boolean;
@@ -76,19 +76,19 @@ export interface ReusableMultiSelectProps {
   showCount?: boolean;
   showArrow?: boolean;
   suffixIcon?: React.ReactNode;
-  
+
   // Size and styling
   size?: 'small' | 'middle' | 'large';
   variant?: 'default' | 'filled' | 'borderless';
   status?: 'error' | 'warning';
-  
+
   // Advanced features
   mode?: 'multiple' | 'tags';
   tagRender?: (props: { label: string; value: string; onClose: () => void; disabled?: boolean }) => React.ReactNode;
   dropdownRender?: (menu: React.ReactNode) => React.ReactNode;
   filterOption?: boolean | FilterOption;
   filterSort?: (optionA: Options, optionB: Options) => number;
-  
+
   // Behavior props
   autoClearSearchValue?: boolean;
   autoFocus?: boolean;
@@ -96,25 +96,25 @@ export interface ReusableMultiSelectProps {
   listHeight?: number;
   maxCount?: number;
   tokenSeparators?: string[];
-  
+
   // Dropdown props
   dropdownMatchSelectWidth?: boolean | number;
   dropdownClassName?: string;
   popupClassName?: string;
   placement?: 'bottomLeft' | 'bottomRight' | 'topLeft' | 'topRight';
   usePortal?: boolean;
-  
+
   // Virtual scrolling
   virtual?: boolean;
-  
+
   // Custom rendering
   optionRender?: (option: Options, info: { index: number }) => React.ReactNode;
   optionLabelProp?: string;
-  
+
   // Styling
   containerClassName?: string;
   className?: string;
-  
+
   // Events
   onChange?: (value: string[] | GroupedSelections, options: Options[]) => void;
   onClear?: () => void;
@@ -130,20 +130,20 @@ export interface ReusableMultiSelectProps {
 }
 
 export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelectProps>(
-  ({ 
+  ({
     // Basic props
-    label, 
+    label,
     labelInfo,
-    tooltip, 
+    tooltip,
     isRequired = false,
-    error, 
+    error,
     options = [],
     groupedOptions,
     value = [],
     placeholder = "Select options",
     disabled = false,
     loading = false,
-    
+
     // Display props
     allowClear = true,
     searchable = true,
@@ -154,19 +154,19 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
     showCount = false,
     showArrow = true,
     suffixIcon,
-    
+
     // Size and styling
     size = 'middle',
     variant = 'default',
     status,
-    
+
     // Advanced features
     mode = 'multiple',
     tagRender,
     dropdownRender,
     filterOption = true,
     filterSort,
-    
+
     // Behavior props
     autoClearSearchValue = true,
     autoFocus = false,
@@ -174,25 +174,25 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
     listHeight = 256,
     maxCount,
     tokenSeparators = [',', ';'],
-    
+
     // Dropdown props
     dropdownMatchSelectWidth = true,
     dropdownClassName,
     popupClassName,
     placement = 'bottomLeft',
     usePortal = true,
-    
+
     // Virtual scrolling
     virtual = false,
-    
+
     // Custom rendering
     optionRender,
     optionLabelProp = 'label',
-    
+
     // Styling
     containerClassName,
     className,
-    
+
     // Events
     onChange,
     onClear,
@@ -205,7 +205,7 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
     onInputKeyDown,
     onPopupScroll,
     onGroupSelectAll,
-    ...props 
+    ...props
   }, ref) => {
     const [isOpen, setIsOpen] = useState(defaultOpen);
     const [searchTerm, setSearchTerm] = useState('');
@@ -216,7 +216,7 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
       left: 0,
       width: 0,
     });
-    
+
     const dropdownRef = useRef<HTMLDivElement>(null);
     const triggerRef = useRef<HTMLDivElement>(null);
     const searchInputRef = useRef<HTMLInputElement>(null);
@@ -230,12 +230,12 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
 
       const inputRect = triggerRef.current.getBoundingClientRect();
       const viewportHeight = window.innerHeight;
-      
+
       // Use exact input width and position - no horizontal constraints
-      const dropdownWidth = dropdownMatchSelectWidth === true 
-        ? inputRect.width 
-        : typeof dropdownMatchSelectWidth === 'number' 
-          ? dropdownMatchSelectWidth 
+      const dropdownWidth = dropdownMatchSelectWidth === true
+        ? inputRect.width
+        : typeof dropdownMatchSelectWidth === 'number'
+          ? dropdownMatchSelectWidth
           : inputRect.width;
       const dropdownMaxHeight = listHeight + 100; // Account for header/padding
       const inputSpacing = 2; // Minimal gap between input and dropdown
@@ -245,12 +245,12 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
       const spaceAbove = inputRect.top;
 
       let top: number;
-      
+
       // Smart vertical positioning logic:
       // 1. If there's enough space below (at least 100px for minimal dropdown), position below
       // 2. If not enough space below but there's space above, position above
       // 3. If no space in either direction, still position below (will go off-screen)
-      
+
       if (spaceBelow >= 100) {
         // Enough space below - position below the input
         top = inputRect.bottom + inputSpacing;
@@ -265,10 +265,10 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
       const left = inputRect.left; // No horizontal constraints
       const width = dropdownWidth;
 
-      return { 
-        top, 
-        left, 
-        width 
+      return {
+        top,
+        left,
+        width
       };
     };
 
@@ -277,12 +277,12 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
       if (isOpen && triggerRef.current) {
         // Calculate position immediately
         setPopupPosition(calculatePopupPosition());
-        
+
         // Also recalculate after a tiny delay to handle any layout shifts
         const timer = setTimeout(() => {
           setPopupPosition(calculatePopupPosition());
         }, 1);
-        
+
         return () => clearTimeout(timer);
       }
     }, [isOpen]);
@@ -292,7 +292,7 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
       if (!isOpen) return;
 
       let rafId: number;
-      
+
       const updatePosition = () => {
         // Use requestAnimationFrame for smooth updates
         if (rafId) cancelAnimationFrame(rafId);
@@ -317,35 +317,44 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
       };
     }, [isOpen]);
 
-    // Close dropdown when clicking outside - updated to work with portal
+    // Close dropdown when clicking outside - updated to work with portal and modals
     useEffect(() => {
       if (!isOpen) return;
 
-      const handleClickOutside = (event: MouseEvent) => {
+      const handleClickOutside = (event: MouseEvent | TouchEvent) => {
         const target = event.target as Node;
-        
-        // Check if click is outside the trigger element
-        const isOutsideTrigger = triggerRef.current && !triggerRef.current.contains(target);
-        
-        // Check if click is outside the dropdown (works for both portal and non-portal)
-        const isOutsideDropdown = dropdownRef.current && !dropdownRef.current.contains(target);
-        
-        // Close if click is outside both trigger and dropdown
-        if (isOutsideTrigger && isOutsideDropdown) {
-          setIsOpen(false);
-          setSearchTerm('');
-          setIsSearching(false);
-          onDropdownVisibleChange?.(false);
+
+        // Don't process if the event was from inside our dropdown or trigger
+        if (!target || !(target instanceof Element)) return;
+
+        // Check if click is inside the trigger element
+        if (triggerRef.current?.contains(target)) {
+          return; // Don't close if clicking inside trigger
         }
+
+        // Check if click is inside the dropdown
+        if (dropdownRef.current?.contains(target)) {
+          return; // Don't close if clicking inside dropdown
+        }
+
+        // Click is outside both trigger and dropdown - close it
+        setIsOpen(false);
+        setSearchTerm('');
+        setIsSearching(false);
+        onDropdownVisibleChange?.(false);
       };
 
-      // Use capture phase to ensure we catch the event before other handlers
-      document.addEventListener('mousedown', handleClickOutside, true);
-      document.addEventListener('click', handleClickOutside, true);
-      
+      // Small delay to prevent immediate closing when opening
+      const timer = setTimeout(() => {
+        // Listen on both mousedown and click for better compatibility with modals
+        document.addEventListener('mousedown', handleClickOutside, false);
+        document.addEventListener('touchstart', handleClickOutside, false);
+      }, 10);
+
       return () => {
-        document.removeEventListener('mousedown', handleClickOutside, true);
-        document.removeEventListener('click', handleClickOutside, true);
+        clearTimeout(timer);
+        document.removeEventListener('mousedown', handleClickOutside, false);
+        document.removeEventListener('touchstart', handleClickOutside, false);
       };
     }, [isOpen, onDropdownVisibleChange]);
 
@@ -388,7 +397,7 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
     // Memoized onChange handler
     const handleChange = useCallback((newValue: string[]) => {
       const selectedOptions = newValue.map(v => flatOptions.find(opt => opt.value === v)).filter(Boolean) as Options[];
-      
+
       if (groupedOptions && onChange) {
         const groupedSelections = convertToGroupedSelections(newValue, groupedOptions);
         onChange(groupedSelections, selectedOptions);
@@ -407,26 +416,26 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
     // Filter options based on search term
     const filterOptions = useCallback((options: Options[], searchTerm: string): Options[] => {
       if (!searchTerm || filterOption === false) return options;
-      
+
       return options.filter(option => {
         if (typeof filterOption === 'function') {
           return filterOption(searchTerm, option);
         }
-        
+
         const searchLower = searchTerm.toLowerCase();
         return option.label.toString().toLowerCase().includes(searchLower) ||
-               option.value.toString().toLowerCase().includes(searchLower) ||
-               option.description?.toString().toLowerCase().includes(searchLower);
+          option.value.toString().toLowerCase().includes(searchLower) ||
+          option.description?.toString().toLowerCase().includes(searchLower);
       });
     }, [filterOption]);
 
     const filteredOptions = useMemo(() => {
       let filtered = filterOptions(flatOptions, searchTerm);
-      
+
       if (filterSort) {
         filtered = filtered.sort(filterSort);
       }
-      
+
       return filtered;
     }, [flatOptions, searchTerm, filterOptions, filterSort]);
 
@@ -479,13 +488,13 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
 
     const handleOptionToggle = useCallback((optionValue: string) => {
       if (disabled) return;
-      
+
       const option = flatOptions.find(opt => opt.value === optionValue);
       if (!option) return;
 
       const isSelected = normalizedValue.includes(optionValue);
       let newValue: string[];
-      
+
       if (isSelected) {
         newValue = normalizedValue.filter(v => v !== optionValue);
         onDeselect?.(optionValue, option);
@@ -496,7 +505,7 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
         newValue = [...normalizedValue, optionValue];
         onSelect?.(optionValue, option);
       }
-      
+
       handleChange(newValue);
 
       if (autoClearSearchValue && !isSelected) {
@@ -509,7 +518,7 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
       const availableOptions = filteredOptions.filter(opt => !opt.disabled);
       const availableValues = availableOptions.map(opt => opt.value);
       const isAllSelected = availableValues.every(val => normalizedValue.includes(val));
-      
+
       let newValue: string[];
       if (isAllSelected) {
         newValue = normalizedValue.filter(v => !availableValues.includes(v));
@@ -522,7 +531,7 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
           newValue = [...new Set([...normalizedValue, ...availableValues])];
         }
       }
-      
+
       handleChange(newValue);
     }, [filteredOptions, normalizedValue, maxCount, handleChange]);
 
@@ -530,7 +539,7 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
       const availableGroupOptions = groupOptions.filter(opt => !opt.disabled);
       const availableGroupValues = availableGroupOptions.map(opt => opt.value);
       const isGroupAllSelected = availableGroupValues.every(val => normalizedValue.includes(val));
-      
+
       let newValue: string[];
       if (isGroupAllSelected) {
         newValue = normalizedValue.filter(v => !availableGroupValues.includes(v));
@@ -543,7 +552,7 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
           newValue = [...new Set([...normalizedValue, ...availableGroupValues])];
         }
       }
-      
+
       handleChange(newValue);
       onGroupSelectAll?.(groupLabel, !isGroupAllSelected, availableGroupOptions);
     }, [normalizedValue, maxCount, handleChange, onGroupSelectAll]);
@@ -557,10 +566,10 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
 
     const handleCreateTag = useCallback((tagValue: string) => {
       if (mode !== 'tags' || !tagValue.trim()) return;
-      
+
       const trimmedValue = tagValue.trim();
       if (normalizedValue.includes(trimmedValue)) return;
-      
+
       const newValue = [...normalizedValue, trimmedValue];
       handleChange(newValue);
       setSearchTerm('');
@@ -569,13 +578,13 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
 
     const handleInputKeyDown = (e: React.KeyboardEvent) => {
       onInputKeyDown?.(e);
-      
+
       if (mode === 'tags' && tokenSeparators.includes(e.key)) {
         e.preventDefault();
         handleCreateTag(searchTerm);
         return;
       }
-      
+
       if (e.key === 'Enter') {
         e.preventDefault();
         if (mode === 'tags' && searchTerm) {
@@ -613,7 +622,7 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
       setSearchTerm(newValue);
       setIsSearching(true);
       onSearch?.(newValue);
-      
+
       if (!isOpen && newValue) {
         setIsOpen(true);
         onDropdownVisibleChange?.(true);
@@ -630,7 +639,7 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
 
     const renderTag = (option: Options, index: number) => {
       const handleClose = () => handleOptionToggle(option.value);
-      
+
       if (tagRender) {
         return tagRender({
           label: option.label,
@@ -712,7 +721,7 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
     const renderOptionContent = (option: Options) => {
       const labelText = option.label;
       const shouldTruncate = shouldTruncateText(labelText);
-      
+
       const optionContent = (
         <div className="flex-1 min-w-0">
           <span className={cn(
@@ -795,9 +804,9 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
             handleGroupSelectAll(groupOptions, groupLabel);
           }}
         >
-          <SimpleCheckbox 
-            checked={isGroupAllSelected} 
-            disabled={disabled || availableGroupOptions.length === 0} 
+          <SimpleCheckbox
+            checked={isGroupAllSelected}
+            disabled={disabled || availableGroupOptions.length === 0}
           />
           <span className="text-xs font-medium text-gray-600 flex-1 min-w-0 truncate">
             {isGroupAllSelected
@@ -848,7 +857,7 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
                   </div>
                 </div>
               )}
-              
+
               {/* Scrollable content */}
               <div className="flex-1 overflow-y-auto" style={{ maxHeight: `${listHeight}px` }}>
                 {mode === 'tags' && searchTerm && !filteredOptions.some(opt => opt.value === searchTerm) && (
@@ -860,12 +869,12 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
                     <span className="text-sm text-blue-600">Create "{searchTerm}"</span>
                   </div>
                 )}
-                
+
                 {groupedOptions ? (
                   groupedOptions.map((group, groupIndex) => {
                     const groupFilteredOptions = filterOptions(group.options, searchTerm);
                     if (groupFilteredOptions.length === 0) return null;
-                    
+
                     return (
                       <div key={groupIndex}>
                         <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider bg-white sticky top-0 z-10 border-b border-gray-100">
@@ -873,7 +882,7 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
                         </div>
                         {groupSelectAll && renderGroupSelectAll(groupFilteredOptions, group.label)}
                         <div>
-                          {groupFilteredOptions.map((option, optionIndex) => 
+                          {groupFilteredOptions.map((option, optionIndex) =>
                             renderOption(option, groupIndex * 1000 + optionIndex)
                           )}
                         </div>
@@ -897,23 +906,23 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
     const renderPopup = () => {
       const inputRect = triggerRef.current?.getBoundingClientRect();
       if (!inputRect) return null;
-   
-      const margin = 8;            
+
+      const margin = 8;
       const headerHeight = selectAll && filteredOptions.length > 0 ? 45 : 0;
       const createTagHeight = (mode === 'tags' && searchTerm && !filteredOptions.some(opt => opt.value === searchTerm)) ? 40 : 0;
       const optionHeight = size === 'small' ? 36 : size === 'large' ? 52 : 44;
       const groupHeaderHeight = 32;
       const padding = 8;
-      
+
       let actualContentHeight = padding;
-      
+
       if (loading) {
         actualContentHeight += 80;
       } else if (filteredOptions.length === 0) {
         actualContentHeight += 80;
       } else {
         actualContentHeight += headerHeight + createTagHeight;
-        
+
         if (groupedOptions) {
           groupedOptions.forEach(group => {
             const groupFilteredOptions = filterOptions(group.options, searchTerm);
@@ -927,25 +936,25 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
           actualContentHeight += filteredOptions.length * optionHeight;
         }
       }
-      
+
       const maxAllowedHeight = listHeight + headerHeight + padding;
       const minHeight = 80;
-   
+
       const spaceBelow = window.innerHeight - inputRect.bottom - margin;
       const spaceAbove = inputRect.top - margin;
-   
+
       const openAbove = spaceBelow < minHeight && spaceAbove > spaceBelow;
-   
+
       const availableSpace = openAbove ? Math.max(0, spaceAbove) : Math.max(0, spaceBelow);
-      
+
       const finalHeight = Math.min(
         Math.max(minHeight, actualContentHeight),
         Math.min(maxAllowedHeight, availableSpace)
       );
-   
+
       const top = openAbove ? inputRect.top : inputRect.bottom;
       const transform = openAbove ? "translateY(-100%)" : "translateY(0)";
-   
+
       return (
         <div
           ref={dropdownRef}
@@ -956,15 +965,15 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
             disabled && "pointer-events-none opacity-50"
           )}
           style={{
-            position: "fixed",         
+            position: "fixed",
             top,
             left: inputRect.left,
             zIndex: 9999,
             transform,
-            width: dropdownMatchSelectWidth === true 
-              ? inputRect.width 
-              : typeof dropdownMatchSelectWidth === 'number' 
-                ? dropdownMatchSelectWidth 
+            width: dropdownMatchSelectWidth === true
+              ? inputRect.width
+              : typeof dropdownMatchSelectWidth === 'number'
+                ? dropdownMatchSelectWidth
                 : inputRect.width,
             height: `${finalHeight}px`,
             maxHeight: `${finalHeight}px`,
@@ -1010,37 +1019,37 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
 
     const handleContainerClick = (e: React.MouseEvent) => {
       if (disabled) return;
-      
+
       const clickedElement = e.target as HTMLElement;
-      
+
       if (clickedElement.closest('button:not([data-dropdown-arrow])')) return;
-      
-      const isArrowClick = clickedElement.closest('.dropdown-arrow') || 
-                          clickedElement.closest('[data-dropdown-arrow]');
+
+      const isArrowClick = clickedElement.closest('.dropdown-arrow') ||
+        clickedElement.closest('[data-dropdown-arrow]');
       const isClearClick = clickedElement.closest('[data-clear-button]');
-      
+
       if (isArrowClick) {
         e.preventDefault();
         const newOpenState = !isOpen;
         setIsOpen(newOpenState);
         onDropdownVisibleChange?.(newOpenState);
-        
+
         if (!newOpenState) {
           setSearchTerm('');
           setIsSearching(false);
         }
         return;
       }
-      
+
       if (isClearClick) {
         return;
       }
-      
+
       if (!isOpen) {
         setIsOpen(true);
         onDropdownVisibleChange?.(true);
       }
-      
+
       if (searchable && searchInputRef.current) {
         requestAnimationFrame(() => {
           searchInputRef.current?.focus();
@@ -1051,15 +1060,15 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
     const getSelectedValuesText = () => {
       const selectedOptions = getSelectedOptions();
       if (selectedOptions.length === 0) return '';
-      
+
       if (selectedOptions.length === 1) {
         return selectedOptions[0].label;
       }
-      
+
       if (selectedOptions.length <= 5) {
         return selectedOptions.map(opt => opt.label).join(', ');
       }
-      
+
       const firstFew = selectedOptions.slice(0, 3).map(opt => opt.label).join(', ');
       const remaining = selectedOptions.length - 3;
       return `${firstFew} and ${remaining} more`;
@@ -1078,9 +1087,9 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
               getStatusClasses(),
               className
             )}
-            style={{ 
-              backgroundColor: disabled ? '#f3f4f6' : 'hsl(240deg 73.33% 97.06%)', 
-              borderColor: 'hsl(214.29deg 31.82% 91.37%)' 
+            style={{
+              backgroundColor: disabled ? '#f3f4f6' : 'hsl(240deg 73.33% 97.06%)',
+              borderColor: 'hsl(214.29deg 31.82% 91.37%)'
             }}
             onClick={handleContainerClick}
             onFocus={onFocus}
@@ -1097,7 +1106,7 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
                   {renderSelectedTags()}
                 </div>
               )}
-              
+
               {searchable ? (
                 <input
                   ref={searchInputRef}
@@ -1148,15 +1157,15 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
                 </button>
               )}
               {showArrow && (
-                <div 
-                  className="dropdown-arrow cursor-pointer p-1" 
+                <div
+                  className="dropdown-arrow cursor-pointer p-1"
                   data-dropdown-arrow="true"
                   onClick={(e) => {
                     e.stopPropagation();
                     const newOpenState = !isOpen;
                     setIsOpen(newOpenState);
                     onDropdownVisibleChange?.(newOpenState);
-                    
+
                     if (!newOpenState) {
                       setSearchTerm('');
                       setIsSearching(false);
@@ -1174,8 +1183,8 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
               {usePortal ? (
                 createPortal(renderPopup(), document.body)
               ) : (
-                <div 
-                  className="absolute z-[9999] top-full left-0" 
+                <div
+                  className="absolute z-[9999] top-full left-0"
                   style={{ width: '100%' }}
                 >
                   <div
@@ -1190,7 +1199,7 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
                       width: '100%'
                     }}
                   >
-                    <div 
+                    <div
                       className="flex-1 overflow-y-auto"
                       style={{ maxHeight: `${listHeight}px` }}
                     >

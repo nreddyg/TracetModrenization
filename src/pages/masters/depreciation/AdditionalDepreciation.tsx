@@ -99,15 +99,15 @@ const AdditionalDepreciation = () => {
         if (companyId)
             getAdditionalDepreciationListAPI()
     }, [companyId])
-const SoftwareDataColumns = [
-    { id: 'Name', accessorKey: "Name", header: "Name" },
-    { id: 'AdditionalDepreciationRate"', accessorKey: "AdditionalDepreciationRate", header: "Rate Of Additional Depreciation" },
-    { id: 'UptoDateRange', accessorKey: "UptoDateRange", header:"Date Range Upto Financial Year" },
-    { id: 'ApplicableFor', accessorKey: "ApplicableFor", header: "Applicable For" },
-    { id: 'Condition', accessorKey: "Condition", header: "Condition" },
-]
- const [columns, setColumns] = useState<ColumnDef<SoftwareData>[]>(SoftwareDataColumns);
- 
+    const SoftwareDataColumns = [
+        { id: 'Name', accessorKey: "Name", header: "Name" },
+        { id: 'AdditionalDepreciationRate"', accessorKey: "AdditionalDepreciationRate", header: "Rate Of Additional Depreciation" },
+        { id: 'UptoDateRange', accessorKey: "UptoDateRange", header: "Date Range Upto Financial Year" },
+        { id: 'ApplicableFor', accessorKey: "ApplicableFor", header: "Applicable For" },
+        { id: 'Condition', accessorKey: "Condition", header: "Condition" },
+    ]
+    const [columns, setColumns] = useState<ColumnDef<SoftwareData>[]>(SoftwareDataColumns);
+
 
     const generateRowsInTable = (num?: number, startNum?: number, data?: any) => {
         const result = [];
@@ -303,13 +303,13 @@ const SoftwareDataColumns = [
     }
     const handleEdit = (data: any): void => {
         form.reset({ ...form.getValues(), ...data })
-             let fieldsData = [...fields]
-                fieldsData.forEach((obj) => {
-                    if (obj.name == "NumberOfLicenses" || obj.name == "LicenseType") {
-                        obj.disabled = true
-                    }
-                })
-                setFields(fieldsData)
+        let fieldsData = [...fields]
+        fieldsData.forEach((obj) => {
+            if (obj.name == "NumberOfLicenses" || obj.name == "LicenseType") {
+                obj.disabled = true
+            }
+        })
+        setFields(fieldsData)
         setDatasource(generateRowsInTable(0, 0, data.LicenseDetails))
         setIsOpenLicenseCard(true)
         setEditRecordId(data.SoftwareId)
@@ -317,8 +317,8 @@ const SoftwareDataColumns = [
     const handleReset = () => {
         setDatasource([])
         form.reset({ ...form.getValues(), SoftwareName: '', Version: "", VendorId: "", CategoryId: '', LicenseType: '', NumberOfLicenses: '' });
-      
-setEditRecordId("")
+
+        setEditRecordId("")
 
     }
     const deleteSoftwareAsset = async (id: string) => {
@@ -363,45 +363,45 @@ setEditRecordId("")
         // fetchAllCustomerList();
         getAdditionalDepreciationListAPI()
     }, [toast]);
-    const getLicenseDetails = (id?: string):any => {
+    const getLicenseDetails = (id?: string): any => {
         let licenseDetails = []
-       
+
         dataSource.some((obj) => {
             let licenseKey = obj.LicenseKey
             let licenseCost = obj.LicenseCost
             let expiryDate = obj.LicenseExpiryDate
 
-            if (licenseKey && licenseCost && (watch("LicenseType") == "Perpetual") ||(expiryDate && watch("LicenseType") !== "Perpetual") ){
+            if (licenseKey && licenseCost && (watch("LicenseType") == "Perpetual") || (expiryDate && watch("LicenseType") !== "Perpetual")) {
                 licenseDetails.push({
                     "LicenseDetailId": id ? obj.LicenseDetailId : "",
                     "LicenseKey": licenseKey,
                     "LicenseCost": licenseCost,
                     "ExpiryDate": (typeof (expiryDate) == "string") ? expiryDate : formatDates(expiryDate, 'YYYY/MM/DD'),
-                                   
+
                     "Status": obj.Status
                 })
-              
-            }else{
 
-                 licenseDetails=[]
+            } else {
+
+                licenseDetails = []
                 return true
-            
+
             }
-             
+
         })
-         return licenseDetails
+        return licenseDetails
     }
     const handleSave = async (data) => {
-        let LicenseDetails = editRecordId ?getLicenseDetails(editRecordId) : getLicenseDetails();
+        let LicenseDetails = editRecordId ? getLicenseDetails(editRecordId) : getLicenseDetails();
         if (LicenseDetails.length > 0) {
             const payload = {
                 "AdditionalDepreciation": [{
-        "Name": data["Name"],
-        "Description":data["Description"],
-        "ApplicableFor":data["ApplicableFor"],
-        "Condition":data["Condition"],
-        "AdditionalDepreciationRate":data["AdditionalDepreciationRate"],
-        "UptoDateRange":data["UptoDateRange"],
+                    "Name": data["Name"],
+                    "Description": data["Description"],
+                    "ApplicableFor": data["ApplicableFor"],
+                    "Condition": data["Condition"],
+                    "AdditionalDepreciationRate": data["AdditionalDepreciationRate"],
+                    "UptoDateRange": data["UptoDateRange"],
                 }]
             }
 
@@ -458,6 +458,14 @@ setEditRecordId("")
                     </div>
                     <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
                         <ReusableButton
+                            variant="text"
+
+                            onClick={() => { navigate("/masters/depreciation/book") }}
+                            icon={""}
+                        >
+                            Back
+                        </ReusableButton>
+                        <ReusableButton
                             size="small"
                             // variant="primary"
                             className=' flex-1 sm:flex-none bg-primary h-[2.38rem] text-white p-4'
@@ -497,7 +505,7 @@ setEditRecordId("")
                                         </div>;
                                     })} */}
 
-                                      
+
 
                                     </div>
                                 </div>
@@ -548,7 +556,7 @@ setEditRecordId("")
                             actions={tableActions}
                             enableColumnPinning
                         />
-                      
+
                     </ScrollArea>
                 </div>
             </div>

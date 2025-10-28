@@ -1,7 +1,7 @@
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import ReusableTable, { TableAction, TablePermissions } from '@/components/ui/reusable-table';
 import { ScrollArea } from '@radix-ui/react-scroll-area';
-import { Edit, Plus, Search, Trash2 } from 'lucide-react';
+import { ArrowLeft, Edit, Plus, Search, Trash2 } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ReusableButton } from '@/components/ui/reusable-button';
@@ -668,7 +668,14 @@ setEditRecordId("")
                             // variant="primary"
                             className=' flex-1 sm:flex-none bg-primary h-[2.38rem] text-white p-4'
                             onClick={() => setIsOpenLicenseCard((prev) => !prev)}>
-                            <span className="" > + Add Software Asset</span>
+                            {/* <span className="" > + Add Software Asset</span> */}
+                              {isOpenLicenseCard ? (
+                                    <div className='flex items-center gap-2'>
+                                        <ArrowLeft className="h-4 w-4 text-current stroke-[3]" /> Grid View
+                                    </div>
+                                ) : (
+                                    '+ Add Software Assetgit'
+                                )}
                         </ReusableButton>
                     </div>
                 </div>

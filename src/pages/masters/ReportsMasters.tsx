@@ -26,7 +26,8 @@ import { GetUsersList } from '@/services/userServices';
 import { getVendorDetails } from '@/services/configurationServices';
 import { GetCustomersList } from '@/services/customerServices';
 import { getServiceLocationData } from '@/services/serviceLocationServices';
-import { getCustomerLocations } from '@/services/masterReportsServices';
+import { getCompanyHierarchyReport, getCustomerLocations } from '@/services/masterReportsServices';
+import { useMessage } from '@/components/ui/reusable-message';
 interface MultiSelectConfig {
   isHierarchy?: boolean;
   labelClassName?: string;
@@ -65,8 +66,9 @@ const treefunWithParent = (data, id, idName, assetLocationUnique) => {
 
 const ReportsMasters = () => {
   const dispatch=useAppDispatch();
+  const msg=useMessage()
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState('');
+  const [activeTab, setActiveTab] = useState('Company Hierarchy');
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
   const [fields, setFields] = useState<BaseField[]>(MASTER_REPORTS_DB);
   const [columnVisibility, setColumnVisibility] = useState({});
@@ -85,7 +87,8 @@ const ReportsMasters = () => {
     tab.toLowerCase().includes(searchTerm.toLowerCase())
   );
   const handleViewReport = async () => {
-    setIsGeneratingReport(true);
+    // setIsGeneratingReport(true);
+    fetchMasterReportData()
   }
   const form = useForm<GenericObject>({
     defaultValues: fields.reduce((acc, f) => {
@@ -157,6 +160,20 @@ const ReportsMasters = () => {
       setLookupsDataInJson(responses);
       setVendors(responses.VendorType.data);
     }catch{}finally{ dispatch(setLoading(false)) }
+  }
+  console.log('branchids',watch('CompanyHierarchy'))
+  //fetch reports
+  const fetchMasterReportData=async()=>{
+    const branchIds=watch('CompanyHierarchy')?watch('CompanyHierarchy').filter(e=>e!=0).join():'';
+    const dateRange=watch('RangePicker') || {from:'',to:''};
+    switch (activeTab){
+      case 'Company Hierarchy':
+        try{
+          const res=await getCompanyHierarchyReport(companyId,branchIds,dateRange.from,dateRange.to);
+          console.log('res',res)
+
+        }catch{}finally{}
+    }
   }
   const multiSelectConfig: MultiSelectConfig = {
     isHierarchy: true,
@@ -334,7 +351,7 @@ const ReportsMasters = () => {
               <div className="space-y-2 h-full overflow-y-hidden">
                 <div className='px-1'>
                   <h4 className="text-sm font-semibold text-gray-900 mb-3">Primary Filters</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-1">
                     {fields.map(renderField)}
                   </div>
                 </div>

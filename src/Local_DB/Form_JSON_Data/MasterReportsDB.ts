@@ -6,7 +6,9 @@ export const MASTER_REPORTS_DB: BaseField[] = [
         label: 'Select Date Range',
         fieldType: 'rangepicker',
         isRequired: false,
-        jsontype:'common'
+        jsontype:'common',
+        allowClear:true,
+        defaultValue:{from:'',to:''}
     },
     {
         name: 'CompanyHierarchy',

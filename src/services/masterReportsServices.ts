@@ -17,7 +17,7 @@ export const getCustomerLocations= async (CompId:string): Promise<APIResponse<an
     }
 }
 //Company Hierarchy Master Report
-export const getCompanyHierarchyReport= async (CompId:string,BranchId:string,FromDate:string,ToDate:string): Promise<APIResponse<any>> => {
+export const getCompanyHierarchyReport= async (CompId:string,BranchId:any,FromDate:string,ToDate:string): Promise<APIResponse<any>> => {
     try {
         const response = await api.get(URL_GET_COMPANY_HIERARCHY_MASTER_REPORT, { params: { CompId,BranchId,FromDate,ToDate} })
         return {success: true,data: response.data,}

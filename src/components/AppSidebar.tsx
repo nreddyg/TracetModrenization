@@ -525,6 +525,11 @@ const navigation: NavItem[] = [
             icon: BarChart,
             link: '/masters/consumables/item-master',
           },
+           {
+            label: "Units Of Measure",
+            icon: BarChart,
+            link: '/masters/consumables/unitsofmeasure',
+          },
         ],
       },
       {

@@ -11,15 +11,12 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from '@/components/ui/label';
 import { setLoading } from '@/store/slices/projectsSlice';
 import { useDispatch } from 'react-redux';
-import { addNewStore, deleteStore, getEditStoreData, getStoreData, getStoreDataByCompanyIdAndBranchName, updateStore } from '@/services/storeServices';
 import { useMessage } from '@/components/ui/reusable-message';
 import { useAppSelector } from '@/store';
 import { Controller, useForm } from 'react-hook-form';
 import { BaseField, GenericObject } from '@/Local_DB/types/types';
-import { STORE_DB } from '@/Local_DB/Form_JSON_Data/StoreDB';
-import { ITEM_MASTER_DB } from '@/Local_DB/Form_JSON_Data/ItemMasterDB';
-import { addNewItemMaster, deleteItemMaster, getEditItemMasterData, getItemMasterData } from '@/services/ItemMasterServices';
-import { getMainCategoryLookUp, getSubCategoryLookUp } from '@/services/servicedeskReportsServices';
+import { addNewUOM, deleteUOM, getEditUOMData, getUOMData, updateUOM } from '@/services/unitsOfMeasureServices';
+import { UNITS_OF_MEASURE_DB } from '@/Local_DB/Form_JSON_Data/UnitsOfMeasureDB';
 
 
 interface Store {
@@ -28,11 +25,11 @@ interface Store {
     branch: string;
     description: string;
 }
-const ItemMaster = () => {
+const UnitOfMeasure = () => {
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedStore, setSelectedStore] = useState<Store | null>(null);
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-    const [fields, setFields] = useState<BaseField[]>(ITEM_MASTER_DB);
+    const [isConverDialogOpen, setIsConvertDialogOpen] = useState(false);
+    const [fields, setFields] = useState<BaseField[]>(UNITS_OF_MEASURE_DB);
     const [dataSource, setDataSource] = useState([])
       const [isDelModalOpen, setIsDelModalOpen] = useState(false);
         const [recordToEditId, setRecordToEditId] = useState(null);
@@ -51,85 +48,13 @@ const ItemMaster = () => {
     useEffect(() => {
         if (companyId )
         {
-            fetchItemMasterData(companyId)
-            fetchAllLookUps()
+            fetchUOMGetData(companyId)
         }
-    }, [companyId])
-
-  async function fetchAllLookUps() {
-    dispatch(setLoading(true));
-    try {
-      const [ SRMainCategoryLookUps] =
-        await Promise.allSettled([
-          getMainCategoryLookUp(companyId),
-        ]);
-      const allResponses = {
-       
-        MainCategory: { data: SRMainCategoryLookUps.status === 'fulfilled' && SRMainCategoryLookUps.value.success && SRMainCategoryLookUps.value.data && SRMainCategoryLookUps.value.data.CategoriesLookup ? SRMainCategoryLookUps.value.data.CategoriesLookup : [], label: "CategoryName", value: "CategoryId" },
-      };
-      setLookupsDataInJson(allResponses);
-    } catch (error) {
-      msg.warning(`Error fetching lookups: ${error}`)
-    } finally {
-      dispatch(setLoading(false));
-    }
-  }
- const setLookupsDataInJson = (lookupsData ): void => {
-    const arr = Object.keys(lookupsData)
-    const groupNames: string[] = []
-    const opts: { [key: string]: any } = {}
-    arr.forEach((obj) => {
-      let ret = []
-      if (lookupsData[obj].isGrouping) {
-        groupNames.push(obj)
-        let groupOpts = []
-        ret = lookupsData[obj].groupData.map((element) => {
-          groupOpts = element.data.map((ele) => {
-            let opt = {}
-            opt["label"] = ele[element.label]
-            opt["value"] = ele[element.value]
-            return opt
-          });
-          return {
-            "label": element.groupLabel,
-            "options": groupOpts
-          }
-        })
-
-      } else if (lookupsData[obj].treedata) {
-        ret = lookupsData[obj].data
-      } else {
-        ret = lookupsData[obj].data.map((element) => {
-          
-          let opt = {}
-          opt["label"] = element[lookupsData[obj].label]
-          opt["value"] = element[lookupsData[obj].value]
-          return opt
-        });
-      }
-      opts[obj] = ret
-    })
-    const data = structuredClone(fields);
-    data.forEach((obj) => {
-      if (arr.includes(obj.name)) {
-        if (groupNames.includes(obj.name)) {
-          obj.groupedOptions = opts[obj.name]
-        }
-        obj.options = opts[obj.name]
-        if (obj.fieldType === 'treeselect') {
-          obj['treeData'] = opts[obj.name]
-        }
-      }
-    });
-    console.log(data,"Chitti")
-    setFields(data);
-    // setFieldsCopy(data);
-  }
-    //   const filteredStores = mockStores.filter(store =>
-    //     store.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    //     store.branch.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    //     store.description.toLowerCase().includes(searchQuery.toLowerCase())
-    //   );
+        // if(companyId && branch!="All" && branch!="")
+        // {
+        //     fetchStoreDataByBranchName(companyId,branch)
+        // }
+    }, [companyId,branch])
     const form = useForm<GenericObject>({
         defaultValues: fields.reduce((acc, f) => {
             acc[f.name!] = f.defaultChecked ?? '';
@@ -141,47 +66,7 @@ const ItemMaster = () => {
 
     const { control, register, handleSubmit, trigger, watch, setValue, reset, formState: { errors } } = form;
     const getFieldsByNames = (names: string[]) => fields.filter(f => names.includes(f.name!));
-  const selectedMainCategory = watch("MainCategory");
- useEffect(() => {
-    if (selectedMainCategory) {
-      getSubCategoryDetails(companyId, selectedMainCategory)
-    } else {
-      getSubCategoryDetails(companyId, null)
-    }
-  }, [selectedMainCategory, companyId])
-   async function getSubCategoryDetails(compId: string, id: number | null) {
-      dispatch(setLoading(true));
-      try {
-        if (id == null) {
-          const data = structuredClone(fields);
-          const subCatIndex = data.findIndex(x => x.name === "SubCategory");
-          if (subCatIndex >= 0) data[subCatIndex].options = [];
-          const subCatSLAIndex = data.findIndex(x => x.name === "subcategoryinSLA");
-          if (subCatSLAIndex >= 0) data[subCatSLAIndex].options = [];
-          setFields(data);
-          return;
-        }
-        const res = await getSubCategoryLookUp(compId, id);
-        if (res?.data?.SubCategoriesLookup?.length > 0) {
-          const subCategories = res.data.SubCategoriesLookup.map((obj: any) => ({
-            ...obj,
-            label: obj.CategoryName,
-            value: obj.CategoryId,
-          }));
-          const data = structuredClone(fields);
-          if (id === selectedMainCategory) {
-            const idx = data.findIndex(x => x.name === "SubCategory");
-            if (idx >= 0) data[idx].options = subCategories;
-          }
-         
-          setFields(data);
-        }
-      } catch (err) {
-        console.error("Error fetching subcategories:", err);
-      } finally {
-        dispatch(setLoading(false));
-      }
-    }
+
     const renderField = (field: BaseField) => {
         const { name, label, fieldType, isRequired, validationPattern, patternErrorMessage, dependsOn, show = true } = field;
         if (!show && dependsOn && !watch(dependsOn)) {
@@ -217,7 +102,6 @@ const ItemMaster = () => {
                         rules={validationRules}
                         render={({ field: ctrl }) => (
                             <ReusableDropdown
-                            usePortal={false}
                                 {...field}
                                 value={ctrl.value}
                                 onChange={ctrl.onChange}
@@ -251,45 +135,15 @@ const ItemMaster = () => {
 
     const columns = [
         {
-            id: 'ItemName',
-            header: 'Item Name',
-            accessorKey: 'ItemName',
-            enableSorting: true,
-        },
-        {
-            id: 'Code',
-            header: 'Item Code',
-            accessorKey: 'Code',
+            id: 'Name',
+            header: 'Name',
+            accessorKey: 'Name',
             enableSorting: true,
         },
         {
             id: 'Description',
             header: 'Description',
             accessorKey: 'Description',
-            enableSorting: true,
-        },
-         {
-            id: 'Level1Category',
-            header: 'Main Category',
-            accessorKey: 'Level1Category',
-            enableSorting: true,
-        },
-         {
-            id: 'Level2Category',
-            header: 'Sub Category',
-            accessorKey: 'Level2Category',
-            enableSorting: true,
-        },
-         {
-            id: 'UnitOfMeasure',
-            header: 'Unit Of Measure',
-            accessorKey: 'UnitOfMeasure',
-            enableSorting: true,
-        },
-         {
-            id: 'ReorderLevel',
-            header: 'Reorder Level',
-            accessorKey: 'ReorderLevel',
             enableSorting: true,
         },
         {
@@ -302,7 +156,7 @@ const ItemMaster = () => {
                         variant="text"
                         size="small"
                         //   icon={<Edit className="h-4 w-4" />}
-                        onClick={() => { setSelectedStore(row.original);setRecordToEditId(row.original.ItemId);fetchItemMasterDataByItemMasterId(companyId,row.original.ItemId); }}
+                        onClick={() => {setRecordToEditId(row.original.UOMId);fetchUOMById(companyId,row.original.UOMId) }}
                     >
                         Edit
                     </ReusableButton>
@@ -311,7 +165,7 @@ const ItemMaster = () => {
                         size="small"
                         danger
                         icon={<Trash2 className="h-4 w-4" />}
-                        onClick={() => {setIsDelModalOpen(true);setRecordToEditId(row.original.ItemId);console.log(row.original),"C"}}
+                        onClick={() => {setIsDelModalOpen(true);setRecordToEditId(row.original.UOMId);console.log(row.original),"C"}}
                     >
                         Delete
                     </ReusableButton>
@@ -319,32 +173,32 @@ const ItemMaster = () => {
             ),
         },
     ];
-    async function fetchItemMasterData(companyId) {
+    async function fetchUOMGetData(companyId) {
         dispatch(setLoading(true))
-        await getItemMasterData(companyId).then(res => {
+        await getUOMData(companyId).then(res => {
             if (res.data && res.data.status == undefined) {
                 //  console.log(res.data,"Nag")
-                setDataSource(res.data.ItemMasterDetails)
+                setDataSource(res.data.UOMDetails)
             } else {
                 setDataSource([])
                 msg.warning(res.data.message || "No Data Found")
             }
         }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
     }
-      async function fetchItemMasterDataByItemMasterId(companyId,id) {
+  async function fetchUOMById(companyId,id) {
         dispatch(setLoading(true))
-        await getEditItemMasterData(companyId,id).then(res => {
+        await getEditUOMData(companyId,id).then(res => {
             if (res.data && res.data.status == undefined) {
                 //  console.log(res.data,"Nag")
                 // setDataSource(res.data.StoreDetails)
-                handleEdit(res.data.ItemMasterDetails)
+                handleEdit(res.data.UOMDetails)
             } else {
                 msg.warning(res.data.message || "No Data Found")
             }
         }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
     }
-  const deleteItemMasterData = async (id: number,data:any) => {
-    await deleteItemMaster(companyId, id,data).then(res => {
+  const deleteUOMData = async (id: number,data:any) => {
+    await deleteUOM(companyId, id,data).then(res => {
       if (res.success) {
         if (res.data.status) {
           msg.success(res.data.message);
@@ -352,7 +206,6 @@ const ItemMaster = () => {
         //     handleReset('DeleteStatus');
         //   }
         //   fetchAllStatusList();
-        fetchItemMasterData(companyId)
         } else {
           msg.warning(res.data.message);
         }
@@ -363,8 +216,8 @@ const ItemMaster = () => {
 
     })
   }
-   const addNewItemMasterData = async (data:any) => {
-    await addNewItemMaster(companyId,data).then(res => {
+   const addNewUOMData = async (branch: any,data:any) => {
+    await addNewUOM(companyId, data).then(res => {
       if (res.success) {
         if (res.data.status) {
           msg.success(res.data.message);
@@ -375,8 +228,9 @@ const ItemMaster = () => {
         // if(recordToEditId==null && companyId){
 
         // }
-        fetchItemMasterData(companyId)
+        // fetchStoreGetData(companyId)
         // fetchStoreDataByBranchName(companyId,branch)
+        fetchUOMGetData(companyId)
 
         } else {
           msg.warning(res.data.message);
@@ -388,20 +242,12 @@ const ItemMaster = () => {
 
     })
   }
-    const updateStoreData = async (id: any,data:any) => {
-    await updateStore(companyId, id,data).then(res => {
+    const updateUOMData = async (id: any,data:any) => {
+    await updateUOM(companyId, id,data).then(res => {
       if (res.success) {
         if (res.data.status) {
           msg.success(res.data.message);
-        //   if (selectedStatusRec && selectedStatusRec.Id == id) {
-        // //     handleReset('DeleteStatus');
-        // //   }
-        // //   fetchAllStatusList();
-        // if(recordToEditId==null && companyId){
-
-        // }
-        fetchItemMasterData(companyId)
-            // fetchStoreDataByBranchName(companyId,branch)
+            fetchUOMGetData(companyId)
 
         } else {
           msg.warning(res.data.message);
@@ -415,21 +261,19 @@ const ItemMaster = () => {
   }
   const submit=()=>{
   let Payload = {
-            "StoreDetails": [
+            "UOMDetails": [
                 {
-                    "Store Name": watch("StoreName"),
-                    "Store Description": watch("StoreDescription"),
-                    "BranchName": branch,
-                    "Branch Code":branchCode
+                    "Name": watch("Name"),
+                    "Description": watch("Description"),
                 }
             ]
         }
         if(recordToEditId==null && companyId){
-            addNewItemMasterData(Payload)
+            addNewUOMData(companyId,Payload)
             setIsAddDialogOpen(false)
         }
         else if(recordToEditId!==null && companyId){
-            updateStoreData(recordToEditId,Payload)
+            updateUOMData(recordToEditId,Payload)
             setIsAddDialogOpen(false)
 
         }
@@ -439,16 +283,11 @@ const ItemMaster = () => {
 
   
       const handleEdit = (data) => {
-        setIsAddDialogOpen(true)
         reset({
-            ItemName: data.ItemName,
-            ItemCode:data.Code,
-            MainCategory:Number(data.Level1CategoryId) || 0,
-            SubCategory:data.Level2CategoryId,
-            UnitofMeasure:data.UnitOfMeasure,
-            ReorderLevel:data.ReorderLevel,
-            ItemDescription:data.Description
+            Name: data.Name,
+            Description:data.Description
         })
+        setIsAddDialogOpen(true)
         // e.preventDefault();
         // console.log('Store data:', formData);
         // setIsAddDialogOpen(false);
@@ -469,85 +308,33 @@ const ItemMaster = () => {
             <div className="space-y-6 p-5">
                 {/* Search and Actions */}
                 <div className="flex justify-between items-center">
-                    {/* <ReusableInput
-            size="middle"
-            placeholder="Search stores..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            prefixIcon={<Search className="h-4 w-4 text-muted-foreground" />}
-            allowClear
-            containerClassName="w-96"
-          /> */}
-                    <h1>Item Master</h1>
+                    <h1>Units Of Measure</h1>
 <div className='flex gap-3'>
+
                     <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                         <DialogTrigger asChild>
                             <ReusableButton
                                 variant="primary"
                                 icon={<Plus className="h-4 w-4" />}
                                 className="bg-orange-500 hover:bg-orange-600 border-orange-500"
-                                onClick={()=>{setRecordToEditId(null);reset({StoreName:"",Branch:"",StoreDescription:""})}}
+                                onClick={()=>{setRecordToEditId(null);reset({Name:"",Description:""})}}
                             >
                                 Add
                             </ReusableButton>
-                            
                         </DialogTrigger>
                         <DialogContent className="max-w-2xl">
                             <DialogHeader>
-                                <DialogTitle>{recordToEditId?"Update Item master":"Add Item master"}</DialogTitle>
+                                <DialogTitle>{recordToEditId?"Update UOM":"Add UOM"}</DialogTitle>
                             </DialogHeader>
-
-                            {/* <form onSubmit={()=>{}} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <ReusableInput
-                    label="Store Name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    required
-                  />
-                  <div>
-                    <Label htmlFor="branch">Branch *</Label>
-                    <ReusableDropdown
-                      options={branchOptions}
-                      value={formData.branch}
-                      onChange={(value) => setFormData({ ...formData, branch: value as string })}
-                      placeholder="Select Branch"
-                    />
-                  </div>
-                </div>
-                
-                <ReusableTextarea
-                  label="Store Description"
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  numberOfRows={3}
-                />
-                
-                <div className="flex justify-end gap-2">
-                  <ReusableButton 
-                    variant="default" 
-                    onClick={() => setIsAddDialogOpen(false)}
-                  >
-                    Cancel
-                  </ReusableButton>
-                  <ReusableButton 
-                    htmlType="submit" 
-                    variant="primary"
-                    className="bg-orange-500 hover:bg-orange-600 border-orange-500"
-                  >
-                    Save Store
-                  </ReusableButton>
-                </div>
-              </form> */}
                             <div className='grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4'>
-                                {getFieldsByNames(['ItemName', 'ItemCode',"MainCategory","SubCategory","UnitofMeasure","UnitPrice","ReorderLevel"]).map((field) => {
+                                {getFieldsByNames(['Name', 'Branch']).map((field) => {
                                     return <div className="flex items-center space-x-2">
                                         {renderField(field)}
                                     </div>;
                                 })}
                             </div>
                             <div className='w-100'>
-                                {getFieldsByNames(['ItemDescription']).map((field) => {
+                                {getFieldsByNames(['Description']).map((field) => {
                                     return <div className=" space-x-2">
                                         {renderField(field)}
                                     </div>;
@@ -571,21 +358,61 @@ const ItemMaster = () => {
                             </div>
                         </DialogContent>
                     </Dialog>
-                    <ReusableButton
+                     <Dialog open={isConverDialogOpen} onOpenChange={setIsConvertDialogOpen}>
+                        <DialogTrigger asChild>
+                            <ReusableButton
                                 variant="primary"
                                 icon={<Plus className="h-4 w-4" />}
                                 className="bg-orange-500 hover:bg-orange-600 border-orange-500"
-                                // onClick={()=>{setRecordToEditId(null);reset({StoreName:"",Branch:"",StoreDescription:""})}}
+                                onClick={()=>{setRecordToEditId(null);reset({StoreName:"",Branch:"",StoreDescription:""})}}
                             >
-                            Import
+                                Manage Unit Conversations 
                             </ReusableButton>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-2xl">
+                            <DialogHeader>
+                                <DialogTitle>{recordToEditId?"Update Store":"Add Store"}</DialogTitle>
+                            </DialogHeader>
+                            <div className='grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4'>
+                                {getFieldsByNames(['StoreName', 'Branch']).map((field) => {
+                                    return <div className="flex items-center space-x-2">
+                                        {renderField(field)}
+                                    </div>;
+                                })}
                             </div>
+                            <div className='w-100'>
+                                {getFieldsByNames(['StoreDescription']).map((field) => {
+                                    return <div className=" space-x-2">
+                                        {renderField(field)}
+                                    </div>;
+                                })}
+                            </div>
+                            <div className="flex justify-end gap-2">
+                                <ReusableButton
+                                    variant="default"
+                                    onClick={() => setIsAddDialogOpen(false)}
+                                >
+                                    Cancel
+                                </ReusableButton>
+                                <ReusableButton
+                                    htmlType="submit"
+                                    variant="primary"
+                                    className="bg-orange-500 hover:bg-orange-600 border-orange-500"
+                                    onClick={()=>submit()}
+                                >
+                                   {recordToEditId?"Update":"Save"}
+                                </ReusableButton>
+                            </div>
+                        </DialogContent>
+                    </Dialog>
+</div>
+
                     <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>
                               <DialogContent className="sm:max-w-[425px]">
                                 <DialogHeader>
                                   <DialogTitle>Confirm the action</DialogTitle>
                                   <DialogDescription>
-                                    Are you sure you want to delete Item master?
+                                    Are you sure you want to delete Store?
                                     {/* {currentTab === "service-request-type"
                                       ? `${selectedRecord?.ServiceRequestType || "this"} Service Request Type`
                                       : `${selectedStatusRec?.StatusType || "this"} Status`
@@ -596,14 +423,13 @@ const ItemMaster = () => {
                                   <ReusableButton
                                     variant="default"
                                     onClick={() => setIsDelModalOpen(false)}
-                                    
                                   >
                                     Cancel
                                   </ReusableButton>
                                   <ReusableButton
                                     variant="primary"
                                     danger={true}
-                                    onClick={()=>{deleteItemMasterData(recordToEditId,"");setIsDelModalOpen(false)}}
+                                    onClick={()=>{deleteUOMData(recordToEditId,"");setIsDelModalOpen(false)}}
                                     // onClick={currentTab === "service-request-type" ? () => { deleteServiceRequestType(selectedRecord?.Id); setIsDelModalOpen(false) } : () => { deleteStatus(selectedStatusRec?.Id); setIsDelModalOpen(false) }}
                                   >
                                     Delete
@@ -625,4 +451,4 @@ const ItemMaster = () => {
     );
 };
 
-export default ItemMaster;
+export default UnitOfMeasure;

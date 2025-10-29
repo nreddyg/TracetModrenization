@@ -210,7 +210,7 @@ const MessageContainer: React.FC<MessageContainerProps> = ({
   return (
     <div
       className={cn(
-        "fixed left-0 right-0 z-50 pointer-events-none",
+        "fixed left-0 right-0 z-[9999] pointer-events-none",
         position === 'top' ? 'top-0' : 'bottom-0'
       )}
       style={{

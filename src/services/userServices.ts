@@ -54,9 +54,9 @@ export const createUser = async (CompId:string, data:any): Promise<APIResponse<a
     }
 };
 // Delete User
-export const deleteUser = async (CompId:string,Id:string): Promise<APIResponse<any>> => {
+export const deleteUser = async (CompId:string,Id:number): Promise<APIResponse<any>> => {
   try {
-        const response = await api.post(URL_DELETE_USER, { params: { CompId, Id } })
+        const response = await api.post(URL_DELETE_USER,'', { params: { CompId, Id } })
         return {success: true,data: response.data,}
     } catch (err: any) {
         return { success: false,message: err.response?.data?.message || err.message,status: err.response?.status};

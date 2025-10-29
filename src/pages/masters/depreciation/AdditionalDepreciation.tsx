@@ -1,7 +1,7 @@
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import ReusableTable, { TableAction, TablePermissions } from '@/components/ui/reusable-table';
 import { ScrollArea } from '@radix-ui/react-scroll-area';
-import { ArrowLeft, Edit, Plus, Search, Trash2 } from 'lucide-react';
+import { Edit, Plus, Search, Trash2 } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ReusableButton } from '@/components/ui/reusable-button';
@@ -25,6 +25,8 @@ import { useDispatch } from 'react-redux';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { Progress } from '@/components/ui/progress';
+import { Additional_Depreciation_DB } from '@/Local_DB/Form_JSON_Data/AdditionalDepreciationDB';
+import { AddAdditionalDepreciationBookDetails, GetAdditionalDepreciationBookDetails } from '@/services/BookServices';
 
 interface SoftwareData {
     SoftwareID: Number,
@@ -70,13 +72,13 @@ const tablePermissions: TablePermissions = {
     canManageColumns: true,
 };
 
-const AssetRegistry = () => {
+const AdditionalDepreciation = () => {
     const navigate = useNavigate();
     const { toast } = useToast();
     const msg = useMessage()
     const dispatch = useDispatch()
     const companyId = useAppSelector(state => state.projects.companyId);
-    const [fields, setFields] = useState<BaseField[]>(REGISTRY_DB);
+    const [fields, setFields] = useState<BaseField[]>(Additional_Depreciation_DB);
     const [isOpenLicenseCard, setIsOpenLicenseCard] = useState(false);
     const [getAllTableData, setGetAllTableData] = useState([])
     const [dataSource, setDatasource] = useState([]);
@@ -95,214 +97,17 @@ const AssetRegistry = () => {
 
     useEffect(() => {
         if (companyId)
-            fetchAllLookups()
+            getAdditionalDepreciationListAPI()
     }, [companyId])
-const SoftwareDataColumns = [
-    { id: 'SoftwareId', accessorKey: "SoftwareId", header: "Software ID" },
-    { id: 'SoftwareName', accessorKey: "SoftwareName", header: "Software Name" },
-    { id: 'Version', accessorKey: "Version", header: "Version" },
-    { id: 'VendorId', accessorKey: "VendorId", header: "Vendor" },
-    { id: 'CategoryId', accessorKey: "CategoryId", header: "Category" },
-    { id: 'AssignmentDate', accessorKey: "LicenseType", header: "License Type" },
-    { id: 'NumberOfLicenses', accessorKey: "NumberOfLicenses", header: "Total Licenses" },
-    { id: 'AssignedLicenseCount', accessorKey: "AssignedLicenseCount", header: "Assigned" ,
-        cell: ({ row }: any) => {
-            console.log(row.original)
-        const assigned = row.original.NumberOfLicenses as number;
-        const total = row.original.NumberOfLicenses;
-        const percentage = (assigned / total) * 100;
-        return (
-          <div className="flex items-center gap-2">
-            <span>{assigned}</span>
-            <div className="w-16 h-2 bg-muted rounded-full">
-              <div 
-                className="h-full bg-primary rounded-full" 
-                style={{ width: `${percentage}%` }}
-              />
-            </div>
-          </div>
-        );
-    }
-     },
-    // { id: 'Status', accessorKey: "Status", header: "Status" },
-    { id: 'AssignedLicenseTotalCost', accessorKey: "AssignedLicenseTotalCost", header: "Total Cost",  }
-      
-]
- const [columns, setColumns] = useState<ColumnDef<SoftwareData>[]>(SoftwareDataColumns);
-    const tableColumnsData = [
-        {
-            accessorKey: "LicenseKey",
-            header: "License Key",
-
-            cell: ({ row }) => (
-
-                <span className='flex'>
-                    <ReusableInput
-                        value={row.original.LicenseKey}
-                        onChange={(e) => handleChange(e.target.value, row.id, "LicenseKey")}
-                        name='LicenseKey'
-                        // placeholder='Enter License key'
-                        isRequired={true}
-                        className='m-2 mt-0 me-0 bg-white border-2'
-                        size='small'
-                    ></ReusableInput><span className='text-red-500'>*</span>
-
-                </span>
-            )
-        },
-        {
-            accessorKey: "LicenseCost",
-            header: "Cost per License",
-            cell: ({ row }) => (
-
-                <span className='flex'>
-                    <ReusableInput
-                        value={row.original.LicenseCost}
-                        onChange={(e) => handleChange(e.target.value, row.id, "LicenseCost")}
-                        name='LicenseCost'
-                        isRequired={true}
-                        className='m-2 me-0  mt-0 bg-white border-2'
-                        size='small'
-
-                        //   placeholder='Enter Cost'
-                        type="number"
-                    ></ReusableInput><span className='text-red-500 ms-0 ps-0'>*</span>
-
-                </span>
-            )
-        },
-        ...(form.watch("LicenseType") !== "Perpetual" ? [
-            {
-                accessorKey: "LicenseExpiryDate",
-                header: "Expiry/Renewal Date",
-                cell: ({ row }) => (
-
-                    <span className='flex' >
-                        <ReusableDatePicker
-                            value={row.original.LicenseExpiryDate}
-                            onChange={(e) => handleChange(e, row.id, "LicenseExpiryDate")}
-                            placeholder=' '
-                            disabled={form.watch("LicenseType") !== "Perpetual" ? false : true}
-                            size="sm"
-                            isRequired={true}
-                            className='m-2 bg-white border-2'
-                            wrapperClassName='m-2 ms-0  me-2'
-                            backgroundColor="white"
-                        ></ReusableDatePicker><span className='text-red-500 mt-2'>*</span>
-
-                    </span>
-                )
-            }
-        ] : []),
-
-        {
-            accessorKey: "Status",
-            header: "Status",
-
-            cell: ({ row }) => (
-
-                <span>
-                    <ReusableDropdown
-                        containerClassName=" p-2"
-                        className='h-8 border-2 '
-                        placeholder=" "
-                        options={[
-                            { label: "Active", value: "Active" }, { label: "Expired", value: "Expired" }, { label: "Suspended", value: "Suspended" },
-                        ]}
-                        allowClear={false}
-                        defaultValue={row.original.Status}
-                        onChange={(e) => handleChange(e, row.id, "Status")}
-                        backgroundColor="white"
-                        size={"small"}
-
-                    >
-
-                    </ReusableDropdown>
-
-                </span>
-            )
-        },
-        {
-            accessorKey: "Actions",
-            header: "Actions  ",
-            size: 70,
-            cell: ({ row }) => (
-                <div className={cn('flex justify-start',(row.id == dataSource.length - 1) && editRecordId!=="" && "justify-center")}>
-
-                    {row.id != 0 && editRecordId=="" && <Trash2 height={18} className='display-inline text-red-400 cursor-pointer '
-                        onClick={() => handleRowDelete(row)} />}
-
-                    {row.id == dataSource.length - 1 && <Plus className='display-inline   cursor-pointer text-blue-500' onClick={() => { setDatasource([...dataSource, { ...defaultRow, key: dataSource.length }]); form.setValue("NumberOfLicenses", parseInt(watch("NumberOfLicenses")) + 1) }} height={18} />}
-                </div>
-            )
-        },
-
+    const SoftwareDataColumns = [
+        { id: 'Name', accessorKey: "Name", header: "Name" },
+        { id: 'AdditionalDepreciationRate"', accessorKey: "AdditionalDepreciationRate", header: "Rate Of Additional Depreciation" },
+        { id: 'UptoDateRange', accessorKey: "UptoDateRange", header: "Date Range Upto Financial Year" },
+        { id: 'ApplicableFor', accessorKey: "ApplicableFor", header: "Applicable For" },
+        { id: 'Condition', accessorKey: "Condition", header: "Condition" },
     ]
+    const [columns, setColumns] = useState<ColumnDef<SoftwareData>[]>(SoftwareDataColumns);
 
-    const handleRowDelete = (row) => {
-        console.log("row", row.id)
-        const data = [...dataSource]
-        data.splice(row.id, 1)
-        setDatasource(data)
-
-        form.setValue("NumberOfLicenses", parseInt(watch("NumberOfLicenses")) - 1)
-
-    }
-    const fetchAllLookups = async () => {
-        try {
-            const [vendors, category, getAllTableData] = await Promise.allSettled([vendorsLookUp(companyId), categoryLookUp(companyId), getSoftwaresList(companyId)])
-            const data = { VendorId: { data: [], label: '', value: "", extendedlable: "" }, CategoryId: { data: [], label: '', value: "" } }
-            if (vendors.status === "fulfilled" && vendors.value.data && vendors.value.success && vendors.value.data.Vendors) {
-                data["VendorId"] = { data: vendors.value.data.Vendors, label: "VendorName", value: "VendorID", extendedlable: "VendorType" }
-            }
-            if (category.status === "fulfilled" && category.value.data && category.value.success && category.value.data) {
-                data["CategoryId"] = { data: category.value.data, label: "CategoryName", value: "CategoryId" }
-            }
-            if (getAllTableData.status === "fulfilled" && getAllTableData.value.success && getAllTableData.value.data && (getAllTableData.value.data.status==undefined)) {
-                setGetAllTableData((getAllTableData.value.data).reverse())
-            }
-            setLookupsDataInJson(data)
-        } catch {
-
-        } finally {
-
-        }
-    }
-
-
-    const setLookupsDataInJson = (lookupsData: allResponsesType): void => {
-        console.log("look",lookupsData)
-        const arr = Object.keys(lookupsData)
-        const opts: { [key: string]: any } = {}
-        arr.forEach((obj) => {
-            let ret = []
-            ret = lookupsData[obj].data.map((element) => {
-                let opt = {}
-                opt["label"] = (lookupsData[obj].extendedlable) ? element[lookupsData[obj].label] + " - " + element[lookupsData[obj].extendedlable] : element[lookupsData[obj].label]
-                opt["value"] = element[lookupsData[obj].value]
-                return opt
-            });
-            opts[obj] = ret
-        })
-        const data = structuredClone(fields);
-        data.forEach((obj) => {
-            if (arr.includes(obj.name)) {
-                obj.options = opts[obj.name]
-            }
-        });
-        setFields(data);
-    }
-
-    function handleChange(val, id, accessorKey) {
-        let data = dataSource
-        //  data.forEach((obj)=>{
-        //     if(obj.key==id){
-        //         obj[accessorKey]=val
-        //     }
-        //  })
-        data[parseInt(id)][accessorKey] = val
-        setDatasource(data)
-    }
 
     const generateRowsInTable = (num?: number, startNum?: number, data?: any) => {
         const result = [];
@@ -354,9 +159,6 @@ const SoftwareDataColumns = [
 
     }
 
-    const getFieldsByNames = (names: string[]) => {
-        return fields.filter(f => names.includes(f.name!));
-    }
     const renderField = (field: BaseField) => {
         const { name, label, fieldType, isRequired, validationPattern, patternErrorMessage, show = true } = field;
         const validationRules = {
@@ -501,13 +303,13 @@ const SoftwareDataColumns = [
     }
     const handleEdit = (data: any): void => {
         form.reset({ ...form.getValues(), ...data })
-             let fieldsData = [...fields]
-                fieldsData.forEach((obj) => {
-                    if (obj.name == "NumberOfLicenses" || obj.name == "LicenseType") {
-                        obj.disabled = true
-                    }
-                })
-                setFields(fieldsData)
+        let fieldsData = [...fields]
+        fieldsData.forEach((obj) => {
+            if (obj.name == "NumberOfLicenses" || obj.name == "LicenseType") {
+                obj.disabled = true
+            }
+        })
+        setFields(fieldsData)
         setDatasource(generateRowsInTable(0, 0, data.LicenseDetails))
         setIsOpenLicenseCard(true)
         setEditRecordId(data.SoftwareId)
@@ -515,14 +317,8 @@ const SoftwareDataColumns = [
     const handleReset = () => {
         setDatasource([])
         form.reset({ ...form.getValues(), SoftwareName: '', Version: "", VendorId: "", CategoryId: '', LicenseType: '', NumberOfLicenses: '' });
-        let fieldsData = [...fields]
-        fieldsData.forEach((obj) => {
-            if (obj.name == "NumberOfLicenses" || obj.name == "LicenseType") {
-                obj.disabled = false
-            }
-        })
-        setFields(fieldsData)
-setEditRecordId("")
+
+        setEditRecordId("")
 
     }
     const deleteSoftwareAsset = async (id: string) => {
@@ -533,7 +329,7 @@ setEditRecordId("")
                     msg.success(res.data.message);
 
                     handleReset();
-                    getSoftwaresListAPI(companyId)
+                    getAdditionalDepreciationListAPI()
                 } else {
                     msg.warning(res.data.message);
                 }
@@ -563,60 +359,58 @@ setEditRecordId("")
 
     // handle refresh
     const handleRefresh = useCallback(() => {
-        toast({ title: "Data Refreshed", description: "All Software Assets data has been updated", });
+        toast({ title: "Data Refreshed", description: "Additional Depreciation data has been updated", });
         // fetchAllCustomerList();
-        getSoftwaresListAPI(companyId)
+        getAdditionalDepreciationListAPI()
     }, [toast]);
-    const getLicenseDetails = (id?: string):any => {
+    const getLicenseDetails = (id?: string): any => {
         let licenseDetails = []
-       
+
         dataSource.some((obj) => {
             let licenseKey = obj.LicenseKey
             let licenseCost = obj.LicenseCost
             let expiryDate = obj.LicenseExpiryDate
 
-            if (licenseKey && licenseCost && (watch("LicenseType") == "Perpetual") ||(expiryDate && watch("LicenseType") !== "Perpetual") ){
+            if (licenseKey && licenseCost && (watch("LicenseType") == "Perpetual") || (expiryDate && watch("LicenseType") !== "Perpetual")) {
                 licenseDetails.push({
                     "LicenseDetailId": id ? obj.LicenseDetailId : "",
                     "LicenseKey": licenseKey,
                     "LicenseCost": licenseCost,
                     "ExpiryDate": (typeof (expiryDate) == "string") ? expiryDate : formatDates(expiryDate, 'YYYY/MM/DD'),
-                                   
+
                     "Status": obj.Status
                 })
-              
-            }else{
 
-                 licenseDetails=[]
+            } else {
+
+                licenseDetails = []
                 return true
-            
+
             }
-             
+
         })
-         return licenseDetails
+        return licenseDetails
     }
     const handleSave = async (data) => {
-        let LicenseDetails = editRecordId ?getLicenseDetails(editRecordId) : getLicenseDetails();
+        let LicenseDetails = editRecordId ? getLicenseDetails(editRecordId) : getLicenseDetails();
         if (LicenseDetails.length > 0) {
             const payload = {
-                "SoftwareLicenses": [{
-                    "SoftwareId": editRecordId ? editRecordId : "",
-                    "SoftwareName": data["SoftwareName"],
-                    "Version": data["Version"],
-                    "VendorId": data["VendorId"],
-                    "CategoryId": data["CategoryId"],
-                    "LicenseType": data["LicenseType"],
-                    "NumberOfLicenses": data["NumberOfLicenses"],
-                    "LicenseDetails": LicenseDetails
+                "AdditionalDepreciation": [{
+                    "Name": data["Name"],
+                    "Description": data["Description"],
+                    "ApplicableFor": data["ApplicableFor"],
+                    "Condition": data["Condition"],
+                    "AdditionalDepreciationRate": data["AdditionalDepreciationRate"],
+                    "UptoDateRange": data["UptoDateRange"],
                 }]
             }
 
 
             dispatch(setLoading(true));
-            await addOrUpdateSoftwareAsset(companyId, payload).then(res => {
+            await AddAdditionalDepreciationBookDetails(companyId, payload).then(res => {
                 if (res.data.status) {
                     msg.success(res.data.message)
-                    getSoftwaresListAPI(companyId)
+                    getAdditionalDepreciationListAPI()
                     handleReset();
                 } else {
                     let errMsg = (res.data.ErrorDetails && res.data.ErrorDetails[0]['Error Message']) ? res.data.ErrorDetails[0]['Error Message'] : res.data.message
@@ -632,11 +426,11 @@ setEditRecordId("")
     };
 
 
-    const getSoftwaresListAPI = async (companyId) => {
+    const getAdditionalDepreciationListAPI = async () => {
         dispatch(setLoading(true))
-        await getSoftwaresList(companyId).then(res => {
+        await GetAdditionalDepreciationBookDetails(companyId).then(res => {
             if (res.success && res.data.status === undefined) {
-                setGetAllTableData((res.data).reverse())
+                setGetAllTableData((res.data.AdditionalDepreciationDetails).reverse())
             } else {
                 setGetAllTableData([]);
             }
@@ -664,18 +458,19 @@ setEditRecordId("")
                     </div>
                     <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
                         <ReusableButton
+                            variant="text"
+
+                            onClick={() => { navigate("/masters/depreciation/book") }}
+                            icon={""}
+                        >
+                            Back
+                        </ReusableButton>
+                        <ReusableButton
                             size="small"
                             // variant="primary"
                             className=' flex-1 sm:flex-none bg-primary h-[2.38rem] text-white p-4'
                             onClick={() => setIsOpenLicenseCard((prev) => !prev)}>
-                            {/* <span className="" > + Add Software Asset</span> */}
-                              {isOpenLicenseCard ? (
-                                    <div className='flex items-center gap-2'>
-                                        <ArrowLeft className="h-4 w-4 text-current stroke-[3]" /> Grid View
-                                    </div>
-                                ) : (
-                                    '+ Add Software Assetgit'
-                                )}
+                            <span className="" > Add Additional Depreciation</span>
                         </ReusableButton>
                     </div>
                 </div>
@@ -684,9 +479,9 @@ setEditRecordId("")
                         <CardContent className="pt-6">
                             <div className="">
                                 <div className="space-y-4">
-                                    <span className='text-2xl'>Add New Software Asset</span>
+                                    <span className='text-2xl'>Additional Depreciation</span>
                                     <div className={`grid xxs:grid-cols-1 xs2:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-6`}>
-                                        {getFieldsByNames(['SoftwareName', 'Version', 'VendorId', 'CategoryId', 'LicenseType', 'NumberOfLicenses']).map((field) => {
+                                        {fields.map((field) => {
                                             return <> <div className="flex-1 items-center space-x-2">
                                                 {renderField(field)}
                                                 {(field.name === 'NumberOfLicenses') && <div className='mt-2 float-right'><ReusableButton
@@ -710,13 +505,7 @@ setEditRecordId("")
                                         </div>;
                                     })} */}
 
-                                        {dataSource.length !== 0 && <ReusableTable data={dataSource} columns={tableColumnsData} enableSearch={false}
-                                            enableColumnVisibility={false}
-                                            enableExport={false}
-                                            enableSorting={false}
-                                            enableFiltering={false}
-                                            headerContentClassName={"justify-center "}
-                                        />}
+
 
                                     </div>
                                 </div>
@@ -751,7 +540,7 @@ setEditRecordId("")
                             data={getAllTableData} columns={columns}
                             // permissions={""}
                             permissions={tablePermissions}
-                            title="Software Assets Overview"
+                            title="Additional Depreciation Details"
                             onRefresh={handleRefresh}
                             enableSearch={true}
                             enableSelection={false}
@@ -767,7 +556,7 @@ setEditRecordId("")
                             actions={tableActions}
                             enableColumnPinning
                         />
-                      
+
                     </ScrollArea>
                 </div>
             </div>
@@ -802,4 +591,4 @@ setEditRecordId("")
     );
 }
 
-export default AssetRegistry
+export default AdditionalDepreciation;

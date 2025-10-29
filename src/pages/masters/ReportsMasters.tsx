@@ -110,6 +110,7 @@ const ReportsMasters = () => {
   const { control, register, handleSubmit, trigger, watch, setValue, reset, formState: { errors } } = form;
   
   useEffect(()=>{
+    form.reset();
     if(companyId && branchName) fetchAllLookups()
   },[companyId,branchName])
   useEffect(()=>{
@@ -581,6 +582,7 @@ const ReportsMasters = () => {
                   {...field}
                   value={ctrl.value}
                   onChange={ctrl.onChange}
+                  selectAll={true}
                   error={errors[name]?.message as string}
                 />
               )}
@@ -657,7 +659,7 @@ const ReportsMasters = () => {
               <div className="space-y-2 h-full overflow-y-hidden">
                 <div className='px-1'>
                   <h4 className="text-sm font-semibold text-gray-900 mb-3">Primary Filters</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-1">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-2">
                     {fields.map(renderField)}
                   </div>
                 </div>

@@ -35,7 +35,7 @@ export const MASTER_REPORTS_DB: BaseField[] = [
         treeData: [],
         isRequired: false,
         jsontype:'Asset Location',
-        defaultValue:[]
+        defaultValue:[],
     },
     {
         name: 'CostCenter',
@@ -53,7 +53,8 @@ export const MASTER_REPORTS_DB: BaseField[] = [
         treeData: [],
         isRequired: false,
         jsontype:'Asset Category',
-        defaultValue:[]
+        defaultValue:[],
+        selectAll:true
     },
     {
         name: 'User',
@@ -94,7 +95,8 @@ export const MASTER_REPORTS_DB: BaseField[] = [
         treeData: [],
         isRequired: false,
         jsontype:'Service Locations',
-        defaultValue:[]
+        defaultValue:[],
+        selectAll:true
     },
     {
         name: 'CustomerLocations',
@@ -103,6 +105,7 @@ export const MASTER_REPORTS_DB: BaseField[] = [
         treeData: [],
         isRequired: false,
         jsontype:'Customer Locations',
-        defaultValue:[]
+        defaultValue:[],
+        selectAll:true
     },
 ]

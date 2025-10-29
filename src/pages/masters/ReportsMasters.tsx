@@ -200,160 +200,84 @@ const ReportsMasters = () => {
   }
   //fetch reports
   const fetchMasterReportData = async () => {
-    const branchIds = watch('CompanyHierarchy') ? watch('CompanyHierarchy').filter(e => e != 0).join() : '';
-    const depIds = watch('Department') ? watch('Department').filter(e => e != 0).join() : '';
-    const assetLocIds = watch('AssetLocation') ? watch('AssetLocation').filter(e => e != 0).join() : '';
-    const costCentIds = watch('CostCenter') ? watch('CostCenter').filter(e => e != 0).join() : '';
-    const assetCatIds = watch('AssetCategory') ? watch('AssetCategory').join() : '';
-    const userIds = watch('User') ? watch('User').join() : '';
-    const vendorTypeIds = watch('VendorType') ? watch('VendorType').join() : '';
-    const vendorNameIds = watch('VendorName') ? watch('VendorName').join() : '';
-    const customerIds = watch('Customer') ? watch('Customer').join() : '';
-    const serviceLocIds = watch('ServiceLocations') ? watch('ServiceLocations').join() : '';
-    const customerLocIds = watch('CustomerLocations') ? watch('CustomerLocations').join() : '';
+    const getIds = (field) => (watch(field)?.filter((e) => e != 0) || []).join();
+    const branchIds = getIds('CompanyHierarchy');
+    const depIds = getIds('Department');
+    const assetLocIds = getIds('AssetLocation');
+    const costCentIds = getIds('CostCenter');
+    const assetCatIds = getIds('AssetCategory');
+    const userIds = getIds('User');
+    const vendorTypeIds = getIds('VendorType');
+    const vendorNameIds = getIds('VendorName');
+    const customerIds = getIds('Customer');
+    const serviceLocIds = getIds('ServiceLocations');
+    const customerLocIds = getIds('CustomerLocations');
     const dateRange = watch('RangePicker') || { from: '', to: '' };
-    switch (activeTab) {
-      case 'Company Hierarchy':
-        try {
-          setIsGeneratingReport(true);
-          dispatch(setLoading(true));
-          const res = await getCompanyHierarchyReport(companyId, branchIds, dateRange.from, dateRange.to);
-          if (res.data && res.data.CompanyHierarchyMasterReportDetails) setDataSource(res.data.CompanyHierarchyMasterReportDetails);
-          else setDataSource([])
-        } catch { } finally {
-          setIsGeneratingReport(false);
-          dispatch(setLoading(false));
-        }
-        break;
-      case 'Department':
-        try {
-          setIsGeneratingReport(true);
-          dispatch(setLoading(true));
-          const res = await getDepartmentReport(companyId, depIds, dateRange.from, dateRange.to)
-          if (res.data && res.data.DepartmentMasterReportDetails) setDataSource(res.data.DepartmentMasterReportDetails);
-          else setDataSource([]);
-
-        } catch { } finally {
-          setIsGeneratingReport(false);
-          dispatch(setLoading(false));
-        }
-        break;
-      case 'Asset Location':
-        try {
-          setIsGeneratingReport(true);
-          dispatch(setLoading(true));
-          const res = await getAssetLocationReport(companyId, assetLocIds, dateRange.from, dateRange.to)
-          if (res.data && res.data.AssetLocationMasterReportDetails) setDataSource(res.data.AssetLocationMasterReportDetails);
-          else setDataSource([]);
-
-        } catch { } finally {
-          setIsGeneratingReport(false);
-          dispatch(setLoading(false));
-        }
-        break;
-      case 'Cost Center':
-        try {
-          setIsGeneratingReport(true);
-          dispatch(setLoading(true));
-          const res = await getCostCenterReport(companyId, costCentIds, dateRange.from, dateRange.to)
-          if (res.data && res.data.CostCenterMasterReportDetails) setDataSource(res.data.CostCenterMasterReportDetails);
-          else setDataSource([]);
-
-        } catch { } finally {
-          setIsGeneratingReport(false);
-          dispatch(setLoading(false));
-        }
-        break;
-      case 'Asset Category':
-        try {
-          setIsGeneratingReport(true);
-          dispatch(setLoading(true));
-          const res = await getAssetCategoryReport(companyId, assetCatIds, dateRange.from, dateRange.to)
-          if (res.data && res.data.AssetCategoryMasterReportDetails) setDataSource(res.data.AssetCategoryMasterReportDetails);
-          else setDataSource([]);
-
-        } catch { } finally {
-          setIsGeneratingReport(false);
-          dispatch(setLoading(false));
-        }
-        break;
-      case 'User':
-        try {
-          setIsGeneratingReport(true);
-          dispatch(setLoading(true));
-          const res = await getUserReport(companyId, userIds, dateRange.from, dateRange.to)
-          if (res.data && res.data.UserMasterReportDetails) setDataSource(res.data.UserMasterReportDetails);
-          else setDataSource([]);
-
-        } catch { } finally {
-          setIsGeneratingReport(false);
-          dispatch(setLoading(false));
-        }
-        break;
-      case 'Vendor':
-        try {
-          setIsGeneratingReport(true);
-          dispatch(setLoading(true));
-          const res = await getVendorReport(companyId, vendorTypeIds, vendorNameIds, dateRange.from, dateRange.to)
-          if (res.data && res.data.VendorMasterReportDetails) setDataSource(res.data.VendorMasterReportDetails);
-          else setDataSource([]);
-        } catch { } finally {
-          setIsGeneratingReport(false);
-          dispatch(setLoading(false));
-        }
-        break;
-      case 'Customer':
-        try {
-          setIsGeneratingReport(true);
-          dispatch(setLoading(true));
-          const res = await getCustomerReport(companyId, customerIds, dateRange.from, dateRange.to)
-          if (res.data && res.data.CustomerMasterReportDetails) setDataSource(res.data.CustomerMasterReportDetails);
-          else setDataSource([]);
-        } catch { } finally {
-          setIsGeneratingReport(false);
-          dispatch(setLoading(false));
-        }
-        break;
-      case 'Service Locations':
-        try {
-          setIsGeneratingReport(true);
-          dispatch(setLoading(true));
-          const res = await getServiceLocationsReport(companyId, serviceLocIds, dateRange.from, dateRange.to)
-          if (res.data && res.data.ServiceLocationMasterReportDetails) setDataSource(res.data.ServiceLocationMasterReportDetails);
-          else setDataSource([]);
-        } catch { } finally {
-          setIsGeneratingReport(false);
-          dispatch(setLoading(false));
-        }
-        break;
-      case 'Customer Locations':
-        try {
-          setIsGeneratingReport(true);
-          dispatch(setLoading(true));
-          const res = await getCustomerLocationsReport(companyId, customerLocIds, dateRange.from, dateRange.to)
-          if (res.data && res.data.CustomerLocationMasterReportDetails) setDataSource(res.data.CustomerLocationMasterReportDetails);
-          else setDataSource([]);
-        } catch { } finally {
-          setIsGeneratingReport(false);
-          dispatch(setLoading(false));
-        }
-        break;
-      case 'User Log':
-        try {
-          setIsGeneratingReport(true);
-          dispatch(setLoading(true));
-          const res = await getUserLogReport(companyId, dateRange.from, dateRange.to)
-          if (res.data && res.data.UserLogMasterReportDetails) setDataSource(res.data.UserLogMasterReportDetails);
-          else setDataSource([]);
-        } catch { } finally {
-          setIsGeneratingReport(false);
-          dispatch(setLoading(false));
-        }
-        break;
-      default:
-        msg.warning('Please select report type !!')
+    const reportMap = {
+      'Company Hierarchy': {
+        fn: () => getCompanyHierarchyReport(companyId, branchIds, dateRange.from, dateRange.to),
+        key: 'CompanyHierarchyMasterReportDetails',
+      },
+      Department: {
+        fn: () => getDepartmentReport(companyId, depIds, dateRange.from, dateRange.to),
+        key: 'DepartmentMasterReportDetails',
+      },
+      'Asset Location': {
+        fn: () => getAssetLocationReport(companyId, assetLocIds, dateRange.from, dateRange.to),
+        key: 'AssetLocationMasterReportDetails',
+      },
+      'Cost Center': {
+        fn: () => getCostCenterReport(companyId, costCentIds, dateRange.from, dateRange.to),
+        key: 'CostCenterMasterReportDetails',
+      },
+      'Asset Category': {
+        fn: () => getAssetCategoryReport(companyId, assetCatIds, dateRange.from, dateRange.to),
+        key: 'AssetCategoryMasterReportDetails',
+      },
+      User: {
+        fn: () => getUserReport(companyId, userIds, dateRange.from, dateRange.to),
+        key: 'UserMasterReportDetails',
+      },
+      Vendor: {
+        fn: () => getVendorReport(companyId, vendorTypeIds, vendorNameIds, dateRange.from, dateRange.to),
+        key: 'VendorMasterReportDetails',
+      },
+      Customer: {
+        fn: () => getCustomerReport(companyId, customerIds, dateRange.from, dateRange.to),
+        key: 'CustomerMasterReportDetails',
+      },
+      'Service Locations': {
+        fn: () => getServiceLocationsReport(companyId, serviceLocIds, dateRange.from, dateRange.to),
+        key: 'ServiceLocationMasterReportDetails',
+      },
+      'Customer Locations': {
+        fn: () => getCustomerLocationsReport(companyId, customerLocIds, dateRange.from, dateRange.to),
+        key: 'CustomerLocationMasterReportDetails',
+      },
+      'User Log': {
+        fn: () => getUserLogReport(companyId, dateRange.from, dateRange.to),
+        key: 'UserLogMasterReportDetails',
+      },
+    };
+    const report = reportMap[activeTab];
+    if (!report) {
+      msg.warning('Please select report type !!');
+      return;
     }
-  }
+    try {
+      setIsGeneratingReport(true);
+      dispatch(setLoading(true));
+      const res = await report.fn();
+      const data = res?.data?.[report.key] || [];
+      setDataSource(data);
+    } catch (error) {
+      console.error(error);
+      setDataSource([]);
+    } finally {
+      setIsGeneratingReport(false);
+      dispatch(setLoading(false));
+    }
+  };
   //stringifying the values of objects
   const safeStringCols = (data:GenericObject) => Object.fromEntries(Object.entries(data).map(([key, value]) => [key, String(value ?? false)]));
   //Save columns 

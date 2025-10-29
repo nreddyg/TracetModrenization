@@ -281,219 +281,163 @@ const ReportsMasters = () => {
   //stringifying the values of objects
   const safeStringCols = (data:GenericObject) => Object.fromEntries(Object.entries(data).map(([key, value]) => [key, String(value ?? false)]));
   //Save columns 
-  const handleSaveColumns=()=>{
-    let cHCols={
-        "BranchName_100": hierarchyLevels.length!==0?hierarchyLevels[0]["LevelName"][0]?columnVisibility[hierarchyLevels[0]["LevelName"][0].LevelName+' Name']:false:'',
-        "BranchCode_100":  hierarchyLevels.length!==0?hierarchyLevels[0]["LevelName"][0]?columnVisibility[hierarchyLevels[0]["LevelName"][0].LevelName+' Code']:false:'',
-        "CreatedBy_100":  hierarchyLevels.length!==0?hierarchyLevels[0]["LevelName"][0]?columnVisibility[hierarchyLevels[0]["LevelName"][0].LevelName+' Created by']:false:'',
-        "CreatedDate1_100": hierarchyLevels.length!==0?hierarchyLevels[0]["LevelName"][0]?columnVisibility[hierarchyLevels[0]["LevelName"][0].LevelName+' Created date']:false:'',
-        "BranchName_101":  hierarchyLevels.length!==0?hierarchyLevels[0]["LevelName"][1]?columnVisibility[hierarchyLevels[0]["LevelName"][1].LevelName+' Name']:false:'',
-        "BranchCode_101":  hierarchyLevels.length!==0?hierarchyLevels[0]["LevelName"][1]?columnVisibility[hierarchyLevels[0]["LevelName"][1].LevelName+' Code']:false:'',
-        "CreatedBy_101": hierarchyLevels.length!==0?hierarchyLevels[0]["LevelName"][1]?columnVisibility[hierarchyLevels[0]["LevelName"][1].LevelName+' Created by']:false:'',
-        "CreatedDate1_101": hierarchyLevels.length!==0?hierarchyLevels[0]["LevelName"][1]?columnVisibility[hierarchyLevels[0]["LevelName"][1].LevelName+' Created date']:false:'',
-        "BranchName_102":  hierarchyLevels.length!==0?hierarchyLevels[0]["LevelName"][2]?columnVisibility[hierarchyLevels[0]["LevelName"][2].LevelName+' Name']:false:'',
-        "BranchCode_102":  hierarchyLevels.length!==0?hierarchyLevels[0]["LevelName"][2]?columnVisibility[hierarchyLevels[0]["LevelName"][2].LevelName+' Code']:false:'',
-        "CreatedBy_102": hierarchyLevels.length!==0?hierarchyLevels[0]["LevelName"][2]?columnVisibility[hierarchyLevels[0]["LevelName"][2].LevelName+' Created by']:false:'',
-        "CreatedDate1_102": hierarchyLevels.length!==0?hierarchyLevels[0]["LevelName"][2]?columnVisibility[hierarchyLevels[0]["LevelName"][2].LevelName+' Created date']:false:'',
-        "BranchName_103":  hierarchyLevels.length!==0?hierarchyLevels[0]["LevelName"][3]?columnVisibility[hierarchyLevels[0]["LevelName"][3].LevelName+' Name']:false:'',
-        "BranchCode_103":  hierarchyLevels.length!==0?hierarchyLevels[0]["LevelName"][3]?columnVisibility[hierarchyLevels[0]["LevelName"][3].LevelName+' Code']:false:'',
-        "CreatedBy_103": hierarchyLevels.length!==0?hierarchyLevels[0]["LevelName"][3]?columnVisibility[hierarchyLevels[0]["LevelName"][3].LevelName+' Created by']:false:'',
-        "CreatedDate1_103": hierarchyLevels.length!==0?hierarchyLevels[0]["LevelName"][3]?columnVisibility[hierarchyLevels[0]["LevelName"][3].LevelName+' Created date']:false:'',
-        "BranchName_104":  hierarchyLevels.length!==0?hierarchyLevels[0]["LevelName"][4]?columnVisibility[hierarchyLevels[0]["LevelName"][4].LevelName+' Name']:false:'',
-        "BranchCode_104":  hierarchyLevels.length!==0?hierarchyLevels[0]["LevelName"][4]?columnVisibility[hierarchyLevels[0]["LevelName"][4].LevelName+' Code']:false:'',
-        "CreatedBy_104": hierarchyLevels.length!==0?hierarchyLevels[0]["LevelName"][4]?columnVisibility[hierarchyLevels[0]["LevelName"][4].LevelName+' Created by']:false:'',
-        "CreatedDate1_104": hierarchyLevels.length!==0?hierarchyLevels[0]["LevelName"][4]?columnVisibility[hierarchyLevels[0]["LevelName"][4].LevelName+' Created date']:false:'',
-        "PANNo_104": columnVisibility['Reg / PAN'],
-        "TINNo_104": columnVisibility['GSTIN/UIN'],
-        "Address_104": columnVisibility['Address'],
-        "City_104": columnVisibility['City'],
-        "State_104": columnVisibility['State'],
-        "ZipCode_104": columnVisibility['Zip Code'],
-        "EmailAddress_104": columnVisibility['Email Address'],
-        "Mobile_104": columnVisibility['Mobile No']
-    }
-    let depCols = {
-      "DepName_100": hierarchyLevels.length!==0?hierarchyLevels[3]["LevelName"][0]?columnVisibility[hierarchyLevels[3]["LevelName"][0].LevelName+' Name']:false:'',
-      "DepCode_100": hierarchyLevels.length!==0?hierarchyLevels[3]["LevelName"][0]?columnVisibility[hierarchyLevels[3]["LevelName"][0].LevelName+' Code']:false:'',
-      "CreatedBy_100": hierarchyLevels.length!==0?hierarchyLevels[3]["LevelName"][0]?columnVisibility[hierarchyLevels[3]["LevelName"][0].LevelName+' Created by']:false:'',
-      "CreatedDate1_100": hierarchyLevels.length!==0?hierarchyLevels[3]["LevelName"][0]?columnVisibility[hierarchyLevels[3]["LevelName"][0].LevelName+' Created date']:false:'',
-      "DepName_101": hierarchyLevels.length!==0?hierarchyLevels[3]["LevelName"][1]?columnVisibility[hierarchyLevels[3]["LevelName"][1].LevelName+' Name']:false:'',
-      "DepCode_101": hierarchyLevels.length!==0?hierarchyLevels[3]["LevelName"][1]?columnVisibility[hierarchyLevels[3]["LevelName"][1].LevelName+' Code']:false:'',
-      "CreatedBy_101": hierarchyLevels.length!==0?hierarchyLevels[3]["LevelName"][1]?columnVisibility[hierarchyLevels[3]["LevelName"][1].LevelName+' Created by']:false:'',
-      "CreatedDate1_101": hierarchyLevels.length!==0?hierarchyLevels[3]["LevelName"][1]?columnVisibility[hierarchyLevels[3]["LevelName"][1].LevelName+' Created date']:false:'',
-      "DepName_102": hierarchyLevels.length!==0?hierarchyLevels[3]["LevelName"][2]?columnVisibility[hierarchyLevels[3]["LevelName"][2].LevelName+' Name']:false:'',
-      "DepCode_102": hierarchyLevels.length!==0?hierarchyLevels[3]["LevelName"][2]?columnVisibility[hierarchyLevels[3]["LevelName"][2].LevelName+' Code']:false:'',
-      "CreatedBy_102": hierarchyLevels.length!==0?hierarchyLevels[3]["LevelName"][2]?columnVisibility[hierarchyLevels[3]["LevelName"][2].LevelName+' Created by']:false:'',
-      "CreatedDate1_102": hierarchyLevels.length!==0?hierarchyLevels[3]["LevelName"][2]?columnVisibility[hierarchyLevels[3]["LevelName"][2].LevelName+' Created date']:false:'',
-      "DepName_103": hierarchyLevels.length!==0?hierarchyLevels[3]["LevelName"][3]?columnVisibility[hierarchyLevels[3]["LevelName"][3].LevelName+' Name']:false:'',
-      "DepCode_103": hierarchyLevels.length!==0?hierarchyLevels[3]["LevelName"][3]?columnVisibility[hierarchyLevels[3]["LevelName"][3].LevelName+' Code']:false:'',
-      "CreatedBy_103": hierarchyLevels.length!==0?hierarchyLevels[3]["LevelName"][3]?columnVisibility[hierarchyLevels[3]["LevelName"][3].LevelName+' Created by']:false:'',
-      "CreatedDate1_103": hierarchyLevels.length!==0?hierarchyLevels[3]["LevelName"][3]?columnVisibility[hierarchyLevels[3]["LevelName"][3].LevelName+' Created date']:false:'',
-      "DepName_104": hierarchyLevels.length!==0?hierarchyLevels[3]["LevelName"][4]?columnVisibility[hierarchyLevels[3]["LevelName"][4].LevelName+' Name']:false:'',
-      "DepCode_104": hierarchyLevels.length!==0?hierarchyLevels[3]["LevelName"][4]?columnVisibility[hierarchyLevels[3]["LevelName"][4].LevelName+' Code']:false:'',
-      "CreatedBy_104": hierarchyLevels.length!==0?hierarchyLevels[3]["LevelName"][4]?columnVisibility[hierarchyLevels[3]["LevelName"][4].LevelName+' Created by']:false:'',
-      "CreatedDate1_104": hierarchyLevels.length!==0?hierarchyLevels[3]["LevelName"][4]?columnVisibility[hierarchyLevels[3]["LevelName"][4].LevelName+' Created date']:false:''
-    }
-    let cCCols={
-      "CostName_100":hierarchyLevels.length!==0?hierarchyLevels[2]["LevelName"][0]?columnVisibility[hierarchyLevels[2]["LevelName"][0].LevelName+' Name']:false:'',
-      "CostCode_100": hierarchyLevels.length!==0?hierarchyLevels[2]["LevelName"][0]?columnVisibility[hierarchyLevels[2]["LevelName"][0].LevelName+' Code']:false:'',
-      "CreatedBy_100":hierarchyLevels.length!==0?hierarchyLevels[2]["LevelName"][0]?columnVisibility[hierarchyLevels[2]["LevelName"][0].LevelName+' Created by']:false:'',
-      "CreatedDate1_100":hierarchyLevels.length!==0?hierarchyLevels[2]["LevelName"][0]?columnVisibility[hierarchyLevels[2]["LevelName"][0].LevelName+' Created date']:false:'',
-      "CostName_101":hierarchyLevels.length!==0?hierarchyLevels[2]["LevelName"][1]?columnVisibility[hierarchyLevels[2]["LevelName"][1].LevelName+' Name']:false:'',
-      "CostCode_101":hierarchyLevels.length!==0?hierarchyLevels[2]["LevelName"][1]?columnVisibility[hierarchyLevels[2]["LevelName"][1].LevelName+' Code']:false:'',
-      "CreatedBy_101":hierarchyLevels.length!==0?hierarchyLevels[2]["LevelName"][1]?columnVisibility[hierarchyLevels[2]["LevelName"][1].LevelName+' Created by']:false:'',
-      "CreatedDate1_101":hierarchyLevels.length!==0?hierarchyLevels[2]["LevelName"][1]?columnVisibility[hierarchyLevels[2]["LevelName"][1].LevelName+' Created date']:false:'',
-      "CostName_102":hierarchyLevels.length!==0?hierarchyLevels[2]["LevelName"][2]?columnVisibility[hierarchyLevels[2]["LevelName"][2].LevelName+' Name']:false:'',
-      "CostCode_102": hierarchyLevels.length!==0?hierarchyLevels[2]["LevelName"][2]?columnVisibility[hierarchyLevels[2]["LevelName"][2].LevelName+' Code']:false:'',
-      "CreatedBy_102":hierarchyLevels.length!==0?hierarchyLevels[2]["LevelName"][2]?columnVisibility[hierarchyLevels[2]["LevelName"][2].LevelName+' Created by']:false:'',
-      "CreatedDate1_102":hierarchyLevels.length!==0?hierarchyLevels[2]["LevelName"][2]?columnVisibility[hierarchyLevels[2]["LevelName"][2].LevelName+' Created date']:false:'',
-      "CostName_103":hierarchyLevels.length!==0?hierarchyLevels[2]["LevelName"][3]?columnVisibility[hierarchyLevels[2]["LevelName"][3].LevelName+' Name']:false:'',
-      "CostCode_103":hierarchyLevels.length!==0?hierarchyLevels[2]["LevelName"][3]?columnVisibility[hierarchyLevels[2]["LevelName"][3].LevelName+' Code']:false:'',
-      "CreatedBy_103":hierarchyLevels.length!==0?hierarchyLevels[2]["LevelName"][3]?columnVisibility[hierarchyLevels[2]["LevelName"][3].LevelName+' Created by']:false:'',
-      "CreatedDate1_103":hierarchyLevels.length!==0?hierarchyLevels[2]["LevelName"][3]?columnVisibility[hierarchyLevels[2]["LevelName"][3].LevelName+' Created date']:false:'',
-      "CostName_104":hierarchyLevels.length!==0?hierarchyLevels[2]["LevelName"][4]?columnVisibility[hierarchyLevels[2]["LevelName"][4].LevelName+' Name']:false:'',
-      "CostCode_104":hierarchyLevels.length!==0?hierarchyLevels[2]["LevelName"][4]?columnVisibility[hierarchyLevels[2]["LevelName"][4].LevelName+' Code']:false:'',
-      "CreatedBy_104":hierarchyLevels.length!==0?hierarchyLevels[2]["LevelName"][4]?columnVisibility[hierarchyLevels[2]["LevelName"][4].LevelName+' Created by']:false:'',
-      "CreatedDate1_104":hierarchyLevels.length!==0?hierarchyLevels[2]["LevelName"][4]?columnVisibility[hierarchyLevels[2]["LevelName"][4].LevelName+' Created date']:false:'',  
-    }
-    let aLCols = {
-      "BranchName": lastLevels?.Branch ? columnVisibility[lastLevels.Branch+' Name']:false,
-      "BranchCode": lastLevels?.Branch ? columnVisibility[lastLevels.Branch+' Code']:false,
-      "LocName_100": hierarchyLevels.length!==0?hierarchyLevels[1]["LevelName"][0]?columnVisibility[hierarchyLevels[1]["LevelName"][0].LevelName+' Name']:false:'',
-      "LocCode_100": hierarchyLevels.length!==0?hierarchyLevels[1]["LevelName"][0]?columnVisibility[hierarchyLevels[1]["LevelName"][0].LevelName+' Code']:false:'',
-      "CreatedBy_100": hierarchyLevels.length!==0?hierarchyLevels[1]["LevelName"][0]?columnVisibility[hierarchyLevels[1]["LevelName"][0].LevelName+' Created by']:false:'',
-      "CreatedDate1_100": hierarchyLevels.length!==0?hierarchyLevels[1]["LevelName"][0]?columnVisibility[hierarchyLevels[1]["LevelName"][0].LevelName+' Created date']:false:'',
-      "LocName_101": hierarchyLevels.length!==0?hierarchyLevels[1]["LevelName"][1]?columnVisibility[hierarchyLevels[1]["LevelName"][1].LevelName+' Name']:false:'',
-      "LocCode_101": hierarchyLevels.length!==0?hierarchyLevels[1]["LevelName"][1]?columnVisibility[hierarchyLevels[1]["LevelName"][1].LevelName+' Code']:false:'',
-      "CreatedBy_101": hierarchyLevels.length!==0?hierarchyLevels[1]["LevelName"][1]?columnVisibility[hierarchyLevels[1]["LevelName"][1].LevelName+' Created by']:false:'',
-      "CreatedDate1_101": hierarchyLevels.length!==0?hierarchyLevels[1]["LevelName"][1]?columnVisibility[hierarchyLevels[1]["LevelName"][1].LevelName+' Created date']:false:'',
-      "LocName_102": hierarchyLevels.length!==0?hierarchyLevels[1]["LevelName"][2]?columnVisibility[hierarchyLevels[1]["LevelName"][2].LevelName+' Name']:false:'',
-      "LocCode_102": hierarchyLevels.length!==0?hierarchyLevels[1]["LevelName"][2]?columnVisibility[hierarchyLevels[1]["LevelName"][2].LevelName+' Code']:false:'',
-      "CreatedBy_102": hierarchyLevels.length!==0?hierarchyLevels[1]["LevelName"][2]?columnVisibility[hierarchyLevels[1]["LevelName"][2].LevelName+' Created by']:false:'',
-      "CreatedDate1_102": hierarchyLevels.length!==0?hierarchyLevels[1]["LevelName"][2]?columnVisibility[hierarchyLevels[1]["LevelName"][2].LevelName+' Created date']:false:'',
-      "LocName_103": hierarchyLevels.length!==0?hierarchyLevels[1]["LevelName"][3]?columnVisibility[hierarchyLevels[1]["LevelName"][3].LevelName+' Name']:false:'',
-      "LocCode_103": hierarchyLevels.length!==0?hierarchyLevels[1]["LevelName"][3]?columnVisibility[hierarchyLevels[1]["LevelName"][3].LevelName+' Code']:false:'',
-      "CreatedBy_103": hierarchyLevels.length!==0?hierarchyLevels[1]["LevelName"][3]?columnVisibility[hierarchyLevels[1]["LevelName"][3].LevelName+' Created by']:false:'',
-      "CreatedDate1_103": hierarchyLevels.length!==0?hierarchyLevels[1]["LevelName"][3]?columnVisibility[hierarchyLevels[1]["LevelName"][3].LevelName+' Created date']:false:'',
-      "LocName_104": hierarchyLevels.length!==0?hierarchyLevels[1]["LevelName"][4]?columnVisibility[hierarchyLevels[1]["LevelName"][4].LevelName+' Name']:false:'',
-      "LocCode_104": hierarchyLevels.length!==0?hierarchyLevels[1]["LevelName"][4]?columnVisibility[hierarchyLevels[1]["LevelName"][4].LevelName+' Code']:false:'',
-      "CreatedBy_104": hierarchyLevels.length!==0?hierarchyLevels[1]["LevelName"][4]?columnVisibility[hierarchyLevels[1]["LevelName"][4].LevelName+' Created by']:false:'',
-      "CreatedDate1_104": hierarchyLevels.length!==0?hierarchyLevels[1]["LevelName"][4]?columnVisibility[hierarchyLevels[1]["LevelName"][4].LevelName+' Created date']:false:''
-    }
-    let aCCols = {
-      "MainCategory": columnVisibility['Main category name'],
-      "MainCategoryCode": columnVisibility['Main category code'],
-      "AssetAcquisitionAccount": columnVisibility['Asset acquisition account'],
-      "AssetDepreciationAccount":columnVisibility['Asset depreciation account'],
-      "DepreciationAccount": columnVisibility['Depreciation account'],
-      "MainCatCreatedBy": columnVisibility['Main category created by'],
-      "MainCategoryDate": columnVisibility['Main category created date'],
-      "MainCategoryDescription": columnVisibility['Main category description'],
-      "SubCategory": columnVisibility['Sub category name'],
-      "SubCategoryCode": columnVisibility['Sub category code'],
-      "Prefix": columnVisibility['Prefix'],
-      "LifeSpan": columnVisibility['Life Span'],
-      "SalvageValue": columnVisibility['Salvage Value'],
-      "SubCatCreatedBy": columnVisibility['Sub category created by'],
-      "SubCategoryDate": columnVisibility['Sub category created date'],
-      "SubCategoryDescription": columnVisibility['Sub category description'],
-    }
-    let userCols = {
-      "FirstName": columnVisibility['First name'],
-      "LastName": columnVisibility['Last name'],
-      "EmailId":columnVisibility['Email id'],
-      "Empid":columnVisibility['Employee id'],
-      "Mobile":columnVisibility['Mobile no'],
-      "Phone":columnVisibility['Phone no'],
-      "UserName":columnVisibility['User name'],
-      "RoleName":columnVisibility['Role'],
-      "UserCreatedBy":columnVisibility['Created by'],
-      "UserDate":columnVisibility['Created date'],
-      "Status":columnVisibility['Status'],
-      "IsServiceDeskUser":columnVisibility['IsServiceDeskUser']
-    }
-    let vendorCols={
-      "Vendorname": columnVisibility['Vendor Name'],
-      "VendorType": columnVisibility['Vendor Type'],
-      "VendorCode": columnVisibility['Vendor Code'],
-      "PanNo": columnVisibility['Reg / PAN'],
-      "GSTIN": columnVisibility['GSTIN/UIN'],
-      "AddressLine1": columnVisibility['Address'],
-      "City": columnVisibility['City'],
-      "StateName": columnVisibility['State'],
-      "CountryName": columnVisibility['Country'],
-      "ZipCode": columnVisibility['Zip Code'],
-      "Phone": columnVisibility['Phone No'],
-      "Mobile": columnVisibility['Mobile No'],
-      "EmailId": columnVisibility['Email id'],
-      "VendorCreatedBy": columnVisibility['Created by'],
-      "VendorDate": columnVisibility['Created date'],
-      "VendorDescription": columnVisibility['Description']
-    }
-    let customerCols = {
-      "Vendorname":  columnVisibility['Customer Name'],
-      "PanNo":  columnVisibility['Reg / PAN'],
-      "GSTIN":  columnVisibility['GSTIN/UIN'],
-      "AddressLine1":  columnVisibility['Address'],
-      "City":  columnVisibility['City'],
-      "StateName":  columnVisibility['State'],
-      "CountryName":  columnVisibility['Country'],
-      "ZipCode":  columnVisibility['Zip Code'],
-      "Phone":  columnVisibility['Phone No'],
-      "Mobile":  columnVisibility['Mobile No'],
-      "EmailId":  columnVisibility['Email id'],
-      "MainLocationName":  columnVisibility['Main location'],
-      "SubLocationName":  columnVisibility['Sub location'],
-      "VendorCreatedBy":  columnVisibility['Created by'],
-      "VendorDate":  columnVisibility['Created date'],
-      "VendorDescription":  columnVisibility['Description']
-    }
-    let customerLocCols = {
-      "CustomerName":  columnVisibility['Customer name'],
-      "MainLocation":  columnVisibility['Main location'],
-      "MainLocCreatedBy":  columnVisibility['Main location Created by'],
-      "MainLocationDate":  columnVisibility['Main location created date'],
-      "SubLocation":  columnVisibility['Sub location'],
-      "SubLocCreatedBy":  columnVisibility['Sub location Created by'],
-      "SubLocationDate":  columnVisibility['Sub location created date'],
-      "AddressLine":  columnVisibility['Address'],
-      "City":  columnVisibility['City'],
-      "StateName":  columnVisibility['State'],
-      "Country":  columnVisibility['Country'],
-      "ZipCode":  columnVisibility['Zip Code'],
-      "Mobile":  columnVisibility['Mobile No'],
-      "UIN":  columnVisibility['TIN / GSTIN / UIN']
-    }
-    let serviceLocCols = {
-      "MainLocation":  columnVisibility['Main location'],
-      "MainLocCreatedBy":  columnVisibility['Main location Created by'],
-      "MainLocationDate":  columnVisibility['Main location Created date'],
-      "SubLocation":  columnVisibility['Sub location'],
-      "SubLocCreatedBy":  columnVisibility['Sub location Created by'],
-      "SubLocationDate":  columnVisibility['Sub location Created date']
-    }
-    let userLogCols = {
-      "Name":  columnVisibility['Name'],
-      "UserName":  columnVisibility['User name'],
-      "Phone":  columnVisibility['Phone no'],
-      "EmailId":  columnVisibility['Email id'],
-      "Empid":  columnVisibility['Employee id'],
-      "Login":  columnVisibility['Login'],
-      "DeviceId": columnVisibility['Device']
-    }
-    let colsData={'Company Hierarchy':cHCols,Department:depCols,'Asset Location':aLCols,'Cost Center':cCCols,'Asset Category':aCCols,
-      User:userCols,Vendor:vendorCols,Customer:customerCols,'Service Locations':serviceLocCols,'Customer Locations':customerLocCols,'User Log':userLogCols
-    }
-    let payload= {"GridColumnsDetails": [safeStringCols(colsData[activeTab])]}
-    dispatch(setLoading(true));
-    postColumns(companyId,branchName,reportIds[activeTab],payload).then(res=>{
-      if(res.data.status){
-        msg.success(res.data.message)
-      }else{
-        msg.warning(res.data.message || 'Failed to save grid columns data !!')
+  const handleSaveColumns = () => {
+    const getLevelValue = (index, keySuffix, sectionIndex) => {
+      if (hierarchyLevels.length === 0) return '';
+      const level = hierarchyLevels[sectionIndex]?.LevelName?.[index];
+      return level ? columnVisibility[`${level.LevelName} ${keySuffix}`] : false;
+    };
+    const buildHierarchyCols = (prefix, sectionIndex) => {
+      const cols = {};
+      for (let i = 0; i <= 4; i++) {
+        const suffix = `_${100 + i}`;
+        cols[`${prefix}Name${suffix}`] = getLevelValue(i, 'Name', sectionIndex);
+        cols[`${prefix}Code${suffix}`] = getLevelValue(i, 'Code', sectionIndex);
+        cols[`CreatedBy${suffix}`] = getLevelValue(i, 'Created by', sectionIndex);
+        cols[`CreatedDate1${suffix}`] = getLevelValue(i, 'Created date', sectionIndex);
       }
-    }).catch(()=>{}).finally(()=>{dispatch(setLoading(false))})
-  }
+      return cols;
+    };
+    const cHCols = {
+      ...buildHierarchyCols('Branch', 0),
+      PANNo_104: columnVisibility['Reg / PAN'],
+      TINNo_104: columnVisibility['GSTIN/UIN'],
+      Address_104: columnVisibility['Address'],
+      City_104: columnVisibility['City'],
+      State_104: columnVisibility['State'],
+      ZipCode_104: columnVisibility['Zip Code'],
+      EmailAddress_104: columnVisibility['Email Address'],
+      Mobile_104: columnVisibility['Mobile No']
+    };
+    const depCols = buildHierarchyCols('Dep', 3);
+    const cCCols = buildHierarchyCols('Cost', 2);
+    const aLCols = {
+      BranchName: lastLevels?.Branch ? columnVisibility[`${lastLevels.Branch} Name`] : false,
+      BranchCode: lastLevels?.Branch ? columnVisibility[`${lastLevels.Branch} Code`] : false,
+      ...buildHierarchyCols('Loc', 1)
+    };
+    const aCCols = {
+      MainCategory: columnVisibility['Main category name'],
+      MainCategoryCode: columnVisibility['Main category code'],
+      AssetAcquisitionAccount: columnVisibility['Asset acquisition account'],
+      AssetDepreciationAccount: columnVisibility['Asset depreciation account'],
+      DepreciationAccount: columnVisibility['Depreciation account'],
+      MainCatCreatedBy: columnVisibility['Main category created by'],
+      MainCategoryDate: columnVisibility['Main category created date'],
+      MainCategoryDescription: columnVisibility['Main category description'],
+      SubCategory: columnVisibility['Sub category name'],
+      SubCategoryCode: columnVisibility['Sub category code'],
+      Prefix: columnVisibility['Prefix'],
+      LifeSpan: columnVisibility['Life Span'],
+      SalvageValue: columnVisibility['Salvage Value'],
+      SubCatCreatedBy: columnVisibility['Sub category created by'],
+      SubCategoryDate: columnVisibility['Sub category created date'],
+      SubCategoryDescription: columnVisibility['Sub category description']
+    };
+    const userCols = {
+      FirstName: columnVisibility['First name'],
+      LastName: columnVisibility['Last name'],
+      EmailId: columnVisibility['Email id'],
+      Empid: columnVisibility['Employee id'],
+      Mobile: columnVisibility['Mobile no'],
+      Phone: columnVisibility['Phone no'],
+      UserName: columnVisibility['User name'],
+      RoleName: columnVisibility['Role'],
+      UserCreatedBy: columnVisibility['Created by'],
+      UserDate: columnVisibility['Created date'],
+      Status: columnVisibility['Status'],
+      IsServiceDeskUser: columnVisibility['IsServiceDeskUser']
+    };
+    const vendorCols = {
+      Vendorname: columnVisibility['Vendor Name'],
+      VendorType: columnVisibility['Vendor Type'],
+      VendorCode: columnVisibility['Vendor Code'],
+      PanNo: columnVisibility['Reg / PAN'],
+      GSTIN: columnVisibility['GSTIN/UIN'],
+      AddressLine1: columnVisibility['Address'],
+      City: columnVisibility['City'],
+      StateName: columnVisibility['State'],
+      CountryName: columnVisibility['Country'],
+      ZipCode: columnVisibility['Zip Code'],
+      Phone: columnVisibility['Phone No'],
+      Mobile: columnVisibility['Mobile No'],
+      EmailId: columnVisibility['Email id'],
+      VendorCreatedBy: columnVisibility['Created by'],
+      VendorDate: columnVisibility['Created date'],
+      VendorDescription: columnVisibility['Description']
+    };
+    const customerCols = {
+      Vendorname: columnVisibility['Customer Name'],
+      PanNo: columnVisibility['Reg / PAN'],
+      GSTIN: columnVisibility['GSTIN/UIN'],
+      AddressLine1: columnVisibility['Address'],
+      City: columnVisibility['City'],
+      StateName: columnVisibility['State'],
+      CountryName: columnVisibility['Country'],
+      ZipCode: columnVisibility['Zip Code'],
+      Phone: columnVisibility['Phone No'],
+      Mobile: columnVisibility['Mobile No'],
+      EmailId: columnVisibility['Email id'],
+      MainLocationName: columnVisibility['Main location'],
+      SubLocationName: columnVisibility['Sub location'],
+      VendorCreatedBy: columnVisibility['Created by'],
+      VendorDate: columnVisibility['Created date'],
+      VendorDescription: columnVisibility['Description']
+    };
+    const customerLocCols = {
+      CustomerName: columnVisibility['Customer name'],
+      MainLocation: columnVisibility['Main location'],
+      MainLocCreatedBy: columnVisibility['Main location Created by'],
+      MainLocationDate: columnVisibility['Main location created date'],
+      SubLocation: columnVisibility['Sub location'],
+      SubLocCreatedBy: columnVisibility['Sub location Created by'],
+      SubLocationDate: columnVisibility['Sub location created date'],
+      AddressLine: columnVisibility['Address'],
+      City: columnVisibility['City'],
+      StateName: columnVisibility['State'],
+      Country: columnVisibility['Country'],
+      ZipCode: columnVisibility['Zip Code'],
+      Mobile: columnVisibility['Mobile No'],
+      UIN: columnVisibility['TIN / GSTIN / UIN']
+    };
+    const serviceLocCols = {
+      MainLocation: columnVisibility['Main location'],
+      MainLocCreatedBy: columnVisibility['Main location Created by'],
+      MainLocationDate: columnVisibility['Main location Created date'],
+      SubLocation: columnVisibility['Sub location'],
+      SubLocCreatedBy: columnVisibility['Sub location Created by'],
+      SubLocationDate: columnVisibility['Sub location Created date']
+    };
+    const userLogCols = {
+      Name: columnVisibility['Name'],
+      UserName: columnVisibility['User name'],
+      Phone: columnVisibility['Phone no'],
+      EmailId: columnVisibility['Email id'],
+      Empid: columnVisibility['Employee id'],
+      Login: columnVisibility['Login'],
+      DeviceId: columnVisibility['Device']
+    };
+    const colsData = {
+      'Company Hierarchy': cHCols,
+      Department: depCols,
+      'Asset Location': aLCols,
+      'Cost Center': cCCols,
+      'Asset Category': aCCols,
+      User: userCols,
+      Vendor: vendorCols,
+      Customer: customerCols,
+      'Service Locations': serviceLocCols,
+      'Customer Locations': customerLocCols,
+      'User Log': userLogCols
+    };
+    const payload = { GridColumnsDetails: [safeStringCols(colsData[activeTab])] };
+    dispatch(setLoading(true));
+    postColumns(companyId, branchName, reportIds[activeTab], payload)
+      .then(res => {
+        if (res.data.status) msg.success(res.data.message);
+        else msg.warning(res.data.message || 'Failed to save grid columns data !!');
+      }).catch(() => { }).finally(() => dispatch(setLoading(false)));
+  };
   const multiSelectFilter: FilterFn<any> = (row, columnId, filterValue) => {
     const selected = Array.isArray(filterValue) ? filterValue : [];
     if (selected.length === 0) return true;

@@ -232,7 +232,7 @@ export const URL_ITEM_CATEGORY_BY_ID = `/api/Masters/GetItemCategoryDetails`;
 export const URL_GET_CUSTOMER_LOCATIONS_DATA='/api/Masters/GetCustomerLocationDetailsByCompanyId';
 export const URL_GET_COMPANY_HIERARCHY_MASTER_REPORT='api/Masters/GetCompanyHierarchyMasterReport';
 export const URL_GET_DEPARTMENT_MASTER_REPORT='/api/Masters/GetDepartmentMasterReport';
-export const URL_GET_COST_CENTER_MASTER_REPORT='/api/Masters/GetCostCenterDetailsByCompanyId';
+export const URL_GET_COST_CENTER_MASTER_REPORT='/api/Masters/GetCostCenterMasterReport';
 export const URL_GET_ASSET_LOCATION_MASTER_REPORT='/api/Masters/GetAssetLocationMasterReport';
 export const URL_GET_ASSET_CATEGORY_MASTER_REPORT='/api/Masters/GetAssetCategoryMasterReport';
 export const URL_GET_USER_MASTER_REPORT='/api/Masters/GetUserMasterReport';
@@ -241,6 +241,8 @@ export const URL_GET_CUSTOMER_MASTER_REPORT='/api/Masters/GetCustomerMasterRepor
 export const URL_GET_USER_LOG_MASTER_REPORT='/api/Masters/GetUserLogMasterReport';
 export const URL_GET_SERVICE_LOCATIONS_MASTER_REPORT='/api/Masters/GetServiceLocationMasterReport';
 export const URL_GET_CUSTOMER_LOCATIONS_MASTER_REPORT='/api/Masters/GetCustomerLocationMasterReport';
+export const URL_GET_MASTER_REPORTS_COLUMNS='/api/Masters/GetMasterDataReportsGridColumnsList';
+export const URL_POST_MASTER_REPORTS_COLUMNS='/api/Masters/SaveMasterDataReportsGridColumns'
 
 //Masters book 
 export const URL_GET_ADDITIONAL_DEPRECIATION_BOOK="/api/Masters/GetAdditionalDepreciationDetails"

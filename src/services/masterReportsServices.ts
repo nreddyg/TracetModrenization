@@ -1,4 +1,4 @@
-import { URL_GET_ASSET_CATEGORY_MASTER_REPORT, URL_GET_ASSET_LOCATION_MASTER_REPORT, URL_GET_COMPANY_HIERARCHY_MASTER_REPORT, URL_GET_COST_CENTER_MASTER_REPORT, URL_GET_CUSTOMER_LOCATIONS_DATA, URL_GET_CUSTOMER_LOCATIONS_MASTER_REPORT, URL_GET_CUSTOMER_MASTER_REPORT, URL_GET_DEPARTMENT_MASTER_REPORT, URL_GET_SERVICE_LOCATIONS_MASTER_REPORT, URL_GET_USER_LOG_MASTER_REPORT, URL_GET_USER_MASTER_REPORT, URL_GET_VENDOR_MASTER_REPORT } from "@/config/apiUrls";
+import { URL_GET_ASSET_CATEGORY_MASTER_REPORT, URL_GET_ASSET_LOCATION_MASTER_REPORT, URL_GET_COMPANY_HIERARCHY_MASTER_REPORT, URL_GET_COST_CENTER_MASTER_REPORT, URL_GET_CUSTOMER_LOCATIONS_DATA, URL_GET_CUSTOMER_LOCATIONS_MASTER_REPORT, URL_GET_CUSTOMER_MASTER_REPORT, URL_GET_DEPARTMENT_MASTER_REPORT, URL_GET_MASTER_REPORTS_COLUMNS, URL_GET_SERVICE_LOCATIONS_MASTER_REPORT, URL_GET_USER_LOG_MASTER_REPORT, URL_GET_USER_MASTER_REPORT, URL_GET_VENDOR_MASTER_REPORT, URL_POST_MASTER_REPORTS_COLUMNS } from "@/config/apiUrls";
 import api from "./api";
 
 interface APIResponse<T> {
@@ -116,4 +116,22 @@ export const getCustomerLocationsReport= async (CompId:string,CustomerLocationId
     }
 }
 
+//get columns
+export const getColumns= async (CompId:string,branchName:string,ReportId:number): Promise<APIResponse<any>> => {
+    try {
+        const response = await api.get(URL_GET_MASTER_REPORTS_COLUMNS, { params: { CompId,branchName,ReportId} })
+        return {success: true,data: response.data,}
+    } catch (err: any) {
+        return { success: false,message: err.response?.data?.message || err.message,status: err.response?.status};
+    }
+}
+//post columns
+export const postColumns= async (CompId:string,branchName:string,ReportId:number,data:any): Promise<APIResponse<any>> => {
+    try {
+        const response = await api.post(URL_POST_MASTER_REPORTS_COLUMNS, data,{params:{CompId,ReportId,branchName}})
+        return {success: true,data: response.data,}
+    } catch (err: any) {
+        return { success: false,message: err.response?.data?.message || err.message,status: err.response?.status};
+    }
+}
 

@@ -26,8 +26,9 @@ import { GetUsersList } from '@/services/userServices';
 import { getVendorDetails } from '@/services/configurationServices';
 import { GetCustomersList } from '@/services/customerServices';
 import { getServiceLocationData } from '@/services/serviceLocationServices';
-import { getCompanyHierarchyReport, getCustomerLocations } from '@/services/masterReportsServices';
+import { getAssetCategoryReport, getAssetLocationReport, getColumns, getCompanyHierarchyReport, getCostCenterReport, getCustomerLocations, getCustomerLocationsReport, getCustomerReport, getDepartmentReport, getServiceLocationsReport, getUserLogReport, getUserReport, getVendorReport, postColumns } from '@/services/masterReportsServices';
 import { useMessage } from '@/components/ui/reusable-message';
+import { ColumnDef, FilterFn, VisibilityState } from '@tanstack/react-table';
 interface MultiSelectConfig {
   isHierarchy?: boolean;
   labelClassName?: string;
@@ -42,6 +43,11 @@ interface MultiSelectConfig {
   icon?: React.ReactNode;
   errorMsgClass?: string;
   showSearch?: boolean;
+}
+interface ColumnApiResponse {
+  [section: string]: {
+    [columnName: string]: true | false;
+  };
 }
 const treefunWithParent = (data, id, idName, assetLocationUnique) => {
   const treeData = [];
@@ -75,10 +81,14 @@ const ReportsMasters = () => {
   const [showReport, setShowReport] = useState(false);
   const [dataSource, setDataSource] = useState([]);
   const [columns, setColumns] = useState([]);
+  const hierarchyLevels=useAppSelector(state=>state.projects.allLevelsData);
+  const lastLevels=useAppSelector(state=>state.projects.lastLevelsData);
   const [reportTabs] = useState([
     'Company Hierarchy', 'Department', 'Asset Location', 'Cost Center', 'Asset Category',
     'User', 'Vendor', 'Customer', 'Service Locations', 'Customer Locations', 'User Log'
   ]);
+  const reportIds={'Company Hierarchy':100,'Department':102, 'Asset Location':101, 'Cost Center':104, 'Asset Category':103,
+    'User':105, 'Vendor':106, 'Customer':107, 'Service Locations':109, 'Customer Locations':108, 'User Log':110};
   const [vendors,setVendors]=useState([]);
   const companyId=useAppSelector(state=>state.projects.companyId);
   const branchId=useAppSelector(state=>state.projects.branchId);
@@ -87,8 +97,8 @@ const ReportsMasters = () => {
     tab.toLowerCase().includes(searchTerm.toLowerCase())
   );
   const handleViewReport = async () => {
-    // setIsGeneratingReport(true);
-    fetchMasterReportData()
+    fetchMasterReportData();
+    setShowReport(true);
   }
   const form = useForm<GenericObject>({
     defaultValues: fields.reduce((acc, f) => {
@@ -109,6 +119,33 @@ const ReportsMasters = () => {
     setLookupsDataInJson({VendorName:{data:filteredVendors,label:'VendorName',value:'VendorID'}})
     }
   },[watch('VendorType')])
+  useEffect(()=>{
+    if(activeTab && companyId && branchName){
+      setShowReport(false);
+      setDataSource([]);
+      setColumnVisibility({});
+      setColumns([]);
+      (async function(){
+        try{
+          dispatch(setLoading(true));
+          const res=await getColumns(companyId,branchName,reportIds[activeTab]);
+          if(res.success){
+            if(res.data && res.data.GridColumnsList){
+              const tempCols = buildColumnsFromApi(res.data)
+              setColumnVisibility(tempCols.initialVisibility)
+              setColumns(tempCols.columns)
+            }else{
+              setColumnVisibility({})
+              setColumns([])
+            }
+          }else{
+            setColumnVisibility({})
+            setColumns([])
+          }
+        }catch{}finally{dispatch(setLoading(false))}
+      })()
+    }
+  },[companyId,branchName,activeTab])
   const setLookupsDataInJson = async (dataset: any) => {
     let keys = Object.keys(dataset);
     const updatedFields = fields.map(field => {
@@ -161,19 +198,420 @@ const ReportsMasters = () => {
       setVendors(responses.VendorType.data);
     }catch{}finally{ dispatch(setLoading(false)) }
   }
-  console.log('branchids',watch('CompanyHierarchy'))
   //fetch reports
-  const fetchMasterReportData=async()=>{
-    const branchIds=watch('CompanyHierarchy')?watch('CompanyHierarchy').filter(e=>e!=0).join():'';
-    const dateRange=watch('RangePicker') || {from:'',to:''};
-    switch (activeTab){
+  const fetchMasterReportData = async () => {
+    const branchIds = watch('CompanyHierarchy') ? watch('CompanyHierarchy').filter(e => e != 0).join() : '';
+    const depIds = watch('Department') ? watch('Department').filter(e => e != 0).join() : '';
+    const assetLocIds = watch('AssetLocation') ? watch('AssetLocation').filter(e => e != 0).join() : '';
+    const costCentIds = watch('CostCenter') ? watch('CostCenter').filter(e => e != 0).join() : '';
+    const assetCatIds = watch('AssetCategory') ? watch('AssetCategory').join() : '';
+    const userIds = watch('User') ? watch('User').join() : '';
+    const vendorTypeIds = watch('VendorType') ? watch('VendorType').join() : '';
+    const vendorNameIds = watch('VendorName') ? watch('VendorName').join() : '';
+    const customerIds = watch('Customer') ? watch('Customer').join() : '';
+    const serviceLocIds = watch('ServiceLocations') ? watch('ServiceLocations').join() : '';
+    const customerLocIds = watch('CustomerLocations') ? watch('CustomerLocations').join() : '';
+    const dateRange = watch('RangePicker') || { from: '', to: '' };
+    switch (activeTab) {
       case 'Company Hierarchy':
-        try{
-          const res=await getCompanyHierarchyReport(companyId,branchIds,dateRange.from,dateRange.to);
-          console.log('res',res)
+        try {
+          setIsGeneratingReport(true);
+          dispatch(setLoading(true));
+          const res = await getCompanyHierarchyReport(companyId, branchIds, dateRange.from, dateRange.to);
+          if (res.data && res.data.CompanyHierarchyMasterReportDetails) setDataSource(res.data.CompanyHierarchyMasterReportDetails);
+          else setDataSource([])
+        } catch { } finally {
+          setIsGeneratingReport(false);
+          dispatch(setLoading(false));
+        }
+        break;
+      case 'Department':
+        try {
+          setIsGeneratingReport(true);
+          dispatch(setLoading(true));
+          const res = await getDepartmentReport(companyId, depIds, dateRange.from, dateRange.to)
+          if (res.data && res.data.DepartmentMasterReportDetails) setDataSource(res.data.DepartmentMasterReportDetails);
+          else setDataSource([]);
 
-        }catch{}finally{}
+        } catch { } finally {
+          setIsGeneratingReport(false);
+          dispatch(setLoading(false));
+        }
+        break;
+      case 'Asset Location':
+        try {
+          setIsGeneratingReport(true);
+          dispatch(setLoading(true));
+          const res = await getAssetLocationReport(companyId, assetLocIds, dateRange.from, dateRange.to)
+          if (res.data && res.data.AssetLocationMasterReportDetails) setDataSource(res.data.AssetLocationMasterReportDetails);
+          else setDataSource([]);
+
+        } catch { } finally {
+          setIsGeneratingReport(false);
+          dispatch(setLoading(false));
+        }
+        break;
+      case 'Cost Center':
+        try {
+          setIsGeneratingReport(true);
+          dispatch(setLoading(true));
+          const res = await getCostCenterReport(companyId, costCentIds, dateRange.from, dateRange.to)
+          if (res.data && res.data.CostCenterMasterReportDetails) setDataSource(res.data.CostCenterMasterReportDetails);
+          else setDataSource([]);
+
+        } catch { } finally {
+          setIsGeneratingReport(false);
+          dispatch(setLoading(false));
+        }
+        break;
+      case 'Asset Category':
+        try {
+          setIsGeneratingReport(true);
+          dispatch(setLoading(true));
+          const res = await getAssetCategoryReport(companyId, assetCatIds, dateRange.from, dateRange.to)
+          if (res.data && res.data.AssetCategoryMasterReportDetails) setDataSource(res.data.AssetCategoryMasterReportDetails);
+          else setDataSource([]);
+
+        } catch { } finally {
+          setIsGeneratingReport(false);
+          dispatch(setLoading(false));
+        }
+        break;
+      case 'User':
+        try {
+          setIsGeneratingReport(true);
+          dispatch(setLoading(true));
+          const res = await getUserReport(companyId, userIds, dateRange.from, dateRange.to)
+          if (res.data && res.data.UserMasterReportDetails) setDataSource(res.data.UserMasterReportDetails);
+          else setDataSource([]);
+
+        } catch { } finally {
+          setIsGeneratingReport(false);
+          dispatch(setLoading(false));
+        }
+        break;
+      case 'Vendor':
+        try {
+          setIsGeneratingReport(true);
+          dispatch(setLoading(true));
+          const res = await getVendorReport(companyId, vendorTypeIds, vendorNameIds, dateRange.from, dateRange.to)
+          if (res.data && res.data.VendorMasterReportDetails) setDataSource(res.data.VendorMasterReportDetails);
+          else setDataSource([]);
+        } catch { } finally {
+          setIsGeneratingReport(false);
+          dispatch(setLoading(false));
+        }
+        break;
+      case 'Customer':
+        try {
+          setIsGeneratingReport(true);
+          dispatch(setLoading(true));
+          const res = await getCustomerReport(companyId, customerIds, dateRange.from, dateRange.to)
+          if (res.data && res.data.CustomerMasterReportDetails) setDataSource(res.data.CustomerMasterReportDetails);
+          else setDataSource([]);
+        } catch { } finally {
+          setIsGeneratingReport(false);
+          dispatch(setLoading(false));
+        }
+        break;
+      case 'Service Locations':
+        try {
+          setIsGeneratingReport(true);
+          dispatch(setLoading(true));
+          const res = await getServiceLocationsReport(companyId, serviceLocIds, dateRange.from, dateRange.to)
+          if (res.data && res.data.ServiceLocationMasterReportDetails) setDataSource(res.data.ServiceLocationMasterReportDetails);
+          else setDataSource([]);
+        } catch { } finally {
+          setIsGeneratingReport(false);
+          dispatch(setLoading(false));
+        }
+        break;
+      case 'Customer Locations':
+        try {
+          setIsGeneratingReport(true);
+          dispatch(setLoading(true));
+          const res = await getCustomerLocationsReport(companyId, customerLocIds, dateRange.from, dateRange.to)
+          if (res.data && res.data.CustomerLocationMasterReportDetails) setDataSource(res.data.CustomerLocationMasterReportDetails);
+          else setDataSource([]);
+        } catch { } finally {
+          setIsGeneratingReport(false);
+          dispatch(setLoading(false));
+        }
+        break;
+      case 'User Log':
+        try {
+          setIsGeneratingReport(true);
+          dispatch(setLoading(true));
+          const res = await getUserLogReport(companyId, dateRange.from, dateRange.to)
+          if (res.data && res.data.UserLogMasterReportDetails) setDataSource(res.data.UserLogMasterReportDetails);
+          else setDataSource([]);
+        } catch { } finally {
+          setIsGeneratingReport(false);
+          dispatch(setLoading(false));
+        }
+        break;
+      default:
+        msg.warning('Please select report type !!')
     }
+  }
+  //stringifying the values of objects
+  const safeStringCols = (data:GenericObject) => Object.fromEntries(Object.entries(data).map(([key, value]) => [key, String(value ?? false)]));
+  //Save columns 
+  const handleSaveColumns=()=>{
+    let cHCols={
+        "BranchName_100": hierarchyLevels.length!==0?hierarchyLevels[0]["LevelName"][0]?columnVisibility[hierarchyLevels[0]["LevelName"][0].LevelName+' Name']:false:'',
+        "BranchCode_100":  hierarchyLevels.length!==0?hierarchyLevels[0]["LevelName"][0]?columnVisibility[hierarchyLevels[0]["LevelName"][0].LevelName+' Code']:false:'',
+        "CreatedBy_100":  hierarchyLevels.length!==0?hierarchyLevels[0]["LevelName"][0]?columnVisibility[hierarchyLevels[0]["LevelName"][0].LevelName+' Created by']:false:'',
+        "CreatedDate1_100": hierarchyLevels.length!==0?hierarchyLevels[0]["LevelName"][0]?columnVisibility[hierarchyLevels[0]["LevelName"][0].LevelName+' Created date']:false:'',
+        "BranchName_101":  hierarchyLevels.length!==0?hierarchyLevels[0]["LevelName"][1]?columnVisibility[hierarchyLevels[0]["LevelName"][1].LevelName+' Name']:false:'',
+        "BranchCode_101":  hierarchyLevels.length!==0?hierarchyLevels[0]["LevelName"][1]?columnVisibility[hierarchyLevels[0]["LevelName"][1].LevelName+' Code']:false:'',
+        "CreatedBy_101": hierarchyLevels.length!==0?hierarchyLevels[0]["LevelName"][1]?columnVisibility[hierarchyLevels[0]["LevelName"][1].LevelName+' Created by']:false:'',
+        "CreatedDate1_101": hierarchyLevels.length!==0?hierarchyLevels[0]["LevelName"][1]?columnVisibility[hierarchyLevels[0]["LevelName"][1].LevelName+' Created date']:false:'',
+        "BranchName_102":  hierarchyLevels.length!==0?hierarchyLevels[0]["LevelName"][2]?columnVisibility[hierarchyLevels[0]["LevelName"][2].LevelName+' Name']:false:'',
+        "BranchCode_102":  hierarchyLevels.length!==0?hierarchyLevels[0]["LevelName"][2]?columnVisibility[hierarchyLevels[0]["LevelName"][2].LevelName+' Code']:false:'',
+        "CreatedBy_102": hierarchyLevels.length!==0?hierarchyLevels[0]["LevelName"][2]?columnVisibility[hierarchyLevels[0]["LevelName"][2].LevelName+' Created by']:false:'',
+        "CreatedDate1_102": hierarchyLevels.length!==0?hierarchyLevels[0]["LevelName"][2]?columnVisibility[hierarchyLevels[0]["LevelName"][2].LevelName+' Created date']:false:'',
+        "BranchName_103":  hierarchyLevels.length!==0?hierarchyLevels[0]["LevelName"][3]?columnVisibility[hierarchyLevels[0]["LevelName"][3].LevelName+' Name']:false:'',
+        "BranchCode_103":  hierarchyLevels.length!==0?hierarchyLevels[0]["LevelName"][3]?columnVisibility[hierarchyLevels[0]["LevelName"][3].LevelName+' Code']:false:'',
+        "CreatedBy_103": hierarchyLevels.length!==0?hierarchyLevels[0]["LevelName"][3]?columnVisibility[hierarchyLevels[0]["LevelName"][3].LevelName+' Created by']:false:'',
+        "CreatedDate1_103": hierarchyLevels.length!==0?hierarchyLevels[0]["LevelName"][3]?columnVisibility[hierarchyLevels[0]["LevelName"][3].LevelName+' Created date']:false:'',
+        "BranchName_104":  hierarchyLevels.length!==0?hierarchyLevels[0]["LevelName"][4]?columnVisibility[hierarchyLevels[0]["LevelName"][4].LevelName+' Name']:false:'',
+        "BranchCode_104":  hierarchyLevels.length!==0?hierarchyLevels[0]["LevelName"][4]?columnVisibility[hierarchyLevels[0]["LevelName"][4].LevelName+' Code']:false:'',
+        "CreatedBy_104": hierarchyLevels.length!==0?hierarchyLevels[0]["LevelName"][4]?columnVisibility[hierarchyLevels[0]["LevelName"][4].LevelName+' Created by']:false:'',
+        "CreatedDate1_104": hierarchyLevels.length!==0?hierarchyLevels[0]["LevelName"][4]?columnVisibility[hierarchyLevels[0]["LevelName"][4].LevelName+' Created date']:false:'',
+        "PANNo_104": columnVisibility['Reg / PAN'],
+        "TINNo_104": columnVisibility['GSTIN/UIN'],
+        "Address_104": columnVisibility['Address'],
+        "City_104": columnVisibility['City'],
+        "State_104": columnVisibility['State'],
+        "ZipCode_104": columnVisibility['Zip Code'],
+        "EmailAddress_104": columnVisibility['Email Address'],
+        "Mobile_104": columnVisibility['Mobile No']
+    }
+    let depCols = {
+      "DepName_100": hierarchyLevels.length!==0?hierarchyLevels[3]["LevelName"][0]?columnVisibility[hierarchyLevels[3]["LevelName"][0].LevelName+' Name']:false:'',
+      "DepCode_100": hierarchyLevels.length!==0?hierarchyLevels[3]["LevelName"][0]?columnVisibility[hierarchyLevels[3]["LevelName"][0].LevelName+' Code']:false:'',
+      "CreatedBy_100": hierarchyLevels.length!==0?hierarchyLevels[3]["LevelName"][0]?columnVisibility[hierarchyLevels[3]["LevelName"][0].LevelName+' Created by']:false:'',
+      "CreatedDate1_100": hierarchyLevels.length!==0?hierarchyLevels[3]["LevelName"][0]?columnVisibility[hierarchyLevels[3]["LevelName"][0].LevelName+' Created date']:false:'',
+      "DepName_101": hierarchyLevels.length!==0?hierarchyLevels[3]["LevelName"][1]?columnVisibility[hierarchyLevels[3]["LevelName"][1].LevelName+' Name']:false:'',
+      "DepCode_101": hierarchyLevels.length!==0?hierarchyLevels[3]["LevelName"][1]?columnVisibility[hierarchyLevels[3]["LevelName"][1].LevelName+' Code']:false:'',
+      "CreatedBy_101": hierarchyLevels.length!==0?hierarchyLevels[3]["LevelName"][1]?columnVisibility[hierarchyLevels[3]["LevelName"][1].LevelName+' Created by']:false:'',
+      "CreatedDate1_101": hierarchyLevels.length!==0?hierarchyLevels[3]["LevelName"][1]?columnVisibility[hierarchyLevels[3]["LevelName"][1].LevelName+' Created date']:false:'',
+      "DepName_102": hierarchyLevels.length!==0?hierarchyLevels[3]["LevelName"][2]?columnVisibility[hierarchyLevels[3]["LevelName"][2].LevelName+' Name']:false:'',
+      "DepCode_102": hierarchyLevels.length!==0?hierarchyLevels[3]["LevelName"][2]?columnVisibility[hierarchyLevels[3]["LevelName"][2].LevelName+' Code']:false:'',
+      "CreatedBy_102": hierarchyLevels.length!==0?hierarchyLevels[3]["LevelName"][2]?columnVisibility[hierarchyLevels[3]["LevelName"][2].LevelName+' Created by']:false:'',
+      "CreatedDate1_102": hierarchyLevels.length!==0?hierarchyLevels[3]["LevelName"][2]?columnVisibility[hierarchyLevels[3]["LevelName"][2].LevelName+' Created date']:false:'',
+      "DepName_103": hierarchyLevels.length!==0?hierarchyLevels[3]["LevelName"][3]?columnVisibility[hierarchyLevels[3]["LevelName"][3].LevelName+' Name']:false:'',
+      "DepCode_103": hierarchyLevels.length!==0?hierarchyLevels[3]["LevelName"][3]?columnVisibility[hierarchyLevels[3]["LevelName"][3].LevelName+' Code']:false:'',
+      "CreatedBy_103": hierarchyLevels.length!==0?hierarchyLevels[3]["LevelName"][3]?columnVisibility[hierarchyLevels[3]["LevelName"][3].LevelName+' Created by']:false:'',
+      "CreatedDate1_103": hierarchyLevels.length!==0?hierarchyLevels[3]["LevelName"][3]?columnVisibility[hierarchyLevels[3]["LevelName"][3].LevelName+' Created date']:false:'',
+      "DepName_104": hierarchyLevels.length!==0?hierarchyLevels[3]["LevelName"][4]?columnVisibility[hierarchyLevels[3]["LevelName"][4].LevelName+' Name']:false:'',
+      "DepCode_104": hierarchyLevels.length!==0?hierarchyLevels[3]["LevelName"][4]?columnVisibility[hierarchyLevels[3]["LevelName"][4].LevelName+' Code']:false:'',
+      "CreatedBy_104": hierarchyLevels.length!==0?hierarchyLevels[3]["LevelName"][4]?columnVisibility[hierarchyLevels[3]["LevelName"][4].LevelName+' Created by']:false:'',
+      "CreatedDate1_104": hierarchyLevels.length!==0?hierarchyLevels[3]["LevelName"][4]?columnVisibility[hierarchyLevels[3]["LevelName"][4].LevelName+' Created date']:false:''
+    }
+    let cCCols={
+      "CostName_100":hierarchyLevels.length!==0?hierarchyLevels[2]["LevelName"][0]?columnVisibility[hierarchyLevels[2]["LevelName"][0].LevelName+' Name']:false:'',
+      "CostCode_100": hierarchyLevels.length!==0?hierarchyLevels[2]["LevelName"][0]?columnVisibility[hierarchyLevels[2]["LevelName"][0].LevelName+' Code']:false:'',
+      "CreatedBy_100":hierarchyLevels.length!==0?hierarchyLevels[2]["LevelName"][0]?columnVisibility[hierarchyLevels[2]["LevelName"][0].LevelName+' Created by']:false:'',
+      "CreatedDate1_100":hierarchyLevels.length!==0?hierarchyLevels[2]["LevelName"][0]?columnVisibility[hierarchyLevels[2]["LevelName"][0].LevelName+' Created date']:false:'',
+      "CostName_101":hierarchyLevels.length!==0?hierarchyLevels[2]["LevelName"][1]?columnVisibility[hierarchyLevels[2]["LevelName"][1].LevelName+' Name']:false:'',
+      "CostCode_101":hierarchyLevels.length!==0?hierarchyLevels[2]["LevelName"][1]?columnVisibility[hierarchyLevels[2]["LevelName"][1].LevelName+' Code']:false:'',
+      "CreatedBy_101":hierarchyLevels.length!==0?hierarchyLevels[2]["LevelName"][1]?columnVisibility[hierarchyLevels[2]["LevelName"][1].LevelName+' Created by']:false:'',
+      "CreatedDate1_101":hierarchyLevels.length!==0?hierarchyLevels[2]["LevelName"][1]?columnVisibility[hierarchyLevels[2]["LevelName"][1].LevelName+' Created date']:false:'',
+      "CostName_102":hierarchyLevels.length!==0?hierarchyLevels[2]["LevelName"][2]?columnVisibility[hierarchyLevels[2]["LevelName"][2].LevelName+' Name']:false:'',
+      "CostCode_102": hierarchyLevels.length!==0?hierarchyLevels[2]["LevelName"][2]?columnVisibility[hierarchyLevels[2]["LevelName"][2].LevelName+' Code']:false:'',
+      "CreatedBy_102":hierarchyLevels.length!==0?hierarchyLevels[2]["LevelName"][2]?columnVisibility[hierarchyLevels[2]["LevelName"][2].LevelName+' Created by']:false:'',
+      "CreatedDate1_102":hierarchyLevels.length!==0?hierarchyLevels[2]["LevelName"][2]?columnVisibility[hierarchyLevels[2]["LevelName"][2].LevelName+' Created date']:false:'',
+      "CostName_103":hierarchyLevels.length!==0?hierarchyLevels[2]["LevelName"][3]?columnVisibility[hierarchyLevels[2]["LevelName"][3].LevelName+' Name']:false:'',
+      "CostCode_103":hierarchyLevels.length!==0?hierarchyLevels[2]["LevelName"][3]?columnVisibility[hierarchyLevels[2]["LevelName"][3].LevelName+' Code']:false:'',
+      "CreatedBy_103":hierarchyLevels.length!==0?hierarchyLevels[2]["LevelName"][3]?columnVisibility[hierarchyLevels[2]["LevelName"][3].LevelName+' Created by']:false:'',
+      "CreatedDate1_103":hierarchyLevels.length!==0?hierarchyLevels[2]["LevelName"][3]?columnVisibility[hierarchyLevels[2]["LevelName"][3].LevelName+' Created date']:false:'',
+      "CostName_104":hierarchyLevels.length!==0?hierarchyLevels[2]["LevelName"][4]?columnVisibility[hierarchyLevels[2]["LevelName"][4].LevelName+' Name']:false:'',
+      "CostCode_104":hierarchyLevels.length!==0?hierarchyLevels[2]["LevelName"][4]?columnVisibility[hierarchyLevels[2]["LevelName"][4].LevelName+' Code']:false:'',
+      "CreatedBy_104":hierarchyLevels.length!==0?hierarchyLevels[2]["LevelName"][4]?columnVisibility[hierarchyLevels[2]["LevelName"][4].LevelName+' Created by']:false:'',
+      "CreatedDate1_104":hierarchyLevels.length!==0?hierarchyLevels[2]["LevelName"][4]?columnVisibility[hierarchyLevels[2]["LevelName"][4].LevelName+' Created date']:false:'',  
+    }
+    let aLCols = {
+      "BranchName": lastLevels?.Branch ? columnVisibility[lastLevels.Branch+' Name']:false,
+      "BranchCode": lastLevels?.Branch ? columnVisibility[lastLevels.Branch+' Code']:false,
+      "LocName_100": hierarchyLevels.length!==0?hierarchyLevels[1]["LevelName"][0]?columnVisibility[hierarchyLevels[1]["LevelName"][0].LevelName+' Name']:false:'',
+      "LocCode_100": hierarchyLevels.length!==0?hierarchyLevels[1]["LevelName"][0]?columnVisibility[hierarchyLevels[1]["LevelName"][0].LevelName+' Code']:false:'',
+      "CreatedBy_100": hierarchyLevels.length!==0?hierarchyLevels[1]["LevelName"][0]?columnVisibility[hierarchyLevels[1]["LevelName"][0].LevelName+' Created by']:false:'',
+      "CreatedDate1_100": hierarchyLevels.length!==0?hierarchyLevels[1]["LevelName"][0]?columnVisibility[hierarchyLevels[1]["LevelName"][0].LevelName+' Created date']:false:'',
+      "LocName_101": hierarchyLevels.length!==0?hierarchyLevels[1]["LevelName"][1]?columnVisibility[hierarchyLevels[1]["LevelName"][1].LevelName+' Name']:false:'',
+      "LocCode_101": hierarchyLevels.length!==0?hierarchyLevels[1]["LevelName"][1]?columnVisibility[hierarchyLevels[1]["LevelName"][1].LevelName+' Code']:false:'',
+      "CreatedBy_101": hierarchyLevels.length!==0?hierarchyLevels[1]["LevelName"][1]?columnVisibility[hierarchyLevels[1]["LevelName"][1].LevelName+' Created by']:false:'',
+      "CreatedDate1_101": hierarchyLevels.length!==0?hierarchyLevels[1]["LevelName"][1]?columnVisibility[hierarchyLevels[1]["LevelName"][1].LevelName+' Created date']:false:'',
+      "LocName_102": hierarchyLevels.length!==0?hierarchyLevels[1]["LevelName"][2]?columnVisibility[hierarchyLevels[1]["LevelName"][2].LevelName+' Name']:false:'',
+      "LocCode_102": hierarchyLevels.length!==0?hierarchyLevels[1]["LevelName"][2]?columnVisibility[hierarchyLevels[1]["LevelName"][2].LevelName+' Code']:false:'',
+      "CreatedBy_102": hierarchyLevels.length!==0?hierarchyLevels[1]["LevelName"][2]?columnVisibility[hierarchyLevels[1]["LevelName"][2].LevelName+' Created by']:false:'',
+      "CreatedDate1_102": hierarchyLevels.length!==0?hierarchyLevels[1]["LevelName"][2]?columnVisibility[hierarchyLevels[1]["LevelName"][2].LevelName+' Created date']:false:'',
+      "LocName_103": hierarchyLevels.length!==0?hierarchyLevels[1]["LevelName"][3]?columnVisibility[hierarchyLevels[1]["LevelName"][3].LevelName+' Name']:false:'',
+      "LocCode_103": hierarchyLevels.length!==0?hierarchyLevels[1]["LevelName"][3]?columnVisibility[hierarchyLevels[1]["LevelName"][3].LevelName+' Code']:false:'',
+      "CreatedBy_103": hierarchyLevels.length!==0?hierarchyLevels[1]["LevelName"][3]?columnVisibility[hierarchyLevels[1]["LevelName"][3].LevelName+' Created by']:false:'',
+      "CreatedDate1_103": hierarchyLevels.length!==0?hierarchyLevels[1]["LevelName"][3]?columnVisibility[hierarchyLevels[1]["LevelName"][3].LevelName+' Created date']:false:'',
+      "LocName_104": hierarchyLevels.length!==0?hierarchyLevels[1]["LevelName"][4]?columnVisibility[hierarchyLevels[1]["LevelName"][4].LevelName+' Name']:false:'',
+      "LocCode_104": hierarchyLevels.length!==0?hierarchyLevels[1]["LevelName"][4]?columnVisibility[hierarchyLevels[1]["LevelName"][4].LevelName+' Code']:false:'',
+      "CreatedBy_104": hierarchyLevels.length!==0?hierarchyLevels[1]["LevelName"][4]?columnVisibility[hierarchyLevels[1]["LevelName"][4].LevelName+' Created by']:false:'',
+      "CreatedDate1_104": hierarchyLevels.length!==0?hierarchyLevels[1]["LevelName"][4]?columnVisibility[hierarchyLevels[1]["LevelName"][4].LevelName+' Created date']:false:''
+    }
+    let aCCols = {
+      "MainCategory": columnVisibility['Main category name'],
+      "MainCategoryCode": columnVisibility['Main category code'],
+      "AssetAcquisitionAccount": columnVisibility['Asset acquisition account'],
+      "AssetDepreciationAccount":columnVisibility['Asset depreciation account'],
+      "DepreciationAccount": columnVisibility['Depreciation account'],
+      "MainCatCreatedBy": columnVisibility['Main category created by'],
+      "MainCategoryDate": columnVisibility['Main category created date'],
+      "MainCategoryDescription": columnVisibility['Main category description'],
+      "SubCategory": columnVisibility['Sub category name'],
+      "SubCategoryCode": columnVisibility['Sub category code'],
+      "Prefix": columnVisibility['Prefix'],
+      "LifeSpan": columnVisibility['Life Span'],
+      "SalvageValue": columnVisibility['Salvage Value'],
+      "SubCatCreatedBy": columnVisibility['Sub category created by'],
+      "SubCategoryDate": columnVisibility['Sub category created date'],
+      "SubCategoryDescription": columnVisibility['Sub category description'],
+    }
+    let userCols = {
+      "FirstName": columnVisibility['First name'],
+      "LastName": columnVisibility['Last name'],
+      "EmailId":columnVisibility['Email id'],
+      "Empid":columnVisibility['Employee id'],
+      "Mobile":columnVisibility['Mobile no'],
+      "Phone":columnVisibility['Phone no'],
+      "UserName":columnVisibility['User name'],
+      "RoleName":columnVisibility['Role'],
+      "UserCreatedBy":columnVisibility['Created by'],
+      "UserDate":columnVisibility['Created date'],
+      "Status":columnVisibility['Status'],
+      "IsServiceDeskUser":columnVisibility['IsServiceDeskUser']
+    }
+    let vendorCols={
+      "Vendorname": columnVisibility['Vendor Name'],
+      "VendorType": columnVisibility['Vendor Type'],
+      "VendorCode": columnVisibility['Vendor Code'],
+      "PanNo": columnVisibility['Reg / PAN'],
+      "GSTIN": columnVisibility['GSTIN/UIN'],
+      "AddressLine1": columnVisibility['Address'],
+      "City": columnVisibility['City'],
+      "StateName": columnVisibility['State'],
+      "CountryName": columnVisibility['Country'],
+      "ZipCode": columnVisibility['Zip Code'],
+      "Phone": columnVisibility['Phone No'],
+      "Mobile": columnVisibility['Mobile No'],
+      "EmailId": columnVisibility['Email id'],
+      "VendorCreatedBy": columnVisibility['Created by'],
+      "VendorDate": columnVisibility['Created date'],
+      "VendorDescription": columnVisibility['Description']
+    }
+    let customerCols = {
+      "Vendorname":  columnVisibility['Customer Name'],
+      "PanNo":  columnVisibility['Reg / PAN'],
+      "GSTIN":  columnVisibility['GSTIN/UIN'],
+      "AddressLine1":  columnVisibility['Address'],
+      "City":  columnVisibility['City'],
+      "StateName":  columnVisibility['State'],
+      "CountryName":  columnVisibility['Country'],
+      "ZipCode":  columnVisibility['Zip Code'],
+      "Phone":  columnVisibility['Phone No'],
+      "Mobile":  columnVisibility['Mobile No'],
+      "EmailId":  columnVisibility['Email id'],
+      "MainLocationName":  columnVisibility['Main location'],
+      "SubLocationName":  columnVisibility['Sub location'],
+      "VendorCreatedBy":  columnVisibility['Created by'],
+      "VendorDate":  columnVisibility['Created date'],
+      "VendorDescription":  columnVisibility['Description']
+    }
+    let customerLocCols = {
+      "CustomerName":  columnVisibility['Customer name'],
+      "MainLocation":  columnVisibility['Main location'],
+      "MainLocCreatedBy":  columnVisibility['Main location Created by'],
+      "MainLocationDate":  columnVisibility['Main location created date'],
+      "SubLocation":  columnVisibility['Sub location'],
+      "SubLocCreatedBy":  columnVisibility['Sub location Created by'],
+      "SubLocationDate":  columnVisibility['Sub location created date'],
+      "AddressLine":  columnVisibility['Address'],
+      "City":  columnVisibility['City'],
+      "StateName":  columnVisibility['State'],
+      "Country":  columnVisibility['Country'],
+      "ZipCode":  columnVisibility['Zip Code'],
+      "Mobile":  columnVisibility['Mobile No'],
+      "UIN":  columnVisibility['TIN / GSTIN / UIN']
+    }
+    let serviceLocCols = {
+      "MainLocation":  columnVisibility['Main location'],
+      "MainLocCreatedBy":  columnVisibility['Main location Created by'],
+      "MainLocationDate":  columnVisibility['Main location Created date'],
+      "SubLocation":  columnVisibility['Sub location'],
+      "SubLocCreatedBy":  columnVisibility['Sub location Created by'],
+      "SubLocationDate":  columnVisibility['Sub location Created date']
+    }
+    let userLogCols = {
+      "Name":  columnVisibility['Name'],
+      "UserName":  columnVisibility['User name'],
+      "Phone":  columnVisibility['Phone no'],
+      "EmailId":  columnVisibility['Email id'],
+      "Empid":  columnVisibility['Employee id'],
+      "Login":  columnVisibility['Login'],
+      "DeviceId": columnVisibility['Device']
+    }
+    let colsData={'Company Hierarchy':cHCols,Department:depCols,'Asset Location':aLCols,'Cost Center':cCCols,'Asset Category':aCCols,
+      User:userCols,Vendor:vendorCols,Customer:customerCols,'Service Locations':serviceLocCols,'Customer Locations':customerLocCols,'User Log':userLogCols
+    }
+    let payload= {"GridColumnsDetails": [safeStringCols(colsData[activeTab])]}
+    dispatch(setLoading(true));
+    postColumns(companyId,branchName,reportIds[activeTab],payload).then(res=>{
+      if(res.data.status){
+        msg.success(res.data.message)
+      }else{
+        msg.warning(res.data.message || 'Failed to save grid columns data !!')
+      }
+    }).catch(()=>{}).finally(()=>{dispatch(setLoading(false))})
+  }
+  const multiSelectFilter: FilterFn<any> = (row, columnId, filterValue) => {
+    const selected = Array.isArray(filterValue) ? filterValue : [];
+    if (selected.length === 0) return true;
+    const cell = row.getValue(columnId);
+    if (cell == null) return false;
+    if (Array.isArray(cell)) return cell.some(v => selected.includes(String(v)));
+    return selected.includes(String(cell));
+  };
+  function buildColumnsFromApi<T extends Record<string, any>>(
+    apiResponse: ColumnApiResponse,
+    editableColumns: string[] = [],
+    typeMapper: Record<string, "text" | "number" | "date" | "select"> = {}
+  ): { columns: ColumnDef<T>[]; initialVisibility: VisibilityState } {
+    const [_, columnsMeta] = Object.entries(apiResponse)[0];
+    const columns: ColumnDef<T>[] = Object.entries(columnsMeta).map(
+      ([colName], index) => {
+        if (!colName || !colName.trim()) {
+          return null;
+        }
+        return {
+          accessorKey: colName,
+          id: colName,
+          header: colName,
+          cell: (info) => info.getValue() ?? "",
+          enableHiding: true,
+          enableColumnFilter: true,
+          filterFn: multiSelectFilter,
+          meta: {
+            editable: editableColumns.includes(colName),
+            editType: typeMapper[colName] || "text",
+          },
+        } as ColumnDef<T>;
+      }
+    ).filter(Boolean) as ColumnDef<T>[];
+    const initialVisibility: VisibilityState = {};
+    Object.entries(columnsMeta).forEach(([colName, visible]) => {
+      if (colName && colName.trim()) {
+        initialVisibility[colName] = visible;
+      }
+    });
+
+    return { columns, initialVisibility };
   }
   const multiSelectConfig: MultiSelectConfig = {
     isHierarchy: true,
@@ -373,7 +811,7 @@ const ReportsMasters = () => {
                 <CardHeader>
                   <CardTitle className="text-lg">Report Results - {activeTab}</CardTitle>
                   <div>
-                    <ReusableButton onClick={null} icon={<Save className="h-4 w-4" />}
+                    <ReusableButton onClick={handleSaveColumns} icon={<Save className="h-4 w-4" />}
                       className="bg-primary text-white hover:bg-primary/90 hover:text-white"
                       variant="default"
                     >

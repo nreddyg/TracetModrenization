@@ -58,7 +58,7 @@ const User = () => {
     }, {} as GenericObject),
     mode: 'onChange'
   });
-  const { control, register, handleSubmit, trigger, watch, setValue, reset, formState: { errors } } = form;
+  const { control, register, handleSubmit, trigger, watch, setValue,getValues, reset, formState: { errors } } = form;
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [selectedUserData, setSelectedUserData] = useState<User | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -345,30 +345,37 @@ const User = () => {
     const isEditMode = !!selectedUserData;
     const isAssetUser = roleName === "Asset User";
     const isRootAdmin = roleName === "Root Admin";
-    const isDeactive = watch("Deactive"); 
-    if (!show || (dependsOn && !watch(dependsOn))) return null;
+    const isDeactive = watch("Deactive");
+    const password = watch("Password");
+    let isVisible = true;
+    if (!show || (dependsOn && !watch(dependsOn))) isVisible = false;
     if (!isEditMode) {
-      if (name === "Deactive") return null;
-      if (isAssetUser && ["Password", "ConfirmPassword", "IsServiceDesk"].includes(name)) {
-        return null;
-      }
-      if (isRootAdmin && ["Department", "Categories", "Branch"].includes(name)) {
-        return null;
-      }
+      if (name === "Deactive") isVisible = false;
+      if (isAssetUser && ["Password", "ConfirmPassword", "IsServiceDesk"].includes(name))
+        isVisible = false;
+      if (isRootAdmin && ["Department", "Categories", "Branch"].includes(name))
+        isVisible = false;
     }
     if (isEditMode) {
       if (["Password", "ConfirmPassword"].includes(name)) {
         const prevRoleName = selectedUserData?.RoleName;
         const hasRoleChangedFromAssetUser =
           prevRoleName === "Asset User" && roleName !== "Asset User";
-        if (!hasRoleChangedFromAssetUser) return null;
+        if (!hasRoleChangedFromAssetUser) isVisible = false;
       }
-      if (isRootAdmin && ["Department", "Categories", "Branch"].includes(name)) {
-        return null;
-      }
-      if (isAssetUser && name === "IsServiceDesk") return null;
+      if (isRootAdmin && ["Department", "Categories", "Branch"].includes(name))
+        isVisible = false;
+      if (isAssetUser && name === "IsServiceDesk")
+        isVisible = false;
     }
-    if (!isDeactive && name === 'DeactiveDate') return null
+    if (!isDeactive && name === "DeactiveDate")
+      isVisible = false;
+    useEffect(() => {
+      if (!isVisible && getValues(name)) {
+        setValue(name, "");
+      }
+    }, [isVisible]);
+    if (!isVisible) return null;
     const validationRules = {
       required: isRequired ? `${label} is required` : false,
       ...(name === "ConfirmPassword" && {
@@ -377,9 +384,9 @@ const User = () => {
       }),
     };
     switch (fieldType) {
-      case 'text':
-      case 'password':
-      case 'email':
+      case "text":
+      case "password":
+      case "email":
         return (
           <Controller
             key={name}
@@ -397,7 +404,7 @@ const User = () => {
             )}
           />
         );
-      case 'dropdown':
+      case "dropdown":
         return (
           <Controller
             key={name}
@@ -411,12 +418,12 @@ const User = () => {
                 onChange={ctrl.onChange}
                 error={errors[name]?.message as string}
                 allowClear
-                dropdownClassName={true ? 'z-[10001]' : ''}
+                dropdownClassName="z-[10001]"
               />
             )}
           />
         );
-      case 'date':
+      case "date":
         return (
           <Controller
             key={name}
@@ -433,27 +440,25 @@ const User = () => {
             )}
           />
         );
-      case 'multiselect':
+      case "multiselect":
         return (
-          <div>
-            <Controller
-              key={name}
-              name={name}
-              control={control}
-              rules={validationRules}
-              render={({ field: ctrl }) => (
-                <ReusableMultiSelect
-                  label={label!}
-                  {...field}
-                  value={ctrl.value}
-                  onChange={ctrl.onChange}
-                  error={errors[name]?.message as string}
-                />
-              )}
-            />
-          </div>
+          <Controller
+            key={name}
+            name={name}
+            control={control}
+            rules={validationRules}
+            render={({ field: ctrl }) => (
+              <ReusableMultiSelect
+                {...field}
+                label={label!}
+                value={ctrl.value}
+                onChange={ctrl.onChange}
+                error={errors[name]?.message as string}
+              />
+            )}
+          />
         );
-      case 'checkbox':
+      case "checkbox":
         return (
           <Controller
             key={name}
@@ -477,96 +482,96 @@ const User = () => {
     <div className="h-full   bg-gray-50 flex flex-col ">
       <div className="flex flex-1 overflow-hidden   ">
         {/* Left Sidebar - Ticket Inbox */}
-        {dataSource.length!==0 && 
-        // <div className={`${isInboxCollapsed ? 'w-6 p-1' : 'w-34 p-2 mb-2 rounded-b-[5px]'} bg-white border-r    border-0 shadow-lg flex pb-3 flex-col transition-all duration-300 shrink-0 hidden lg:flex`}>
+        {dataSource.length !== 0 &&
+          // <div className={`${isInboxCollapsed ? 'w-6 p-1' : 'w-34 p-2 mb-2 rounded-b-[5px]'} bg-white border-r    border-0 shadow-lg flex pb-3 flex-col transition-all duration-300 shrink-0 hidden lg:flex`}>
           <div
-  className={`
+            className={`
     ${isInboxCollapsed ? 'w-6 p-1' : 'w-64 p-2 mb-2 rounded-b-[5px]'}
    bg-white border border-gray-200 border-t-0 border-t-transparent shadow-xl flex flex-col pb-3 transition-all duration-300 shrink-0
     md:relative
     ${isInboxCollapsed ? 'relative' : 'fixed md:relative'}
     ${isInboxCollapsed ? '' : 'top-15 left-0 h-full z-50 md:top-auto md:left-auto md:h-auto'}
   `}
->
-          <div className="pt-1 shrink-0">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className={`font-semibold text-gray-900 ${isInboxCollapsed ? 'hidden' : ''}`}>
-                Users ({dataSource.length})
-              </h3>
-              <div onClick={() => setIsInboxCollapsed(!isInboxCollapsed)} className={`cursor-pointer transition-colors hover:bg-accent hover:text-accent-foreground  ${isInboxCollapsed ? 'me-2  py-1 ' : 'p-1'}`}>
-                {isInboxCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-              </div>
-            </div>
-            {!isInboxCollapsed && (
-              <div className="space-y-2 pb-1">
-                {/* Search */}
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Input
-                    placeholder="Search Organizations..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
+          >
+            <div className="pt-1 shrink-0">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className={`font-semibold text-gray-900 ${isInboxCollapsed ? 'hidden' : ''}`}>
+                  Users ({dataSource.length})
+                </h3>
+                <div onClick={() => setIsInboxCollapsed(!isInboxCollapsed)} className={`cursor-pointer transition-colors hover:bg-accent hover:text-accent-foreground  ${isInboxCollapsed ? 'me-2  py-1 ' : 'p-1'}`}>
+                  {isInboxCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
                 </div>
               </div>
-            )}
-          </div>
-          {!isInboxCollapsed && (
-            <ScrollArea hideScrollbar={true} className="flex-1 min-h-0 mb-2 truncate max-w-[250px] block">
-              <div className="py-2">
-                {filteredUsers.map((user) => (
-                  <div
-                    key={user.UserId}
-                    className={`p-2.5 py-2 rounded-lg mb-2 cursor-pointer transition-all hover:bg-gray-50 ${selectedUser?.UserId === user.UserId
-                      ? 'bg-blue-50 border-l-4 border-blue-500'
-                      : 'border border-gray-200'
-                      }`}
-                    onClick={LoggedInUser?.RoleName !== 'Root Admin' && (user.RoleName === 'Root Admin' || LoggedInUser?.UserId===user.UserId) ? undefined : () => handleSelect(user)}
-                  >
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-xs font-medium text-blue-600 me-2">{user.UserName}</span>
-                      <Badge
-                        title={`User Known As : ${user.RoleName}`}
-                        variant="secondary"
-                        className="bg-purple-100 text-purple-800 text-center truncate inline-block w-[90px] text-[11px] px-2 py-0.5"
-                      >
-                        {user.RoleName}
-                      </Badge>
-                    </div>
-
-                    <h3
-                      className="text-xs font-medium text-gray-900 mb-1 truncate"
-                      title={user?.Email}
-                    >
-                      {user?.Email}
-                    </h3>
-                    <div className="flex items-center justify-between gap-1.5 text-[11px] text-gray-500">
-                      <Badge
-                        title="Organization Type"
-                        variant="outline"
-                        className="bg-green-100 text-green-800 text-[11px] px-2 py-0.5"
-                      >
-                        {user?.EmployeeId}
-                      </Badge>
-                      {
-                      (user?.RoleName !== 'Root Admin' && LoggedInUser?.UserId!==user.UserId) &&
-                        <div>
-                          <span
-                            title={user.MobileNumber}
-                            className="block max-w-[90px] truncate text-[11px] text-gray-500"
-                          >
-                            <Trash2 height={18} className='text-red-400' onClick={()=>setIsDelModalOpen(true)}></Trash2>
-                          </span>
-                        </div>
-                      }
-                    </div>
+              {!isInboxCollapsed && (
+                <div className="space-y-2 pb-1">
+                  {/* Search */}
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Input
+                      placeholder="Search Organizations..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10"
+                    />
                   </div>
-                ))}
-              </div>
-            </ScrollArea>
-          )}
-        </div>}
+                </div>
+              )}
+            </div>
+            {!isInboxCollapsed && (
+              <ScrollArea hideScrollbar={true} className="flex-1 min-h-0 mb-2 truncate max-w-[250px] block">
+                <div className="py-2">
+                  {filteredUsers.map((user) => (
+                    <div
+                      key={user.UserId}
+                      className={`p-2.5 py-2 rounded-lg mb-2 cursor-pointer transition-all hover:bg-gray-50 ${selectedUser?.UserId === user.UserId
+                        ? 'bg-blue-50 border-l-4 border-blue-500'
+                        : 'border border-gray-200'
+                        }`}
+                      onClick={LoggedInUser?.RoleName !== 'Root Admin' && (user.RoleName === 'Root Admin' || LoggedInUser?.UserId === user.UserId) ? undefined : () => handleSelect(user)}
+                    >
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-xs font-medium text-blue-600 me-2">{user.UserName}</span>
+                        <Badge
+                          title={`User Known As : ${user.RoleName}`}
+                          variant="secondary"
+                          className="bg-purple-100 text-purple-800 text-center truncate inline-block w-[90px] text-[11px] px-2 py-0.5"
+                        >
+                          {user.RoleName}
+                        </Badge>
+                      </div>
+
+                      <h3
+                        className="text-xs font-medium text-gray-900 mb-1 truncate"
+                        title={user?.Email}
+                      >
+                        {user?.Email}
+                      </h3>
+                      <div className="flex items-center justify-between gap-1.5 text-[11px] text-gray-500">
+                        <Badge
+                          title="Organization Type"
+                          variant="outline"
+                          className="bg-green-100 text-green-800 text-[11px] px-2 py-0.5"
+                        >
+                          {user?.EmployeeId}
+                        </Badge>
+                        {
+                          (user?.RoleName !== 'Root Admin' && LoggedInUser?.UserId !== user.UserId) &&
+                          <div>
+                            <span
+                              title={user.MobileNumber}
+                              className="block max-w-[90px] truncate text-[11px] text-gray-500"
+                            >
+                              <Trash2 height={18} className='text-red-400' onClick={() => setIsDelModalOpen(true)}></Trash2>
+                            </span>
+                          </div>
+                        }
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            )}
+          </div>}
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col min-w-0 ">
           {/* Navigation and Action Bar */}

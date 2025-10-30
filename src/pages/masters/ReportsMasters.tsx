@@ -132,7 +132,10 @@ const ReportsMasters = () => {
           const res=await getColumns(companyId,branchName,reportIds[activeTab]);
           if(res.success){
             if(res.data && res.data.GridColumnsList){
-              const tempCols = buildColumnsFromApi(res.data)
+              if(activeTab==='User'){
+                delete res.data.GridColumnsList["Mobile no"];
+              }
+              const tempCols = buildColumnsFromApi(res.data);
               setColumnVisibility(tempCols.initialVisibility)
               setColumns(tempCols.columns)
             }else{

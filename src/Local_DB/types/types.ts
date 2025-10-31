@@ -74,6 +74,7 @@ export interface field {
   patternErrorMessage?:string;
   labelInfo?:string;
   heading?:string
+  isDisplay?:boolean
 }
  
 export type BaseField = field;

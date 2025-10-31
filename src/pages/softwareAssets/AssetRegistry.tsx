@@ -522,7 +522,7 @@ const SoftwareDataColumns = [
             }
         })
         setFields(fieldsData)
-setEditRecordId("")
+        setEditRecordId("")
 
     }
     const deleteSoftwareAsset = async (id: string) => {

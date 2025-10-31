@@ -27,6 +27,7 @@ import ManageUnitConversion from "./pages/masters/ManageUnitConvertion";
 
 
 
+
 // Lazy load all pages
 const Index = WrapperLazyComponent(() => import("./pages/Index"));
 const Login = WrapperLazyComponent(() => import("./pages/Login"));
@@ -60,7 +61,7 @@ const ProductMasters=WrapperLazyComponent(() => import("./pages/masters/ProductM
 const CostBreakupAttributes=WrapperLazyComponent(() => import("./pages/masters/fixedAssets/CostBreakupAttributes"));
 const Books=WrapperLazyComponent(()=>import("./pages/masters/depreciation/Books"));
 const AdditionalDepreciation=WrapperLazyComponent(()=>import("./pages/masters/depreciation/AdditionalDepreciation"));
-
+const AddBook=WrapperLazyComponent(()=>import("./pages/masters/depreciation/AddBook"))
 
 // CWIP
 const ProjectManagement = WrapperLazyComponent(() => import("./pages/cwip/ProjectManagement"));
@@ -232,6 +233,7 @@ const AnimatedRoutes = () => {
                   <Route path="/masters/consumables/item-category" element={<ItemCategory/>} />
                   <Route path="/masters/depreciation/book" element={<Books/>} />
                   <Route path="/masters/depreciation/book/additionaldepreciation" element={<AdditionalDepreciation/> }/>
+                  <Route path="/masters/depreciation/book/addbook" element={<AddBook/>}/>
 
                   {/* CWIP */}
                   <Route path="/cwip/project-management" element={<ProjectManagement />} />

@@ -58,6 +58,8 @@ const CostBreakupAttributes = () => {
     const [tableData, setTableData] = useState([defaultRow]);
     const [recordData, setRecordData] = useState(null);
     const [isDelModalOpen, setIsDelModalOpen] = useState(false);
+    const [tableRow, setTableRow] = useState(null);
+    const [isUsed, setIsUsed] = useState(false);
     console.log(recordData, "59")
     const form = useForm<GenericObject>({
         defaultValues: fields.reduce((acc, f) => {
@@ -103,6 +105,7 @@ const CostBreakupAttributes = () => {
         form.reset({ GroupName: '' });
         setTableData([defaultRow]);
         setRecordData(null);
+        setIsUsed(false);
     };
 
     const renderField = (field: BaseField) => {
@@ -157,6 +160,8 @@ const CostBreakupAttributes = () => {
         if (delKey?.original?.key) {
             const changedTable = tableData.filter(record => record.key !== delKey.original.key);
             setTableData(changedTable.map((item, index) => ({ ...item, key: index + 1 })));
+            setIsDelModalOpen(false);
+            setTableRow(null);
         }
     };
 
@@ -257,15 +262,10 @@ const CostBreakupAttributes = () => {
                             onChange={(e) => handleChange(e, row.id, "isMandatory")}
                             backgroundColor="white"
                             size={"small"}
-
                         >
-
                         </ReusableDropdown>
-
                     </span>
-
                 )
-
             }
         },
 
@@ -274,6 +274,7 @@ const CostBreakupAttributes = () => {
             accessorKey: 'actions',
             header: 'Actions',
             cell: ({ row }: any) => {
+                console.log(row, "row273")
                 if (row.original.key === 1) {
                     return (
                         <span></span>
@@ -281,14 +282,14 @@ const CostBreakupAttributes = () => {
                 }
                 return (
                     <div className="flex">
-                        <ReusableButton
+                         {!isUsed &&   <ReusableButton
                             variant="text"
                             size="small"
                             danger
-                            onClick={() => { row?.original.attributeName === "" ? handleDelete(row) : handleDialog() }}
+                            onClick={() => { row?.original.attributeName === "" ? handleDelete(row) : setIsDelModalOpen(true); setTableRow(row) }}
                         >
                             <Trash2 height={18} className='text-red-400'></Trash2>
-                        </ReusableButton>
+                        </ReusableButton>}
                     </div>
                 )
 
@@ -378,6 +379,7 @@ const CostBreakupAttributes = () => {
         dispatch(setLoading(true))
         await editCostBreakup(groupid, compid).then((res) => {
             if (res.data && res.success) {
+                setIsUsed(res.data[0].IsUsed)
                 const attributes = res.data[0]?.CostBreakupAttributes || [];
                 if (attributes.length > 0) {
                     const formattedData = attributes.map((item, index) => ({
@@ -406,19 +408,19 @@ const CostBreakupAttributes = () => {
         }
     }, [recordData, companyId])
 
-    const handleDeleteByApi=async(id,compid)=>{
+    const handleDeleteByApi = async (id, compid) => {
         dispatch(setLoading(true));
-     await deleteCostBreakup(id,compid).then((res)=>{
-            if(res.data && res.success){
-            if(res.data.Status===true){
-                setIsDelModalOpen(false);
-                msg.success(res.data.Message);
-                fetchCostBreakupList(companyId);
-                handleReset();
-            }
-            else{
-                msg.warning(res.data.message)
-            }
+        await deleteCostBreakup(id, compid).then((res) => {
+            if (res.data && res.success) {
+                if (res.data.Status === true) {
+                    setIsDelModalOpen(false);
+                    msg.success(res.data.Message);
+                    fetchCostBreakupList(companyId);
+                    handleReset();
+                }
+                else {
+                    msg.warning(res.data.message)
+                }
             }
         }).catch(err => console.log(err)).finally(() => {
             dispatch(setLoading(false));
@@ -429,7 +431,13 @@ const CostBreakupAttributes = () => {
         <div className="h-full   bg-gray-50 flex flex-col ">
             <div className="flex flex-1 overflow-hidden   ">
                 {/* Left Sidebar - Ticket Inbox */}
-                {dataSource.length !== 0 && <div className={`${isInboxCollapsed ? 'w-6 p-1' : 'w-34 p-2 mb-2 rounded-b-[5px]'} bg-white border-r    border-0 shadow-lg flex pb-3 flex-col transition-all duration-300 shrink-0 hidden lg:flex`}>
+                {dataSource.length !== 0 && <div className={`
+    ${isInboxCollapsed ? 'w-6 p-1' : 'w-64 p-2 mb-2 rounded-b-[5px]'}
+   bg-white border border-gray-200 border-t-0 border-t-transparent shadow-xl flex flex-col pb-3 transition-all duration-300 shrink-0
+    md:relative
+    ${isInboxCollapsed ? 'relative' : 'fixed md:relative'}
+    ${isInboxCollapsed ? '' : 'top-15 left-0 h-full z-50 md:top-auto md:left-auto md:h-auto'}
+  `}>
                     <div className="pt-1 shrink-0">
                         <div className="flex items-center justify-between mb-2">
                             <h3 className={`font-semibold text-gray-900 ${isInboxCollapsed ? 'hidden' : ''}`}>
@@ -470,7 +478,7 @@ const CostBreakupAttributes = () => {
                                     >
                                         <div className="flex items-center justify-between mb-1.5">
                                             <span className="text-xs font-medium text-blue-600 me-2 ms-1">{group.GroupName}</span>
-                                            <Trash2 height={18} className='text-red-400' onClick={()=>{setIsDelModalOpen(true)}}></Trash2>
+                                            <Trash2 height={18} className='text-red-400' onClick={() => { setIsDelModalOpen(true) }}></Trash2>
                                         </div>
                                     </div>
                                 ))}
@@ -510,7 +518,7 @@ const CostBreakupAttributes = () => {
                                 onClick={() => { handleSubmit(handleSave)() }}
                                 icon={<Save className="h-4 w-4" />}
                             >
-                                Save
+                                {recordData ? 'Update':'Add'}
                             </ReusableButton>
                         </div>
                     </div>
@@ -593,7 +601,7 @@ const CostBreakupAttributes = () => {
                             <ReusableButton
                                 variant="primary"
                                 danger={true}
-                                onClick={()=>{handleDeleteByApi(recordData,companyId)}}
+                                onClick={() => { recordData === null ? handleDelete(tableRow) : handleDeleteByApi(recordData, companyId) }}
                             >
                                 Delete
                             </ReusableButton>

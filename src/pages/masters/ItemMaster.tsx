@@ -18,8 +18,10 @@ import { Controller, useForm } from 'react-hook-form';
 import { BaseField, GenericObject } from '@/Local_DB/types/types';
 import { STORE_DB } from '@/Local_DB/Form_JSON_Data/StoreDB';
 import { ITEM_MASTER_DB } from '@/Local_DB/Form_JSON_Data/ItemMasterDB';
-import { addNewItemMaster, deleteItemMaster, getEditItemMasterData, getItemMasterData } from '@/services/ItemMasterServices';
+import { addNewItemMaster, deleteItemMaster, getEditItemMasterData, getItemMasterData, updateItemMaster } from '@/services/ItemMasterServices';
 import { getMainCategoryLookUp, getSubCategoryLookUp } from '@/services/servicedeskReportsServices';
+import { getItemCategoryData } from '@/services/itemCategoryServices';
+import { getUOMData } from '@/services/unitsOfMeasureServices';
 
 
 interface Store {
@@ -51,28 +53,11 @@ const ItemMaster = () => {
   useEffect(() => {
     if (companyId) {
       fetchItemMasterData(companyId)
-      fetchAllLookUps()
+      // fetchAllLookUps()
     }
   }, [companyId])
 
-  async function fetchAllLookUps() {
-    dispatch(setLoading(true));
-    try {
-      const [SRMainCategoryLookUps] =
-        await Promise.allSettled([
-          getMainCategoryLookUp(companyId),
-        ]);
-      const allResponses = {
 
-        MainCategory: { data: SRMainCategoryLookUps.status === 'fulfilled' && SRMainCategoryLookUps.value.success && SRMainCategoryLookUps.value.data && SRMainCategoryLookUps.value.data.CategoriesLookup ? SRMainCategoryLookUps.value.data.CategoriesLookup : [], label: "CategoryName", value: "CategoryId" },
-      };
-      setLookupsDataInJson(allResponses);
-    } catch (error) {
-      msg.warning(`Error fetching lookups: ${error}`)
-    } finally {
-      dispatch(setLoading(false));
-    }
-  }
   const setLookupsDataInJson = (lookupsData): void => {
     const arr = Object.keys(lookupsData)
     const groupNames: string[] = []
@@ -120,15 +105,10 @@ const ItemMaster = () => {
         }
       }
     });
-    console.log(data, "Chitti")
     setFields(data);
     // setFieldsCopy(data);
   }
-  //   const filteredStores = mockStores.filter(store =>
-  //     store.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-  //     store.branch.toLowerCase().includes(searchQuery.toLowerCase()) ||
-  //     store.description.toLowerCase().includes(searchQuery.toLowerCase())
-  //   );
+
   const form = useForm<GenericObject>({
     defaultValues: fields.reduce((acc, f) => {
       acc[f.name!] = f.defaultChecked ?? '';
@@ -140,46 +120,66 @@ const ItemMaster = () => {
 
   const { control, register, handleSubmit, trigger, watch, setValue, reset, formState: { errors } } = form;
   const getFieldsByNames = (names: string[]) => fields.filter(f => names.includes(f.name!));
-  const selectedMainCategory = watch("MainCategory");
+  const selectedMainCategory = watch("MainCategory")|| null;
   useEffect(() => {
-    if (selectedMainCategory) {
-      getSubCategoryDetails(companyId, selectedMainCategory)
-    } else {
-      getSubCategoryDetails(companyId, null)
-    }
+      getItemCategoryForDropdown(companyId)
   }, [selectedMainCategory, companyId])
-  async function getSubCategoryDetails(compId: string, id: number | null) {
-    dispatch(setLoading(true));
-    try {
-      if (id == null) {
-        const data = structuredClone(fields);
-        const subCatIndex = data.findIndex(x => x.name === "SubCategory");
-        if (subCatIndex >= 0) data[subCatIndex].options = [];
-        const subCatSLAIndex = data.findIndex(x => x.name === "subcategoryinSLA");
-        if (subCatSLAIndex >= 0) data[subCatSLAIndex].options = [];
-        setFields(data);
-        return;
-      }
-      const res = await getSubCategoryLookUp(compId, id);
-      if (res?.data?.SubCategoriesLookup?.length > 0) {
-        const subCategories = res.data.SubCategoriesLookup.map((obj: any) => ({
-          ...obj,
-          label: obj.CategoryName,
-          value: obj.CategoryId,
-        }));
-        const data = structuredClone(fields);
-        if (id === selectedMainCategory) {
-          const idx = data.findIndex(x => x.name === "SubCategory");
-          if (idx >= 0) data[idx].options = subCategories;
+  
+  const getUOMDetailsForDropdown = async (id) => {
+    // dispatch(setLoading(true))
+    await getUOMData(id)
+      .then((res) => {
+        if (res.data !== undefined) {
+          res.data.UOMDetails.forEach((element) => {
+            element["label"] = element.Name
+            element["value"] = element.Name
+          })
+          const tempData = fields;
+          const itemIndex = tempData.findIndex((x) => x.name === "UnitofMeasure");
+          tempData[itemIndex].options = res.data.UOMDetails;
+          setFields(structuredClone(tempData))
         }
+      }).catch((err) => { })
+      .finally(() => { dispatch(setLoading(false)) })
+  }
+   const getItemCategoryForDropdown = async (id) => {
+    dispatch(setLoading(true))
+    await getItemCategoryData(id).then((res) => {
+      console.log("1","Nag")
+      if (res.data !== undefined && res.data.length !== 0) {
+      console.log("2","Nag")
 
-        setFields(data);
+        // setMainCategories(res.data.MainCategories);
+        res.data.MainCategories.forEach((element) => {
+          element["label"] = element.CategoryName;
+          element["value"] = element.CategoryName;
+        })
+        const tempItems = fields;
+        const index = tempItems.findIndex(x => x.name === "MainCategory");
+        tempItems[index].options = res.data.MainCategories
+        let selectedMainObj=res.data.MainCategories.filter(x=>x.CategoryName===selectedMainCategory)
+        if (selectedMainObj !== null) {
+          console.log(selectedMainObj,"Nag")
+          let tempCategory = res.data.SubCategories.filter((obj) => obj.ParentId === selectedMainObj[0].CategoryId)
+          tempCategory.forEach((sub) => {
+            sub["label"] = sub.CategoryName;
+            sub["value"] = sub.CategoryName;
+          })
+        console.log(tempCategory,"Nag")
+
+          const tempItems = fields;
+          const index = tempItems.findIndex(x => x.name === "SubCategory");
+          tempItems[index].options = tempCategory
+
+        }
+        setFields(structuredClone(tempItems))
       }
-    } catch (err) {
-      console.error("Error fetching subcategories:", err);
-    } finally {
-      dispatch(setLoading(false));
-    }
+    }).catch((err) => { })
+      .finally(() => { 
+      getUOMDetailsForDropdown(companyId)
+
+        // dispatch(setLoading(false))
+       })
   }
   const renderField = (field: BaseField) => {
     const { name, label, fieldType, isRequired, validationPattern, patternErrorMessage, dependsOn, show = true } = field;
@@ -310,7 +310,7 @@ const ItemMaster = () => {
             size="small"
             danger
             icon={<Trash2 className="h-4 w-4" />}
-            onClick={() => { setIsDelModalOpen(true); setRecordToEditId(row.original.ItemId); console.log(row.original), "C" }}
+            onClick={() => { setIsDelModalOpen(true); setRecordToEditId(row.original.ItemId);}}
           >
             <Trash2 className="h-4 w-4" />
           </ReusableButton>
@@ -347,10 +347,6 @@ const ItemMaster = () => {
       if (res.success) {
         if (res.data.status) {
           msg.success(res.data.message);
-          //   if (selectedStatusRec && selectedStatusRec.Id == id) {
-          //     handleReset('DeleteStatus');
-          //   }
-          //   fetchAllStatusList();
           fetchItemMasterData(companyId)
         } else {
           msg.warning(res.data.message);
@@ -367,10 +363,8 @@ const ItemMaster = () => {
       if (res.success) {
         if (res.data.status) {
           msg.success(res.data.message);
-        
           fetchItemMasterData(companyId)
-          // fetchStoreDataByBranchName(companyId,branch)
-
+      setIsAddDialogOpen(false)
         } else {
           msg.warning(res.data.ErrorDetails[0]["Error Message"]);
         }
@@ -382,22 +376,14 @@ const ItemMaster = () => {
     })
   }
   const updateStoreData = async (id: any, data: any) => {
-    await updateStore(companyId, id, data).then(res => {
+    await updateItemMaster(companyId, id, data).then(res => {
       if (res.success) {
         if (res.data.status) {
           msg.success(res.data.message);
-          //   if (selectedStatusRec && selectedStatusRec.Id == id) {
-          // //     handleReset('DeleteStatus');
-          // //   }
-          // //   fetchAllStatusList();
-          // if(recordToEditId==null && companyId){
-
-          // }
+      setIsAddDialogOpen(false)
           fetchItemMasterData(companyId)
-          // fetchStoreDataByBranchName(companyId,branch)
-
         } else {
-          msg.warning(res.data.message);
+          msg.warning(res.data.ErrorDetails[0]["Error Message"]);
         }
       } else {
         msg.warning('Failed to delete status !!')
@@ -425,7 +411,6 @@ const ItemMaster = () => {
     }
     if (recordToEditId == null && companyId) {
       addNewItemMasterData(Payload)
-      setIsAddDialogOpen(false)
     }
     else if (recordToEditId !== null && companyId) {
       updateStoreData(recordToEditId, Payload)
@@ -444,8 +429,8 @@ const ItemMaster = () => {
       ...watch(),
       ItemName: data.ItemName,
       ItemCode: data.Code,
-      MainCategory: parseInt(data.Level1CategoryId),
-      SubCategory: data.Level2CategoryId,
+      MainCategory: data.Level1Category,
+      SubCategory: data.Level2Category,
       UnitofMeasure: data.UnitOfMeasure,
       ReorderLevel: data.ReorderLevel,
       ItemDescription: data.Description
@@ -458,7 +443,7 @@ const ItemMaster = () => {
 
   return (
     <PageLayout>
-      <div className="space-y-6 p-5">
+      <div className="space-y-6 p-5 h-[90vh] overflow-auto">
         <div className="flex justify-between items-center">
           <h1>Item Master</h1>
           <div className='flex gap-3'>
@@ -504,7 +489,7 @@ const ItemMaster = () => {
                     htmlType="submit"
                     variant="primary"
                     className="bg-orange-500 hover:bg-orange-600 border-orange-500"
-                    onClick={() => submit()}
+                    onClick={() => handleSubmit(submit)()}
                   >
                     {recordToEditId ? "Update" : "Save"}
                   </ReusableButton>

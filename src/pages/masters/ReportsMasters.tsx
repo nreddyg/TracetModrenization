@@ -26,8 +26,9 @@ import { GetUsersList } from '@/services/userServices';
 import { getVendorDetails } from '@/services/configurationServices';
 import { GetCustomersList } from '@/services/customerServices';
 import { getServiceLocationData } from '@/services/serviceLocationServices';
-import { getCompanyHierarchyReport, getCustomerLocations } from '@/services/masterReportsServices';
+import { getAssetCategoryReport, getAssetLocationReport, getColumns, getCompanyHierarchyReport, getCostCenterReport, getCustomerLocations, getCustomerLocationsReport, getCustomerReport, getDepartmentReport, getServiceLocationsReport, getUserLogReport, getUserReport, getVendorReport, postColumns } from '@/services/masterReportsServices';
 import { useMessage } from '@/components/ui/reusable-message';
+import { ColumnDef, FilterFn, VisibilityState } from '@tanstack/react-table';
 interface MultiSelectConfig {
   isHierarchy?: boolean;
   labelClassName?: string;
@@ -42,6 +43,11 @@ interface MultiSelectConfig {
   icon?: React.ReactNode;
   errorMsgClass?: string;
   showSearch?: boolean;
+}
+interface ColumnApiResponse {
+  [section: string]: {
+    [columnName: string]: true | false;
+  };
 }
 const treefunWithParent = (data, id, idName, assetLocationUnique) => {
   const treeData = [];
@@ -75,10 +81,14 @@ const ReportsMasters = () => {
   const [showReport, setShowReport] = useState(false);
   const [dataSource, setDataSource] = useState([]);
   const [columns, setColumns] = useState([]);
+  const hierarchyLevels=useAppSelector(state=>state.projects.allLevelsData);
+  const lastLevels=useAppSelector(state=>state.projects.lastLevelsData);
   const [reportTabs] = useState([
     'Company Hierarchy', 'Department', 'Asset Location', 'Cost Center', 'Asset Category',
     'User', 'Vendor', 'Customer', 'Service Locations', 'Customer Locations', 'User Log'
   ]);
+  const reportIds={'Company Hierarchy':100,'Department':102, 'Asset Location':101, 'Cost Center':104, 'Asset Category':103,
+    'User':105, 'Vendor':106, 'Customer':107, 'Service Locations':109, 'Customer Locations':108, 'User Log':110};
   const [vendors,setVendors]=useState([]);
   const companyId=useAppSelector(state=>state.projects.companyId);
   const branchId=useAppSelector(state=>state.projects.branchId);
@@ -87,8 +97,8 @@ const ReportsMasters = () => {
     tab.toLowerCase().includes(searchTerm.toLowerCase())
   );
   const handleViewReport = async () => {
-    // setIsGeneratingReport(true);
-    fetchMasterReportData()
+    fetchMasterReportData();
+    setShowReport(true);
   }
   const form = useForm<GenericObject>({
     defaultValues: fields.reduce((acc, f) => {
@@ -100,6 +110,7 @@ const ReportsMasters = () => {
   const { control, register, handleSubmit, trigger, watch, setValue, reset, formState: { errors } } = form;
   
   useEffect(()=>{
+    form.reset();
     if(companyId && branchName) fetchAllLookups()
   },[companyId,branchName])
   useEffect(()=>{
@@ -109,6 +120,36 @@ const ReportsMasters = () => {
     setLookupsDataInJson({VendorName:{data:filteredVendors,label:'VendorName',value:'VendorID'}})
     }
   },[watch('VendorType')])
+  useEffect(()=>{
+    if(activeTab && companyId && branchName){
+      setShowReport(false);
+      setDataSource([]);
+      setColumnVisibility({});
+      setColumns([]);
+      (async function(){
+        try{
+          dispatch(setLoading(true));
+          const res=await getColumns(companyId,branchName,reportIds[activeTab]);
+          if(res.success){
+            if(res.data && res.data.GridColumnsList){
+              if(activeTab==='User'){
+                delete res.data.GridColumnsList["Mobile no"];
+              }
+              const tempCols = buildColumnsFromApi(res.data);
+              setColumnVisibility(tempCols.initialVisibility)
+              setColumns(tempCols.columns)
+            }else{
+              setColumnVisibility({})
+              setColumns([])
+            }
+          }else{
+            setColumnVisibility({})
+            setColumns([])
+          }
+        }catch{}finally{dispatch(setLoading(false))}
+      })()
+    }
+  },[companyId,branchName,activeTab])
   const setLookupsDataInJson = async (dataset: any) => {
     let keys = Object.keys(dataset);
     const updatedFields = fields.map(field => {
@@ -161,19 +202,288 @@ const ReportsMasters = () => {
       setVendors(responses.VendorType.data);
     }catch{}finally{ dispatch(setLoading(false)) }
   }
-  console.log('branchids',watch('CompanyHierarchy'))
   //fetch reports
-  const fetchMasterReportData=async()=>{
-    const branchIds=watch('CompanyHierarchy')?watch('CompanyHierarchy').filter(e=>e!=0).join():'';
-    const dateRange=watch('RangePicker') || {from:'',to:''};
-    switch (activeTab){
-      case 'Company Hierarchy':
-        try{
-          const res=await getCompanyHierarchyReport(companyId,branchIds,dateRange.from,dateRange.to);
-          console.log('res',res)
-
-        }catch{}finally{}
+  const fetchMasterReportData = async () => {
+    const getIds = (field) => (watch(field)?.filter((e) => e != 0) || []).join();
+    const branchIds = getIds('CompanyHierarchy');
+    const depIds = getIds('Department');
+    const assetLocIds = getIds('AssetLocation');
+    const costCentIds = getIds('CostCenter');
+    const assetCatIds = getIds('AssetCategory');
+    const userIds = getIds('User');
+    const vendorTypeIds = getIds('VendorType');
+    const vendorNameIds = getIds('VendorName');
+    const customerIds = getIds('Customer');
+    const serviceLocIds = getIds('ServiceLocations');
+    const customerLocIds = getIds('CustomerLocations');
+    const dateRange = watch('RangePicker') || { from: '', to: '' };
+    const reportMap = {
+      'Company Hierarchy': {
+        fn: () => getCompanyHierarchyReport(companyId, branchIds, dateRange.from, dateRange.to),
+        key: 'CompanyHierarchyMasterReportDetails',
+      },
+      Department: {
+        fn: () => getDepartmentReport(companyId, depIds, dateRange.from, dateRange.to),
+        key: 'DepartmentMasterReportDetails',
+      },
+      'Asset Location': {
+        fn: () => getAssetLocationReport(companyId, assetLocIds, dateRange.from, dateRange.to),
+        key: 'AssetLocationMasterReportDetails',
+      },
+      'Cost Center': {
+        fn: () => getCostCenterReport(companyId, costCentIds, dateRange.from, dateRange.to),
+        key: 'CostCenterMasterReportDetails',
+      },
+      'Asset Category': {
+        fn: () => getAssetCategoryReport(companyId, assetCatIds, dateRange.from, dateRange.to),
+        key: 'AssetCategoryMasterReportDetails',
+      },
+      User: {
+        fn: () => getUserReport(companyId, userIds, dateRange.from, dateRange.to),
+        key: 'UserMasterReportDetails',
+      },
+      Vendor: {
+        fn: () => getVendorReport(companyId, vendorTypeIds, vendorNameIds, dateRange.from, dateRange.to),
+        key: 'VendorMasterReportDetails',
+      },
+      Customer: {
+        fn: () => getCustomerReport(companyId, customerIds, dateRange.from, dateRange.to),
+        key: 'CustomerMasterReportDetails',
+      },
+      'Service Locations': {
+        fn: () => getServiceLocationsReport(companyId, serviceLocIds, dateRange.from, dateRange.to),
+        key: 'ServiceLocationMasterReportDetails',
+      },
+      'Customer Locations': {
+        fn: () => getCustomerLocationsReport(companyId, customerLocIds, dateRange.from, dateRange.to),
+        key: 'CustomerLocationMasterReportDetails',
+      },
+      'User Log': {
+        fn: () => getUserLogReport(companyId, dateRange.from, dateRange.to),
+        key: 'UserLogMasterReportDetails',
+      },
+    };
+    const report = reportMap[activeTab];
+    if (!report) {
+      msg.warning('Please select report type !!');
+      return;
     }
+    try {
+      setIsGeneratingReport(true);
+      dispatch(setLoading(true));
+      const res = await report.fn();
+      const data = res?.data?.[report.key] || [];
+      setDataSource(data);
+    } catch (error) {
+      console.error(error);
+      setDataSource([]);
+    } finally {
+      setIsGeneratingReport(false);
+      dispatch(setLoading(false));
+    }
+  };
+  //stringifying the values of objects
+  const safeStringCols = (data:GenericObject) => Object.fromEntries(Object.entries(data).map(([key, value]) => [key, String(value ?? false)]));
+  //Save columns 
+  const handleSaveColumns = () => {
+    const getLevelValue = (index, keySuffix, sectionIndex) => {
+      if (hierarchyLevels.length === 0) return '';
+      const level = hierarchyLevels[sectionIndex]?.LevelName?.[index];
+      return level ? columnVisibility[`${level.LevelName} ${keySuffix}`] : false;
+    };
+    const buildHierarchyCols = (prefix, sectionIndex) => {
+      const cols = {};
+      for (let i = 0; i <= 4; i++) {
+        const suffix = `_${100 + i}`;
+        cols[`${prefix}Name${suffix}`] = getLevelValue(i, 'Name', sectionIndex);
+        cols[`${prefix}Code${suffix}`] = getLevelValue(i, 'Code', sectionIndex);
+        cols[`CreatedBy${suffix}`] = getLevelValue(i, 'Created by', sectionIndex);
+        cols[`CreatedDate1${suffix}`] = getLevelValue(i, 'Created date', sectionIndex);
+      }
+      return cols;
+    };
+    const cHCols = {
+      ...buildHierarchyCols('Branch', 0),
+      PANNo_104: columnVisibility['Reg / PAN'],
+      TINNo_104: columnVisibility['GSTIN/UIN'],
+      Address_104: columnVisibility['Address'],
+      City_104: columnVisibility['City'],
+      State_104: columnVisibility['State'],
+      ZipCode_104: columnVisibility['Zip Code'],
+      EmailAddress_104: columnVisibility['Email Address'],
+      Mobile_104: columnVisibility['Mobile No']
+    };
+    const depCols = buildHierarchyCols('Dep', 3);
+    const cCCols = buildHierarchyCols('Cost', 2);
+    const aLCols = {
+      BranchName: lastLevels?.Branch ? columnVisibility[`${lastLevels.Branch} Name`] : false,
+      BranchCode: lastLevels?.Branch ? columnVisibility[`${lastLevels.Branch} Code`] : false,
+      ...buildHierarchyCols('Loc', 1)
+    };
+    const aCCols = {
+      MainCategory: columnVisibility['Main category name'],
+      MainCategoryCode: columnVisibility['Main category code'],
+      AssetAcquisitionAccount: columnVisibility['Asset acquisition account'],
+      AssetDepreciationAccount: columnVisibility['Asset depreciation account'],
+      DepreciationAccount: columnVisibility['Depreciation account'],
+      MainCatCreatedBy: columnVisibility['Main category created by'],
+      MainCategoryDate: columnVisibility['Main category created date'],
+      MainCategoryDescription: columnVisibility['Main category description'],
+      SubCategory: columnVisibility['Sub category name'],
+      SubCategoryCode: columnVisibility['Sub category code'],
+      Prefix: columnVisibility['Prefix'],
+      LifeSpan: columnVisibility['Life Span'],
+      SalvageValue: columnVisibility['Salvage Value'],
+      SubCatCreatedBy: columnVisibility['Sub category created by'],
+      SubCategoryDate: columnVisibility['Sub category created date'],
+      SubCategoryDescription: columnVisibility['Sub category description']
+    };
+    const userCols = {
+      FirstName: columnVisibility['First name'],
+      LastName: columnVisibility['Last name'],
+      EmailId: columnVisibility['Email id'],
+      Empid: columnVisibility['Employee id'],
+      Mobile: columnVisibility['Mobile no'],
+      Phone: columnVisibility['Phone no'],
+      UserName: columnVisibility['User name'],
+      RoleName: columnVisibility['Role'],
+      UserCreatedBy: columnVisibility['Created by'],
+      UserDate: columnVisibility['Created date'],
+      Status: columnVisibility['Status'],
+      IsServiceDeskUser: columnVisibility['IsServiceDeskUser']
+    };
+    const vendorCols = {
+      Vendorname: columnVisibility['Vendor Name'],
+      VendorType: columnVisibility['Vendor Type'],
+      VendorCode: columnVisibility['Vendor Code'],
+      PanNo: columnVisibility['Reg / PAN'],
+      GSTIN: columnVisibility['GSTIN/UIN'],
+      AddressLine1: columnVisibility['Address'],
+      City: columnVisibility['City'],
+      StateName: columnVisibility['State'],
+      CountryName: columnVisibility['Country'],
+      ZipCode: columnVisibility['Zip Code'],
+      Phone: columnVisibility['Phone No'],
+      Mobile: columnVisibility['Mobile No'],
+      EmailId: columnVisibility['Email id'],
+      VendorCreatedBy: columnVisibility['Created by'],
+      VendorDate: columnVisibility['Created date'],
+      VendorDescription: columnVisibility['Description']
+    };
+    const customerCols = {
+      Vendorname: columnVisibility['Customer Name'],
+      PanNo: columnVisibility['Reg / PAN'],
+      GSTIN: columnVisibility['GSTIN/UIN'],
+      AddressLine1: columnVisibility['Address'],
+      City: columnVisibility['City'],
+      StateName: columnVisibility['State'],
+      CountryName: columnVisibility['Country'],
+      ZipCode: columnVisibility['Zip Code'],
+      Phone: columnVisibility['Phone No'],
+      Mobile: columnVisibility['Mobile No'],
+      EmailId: columnVisibility['Email id'],
+      MainLocationName: columnVisibility['Main location'],
+      SubLocationName: columnVisibility['Sub location'],
+      VendorCreatedBy: columnVisibility['Created by'],
+      VendorDate: columnVisibility['Created date'],
+      VendorDescription: columnVisibility['Description']
+    };
+    const customerLocCols = {
+      CustomerName: columnVisibility['Customer name'],
+      MainLocation: columnVisibility['Main location'],
+      MainLocCreatedBy: columnVisibility['Main location Created by'],
+      MainLocationDate: columnVisibility['Main location created date'],
+      SubLocation: columnVisibility['Sub location'],
+      SubLocCreatedBy: columnVisibility['Sub location Created by'],
+      SubLocationDate: columnVisibility['Sub location created date'],
+      AddressLine: columnVisibility['Address'],
+      City: columnVisibility['City'],
+      StateName: columnVisibility['State'],
+      Country: columnVisibility['Country'],
+      ZipCode: columnVisibility['Zip Code'],
+      Mobile: columnVisibility['Mobile No'],
+      UIN: columnVisibility['TIN / GSTIN / UIN']
+    };
+    const serviceLocCols = {
+      MainLocation: columnVisibility['Main location'],
+      MainLocCreatedBy: columnVisibility['Main location Created by'],
+      MainLocationDate: columnVisibility['Main location Created date'],
+      SubLocation: columnVisibility['Sub location'],
+      SubLocCreatedBy: columnVisibility['Sub location Created by'],
+      SubLocationDate: columnVisibility['Sub location Created date']
+    };
+    const userLogCols = {
+      Name: columnVisibility['Name'],
+      UserName: columnVisibility['User name'],
+      Phone: columnVisibility['Phone no'],
+      EmailId: columnVisibility['Email id'],
+      Empid: columnVisibility['Employee id'],
+      Login: columnVisibility['Login'],
+      DeviceId: columnVisibility['Device']
+    };
+    const colsData = {
+      'Company Hierarchy': cHCols,
+      Department: depCols,
+      'Asset Location': aLCols,
+      'Cost Center': cCCols,
+      'Asset Category': aCCols,
+      User: userCols,
+      Vendor: vendorCols,
+      Customer: customerCols,
+      'Service Locations': serviceLocCols,
+      'Customer Locations': customerLocCols,
+      'User Log': userLogCols
+    };
+    const payload = { GridColumnsDetails: [safeStringCols(colsData[activeTab])] };
+    dispatch(setLoading(true));
+    postColumns(companyId, branchName, reportIds[activeTab], payload)
+      .then(res => {
+        if (res.data.status) msg.success(res.data.message);
+        else msg.warning(res.data.message || 'Failed to save grid columns data !!');
+      }).catch(() => { }).finally(() => dispatch(setLoading(false)));
+  };
+  const multiSelectFilter: FilterFn<any> = (row, columnId, filterValue) => {
+    const selected = Array.isArray(filterValue) ? filterValue : [];
+    if (selected.length === 0) return true;
+    const cell = row.getValue(columnId);
+    if (cell == null) return false;
+    if (Array.isArray(cell)) return cell.some(v => selected.includes(String(v)));
+    return selected.includes(String(cell));
+  };
+  function buildColumnsFromApi<T extends Record<string, any>>(
+    apiResponse: ColumnApiResponse,
+    editableColumns: string[] = [],
+    typeMapper: Record<string, "text" | "number" | "date" | "select"> = {}
+  ): { columns: ColumnDef<T>[]; initialVisibility: VisibilityState } {
+    const [_, columnsMeta] = Object.entries(apiResponse)[0];
+    const columns: ColumnDef<T>[] = Object.entries(columnsMeta).map(
+      ([colName], index) => {
+        if (!colName || !colName.trim()) {
+          return null;
+        }
+        return {
+          accessorKey: colName,
+          id: colName,
+          header: colName,
+          cell: (info) => info.getValue() ?? "",
+          enableHiding: true,
+          enableColumnFilter: true,
+          filterFn: multiSelectFilter,
+          meta: {
+            editable: editableColumns.includes(colName),
+            editType: typeMapper[colName] || "text",
+          },
+        } as ColumnDef<T>;
+      }
+    ).filter(Boolean) as ColumnDef<T>[];
+    const initialVisibility: VisibilityState = {};
+    Object.entries(columnsMeta).forEach(([colName, visible]) => {
+      if (colName && colName.trim()) {
+        initialVisibility[colName] = visible;
+      }
+    });
+
+    return { columns, initialVisibility };
   }
   const multiSelectConfig: MultiSelectConfig = {
     isHierarchy: true,
@@ -275,6 +585,7 @@ const ReportsMasters = () => {
                   {...field}
                   value={ctrl.value}
                   onChange={ctrl.onChange}
+                  selectAll={true}
                   error={errors[name]?.message as string}
                 />
               )}
@@ -351,7 +662,7 @@ const ReportsMasters = () => {
               <div className="space-y-2 h-full overflow-y-hidden">
                 <div className='px-1'>
                   <h4 className="text-sm font-semibold text-gray-900 mb-3">Primary Filters</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-1">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-2">
                     {fields.map(renderField)}
                   </div>
                 </div>
@@ -373,7 +684,7 @@ const ReportsMasters = () => {
                 <CardHeader>
                   <CardTitle className="text-lg">Report Results - {activeTab}</CardTitle>
                   <div>
-                    <ReusableButton onClick={null} icon={<Save className="h-4 w-4" />}
+                    <ReusableButton onClick={handleSaveColumns} icon={<Save className="h-4 w-4" />}
                       className="bg-primary text-white hover:bg-primary/90 hover:text-white"
                       variant="default"
                     >

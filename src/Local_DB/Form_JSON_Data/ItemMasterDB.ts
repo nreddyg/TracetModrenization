@@ -39,14 +39,12 @@ export const ITEM_MASTER_DB:BaseField[]=[
         options: [],
         // selectAll:true,
     },
-  
     {
         name:'UnitPrice',
         fieldType:'text',
         label:'Unit Price',
         // defaultChecked:false,
     },
-    
     {
         name:'ReorderLevel',
         fieldType:'text',

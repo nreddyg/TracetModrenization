@@ -46,7 +46,8 @@ import {
   UserPlus,
   User,
   UserCheck,
-  UserCog
+  UserCog,
+  MapPin
 } from 'lucide-react';
 
 interface NavItem {
@@ -519,6 +520,11 @@ const navigation: NavItem[] = [
             label: 'Asset Category',
             icon: Building2,
             link: 'masters/fixed-assets/asset-category',
+          },
+          {
+            label: 'Cost Breakup Attributes',
+            icon: DollarSign,
+            link: 'masters/fixed-assets/costbreakup',
           }
         ]
       },
@@ -568,17 +574,17 @@ const navigation: NavItem[] = [
       },
       {
         label: 'Service Maintenance',
-        icon: Building2,
+        icon:  Wrench,
         link: '/servicemaintenance',
         children: [
           {
             label: 'Service Locations',
-            icon: Building2,
+            icon:MapPin,
             link: '/masters/servicemaintenance/servicelocations',
           },
           {
             label: 'Product Masters',
-            icon: Building2,
+            icon: Package,
             link: '/masters/servicemaintenance/productmaster',
           },
         ],

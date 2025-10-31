@@ -1,7 +1,7 @@
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import ReusableTable, { TableAction, TablePermissions } from '@/components/ui/reusable-table';
 import { ScrollArea } from '@radix-ui/react-scroll-area';
-import { Edit, Plus, Search, Trash2 } from 'lucide-react';
+import { ArrowLeft, Edit, Plus, Search, Trash2 } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ReusableButton } from '@/components/ui/reusable-button';
@@ -79,7 +79,7 @@ const AdditionalDepreciation = () => {
     const dispatch = useDispatch()
     const companyId = useAppSelector(state => state.projects.companyId);
     const [fields, setFields] = useState<BaseField[]>(Additional_Depreciation_DB);
-    const [isOpenLicenseCard, setIsOpenLicenseCard] = useState(false);
+    const [isOpenCard, setIsOpenCard] = useState(false);
     const [getAllTableData, setGetAllTableData] = useState([])
     const [dataSource, setDatasource] = useState([]);
     const [editRecordId, setEditRecordId] = useState<string>("")
@@ -311,16 +311,17 @@ const AdditionalDepreciation = () => {
         })
         setFields(fieldsData)
         setDatasource(generateRowsInTable(0, 0, data.LicenseDetails))
-        setIsOpenLicenseCard(true)
+        setIsOpenCard(true)
         setEditRecordId(data.SoftwareId)
     }
     const handleReset = () => {
         setDatasource([])
-        form.reset({ ...form.getValues(), SoftwareName: '', Version: "", VendorId: "", CategoryId: '', LicenseType: '', NumberOfLicenses: '' });
+        form.reset({ ...form.getValues(), Name: '', Description: "", ApplicableFor: "", Condition: '', AdditionalDepreciationRate: '', UptoDateRange: '' });
 
         setEditRecordId("")
 
     }
+    
     const deleteSoftwareAsset = async (id: string) => {
         dispatch(setLoading(true));
         await deleteSoftwareById(companyId, id).then(res => {
@@ -362,7 +363,7 @@ const AdditionalDepreciation = () => {
         toast({ title: "Data Refreshed", description: "Additional Depreciation data has been updated", });
         // fetchAllCustomerList();
         getAdditionalDepreciationListAPI()
-    }, [toast]);
+    }, [toast,companyId]);
     const getLicenseDetails = (id?: string): any => {
         let licenseDetails = []
 
@@ -469,12 +470,19 @@ const AdditionalDepreciation = () => {
                             size="small"
                             // variant="primary"
                             className=' flex-1 sm:flex-none bg-primary h-[2.38rem] text-white p-4'
-                            onClick={() => setIsOpenLicenseCard((prev) => !prev)}>
-                            <span className="" > Add Additional Depreciation</span>
+                            onClick={() => setIsOpenCard((prev) => !prev)}>
+                          
+                             {isOpenCard ? (
+                                                                <div className='flex items-center gap-2'>
+                                                                    <ArrowLeft className="h-4 w-4 text-current stroke-[3]" /> Grid View
+                                                                </div>
+                                                            ) : (
+                                                                ' Add Additional Depreciation'
+                                                            )}
                         </ReusableButton>
                     </div>
                 </div>
-                {isOpenLicenseCard &&
+                {isOpenCard &&
                     <Card>
                         <CardContent className="pt-6">
                             <div className="">

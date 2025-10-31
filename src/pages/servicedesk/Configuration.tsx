@@ -186,7 +186,12 @@ const Configuration = () => {
     dispatch(setLoading(true));
     await getServiceRequestTypes(companyId,branchId).then(res => {
       if (res.success && res.data) {
-        setServiceRequestTypeData(res.data)
+        if(Array.isArray(res.data)){
+          setServiceRequestTypeData(res.data)
+        }else{
+            setServiceRequestTypeData([])
+        }
+       
       } else {
         setServiceRequestTypeData([])
       }

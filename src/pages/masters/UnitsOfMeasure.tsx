@@ -17,14 +17,10 @@ import { Controller, useForm } from 'react-hook-form';
 import { BaseField, GenericObject } from '@/Local_DB/types/types';
 import { addNewUOM, deleteUOM, getEditUOMData, getUOMData, updateUOM } from '@/services/unitsOfMeasureServices';
 import { UNITS_OF_MEASURE_DB } from '@/Local_DB/Form_JSON_Data/UnitsOfMeasureDB';
+import { useNavigate } from 'react-router-dom';
 
 
-interface Store {
-    id: string;
-    name: string;
-    branch: string;
-    description: string;
-}
+
 const UnitOfMeasure = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -43,6 +39,7 @@ const UnitOfMeasure = () => {
     const companyId = useAppSelector(state => state.projects.companyId);
     const branch=useAppSelector(state => state.projects.branch) || '';
     const branchCode=useAppSelector(state => state.projects.branchCode) || '';
+    let navigate=useNavigate()
     
 
     useEffect(() => {
@@ -50,10 +47,7 @@ const UnitOfMeasure = () => {
         {
             fetchUOMGetData(companyId)
         }
-        // if(companyId && branch!="All" && branch!="")
-        // {
-        //     fetchStoreDataByBranchName(companyId,branch)
-        // }
+       
     }, [companyId,branch])
     const form = useForm<GenericObject>({
         defaultValues: fields.reduce((acc, f) => {
@@ -155,19 +149,19 @@ const UnitOfMeasure = () => {
                     <ReusableButton
                         variant="text"
                         size="small"
-                        //   icon={<Edit className="h-4 w-4" />}
+                        //   icon={}
                         onClick={() => {setRecordToEditId(row.original.UOMId);fetchUOMById(companyId,row.original.UOMId) }}
                     >
-                        Edit
+                      <Edit className="h-4 w-4" />
                     </ReusableButton>
                     <ReusableButton
                         variant="text"
                         size="small"
                         danger
-                        icon={<Trash2 className="h-4 w-4" />}
+                       
                         onClick={() => {setIsDelModalOpen(true);setRecordToEditId(row.original.UOMId);console.log(row.original),"C"}}
                     >
-                        Delete
+                        <Trash2 className="h-4 w-4" />
                     </ReusableButton>
                 </div>
             ),
@@ -189,8 +183,7 @@ const UnitOfMeasure = () => {
         dispatch(setLoading(true))
         await getEditUOMData(companyId,id).then(res => {
             if (res.data && res.data.status == undefined) {
-                //  console.log(res.data,"Nag")
-                // setDataSource(res.data.StoreDetails)
+                
                 handleEdit(res.data.UOMDetails)
             } else {
                 msg.warning(res.data.message || "No Data Found")
@@ -210,7 +203,7 @@ const UnitOfMeasure = () => {
           msg.warning(res.data.message);
         }
       } else {
-        msg.warning('Failed to delete status !!')
+        msg.warning('Failed to delete UOM !!')
       }
     }).catch(err => { }).finally(() => {
 
@@ -221,15 +214,6 @@ const UnitOfMeasure = () => {
       if (res.success) {
         if (res.data.status) {
           msg.success(res.data.message);
-        //   if (selectedStatusRec && selectedStatusRec.Id == id) {
-        // //     handleReset('DeleteStatus');
-        // //   }
-        // //   fetchAllStatusList();
-        // if(recordToEditId==null && companyId){
-
-        // }
-        // fetchStoreGetData(companyId)
-        // fetchStoreDataByBranchName(companyId,branch)
         fetchUOMGetData(companyId)
 
         } else {
@@ -319,12 +303,12 @@ const UnitOfMeasure = () => {
                                 className="bg-orange-500 hover:bg-orange-600 border-orange-500"
                                 onClick={()=>{setRecordToEditId(null);reset({Name:"",Description:""})}}
                             >
-                                Add
+                                Add Unit
                             </ReusableButton>
                         </DialogTrigger>
                         <DialogContent className="max-w-2xl">
                             <DialogHeader>
-                                <DialogTitle>{recordToEditId?"Update UOM":"Add UOM"}</DialogTitle>
+                                <DialogTitle>{recordToEditId?"Update Unit Of Measure":"Add Unit Of Measure"}</DialogTitle>
                             </DialogHeader>
                             <div className='grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4'>
                                 {getFieldsByNames(['Name', 'Branch']).map((field) => {
@@ -358,53 +342,14 @@ const UnitOfMeasure = () => {
                             </div>
                         </DialogContent>
                     </Dialog>
-                     <Dialog open={isConverDialogOpen} onOpenChange={setIsConvertDialogOpen}>
-                        <DialogTrigger asChild>
-                            <ReusableButton
+                    <ReusableButton
                                 variant="primary"
                                 icon={<Plus className="h-4 w-4" />}
                                 className="bg-orange-500 hover:bg-orange-600 border-orange-500"
-                                onClick={()=>{setRecordToEditId(null);reset({StoreName:"",Branch:"",StoreDescription:""})}}
+                                onClick={()=>{ navigate('/masters/consumables/unitsofmeasure/manageunitconverstion');}}
                             >
                                 Manage Unit Conversations 
                             </ReusableButton>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-2xl">
-                            <DialogHeader>
-                                <DialogTitle>{recordToEditId?"Update Store":"Add Store"}</DialogTitle>
-                            </DialogHeader>
-                            <div className='grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4'>
-                                {getFieldsByNames(['StoreName', 'Branch']).map((field) => {
-                                    return <div className="flex items-center space-x-2">
-                                        {renderField(field)}
-                                    </div>;
-                                })}
-                            </div>
-                            <div className='w-100'>
-                                {getFieldsByNames(['StoreDescription']).map((field) => {
-                                    return <div className=" space-x-2">
-                                        {renderField(field)}
-                                    </div>;
-                                })}
-                            </div>
-                            <div className="flex justify-end gap-2">
-                                <ReusableButton
-                                    variant="default"
-                                    onClick={() => setIsAddDialogOpen(false)}
-                                >
-                                    Cancel
-                                </ReusableButton>
-                                <ReusableButton
-                                    htmlType="submit"
-                                    variant="primary"
-                                    className="bg-orange-500 hover:bg-orange-600 border-orange-500"
-                                    onClick={()=>submit()}
-                                >
-                                   {recordToEditId?"Update":"Save"}
-                                </ReusableButton>
-                            </div>
-                        </DialogContent>
-                    </Dialog>
 </div>
 
                     <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>
@@ -412,7 +357,7 @@ const UnitOfMeasure = () => {
                                 <DialogHeader>
                                   <DialogTitle>Confirm the action</DialogTitle>
                                   <DialogDescription>
-                                    Are you sure you want to delete Store?
+                                    Are you sure you want to delete Unit Of Measure?
                                     {/* {currentTab === "service-request-type"
                                       ? `${selectedRecord?.ServiceRequestType || "this"} Service Request Type`
                                       : `${selectedStatusRec?.StatusType || "this"} Status`

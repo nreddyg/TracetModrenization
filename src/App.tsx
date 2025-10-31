@@ -23,6 +23,7 @@ import AssetCategory from "./pages/masters/fixedAssets/AssetCategory"
 import ItemMaster from "./pages/masters/ItemMaster";
 import UnitOfMeasure from "./pages/masters/UnitsOfMeasure";
 import ItemCategory from "./pages/masters/ItemCategory";
+import ManageUnitConversion from "./pages/masters/ManageUnitConvertion";
 
 
 
@@ -223,6 +224,7 @@ const AnimatedRoutes = () => {
                   <Route path="/masters/consumables/store" element={<Store/>} />
                   <Route path="/masters/consumables/item-master" element={<ItemMaster/>} />
                   <Route path="/masters/consumables/unitsofmeasure" element={<UnitOfMeasure/>} />
+                  <Route path="/masters/consumables/unitsofmeasure/manageunitconverstion" element={<ManageUnitConversion/>} />
                   <Route path="/masters/consumables/item-category" element={<ItemCategory/>} />
                   <Route path="/masters/depreciation/book" element={<Books/>} />
                   <Route path="/masters/depreciation/book/additionaldepreciation" element={<AdditionalDepreciation/> }/>

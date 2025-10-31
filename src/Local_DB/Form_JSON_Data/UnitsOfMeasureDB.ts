@@ -23,3 +23,50 @@ export const UNITS_OF_MEASURE_DB:BaseField[]=[
         isRequired: false,
     },
 ]
+export const MANAGE_UNITS_OF_MEASURE_DB:BaseField[]=[
+    {
+        name:'base',
+        fieldType:'text',
+        label:'Base Value',
+        isRequired:true,
+        defaultValue:"1",
+        disabled:true
+        // defaultChecked:false,
+    },
+     {
+        label: 'UOM',
+        fieldType: 'dropdown',
+        name: 'baseUOM',
+        placeholder: 'Select UOM',
+        isRequired: false,
+        options: [],
+        allowClear: true,
+        defaultValue:'',
+    },
+    {
+        
+        fieldType: 'equals',
+        name:"equals"
+        
+    },
+
+     {
+        name:'target',
+        fieldType:'text',
+        label:'Target Value',
+        isRequired:true
+
+        // defaultChecked:false,
+    },
+     {
+        label: 'UOM',
+        fieldType: 'dropdown',
+        name: 'targetUOM',
+        placeholder: 'Select UOM',
+        isRequired: false,
+        options: [],
+        allowClear: true,
+        defaultValue:'',
+    },
+    
+]

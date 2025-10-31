@@ -221,9 +221,12 @@ export const URL_POST_UPDATE_ITEM_MASTER = `/api/Masters/UpdateItemMasterDetails
 //Masters Units of Measure
 
 export const URL_GET_UNITS_OF_MEASURE_DATA = `/api/Masters/GetUOMDetailsByCompanyId`;
+export const URL_GET_MANAGE_UNITS_OF_MEASURE_DATA = `/api/Masters/GetUOMConversionDetails`;
 export const URL_GET_UNITS_OF_MEASURE_DATA_BY_ID = `/api/Masters/GetUOMDetailsByCompanyId`;
 export const URL_DELETE_UNITS_OF_MEASURE = `/api/Masters/DeleteUnitofMeasureById`;
+export const URL_DELETE_CONVERSION = `/api/Masters/DeleteUOMConversionById`;
 export const URL_POST_NEW_UNITS_OF_MEASURE = `/api/Masters/AddUnitOfMeasuresDetails`;
+export const URL_POST_NEW_CONVERSION = `/api/Masters/AddUOMConversionDetails`;
 export const URL_POST_UPDATE_UNITS_OF_MEASURE = `/api/Masters/UpdateUnitOfMeasuresDetails`;
 
 

@@ -171,16 +171,16 @@ const Store = () => {
                         //   icon={<Edit className="h-4 w-4" />}
                         onClick={() => { setSelectedStore(row.original);setRecordToEditId(row.original.StoreId);fetchStoreDataByStoreId(companyId,row.original.StoreId) }}
                     >
-                        Edit
+                        <Edit className="h-4 w-4" />
                     </ReusableButton>
                     <ReusableButton
                         variant="text"
                         size="small"
                         danger
-                        icon={<Trash2 className="h-4 w-4" />}
+                        // icon={}
                         onClick={() => {setIsDelModalOpen(true);setRecordToEditId(row.original.StoreId);console.log(row.original),"C"}}
                     >
-                        Delete
+                       <Trash2 className="h-4 w-4" />
                     </ReusableButton>
                 </div>
             ),

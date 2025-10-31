@@ -196,6 +196,13 @@ export const URL_DELETE_COSTCENTER=`/api/Masters/DeleteCostCenterDetailsById`;
  export const URL_POST_SERVICELOCATIONS=`/api/Masters/AddServiceMaintenaceLocations`;
  export const URL_DELETE_SERVICELOCATIONS=`/api/Masters/DeleteServiceLocationById`;
  export const URL_UPDATE_SERVICE_LOCATIONS=`/api/Masters/UpdateServiceMaintenanceLocations`;
+
+ //Masters Cost Breakup 
+export const URL_GET_COSTBREAKUP_LIST=`/api/Masters/GetCostBreakupAttributesByCompanyId`;
+export const URL_POST_COSTBREAKUP=`/api/Masters/AddCostBreakupAttributesDetails`;
+export const URL_UPDATE_COSTBREAKUP=`/api/Masters/UpdateCostBreakupAttributesDetails`;
+export const URL_EDIT_COSTBREAKUP=`/api/Masters/GetCostBreakupAttributesByCompanyId`;
+export const URL_DELETE_COSTBREAKUP=`/api/Masters/DeleteCostBreakupAttributes`;
 // Master's fixed Assets Asset Category
 export const URL_GET_ASSET_CATEGORY_DATA = `/api/Masters/GetAssetCategoriesByCompanyId`;
 export const URL_POST_ASSET_CATEGORY_DATA = `/api/Masters/AddAssetCategoryDetails`;

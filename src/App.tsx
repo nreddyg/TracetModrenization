@@ -55,6 +55,8 @@ const AssetsMasters = WrapperLazyComponent(() => import("./pages/masters/AssetsM
 const MaintenanceMasters = WrapperLazyComponent(() => import("./pages/masters/MaintenanceMasters"));
 const ReportsMasters = WrapperLazyComponent(() => import("./pages/masters/ReportsMasters"));
 const ServiceLocations=WrapperLazyComponent(() => import("./pages/masters/ServiceLocations"));
+const ProductMasters=WrapperLazyComponent(() => import("./pages/masters/ProductMasters"));
+const CostBreakupAttributes=WrapperLazyComponent(() => import("./pages/masters/fixedAssets/CostBreakupAttributes"));
 const Books=WrapperLazyComponent(()=>import("./pages/masters/depreciation/Books"));
 const AdditionalDepreciation=WrapperLazyComponent(()=>import("./pages/masters/depreciation/AdditionalDepreciation"));
 const AddBook=WrapperLazyComponent(()=>import("./pages/masters/depreciation/AddBook"))
@@ -218,8 +220,10 @@ const AnimatedRoutes = () => {
                   <Route path="/masters/reports" element={<ReportsMasters />} />
                   <Route path="/masters/asset-location" element={<AssetLocation />} />
                   <Route path="/masters/servicemaintenance/servicelocations" element={<ServiceLocations />} />
+                  <Route path='/masters/servicemaintenance/productmaster' element={<ProductMasters/>}/>
                   <Route path="/masters/store" element={<Store/>} />
                   <Route path="/masters/fixed-assets/asset-category" element={<AssetCategory/>} />
+                  <Route path="masters/fixed-assets/costbreakup" element={<CostBreakupAttributes/>}/>
                   <Route path="/masters/consumables/store" element={<Store/>} />
                   <Route path="/masters/consumables/item-master" element={<ItemMaster/>} />
                   <Route path="/masters/consumables/item-category" element={<ItemCategory/>} />

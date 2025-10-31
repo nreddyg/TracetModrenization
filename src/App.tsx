@@ -21,6 +21,9 @@ import AssetLocation from "./pages/masters/AssetLocation";
 import Store from "./pages/masters/Store";
 import AssetCategory from "./pages/masters/fixedAssets/AssetCategory"
 import ItemMaster from "./pages/masters/ItemMaster";
+import ItemCategory from "./pages/masters/ItemCategory";
+
+
 
 // Lazy load all pages
 const Index = WrapperLazyComponent(() => import("./pages/Index"));
@@ -43,6 +46,7 @@ const Organization = WrapperLazyComponent(() => import("./pages/masters/Organiza
 const User = WrapperLazyComponent(() => import("./pages/masters/User"));
 const Vendor = WrapperLazyComponent(() => import("./pages/masters/Vendor"));
 const Customer = WrapperLazyComponent(() => import("./pages/masters/Customer"));
+const CustomerLocation = WrapperLazyComponent(() => import("./pages/masters/CustomerLocation"));
 const CompanyHierarchy = WrapperLazyComponent(() => import("./pages/masters/CompanyHierarchy"));
 const Department = WrapperLazyComponent(() => import("./pages/masters/Department"));
 const CostCenter=WrapperLazyComponent(() => import("./pages/masters/CostCenter"));
@@ -52,6 +56,9 @@ const ReportsMasters = WrapperLazyComponent(() => import("./pages/masters/Report
 const ServiceLocations=WrapperLazyComponent(() => import("./pages/masters/ServiceLocations"));
 const ProductMasters=WrapperLazyComponent(() => import("./pages/masters/ProductMasters"));
 const CostBreakupAttributes=WrapperLazyComponent(() => import("./pages/masters/fixedAssets/CostBreakupAttributes"));
+const Books=WrapperLazyComponent(()=>import("./pages/masters/depreciation/Books"));
+const AdditionalDepreciation=WrapperLazyComponent(()=>import("./pages/masters/depreciation/AdditionalDepreciation"));
+
 
 // CWIP
 const ProjectManagement = WrapperLazyComponent(() => import("./pages/cwip/ProjectManagement"));
@@ -200,6 +207,7 @@ const AnimatedRoutes = () => {
 
                   {/* Masters */}
                   <Route path="/masters/company/customer" element={<Customer />} />
+                  <Route path="/masters/company/customer/customerlocation" element={<CustomerLocation/>}/>
                   <Route path="/masters/company/vendor" element={<Vendor />} />
                   <Route path="/masters/company/user" element={<User />} />
                   <Route path="/masters/company/organization" element={<Organization />} />
@@ -217,6 +225,9 @@ const AnimatedRoutes = () => {
                   <Route path="masters/fixed-assets/costbreakup" element={<CostBreakupAttributes/>}/>
                   <Route path="/masters/consumables/store" element={<Store/>} />
                   <Route path="/masters/consumables/item-master" element={<ItemMaster/>} />
+                  <Route path="/masters/consumables/item-category" element={<ItemCategory/>} />
+                  <Route path="/masters/depreciation/book" element={<Books/>} />
+                  <Route path="/masters/depreciation/book/additionaldepreciation" element={<AdditionalDepreciation/> }/>
 
                   {/* CWIP */}
                   <Route path="/cwip/project-management" element={<ProjectManagement />} />

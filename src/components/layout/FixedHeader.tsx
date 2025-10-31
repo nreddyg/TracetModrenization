@@ -13,11 +13,12 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { GetBranchListBasedonCompanyId, GetCompanyListBasedonUserId } from '@/services/headerServices';
 import { useAppDispatch } from '@/store';
 import { getHierarchyLevelsData, getOrganizationDetailsByToken, getUserDetailsByUserName } from '@/services/appService';
-import {setAllLevelsData, setLastLevelsData, setBranch, setBranchCode, setBranchId, setCompanyId, setLoading, setUserId } from '@/store/slices/projectsSlice';
+import {setAllLevelsData, setLastLevelsData, setBranch, setBranchCode, setBranchId, setCompanyId, setLoading, setUserId, setBranchesList } from '@/store/slices/projectsSlice';
 
 const FixedHeader: React.FC = () => {
   const navigate=useNavigate();
   const breadcrumbs = useAppSelector((state) => state.ui.currentBreadcrumb);
+  
   const dispatch = useAppDispatch();
   const storeData= useAppSelector((state) => state.projects);
   const userId = storeData.userId || JSON.parse(localStorage.getItem("LoggedInUser") || "{}")?.UserId;
@@ -94,6 +95,7 @@ const FixedHeader: React.FC = () => {
           id:item.id,
           code:item.Code
         }));
+      dispatch(setBranchesList(lookupData))
         setBranchList(lookupData);
         if(!localStorage.getItem("Branch")){
           let branch = lookupData.length>1?lookupData[1].value: lookupData[0].value;

@@ -1,4 +1,4 @@
-import { URL_GET_BRANCH_LOOKUP, URL_GET_COUNTRY_LIST, URL_GET_CUSTOMER_DETAILS, URL_GET_CUSTOMER_LIST, URL_GET_CUSTOMER_LOCATION_DATA, URL_POST_ADD_NEW_CUSTOMER, URL_POST_DELETE_CUSTOMER, URL_POST_UPDATE_CUSTOMER, } from "@/config/apiUrls";
+import { URL_GET_BRANCH_LOOKUP, URL_GET_COUNTRY_LIST, URL_GET_CUSTOMER_DETAILS, URL_GET_CUSTOMER_LIST, URL_GET_CUSTOMER_LOCATION_DATA, URL_POST_ADD_CUSTOMER_LOCATION, URL_POST_ADD_NEW_CUSTOMER, URL_POST_DELETE_CUSTOMER, URL_POST_DELETE_CUSTOMER_LOCATION, URL_POST_UPDATE_CUSTOMER, URL_POST_UPDATE_CUSTOMER_LOCATION, } from "@/config/apiUrls";
 import api from "./api";
 
 interface APIResponse<T> {
@@ -78,3 +78,27 @@ export const getCustomerLocations=async (companyId:string): Promise<APIResponse<
         return { success: false,message: err.response?.data?.message || err.message,status: err.response?.status};
     }
 }
+export const postNewCustomerLocation= async (CompId: string,customerId:string,Data:string): Promise<APIResponse<any>> => {
+    try {
+        const response = await api.post(URL_POST_ADD_CUSTOMER_LOCATION,Data, { params: { CompId:CompId,CustomerId:customerId} });
+        return {success: true,data: response.data};
+    } catch (err: any) {
+        return {success: false,message: err.response?.data?.message || err.message,status: err.response?.status,};
+    }
+};
+export const deleteCustomerLocation = async (CompId: string,LocationId:string): Promise<APIResponse<any>> => {
+    try {
+        const response = await api.post(URL_POST_DELETE_CUSTOMER_LOCATION,"", { params: { CompId:CompId,LocationId:LocationId} });
+        return {success: true,data: response.data};
+    } catch (err: any) {
+        return {success: false,message: err.response?.data?.message || err.message,status: err.response?.status,};
+    }
+};
+export const updateCustomerLocation = async (CompId: string,CustomerId:string,LocationId:string,ParentLocationId:string,Data): Promise<APIResponse<any>> => {
+    try {
+        const response = await api.post(URL_POST_UPDATE_CUSTOMER_LOCATION,Data, { params: { CustomerId:CustomerId,LocationId:LocationId,ParentLocationId:ParentLocationId,CompId:CompId}});
+        return {success: true,data: response.data}; 
+    } catch (err: any) {
+        return {success: false,message: err.response?.data?.message || err.message,status: err.response?.status,};
+    }
+};

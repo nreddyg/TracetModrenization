@@ -168,7 +168,6 @@ const Store = () => {
                     <ReusableButton
                         variant="text"
                         size="small"
-                        //   icon={<Edit className="h-4 w-4" />}
                         onClick={() => { setSelectedStore(row.original);setRecordToEditId(row.original.StoreId);fetchStoreDataByStoreId(companyId,row.original.StoreId) }}
                     >
                         <Edit className="h-4 w-4" />
@@ -177,8 +176,8 @@ const Store = () => {
                         variant="text"
                         size="small"
                         danger
-                        // icon={}
-                        onClick={() => {setIsDelModalOpen(true);setRecordToEditId(row.original.StoreId);console.log(row.original),"C"}}
+                        icon={<Trash2 className="h-4 w-4" />}
+                        onClick={() => {setIsDelModalOpen(true);setRecordToEditId(row.original.StoreId)}}
                     >
                        <Trash2 className="h-4 w-4" />
                     </ReusableButton>
@@ -190,7 +189,6 @@ const Store = () => {
         dispatch(setLoading(true))
         await getStoreData(companyId).then(res => {
             if (res.data && res.data.status == undefined) {
-                //  console.log(res.data,"Nag")
                 setDataSource(res.data.StoreDetails)
             } else {
                 setDataSource([])
@@ -202,7 +200,6 @@ const Store = () => {
         dispatch(setLoading(true))
         await getStoreDataByCompanyIdAndBranchName(companyId,branch).then(res => {
             if (res.data && res.data.status == undefined) {
-                //  console.log(res.data,"Nag")
                 setDataSource(res.data)
             } else {
                 msg.warning(res.data.message || "No Data Found")
@@ -213,8 +210,6 @@ const Store = () => {
         dispatch(setLoading(true))
         await getEditStoreData(companyId,id).then(res => {
             if (res.data && res.data.status == undefined) {
-                //  console.log(res.data,"Nag")
-                // setDataSource(res.data.StoreDetails)
                 handleEdit(res.data.StoreDetails)
             } else {
                 msg.warning(res.data.message || "No Data Found")
@@ -324,7 +319,6 @@ const Store = () => {
         })
         setIsAddDialogOpen(true)
         // e.preventDefault();
-        // console.log('Store data:', formData);
         // setIsAddDialogOpen(false);
         // setFormData({ name: '', branch: '', description: '' });
       };

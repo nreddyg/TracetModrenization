@@ -15,6 +15,10 @@ import { ReusableDatePicker } from '@/components/ui/reusable-datepicker';
 import ReusableMultiSelect from '@/components/ui/reusable-multi-select';
 import { useMessage } from '@/components/ui/reusable-message';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, } from '@/components/ui/dialog';
+import { createUser, deleteUser, getCategoryList, getDepartmentList, getRoleNamesList, GetUsersList, updateUser } from '@/services/userServices';
+import { USER_DETAILS } from '@/Local_DB/Form_JSON_Data/UserDB';
+import { GetBranchListBasedonCompanyId } from '@/services/headerServices';
+import ReusableSingleCheckbox from '@/components/ui/reusable-single-checkbox';
 
 interface User {
   UserId: number,
@@ -59,6 +63,7 @@ const User = () => {
   const { control, register, handleSubmit, trigger, watch, setValue,getValues, reset, formState: { errors } } = form;
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [selectedUserData, setSelectedUserData] = useState<User | null>(null);
+  const [deletingUserData,setSelectedDeletingUserData]=useState<User | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isInboxCollapsed, setIsInboxCollapsed] = useState(false);
   const [isDelModalOpen, setIsDelModalOpen] = useState(false);
@@ -97,13 +102,10 @@ const User = () => {
       };
       setBranchAndCategoriesList({Branch:allResponses.Branch.data,Categories:allResponses.Categories.data});
       setLookupsDataInJson(allResponses);
-    } catch {
-
-    } finally {
+    } catch {} finally {
       dispatch(setLoading(false));
     }
   }
-
   useEffect(()=>{
     if (LoggedInUser?.RoleName !== 'Root Admin' && selectedUserData) {
       let field = fields.find(obj => obj.name === 'Branch');
@@ -122,8 +124,9 @@ const User = () => {
   },[selectedUserData,LoggedInUser])
   //fetch all users list
   const fetchAllUsersList = async (UserId?: number) => {
-    dispatch(setLoading(true));
-    await GetUsersList(companyId, UserId).then(res => {
+    try {
+      dispatch(setLoading(true));
+      const res = await GetUsersList(companyId, UserId);
       if (res.success && res.data) {
         if (UserId) {
           form.reset({
@@ -131,7 +134,7 @@ const User = () => {
             Branch: res.data[0]?.Branch ? res.data[0].Branch.split(',') : [],
             Department: res.data[0]?.Department ? res.data[0].Department.split(',') : [],
             Categories: res.data[0]?.Categories ? res.data[0].Categories.split(',') : [],
-            JoinDate:res.data[0].JoinDate ? res.data[0].JoinDate.split(' ')[0]:''
+            JoinDate: res.data[0].JoinDate ? res.data[0].JoinDate.split(' ')[0] : ''
           });
           setSelectedUserData(res.data[0]);
         } else {
@@ -145,9 +148,7 @@ const User = () => {
           setDataSource([]);
         }
       }
-    }).catch(err => console.log(err)).finally(() => {
-      dispatch(setLoading(false));
-    });
+    } catch { } finally { dispatch(setLoading(false)) }
   }
   function setLookupsDataInJson(data: any) {
     let keys = Object.keys(data);
@@ -247,8 +248,8 @@ const User = () => {
     }
   };
   const addUser = async (payload: any) => {
-    dispatch(setLoading(true))
     try {
+      dispatch(setLoading(true))
       const res = await createUser(companyId, payload);
       if (res.success && res.data) {
         if (res.data.status) {
@@ -265,8 +266,8 @@ const User = () => {
     }
   };
   const updateUserDetails = async (payload: any) => {
-    dispatch(setLoading(true));
     try {
+      dispatch(setLoading(true));
       const res = await updateUser(companyId, selectedUserData?.UserId, payload);
       if (res.data && res.data.status !== undefined) {
         if (res.data.status) {
@@ -288,12 +289,12 @@ const User = () => {
     }
   };
   const delUser = async () => {
-    dispatch(setLoading(true));
     try {
-      const res = await deleteUser(companyId, selectedUserData.UserId);
+      dispatch(setLoading(true));
+      const res = await deleteUser(companyId, deletingUserData.UserId);
       if (res.data[0].status !== undefined) {
         if (res.data[0].status === true) {
-          if (LoggedInUser.UserId && (selectedUserData.UserId === LoggedInUser.UserId)) {
+          if (LoggedInUser.UserId && (deletingUserData.UserId === LoggedInUser.UserId)) {
             logoutFunction();
           }
           msg.success(res.data[0].message);
@@ -312,6 +313,15 @@ const User = () => {
       dispatch(setLoading(false));
     }
   };
+  const handleDelete=(e,data)=>{
+    e.stopPropagation();
+    setIsDelModalOpen(true);
+    setSelectedDeletingUserData(data)
+  }
+  const handleDeleteCancel=()=>{
+    setIsDelModalOpen(false);
+    setSelectedDeletingUserData(null);
+  }
   const handleReset = () => {
     if(selectedUserData){
       let field=fields.find(f=>f.name==='Branch');
@@ -323,6 +333,7 @@ const User = () => {
     }
     setSelectedUser(null);
     setSelectedUserData(null);
+    setSelectedDeletingUserData(null);
     form.reset({
       FirstName: '', LastName: '', Email: '', OrganizationDomain: '', PanNumber: '',
       AddressLine1: '', AddressLine2: '', City: '', State: '', CountryName: '',
@@ -559,7 +570,7 @@ const User = () => {
                               title={user.MobileNumber}
                               className="block max-w-[90px] truncate text-[11px] text-gray-500"
                             >
-                              <Trash2 height={18} className='text-red-400' onClick={() => setIsDelModalOpen(true)}></Trash2>
+                              <Trash2 height={18} className='text-red-400' onClick={(e) => handleDelete(e,user)}></Trash2>
                             </span>
                           </div>
                         }
@@ -641,13 +652,13 @@ const User = () => {
           <DialogHeader>
             <DialogTitle>Confirm the action</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete {selectedUserData?.UserName}
+              Are you sure you want to delete {deletingUserData?.UserName} ?
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <ReusableButton
               variant="default"
-              onClick={() => setIsDelModalOpen(false)}
+              onClick={handleDeleteCancel}
             >
               Cancel
             </ReusableButton>
@@ -675,165 +686,155 @@ export default User;
 
 
 
-import { useCallback } from 'react';
-import { SidebarTrigger } from '@/components/ui/sidebar';
-import { CardHeader } from '@/components/ui/card';
-import { ReusableTable, TableAction, TablePermissions } from '@/components/ui/reusable-table';
-import { Plus, Edit } from 'lucide-react';
-import { ColumnDef } from '@tanstack/react-table';
-import { useToast } from '@/hooks/use-toast';
-import { createUser, deleteUser, getCategoryList, getDepartmentList, getRoleNamesList, GetUsersList, updateUser } from '@/services/userServices';
-import { USER_DETAILS } from '@/Local_DB/Form_JSON_Data/UserDB';
-import { GetBranchListBasedonCompanyId } from '@/services/headerServices';
-import ReusableSingleCheckbox from '@/components/ui/reusable-single-checkbox';
 
-interface UserData {
-  UserId: number,
-  FirstName: string,
-  LastName: string,
-  Email: string,
-  EmployeeId: string,
-  MobileNumber: string,
-  PhoneNumber: string,
-  UserName: string,
-  DeviceName: string,
-  RoleTypeId: number,
-  RoleName: string,
-  DepartmentIds: string,
-  Department: string,
-  AssetCategoryIds: string,
-  Categories: string,
-  BranchIds: string,
-  Branch: string,
-  Deactive: boolean,
-  DeactiveDate: string,
-  IsServiceDesk: boolean,
-  JoinDate: string,
-  Password: string,
-  ConfirmPassword: string
-}
-const Positive = 'border font-medium text-xs px-2 py-0.5 bg-green-50 text-green-700 border-green-200 hover:bg-green-600 hover:text-white transition-colors';
-const Negative = 'border font-medium text-xs px-2 py-0.5 bg-red-50 text-red-700 border-red-200 hover:bg-red-600 hover:text-white transition-colors'
-export const User1 = () => {
-  const { toast } = useToast();
-  const dispatch = useAppDispatch();
-  const companyId = useAppSelector(state => state.projects.companyId)
-  const [dataSource, setDataSource] = useState<UserData[]>([]);
-  const [columns, setColumns] = useState<ColumnDef<UserData>[]>([
-    { id: 'FirstName', accessorKey: "FirstName", header: "First Name" },
-    { id: 'LastName', accessorKey: "LastName", header: "Last Name" },
-    { id: 'UserName', accessorKey: "UserName", header: "User Name" },
-    { id: 'RoleName', accessorKey: "RoleName", header: "Role Name" },
-    { id: 'EmployeeId', accessorKey: "EmployeeId", header: "Employee ID" },
-    { id: 'Email', accessorKey: "Email", header: "Email ID" },
-    { id: 'PhoneNumber', accessorKey: "PhoneNumber", header: "Mobile Number" },
-    {
-      id: 'Status', accessorKey: "Status", header: "Status", cell: ({ row }) => (
-        row.original.Deactive ? <Badge title='Status' className={Negative}>Deactive</Badge> : <Badge title='Status' className={Positive}>Active</Badge>
-      )
-    },
-    {
-      id: 'IsServiceDesk', accessorKey: "IsServiceDesk", header: "Is Service Desk User",
-      cell: ({ row }) => (
-        row.original.IsServiceDesk ? <Badge title='Is Service Desk User' className={Positive}>Yes</Badge> : <Badge title='Is Service Desk User' variant="destructive" className={Negative}>No</Badge>
-      )
-    },
-  ])
 
-  useEffect(() => {
-    if (companyId) fetchAllUsersList();
-  }, [companyId]);
-  //fetch all users list
-  const fetchAllUsersList = async () => {
-    dispatch(setLoading(true));
-    await GetUsersList(companyId).then(res => {
-      if (res.success && res.data && Array.isArray(res.data)) {
-        setDataSource(res.data);
-      } else {
-        setDataSource([]);
-      }
-    }).catch(err => console.log(err)).finally(() => {
-      dispatch(setLoading(false));
-    });
-  }
-  const handleDelete = (data: UserData): void => {
-  }
-  const handleEdit = (data: UserData): void => {
-  }
-  const tableActions: TableAction<UserData>[] = [
-    {
-      label: 'Edit',
-      icon: Edit,
-      onClick: handleEdit,
-      variant: 'default',
-    },
-    {
-      label: 'Delete',
-      icon: Trash2,
-      onClick: handleDelete,
-      variant: 'destructive',
-    },
-  ];
-  // handle refresh
-  const handleRefresh = useCallback(() => {
-    toast({ title: "Data Refreshed", description: "All users data has been updated", });
-    fetchAllUsersList();
-  }, [toast]);
-  // Define table permissions
-  const tablePermissions: TablePermissions = {
-    canEdit: true,
-    canDelete: true,
-    canView: true,
-    canExport: false,
-    canAdd: true,
-    canManageColumns: true,
-  };
-  return (
-    <div className="h-full overflow-y-scroll bg-gray-50 transition-all duration-300 ease-in-out">
-      <header className="bg-white border-b px-6 py-4 shadow-sm">
-        <div className="flex items-center gap-4">
-          <SidebarTrigger />
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <span>Masters</span><span>/</span><span>Company</span><span>/</span><span className="text-gray-900 font-medium">User</span>
-          </div>
-        </div>
-      </header>
-      <div className="p-6 space-y-6 animate-fade-in">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-900">Users</h1>
-          <ReusableButton
-            htmlType="button"
-            variant="default"
-            onClick={null}
-            iconPosition="left"
-            size="middle"
-            className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
-          >
-            <div className='flex items-center'><Plus className="h-4 w-4 mr-2" />Add User</div>
-          </ReusableButton>
-        </div>
-        <Card className="shadow-sm">
-          <CardHeader className="pb-4">
-          </CardHeader>
-          <CardContent>
-            <ReusableTable
-              data={dataSource} columns={columns}
-              permissions={tablePermissions}
-              title="Users List"
-              onRefresh={handleRefresh} enableSearch={true}
-              enableSelection={false} enableExport={true}
-              enableColumnVisibility={true} enablePagination={true}
-              enableSorting={true} enableFiltering={true}
-              pageSize={10} emptyMessage="No Data found"
-              rowHeight="normal" storageKey="user-master-list-table"
-              actions={tableActions}
-              enableColumnPinning
-            />
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  );
-};
+// interface UserData {
+//   UserId: number,
+//   FirstName: string,
+//   LastName: string,
+//   Email: string,
+//   EmployeeId: string,
+//   MobileNumber: string,
+//   PhoneNumber: string,
+//   UserName: string,
+//   DeviceName: string,
+//   RoleTypeId: number,
+//   RoleName: string,
+//   DepartmentIds: string,
+//   Department: string,
+//   AssetCategoryIds: string,
+//   Categories: string,
+//   BranchIds: string,
+//   Branch: string,
+//   Deactive: boolean,
+//   DeactiveDate: string,
+//   IsServiceDesk: boolean,
+//   JoinDate: string,
+//   Password: string,
+//   ConfirmPassword: string
+// }
+// const Positive = 'border font-medium text-xs px-2 py-0.5 bg-green-50 text-green-700 border-green-200 hover:bg-green-600 hover:text-white transition-colors';
+// const Negative = 'border font-medium text-xs px-2 py-0.5 bg-red-50 text-red-700 border-red-200 hover:bg-red-600 hover:text-white transition-colors'
+// export const User1 = () => {
+//   const { toast } = useToast();
+//   const dispatch = useAppDispatch();
+//   const companyId = useAppSelector(state => state.projects.companyId)
+//   const [dataSource, setDataSource] = useState<UserData[]>([]);
+//   const [columns, setColumns] = useState<ColumnDef<UserData>[]>([
+//     { id: 'FirstName', accessorKey: "FirstName", header: "First Name" },
+//     { id: 'LastName', accessorKey: "LastName", header: "Last Name" },
+//     { id: 'UserName', accessorKey: "UserName", header: "User Name" },
+//     { id: 'RoleName', accessorKey: "RoleName", header: "Role Name" },
+//     { id: 'EmployeeId', accessorKey: "EmployeeId", header: "Employee ID" },
+//     { id: 'Email', accessorKey: "Email", header: "Email ID" },
+//     { id: 'PhoneNumber', accessorKey: "PhoneNumber", header: "Mobile Number" },
+//     {
+//       id: 'Status', accessorKey: "Status", header: "Status", cell: ({ row }) => (
+//         row.original.Deactive ? <Badge title='Status' className={Negative}>Deactive</Badge> : <Badge title='Status' className={Positive}>Active</Badge>
+//       )
+//     },
+//     {
+//       id: 'IsServiceDesk', accessorKey: "IsServiceDesk", header: "Is Service Desk User",
+//       cell: ({ row }) => (
+//         row.original.IsServiceDesk ? <Badge title='Is Service Desk User' className={Positive}>Yes</Badge> : <Badge title='Is Service Desk User' variant="destructive" className={Negative}>No</Badge>
+//       )
+//     },
+//   ])
+
+//   useEffect(() => {
+//     if (companyId) fetchAllUsersList();
+//   }, [companyId]);
+//   //fetch all users list
+//   const fetchAllUsersList = async () => {
+//     dispatch(setLoading(true));
+//     await GetUsersList(companyId).then(res => {
+//       if (res.success && res.data && Array.isArray(res.data)) {
+//         setDataSource(res.data);
+//       } else {
+//         setDataSource([]);
+//       }
+//     }).catch(err => console.log(err)).finally(() => {
+//       dispatch(setLoading(false));
+//     });
+//   }
+//   const handleDelete = (data: UserData): void => {
+//   }
+//   const handleEdit = (data: UserData): void => {
+//   }
+//   const tableActions: TableAction<UserData>[] = [
+//     {
+//       label: 'Edit',
+//       icon: Edit,
+//       onClick: handleEdit,
+//       variant: 'default',
+//     },
+//     {
+//       label: 'Delete',
+//       icon: Trash2,
+//       onClick: handleDelete,
+//       variant: 'destructive',
+//     },
+//   ];
+//   // handle refresh
+//   const handleRefresh = useCallback(() => {
+//     toast({ title: "Data Refreshed", description: "All users data has been updated", });
+//     fetchAllUsersList();
+//   }, [toast]);
+//   // Define table permissions
+//   const tablePermissions: TablePermissions = {
+//     canEdit: true,
+//     canDelete: true,
+//     canView: true,
+//     canExport: false,
+//     canAdd: true,
+//     canManageColumns: true,
+//   };
+//   return (
+//     <div className="h-full overflow-y-scroll bg-gray-50 transition-all duration-300 ease-in-out">
+//       <header className="bg-white border-b px-6 py-4 shadow-sm">
+//         <div className="flex items-center gap-4">
+//           <SidebarTrigger />
+//           <div className="flex items-center gap-2 text-sm text-gray-600">
+//             <span>Masters</span><span>/</span><span>Company</span><span>/</span><span className="text-gray-900 font-medium">User</span>
+//           </div>
+//         </div>
+//       </header>
+//       <div className="p-6 space-y-6 animate-fade-in">
+//         <div className="flex items-center justify-between">
+//           <h1 className="text-2xl font-bold text-gray-900">Users</h1>
+//           <ReusableButton
+//             htmlType="button"
+//             variant="default"
+//             onClick={null}
+//             iconPosition="left"
+//             size="middle"
+//             className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+//           >
+//             <div className='flex items-center'><Plus className="h-4 w-4 mr-2" />Add User</div>
+//           </ReusableButton>
+//         </div>
+//         <Card className="shadow-sm">
+//           <CardHeader className="pb-4">
+//           </CardHeader>
+//           <CardContent>
+//             <ReusableTable
+//               data={dataSource} columns={columns}
+//               permissions={tablePermissions}
+//               title="Users List"
+//               onRefresh={handleRefresh} enableSearch={true}
+//               enableSelection={false} enableExport={true}
+//               enableColumnVisibility={true} enablePagination={true}
+//               enableSorting={true} enableFiltering={true}
+//               pageSize={10} emptyMessage="No Data found"
+//               rowHeight="normal" storageKey="user-master-list-table"
+//               actions={tableActions}
+//               enableColumnPinning
+//             />
+//           </CardContent>
+//         </Card>
+//       </div>
+//     </div>
+//   );
+// };
 
 // export default User;

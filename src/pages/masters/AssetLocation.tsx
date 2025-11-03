@@ -470,7 +470,6 @@ const AssetLocation = () => {
     // getting assetlocationBYId
     async function getIndAssetLocDataByID(branchName, id, companyId) {
         dispatch(setLoading(true))
-        console.log("branchName", branchName, "id", id, "companyId", companyId);
         await getAssetLocationDataByLocID(branchName, id, companyId).then(res => {
             if (res.data && res.data.length > 0) {
                 const details = res.data[0];

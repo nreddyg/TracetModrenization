@@ -1,23 +1,19 @@
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ReusableButton } from '@/components/ui/reusable-button';
 import { ReusableInput } from '@/components/ui/reusable-input';
-import { ReusableTable, TableAction, TablePermissions } from '@/components/ui/reusable-table';
+import { ReusableTable, TablePermissions } from '@/components/ui/reusable-table';
 import { ReusableDropdown } from '@/components/ui/reusable-dropdown';
-// import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Plus, Edit, Trash2 } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Plus, Trash2 } from 'lucide-react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ColumnDef } from '@tanstack/react-table';
 import { useMessage } from '@/components/ui/reusable-message';
 import { useAppDispatch, useAppSelector } from '@/store/reduxStore';
 import { setLoading } from '@/store/slices/projectsSlice';
-// import { deleteAssetCat, getAssetCatByID, getAssetCategoryData, getCostBreakUpAttribute, getUserAttributes, postAssetCatDetails, updateAssetCat } from '@/services/assetCategoryServices';
 import { Controller, useForm } from 'react-hook-form';
-import { Asset_Main_Category_DB } from '@/Local_DB/Form_JSON_Data/AssetCategoryDB';
 import { BaseField, GenericObject } from '@/Local_DB/types/types';
 import ReusableMultiSelect from '@/components/ui/reusable-multi-select';
 import { FaSearch } from 'react-icons/fa';
@@ -38,97 +34,60 @@ interface SubCategory {
 const CustomerLocation = () => {
     const [activeTab, setActiveTab] = useState('main');
     const location = useLocation();
-    const navigate=useNavigate()
+    const navigate = useNavigate()
     const [isMainDialogOpen, setIsMainDialogOpen] = useState(false);
     const [isSubDialogOpen, setIsSubDialogOpen] = useState(false);
     const [isMainDelOpen, setIsMainDelOpen] = useState(false)
-    const [mainCategoryName, setMainCategoryName] = useState('');
-    const [subCategoryName, setSubCategoryName] = useState('');
     const [getMainCategoryData, setGetMainCategoryData] = useState([]);
     const [subCategoryData, setSubCategoryData] = useState([]);
     const [subDataToShow, setSubDataToShow] = useState([]);
     const [recordToEditId, setRecordToEditId] = useState(null);
     const [subRecID, setSubRecID] = useState(null);
-    const [subRecord, setSubRecord] = useState({});
     const [mainCatfields, setMainCatFields] = useState<BaseField[]>(Customer_Location_DB);
     const [mainDelRec, setMainDelRec] = useState<any>();
     const [selectedParentData, setSelectedParentData] = useState(null);
     const companyId = useAppSelector(state => state.projects.companyId);
-    const [customerId, setCustomerId] = useState(location.state?.selectedCustomerData?location.state.selectedCustomerData.CustomerID:"")
-    const [parentId,setParentId]=useState(null)
-    const branch = useAppSelector(state => state.projects.branch) || '';
-        const form = useForm<GenericObject>({
+    const [customerId, setCustomerId] = useState(location.state?.selectedCustomerData ? location.state.selectedCustomerData.CustomerID : "")
+    const form = useForm<GenericObject>({
         defaultValues: mainCatfields.reduce((acc, f) => {
             acc[f.name!] = f.defaultChecked ?? '';
             return acc;
         }, {} as GenericObject),
 
     });
-
     const { control, register, handleSubmit, watch, setValue, reset, formState: { errors } } = form;
     const msg = useMessage()
     const dispatch = useAppDispatch();
-
     useEffect(() => {
         if (companyId) {
             getLocationDetails(companyId);
         }
     }, [companyId])
+    useEffect(() => {
+        const parentId = watch('mainLocationDropdown');
+        if (parentId) {
+            let find = getMainCategoryData.find((x) => x.LocationId === parentId);
+            setSelectedParentData(find)
+            let subdata = []
+            subCategoryData?.forEach((obj) => {
+                if (parentId == obj.Parent) {
+                    subdata.push(obj)
+                }
+            })
+            setSubDataToShow(subdata)
+        } else {
+            setSubDataToShow([])
+        }
 
-      useEffect(()=>{
- const parentId = watch('mainLocationDropdown');
-
- if(parentId)
- {
-       let find = getMainCategoryData.find((x) => x.LocationId === parentId);
-      setSelectedParentData(find)
-
-// settingSubdata(parentId)
- let subdata = []
-    subCategoryData?.forEach((obj) => {
-      if (parentId == obj.Parent) {
-        subdata.push(obj)
-      }
-    })
-    setSubDataToShow(subdata)
- }else{
-     setSubDataToShow([])
- }
-
-  },[watch("mainLocationDropdown"),subCategoryData])
-
-
-   
-   
-
-    // useEffect(() => {
-    //     if (parentId) settingSubdata(parentId);
-    // }, [parentId, subCategoryData])
-
-    // console.log("selectedParentData", selectedParentData)
-
-    // const [subCatgory] = useState<SubCategory[]>([]);
-
-    // const settingSubdata = (val) => {
-    //     let subdata = []
-    //     subCategoryData.forEach((obj) => {
-    //         if (val == obj.Parent) {
-    //             subdata.push(obj)
-    //         }
-    //     })
-    //     setSubCategoryData(subdata)
-    // }
-
+    }, [watch("mainLocationDropdown"), subCategoryData])
     const mainCategoryColumns: ColumnDef<MainCategory>[] = [
         {
             accessorKey: 'LocationName',
             header: 'Name',
             cell: ({ row }) => (
-
                 <span className="font-medium text-gray-900 text-sm">{row.getValue('LocationName')}</span>
             ),
         },
-
         {
             id: 'actions',
             accessorKey: 'actions',
@@ -138,10 +97,7 @@ const CustomerLocation = () => {
                     <ReusableButton
                         variant="text"
                         size="small"
-                        //   icon={<Edit className="h-4 w-4" />}
-                        onClick={() => { setRecordToEditId(row.original.LocationId);handleEdit(true,row.original) }}
-
-                    // onClick={() => { setRecordToEditId(row.original.AssetCategoryId); getAssetCategoryByID(row.original.AssetCategoryId, companyId) }}
+                        onClick={() => { setRecordToEditId(row.original.LocationId); handleEdit(true, row.original) }}
                     >
                         Edit
                     </ReusableButton>
@@ -158,7 +114,6 @@ const CustomerLocation = () => {
             ),
         },
     ]
-
     const subLocationColumns: ColumnDef<SubCategory>[] = [
         {
             accessorKey: 'LocationName',
@@ -177,7 +132,7 @@ const CustomerLocation = () => {
                         variant="text"
                         size="small"
                         //   icon={<Edit className="h-4 w-4" />}
-                        onClick={() => { setSubRecID(row.original.LocationId); setSubRecord(row.original);handleEdit(false,row.original)}}
+                        onClick={() => { setSubRecID(row.original.LocationId); handleEdit(false, row.original) }}
                     >
                         Edit
                     </ReusableButton>
@@ -186,7 +141,7 @@ const CustomerLocation = () => {
                         size="small"
                         danger
                         icon={<Trash2 className="h-4 w-4" />}
-                        onClick={()=>{ setSubRecID(row.original.LocationId); setMainDelRec(row.original); setIsMainDelOpen(true)}}
+                        onClick={() => { setSubRecID(row.original.LocationId); setMainDelRec(row.original); setIsMainDelOpen(true) }}
                     >
                         Delete
                     </ReusableButton>
@@ -194,26 +149,20 @@ const CustomerLocation = () => {
             ),
         },
     ];
-
     let handleReset = () => {
         reset({
-            // ...watch(),
-            
-    "LocationName": "",
-    "mainLocationDropdown":watch("mainLocationDropdown"),
-    "LocationNameSub": "",
-    "Address": "",
-    "City": "",
-    "State": "",
-    "Country": "",
-    "MobileNo": "",
-    "ZipCode": "",
-    "TIN_GSTIN_UIN": ""
-
-           
+            "LocationName": "",
+            "mainLocationDropdown": watch("mainLocationDropdown"),
+            "LocationNameSub": "",
+            "Address": "",
+            "City": "",
+            "State": "",
+            "Country": "",
+            "MobileNo": "",
+            "ZipCode": "",
+            "TIN_GSTIN_UIN": ""
         })
     }
-
     function handleCancel() {
         setSubRecID(null)
         setRecordToEditId(null);
@@ -222,23 +171,6 @@ const CustomerLocation = () => {
         setIsMainDelOpen(false);
         handleReset();
     }
-
-    const handleSubEdit = (subData) => {
-        reset({
-            ...watch(),
-            subname: subData.Name,
-            subcode: subData.Code,
-            attributegroup: subData?.AttributeGroupNames ? subData?.AttributeGroupNames?.split(',') : [],
-            costbreakgroup: subData.CostBreakupGroupNames ? subData?.CostBreakupGroupNames : [],
-            lifespan: subData.LifeSpan,
-            salvagevalue: subData.SalvageValue,
-            subdescription: subData.Description,
-        });
-
-        setIsSubDialogOpen(true);
-    };
-
-
     function handleSubReset() {
         reset({
             ...watch(),
@@ -260,18 +192,13 @@ const CustomerLocation = () => {
         canAdd: true,
         canManageColumns: false,
     };
-
     const getFieldsByNames = (names: string[]) => mainCatfields.filter(f => names.includes(f.name!));
-
     const renderField = (field: BaseField) => {
         const { name, label, fieldType, isRequired, dependsOn, show = true } = field;
         if (!name || !show) return null;
         const validationRules = {
             required: isRequired ? `${label} is Required` : false,
         };
-
-    
-
         switch (fieldType) {
             case 'text':
                 return (
@@ -331,7 +258,6 @@ const CustomerLocation = () => {
                 );
         }
     }
-
     // getAll AssetCat Details
     const getLocationDetails = async (companyId) => {
         dispatch(setLoading(true));
@@ -343,7 +269,7 @@ const CustomerLocation = () => {
                     res.data?.CustomerLocation.map((obj) => {
                         if (obj.Parent === "#" && obj.CustomerId == customerId) {
                             mainarr.push(obj)
-                        } else if(obj.CustomerId == customerId){
+                        } else if (obj.CustomerId == customerId) {
                             subarr.push(obj)
                         }
                     })
@@ -361,33 +287,29 @@ const CustomerLocation = () => {
     };
     const setMainData = (mainlocations) => {
         let mainloc = []
-        let mainLocOptions=[]
+        let mainLocOptions = []
         mainlocations?.forEach((obj) => {
             if (obj.CustomerId == customerId) {
                 mainloc.push(obj)
                 mainLocOptions.push({
-                    label:obj.LocationName,
-                    value:obj.LocationId
+                    label: obj.LocationName,
+                    value: obj.LocationId
                 })
             }
         }
         )
-        const fieldData=[...mainCatfields]
-        fieldData.forEach((obj)=>{
-if(obj.name==="mainLocationDropdown"){
-    obj.options=mainLocOptions
-}
+        const fieldData = [...mainCatfields]
+        fieldData.forEach((obj) => {
+            if (obj.name === "mainLocationDropdown") {
+                obj.options = mainLocOptions
+            }
         })
         setMainCatFields(fieldData)
-        // console.log(mainloc, "main loc")
-      
         setGetMainCategoryData(mainloc);
     }
-
     //adding Asset Category
     const addNewCustLocationAPI = async (companyId, payload) => {
         dispatch(setLoading(true))
-        console.log(companyId, customerId, payload)
         await postNewCustomerLocation(companyId, customerId, payload).then((res) => {
             if (res.data.status !== undefined) {
                 if (res.data.status === true) {
@@ -406,9 +328,9 @@ if(obj.name==="mainLocationDropdown"){
         }).catch(() => { }).finally(() => { dispatch(setLoading(false)) })
     }
     // update MainCategory API
-    const updateAPI = async ( companyId,customerId ,LocationId, ParentId,data) => {
+    const updateAPI = async (companyId, customerId, LocationId, ParentId, data) => {
         dispatch(setLoading(true))
-        await updateCustomerLocation( companyId,customerId,LocationId, ParentId, data).then((res) => {
+        await updateCustomerLocation(companyId, customerId, LocationId, ParentId, data).then((res) => {
             if (res.data.status !== undefined) {
                 if (res.data.status === true) {
                     handleCancel()
@@ -423,14 +345,10 @@ if(obj.name==="mainLocationDropdown"){
             }
         }).catch(() => { }).finally(() => { dispatch(setLoading(false)) })
     }
-
-    // console.log("costbreakUpkjh", watch("costbreakgroup"));
     // post submit function
     const submit = (e, isMain, data) => {
-        console.log(e, data, "e")
         e.preventDefault();
         if (isMain) {
-
             let payload = {
                 'CustomerLocationDetails': [
                     {
@@ -450,18 +368,11 @@ if(obj.name==="mainLocationDropdown"){
                 addNewCustLocationAPI(companyId, payload)
             }
             if (recordToEditId !== null) {
-                  updateAPI(companyId,customerId, 0, recordToEditId, payload)
+                updateAPI(companyId, customerId, 0, recordToEditId, payload)
             }
-            //         addNewCustLocationAPI(companyId, payload);
-            // } else if (recordToEditId !== null) {
-
-            //     // update API here
-            //     // updateAPI(recordToEditId, 0, companyId, payload)
-            // }
-            } 
-            else {
-
-                  let payload = {
+        }
+        else {
+            let payload = {
                 'CustomerLocationDetails': [
                     {
                         "MainLocationName": selectedParentData["LocationName"],
@@ -480,323 +391,270 @@ if(obj.name==="mainLocationDropdown"){
                 addNewCustLocationAPI(companyId, payload)
             }
             if (subRecID !== null) {
-                  updateAPI(companyId,customerId, subRecID, selectedParentData?.LocationId, payload)
+                updateAPI(companyId, customerId, subRecID, selectedParentData?.LocationId, payload)
             }
-         
-
-                }
-            }
-
-
-       
-            //Deleting main
-            const handleMainDelete = async (companyId,ID) => {
-                dispatch(setLoading(true));
-                await deleteCustomerLocation(companyId,ID)
-                    .then((res) => {
-                        if (res.data.status !== undefined) {
-                            if (res.data.status === true) {
-                                msg.success(res.data.message);
-                                getLocationDetails(companyId);
-                                handleCancel();
-                            }
-                            else {
-                                msg.warning(res.data.message);
-                            }
-                        } else {
-                            msg.warning(res.data.ErrorDetails[0]["Error Message"]);
-                        }
-                    })
-                    .catch((err) => {
-                        // TracetMessage("error","1vh","Failed to Delete Asset Category","assetcategorydelete");   
-                    })
-                    .finally(() => {
-                        dispatch(setLoading(false));
-                    });
-                handleCancel()
-                
-            };
-
-
-            // function handleReset() {
-            //     reset({
-            //         ...watch(),
-            //         name: '',
-            //         code: '',
-            //         assetacquisitionaccount: '',
-            //         assetdepreciationaccount: '',
-            //         description: '',
-            //         depreciationaccount: ''
-            //     })
-            // }
-            function subDialogFN() {
-                setIsSubDialogOpen(false);
-                setSubRecID(null);
-            }
-
-
-            function handleModalOpen(flag) {
-                if (flag === true) {
-                    setIsMainDialogOpen(true)
-                } else if (flag === false) {
-                    if(watch("mainLocationDropdown")){
-                    setIsSubDialogOpen(true);
-                    handleSubReset();
-                    setSubRecID(null);
-                    setSubRecord({});
-                    }else{
-                        msg.warning("Please Select Main Location")
+        }
+    }
+    //Deleting main
+    const handleMainDelete = async (companyId, ID) => {
+        dispatch(setLoading(true));
+        await deleteCustomerLocation(companyId, ID)
+            .then((res) => {
+                if (res.data.status !== undefined) {
+                    if (res.data.status === true) {
+                        msg.success(res.data.message);
+                        getLocationDetails(companyId);
+                        handleCancel();
                     }
-                    
+                    else {
+                        msg.warning(res.data.message);
+                    }
                 } else {
-                    setIsMainDialogOpen(false);
-                    setIsSubDialogOpen(false)
+                    msg.warning(res.data.ErrorDetails[0]["Error Message"]);
                 }
+            })
+            .catch((err) => {
+            })
+            .finally(() => {
+                dispatch(setLoading(false));
+            });
+        handleCancel()
+    };
+    function handleModalOpen(flag) {
+        if (flag === true) {
+            setIsMainDialogOpen(true)
+        } else if (flag === false) {
+            if (watch("mainLocationDropdown")) {
+                setIsSubDialogOpen(true);
+                handleSubReset();
+                setSubRecID(null);
+            } else {
+                msg.warning("Please Select Main Location")
             }
+        } else {
+            setIsMainDialogOpen(false);
+            setIsSubDialogOpen(false)
+        }
+    }
+    const handleEdit = (isMain, data) => {
+        if (isMain) {
+            reset({
 
-            const handleEdit = (isMain,data) => {
-            if(isMain){
-                 reset({
-                            
-    "LocationName": data["LocationName"],
-    "mainLocationDropdown": "",
-    "LocationNameSub": "",
-    "Address": "",
-    "City": "",
-    "State": "",
-    "Country": "",
-    "MobileNo": "",
-    "ZipCode": "",
-    "TIN_GSTIN_UIN": ""
-                
-                })
-                setIsMainDialogOpen(true)
-            }else{
-reset({
-    "LocationName": "",
-    "mainLocationDropdown":watch("mainLocationDropdown"),
-    "LocationNameSub":data["LocationName"],
-    "Address":data["Address"],
-    "City":data["City"],
-    "State":data["State"],
-    "Country":data["Country"],
-    "MobileNo":data["MobileNo"],
-    "ZipCode": data["ZipCode"],
-    "TIN_GSTIN_UIN": data["TIN_GSTIN_UIN"]
-                })
-                       setIsSubDialogOpen(true);
-            }
-                
-            }
-            return (
-                <div className="h-full overflow-y-scroll bg-gray-50/30">
-                    <header className="bg-card flex justify-between border-b px-6 py-4 shadow-sm">
-                        <div className="flex items-center gap-4">
-                            <SidebarTrigger />
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <span>Masters</span>
-                                <span>/</span>
-                                <span>Fixed Assets</span>
-                                <span>/</span>
-                                <span className="text-foreground font-medium">Customer Location</span>
-                            </div>
-                        </div>
-                    </header>
-                    <div className="p-4 space-y-4">
-                        <div className='ps-3'>
-                            <h1 className="text-3xl font-bold text-gray-900">Customer Location</h1>
-                        </div>
-                        <Card className="border-0 shadow-sm mt-2">
-                            <CardHeader className="pb-2 pt-2">
-                                <div className='mt-2 p-2'>
-                                    <Tabs value={activeTab} onValueChange={setActiveTab}>
-                                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                                            <TabsList>
-                                                <TabsTrigger value="main">Main Location</TabsTrigger>
-                                                <TabsTrigger value="sub">Sub Location</TabsTrigger>
-                                            </TabsList>
-                                            <div className='flex items-center gap-2'>
-                                             <ReusableButton
-                                                            variant="text"
-                                                    
-                                                            onClick={() => { navigate("/masters/company/customer")}}
-                                                            icon={""}
-                                                          >
-                                                           Back
-                                                          </ReusableButton>
-                                            <ReusableButton
-                                                variant="primary"
-                                                icon={<Plus className="h-4 w-4" />}
-                                                onClick={() => activeTab === 'main' ? handleModalOpen(true) : handleModalOpen(false)}
-                                            >
-                                                Add
-                                            </ReusableButton>
-                                            </div>
-                                        </div>
+                "LocationName": data["LocationName"],
+                "mainLocationDropdown": "",
+                "LocationNameSub": "",
+                "Address": "",
+                "City": "",
+                "State": "",
+                "Country": "",
+                "MobileNo": "",
+                "ZipCode": "",
+                "TIN_GSTIN_UIN": ""
 
-                                        <TabsContent value="main" className="space-y-4">
-                                            <ReusableTable
-                                                data={getMainCategoryData}
-                                                columns={mainCategoryColumns}
-                                                // actions={tableActions}
-                                                permissions={tablePermissions}
-                                                title=""
-                                                //    onRefresh={handleRefresh}
-                                                enableSearch={false}
-                                                enableSelection={false}
-                                                // enableExport={true}
-                                                enableColumnVisibility={true}
-                                                enablePagination={true}
-                                                enableSorting={true}
-                                                enableFiltering={true}
-                                                pageSize={10}
-                                                emptyMessage="No user groups found"
-                                                rowHeight="normal"
-                                                storageKey="usergroups-table"
-                                            />
-                                        </TabsContent>
+            })
+            setIsMainDialogOpen(true)
+        } else {
+            reset({
+                "LocationName": "",
+                "mainLocationDropdown": watch("mainLocationDropdown"),
+                "LocationNameSub": data["LocationName"],
+                "Address": data["Address"],
+                "City": data["City"],
+                "State": data["State"],
+                "Country": data["Country"],
+                "MobileNo": data["MobileNo"],
+                "ZipCode": data["ZipCode"],
+                "TIN_GSTIN_UIN": data["TIN_GSTIN_UIN"]
+            })
+            setIsSubDialogOpen(true);
+        }
 
-                                        <TabsContent value="sub" className="space-y-4">
-                                            <div className='flex items-center gap-6 mb-3'>
-                                                <div>
-                                                    <h2 className='text-lg mb-2'>Select Main Location</h2>
-                                                </div>
-                                                <div className="mb-4">
-                                                    {getFieldsByNames(['mainLocationDropdown']).map((field) => {
-                                                        return <div className=" space-x-2">
-                                                            {renderField(field)}
-                                                        </div>;
-                                                    })}
-                                                </div>
-                                            </div>
-                                            <ReusableTable
-                                                data={subDataToShow}
-                                                columns={subLocationColumns}
-                                                // actions={tableActions2}
-                                                permissions={tablePermissions}
-                                                title=""
-                                                //    onRefresh={handleRefresh}
-                                                enableSearch={false}
-                                                enableSelection={false}
-                                                // enableExport={false}
-                                                enableColumnVisibility={true}
-                                                enablePagination={true}
-                                                enableSorting={true}
-                                                enableFiltering={true}
-                                                pageSize={10}
-                                                emptyMessage="No user groups found"
-                                                rowHeight="normal"
-                                                storageKey="usergroups-table"
-                                            />
-                                        </TabsContent>
-                                    </Tabs>
+    }
+    return (
+        <div className="h-full overflow-y-scroll bg-gray-50/30">
+            <header className="bg-card flex justify-between border-b px-6 py-4 shadow-sm">
+                <div className="flex items-center gap-4">
+                    <SidebarTrigger />
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <span>Masters</span>
+                        <span>/</span>
+                        <span>Fixed Assets</span>
+                        <span>/</span>
+                        <span className="text-foreground font-medium">Customer Location</span>
+                    </div>
+                </div>
+            </header>
+            <div className="p-4 space-y-4">
+                <div className='ps-3'>
+                    <h1 className="text-3xl font-bold text-gray-900">Customer Location</h1>
+                </div>
+                <Card className="border-0 shadow-sm mt-2">
+                    <CardHeader className="pb-2 pt-2">
+                        <div className='mt-2 p-2'>
+                            <Tabs value={activeTab} onValueChange={setActiveTab}>
+                                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                                    <TabsList>
+                                        <TabsTrigger value="main">Main Location</TabsTrigger>
+                                        <TabsTrigger value="sub">Sub Location</TabsTrigger>
+                                    </TabsList>
+                                    <div className='flex items-center gap-2'>
+                                        <ReusableButton
+                                            variant="text"
+                                            onClick={() => { navigate("/masters/company/customer") }}
+                                            icon={""}
+                                        >
+                                            Back
+                                        </ReusableButton>
+                                        <ReusableButton
+                                            variant="primary"
+                                            icon={<Plus className="h-4 w-4" />}
+                                            onClick={() => activeTab === 'main' ? handleModalOpen(true) : handleModalOpen(false)}
+                                        >
+                                            Add
+                                        </ReusableButton>
+                                    </div>
                                 </div>
-                            </CardHeader>
-                            <CardContent className="pt-0">
-                            </CardContent>
-                        </Card>
-
-                        {/* Main Category Dialog */}
-                        <div className="">
-                            {/* Search and Actions */}
-                            <div className="flex justify-between items-center">
-                                <Dialog open={isMainDialogOpen}
-                                    onOpenChange={(open) => {
-                                        setIsMainDialogOpen(open);
-                                        if (!open) {
-                                            handleCancel(); // example: reset form
-                                        }
-                                    }}
-                                >
-                                    <DialogTrigger asChild>
-                                    </DialogTrigger>
-                                    <DialogContent className="max-w-2xl">
-                                        <DialogHeader>
-                                            <DialogTitle>{recordToEditId?"Update Main Location":"Add Main Location"}</DialogTitle>
-                                        </DialogHeader>
-                                        <div className='grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4'>
-                                            {getFieldsByNames(['LocationName']).map((field) => {
-                                                return <div className="flex items-center space-x-2">
+                                <TabsContent value="main" className="space-y-4">
+                                    <ReusableTable
+                                        data={getMainCategoryData}
+                                        columns={mainCategoryColumns}
+                                        permissions={tablePermissions}
+                                        title=""
+                                        enableSearch={false}
+                                        enableSelection={false}
+                                        enableColumnVisibility={true}
+                                        enablePagination={true}
+                                        enableSorting={true}
+                                        enableFiltering={true}
+                                        pageSize={10}
+                                        emptyMessage="No user groups found"
+                                        rowHeight="normal"
+                                        storageKey="usergroups-table"
+                                    />
+                                </TabsContent>
+                                <TabsContent value="sub" className="space-y-4">
+                                    <div className='flex items-center gap-6 mb-3'>
+                                        <div>
+                                            <h2 className='text-lg mb-2'>Select Main Location</h2>
+                                        </div>
+                                        <div className="mb-4">
+                                            {getFieldsByNames(['mainLocationDropdown']).map((field) => {
+                                                return <div className=" space-x-2">
                                                     {renderField(field)}
                                                 </div>;
                                             })}
                                         </div>
-                                        <div className="flex justify-end gap-2">
-                                            <ReusableButton
-                                                variant="default"
-                                                onClick={() => { setIsSubDialogOpen(false); setSubRecID(null),handleCancel() }}
-                                            >
-                                                Cancel
-                                            </ReusableButton>
-                                            <ReusableButton
-                                                htmlType="submit"
-                                                variant="primary"
-                                                className="bg-orange-500 hover:bg-orange-600 border-orange-500"
-                                                onClick={(e) => { handleSubmit((data) => submit(e, true, data))(e) }}
-                                            >
-                                                {recordToEditId?"Update":"Save"}
-                                            
-                                            </ReusableButton>
-                                        </div>
-                                    </DialogContent>
-                                </Dialog>
-                            </div>
-                            {/* main delete dialog open */}
-                            <Dialog open={isMainDelOpen} onOpenChange={setIsMainDelOpen}>
-                                <DialogContent>
-                                    <DialogHeader>
-                                        <DialogTitle>Confirm the action</DialogTitle>
-                                    </DialogHeader>
-                                    <div className="space-y-4">
-                                        <h4>{`Are you sure want to delete ${mainDelRec?.LocationName} Location`}</h4>
-                                        <div className="flex justify-end gap-2">
-                                            <ReusableButton onClick={() =>{setIsMainDelOpen(false);handleCancel()}}>
-                                                Cancel
-                                            </ReusableButton>
-                                            <ReusableButton variant="primary" onClick={() =>{(recordToEditId)?handleMainDelete( companyId,recordToEditId):handleMainDelete( companyId,subRecID)}}>
-                                                Delete
-                                            </ReusableButton>
-                                        </div>
                                     </div>
-                                </DialogContent>
-                            </Dialog>
-
-                            {/* Sub Location Dialog */}
-                            <Dialog open={isSubDialogOpen} onOpenChange={() => handleCancel()}>
-                                <DialogContent>
-                                    <DialogHeader>
-                                        <DialogTitle>{subRecID?"Update Sub Location":"Add Sub Location"}</DialogTitle>
-                                    </DialogHeader>
-                                    <div className='grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4'>
-                                        {getFieldsByNames(['LocationNameSub', 'Address', 'City', 'State', 'lifespan', 'Country', 'MobileNo', 'ZipCode', 'TIN_GSTIN_UIN']).map((field) => {
-                                            return (
-
-                                                <div className="flex items-center space-x-2">
-                                                    {renderField(field)}
-                                                </div>
-
-                                            );
-                                        })}
-                                    </div>
-                                    {/* <div className="space-y-4"> */}
-
-                                    <div className="flex justify-end gap-2">
-                                        <ReusableButton onClick={() => {setIsSubDialogOpen(false);handleCancel()}}>
-                                            Cancel
-                                        </ReusableButton>
-                                        <ReusableButton variant="primary" onClick={(e) => { handleSubmit((data) => submit(e, false, data))(e) }}>
-                                            {subRecID?"Update":"Save"}
-                                        </ReusableButton>
-                                    </div>
-                                    {/* </div> */}
-                                </DialogContent>
-                            </Dialog>
+                                    <ReusableTable
+                                        data={subDataToShow}
+                                        columns={subLocationColumns}
+                                        permissions={tablePermissions}
+                                        title=""
+                                        enableSearch={false}
+                                        enableSelection={false}
+                                        enableColumnVisibility={true}
+                                        enablePagination={true}
+                                        enableSorting={true}
+                                        enableFiltering={true}
+                                        pageSize={10}
+                                        emptyMessage="No user groups found"
+                                        rowHeight="normal"
+                                        storageKey="usergroups-table"
+                                    />
+                                </TabsContent>
+                            </Tabs>
                         </div>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                    </CardContent>
+                </Card>
+                <div className="">
+                    <div className="flex justify-between items-center">
+                        <Dialog open={isMainDialogOpen}
+                            onOpenChange={(open) => {
+                                setIsMainDialogOpen(open);
+                                if (!open) {
+                                    handleCancel();
+                                }
+                            }}
+                        >
+                            <DialogTrigger asChild>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-2xl">
+                                <DialogHeader>
+                                    <DialogTitle>{recordToEditId ? "Update Main Location" : "Add Main Location"}</DialogTitle>
+                                </DialogHeader>
+                                <div className='grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4'>
+                                    {getFieldsByNames(['LocationName']).map((field) => {
+                                        return <div className="flex items-center space-x-2">
+                                            {renderField(field)}
+                                        </div>;
+                                    })}
+                                </div>
+                                <div className="flex justify-end gap-2">
+                                    <ReusableButton
+                                        variant="default"
+                                        onClick={() => { setIsSubDialogOpen(false); setSubRecID(null), handleCancel() }}
+                                    >
+                                        Cancel
+                                    </ReusableButton>
+                                    <ReusableButton
+                                        htmlType="submit"
+                                        variant="primary"
+                                        className="bg-orange-500 hover:bg-orange-600 border-orange-500"
+                                        onClick={(e) => { handleSubmit((data) => submit(e, true, data))(e) }}
+                                    >
+                                        {recordToEditId ? "Update" : "Save"}
+                                    </ReusableButton>
+                                </div>
+                            </DialogContent>
+                        </Dialog>
                     </div>
-
+                    <Dialog open={isMainDelOpen} onOpenChange={setIsMainDelOpen}>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Confirm the action</DialogTitle>
+                            </DialogHeader>
+                            <div className="space-y-4">
+                                <h4>{`Are you sure want to delete ${mainDelRec?.LocationName} Location`}</h4>
+                                <div className="flex justify-end gap-2">
+                                    <ReusableButton onClick={() => { setIsMainDelOpen(false); handleCancel() }}>
+                                        Cancel
+                                    </ReusableButton>
+                                    <ReusableButton variant="primary" onClick={() => { (recordToEditId) ? handleMainDelete(companyId, recordToEditId) : handleMainDelete(companyId, subRecID) }}>
+                                        Delete
+                                    </ReusableButton>
+                                </div>
+                            </div>
+                        </DialogContent>
+                    </Dialog>
+                    <Dialog open={isSubDialogOpen} onOpenChange={() => handleCancel()}>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>{subRecID ? "Update Sub Location" : "Add Sub Location"}</DialogTitle>
+                            </DialogHeader>
+                            <div className='grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4'>
+                                {getFieldsByNames(['LocationNameSub', 'Address', 'City', 'State', 'lifespan', 'Country', 'MobileNo', 'ZipCode', 'TIN_GSTIN_UIN']).map((field) => {
+                                    return (
+                                        <div className="flex items-center space-x-2">
+                                            {renderField(field)}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                            <div className="flex justify-end gap-2">
+                                <ReusableButton onClick={() => { setIsSubDialogOpen(false); handleCancel() }}>
+                                    Cancel
+                                </ReusableButton>
+                                <ReusableButton variant="primary" onClick={(e) => { handleSubmit((data) => submit(e, false, data))(e) }}>
+                                    {subRecID ? "Update" : "Save"}
+                                </ReusableButton>
+                            </div>
+                        </DialogContent>
+                    </Dialog>
                 </div>
-
-            );
-        };
-
-        export default CustomerLocation;
+            </div>
+        </div>
+    );
+};
+export default CustomerLocation;

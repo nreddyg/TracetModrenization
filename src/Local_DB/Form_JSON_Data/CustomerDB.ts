@@ -65,7 +65,7 @@ export const CUSTOMER_DETAILS: BaseField[] = [
     {
         label: 'Address',
         fieldType: 'text',
-        name: 'Address',
+        name: 'AddOnAddress',
         isRequired: false,
     },
       

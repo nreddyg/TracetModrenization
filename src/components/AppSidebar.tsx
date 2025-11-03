@@ -525,6 +525,11 @@ const navigation: NavItem[] = [
             label: 'Cost Breakup Attributes',
             icon: DollarSign,
             link: 'masters/fixed-assets/costbreakup',
+          },
+          {
+            label: 'User Attributes',
+            icon: DollarSign,
+            link: 'masters/fixed-assets/userattributes',
           }
         ]
       },

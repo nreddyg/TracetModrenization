@@ -243,6 +243,13 @@ export const URL_POST_PRODUCTS=`/api/Masters/AddProductDetails`;
 export const URL_EDIT_PRODUCTS=`/api/Masters/GetProductMasterDetailsByCompanyId`;
 export const URL_UPDATE_PRODUCTS=`/api/Masters/UpdateProductDetails`;
 export const URL_DELETE_PRODUCTS=`/api/Masters/DeleteProductMasterById`;
+// Masters User Attributes 
+export const URL_GET_USER_ATTRIBUTES = `/api/Masters/GetUserAttributesByCompanyId`;
+export const URL_POST_NEW_USER_ATTRIBUTES=`/api/Masters/AddUserAttributesDetails`;
+
+
+
+
 
 
 

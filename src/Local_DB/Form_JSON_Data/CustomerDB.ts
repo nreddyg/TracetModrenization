@@ -65,7 +65,7 @@ export const CUSTOMER_DETAILS: BaseField[] = [
     {
         label: 'Address',
         fieldType: 'text',
-        name: 'Address',
+        name: 'AddOnAddress',
         isRequired: false,
     },
       
@@ -88,8 +88,8 @@ export const CUSTOMER_DETAILS: BaseField[] = [
         label: 'Branch',
         fieldType: "multiselect",
         name: "BranchName",
-        defaultValue: "INDIA",
-        options: [ ],
+        defaultValue:[],
+        options: [],
         placeholder: "Select Country",
         isRequired: false,
     },

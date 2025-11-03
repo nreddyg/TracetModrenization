@@ -21,7 +21,10 @@ import AssetLocation from "./pages/masters/AssetLocation";
 import Store from "./pages/masters/Store";
 import AssetCategory from "./pages/masters/fixedAssets/AssetCategory"
 import ItemMaster from "./pages/masters/ItemMaster";
+import UnitOfMeasure from "./pages/masters/UnitsOfMeasure";
 import ItemCategory from "./pages/masters/ItemCategory";
+import ManageUnitConversion from "./pages/masters/ManageUnitConvertion";
+import UserAttributes from "./pages/masters/fixedAssets/UserAttributes";
 
 
 
@@ -224,8 +227,13 @@ const AnimatedRoutes = () => {
                   <Route path="/masters/store" element={<Store/>} />
                   <Route path="/masters/fixed-assets/asset-category" element={<AssetCategory/>} />
                   <Route path="masters/fixed-assets/costbreakup" element={<CostBreakupAttributes/>}/>
+                  <Route path="masters/fixed-assets/userattributes" element={<UserAttributes/>}/>
+                  
+
                   <Route path="/masters/consumables/store" element={<Store/>} />
                   <Route path="/masters/consumables/item-master" element={<ItemMaster/>} />
+                  <Route path="/masters/consumables/unitsofmeasure" element={<UnitOfMeasure/>} />
+                  <Route path="/masters/consumables/unitsofmeasure/manageunitconverstion" element={<ManageUnitConversion/>} />
                   <Route path="/masters/consumables/item-category" element={<ItemCategory/>} />
                   <Route path="/masters/depreciation/book" element={<Books/>} />
                   <Route path="/masters/depreciation/book/additionaldepreciation" element={<AdditionalDepreciation/> }/>

@@ -136,7 +136,6 @@ const CostCenter = () => {
   });
   const [costCenterData, setCostCenterData] = useState<BaseField[]>(fields[selectedLevel]);
   const [recordToEditId, setRecordToEditId] = useState(null);
-  console.log("138", recordToEditId)
   const [selectedId, setSelectedId] = useState('');
   const [treeView, setTreeview] = useState([]);
   const [tree, setTree] = useState([]);
@@ -181,7 +180,6 @@ const CostCenter = () => {
 
   useEffect(() => {
     if (companyId && selectedLevel) getlevels();
-    console.log(selectedLevel, "Nag")
   }, [companyId, selectedLevel])
 
   useEffect(() => {
@@ -419,7 +417,6 @@ const CostCenter = () => {
     dispatch(setLoading(true))
     await getCostcenterById(companyId, id).then(res => {
       if (res.data && res.data.length > 0) {
-        console.log("resdddd", res.data[0])
         const details = res.data[0];
         if (details) {
           reset({
@@ -544,8 +541,6 @@ const CostCenter = () => {
           "Code": code,
         }]
     }
-    // let branchId = recordToEditId ? selectedNode?.id : 0
-    console.log("payload", payload);
     const branchId = Number(recordToEditId ? selectedNode?.id : 0);
     await postCostCenter(companyId, branchId, payload).then(res => {
       if (res.data.status) {

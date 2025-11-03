@@ -58,7 +58,6 @@ type UploadedFileOutput = {
   OrganizationLogoConversionType: string
 };
 
-
 const Organization = () => {
   const dispatch = useAppDispatch();
   const msg = useMessage();
@@ -82,7 +81,6 @@ const Organization = () => {
     OrganizationLogoType: "",
     OrganizationLogoConversionType: ""
   }]);
-
   const filteredOrgs = dataSource.filter(org => {
     const matchesSearch = org.OrganizationName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       org.CompanyCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -129,8 +127,6 @@ const Organization = () => {
       loadFile();
     }
   }, [selectedOrganizationData]);
-
-
   const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> => {
     const fileArray = Array.isArray(filelist) ? filelist : [];
     if (fileArray.length === 0) {
@@ -162,10 +158,11 @@ const Organization = () => {
     );
     setUploadedData(validFiles);
   };
-  //fetch all users list
+  //fetch all organizations list
   const fetchAllOrganizationsList = async (orgId?: number) => {
-    dispatch(setLoading(true));
-    await GetOrganizationsList(orgId).then(res => {
+    try {
+      dispatch(setLoading(true));
+      const res = await GetOrganizationsList(orgId);
       if (res.success && res.data && res.data.organizations && Array.isArray(res.data.organizations)) {
         if (orgId) {
           form.reset({ ...res.data.organizations[0], OrganizationLogo: [] });
@@ -187,9 +184,7 @@ const Organization = () => {
           setDataSource([]);
         }
       }
-    }).catch(err => console.log(err)).finally(() => {
-      dispatch(setLoading(false));
-    });
+    } catch { } finally { dispatch(setLoading(false)); }
   }
   function setLookupsDataInJson(data: any, key: string) {
     const updatedFields = fields.map(field => {
@@ -201,8 +196,9 @@ const Organization = () => {
     setFields(updatedFields);
   }
   const fetchCountryList = async () => {
-    dispatch(setLoading(true));
-    await GetCountryList().then(res => {
+    try {
+      dispatch(setLoading(true));
+      const res = await GetCountryList();
       if (res.success && res.data && Array.isArray(res.data.CountryList)) {
         const countryOptions = res.data.CountryList.map((country: any) => ({
           label: country.CountryName,
@@ -212,13 +208,12 @@ const Organization = () => {
       } else {
         msg.warning("No Country Data Found !!");
       }
-    }).catch(err => console.log(err)).finally(() => {
-      dispatch(setLoading(false));
-    });
+    } catch { } finally { dispatch(setLoading(false)) }
   }
   const fetchCurrencyBasedOnCountry = async (Country: string) => {
-    dispatch(setLoading(true));
-    await GetCurrency(Country).then(res => {
+    try {
+      dispatch(setLoading(true));
+      const res = await GetCurrency(Country);
       if (res.success && res.data && Array.isArray(res.data) && res.data.length > 0) {
         const currencyData = res.data[0];
         setValue("Currency", currencyData.CurrencyName);
@@ -228,9 +223,7 @@ const Organization = () => {
         setValue("CurrencySymbol", "");
         msg.warning("No Currency Data Found For This Country !!");
       }
-    }).catch(err => console.log(err)).finally(() => {
-      dispatch(setLoading(false));
-    });
+    } catch { } finally { dispatch(setLoading(true)) }
   }
   const handleSelect = (data: OrganizationData) => {
     // handleReset();
@@ -266,8 +259,9 @@ const Organization = () => {
       ]
     }
     if (selectedOrganizationData) {
-      dispatch(setLoading(true));
-      await UpdateOrganization(payload).then(res => {
+      try {
+        dispatch(setLoading(true));
+        const res = await UpdateOrganization(payload);
         if (res.success) {
           if (res.data.status) {
             msg.success(res.data.message || "Organization Updated Successfully !!");
@@ -279,10 +273,11 @@ const Organization = () => {
             msg.warning('Failed to update organization !!')
           }
         }
-      }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
+      } catch { } finally { dispatch(setLoading(false)) }
     } else {
-      dispatch(setLoading(true));
-      await AddOrganization(payload).then(res => {
+      try {
+        dispatch(setLoading(true));
+        const res = await AddOrganization(payload);
         if (res.success) {
           if (res.data.status) {
             msg.success(res.data.message || "Organization Added Successfully !!");
@@ -294,7 +289,7 @@ const Organization = () => {
             msg.warning('Failed to add organization !!')
           }
         }
-      }).catch(err => console.log(err)).finally(() => { dispatch(setLoading(false)) })
+      } catch { } finally { dispatch(setLoading(false)) }
     }
   }
   const handleReset = () => {
@@ -307,7 +302,6 @@ const Organization = () => {
       Currency: '', CurrencySymbol: '', OrganizationLogo: [], AddressLine1: '', AddressLine2: '', City: '', State: '', ZipCode: ''
     });
   };
-
   const renderField = (field: BaseField) => {
     const { name, label, fieldType, isRequired, show = true } = field;
     if (!name) {

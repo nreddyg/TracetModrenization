@@ -227,12 +227,29 @@ export const URL_GET_ITEM_MASTER_DATA = `/api/Masters/GetItemMasterDetailsByComp
 export const URL_DELETE_ITEM_MASTER = `/api/Masters/DeleteItemMaster`;
 export const URL_POST_NEW_ITEM_MASTER = `/api/Masters/AddItemMasterDetails`;
 export const URL_POST_UPDATE_ITEM_MASTER = `/api/Masters/UpdateItemMasterDetails`;
+//Masters Units of Measure
+
+export const URL_GET_UNITS_OF_MEASURE_DATA = `/api/Masters/GetUOMDetailsByCompanyId`;
+export const URL_GET_MANAGE_UNITS_OF_MEASURE_DATA = `/api/Masters/GetUOMConversionDetails`;
+export const URL_GET_UNITS_OF_MEASURE_DATA_BY_ID = `/api/Masters/GetUOMDetailsByCompanyId`;
+export const URL_DELETE_UNITS_OF_MEASURE = `/api/Masters/DeleteUnitofMeasureById`;
+export const URL_DELETE_CONVERSION = `/api/Masters/DeleteUOMConversionById`;
+export const URL_POST_NEW_UNITS_OF_MEASURE = `/api/Masters/AddUnitOfMeasuresDetails`;
+export const URL_POST_NEW_CONVERSION = `/api/Masters/AddUOMConversionDetails`;
+export const URL_POST_UPDATE_UNITS_OF_MEASURE = `/api/Masters/UpdateUnitOfMeasuresDetails`;
 //Masters Product masters
 export const URL_PRODUCT_MASTERS=`/api/Masters/GetProductMasterDetailsByCompanyId`;
 export const URL_POST_PRODUCTS=`/api/Masters/AddProductDetails`;
 export const URL_EDIT_PRODUCTS=`/api/Masters/GetProductMasterDetailsByCompanyId`;
 export const URL_UPDATE_PRODUCTS=`/api/Masters/UpdateProductDetails`;
 export const URL_DELETE_PRODUCTS=`/api/Masters/DeleteProductMasterById`;
+// Masters User Attributes 
+export const URL_GET_USER_ATTRIBUTES = `/api/Masters/GetUserAttributesByCompanyId`;
+export const URL_POST_NEW_USER_ATTRIBUTES=`/api/Masters/AddUserAttributesDetails`;
+
+
+
+
 
 
 

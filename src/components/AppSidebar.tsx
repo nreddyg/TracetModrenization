@@ -499,16 +499,16 @@ const navigation: NavItem[] = [
             icon: UserCog,
             link: '/masters/company/customer',
           },
-          {
-            label: 'Assets & Inventory',
-            icon: Package,
-            link: '/masters/company/assets-inventory',
-          },
-          {
-            label: 'Maintenance',
-            icon: Wrench,
-            link: '/masters/company/maintenance',
-          },
+          // {
+          //   label: 'Assets & Inventory',
+          //   icon: Package,
+          //   link: '/masters/company/assets-inventory',
+          // },
+          // {
+          //   label: 'Maintenance',
+          //   icon: Wrench,
+          //   link: '/masters/company/maintenance',
+          // },
         ],
       },
       {
@@ -525,6 +525,11 @@ const navigation: NavItem[] = [
             label: 'Cost Breakup Attributes',
             icon: DollarSign,
             link: 'masters/fixed-assets/costbreakup',
+          },
+          {
+            label: 'User Attributes',
+            icon: DollarSign,
+            link: 'masters/fixed-assets/userattributes',
           }
         ]
       },
@@ -560,6 +565,11 @@ const navigation: NavItem[] = [
             icon: BarChart,
             link: '/masters/consumables/item-master',
           },
+           {
+            label: "Units Of Measure",
+            icon: BarChart,
+            link: '/masters/consumables/unitsofmeasure',
+           },
           {
             label: 'Item Category',
             icon: BarChart,

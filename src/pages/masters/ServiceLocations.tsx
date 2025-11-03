@@ -32,7 +32,6 @@ interface SubLocation {
 
 const ServiceLocations = () => {
     const [activeTab, setActiveTab] = useState('main');
-    console.log(activeTab, "35")
     const [isMainDialogOpen, setIsMainDialogOpen] = useState(false);
     const [isSubDialogOpen, setIsSubDialogOpen] = useState(false);
     const [subLocationName, setSubLocationName] = useState('');
@@ -43,9 +42,7 @@ const ServiceLocations = () => {
     const [isDelModalOpen, setIsDelModalOpen] = useState(false);
     const [fields, setFields] = useState<BaseField[]>(SERVICE_LOCATION_DB);
     const [filteredSub, setFilteredSub] = useState([]);
-    console.log(filteredSub,"46")
     const [selectedMainLocationObj, setSelectedMainLocationObj] = useState(null);
-    console.log(selectedMainLocationObj,"47")
     // const [mainDrop, setMainDrop] = useState(MAIN_LOCATION_DROPDOWN);
     const dispatch = useDispatch();
     // const [isEditMode, setIsEditMode] = useState(false);
@@ -63,7 +60,6 @@ const ServiceLocations = () => {
 
     const { control, register, handleSubmit, trigger, watch, setValue, reset, formState: { errors } } = form;
     const mainlocationId = watch('SelectMainLocation')
-    console.log(mainlocationId, "60")
 
 
     const renderField = (field: BaseField) => {
@@ -236,7 +232,6 @@ const ServiceLocations = () => {
         dispatch(setLoading(true));
         getServiceLocationData(compid).then((res) => {
             if (res.data && res.data?.length > 0) {
-                console.log(res.data, "res")
                 const mainList = res.data.filter((rec) => rec.Parent === '#')
                 const sublist = res.data.filter((rec) => rec.Parent !== '#')
                 setMainLocations(mainList?.reverse())
@@ -312,7 +307,6 @@ const ServiceLocations = () => {
                 handleCancel();
 
             } else {
-                // console.log(res.data.ErrorDetails[0]["Error Message"],"res")
                 message.error(res.data.ErrorDetails[0]["Error Message"]);
             }
         } catch (error) {
@@ -323,7 +317,6 @@ const ServiceLocations = () => {
     };
 
     const settingSubLocations = (subList) => {
-        console.log('check')
         let newSublist = [];
         newSublist = subList?.filter((l) => (l.Parent == watch("SelectMainLocation")))
         setFilteredSub(newSublist);

@@ -288,6 +288,7 @@ const Store = () => {
                                     {branch!=='All' && 
                                     <ReusableButton
                                         variant="primary"
+                                        size='small'
                                         icon={<Plus className="h-4 w-4" />}
                                         onClick={() => { setRecordToEditId(null); reset({ StoreName: "", Branch: "", StoreDescription: "" }) }}
                                     >

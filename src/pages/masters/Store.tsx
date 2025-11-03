@@ -285,6 +285,7 @@ const Store = () => {
                         <div className="flex items-center gap-2">
                             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                                 <DialogTrigger asChild>
+                                    {branch!=='All' && 
                                     <ReusableButton
                                         variant="primary"
                                         icon={<Plus className="h-4 w-4" />}
@@ -292,6 +293,7 @@ const Store = () => {
                                     >
                                         Add
                                     </ReusableButton>
+                                    }
                                 </DialogTrigger>
                                 <DialogContent className="max-w-2xl">
                                     <DialogHeader>
@@ -331,7 +333,7 @@ const Store = () => {
                             </Dialog>
                         </div>
                     </div>
-                    <div className="flex-1 p-2 py-3 overflow-hidden min-h-0  ">
+                    <div className="flex-1 p-3 overflow-hidden min-h-0  ">
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-1 h-full">
                             <div className="lg:col-span-12 flex flex-col  min-h-0 ">
                                 <ScrollArea className="flex-1">

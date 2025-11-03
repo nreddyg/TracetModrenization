@@ -505,17 +505,15 @@ const Customer = () => {
     dispatch(setLoading(true))
     await deleteCustomerByCompanyId(companyId, id).then(res => {
       if (res.success) {
-        if (res.data && res.data[0].status) {
+        if (res.data && Array.isArray(res.data) && res.data.length!==0 && res.data[0].status) {
           msg.success(res.data[0].message || "Customer Deleted Successfully!!");
           fetchAllCustomerList();
           handleReset();
-        } else if (res.data.ErrorDetails && Array.isArray(res.data.ErrorDetails) && res.data.ErrorDetails.length > 0) {
-          msg.warning(res.data.ErrorDetails[0]['Error Message'] || 'Failed to Delete Customer !!');
         } else {
-          msg.warning('Failed to Delete Customer !!')
+          msg.warning(res.data.message || 'Failed to Delete Customer !!')
         }
       }
-    }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
+    }).catch(err => {console.error(err) }).finally(() => { dispatch(setLoading(false)) })
   }
   return (
     <div className="h-full   bg-gray-50 flex flex-col ">

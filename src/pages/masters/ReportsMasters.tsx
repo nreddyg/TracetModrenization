@@ -91,7 +91,6 @@ const ReportsMasters = () => {
     'User':105, 'Vendor':106, 'Customer':107, 'Service Locations':109, 'Customer Locations':108, 'User Log':110};
   const [vendors,setVendors]=useState([]);
   const companyId=useAppSelector(state=>state.projects.companyId);
-  const branchId=useAppSelector(state=>state.projects.branchId);
   const branchName=useAppSelector(state=>state.projects.branch);
   const filteredReportTabs = reportTabs.filter(tab =>
     tab.toLowerCase().includes(searchTerm.toLowerCase())

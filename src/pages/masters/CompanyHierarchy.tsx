@@ -180,7 +180,6 @@ const CompanyHierarchy = () => {
   useEffect(()=>{
     if(companyId && selectedLevel){
       fetchHierarchyLevelsData(companyId)
-      // console.log(selectedLevel,"Nag")
     }  
   },[companyId,selectedLevel])
   useEffect(() => {
@@ -380,7 +379,6 @@ const CompanyHierarchy = () => {
           });
  
           const data = fields;
-          console.log("data",data);
           data[0].disabled = true
           data[1].disabled = true
           setFields(data)
@@ -406,7 +404,6 @@ const CompanyHierarchy = () => {
             let last = allLevelsJson;
             let lastData = last[lastLevel];
             const stateIndex = lastData.findIndex((x) => x.name === "State");
-            console.log(stateIndex,'Nag')
             lastData[stateIndex].options = res.data.Details;
 
             setAllLevelsJson({ ...last,lastLevel:lastData });
@@ -426,7 +423,6 @@ const CompanyHierarchy = () => {
           setLastLevel(res.data["Company Hierarchy"][0].LevelName.at(-1)["Id"]);
           let lastData = allLevelsJson;
           lastData[res.data["Company Hierarchy"][0].LevelName.at(-1)["Id"]] = lastLevelData;
-          // console.log(lastData)  
           setAllLevelsJson(lastData);
           // getStates.current = true;
           getjsonMapping(res.data["Company Hierarchy"][0].LevelName);
@@ -482,9 +478,6 @@ const CompanyHierarchy = () => {
     dispatch(setLoading(true))
     await getCompanyDataBybranchId(companyId, branchid).then(res => {
       if (res.data && res.data.length > 0) {
-        // const result = treefun(res.data, "#")
-        // setTree(result)
-        console.log(res.data,"Nag")
         const details = res.data[0];
         if (details) {
           if(selectedLevel!==lastLevel){

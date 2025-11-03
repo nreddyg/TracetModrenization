@@ -59,6 +59,7 @@ const User = () => {
   const { control, register, handleSubmit, trigger, watch, setValue,getValues, reset, formState: { errors } } = form;
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [selectedUserData, setSelectedUserData] = useState<User | null>(null);
+  const [deletingUserData,setSelectedDeletingUserData]=useState<User | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isInboxCollapsed, setIsInboxCollapsed] = useState(false);
   const [isDelModalOpen, setIsDelModalOpen] = useState(false);
@@ -290,10 +291,10 @@ const User = () => {
   const delUser = async () => {
     dispatch(setLoading(true));
     try {
-      const res = await deleteUser(companyId, selectedUserData.UserId);
+      const res = await deleteUser(companyId, deletingUserData.UserId);
       if (res.data[0].status !== undefined) {
         if (res.data[0].status === true) {
-          if (LoggedInUser.UserId && (selectedUserData.UserId === LoggedInUser.UserId)) {
+          if (LoggedInUser.UserId && (deletingUserData.UserId === LoggedInUser.UserId)) {
             logoutFunction();
           }
           msg.success(res.data[0].message);
@@ -312,6 +313,15 @@ const User = () => {
       dispatch(setLoading(false));
     }
   };
+  const handleDelete=(e,data)=>{
+    e.stopPropagation();
+    setIsDelModalOpen(true);
+    setSelectedDeletingUserData(data)
+  }
+  const handleDeleteCancel=()=>{
+    setIsDelModalOpen(false);
+    setSelectedDeletingUserData(null);
+  }
   const handleReset = () => {
     if(selectedUserData){
       let field=fields.find(f=>f.name==='Branch');
@@ -323,6 +333,7 @@ const User = () => {
     }
     setSelectedUser(null);
     setSelectedUserData(null);
+    setSelectedDeletingUserData(null);
     form.reset({
       FirstName: '', LastName: '', Email: '', OrganizationDomain: '', PanNumber: '',
       AddressLine1: '', AddressLine2: '', City: '', State: '', CountryName: '',
@@ -559,7 +570,7 @@ const User = () => {
                               title={user.MobileNumber}
                               className="block max-w-[90px] truncate text-[11px] text-gray-500"
                             >
-                              <Trash2 height={18} className='text-red-400' onClick={() => setIsDelModalOpen(true)}></Trash2>
+                              <Trash2 height={18} className='text-red-400' onClick={(e) => handleDelete(e,user)}></Trash2>
                             </span>
                           </div>
                         }
@@ -641,13 +652,13 @@ const User = () => {
           <DialogHeader>
             <DialogTitle>Confirm the action</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete {selectedUserData?.UserName}
+              Are you sure you want to delete {deletingUserData?.UserName} ?
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <ReusableButton
               variant="default"
-              onClick={() => setIsDelModalOpen(false)}
+              onClick={handleDeleteCancel}
             >
               Cancel
             </ReusableButton>

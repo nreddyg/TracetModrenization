@@ -24,6 +24,7 @@ export interface ReusableInputProps extends Omit<React.InputHTMLAttributes<HTMLI
   suffixIcon?: React.ReactNode;
   addonBefore?: React.ReactNode;
   addonAfter?: React.ReactNode;
+  addonAfterClassName?:string
   
   // Password specific
   showPasswordToggle?: boolean;
@@ -82,7 +83,7 @@ export const ReusableInput = forwardRef<ReusableInputRef, ReusableInputProps>(
     label, 
     labelPosition = 'top',
     tooltip, 
-    error, 
+    error,
     warning,
     isRequired,
     
@@ -91,6 +92,7 @@ export const ReusableInput = forwardRef<ReusableInputRef, ReusableInputProps>(
     suffixIcon, 
     addonBefore,
     addonAfter,
+    addonAfterClassName,
     
     // Password specific
     showPasswordToggle = true,
@@ -402,7 +404,8 @@ export const ReusableInput = forwardRef<ReusableInputRef, ReusableInputProps>(
       
       return (
         <div className={cn(
-          "flex items-center bg-gray-50 border border-l-0 rounded-r-md",
+          "flex items-center bg-gray-50 border border-l-0   rounded-r-md",addonAfterClassName,
+          focused && "ms-[.1rem]",
           sizeClasses.split(' ').find(cls => cls.startsWith('h-')),
           variantClasses,
           statusClasses,

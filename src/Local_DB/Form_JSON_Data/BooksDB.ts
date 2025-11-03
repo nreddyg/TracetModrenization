@@ -111,7 +111,7 @@ export const BOOKS_DB: BaseField[] = [
             { label: "Book Category", value: "Book Category" }],
         disabled: false,
         isRequired: true,
-
+  isDisplay: true
     },
     {
         label: 'Salvage Value To Consider',
@@ -123,19 +123,6 @@ export const BOOKS_DB: BaseField[] = [
             { label: 'Asset', value: 'Asset' },
             { label: 'Book Category', value: 'Book Category' }
         ],
-        isDisplay: true
-    },
-    {
-        label: 'Life To consider ',
-        fieldType: "dropdown",
-        name: 'LifeToConsider',
-        placeholder: 'Life To Consider ',
-        defaultValue: "Book Category",
-        isRequired: true,
-        options: [
-            { label: 'Asset', value: 'Asset' },
-            { label: 'Book Category', value: 'Book Category' }
-        ],
         isDisplay: false
     },
     {
@@ -151,6 +138,7 @@ export const BOOKS_DB: BaseField[] = [
         ],
         isDisplay: false
     },
+   
 
     {
         label: 'Salvage Value',
@@ -158,29 +146,8 @@ export const BOOKS_DB: BaseField[] = [
         name: 'SalvageValueRate',
         placeholder: '',
         value: "0",
-        isDisplay: true
+        isDisplay: false
 
-    },
-        {
-        label: "",
-        fieldType: "dropdown",
-        name: "salvagevalue_unit",
-        placeholder: "",
-        isRequired: false,
-        visible: false,
-        options: [
-            {
-                label: "%",
-                value: "%"
-            },
-            {
-                label: "@",
-                value: "@"
-            },
-        ],
-        defaultValue: "%",
-        // selectAll: true,
-        className: 'flex h-10 w-full rounded-md border border-input bg-white px-3 py-2 text-base ring-offset-background',
     },
     {
         label: 'First-Year Depreciation Conventions',

@@ -1,7 +1,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import ReusableTable, { TableAction, TablePermissions } from '@/components/ui/reusable-table';
 import { ScrollArea } from '@radix-ui/react-scroll-area';
-import { ArrowLeft, Edit,Trash2 } from 'lucide-react';
+import { ArrowLeft, Edit, Trash2 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { ReusableButton } from '@/components/ui/reusable-button';
 import { ColumnDef } from '@tanstack/react-table';
@@ -15,7 +15,7 @@ import { ReusableDropdown } from '@/components/ui/reusable-dropdown';
 import { ReusableInput } from '@/components/ui/reusable-input';
 import { BaseField, GenericObject } from '@/Local_DB/types/types';
 import { ReusableDatePicker } from '@/components/ui/reusable-datepicker';
-import { addOrUpdateLicenseAssignment, getLicenseAssigmentsList } from '@/services/licenseAssignmentServices';
+import { addOrUpdateLicenseAssignment, deleteLicenseAssignmentById, getLicenseAssigmentsList } from '@/services/licenseAssignmentServices';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { GetServiceRequestAssignToLookups } from '@/services/ticketServices';
 import { getDepartment } from '@/services/servicedeskReportsServices';
@@ -29,22 +29,22 @@ interface SoftwareData {
     LicenseAssignmentId: Number,
     EmployeeName: string,
     DepartmentName: string,
-    DepartmentId?:string,
+    DepartmentId?: string,
     SoftwareName: string,
     LicenseKey: string,
-    LicenseKeyId?:string,
+    LicenseKeyId?: string,
     AssignmentDate: string,
     ExpiryDate: string,
     Status: string
 }
 
 const LicenseAssignment = () => {
-    const dispatch=useAppDispatch();
+    const dispatch = useAppDispatch();
     const { toast } = useToast();
-    const msg=useMessage();
-    const companyId=useAppSelector(state=>state.projects.companyId);
-    const branch=useAppSelector(state=>state.projects.branch);
-    const lastLevelsData=useAppSelector(state=>state.projects.lastLevelsData);
+    const msg = useMessage();
+    const companyId = useAppSelector(state => state.projects.companyId);
+    const branch = useAppSelector(state => state.projects.branch);
+    const lastLevelsData = useAppSelector(state => state.projects.lastLevelsData);
     const [columns, setColumns] = useState<ColumnDef<SoftwareData>[]>([
         { id: 'AssignmentId', accessorKey: "LicenseAssignmentId", header: "Assignment ID" },
         { id: 'Employee', accessorKey: "EmployeeName", header: "Employee" },
@@ -52,17 +52,17 @@ const LicenseAssignment = () => {
         { id: 'Software', accessorKey: "SoftwareName", header: "Software" },
         { id: 'Licensekey', accessorKey: "LicenseKey", header: "License Key" },
         { id: 'AssignmentDate', accessorKey: "AssignmentDate", header: "Assignment Date" },
-        { id: 'ExpiryDate', accessorKey: "ExpiryDate", header: "Expiry Date" },
+        { id: 'ExpiryDate', accessorKey: "ExpiryDate", header: "License Expiry Date" },
         { id: 'Status', accessorKey: 'Status', header: 'Status' }
     ]);
     const [fields, setFields] = useState<BaseField[]>(SOFTWARE_DB);
     const [isOpenLicenseCard, setIsOpenLicenseCard] = useState(false);
     const [dataSource, setDataSource] = useState([]);
-    const [softwaresData,setSoftwaresData]=useState([])
-    const [editingRecord,setEditingRecord]=useState<SoftwareData|null>(null);
-    const [deletingRecord,setDeletingRecord]=useState<SoftwareData|null>(null);
+    const [softwaresData, setSoftwaresData] = useState([])
+    const [editingRecord, setEditingRecord] = useState<SoftwareData | null>(null);
+    const [deletingRecord, setDeletingRecord] = useState<SoftwareData | null>(null);
     const [isDelModalOpen, setIsDelModalOpen] = useState(false);
-    
+
     const form = useForm<GenericObject>({
         defaultValues: fields.reduce((acc, f) => {
             acc[f.name!] = f.defaultValue ?? '';
@@ -80,74 +80,74 @@ const LicenseAssignment = () => {
         }
     }, [companyId, branch])
 
-    useEffect(()=>{
-        if(watch('SoftwareId') && companyId){
+    useEffect(() => {
+        if (watch('SoftwareId') && companyId) {
             async function fetchSoftwareLicenses() {
                 const softwareId = watch('SoftwareId');
                 dispatch(setLoading(true));
-                await getSoftwaresList(companyId,softwareId).then(res=>{
-                    let licenseOptions=[]
-                    if(res.success && Array.isArray(res.data) && res.data?.length>0){
-                        if(res.data[0].LicenseDetails && Array.isArray(res.data[0].LicenseDetails) && res.data[0].LicenseDetails?.length>0){
-                            licenseOptions=res.data[0].LicenseDetails.filter(k=>!k.LicenseAssignToId && k.Status==="Active").map(ele=>({label:ele.LicenseKey,value:ele.LicenseDetailId}));
-                            setLookupsDataInJson({LicenseKeyId:licenseOptions})
+                await getSoftwaresList(companyId, softwareId).then(res => {
+                    let licenseOptions = []
+                    if (res.success && Array.isArray(res.data) && res.data?.length > 0) {
+                        if (res.data[0].LicenseDetails && Array.isArray(res.data[0].LicenseDetails) && res.data[0].LicenseDetails?.length > 0) {
+                            licenseOptions = res.data[0].LicenseDetails.filter(k => !k.LicenseAssignToId && k.Status === "Active").map(ele => ({ label: ele.LicenseKey, value: ele.LicenseDetailId }));
+                            setLookupsDataInJson({ LicenseKeyId: licenseOptions })
                         }
                     }
-                    setLookupsDataInJson({LicenseKeyId:licenseOptions})
-                }).catch(err=>{}).finally(()=>{dispatch(setLoading(false));})
+                    setLookupsDataInJson({ LicenseKeyId: licenseOptions })
+                }).catch(err => { }).finally(() => { dispatch(setLoading(false)); })
             }
             fetchSoftwareLicenses();
-        }else{
-            setLookupsDataInJson({LicenseKeyId:[]})
+        } else {
+            setLookupsDataInJson({ LicenseKeyId: [] })
         }
-    },[watch('SoftwareId'),companyId])
+    }, [watch('SoftwareId'), companyId])
     //store lookup data in json
-    function setLookupsDataInJson(lookupData:any){
-        let keys=Object.keys(lookupData);
-        let fieldsCopy=structuredClone(fields);
-        keys.forEach(key=>{
-            let index=fieldsCopy.findIndex(f=>f.name===key);
-            if(index!==-1){
-                fieldsCopy[index].options=lookupData[key]
+    function setLookupsDataInJson(lookupData: any) {
+        let keys = Object.keys(lookupData);
+        let fieldsCopy = structuredClone(fields);
+        keys.forEach(key => {
+            let index = fieldsCopy.findIndex(f => f.name === key);
+            if (index !== -1) {
+                fieldsCopy[index].options = lookupData[key]
             }
         })
         setFields(fieldsCopy);
     }
     // fetch all lookups
-    async function fetchAllLookups(){
+    async function fetchAllLookups() {
         dispatch(setLoading(true));
-        try{
-            const [users,departments,softwares]=await Promise.allSettled([
-                GetServiceRequestAssignToLookups(companyId,branch),
-                getDepartment(companyId),getSoftwaresList(companyId)
+        try {
+            const [users, departments, softwares] = await Promise.allSettled([
+                GetServiceRequestAssignToLookups(companyId, branch),
+                getDepartment(companyId), getSoftwaresList(companyId)
             ]);
-            let responses={
-                EmployeeId:users.status==='fulfilled'&&users.value.success?users.value.data?.ServiceRequestAssignToUsersLookup.map((user:any)=>({label:user.UserName,value:user.UserId})):[],
-                DepartmentId:departments.status==='fulfilled'&&departments.value.success?departments.value.data?.filter(ele=>ele.type==lastLevelsData?.DepartmentId).map((dept:any)=>({label:dept.text,value:dept.id})):[],
-                SoftwareId:softwares.status==='fulfilled' && softwares.value.success && softwares.value.data.status===undefined?softwares.value.data?.map((soft:any)=>({label:soft.SoftwareName,value:soft.SoftwareId})):[],
+            let responses = {
+                EmployeeId: users.status === 'fulfilled' && users.value.success ? users.value.data?.ServiceRequestAssignToUsersLookup.map((user: any) => ({ label: user.UserName, value: user.UserId })) : [],
+                DepartmentId: departments.status === 'fulfilled' && departments.value.success ? departments.value.data?.filter(ele => ele.type == lastLevelsData?.DepartmentId).map((dept: any) => ({ label: dept.text, value: dept.id })) : [],
+                SoftwareId: softwares.status === 'fulfilled' && softwares.value.success && softwares.value.data.status === undefined ? softwares.value.data?.map((soft: any) => ({ label: soft.SoftwareName, value: soft.SoftwareId })) : [],
             }
-            let licensesData=softwares.status==='fulfilled'&&softwares.value.success && softwares.value.data.status===undefined ?softwares.value.data:[];
+            let licensesData = softwares.status === 'fulfilled' && softwares.value.success && softwares.value.data.status === undefined ? softwares.value.data : [];
             setSoftwaresData(licensesData);
             setLookupsDataInJson(responses);
-        }catch(err){}finally{dispatch(setLoading(false));}
+        } catch (err) { } finally { dispatch(setLoading(false)); }
     }
     // fetch all license assignments
     async function fetchAllLicenseAssignments() {
         dispatch(setLoading(true));
-        await getLicenseAssigmentsList(companyId).then(res=>{
-            if(res.success && res.data.status===undefined){
-                setDataSource(res.data);
-            }else{
+        await getLicenseAssigmentsList(companyId).then(res => {
+            if (res.success && res.data.status === undefined) {
+                setDataSource(res.data.reverse());
+            } else {
                 setDataSource([]);
                 msg.warning('No License Assignments Data Found !!')
             }
-        }).catch(err=>{}).finally(()=>{dispatch(setLoading(false));})
+        }).catch(err => { }).finally(() => { dispatch(setLoading(false)); })
     }
     // handle save
     const handleSave = async (data: GenericObject) => {
         try {
             dispatch(setLoading(true));
-            const licenseKey = fields.find(f => f.name === 'LicenseKeyId')?.options?.find(opt => opt.value === data.LicenseKey)?.label || '';
+            const licenseKey = fields.find(f => f.name === 'LicenseKeyId')?.options?.find(opt => opt.value == data.LicenseKeyId)?.label || '';
             const selectedLicenseData = softwaresData.find(s => s.SoftwareId === data.SoftwareId)?.LicenseDetails?.find(l => l.LicenseDetailId === data.LicenseKeyId);
             const payload = {
                 LicenseAssignment: [
@@ -160,7 +160,7 @@ const LicenseAssignment = () => {
                         SoftwareId: data.SoftwareId,
                         SoftwareName: '',
                         LicenseKeyId: data.LicenseKeyId,
-                        LicenseKey: licenseKey,
+                        LicenseKey: licenseKey || data.LicenseKey,
                         AssignmentDate: formatDate(data.AssignmentDate, 'DD/MM/YYYY'),
                         ExpiryDate: "12/12/2025",// selectedLicenseData?.LicenseExpiryDate || '12/12/2025',
                         Status: selectedLicenseData?.Status || '',
@@ -171,6 +171,7 @@ const LicenseAssignment = () => {
             const res = await addOrUpdateLicenseAssignment(companyId, payload);
             if (res.success && res.data?.status) {
                 msg.success(res.data.message || 'License Assignment Successful');
+                fetchAllLicenseAssignments();
                 form.reset()
             } else {
                 msg.warning(res.data?.message || 'Something went wrong');
@@ -184,21 +185,23 @@ const LicenseAssignment = () => {
     };
     // handle refresh
     const handleRefresh = useCallback(() => {
-        toast({ title: "Data Refreshed", description: "All users data has been updated", });
-        fetchAllLicenseAssignments();
-    }, [toast]);
+        toast({ title: "Data Refreshed", description: "All License Assignments data has been updated", });
+        if(companyId) fetchAllLicenseAssignments();
+    }, [toast,companyId]);
 
     const handleReset = () => {
         form.reset();
         setEditingRecord(null);
+        setDeletingRecord(null)
     }
     const handleDelete = (data: SoftwareData): void => {
         setDeletingRecord(data);
         setIsDelModalOpen(true);
     }
     const handleEdit = (data: SoftwareData): void => {
+        console.log("first", data)
         setEditingRecord(data);
-        let selectedData={...data,DepartmentId:data.DepartmentId ? `${data.DepartmentId}`:''}
+        let selectedData = { ...data, DepartmentId: data.DepartmentId ? `${data.DepartmentId}` : '' }
         setIsOpenLicenseCard(true);
         Object.keys(selectedData).forEach(key => {
             form.setValue(key, (selectedData as any)[key]);
@@ -229,6 +232,10 @@ const LicenseAssignment = () => {
     const getFieldsByNames = (names: string[]) => fields.filter(f => names.includes(f.name!))
     const renderField = (field: BaseField) => {
         const { name, label, fieldType, isRequired, validationPattern, patternErrorMessage, show = true } = field;
+        let isdisable = editingRecord ? true : false
+        if (name === "LicenseKeyId" && editingRecord) {
+            return null
+        }
         const validationRules = {
             required: isRequired ? `${label} is Required` : false,
             ...(validationPattern && {
@@ -238,7 +245,7 @@ const LicenseAssignment = () => {
                 }
             }),
         };
-        let depLabel=lastLevelsData?.Department
+        let depLabel = lastLevelsData?.Department
 
         switch (fieldType) {
             case 'text':
@@ -251,6 +258,7 @@ const LicenseAssignment = () => {
                             <ReusableInput
                                 {...field}
                                 value={ctrl.value}
+                                disabled={isdisable}
                                 onChange={ctrl.onChange}
                                 error={fieldState.error?.message}
                             />
@@ -267,6 +275,7 @@ const LicenseAssignment = () => {
                         render={({ field: ctrl }) => (
                             <ReusableDatePicker
                                 {...field}
+                                disabled={isdisable}
                                 value={ctrl.value}
                                 onChange={ctrl.onChange}
                                 error={errors[name]?.message as string}
@@ -285,10 +294,11 @@ const LicenseAssignment = () => {
                             <ReusableDropdown
                                 {...field}
                                 value={ctrl.value}
+                                disabled={isdisable}
                                 onChange={ctrl.onChange}
                                 error={errors[name]?.message as string}
                                 allowClear
-                                {...(name==='DepartmentId'?{label:depLabel || label,placeholder:`Select ${depLabel || label}` }:{})}
+                                {...(name === 'DepartmentId' ? { label: depLabel || label, placeholder: `Select ${depLabel || label}` } : {})}
 
                             />
                         )}
@@ -306,6 +316,7 @@ const LicenseAssignment = () => {
                                 <ReusableMultiSelect
                                     label={label!}
                                     {...field}
+                                    disabled={isdisable}
                                     value={ctrl.value}
                                     onChange={ctrl.onChange}
                                     error={errors[name]?.message as string}
@@ -313,22 +324,6 @@ const LicenseAssignment = () => {
                             )}
                         />
                     </div>
-                );
-            case 'checkbox':
-                return (
-                    <Controller
-                        name={name}
-                        control={control}
-                        render={({ field: ctrl }) => (
-                            <ReusableSingleCheckbox
-                                label={label}
-                                onChange={ctrl.onChange}
-                                value={ctrl.value}
-                                className="text-orange-500"
-                                {...field}
-                            />
-                        )}
-                    />
                 );
             case 'textarea':
                 return (
@@ -351,6 +346,27 @@ const LicenseAssignment = () => {
                 return null;
         }
     };
+    const callDeleteAPI = async () => {
+
+        setIsDelModalOpen(false)
+        try {
+            dispatch(setLoading(true))
+            const res = await deleteLicenseAssignmentById(companyId, String(deletingRecord?.LicenseAssignmentId))
+            if (res.success && res.data.status) {
+                msg.success(res.data.message)
+                fetchAllLicenseAssignments()
+                handleReset()
+            } else {
+                msg.warning(res?.data?.message || "Unable to Delete")
+            }
+
+        } catch {
+
+        } finally {
+            dispatch(setLoading(false))
+        }
+
+    }
     return (
         <div className="h-full overflow-y-scroll bg-gray-50/30">
             <div className="p-4 sm:p-4 space-y-4 sm:space-y-4">
@@ -382,9 +398,8 @@ const LicenseAssignment = () => {
                                     <span className='text-2xl'>Assign License To Employee</span>
                                     <div className={`grid xxs:grid-cols-1 xs2:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-6`}>
                                         {getFieldsByNames(['EmployeeId', 'DepartmentId', 'SoftwareId', 'LicenseKeyId', 'AssignmentDate']).map((field) => {
-                                            return <div className="flex-1 items-center space-x-2">
-                                                {renderField(field)}
-                                            </div>;
+                                            return (renderField(field))
+
                                         })}
                                     </div>
                                     <div className={`grid xxs:grid-cols-1 xs2:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-1 gap-6 mb-6`}>
@@ -463,7 +478,7 @@ const LicenseAssignment = () => {
                             <ReusableButton
                                 variant="primary"
                                 danger={true}
-                                onClick={() => setIsDelModalOpen(false)}
+                                onClick={callDeleteAPI}
                             >
                                 Delete
                             </ReusableButton>

@@ -499,16 +499,16 @@ const navigation: NavItem[] = [
             icon: UserCog,
             link: '/masters/company/customer',
           },
-          {
-            label: 'Assets & Inventory',
-            icon: Package,
-            link: '/masters/company/assets-inventory',
-          },
-          {
-            label: 'Maintenance',
-            icon: Wrench,
-            link: '/masters/company/maintenance',
-          },
+          // {
+          //   label: 'Assets & Inventory',
+          //   icon: Package,
+          //   link: '/masters/company/assets-inventory',
+          // },
+          // {
+          //   label: 'Maintenance',
+          //   icon: Wrench,
+          //   link: '/masters/company/maintenance',
+          // },
         ],
       },
       {

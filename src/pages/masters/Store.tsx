@@ -1,14 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import PageLayout from '@/components/common/PageLayout';
-import PageHeader from '@/components/common/PageHeader';
+import { useEffect, useState } from 'react';
 import { ReusableButton } from '@/components/ui/reusable-button';
 import { ReusableInput } from '@/components/ui/reusable-input';
 import { ReusableTable } from '@/components/ui/reusable-table';
 import { ReusableDropdown } from '@/components/ui/reusable-dropdown';
 import { ReusableTextarea } from '@/components/ui/reusable-textarea';
-import { Search, Plus, Edit, Trash2 } from 'lucide-react';
+import { Plus, Edit, Trash2, X, Save } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
 import { setLoading } from '@/store/slices/projectsSlice';
 import { useDispatch } from 'react-redux';
 import { addNewStore, deleteStore, getEditStoreData, getStoreData, getStoreDataByCompanyIdAndBranchName, updateStore } from '@/services/storeServices';
@@ -17,8 +14,8 @@ import { useAppSelector } from '@/store';
 import { Controller, useForm } from 'react-hook-form';
 import { BaseField, GenericObject } from '@/Local_DB/types/types';
 import { STORE_DB } from '@/Local_DB/Form_JSON_Data/StoreDB';
-
-
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Card, CardContent } from '@/components/ui/card';
 interface Store {
     id: string;
     name: string;
@@ -26,54 +23,34 @@ interface Store {
     description: string;
 }
 const Store = () => {
-    const [searchQuery, setSearchQuery] = useState('');
     const [selectedStore, setSelectedStore] = useState<Store | null>(null);
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
     const [fields, setFields] = useState<BaseField[]>(STORE_DB);
     const [dataSource, setDataSource] = useState([])
-      const [isDelModalOpen, setIsDelModalOpen] = useState(false);
-        const [recordToEditId, setRecordToEditId] = useState(null);
-    const [formData, setFormData] = useState({
-        name: '',
-        branch: '',
-        description: '',
-    });
+    const [isDelModalOpen, setIsDelModalOpen] = useState(false);
+    const [recordToEditId, setRecordToEditId] = useState(null);
     const dispatch = useDispatch()
     const msg = useMessage()
     const companyId = useAppSelector(state => state.projects.companyId);
-    const branch=useAppSelector(state => state.projects.branch) || '';
-    const branchCode=useAppSelector(state => state.projects.branchCode) || '';
-    
-
+    const branch = useAppSelector(state => state.projects.branch) || '';
+    const branchCode = useAppSelector(state => state.projects.branchCode) || '';
     useEffect(() => {
-        if (companyId && branch=="All")
-        {
+        if (companyId && branch == "All") {
             fetchStoreGetData(companyId)
         }
-        if(companyId && branch!="All" && branch!="")
-        {
-            fetchStoreDataByBranchName(companyId,branch)
+        if (companyId && branch != "All" && branch != "") {
+            fetchStoreDataByBranchName(companyId, branch)
         }
-    }, [companyId,branch])
-
-
-    //   const filteredStores = mockStores.filter(store =>
-    //     store.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    //     store.branch.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    //     store.description.toLowerCase().includes(searchQuery.toLowerCase())
-    //   );
+    }, [companyId, branch])
     const form = useForm<GenericObject>({
         defaultValues: fields.reduce((acc, f) => {
             acc[f.name!] = f.defaultChecked ?? '';
             return acc;
         }, {} as GenericObject),
-        // mode: 'onChange',
-        // reValidateMode: "onChange"
+        mode: 'onChange',
     });
-
     const { control, register, handleSubmit, trigger, watch, setValue, reset, formState: { errors } } = form;
     const getFieldsByNames = (names: string[]) => fields.filter(f => names.includes(f.name!));
-
     const renderField = (field: BaseField) => {
         const { name, label, fieldType, isRequired, validationPattern, patternErrorMessage, dependsOn, show = true } = field;
         if (!show && dependsOn && !watch(dependsOn)) {
@@ -82,7 +59,6 @@ const Store = () => {
         const validationRules = {
             required: isRequired ? `${label} is Required` : false,
         };
-
         switch (fieldType) {
             case 'text':
                 return (
@@ -138,8 +114,6 @@ const Store = () => {
                 return null;
         }
     }
-
-
     const columns = [
         {
             id: 'StoreName',
@@ -168,7 +142,7 @@ const Store = () => {
                     <ReusableButton
                         variant="text"
                         size="small"
-                        onClick={() => { setSelectedStore(row.original);setRecordToEditId(row.original.StoreId);fetchStoreDataByStoreId(companyId,row.original.StoreId) }}
+                        onClick={() => { setSelectedStore(row.original); setRecordToEditId(row.original.StoreId); fetchStoreDataByStoreId(companyId, row.original.StoreId) }}
                     >
                         <Edit className="h-4 w-4" />
                     </ReusableButton>
@@ -177,9 +151,9 @@ const Store = () => {
                         size="small"
                         danger
                         icon={<Trash2 className="h-4 w-4" />}
-                        onClick={() => {setIsDelModalOpen(true);setRecordToEditId(row.original.StoreId)}}
+                        onClick={() => { setIsDelModalOpen(true); setRecordToEditId(row.original.StoreId) }}
                     >
-                       <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-4 w-4" />
                     </ReusableButton>
                 </div>
             ),
@@ -196,9 +170,9 @@ const Store = () => {
             }
         }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
     }
-       async function fetchStoreDataByBranchName(companyId,branch) {
+    async function fetchStoreDataByBranchName(companyId, branch) {
         dispatch(setLoading(true))
-        await getStoreDataByCompanyIdAndBranchName(companyId,branch).then(res => {
+        await getStoreDataByCompanyIdAndBranchName(companyId, branch).then(res => {
             if (res.data && res.data.status == undefined) {
                 setDataSource(res.data)
             } else {
@@ -206,9 +180,9 @@ const Store = () => {
             }
         }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
     }
-  async function fetchStoreDataByStoreId(companyId,id) {
+    async function fetchStoreDataByStoreId(companyId, id) {
         dispatch(setLoading(true))
-        await getEditStoreData(companyId,id).then(res => {
+        await getEditStoreData(companyId, id).then(res => {
             if (res.data && res.data.status == undefined) {
                 handleEdit(res.data.StoreDetails)
             } else {
@@ -216,218 +190,200 @@ const Store = () => {
             }
         }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
     }
-  const deleteStoreData = async (id: number,data:any) => {
-    await deleteStore(companyId, id,data).then(res => {
-      if (res.success) {
-        if (res.data.status) {
-          msg.success(res.data.message);
-        //   if (selectedStatusRec && selectedStatusRec.Id == id) {
-        //     handleReset('DeleteStatus');
-        //   }
-        //   fetchAllStatusList();
-        fetchStoreGetData(companyId)
-        } else {
-          msg.warning(res.data.message);
-        }
-      } else {
-        msg.warning('Failed to delete status !!')
-      }
-    }).catch(err => { }).finally(() => {
+    const deleteStoreData = async (id: number, data: any) => {
+        dispatch(setLoading(true));
+        await deleteStore(companyId, id, data).then(res => {
+            if (res.success) {
+                if (res.data.status) {
+                    msg.success(res.data.message);
+                    fetchStoreGetData(companyId)
+                } else {
+                    msg.warning(res.data.message);
+                }
+            } else {
+                msg.warning('Failed to delete status !!')
+            }
+        }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
+    }
+    const addNewStoreData = async (branch: any, data: any) => {
+        dispatch(setLoading(true));
+        await addNewStore(companyId, branch, data).then(res => {
+            if (res.success) {
+                if (res.data.status) {
+                    msg.success(res.data.message);
+                    fetchStoreDataByBranchName(companyId, branch)
 
-    })
-  }
-   const addNewStoreData = async (branch: any,data:any) => {
-    await addNewStore(companyId, branch,data).then(res => {
-      if (res.success) {
-        if (res.data.status) {
-          msg.success(res.data.message);
-        //   if (selectedStatusRec && selectedStatusRec.Id == id) {
-        // //     handleReset('DeleteStatus');
-        // //   }
-        // //   fetchAllStatusList();
-        // if(recordToEditId==null && companyId){
+                } else {
+                    msg.warning(res.data.message);
+                }
+            } else {
+                msg.warning('Failed to delete status !!')
+            }
+        }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
+    }
+    const updateStoreData = async (id: any, data: any) => {
+        dispatch(setLoading(true));
+        await updateStore(companyId, id, data).then(res => {
+            if (res.success) {
+                if (res.data.status) {
+                    msg.success(res.data.message);
+                    fetchStoreDataByBranchName(companyId, branch)
 
-        // }
-        // fetchStoreGetData(companyId)
-        fetchStoreDataByBranchName(companyId,branch)
-
-        } else {
-          msg.warning(res.data.message);
-        }
-      } else {
-        msg.warning('Failed to delete status !!')
-      }
-    }).catch(err => { }).finally(() => {
-
-    })
-  }
-    const updateStoreData = async (id: any,data:any) => {
-    await updateStore(companyId, id,data).then(res => {
-      if (res.success) {
-        if (res.data.status) {
-          msg.success(res.data.message);
-        //   if (selectedStatusRec && selectedStatusRec.Id == id) {
-        // //     handleReset('DeleteStatus');
-        // //   }
-        // //   fetchAllStatusList();
-        // if(recordToEditId==null && companyId){
-
-        // }
-        // fetchStoreGetData(companyId)
-            fetchStoreDataByBranchName(companyId,branch)
-
-        } else {
-          msg.warning(res.data.message);
-        }
-      } else {
-        msg.warning('Failed to delete status !!')
-      }
-    }).catch(err => { }).finally(() => {
-
-    })
-  }
-  const submit=()=>{
-  let Payload = {
+                } else {
+                    msg.warning(res.data.message);
+                }
+            } else {
+                msg.warning('Failed to delete status !!')
+            }
+        }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
+    }
+    const submit = () => {
+        let Payload = {
             "StoreDetails": [
                 {
                     "Store Name": watch("StoreName"),
                     "Store Description": watch("StoreDescription"),
                     "BranchName": branch,
-                    "Branch Code":branchCode
+                    "Branch Code": branchCode
                 }
             ]
         }
-        if(recordToEditId==null && companyId){
-            addNewStoreData(branch,Payload)
+        if (recordToEditId == null && companyId) {
+            addNewStoreData(branch, Payload)
             setIsAddDialogOpen(false)
         }
-        else if(recordToEditId!==null && companyId){
-            updateStoreData(recordToEditId,Payload)
+        else if (recordToEditId !== null && companyId) {
+            updateStoreData(recordToEditId, Payload)
             setIsAddDialogOpen(false)
 
         }
-  }
-
-   
-
-  
-      const handleEdit = (data) => {
+    }
+    const handleEdit = (data) => {
         reset({
             StoreName: data.StoreName,
-            Branch:data.Branch,
-            StoreDescription:data.StoreDescription
+            Branch: data.Branch,
+            StoreDescription: data.StoreDescription
         })
         setIsAddDialogOpen(true)
-        // e.preventDefault();
-        // setIsAddDialogOpen(false);
-        // setFormData({ name: '', branch: '', description: '' });
-      };
-
+    };
     return (
-        <PageLayout>
-            {/* <PageHeader 
-        title="Store List" 
-        breadcrumbs={[
-          { label: 'Masters', href: '/masters' },
-          { label: 'Consumables', href: '/masters/consumables' },
-          { label: 'Store', href: '/masters/store' }
-        ]}
-      /> */}
-
-            <div className="space-y-6 p-5">
-                {/* Search and Actions */}
-                <div className="flex justify-between items-center">
-                    <h1>Store</h1>
-
-                    <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-                        <DialogTrigger asChild>
-                            <ReusableButton
-                                variant="primary"
-                                icon={<Plus className="h-4 w-4" />}
-                                className="bg-orange-500 hover:bg-orange-600 border-orange-500"
-                                onClick={()=>{setRecordToEditId(null);reset({StoreName:"",Branch:"",StoreDescription:""})}}
-                            >
-                                Add
-                            </ReusableButton>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-2xl">
-                            <DialogHeader>
-                                <DialogTitle>{recordToEditId?"Update Store":"Add Store"}</DialogTitle>
-                            </DialogHeader>
-                            <div className='grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4'>
-                                {getFieldsByNames(['StoreName', 'Branch']).map((field) => {
-                                    return <div className="flex items-center space-x-2">
-                                        {renderField(field)}
-                                    </div>;
-                                })}
+        <div className="h-full bg-gray-50 flex flex-col ">
+            <div className="flex flex-1 overflow-hidden">
+                <div className="flex-1 flex flex-col min-w-0 ">
+                    <div className="bg-white border-b shadow-sm px-4 lg:px-6 py-3 flex flex-row xxs:flex-col xs2:flex-row lg:flex-row lg:items-center justify-between gap-4 shrink-0">
+                        <div className="flex items-center gap-4 lg:gap-6 flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 text-sm text-gray-600">
+                                    <span>Masters</span>
+                                    <span>/</span>
+                                    <span>Company</span>
+                                    <span>/</span>
+                                    <span className="text-gray-900 font-medium">Store</span>
+                                </div>
                             </div>
-                            <div className='w-100'>
-                                {getFieldsByNames(['StoreDescription']).map((field) => {
-                                    return <div className=" space-x-2">
-                                        {renderField(field)}
-                                    </div>;
-                                })}
-                            </div>
-                            <div className="flex justify-end gap-2">
-                                <ReusableButton
-                                    variant="default"
-                                    onClick={() => setIsAddDialogOpen(false)}
-                                >
-                                    Cancel
-                                </ReusableButton>
-                                <ReusableButton
-                                    htmlType="submit"
-                                    variant="primary"
-                                    className="bg-orange-500 hover:bg-orange-600 border-orange-500"
-                                    onClick={()=>submit()}
-                                >
-                                   {recordToEditId?"Update":"Save"}
-                                </ReusableButton>
-                            </div>
-                        </DialogContent>
-                    </Dialog>
-                    <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>
-                              <DialogContent className="sm:max-w-[425px]">
-                                <DialogHeader>
-                                  <DialogTitle>Confirm the action</DialogTitle>
-                                  <DialogDescription>
-                                    Are you sure you want to delete Store?
-                                    {/* {currentTab === "service-request-type"
-                                      ? `${selectedRecord?.ServiceRequestType || "this"} Service Request Type`
-                                      : `${selectedStatusRec?.StatusType || "this"} Status`
-                                    } */}
-                                  </DialogDescription>
-                                </DialogHeader>
-                                <DialogFooter>
-                                  <ReusableButton
-                                    variant="default"
-                                    onClick={() => setIsDelModalOpen(false)}
-                                  >
-                                    Cancel
-                                  </ReusableButton>
-                                  <ReusableButton
-                                    variant="primary"
-                                    danger={true}
-                                    onClick={()=>{deleteStoreData(recordToEditId,"");setIsDelModalOpen(false)}}
-                                    // onClick={currentTab === "service-request-type" ? () => { deleteServiceRequestType(selectedRecord?.Id); setIsDelModalOpen(false) } : () => { deleteStatus(selectedStatusRec?.Id); setIsDelModalOpen(false) }}
-                                  >
-                                    Delete
-                                  </ReusableButton>
-                                </DialogFooter>
-                              </DialogContent>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                                <DialogTrigger asChild>
+                                    <ReusableButton
+                                        variant="primary"
+                                        icon={<Plus className="h-4 w-4" />}
+                                        onClick={() => { setRecordToEditId(null); reset({ StoreName: "", Branch: "", StoreDescription: "" }) }}
+                                    >
+                                        Add
+                                    </ReusableButton>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-2xl">
+                                    <DialogHeader>
+                                        <DialogTitle>{recordToEditId ? "Update Store" : "Add Store"}</DialogTitle>
+                                    </DialogHeader>
+                                    <div className='grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4'>
+                                        {getFieldsByNames(['StoreName', 'Branch']).map((field) => {
+                                            return <div className="flex items-center space-x-2">
+                                                {renderField(field)}
+                                            </div>;
+                                        })}
+                                    </div>
+                                    <div className='w-100'>
+                                        {getFieldsByNames(['StoreDescription']).map((field) => {
+                                            return <div className=" space-x-2">
+                                                {renderField(field)}
+                                            </div>;
+                                        })}
+                                    </div>
+                                    <div className="flex justify-end gap-2">
+                                        <ReusableButton
+                                            variant="default"
+                                            onClick={() => setIsAddDialogOpen(false)}
+                                        >
+                                            Cancel
+                                        </ReusableButton>
+                                        <ReusableButton
+                                            htmlType="submit"
+                                            variant="primary"
+                                            className="bg-orange-500 hover:bg-orange-600 border-orange-500"
+                                            onClick={() => submit()}
+                                        >
+                                            {recordToEditId ? "Update" : "Save"}
+                                        </ReusableButton>
+                                    </div>
+                                </DialogContent>
                             </Dialog>
-                </div>
-
-                {/* Table */}
-                <div className="bg-card ">
-                    <ReusableTable
-                        data={dataSource}
-                        columns={columns}
-                    />
+                        </div>
+                    </div>
+                    <div className="flex-1 p-2 py-3 overflow-hidden min-h-0  ">
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-1 h-full">
+                            <div className="lg:col-span-12 flex flex-col  min-h-0 ">
+                                <ScrollArea className="flex-1">
+                                    <div className="space-y-2 pr-1">
+                                        <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+                                            <CardContent className="p-2">
+                                                <div className="p-2">
+                                                    <div className="flex justify-between items-center">
+                                                        <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>
+                                                            <DialogContent className="sm:max-w-[425px]">
+                                                                <DialogHeader>
+                                                                    <DialogTitle>Confirm the action</DialogTitle>
+                                                                    <DialogDescription>
+                                                                        Are you sure you want to delete Store?
+                                                                    </DialogDescription>
+                                                                </DialogHeader>
+                                                                <DialogFooter>
+                                                                    <ReusableButton
+                                                                        variant="default"
+                                                                        onClick={() => setIsDelModalOpen(false)}
+                                                                    >
+                                                                        Cancel
+                                                                    </ReusableButton>
+                                                                    <ReusableButton
+                                                                        variant="primary"
+                                                                        danger={true}
+                                                                        onClick={() => { deleteStoreData(recordToEditId, ""); setIsDelModalOpen(false) }}
+                                                                    >
+                                                                        Delete
+                                                                    </ReusableButton>
+                                                                </DialogFooter>
+                                                            </DialogContent>
+                                                        </Dialog>
+                                                    </div>
+                                                    <div className="bg-gray-50/30">
+                                                        <ReusableTable
+                                                            title='Store'
+                                                            data={dataSource}
+                                                            columns={columns}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                    </div>
+                                </ScrollArea>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </PageLayout>
+        </div>
     );
 };
-
 export default Store;

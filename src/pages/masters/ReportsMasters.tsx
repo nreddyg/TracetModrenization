@@ -654,7 +654,7 @@ const ReportsMasters = () => {
                       </>
                     )}
                   </Button>
-                  <Button onClick={null} variant="outline"> Clear All </Button>
+                  <Button onClick={reset} variant="outline"> Clear All </Button>
                 </div>
               }
             >

@@ -258,7 +258,7 @@ const TicketView = () => {
     if (isEditing && selectedTicket) {
       let fieldsCopy = structuredClone(fields);
       let ind = fieldsCopy.findIndex(ele => ele?.name === 'Priority');
-      if (selectedTicket.Status === 'Open' && watch('Status') != 'Open') {
+      if ((selectedTicket.Status === 'Open' && watch('Status') != 'Open') || selectedTicket.Status !== 'Open') {
         if (ind !== -1) {
           fieldsCopy[ind].disabled = true
         }
@@ -1396,10 +1396,12 @@ const TicketView = () => {
     }
 
     try {
+      // dispatch(setLoading(true))
       await updateServiceRequestDetails();
     } catch (err) {
       console.error("Error while updating service request:", err);
     } finally {
+        // dispatch(setLoading(false))
       // Add any cleanup logic here if needed
     }
   };
@@ -1468,17 +1470,17 @@ const TicketView = () => {
 
         msg.success(res.data.message);
       } else {
-        // ⚠️ API returned failure
         const errMsg =
           res.data.ErrorDetails?.[0]?.["Error Message"] || res.data.message;
         msg.warning(errMsg);
+         dispatch(setLoading(false));
       }
     } catch (err: any) {
-      // ❌ Network or unexpected error
       msg.error(err.message || "Failed to update service request.");
       console.error("Update failed:", err);
-    } finally {
       dispatch(setLoading(false));
+    } finally {
+      // dispatch(setLoading(false));
     }
   }
 
@@ -1515,6 +1517,8 @@ const TicketView = () => {
     setUpdatedComments("")
     setHasChanges(false);
     setIsEditing(false);
+    fieldsCopy.forEach(element => {element.disabled=true});
+    setFields(fieldsCopy)
   }
   // Handle cancel edit - only clear form values, preserve all field configs and options
   const handleEdit = (type: string) => {

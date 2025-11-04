@@ -280,7 +280,6 @@ const Vendor = () => {
   };
 
   const handleSave = (data) => {
-    console.log(data)
     const payload = {
       VendorCustomerDetails: [
         {
@@ -379,7 +378,6 @@ UpdateVendorAPI(payload,selectedVendorData?.VendorID)
   const getVendorDataAPI = async (Id) => {
     dispatch(setLoading(true));
     await getEditVendorListByCompanyId(companyId, Id).then(res => {
-      console.log("res", res)
       if (res.success && res.data && res.data.status == undefined) {
 
         form.reset({ ...form.getValues(), ...res.data[0], VendorType: res.data[0]["VendorType"]?.split(",") })

@@ -116,7 +116,6 @@ const AssetCategory = () => {
             accessorKey: 'Name',
             header: 'Name',
             cell: ({ row }) => (
-
                 <span className="font-medium text-gray-900 text-sm">{row.getValue('Name')}</span>
             ),
         },

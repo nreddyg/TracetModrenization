@@ -500,7 +500,10 @@ const SoftwareDataColumns = [
         setDeletingRecord(data)
     }
     const handleEdit = (data: any): void => {
-        form.reset({ ...form.getValues(), ...data })
+        dispatch(setLoading(true))
+        setTimeout(()=>{
+
+              form.reset({ ...form.getValues(), ...data })
              let fieldsData = [...fields]
                 fieldsData.forEach((obj) => {
                     if (obj.name == "NumberOfLicenses" || obj.name == "LicenseType") {
@@ -508,9 +511,14 @@ const SoftwareDataColumns = [
                     }
                 })
                 setFields(fieldsData)
+
         setDatasource(generateRowsInTable(0, 0, data.LicenseDetails))
         setIsOpenLicenseCard(true)
         setEditRecordId(data.SoftwareId)
+          dispatch(setLoading(false))
+
+        },2000)
+       
     }
     const handleReset = () => {
         setDatasource([])
@@ -522,7 +530,9 @@ const SoftwareDataColumns = [
             }
         })
         setFields(fieldsData)
-setEditRecordId("")
+        setEditRecordId("")
+        setDeletingRecord(null)
+        
 
     }
     const deleteSoftwareAsset = async (id: string) => {
@@ -674,7 +684,7 @@ setEditRecordId("")
                                         <ArrowLeft className="h-4 w-4 text-current stroke-[3]" /> Grid View
                                     </div>
                                 ) : (
-                                    '+ Add Software Assetgit'
+                                    '+ Add Software Asset'
                                 )}
                         </ReusableButton>
                     </div>
@@ -730,7 +740,7 @@ setEditRecordId("")
                                     size="middle"
                                     className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
                                 >
-                                    {'Save'}
+                                    {editRecordId?'Update':'Save'}
                                 </ReusableButton>
                                 <ReusableButton
                                     htmlType="button"
@@ -739,7 +749,7 @@ setEditRecordId("")
                                     iconPosition="left"
                                     size="middle"
                                 >
-                                    Cancel
+                                    {editRecordId?'Cancel':'Clear'}
                                 </ReusableButton>
                             </div>
                         </CardContent>
@@ -776,14 +786,14 @@ setEditRecordId("")
                     <DialogHeader>
                         <DialogTitle>Confirm the action</DialogTitle>
                         <DialogDescription>
-                            Are you sure you want to delete this row?
+                            {`Are you sure you want to delete this ${deletingRecord?.SoftwareName} Software?`}
 
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
                         <ReusableButton
                             variant="default"
-                            onClick={() => setIsDelModalOpen(false)}
+                            onClick={() => {setIsDelModalOpen(false);setDeletingRecord(null)}}
                         >
                             Cancel
                         </ReusableButton>

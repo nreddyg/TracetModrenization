@@ -8,24 +8,19 @@ import { Plus, Edit, Trash2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { setLoading } from '@/store/slices/projectsSlice';
 import { useDispatch } from 'react-redux';
-import { addNewStore, deleteStore, getEditStoreData, getStoreData, getStoreDataByCompanyIdAndBranchName, updateStore } from '@/services/storeServices';
 import { useMessage } from '@/components/ui/reusable-message';
 import { useAppSelector } from '@/store';
 import { Controller, useForm } from 'react-hook-form';
 import { BaseField, GenericObject } from '@/Local_DB/types/types';
-import { STORE_DB } from '@/Local_DB/Form_JSON_Data/StoreDB';
+import { addNewUOM, deleteUOM, getEditUOMData, getUOMData, updateUOM } from '@/services/unitsOfMeasureServices';
+import { UNITS_OF_MEASURE_DB } from '@/Local_DB/Form_JSON_Data/UnitsOfMeasureDB';
+import { useNavigate } from 'react-router-dom';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardContent } from '@/components/ui/card';
-interface Store {
-    id: string;
-    name: string;
-    branch: string;
-    description: string;
-}
-const Store = () => {
-    const [selectedStore, setSelectedStore] = useState<Store | null>(null);
+
+const UnitOfMeasure = () => {
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-    const [fields, setFields] = useState<BaseField[]>(STORE_DB);
+    const [fields, setFields] = useState<BaseField[]>(UNITS_OF_MEASURE_DB);
     const [dataSource, setDataSource] = useState([])
     const [isDelModalOpen, setIsDelModalOpen] = useState(false);
     const [recordToEditId, setRecordToEditId] = useState(null);
@@ -33,13 +28,10 @@ const Store = () => {
     const msg = useMessage()
     const companyId = useAppSelector(state => state.projects.companyId);
     const branch = useAppSelector(state => state.projects.branch) || '';
-    const branchCode = useAppSelector(state => state.projects.branchCode) || '';
+    let navigate = useNavigate()
     useEffect(() => {
-        if (companyId && branch == "All") {
-            fetchStoreGetData(companyId)
-        }
-        if (companyId && branch != "All" && branch != "") {
-            fetchStoreDataByBranchName(companyId, branch)
+        if (companyId) {
+            fetchUOMGetData(companyId)
         }
     }, [companyId, branch])
     const form = useForm<GenericObject>({
@@ -52,7 +44,7 @@ const Store = () => {
     const { control, register, handleSubmit, trigger, watch, setValue, reset, formState: { errors } } = form;
     const getFieldsByNames = (names: string[]) => fields.filter(f => names.includes(f.name!));
     const renderField = (field: BaseField) => {
-        const { name, label, fieldType, isRequired, validationPattern, patternErrorMessage, dependsOn, show = true } = field;
+        const { name, label, fieldType, isRequired, dependsOn, show = true } = field;
         if (!show && dependsOn && !watch(dependsOn)) {
             return null;
         }
@@ -116,21 +108,15 @@ const Store = () => {
     }
     const columns = [
         {
-            id: 'StoreName',
-            header: 'Store Name',
-            accessorKey: 'StoreName',
+            id: 'Name',
+            header: 'Name',
+            accessorKey: 'Name',
             enableSorting: true,
         },
         {
-            id: 'BranchName',
-            header: 'Branch',
-            accessorKey: 'BranchName',
-            enableSorting: true,
-        },
-        {
-            id: 'StoreDescription',
-            header: 'Store Description',
-            accessorKey: 'StoreDescription',
+            id: 'Description',
+            header: 'Description',
+            accessorKey: 'Description',
             enableSorting: true,
         },
         {
@@ -142,7 +128,7 @@ const Store = () => {
                     <ReusableButton
                         variant="text"
                         size="small"
-                        onClick={() => { setSelectedStore(row.original); setRecordToEditId(row.original.StoreId); fetchStoreDataByStoreId(companyId, row.original.StoreId) }}
+                        onClick={() => { setRecordToEditId(row.original.UOMId); fetchUOMById(companyId, row.original.UOMId) }}
                     >
                         <Edit className="h-4 w-4" />
                     </ReusableButton>
@@ -150,8 +136,7 @@ const Store = () => {
                         variant="text"
                         size="small"
                         danger
-                        icon={<Trash2 className="h-4 w-4" />}
-                        onClick={() => { setIsDelModalOpen(true); setRecordToEditId(row.original.StoreId) }}
+                        onClick={() => { setIsDelModalOpen(true); setRecordToEditId(row.original.UOMId) }}
                     >
                         <Trash2 className="h-4 w-4" />
                     </ReusableButton>
@@ -159,111 +144,98 @@ const Store = () => {
             ),
         },
     ];
-    async function fetchStoreGetData(companyId) {
+    async function fetchUOMGetData(companyId) {
         dispatch(setLoading(true))
-        await getStoreData(companyId).then(res => {
+        await getUOMData(companyId).then(res => {
             if (res.data && res.data.status == undefined) {
-                setDataSource(res.data.StoreDetails)
+                setDataSource(res.data.UOMDetails)
             } else {
                 setDataSource([])
                 msg.warning(res.data.message || "No Data Found")
             }
         }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
     }
-    async function fetchStoreDataByBranchName(companyId, branch) {
+    async function fetchUOMById(companyId, id) {
         dispatch(setLoading(true))
-        await getStoreDataByCompanyIdAndBranchName(companyId, branch).then(res => {
+        await getEditUOMData(companyId, id).then(res => {
             if (res.data && res.data.status == undefined) {
-                setDataSource(res.data)
+
+                handleEdit(res.data.UOMDetails)
             } else {
                 msg.warning(res.data.message || "No Data Found")
             }
         }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
     }
-    async function fetchStoreDataByStoreId(companyId, id) {
+    const deleteUOMData = async (id: number, data: any) => {
         dispatch(setLoading(true))
-        await getEditStoreData(companyId, id).then(res => {
-            if (res.data && res.data.status == undefined) {
-                handleEdit(res.data.StoreDetails)
-            } else {
-                msg.warning(res.data.message || "No Data Found")
-            }
-        }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
-    }
-    const deleteStoreData = async (id: number, data: any) => {
-        dispatch(setLoading(true));
-        await deleteStore(companyId, id, data).then(res => {
+        await deleteUOM(companyId, id, data).then(res => {
             if (res.success) {
                 if (res.data.status) {
                     msg.success(res.data.message);
-                    fetchStoreGetData(companyId)
+                } else {
+                    msg.warning(res.data.message);
+                }
+            } else {
+                msg.warning('Failed to delete UOM !!')
+            }
+        }).catch(err => { }).finally(() => {
+            dispatch(setLoading(false))
+        })
+    }
+    const addNewUOMData = async (branch: any, data: any) => {
+        dispatch(setLoading(true))
+        await addNewUOM(companyId, data).then(res => {
+            if (res.success) {
+                if (res.data.status) {
+                    msg.success(res.data.message);
+                    fetchUOMGetData(companyId)
                 } else {
                     msg.warning(res.data.message);
                 }
             } else {
                 msg.warning('Failed to delete status !!')
             }
-        }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
+        }).catch(err => { }).finally(() => {
+            dispatch(setLoading(false));
+        })
     }
-    const addNewStoreData = async (branch: any, data: any) => {
-        dispatch(setLoading(true));
-        await addNewStore(companyId, branch, data).then(res => {
+    const updateUOMData = async (id: any, data: any) => {
+        dispatch(setLoading(true))
+        await updateUOM(companyId, id, data).then(res => {
             if (res.success) {
                 if (res.data.status) {
                     msg.success(res.data.message);
-                    fetchStoreDataByBranchName(companyId, branch)
-
+                    fetchUOMGetData(companyId)
                 } else {
                     msg.warning(res.data.message);
                 }
             } else {
                 msg.warning('Failed to delete status !!')
             }
-        }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
-    }
-    const updateStoreData = async (id: any, data: any) => {
-        dispatch(setLoading(true));
-        await updateStore(companyId, id, data).then(res => {
-            if (res.success) {
-                if (res.data.status) {
-                    msg.success(res.data.message);
-                    fetchStoreDataByBranchName(companyId, branch)
-
-                } else {
-                    msg.warning(res.data.message);
-                }
-            } else {
-                msg.warning('Failed to delete status !!')
-            }
-        }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
+        }).catch(err => { }).finally(() => {
+            dispatch(setLoading(false))
+        })
     }
     const submit = () => {
         let Payload = {
-            "StoreDetails": [
+            "UOMDetails": [
                 {
-                    "Store Name": watch("StoreName"),
-                    "Store Description": watch("StoreDescription"),
-                    "BranchName": branch,
-                    "Branch Code": branchCode
+                    "Name": watch("Name"),
+                    "Description": watch("Description"),
                 }
             ]
         }
         if (recordToEditId == null && companyId) {
-            addNewStoreData(branch, Payload)
+            addNewUOMData(companyId, Payload)
             setIsAddDialogOpen(false)
         }
         else if (recordToEditId !== null && companyId) {
-            updateStoreData(recordToEditId, Payload)
+            updateUOMData(recordToEditId, Payload)
             setIsAddDialogOpen(false)
-
         }
     }
     const handleEdit = (data) => {
-        reset({
-            StoreName: data.StoreName,
-            Branch: data.Branch,
-            StoreDescription: data.StoreDescription
-        })
+        reset({ Name: data.Name, Description: data.Description })
         setIsAddDialogOpen(true)
     };
     return (
@@ -278,37 +250,35 @@ const Store = () => {
                                     <span>/</span>
                                     <span>Consumables</span>
                                     <span>/</span>
-                                    <span className="text-gray-900 font-medium">Store</span>
+                                    <span className="text-gray-900 font-medium">Units of Measure</span>
                                 </div>
                             </div>
                         </div>
                         <div className="flex items-center gap-2">
                             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                                 <DialogTrigger asChild>
-                                    {branch!=='All' && 
                                     <ReusableButton
                                         variant="primary"
-                                        size='small'
                                         icon={<Plus className="h-4 w-4" />}
-                                        onClick={() => { setRecordToEditId(null); reset({ StoreName: "", Branch: "", StoreDescription: "" }) }}
+                                        className="bg-orange-500 hover:bg-orange-600 border-orange-500"
+                                        onClick={() => { setRecordToEditId(null); reset({ Name: "", Description: "" }) }}
                                     >
-                                        Add
+                                        Add Unit
                                     </ReusableButton>
-                                    }
                                 </DialogTrigger>
                                 <DialogContent className="max-w-2xl">
                                     <DialogHeader>
-                                        <DialogTitle>{recordToEditId ? "Update Store" : "Add Store"}</DialogTitle>
+                                        <DialogTitle>{recordToEditId ? "Update Unit Of Measure" : "Add Unit Of Measure"}</DialogTitle>
                                     </DialogHeader>
                                     <div className='grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4'>
-                                        {getFieldsByNames(['StoreName', 'Branch']).map((field) => {
+                                        {getFieldsByNames(['Name', 'Branch']).map((field) => {
                                             return <div className="flex items-center space-x-2">
                                                 {renderField(field)}
                                             </div>;
                                         })}
                                     </div>
                                     <div className='w-100'>
-                                        {getFieldsByNames(['StoreDescription']).map((field) => {
+                                        {getFieldsByNames(['Description']).map((field) => {
                                             return <div className=" space-x-2">
                                                 {renderField(field)}
                                             </div>;
@@ -332,6 +302,14 @@ const Store = () => {
                                     </div>
                                 </DialogContent>
                             </Dialog>
+                            <ReusableButton
+                                variant="primary"
+                                icon={<Plus className="h-4 w-4" />}
+                                className="bg-orange-500 hover:bg-orange-600 border-orange-500"
+                                onClick={() => { navigate('/masters/consumables/unitsofmeasure/manageunitconverstion'); }}
+                            >
+                                Manage Unit Conversations
+                            </ReusableButton>
                         </div>
                     </div>
                     <div className="flex-1 p-3 overflow-hidden min-h-0  ">
@@ -342,36 +320,9 @@ const Store = () => {
                                         <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
                                             <CardContent className="p-2">
                                                 <div className="p-2">
-                                                    <div className="flex justify-between items-center">
-                                                        <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>
-                                                            <DialogContent className="sm:max-w-[425px]">
-                                                                <DialogHeader>
-                                                                    <DialogTitle>Confirm the action</DialogTitle>
-                                                                    <DialogDescription>
-                                                                        Are you sure you want to delete Store?
-                                                                    </DialogDescription>
-                                                                </DialogHeader>
-                                                                <DialogFooter>
-                                                                    <ReusableButton
-                                                                        variant="default"
-                                                                        onClick={() => setIsDelModalOpen(false)}
-                                                                    >
-                                                                        Cancel
-                                                                    </ReusableButton>
-                                                                    <ReusableButton
-                                                                        variant="primary"
-                                                                        danger={true}
-                                                                        onClick={() => { deleteStoreData(recordToEditId, ""); setIsDelModalOpen(false) }}
-                                                                    >
-                                                                        Delete
-                                                                    </ReusableButton>
-                                                                </DialogFooter>
-                                                            </DialogContent>
-                                                        </Dialog>
-                                                    </div>
                                                     <div className="bg-gray-50/30">
                                                         <ReusableTable
-                                                            title='Store'
+                                                            title='Units of Measure'
                                                             data={dataSource}
                                                             columns={columns}
                                                         />
@@ -386,7 +337,32 @@ const Store = () => {
                     </div>
                 </div>
             </div>
+            <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>
+                <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                        <DialogTitle>Confirm the action</DialogTitle>
+                        <DialogDescription>
+                            Are you sure you want to delete Unit Of Measure?
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <ReusableButton
+                            variant="default"
+                            onClick={() => setIsDelModalOpen(false)}
+                        >
+                            Cancel
+                        </ReusableButton>
+                        <ReusableButton
+                            variant="primary"
+                            danger={true}
+                            onClick={() => { deleteUOMData(recordToEditId, ""); setIsDelModalOpen(false) }}
+                        >
+                            Delete
+                        </ReusableButton>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
-    );
-};
-export default Store;
+    )
+}
+export default UnitOfMeasure;

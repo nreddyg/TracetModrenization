@@ -192,7 +192,7 @@ const ServiceLocations = () => {
         canEdit: true,
         canDelete: true,
         canView: true,
-        canExport: true,
+        canExport: false,
         canAdd: true,
         canManageColumns: false,
     };
@@ -402,7 +402,7 @@ const ServiceLocations = () => {
                                         //    onRefresh={handleRefresh}
                                         enableSearch={false}
                                         enableSelection={false}
-                                        enableExport={true}
+                                        // enableExport={true}
                                         enableColumnVisibility={true}
                                         enablePagination={true}
                                         enableSorting={true}
@@ -433,7 +433,7 @@ const ServiceLocations = () => {
                                         //    onRefresh={handleRefresh}
                                         enableSearch={false}
                                         enableSelection={false}
-                                        enableExport={true}
+                                        // enableExport={true}
                                         enableColumnVisibility={true}
                                         enablePagination={true}
                                         enableSorting={true}
@@ -450,7 +450,12 @@ const ServiceLocations = () => {
                 </Card>
 
                 {/* Main Location Dialog */}
-                <Dialog open={isMainDialogOpen} onOpenChange={setIsMainDialogOpen}>
+                <Dialog open={isMainDialogOpen} onOpenChange={(open) => {
+                    if (!open) {
+                        handleCancel();
+                    }
+                    setIsDelModalOpen(open);
+                }}>
                     <DialogContent>
                         <DialogHeader>
                             <DialogTitle>{activeTab === 'main' ? `${editRecord === null ? 'Add' : 'Update'} Main Location` : `${editRecord === null ? 'Add' : 'Update'} Sub Location`}</DialogTitle>

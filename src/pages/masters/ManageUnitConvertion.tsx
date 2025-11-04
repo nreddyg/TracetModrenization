@@ -1,84 +1,45 @@
 
-import React, { useState, useMemo, useEffect } from 'react';
-
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState, useMemo, useEffect } from 'react';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Trash2} from 'lucide-react';
-import { Form, } from '@/components/ui/form';
 import { useForm, Controller } from 'react-hook-form';
-import { ColumnDef } from '@tanstack/react-table';
 import { ReusableButton } from '../../components/ui/reusable-button';
 import { ReusableInput } from '../../components/ui/reusable-input';
 import { ReusableDropdown } from '../../components/ui/reusable-dropdown';
-import { ReusableTable, TableAction, TablePermissions } from '../../components/ui//reusable-table';
-import { MessageProvider, useMessage } from '../../components/ui/reusable-message';
+import { ReusableTable, TablePermissions } from '../../components/ui//reusable-table';
+import { useMessage } from '../../components/ui/reusable-message';
 import { BaseField, GenericObject } from '@/Local_DB/types/types';
-import { getSRCustomerLookupsList } from '@/services/ticketServices';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { SUBSCRIPTION_DB } from '@/Local_DB/Form_JSON_Data/SubscriptionDB';
-import { getProductName, getSubscriptionTableData } from '@/services/subscriptionServices';
-import ExcelJS from "exceljs";
-import { Badge } from '@/components/ui/badge';
 import { useAppSelector } from '@/store';
 import { setLoading } from '@/store/slices/projectsSlice';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
 import { getUnitOfMeasure } from '@/services/itemCategoryServices';
 import { MANAGE_UNITS_OF_MEASURE_DB } from '@/Local_DB/Form_JSON_Data/UnitsOfMeasureDB';
 import { addNewConversion, deleteConversion, getConversionUOMData } from '@/services/unitsOfMeasureServices';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-
-
-
-
-
-interface subscriptionrecord {
-    SubscriptionId: number,
-    CustomerId: number,
-    CustomerName: string,
-    ProductId: number,
-    ProductName: string,
-    AMCFromDate: string,
-    AMCToDate: string,
-    SubscriptionType: string,
-    SubscriptionStatus: string
-}
-
-
-
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 const ManageUnitConversion = () => {
-    const message = useMessage();
     const [dataSource, setDatasource] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [fields, setFields] = useState<BaseField[]>(MANAGE_UNITS_OF_MEASURE_DB);
     const [isDelModalOpen, setIsDelModalOpen] = useState(false);
-
     const [recordToEditId, setRecordToEditId] = useState(null);
     const dispatch = useDispatch();
     const companyId = useAppSelector(state => state.projects.companyId);
-    const branchName = useAppSelector(state => state.projects.branch);
     const navigate = useNavigate();
     const msg = useMessage()
-
-
     useEffect(() => {
         if (companyId) {
             getUnitOfMeasureDetails(companyId)
             fetchUOMGetData(companyId)
-            
         }
     }, [companyId])
-
     const form = useForm<GenericObject>({
         defaultValues: fields.reduce((acc, f) => {
             acc[f.name!] = f.defaultChecked ?? f.defaultValue ?? '';
             return acc;
         }, {} as GenericObject),
         mode: 'onChange',
-        // reValidateMode: "onChange"
     });
 
     const { control, register, handleSubmit, trigger, watch, setValue, reset, formState: { errors } } = form;
@@ -145,7 +106,6 @@ const ManageUnitConversion = () => {
         dispatch(setLoading(true))
         await getConversionUOMData(companyId).then(res => {
             if (res.data && res.data.status == undefined) {
-                //  console.log(res.data,"Nag")
                 setDatasource(res.data)
             } else {
                 setDatasource([])
@@ -153,7 +113,6 @@ const ManageUnitConversion = () => {
             }
         }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
     }
-
     const getUnitOfMeasureDetails = async (companyId) => {
         dispatch(setLoading(true))
         await getUnitOfMeasure(companyId)
@@ -163,7 +122,6 @@ const ManageUnitConversion = () => {
                         value: main?.Name,
                         label: main?.Name,
                     }));
-                    console.log(newOptions, "Nag")
                     let data = structuredClone(fields)
                     let NewData = data.map((obj) => {
                         if (obj.name === "baseUOM" || obj.name === "targetUOM") {
@@ -171,7 +129,6 @@ const ManageUnitConversion = () => {
                         }
                         return obj
                     });
-                    console.log(data, "Nag")
                     setFields(NewData)
                 } else {
                     msg.warning('no data found')
@@ -188,7 +145,6 @@ const ManageUnitConversion = () => {
                 if (res.data.status) {
                     msg.success(res.data.message);
                     fetchUOMGetData(companyId)
-
                 } else {
                     msg.warning(res.data.ErrorDetails[0]["Error Message"]);
                 }
@@ -196,7 +152,6 @@ const ManageUnitConversion = () => {
                 msg.warning('Failed to Add Conversion !!')
             }
         }).catch(err => { }).finally(() => {
-
         })
     }
     const deleteConversionData = async (id: number, data: any) => {
@@ -215,9 +170,6 @@ const ManageUnitConversion = () => {
 
         })
     }
-
-
-
     // Filter data based on search
     const filteredData = useMemo(() => {
         return dataSource.filter(group =>
@@ -226,15 +178,6 @@ const ManageUnitConversion = () => {
             )
         );
     }, [dataSource, searchTerm]);
-
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'Active': return 'bg-green-100 text-green-800 border-green-300';
-            case 'Expired': return 'bg-red-100 text-red-800 border-red-300';
-            default: return 'bg-gray-100 text-gray-800 border-gray-300';
-        }
-    };
-
     const submit = () => {
         const payload = {
             UOMConversionDetails: [
@@ -244,7 +187,6 @@ const ManageUnitConversion = () => {
                     TargetUnitConversionName: watch("targetUOM")
                 }
             ]
-
         }
         addNewConversionData(payload)
     }
@@ -266,7 +208,6 @@ const ManageUnitConversion = () => {
                         variant="text"
                         size="small"
                         danger
-                        // icon={}
                     onClick={() => {setIsDelModalOpen(true);setRecordToEditId(row.original.UnitConversionId);}}
                     >
                         <Trash2 className="h-4 w-4" />
@@ -323,7 +264,6 @@ const ManageUnitConversion = () => {
                                     variant="primary"
                                     danger={true}
                                     onClick={() => { deleteConversionData(recordToEditId, ""); setIsDelModalOpen(false) }}
-                                // onClick={currentTab === "service-request-type" ? () => { deleteServiceRequestType(selectedRecord?.Id); setIsDelModalOpen(false) } : () => { deleteStatus(selectedStatusRec?.Id); setIsDelModalOpen(false) }}
                                 >
                                     Delete
                                 </ReusableButton>
@@ -350,8 +290,6 @@ const ManageUnitConversion = () => {
                         <ReusableButton variant="default"
                         onClick={()=>handleReset()}
                         >Clear</ReusableButton>
-                        {/* <Button variant="default">Save</Button>
-                        <Button variant="destructive">Clear</Button> */}
                     </div>
                 </div>
 
@@ -360,18 +298,12 @@ const ManageUnitConversion = () => {
 
                 {/* User Group List with ReusableTable */}
                 <Card className="border-0 shadow-sm">
-                    <CardHeader className="pb-3 pt-2">
-                        Unit of Measures Conversion list
-                    </CardHeader>
-                    <CardContent className="pt-0">
+                    <CardContent className="pt-2">
                         <ReusableTable
                             data={filteredData}
                             columns={columns}
-                            // actions={tableActions}
                             permissions={tablePermissions}
-                            // loading={loading}
-                            title=""
-                            // onRefresh={handleRefresh}
+                            title="Unit of Measures Conversion list"
                             enableSearch={false}
                             enableSelection={false}
                             enableExport={true}

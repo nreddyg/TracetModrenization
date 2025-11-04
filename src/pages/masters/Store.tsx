@@ -276,8 +276,6 @@ const Store = () => {
                                 <div className="flex items-center gap-2 text-sm text-gray-600">
                                     <span>Masters</span>
                                     <span>/</span>
-                                    <span>Company</span>
-                                    <span>/</span>
                                     <span>Consumables</span>
                                     <span>/</span>
                                     <span className="text-gray-900 font-medium">Store</span>

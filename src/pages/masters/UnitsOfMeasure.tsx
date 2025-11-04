@@ -136,7 +136,7 @@ const UnitOfMeasure = () => {
                         variant="text"
                         size="small"
                         danger
-                        onClick={() => { setIsDelModalOpen(true); setRecordToEditId(row.original.UOMId)}}
+                        onClick={() => { setIsDelModalOpen(true); setRecordToEditId(row.original.UOMId) }}
                     >
                         <Trash2 className="h-4 w-4" />
                     </ReusableButton>
@@ -167,6 +167,7 @@ const UnitOfMeasure = () => {
         }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
     }
     const deleteUOMData = async (id: number, data: any) => {
+        dispatch(setLoading(true))
         await deleteUOM(companyId, id, data).then(res => {
             if (res.success) {
                 if (res.data.status) {
@@ -178,10 +179,11 @@ const UnitOfMeasure = () => {
                 msg.warning('Failed to delete UOM !!')
             }
         }).catch(err => { }).finally(() => {
-
+            dispatch(setLoading(false))
         })
     }
     const addNewUOMData = async (branch: any, data: any) => {
+        dispatch(setLoading(true))
         await addNewUOM(companyId, data).then(res => {
             if (res.success) {
                 if (res.data.status) {
@@ -194,9 +196,11 @@ const UnitOfMeasure = () => {
                 msg.warning('Failed to delete status !!')
             }
         }).catch(err => { }).finally(() => {
+            dispatch(setLoading(false));
         })
     }
     const updateUOMData = async (id: any, data: any) => {
+        dispatch(setLoading(true))
         await updateUOM(companyId, id, data).then(res => {
             if (res.success) {
                 if (res.data.status) {
@@ -209,7 +213,7 @@ const UnitOfMeasure = () => {
                 msg.warning('Failed to delete status !!')
             }
         }).catch(err => { }).finally(() => {
-
+            dispatch(setLoading(false))
         })
     }
     const submit = () => {
@@ -231,7 +235,7 @@ const UnitOfMeasure = () => {
         }
     }
     const handleEdit = (data) => {
-        reset({Name: data.Name,Description: data.Description})
+        reset({ Name: data.Name, Description: data.Description })
         setIsAddDialogOpen(true)
     };
     return (

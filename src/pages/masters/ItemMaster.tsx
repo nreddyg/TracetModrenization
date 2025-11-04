@@ -104,6 +104,7 @@ const ItemMaster = () => {
   }, [selectedMainCategory, companyId])
 
   const getUOMDetailsForDropdown = async (id) => {
+    dispatch(setLoading(true))
     await getUOMData(id)
       .then((res) => {
         if (res.data !== undefined) {
@@ -145,6 +146,7 @@ const ItemMaster = () => {
       }
     }).catch((err) => { })
       .finally(() => {
+        dispatch(setLoading(false))
         getUOMDetailsForDropdown(companyId)
       })
   }
@@ -305,6 +307,7 @@ const ItemMaster = () => {
     }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
   }
   const deleteItemMasterData = async (id: number, data: any) => {
+    dispatch(setLoading(true))
     await deleteItemMaster(companyId, id, data).then(res => {
       if (res.success) {
         if (res.data.status) {
@@ -317,10 +320,11 @@ const ItemMaster = () => {
         msg.warning('Failed to delete status !!')
       }
     }).catch(err => { }).finally(() => {
-
+      dispatch(setLoading(false))
     })
   }
   const addNewItemMasterData = async (data: any) => {
+    dispatch(setLoading(true))
     await addNewItemMaster(companyId, data).then(res => {
       if (res.success) {
         if (res.data.status) {
@@ -334,10 +338,11 @@ const ItemMaster = () => {
         msg.warning('Failed to delete status !!')
       }
     }).catch(err => { }).finally(() => {
-
+        dispatch(setLoading(false))
     })
   }
   const updateStoreData = async (id: any, data: any) => {
+    dispatch(setLoading(true))
     await updateItemMaster(companyId, id, data).then(res => {
       if (res.success) {
         if (res.data.status) {
@@ -351,7 +356,7 @@ const ItemMaster = () => {
         msg.warning('Failed to delete status !!')
       }
     }).catch(err => { }).finally(() => {
-
+      dispatch(setLoading(false))
     })
   }
   const submit = () => {

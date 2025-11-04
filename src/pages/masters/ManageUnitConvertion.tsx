@@ -1,7 +1,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Trash2} from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Trash2 } from 'lucide-react';
 import { useForm, Controller } from 'react-hook-form';
 import { ReusableButton } from '../../components/ui/reusable-button';
 import { ReusableInput } from '../../components/ui/reusable-input';
@@ -41,10 +41,8 @@ const ManageUnitConversion = () => {
         }, {} as GenericObject),
         mode: 'onChange',
     });
-
     const { control, register, handleSubmit, trigger, watch, setValue, reset, formState: { errors } } = form;
     const getFieldsByNames = (names: string[]) => fields.filter(f => names.includes(f.name!));
-
     const renderField = (field: BaseField) => {
         const { name, label, fieldType, isRequired, validationPattern, patternErrorMessage, dependsOn, show = true } = field;
         if (!show && dependsOn && !watch(dependsOn)) {
@@ -140,6 +138,7 @@ const ManageUnitConversion = () => {
             })
     }
     const addNewConversionData = async (data: any) => {
+        dispatch(setLoading(true))
         await addNewConversion(companyId, data).then(res => {
             if (res.success) {
                 if (res.data.status) {
@@ -152,9 +151,11 @@ const ManageUnitConversion = () => {
                 msg.warning('Failed to Add Conversion !!')
             }
         }).catch(err => { }).finally(() => {
+            dispatch(setLoading(false))
         })
     }
     const deleteConversionData = async (id: number, data: any) => {
+        dispatch(setLoading(true))
         await deleteConversion(companyId, id, data).then(res => {
             if (res.success) {
                 if (res.data.status) {
@@ -167,7 +168,7 @@ const ManageUnitConversion = () => {
                 msg.warning('Failed to delete status !!')
             }
         }).catch(err => { }).finally(() => {
-
+            dispatch(setLoading(false))
         })
     }
     // Filter data based on search
@@ -208,7 +209,7 @@ const ManageUnitConversion = () => {
                         variant="text"
                         size="small"
                         danger
-                    onClick={() => {setIsDelModalOpen(true);setRecordToEditId(row.original.UnitConversionId);}}
+                        onClick={() => { setIsDelModalOpen(true); setRecordToEditId(row.original.UnitConversionId); }}
                     >
                         <Trash2 className="h-4 w-4" />
                     </ReusableButton>
@@ -216,15 +217,14 @@ const ManageUnitConversion = () => {
             ),
         },
     ];
-    const handleReset=()=>{
+    const handleReset = () => {
         reset({
-            base:1,
-            baseUOM:"",
-            target:"",
-            targetUOM:""
+            base: 1,
+            baseUOM: "",
+            target: "",
+            targetUOM: ""
         })
     }
-
     const tablePermissions: TablePermissions = {
         canEdit: true,
         canDelete: true,
@@ -235,13 +235,12 @@ const ManageUnitConversion = () => {
     };
     return (
         <div className="bg-gray-50/30 h-full overflow-y-scroll">
-
             <div className="p-4 space-y-4 " >
                 <div className='flex w-full justify-between'>
-                <h1 className='text-lg font-semibold text-gray-900'>Add Unit of Conversion</h1>
-                <ReusableButton 
-                className=' flex-1 sm:flex-none bg-primary h-[2.38rem] text-white p-4'
-                onClick={()=>navigate("/masters/consumables/unitsofmeasure")}>Back</ReusableButton>
+                    <h1 className='text-lg font-semibold text-gray-900'>Add Unit of Conversion</h1>
+                    <ReusableButton
+                        className=' flex-1 sm:flex-none bg-primary h-[2.38rem] text-white p-4'
+                        onClick={() => navigate("/masters/consumables/unitsofmeasure")}>Back</ReusableButton>
                 </div>
                 <div className="w-full p-4 bg-white rounded-md border">
                     <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>
@@ -250,7 +249,6 @@ const ManageUnitConversion = () => {
                                 <DialogTitle>Confirm the action</DialogTitle>
                                 <DialogDescription>
                                     Are you sure you want to delete Unit Of Measure?
-                                    
                                 </DialogDescription>
                             </DialogHeader>
                             <DialogFooter>
@@ -270,7 +268,6 @@ const ManageUnitConversion = () => {
                             </DialogFooter>
                         </DialogContent>
                     </Dialog>
-
                     <div className="grid grid-cols-5 gap-6 items-end">
                         {getFieldsByNames(['base', 'baseUOM', "equals", 'target', 'targetUOM']).map((field) => {
                             return <div className="flex items-center space-x-2">
@@ -278,8 +275,6 @@ const ManageUnitConversion = () => {
                             </div>;
                         })}
                     </div>
-
-                    {/* Action Buttons */}
                     <div className="flex justify-end mt-6 gap-3">
                         <ReusableButton
                             htmlType="submit"
@@ -288,15 +283,10 @@ const ManageUnitConversion = () => {
                             onClick={() => submit()}
                         >Save</ReusableButton>
                         <ReusableButton variant="default"
-                        onClick={()=>handleReset()}
+                            onClick={() => handleReset()}
                         >Clear</ReusableButton>
                     </div>
                 </div>
-
-
-
-
-                {/* User Group List with ReusableTable */}
                 <Card className="border-0 shadow-sm">
                     <CardContent className="pt-2">
                         <ReusableTable
@@ -322,5 +312,4 @@ const ManageUnitConversion = () => {
         </div>
     );
 };
-
 export default ManageUnitConversion;

@@ -34,7 +34,7 @@ const ReusableSingleCheckbox: React.FC<ReusableCheckboxProps> = ({
         className={className}
         disabled={disabled}
       />
-      <Label htmlFor={id} className={`text-sm ${labelClassName || ""}`}>
+      <Label htmlFor={id} className={`text-sm  text-slate-700 ${labelClassName || ""}`}>
         {label}
       </Label>
     </div>

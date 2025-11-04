@@ -454,155 +454,155 @@ const navigation: NavItem[] = [
   //     // },  
   //   ]
   // },
-  {
-    label: 'Masters',
-    icon: Building2,
-    link: '/masters',
-    children: [
-      {
-        label: 'Company',
-        icon: Building2,
-        link: '/company',
-        children: [
-          {
-            label: 'Organization',
-            icon: Building2,
-            link: '/masters/company/organization',
-          },
-          {
-            label: 'Company Hierarchy',
-            icon: Building2,
-            link: '/masters/company/company-hierarchy',
-          },
-          {
-            label: 'Department',
-            icon: Building2,
-            link: '/masters/company/department',
-          },
-          {
-            label: 'Cost Center',
-            icon: DollarSign,
-            link: '/masters/company/costcenter',
-          },
-          {
-            label: 'User',
-            icon: User,
-            link: '/masters/company/user',
-          },
-          {
-            label: 'Vendor',
-            icon: UserCheck,
-            link: '/masters/company/vendor',
-          },
-          {
-            label: 'Customer',
-            icon: UserCog,
-            link: '/masters/company/customer',
-          },
-          // {
-          //   label: 'Assets & Inventory',
-          //   icon: Package,
-          //   link: '/masters/company/assets-inventory',
-          // },
-          // {
-          //   label: 'Maintenance',
-          //   icon: Wrench,
-          //   link: '/masters/company/maintenance',
-          // },
-        ],
-      },
-      {
-        label: 'Fixed Assets',
-        icon: Building2,
-        link: '/company',
-        children: [
-          {
-            label: 'Asset Category',
-            icon: Building2,
-            link: 'masters/fixed-assets/asset-category',
-          },
-          {
-            label: 'Cost Breakup Attributes',
-            icon: DollarSign,
-            link: 'masters/fixed-assets/costbreakup',
-          },
-          {
-            label: 'User Attributes',
-            icon: DollarSign,
-            link: 'masters/fixed-assets/userattributes',
-          }
-        ]
-      },
-         {
-        label: 'Depreciation',
-        icon: Building2,
-        link: '/depreciation',
-        children: [
-          {
-            label: 'Books',
-            icon: BarChart,
-            link: '/masters/depreciation/book',
-          },
-          // {
-          //   label: 'Item Master',
-          //   icon: BarChart,
-          //   link: '/masters/consumables/item-master',
-          // },
-        ],
-      },
-      {
-        label: 'Consumables',
-        icon: Building2,
-        link: '/consumables',
-        children: [
-          {
-            label: 'Store',
-            icon: BarChart,
-            link: '/masters/consumables/store',
-          },
-          {
-            label: 'Item Master',
-            icon: BarChart,
-            link: '/masters/consumables/item-master',
-          },
-           {
-            label: "Units Of Measure",
-            icon: BarChart,
-            link: '/masters/consumables/unitsofmeasure',
-           },
-          {
-            label: 'Item Category',
-            icon: BarChart,
-            link: '/masters/consumables/item-category',
-          },
-        ],
-      },
-      {
-        label: 'Service Maintenance',
-        icon:  Wrench,
-        link: '/servicemaintenance',
-        children: [
-          {
-            label: 'Service Locations',
-            icon:MapPin,
-            link: '/masters/servicemaintenance/servicelocations',
-          },
-          {
-            label: 'Product Masters',
-            icon: Package,
-            link: '/masters/servicemaintenance/productmaster',
-          },
-        ],
+  // {
+  //   label: 'Masters',
+  //   icon: Building2,
+  //   link: '/masters',
+  //   children: [
+  //     {
+  //       label: 'Company',
+  //       icon: Building2,
+  //       link: '/company',
+  //       children: [
+  //         {
+  //           label: 'Organization',
+  //           icon: Building2,
+  //           link: '/masters/company/organization',
+  //         },
+  //         {
+  //           label: 'Company Hierarchy',
+  //           icon: Building2,
+  //           link: '/masters/company/company-hierarchy',
+  //         },
+  //         {
+  //           label: 'Department',
+  //           icon: Building2,
+  //           link: '/masters/company/department',
+  //         },
+  //         {
+  //           label: 'Cost Center',
+  //           icon: DollarSign,
+  //           link: '/masters/company/costcenter',
+  //         },
+  //         {
+  //           label: 'User',
+  //           icon: User,
+  //           link: '/masters/company/user',
+  //         },
+  //         {
+  //           label: 'Vendor',
+  //           icon: UserCheck,
+  //           link: '/masters/company/vendor',
+  //         },
+  //         {
+  //           label: 'Customer',
+  //           icon: UserCog,
+  //           link: '/masters/company/customer',
+  //         },
+  //         // {
+  //         //   label: 'Assets & Inventory',
+  //         //   icon: Package,
+  //         //   link: '/masters/company/assets-inventory',
+  //         // },
+  //         // {
+  //         //   label: 'Maintenance',
+  //         //   icon: Wrench,
+  //         //   link: '/masters/company/maintenance',
+  //         // },
+  //       ],
+  //     },
+  //     {
+  //       label: 'Fixed Assets',
+  //       icon: Building2,
+  //       link: '/company',
+  //       children: [
+  //         {
+  //           label: 'Asset Category',
+  //           icon: Building2,
+  //           link: 'masters/fixed-assets/asset-category',
+  //         },
+  //         {
+  //           label: 'Cost Breakup Attributes',
+  //           icon: DollarSign,
+  //           link: 'masters/fixed-assets/costbreakup',
+  //         },
+  //         {
+  //           label: 'User Attributes',
+  //           icon: DollarSign,
+  //           link: 'masters/fixed-assets/userattributes',
+  //         }
+  //       ]
+  //     },
+  //        {
+  //       label: 'Depreciation',
+  //       icon: Building2,
+  //       link: '/depreciation',
+  //       children: [
+  //         {
+  //           label: 'Books',
+  //           icon: BarChart,
+  //           link: '/masters/depreciation/book',
+  //         },
+  //         // {
+  //         //   label: 'Item Master',
+  //         //   icon: BarChart,
+  //         //   link: '/masters/consumables/item-master',
+  //         // },
+  //       ],
+  //     },
+  //     {
+  //       label: 'Consumables',
+  //       icon: Building2,
+  //       link: '/consumables',
+  //       children: [
+  //         {
+  //           label: 'Store',
+  //           icon: BarChart,
+  //           link: '/masters/consumables/store',
+  //         },
+  //         {
+  //           label: 'Item Master',
+  //           icon: BarChart,
+  //           link: '/masters/consumables/item-master',
+  //         },
+  //          {
+  //           label: "Units Of Measure",
+  //           icon: BarChart,
+  //           link: '/masters/consumables/unitsofmeasure',
+  //          },
+  //         {
+  //           label: 'Item Category',
+  //           icon: BarChart,
+  //           link: '/masters/consumables/item-category',
+  //         },
+  //       ],
+  //     },
+  //     {
+  //       label: 'Service Maintenance',
+  //       icon:  Wrench,
+  //       link: '/servicemaintenance',
+  //       children: [
+  //         {
+  //           label: 'Service Locations',
+  //           icon:MapPin,
+  //           link: '/masters/servicemaintenance/servicelocations',
+  //         },
+  //         {
+  //           label: 'Product Masters',
+  //           icon: Package,
+  //           link: '/masters/servicemaintenance/productmaster',
+  //         },
+  //       ],
 
-      },
-      {
-        label: 'Reports',
-        icon: FileText,
-        link: '/masters/reports',
-      },
-      // masters/fixed-assets/asset-category
-    ],
-  },
+  //     },
+  //     {
+  //       label: 'Reports',
+  //       icon: FileText,
+  //       link: '/masters/reports',
+  //     },
+  //     // masters/fixed-assets/asset-category
+  //   ],
+  // },
   {
     label: 'Software assets',
     icon: Package,

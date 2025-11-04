@@ -10,7 +10,7 @@ import { ReusableTextarea } from '@/components/ui/reusable-textarea';
 import { ReusableDatePicker } from '@/components/ui/reusable-datepicker';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Plus, Edit, Trash2, ChevronLeft, ChevronRight, X, Save, Link } from 'lucide-react';
+import { Search, Plus, Edit, Trash2, ChevronLeft, ChevronRight, X, Save } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { useNavigate } from 'react-router-dom';
@@ -264,6 +264,72 @@ const AddBook = () => {
     },
   ];
 
+  //handling change dependencies
+  useEffect(()=>{
+    let  depMethod=watch("DefaultDepreciationMethod")
+          let depreciateWith=watch("DepreciateWith")
+      let  depreciationLevel=watch("DepreciationLevel")
+      let fieldData=structuredClone(fields)
+   if(depMethod=='SLM' ){
+    {   
+      if(depreciateWith=="Rate" ){
+      fieldData.forEach((o)=>{
+        if(depreciationLevel=="Asset"){
+         if((o.name!=="FormulaCalculationTypeId" && o.name!=="LifeToConsider") ){o.isDisplay=true;o.disabled=false}
+        }else if(depreciationLevel=="Book Category"){
+         if((o.name==="LifeToConsider" || o.name=="SalvageValueToConsider"|| o.name=="SalvageValueRate"|| o.name=="FirstYearDepreciationConventions" ||o.name=="FirstYearDepreciationConventions"||o.name=="IsWriteOffApplicable"||o.name=="IsForexApplicable"||o.name=="IsRevaluationApplicable"||o.name=="AssetIndependentCalulation"||o.name=="AssetIndependentCalulation"||o.name=="IsRequiredBackDateEntry"||o.name=="FormulaCalculationTypeId") ){o.isDisplay=false;setValue(o.name,"")}
+        }
+         })
+      }else if(depreciateWith=="Useful life")
+      {
+ fieldData.forEach((o)=>{
+  if(o.name==="DepreciationLevel"){
+    o.disabled=true;
+    o.defaultValue="Asset";
+    form.setValue(o.name,"Asset")
+  }
+  if(o.name!=="FormulaCalculationTypeId" && o.name!=="DepreciationLevel"){
+o.isDisplay=true;o.disabled=false
+  }
+  
+         })
+
+
+
+        
+      }else{
+
+        fieldData.forEach((o)=>{
+                if(o.name=="SalvageValueRate" || o.name=="SalvageValueToConsider" || o.name=="FormulaCalculationTypeId" || o.name=="LifeToConsider") {o.isDisplay=false;form.setValue(o.name,"")}
+              })
+      }
+    }
+    
+    
+
+
+
+
+
+   if(watch("IsWriteOffApplicable")){
+      fieldData.forEach((o)=>{
+                if(o.name=="WriteOffValue" || o.name=="WriteOffType" ) {o.isDisplay=true;}else{
+
+                }
+              })
+   }else{
+        fieldData.forEach((o)=>{
+                if(o.name=="WriteOffValue" || o.name=="WriteOffType" ) {o.isDisplay=false;form.setValue(o.name,"")}else{
+
+                }
+              })
+   }
+  
+  }
+  setFields(fieldData)
+  },[watch("DefaultDepreciationMethod"),watch("DepreciateWith"),watch("DepreciationLevel"),watch("IsWriteOffApplicable")])
+
+ 
   // const handleSubmit = (e: React.FormEvent) => {
   //   e.preventDefault();
   //   console.log('Book data:', formData, bookCategoryData);
@@ -301,9 +367,9 @@ const AddBook = () => {
     const { name, label, fieldType, isRequired, show = true } = field;
     //  const overrideShow = !show && fieldsToShowInEdit.includes(name) && !isCreateMode;
     //  const branchLabel=lastLevelsData?.Branch
-    //  if (!name || (!overrideShow && (!show || (fieldsToShowInEdit.includes(name) && !isCreateMode)))) {
-    //    return null;
-    //  }
+     if (!field.isDisplay) {
+       return null;
+     }
     const validationRules = {
       required: isRequired ? `${label} is Required` : false,
     };
@@ -433,7 +499,7 @@ const AddBook = () => {
                 {...field}
                 type="number"
                   addonAfter={ctrl.name==="SalvageValueRate"? selectAfter:undefined}
-
+                  addonAfterClassName={ctrl.name==="SalvageValueRate"?"w-20":""}
                 value={ctrl.value}
                 onChange={ctrl.onChange}
                 error={errors[name]?.message as string}
@@ -508,21 +574,23 @@ const AddBook = () => {
   };
 
     const selectAfter = (
-      <Select
-  defaultValue="%"
-  onValueChange={()=>{}
-    // (val) => handleSalvageType(val, "salvageType")
-  }
-  disabled={false}
->
-  <SelectTrigger className="w-[80px]">
-    <SelectValue />
-  </SelectTrigger>
-  <SelectContent>
-    <SelectItem value="%">%</SelectItem>
-    <SelectItem value="@">@</SelectItem>
-  </SelectContent>
-</Select>
+
+<ReusableDropdown 
+placeholder=' '
+        options={[
+            {
+                label: "%",
+                value: "%"
+            },
+            {
+                label: "@",
+                value: "@"
+            },
+        ]}
+        defaultValue={"%"}  className='parent [&>div:first-child]:pr-0 rounded-tl-none rounded-bl-none rounded-br-md rounded-tr-md' />
+        
+
+       
 
       )
   //apis

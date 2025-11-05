@@ -16,7 +16,7 @@ import { Label } from '@/components/ui/label';
 import { useNavigate } from 'react-router-dom';
 import { ScrollArea } from '@radix-ui/react-scroll-area';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { GetAdditionalDepreciationBookDetails, GetDepreciationBookDetails } from '@/services/BookServices';
+import { GetAdditionalDepreciationBookDetails, GetBookCatListById, GetDepreciationBookDetails } from '@/services/BookServices';
 import dayjs from 'dayjs';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Controller, useForm } from 'react-hook-form';
@@ -24,13 +24,17 @@ import { ReusableRadio } from '@/components/ui/reusable-radio';
 import { ReusableCheckbox } from '@/components/ui/reusable-checkbox';
 import { ReusableUpload } from '@/components/ui/reusable-upload';
 import ReusableMultiSelect from '@/components/ui/reusable-multi-select';
-import { ReusableRichTextEditor } from '@/components/ui/reusable-rich-text-editor';
 import { BaseField, GenericObject } from '@/Local_DB/types/types';
 import { BOOKS_DB } from '@/Local_DB/Form_JSON_Data/BooksDB';
 import ReusableSingleCheckbox from '@/components/ui/reusable-single-checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { } from '@radix-ui/react-select';
 import { cn } from '@/lib/utils';
+import { matchesGlob } from 'path';
+import { useMessage } from '@/components/ui/reusable-message';
+import { setLoading } from '@/store/slices/projectsSlice';
+import { useAppSelector } from '@/store';
+import { useDispatch } from 'react-redux';
 // import { Select } from '@radix-ui/react-select';
 
 interface Book {
@@ -44,20 +48,20 @@ interface Book {
 
 
 const defaultRow = {
-    key: 1,
-    CategoryName: '',
-    GroupName: "",
-    DepreciationMethodName: "SLM",
-    AdditionalDepreciationName: "",
-    CategoryLife: "0",
-    CategoryRate:"0",
-    Usefullife:"0",
-    SalvageValueRate:"0",
-    ShiftApplicable:"NO",
-    DoubleShiftRate:"0",
-    TripleShiftRate:"0"
+  key: 1,
+  CategoryName: '',
+  GroupName: "",
+  DepreciationMethodName: "SLM",
+  AdditionalDepreciationName: "",
+  CategoryLife: "0",
+  CategoryRate: "0",
+  Usefullife: "0",
+  SalvageValueRate: "0",
+  ShiftApplicable: "NO",
+  DoubleShiftRate: "0",
+  TripleShiftRate: "0"
 
-    // cellsData: cellsData,
+  // cellsData: cellsData,
 };
 const fieldsToDisable = ["DepreciateWith", "DepreciationLevel", "SalvageValueToConsider", "LifeToConsider", "FYStartDate"]
 
@@ -68,9 +72,17 @@ const AddBook = () => {
   const [fields, setFields] = useState<BaseField[]>(BOOKS_DB);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('BookDetails');
-  const [effectiveFrom,setEffectiveFrom]=useState("")
-      const [dataSource, setDatasource] = useState([]);
-      const [isFinancialYearOpen,setIsFinancialYearOpen]=useState(false)
+  const [effectiveFrom, setEffectiveFrom] = useState("")
+  const [dataSource, setDataSource] = useState([]);
+  const msg = useMessage()
+  const [validationTrigger, setValidationTrigger] = useState(false)
+  const [isFinancialYearOpen, setIsFinancialYearOpen] = useState(false)
+  const [isCopyFromOpen, setIsCopyFromOpen] = useState(false)
+  const [selectedGroup,setSelectedGroup]=useState<string|number|(string | number)[]>("")
+  const [groupOptions,setGroupOptions]=useState([])
+  const companyId = useAppSelector(state => state.projects.companyId);
+  const dispatch=useDispatch()
+
   const navigate = useNavigate()
   const form = useForm<GenericObject>({
     defaultValues: fields.reduce((acc, f) => {
@@ -78,324 +90,312 @@ const AddBook = () => {
       return acc;
     }, {} as GenericObject),
     mode: 'onChange',
-    reValidateMode:"onChange"
+    reValidateMode: "onChange"
   });
-  
+
   const { control, register, handleSubmit, trigger, watch, setValue, reset, formState: { errors } } = form;
-  const [formData, setFormData] = useState({
-    bookName: '',
-    description: '',
-    depreciationBasedOn: '',
-    defaultDepreciationMethod: '',
-    fyStartDate: null as Date | null,
-    fyEndDate: null as Date | null,
-    depreciateWith: '',
-    depreciationLevel: '',
-    salvageValueToConsider: '',
-    salvageValue: '0',
-    salvageValueUnit: '%',
-    firstYearConventions: '',
-    forexGainLoss: false,
-    revaluationApplicable: false,
-    writeOffApplicable: false,
-    backdatedEntry: false,
-    dependentAsset: false,
-    roundOffValue: '2',
-  });
 
 
-useEffect(()=>{
-if(activeTab=="BookDetails"){
-  if(dataSource.length!==0){
-    setTimeout(()=>{
-triggerAccordionItemsValidations()
-    },10)
 
+  useEffect(() => {
+    if (activeTab == "BookDetails") {
+      if (validationTrigger) {
+        setTimeout(() => {
+          triggerAccordionItemsValidations()
+          setValidationTrigger(false)
+        }, 10)
+
+      }
+
+    }
+  }, [activeTab])
+
+useEffect(() => {
+  if(companyId){
+  getBookDataAPI()
   }
+  }, [companyId,watch("DepreciationLevel")])
+  const handleCopyFromSubmit = () => {
+    GetBookCatListByIdAPI(companyId, selectedGroup)
+  }
+   
 
-}
-},[activeTab])
-
-
-     const tableColumnsData = [
-       {
+  const tableColumnsData = [
+    {
       header: "S.No",
       accessorKey: "key",
-      id:"key",
-         size:50,
+      id: "key",
+      size: 50,
       // key: "key",
     },
-          {
-              accessorKey: "CategoryName",
-              header: "Book category",
-  
-              cell: ({ row }) => (
-  
-                  <span className='flex'>
-                      <ReusableInput
-                          value={row.original.CategoryName}
-                          onChange={(e) => handleChange(e.target.value, row.id, "CategoryName")}
-                          name='CategoryName'
-                          // placeholder='Enter License key'
-                          isRequired={true}
-                          className='m-2 mt-0 me-0 bg-white border-2'
-                          size='small'
-                      ></ReusableInput>
-  
-                  </span>
-              )
-          },
-          {
-              accessorKey: "GroupName",
-              header: "Group",
-              cell: ({ row }) => (
-  
-                  <span className='flex'>
-                         <ReusableInput
-                          value={row.original.GroupName}
-                          onChange={(e) => handleChange(e.target.value, row.id, "GroupName")}
-                          name='GroupName'
-                          // placeholder='Enter License key'
-                          isRequired={true}
-                          className='m-2 mt-0 me-0 bg-white border-2'
-                          size='small'
-                      ></ReusableInput>
-  
-                  </span>
-              )
-          },
+    {
+      accessorKey: "CategoryName",
+      header: "Book category",
 
-              {
-                  accessorKey: "DepreciationMethodName",
-                  header: "Depreciation Method",
-                  cell: ({ row }) => (
-  
-                      <span className='flex' >
-                         <ReusableDropdown
-                          containerClassName=" p-2"
-                          className='h-8 border-2 '
-                          placeholder=" "
-                          options={[
-                              { label: "SLM", value: "SLM" }, { label: "WDV", value: "WDV" },
-                          ]}
-                          allowClear={false}
-                          defaultValue={row.original.DepreciationMethodName}
-                          onChange={(e) => handleChange(e, row.id, "DepreciationMethodName")}
-                          backgroundColor="white"
-                          size={"small"}
-  
-                      >
-  
-                      </ReusableDropdown>
-  
-                      </span>
-                  )
-              },
-       
-           ...(form.watch("DepreciationLevel") ==  "Book Category"? [
-              {
-                  accessorKey: "AdditionalDepreciationName",
-                  header: "Additional Depreciation",
-                  cell: ({ row }) => (
-  
-                      <span className='flex' >
-                         <ReusableDropdown
-                          containerClassName=" p-2"
-                          className='h-8 border-2 '
-                          placeholder=" "
-                          options={[]}
-                          allowClear={false}
-                          defaultValue={row.original.AdditionalDepreciationName}
-                          onChange={(e) => handleChange(e, row.id, "AdditionalDepreciationName")}
-                          backgroundColor="white"
-                          size={"small"}
-  
-                      >
-  
-                      </ReusableDropdown>
-  
-                      </span>
-                  )
-              }
-          ] : []),
-        ...(form.watch("DepreciateWith") == "Rate"? [
-              {
-                  accessorKey: "CategoryRate",
-                  header: "Rate",
-                  cell: ({ row }) => (
-  
-                      <span className='flex' >
-                      <ReusableInput
-                          value={row.original.CategoryRate}
-                          onChange={(e) => handleChange(e.target.value, row.id, "CategoryRate")}
-                          name='CategoryRate'
-                          type='number'
-                          // placeholder='Enter License key'
-                          isRequired={true}
-                          className='m-2 mt-0 me-0 bg-white border-2'
-                          size='small'
-                      ></ReusableInput>
-  
-                      </span>
-                  )
-              }
-          ] : []),
-      ...(form.watch("DepreciateWith") === "Useful life" && form.watch("LifeToConsider") ===  "Book Category" ? [
-              {
-                  accessorKey:"CategoryLife",
-                  header: "Useful life",
-                  cell: ({ row }) => (
-  
-                      <span className='flex' >
-                      <ReusableInput
-                          value={row.original.CategoryLife}
-                          onChange={(e) => handleChange(e.target.value, row.id, "CategoryLife")}
-                          name='CategoryLife'
-                          type='number'
-                          // placeholder='Enter License key'
-                          isRequired={true}
-                          className='m-2 mt-0 me-0 bg-white border-2'
-                          size='small'
-                      ></ReusableInput>
-  
-                      </span>
-                  )
-              }
-          ] : []),
-               ...(form.watch("DepreciationLevel") ===  "Asset" && form.watch("SalvageValueToConsider") ===  "Book Category" ? [
-              {
-                  accessorKey:"SalvageValueRate",
-                  header:"Salvage value (%)",
-                  cell: ({ row }) => (
-  
-                      <span className='flex' >
-                      <ReusableInput
-                          value={row.original.SalvageValueRate}
-                          onChange={(e) => handleChange(e.target.value, row.id, "SalvageValueRate")}
-                          name='SalvageValueRate'
-                          type='number'
-                          // placeholder='Enter License key'
-                          isRequired={true}
-                          className='m-2 mt-0 me-0 bg-white border-2'
-                          size='small'
-                      ></ReusableInput>
-  
-                      </span>
-                  )
-              }
-          ] : []),
-  
-          {
-              accessorKey: "ShiftApplicable",
-              header: "Shifts applicable",
-  
-              cell: ({ row }) => (
-  
-                  <span>
-                      <ReusableDropdown
-                          containerClassName=" p-2"
-                          className='h-8 border-2 '
-                          placeholder=" "
-                          options={[
-                              { label: "Active", value: "Active" }, { label: "Expired", value: "Expired" }, { label: "Suspended", value: "Suspended" },
-                          ]}
-                          allowClear={false}
-                          defaultValue={row.original.ShiftApplicable}
-                          onChange={(e) => handleChange(e, row.id, "ShiftApplicable")}
-                          backgroundColor="white"
-                          size={"small"}
-  
-                      >
-  
-                      </ReusableDropdown>
-  
-                  </span>
-              )
-          },
-           {
-                  accessorKey:"DoubleShiftRate",
-                  header: "Double Shift Rate",
-                  cell: ({ row }) => (
-  
-                      <span className='flex' >
-                      <ReusableInput
-                          value={row.original.DoubleShiftRate}
-                          onChange={(e) => handleChange(e.target.value, row.id, "DoubleShiftRate")}
-                          name='DoubleShiftRate'
-                          type='number'
-                          // placeholder='Enter License key'
-                          isRequired={true}
-                          className='m-2 mt-0 me-0 bg-white border-2'
-                          size='small'
-                      ></ReusableInput>
-  
-                      </span>
-                  )
-              },
-               {
-                  accessorKey:"TripleShiftRate",
-                  header:"Triple Shift Rate",
-                  cell: ({ row }) => (
-  
-                      <span className='flex' >
-                      <ReusableInput
-                          value={row.original.TripleShiftRate}
-                          onChange={(e) => handleChange(e.target.value, row.id, "TripleShiftRate")}
-                          name='TripleShiftRate'
-                          type='number'
-                          // placeholder='Enter License key'
-                          isRequired={true}
-                          className='m-2 mt-0 me-0 bg-white border-2'
-                          size='small'
-                      ></ReusableInput>
-  
-                      </span>
-                  )
-              },
-          {
-              accessorKey: "Actions",
-              header: "Actions  ",
-              size: 100,
-              cell: ({ row }) => (
-                  <div className={cn('flex justify-start', "justify-center")}>
-  
-                      { <Trash2 height={18} className='text-red-400 cursor-pointer '
-                          onClick={() => handleRowDelete(row)} />}
-  
-             
-                  </div>
-              )
-          },
-  
+      cell: ({ row }) => (
 
-      ]
-      console.log(tableColumnsData,"tabledata",watch("depreciationLevel"))
-      
-         const handleRowDelete = (row) => {
-        console.log("row", row.id)
-        const data = [...dataSource]
-        data.splice(row.id, 1)
-        if(data.length<=0){
-          settingFieldDependencies()
-        }
-        setDatasource(data)
+        <span className='flex'>
+          <ReusableInput
+            value={row.original.CategoryName}
+            onChange={(e) => handleChange(e.target.value, row.id, "CategoryName")}
+            name='CategoryName'
+            // placeholder='Enter License key'
+            isRequired={true}
+            className='m-2 mt-0 me-0 bg-white border-2'
+            size='small'
+          ></ReusableInput>
 
-     
+        </span>
+      )
+    },
+    {
+      accessorKey: "GroupName",
+      header: "Group",
+      cell: ({ row }) => (
 
+        <span className='flex'>
+          <ReusableInput
+            value={row.original.GroupName}
+            onChange={(e) => handleChange(e.target.value, row.id, "GroupName")}
+            name='GroupName'
+            // placeholder='Enter License key'
+            isRequired={true}
+            className='m-2 mt-0 me-0 bg-white border-2'
+            size='small'
+          ></ReusableInput>
+
+        </span>
+      )
+    },
+
+    {
+      accessorKey: "DepreciationMethodName",
+      header: "Depreciation Method",
+      cell: ({ row }) => (
+
+        <span className='flex' >
+          <ReusableDropdown
+            containerClassName=" p-2"
+            className='h-8 border-2 '
+            placeholder=" "
+            options={[
+              { label: "SLM", value: "SLM" }, { label: "WDV", value: "WDV" },
+            ]}
+            allowClear={false}
+            defaultValue={row.original.DepreciationMethodName}
+            onChange={(e) => handleChange(e, row.id, "DepreciationMethodName")}
+            backgroundColor="white"
+            size={"small"}
+
+          >
+
+          </ReusableDropdown>
+
+        </span>
+      )
+    },
+
+    ...(form.watch("DepreciationLevel") == "Book Category" ? [
+      {
+        accessorKey: "AdditionalDepreciationName",
+        header: "Additional Depreciation",
+        cell: ({ row }) => (
+
+          <span className='flex' >
+            <ReusableDropdown
+              containerClassName=" p-2"
+              className='h-8 border-2 '
+              placeholder=" "
+              options={[]}
+              allowClear={false}
+              defaultValue={row.original.AdditionalDepreciationName}
+              onChange={(e) => handleChange(e, row.id, "AdditionalDepreciationName")}
+              backgroundColor="white"
+              size={"small"}
+
+            >
+
+            </ReusableDropdown>
+
+          </span>
+        )
+      }
+    ] : []),
+    ...(form.watch("DepreciateWith") == "Rate" ? [
+      {
+        accessorKey: "CategoryRate",
+        header: "Rate",
+        cell: ({ row }) => (
+
+          <span className='flex' >
+            <ReusableInput
+              value={row.original.CategoryRate}
+              onChange={(e) => handleChange(e.target.value, row.id, "CategoryRate")}
+              name='CategoryRate'
+              type='number'
+              // placeholder='Enter License key'
+              isRequired={true}
+              className='m-2 mt-0 me-0 bg-white border-2'
+              size='small'
+            ></ReusableInput>
+
+          </span>
+        )
+      }
+    ] : []),
+    ...(form.watch("DepreciateWith") === "Useful life" && form.watch("LifeToConsider") === "Book Category" ? [
+      {
+        accessorKey: "CategoryLife",
+        header: "Useful life",
+        cell: ({ row }) => (
+
+          <span className='flex' >
+            <ReusableInput
+              value={row.original.CategoryLife}
+              onChange={(e) => handleChange(e.target.value, row.id, "CategoryLife")}
+              name='CategoryLife'
+              type='number'
+              // placeholder='Enter License key'
+              isRequired={true}
+              className='m-2 mt-0 me-0 bg-white border-2'
+              size='small'
+            ></ReusableInput>
+
+          </span>
+        )
+      }
+    ] : []),
+    ...(form.watch("DepreciationLevel") === "Asset" && form.watch("SalvageValueToConsider") === "Book Category" ? [
+      {
+        accessorKey: "SalvageValueRate",
+        header: "Salvage value (%)",
+        cell: ({ row }) => (
+
+          <span className='flex' >
+            <ReusableInput
+              value={row.original.SalvageValueRate}
+              onChange={(e) => handleChange(e.target.value, row.id, "SalvageValueRate")}
+              name='SalvageValueRate'
+              type='number'
+              // placeholder='Enter License key'
+              isRequired={true}
+              className='m-2 mt-0 me-0 bg-white border-2'
+              size='small'
+            ></ReusableInput>
+
+          </span>
+        )
+      }
+    ] : []),
+
+    {
+      accessorKey: "ShiftApplicable",
+      header: "Shifts applicable",
+
+      cell: ({ row }) => (
+
+        <span>
+          <ReusableDropdown
+            containerClassName=" p-2"
+            className='h-8 border-2 '
+            placeholder=" "
+            options={[
+              { label: "Active", value: "Active" }, { label: "Expired", value: "Expired" }, { label: "Suspended", value: "Suspended" },
+            ]}
+            allowClear={false}
+            defaultValue={row.original.ShiftApplicable}
+            onChange={(e) => handleChange(e, row.id, "ShiftApplicable")}
+            backgroundColor="white"
+            size={"small"}
+
+          >
+
+          </ReusableDropdown>
+
+        </span>
+      )
+    },
+    {
+      accessorKey: "DoubleShiftRate",
+      header: "Double Shift Rate",
+      cell: ({ row }) => (
+
+        <span className='flex' >
+          <ReusableInput
+            value={row.original.DoubleShiftRate}
+            onChange={(e) => handleChange(e.target.value, row.id, "DoubleShiftRate")}
+            name='DoubleShiftRate'
+            type='number'
+            // placeholder='Enter License key'
+            isRequired={true}
+            className='m-2 mt-0 me-0 bg-white border-2'
+            size='small'
+          ></ReusableInput>
+
+        </span>
+      )
+    },
+    {
+      accessorKey: "TripleShiftRate",
+      header: "Triple Shift Rate",
+      cell: ({ row }) => (
+
+        <span className='flex' >
+          <ReusableInput
+            value={row.original.TripleShiftRate}
+            onChange={(e) => handleChange(e.target.value, row.id, "TripleShiftRate")}
+            name='TripleShiftRate'
+            type='number'
+            // placeholder='Enter License key'
+            isRequired={true}
+            className='m-2 mt-0 me-0 bg-white border-2'
+            size='small'
+          ></ReusableInput>
+
+        </span>
+      )
+    },
+    {
+      accessorKey: "Actions",
+      header: "Actions  ",
+      size: 100,
+      cell: ({ row }) => (
+        <div className={cn('flex justify-start', "justify-center")}>
+
+          {<Trash2 height={18} className='text-red-400 cursor-pointer '
+            onClick={() => handleRowDelete(row)} />}
+
+
+        </div>
+      )
+    },
+
+
+  ]
+  
+  const handleRowDelete = (row) => {
+    console.log("row", row.id)
+    const data = [...dataSource]
+    data.splice(row.id, 1)
+    if (data.length <= 0) {
+      settingFieldDependencies()
     }
- function handleChange(val, id, accessorKey) {
-        let data = dataSource
-        //  data.forEach((obj)=>{
-        //     if(obj.key==id){
-        //         obj[accessorKey]=val
-        //     }
-        //  })
-        data[parseInt(id)][accessorKey] = val
-        setDatasource(data)
-    }
-  useEffect(() => {
-    getBookDataAPI()
-  }, [])
+    setDataSource(data)
+
+
+
+  }
+  function handleChange(val, id, accessorKey) {
+    let data = dataSource
+    //  data.forEach((obj)=>{
+    //     if(obj.key==id){
+    //         obj[accessorKey]=val
+    //     }
+    //  })
+    data[parseInt(id)][accessorKey] = val
+    setDataSource(data)
+  }
+
   useEffect(() => {
     let calculatedDate = getDateAfterYears(watch("FYStartDate"));
     form.setValue("FYEndDate", calculatedDate)
@@ -404,125 +404,129 @@ triggerAccordionItemsValidations()
 
   //handling change dependencies
   useEffect(() => {
-settingFieldDependencies()
+    settingFieldDependencies()
   }, [watch("DefaultDepreciationMethod"), watch("DepreciateWith"), watch("DepreciationLevel"), watch("IsWriteOffApplicable")])
 
-const settingFieldDependencies=()=>{
+  const settingFieldDependencies = () => {
     let depMethod = watch("DefaultDepreciationMethod")
     let depreciateWith = watch("DepreciateWith")
     let depreciationLevel = watch("DepreciationLevel")
     let fieldData = structuredClone(fields)
- 
-      
-        if (depreciateWith == "Rate") {
-          fieldData.forEach((o) => {
-            if (depreciationLevel == "Asset") {
-              if ((o.name !== "FormulaCalculationTypeId" && o.name !== "LifeToConsider")) { o.isDisplay = true;(o.name=="FYEndDate")?o.disabled = true:o.disabled = false }else{
-                o.isDisplay=false,form.setValue(o.name,o.name=="FormulaCalculationTypeId"?"Net Book Value & Remaining Useful Life":"Book Category")
-              }
-            } else if (depreciationLevel == "Book Category") {
-     
-              if ((o.name === "LifeToConsider" || o.name == "SalvageValueToConsider" || o.name == "SalvageValueRate" || o.name == "FirstYearDepreciationConventions" || o.name == "FirstYearDepreciationConventions" || o.name == "IsWriteOffApplicable" || o.name == "IsForexApplicable" || o.name == "IsRevaluationApplicable" || o.name == "AssetIndependentCalulation" || o.name == "AssetIndependentCalulation" || o.name == "IsRequiredBackDateEntry" || o.name == "FormulaCalculationTypeId")) { 
-                o.isDisplay = false; 
-                setValue(o.name,o.name=="LifeToConsider"||o.name=="SalvageValueToConsider"? "Book Category":o.name=="SalvageValueRate"?"0":o.name=="FormulaCalculationTypeId"?"Net Book Value & Remaining Useful Life":"")
-               }else{
-                o.isDisplay = true; (o.name=="FYEndDate")?o.disabled = true:o.disabled = false
-            }
-            }
-          })
-        } else if (depreciateWith == "Useful life") {
-
-          fieldData.forEach((o) => {
-            if (o.name === "DepreciationLevel") {
-              o.disabled = true;o.defaultValue = "Asset";form.setValue(o.name, "Asset")
-            }
-            if ((o.name == "FormulaCalculationTypeId" && depMethod=="WDV") || (o.name !== "DepreciationLevel") ) {
-              o.isDisplay = true; o.disabled = false
-          
-            }
-             if(o.name == "FormulaCalculationTypeId" && depMethod=="SLM"){
-                o.isDisplay = false;form.setValue(o.name,"Net Book Value & Remaining Useful Life")
-            }
-
-          })
 
 
+    if (depreciateWith == "Rate") {
+      fieldData.forEach((o) => {
+        if (depreciationLevel == "Asset") {
+          if ((o.name !== "FormulaCalculationTypeId" && o.name !== "LifeToConsider")) { o.isDisplay = true; (o.name == "FYEndDate") ? o.disabled = true : o.disabled = false } else {
+            o.isDisplay = false, form.setValue(o.name, o.name == "FormulaCalculationTypeId" ? "Net Book Value & Remaining Useful Life" : "Book Category")
+          }
+        } else if (depreciationLevel == "Book Category") {
 
-
-        } else {
-
-          fieldData.forEach((o) => {
-            if (o.name == "SalvageValueRate" || o.name == "SalvageValueToConsider" || o.name == "FormulaCalculationTypeId" || o.name == "LifeToConsider") { o.isDisplay = false; form.setValue(o.name, "") }
-          })
+          if ((o.name === "LifeToConsider" || o.name == "SalvageValueToConsider" || o.name == "SalvageValueRate" || o.name == "FirstYearDepreciationConventions" || o.name == "FirstYearDepreciationConventions" || o.name == "IsWriteOffApplicable" || o.name == "IsForexApplicable" || o.name == "IsRevaluationApplicable" || o.name == "AssetIndependentCalulation" || o.name == "AssetIndependentCalulation" || o.name == "IsRequiredBackDateEntry" || o.name == "FormulaCalculationTypeId")) {
+            o.isDisplay = false;
+            setValue(o.name, o.name == "LifeToConsider" || o.name == "SalvageValueToConsider" ? "Book Category" : o.name == "SalvageValueRate" ? "0" : o.name == "FormulaCalculationTypeId" ? "Net Book Value & Remaining Useful Life" : "")
+          } else {
+            o.isDisplay = true; (o.name == "FYEndDate") ? o.disabled = true : o.disabled = false
+          }
         }
-      
+      })
+    } else if (depreciateWith == "Useful life") {
 
-      if (watch("IsWriteOffApplicable")) {
-        fieldData.forEach((o) => {
-          if (o.name == "WriteOffValue" || o.name == "WriteOffType") { o.isDisplay = true; } else {
+      fieldData.forEach((o) => {
+        if (o.name === "DepreciationLevel") {
+          o.disabled = true; o.defaultValue = "Asset"; form.setValue(o.name, "Asset")
+        }
+        if ((o.name == "FormulaCalculationTypeId" && depMethod == "WDV") || (o.name !== "DepreciationLevel")) {
+          o.isDisplay = true; o.disabled = false
 
-          }
-        })
-      } else {
-        fieldData.forEach((o) => {
-          if (o.name == "WriteOffValue" || o.name == "WriteOffType") { o.isDisplay = false; form.setValue(o.name,( o.name == "WriteOffType")?"Proportionate Dep Calculation": "") } else {
+        }
+        if (o.name == "FormulaCalculationTypeId" && depMethod == "SLM") {
+          o.isDisplay = false; form.setValue(o.name, "Net Book Value & Remaining Useful Life")
+        }
 
-          }
-        })
-      
+      })
+
+
+
+
+    } else {
+
+      fieldData.forEach((o) => {
+        if (o.name == "SalvageValueRate" || o.name == "SalvageValueToConsider" || o.name == "FormulaCalculationTypeId" || o.name == "LifeToConsider") { o.isDisplay = false; form.setValue(o.name, "") }
+      })
+    }
+
+
+    if (watch("IsWriteOffApplicable")) {
+      fieldData.forEach((o) => {
+        if (o.name == "WriteOffValue" || o.name == "WriteOffType") { o.isDisplay = true; } else {
+
+        }
+      })
+    } else {
+      fieldData.forEach((o) => {
+        if (o.name == "WriteOffValue" || o.name == "WriteOffType") { o.isDisplay = false; form.setValue(o.name, (o.name == "WriteOffType") ? "Proportionate Dep Calculation" : "") } else {
+
+        }
+      })
+
 
     }
     setFields(fieldData)
-}
+  }
   // const handleSubmit = (e: React.FormEvent) => {
   //   e.preventDefault();
   //   console.log('Book data:', formData, bookCategoryData);
   //   setIsAddDialogOpen(false);
   // };
- const triggerAccordionItemsValidations=async()=>{
-  
+  const triggerAccordionItemsValidations = async () => {
+
     await trigger();
     // handleSubmit(()=>{})()
-   
+
   }
   const handleAddCategory = (e) => {
-
-//     const isValidationFailed = fields.filter(f => f.isRequired).every(f=>form.getValues()[f.name] !== undefined && form.getValues()[f.name] !== null && form.getValues()[f.name] !== '');
-// triggerAccordionItemsValidations()
-//     if (!isValidationFailed) {
-//       return;
-//     }
-      if (dataSource.length === 0) {
-        let form = fields
-        form.forEach((obj) => {
-          if (fieldsToDisable.includes(obj.name)) {
-            obj.disabled = true
-          }
-        })
-
-        setFields(form)
+    if (dataSource.length === 0) {
+      const isValidationFailed = fields.filter(f => f.isDisplay && f.isRequired).every(f => form.getValues()[f.name] !== undefined && form.getValues()[f.name] !== null && form.getValues()[f.name] !== '');
+      triggerAccordionItemsValidations()
+      if (!isValidationFailed) {
+        setValidationTrigger(true)
+        msg.warning("Please fill all the required fields");
+        return;
       }
- setDatasource([...dataSource, { ...defaultRow, key: (dataSource.length+1),DepreciationMethodName:watch("DefaultDepreciationMethod") }]) 
+    }
+
+    if (dataSource.length === 0) {
+      let form = fields
+      form.forEach((obj) => {
+        if (fieldsToDisable.includes(obj.name)) {
+          obj.disabled = true
+        }
+      })
+
+      setFields(form)
+    }
+    setDataSource([...dataSource, { ...defaultRow, key: (dataSource.length + 1), DepreciationMethodName: watch("DefaultDepreciationMethod") }])
   };
 
 
 
   const renderField = (field: BaseField) => {
     let fieldsToShowInEdit: string[] = ['Status', 'Notify']
-    const { name, label, fieldType, isRequired,  validationPattern, patternErrorMessage, show = true } = field;
+    const { name, label, fieldType, isRequired, validationPattern, patternErrorMessage, show = true } = field;
     //  const overrideShow = !show && fieldsToShowInEdit.includes(name) && !isCreateMode;
     //  const branchLabel=lastLevelsData?.Branch
     if (!field.isDisplay) {
       return null;
     }
     const validationRules = {
-  required: isRequired ? `${label} is required` : false,
-  ...(name === "DepreciatedValueRoundOffUpTo" && {
-    validate: (value) => {
-      return value >= 0 && value <= 2 ? true : "Value should be between 0 and 2";
-    },
-  }),
-}
+      required: isRequired ? `${label} is required` : false,
+      ...(name === "DepreciatedValueRoundOffUpTo" && {
+        validate: (value) => {
+          return value >= 0 && value <= 2 ? true : "Value should be between 0 and 2";
+        },
+      }),
+    }
 
 
 
@@ -655,7 +659,7 @@ const settingFieldDependencies=()=>{
                 value={ctrl.value}
                 onChange={ctrl.onChange}
                 error={errors[name]?.message as string}
-           
+
               />
             )}
           />
@@ -746,13 +750,98 @@ const settingFieldDependencies=()=>{
 
 
   )
+  const settingOptions=(getdata,optionlabel, optionvalue,)=>{
+
+    let opt1 = []
+    let opt2 = []
+    let opts;
+    getdata?.forEach((element) => {
+      if ("Book Category" === element.DepreciationLevel) {
+        opt1.push(
+          {
+            "label": element[optionlabel],
+            "value": element[optionvalue],
+            "obj": element
+          }
+        )
+
+      }
+      if ("Asset" === element.DepreciationLevel) {
+        opt2.push(
+          {
+            "label": element[optionlabel],
+            "value": element[optionvalue],
+            "obj": element
+          }
+        )
+      }
+
+    });
+
+    if (watch("DepreciationLevel")  === "Book Category") {
+      // opts = (bookId) ? opt1.filter((o) => o.value !== bookId) : opt1
+      opts=opt1
+    } else {
+      // opts = (bookId) ? opt2.filter((o) => o.value !== bookId) : opt2
+      opts=opt2
+    }
+
+     setGroupOptions(opts )
+  }
+   const settingCopyFromToDataSource = (catdata) => {
+    if (catdata.length !== 0) {
+
+      if (dataSource.length === 0) {
+        let form = fields
+      form.forEach((obj) => {
+        if (fieldsToDisable.includes(obj.name) && obj.name!=="FYStartDate") {
+          obj.disabled = true
+        }
+      })
+
+      setFields(form)
+      }
+     
+      let cd=catdata.map((i, ind) => {
+        return { ...i, key: dataSource.length + (ind + 1),  }
+      })
+
+      setDataSource([...dataSource, ...cd]);
+
+    // setIsCopyFromOpen(false) 
+    } else {
+      msg.warning("There are no categories in the selected book");
+    }
+
+  }
   //apis
+   const GetBookCatListByIdAPI = async (compid, id) => {
+    dispatch(setLoading(true));
+    await GetBookCatListById(compid, id).then((res) => {
+
+         if (res.success && res.data && res.data.status !== false) {
+        if (Array.isArray(res.data.BookCategoryDetails)) {
+               settingCopyFromToDataSource(res.data.BookCategoryDetails)
+        } else {
+          setBooksData([])
+        }
+
+      } else {
+        setBooksData([])
+      }
+
+      
+    }).catch(() => { })
+      .finally(() => {
+        dispatch(setLoading(false));
+      });
+  }
   let getBookDataAPI = async () => {
     //  dispatch(loaderEnable());
-    await GetDepreciationBookDetails("111").then((res) => {
+    await GetDepreciationBookDetails(companyId).then((res) => {
       if (res.success && res.data) {
         if (Array.isArray(res.data.BookDetails)) {
-          setBooksData(res.data.BookDetails)
+        settingOptions(res.data.BookDetails,"BookName","BookID")
         } else {
           setBooksData([])
         }
@@ -766,6 +855,7 @@ const settingFieldDependencies=()=>{
       });
 
   }
+  console.log(groupOptions,"gpopt")
 
   const getFieldsByNames = (names: string[]) => fields.filter(f => names.includes(f.name!));
   return (
@@ -812,9 +902,9 @@ const settingFieldDependencies=()=>{
                     <ReusableButton
                       variant="primary"
                       icon={<Plus className="h-4 w-4" />}
-                          onClick={() => { handleSubmit(()=>{})() }}
-                      
-                      
+                      onClick={() => { handleSubmit(() => { })() }}
+
+
                     >
                       Add
                     </ReusableButton>
@@ -873,34 +963,34 @@ const settingFieldDependencies=()=>{
                         label="Effective From"
                         value={effectiveFrom}
                         disabled={true}
-                        onChange={()=>{}}
+                        onChange={() => { }}
                         placeholder="DD/MM/YYYY"
                       />
-                      <div className="flex items-center gap-2 mt-6">
+                      {/* <div className="flex items-center gap-2 mt-6">
                         <span className="text-blue-600 cursor-pointer" onClick={()=>{
                             // setIsFinancialYearOpen(true)
                           
                         }}>Add New Financial Year</span>
                         <ReusableButton variant="default" size="small" icon={<ChevronLeft className="h-4 w-4" />} />
                         <ReusableButton variant="default" size="small" icon={<ChevronRight className="h-4 w-4" />} className="bg-orange-500 hover:bg-orange-600 border-orange-500 text-white" />
-                      </div>
+                      </div> */}
                     </div>
                     <div className="flex gap-2">
-                      <ReusableButton variant="default">Copy From</ReusableButton>
+                      <ReusableButton variant="default" onClick={() => { setIsCopyFromOpen(true) }}>Copy From</ReusableButton>
                       {/* <ReusableButton variant="primary" className="bg-orange-500 hover:bg-orange-600 border-orange-500">Add Group</ReusableButton> */}
                       <ReusableButton variant="primary" className="bg-orange-500 hover:bg-orange-600 border-orange-500" onClick={handleAddCategory}>Add Category</ReusableButton>
                     </div>
                   </div>
-              
+
                   <div>
-                   {dataSource?.length>0 && <ReusableTable data={dataSource} columns={tableColumnsData} enableSearch={false}
-                                                                enableColumnVisibility={false}
-                                                                enableExport={false}
-                                                                enableSorting={false}
-                                                                enableFiltering={false}
-                                                                headerContentClassName={"justify-center "}
-                                                            />
-                                }
+                    {dataSource?.length > 0 && <ReusableTable data={dataSource} columns={tableColumnsData} enableSearch={false}
+                      enableColumnVisibility={false}
+                      enableExport={false}
+                      enableSorting={false}
+                      enableFiltering={false}
+                      headerContentClassName={"justify-center "}
+                    />
+                    }
                   </div>
 
                 </TabsContent>
@@ -912,33 +1002,58 @@ const settingFieldDependencies=()=>{
         </Card>
 
         {/* Main Category Dialog */}
-          <Dialog open={isFinancialYearOpen}
-                                    onOpenChange={(open) => {
-                                        setIsFinancialYearOpen(open);
-                                        if (!open) {
-                                            // handleCancel();
-                                        }
-                                    }}
-                                >
-                                    <DialogTrigger asChild>
-                                    </DialogTrigger>
-                                    <DialogContent className="max-w-2xl">
-                                        <DialogHeader>
-                                            <DialogTitle>{"Add Main Location"}</DialogTitle>
-                                        </DialogHeader>
-                                        <div>
-                                                  <ReusableTable data={dataSource} columns={tableColumnsData} enableSearch={false}
-                                                                enableColumnVisibility={false}
-                                                                enableExport={false}
-                                                                enableSorting={false}
-                                                                enableFiltering={false}
-                                                                headerContentClassName={"justify-center "}></ReusableTable>
 
-                                    </div>
-                                    </DialogContent>
-                                </Dialog>
 
-      </div>
+      </div> <Dialog open={isCopyFromOpen}
+        onOpenChange={(open) => {
+          setIsCopyFromOpen(open);
+          if (!open) {
+            // handleCancel();
+          }
+        }}
+      >
+        <DialogTrigger asChild>
+        </DialogTrigger>
+        <DialogContent className="max-w-2xl" onOpenAutoFocus={(e) => e.preventDefault()} >
+          <DialogHeader>
+            <DialogTitle>Copy Book Categories</DialogTitle>
+          </DialogHeader>
+          <div className='grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4'>
+
+            <div className="flex items-center space-x-2">
+              <ReusableDropdown
+                usePortal={false}
+                containerClassName=" p-2"
+                className='h-8 border-2 '
+                placeholder=" "
+                options={groupOptions}
+                allowClear={false}
+                defaultValue={""}
+                onChange={(e) => {setSelectedGroup(e)}}
+                backgroundColor="white"
+                size={"small"}
+
+              ></ReusableDropdown>
+
+            </div>
+
+
+          </div>
+          <div className="flex justify-end gap-2">
+
+            <ReusableButton
+              htmlType="submit"
+              variant="primary"
+              className="bg-orange-500 hover:bg-orange-600 border-orange-500"
+              onClick={
+               handleCopyFromSubmit
+              }
+            >
+              Submit
+            </ReusableButton>
+          </div>
+        </DialogContent>
+      </Dialog>
 
     </div>
 

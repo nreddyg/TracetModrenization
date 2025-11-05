@@ -1,10 +1,21 @@
 
 import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+
+dayjs.extend(customParseFormat);
 
 //you can format the dates into various formats like dd/mm/yyyy || dd-mm-yyyy || dd-mm-yy || mm-dd-yyyy || yyyy-mm-dd etc other formats
-export const formatDate = (date: Date | string | number, format: string = 'YYYY-MM-DD'): string => {
-  return date ? dayjs(date).format(format):'';
+export const formatDate = (
+  date: Date | string | number,
+  format: string = "YYYY-MM-DD"
+): string => {
+  if (!date) return "";
+  if (typeof date === "string" && date.includes("-")) {
+    return dayjs(date, "DD-MM-YYYY").format(format);
+  }
+  return dayjs(date).format(format);
 };
+
 // "04/03/2025 09:58:52" to DD-MM-YYYY
 export function formatDateToDDMMYYYY(dateTimeStr: string) {
   if (!dateTimeStr?.trim()) return "";
@@ -13,9 +24,7 @@ export function formatDateToDDMMYYYY(dateTimeStr: string) {
   );
 }
 
-import customParseFormat from 'dayjs/plugin/customParseFormat';
 
-dayjs.extend(customParseFormat);
 //you can format the dates into various formats like dd/mm/yyyy || dd-mm-yyyy || dd-mm-yy || mm-dd-yyyy || yyyy-mm-dd etc other formats and also accepts String in in given format
 
 export const formatDates = (date: Date | string | number, format: string = 'YYYY-MM-DD'): string => {

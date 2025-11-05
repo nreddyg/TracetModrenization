@@ -57,8 +57,10 @@ const CostBreakupAttributes = () => {
     const [fields, setFields] = useState<BaseField[]>(COST_BREAKUP_DB);
     const [tableData, setTableData] = useState([defaultRow]);
     const [recordData, setRecordData] = useState(null);
+    console.log(recordData,"60")
     const [isDelModalOpen, setIsDelModalOpen] = useState(false);
     const [tableRow, setTableRow] = useState(null);
+    console.log(tableRow, "62")
     const [isUsed, setIsUsed] = useState(false);
     console.log(recordData, "59")
     const form = useForm<GenericObject>({
@@ -185,13 +187,13 @@ const CostBreakupAttributes = () => {
                     )
                 }
                 return (
-                    <span className='flex'>
+                    <span>
                         <ReusableInput
                             value={row.original.attributeName}
                             onChange={(e) => handleChange(e.target.value, row.id, "attributeName")}
                             name='attributeName'
                             isRequired={false}
-                            className='m-2 mt-0 me-0 bg-white border-2'
+                            className='m-2 me-2  mt-0 bg-white border-2'
                             size='small'
                         ></ReusableInput>
 
@@ -282,7 +284,7 @@ const CostBreakupAttributes = () => {
                 }
                 return (
                     <div className="flex">
-                         {!isUsed &&   <ReusableButton
+                        {!isUsed && <ReusableButton
                             variant="text"
                             size="small"
                             danger
@@ -419,7 +421,7 @@ const CostBreakupAttributes = () => {
                     handleReset();
                 }
                 else {
-                    msg.warning(res.data.message)
+                    msg.warning(res.data.Message)
                 }
             }
         }).catch(err => console.log(err)).finally(() => {
@@ -518,7 +520,7 @@ const CostBreakupAttributes = () => {
                                 onClick={() => { handleSubmit(handleSave)() }}
                                 icon={<Save className="h-4 w-4" />}
                             >
-                                {recordData ? 'Update':'Add'}
+                                {recordData ? 'Update' : 'Add'}
                             </ReusableButton>
                         </div>
                     </div>
@@ -583,12 +585,17 @@ const CostBreakupAttributes = () => {
                     </div>
                 </div>
                 {/* Delete Confirmation Modal */}
-                <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>
+                <Dialog open={isDelModalOpen} onOpenChange={(open) => {
+                    if (!open) {
+                        handleReset();
+                    }
+                    setIsDelModalOpen(open);
+                }}>
                     <DialogContent className="sm:max-w-[425px]">
                         <DialogHeader>
                             <DialogTitle>Confirm the action</DialogTitle>
                             <DialogDescription>
-                                {`Are you sure you want to delete Cost breakup Group?`}
+                                Are you sure you want to delete {!tableRow ? "Cost Breakup Group" : tableRow?.original?.attributeName}?
                             </DialogDescription>
                         </DialogHeader>
                         <DialogFooter>
@@ -601,7 +608,7 @@ const CostBreakupAttributes = () => {
                             <ReusableButton
                                 variant="primary"
                                 danger={true}
-                                onClick={() => { recordData === null ? handleDelete(tableRow) : handleDeleteByApi(recordData, companyId) }}
+                                onClick={() => { tableRow !== null ? handleDelete(tableRow) : handleDeleteByApi(recordData, companyId) }}
                             >
                                 Delete
                             </ReusableButton>

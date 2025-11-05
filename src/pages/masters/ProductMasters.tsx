@@ -132,7 +132,7 @@ const ProductMasters = () => {
         canEdit: true,
         canDelete: true,
         canView: true,
-        canExport: true,
+        canExport: false,
         canAdd: true,
         canManageColumns: false,
     };

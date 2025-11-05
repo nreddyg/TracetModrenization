@@ -162,7 +162,7 @@ const LicenseAssignment = () => {
                         LicenseKeyId: data.LicenseKeyId,
                         LicenseKey: licenseKey || data.LicenseKey,
                         AssignmentDate: formatDate(data.AssignmentDate, 'DD/MM/YYYY'),
-                        ExpiryDate: "12/12/2025",// selectedLicenseData?.LicenseExpiryDate || '12/12/2025',
+                        ExpiryDate: selectedLicenseData?.LicenseExpiryDate || '12/12/2025',
                         Status: selectedLicenseData?.Status || '',
                         Notes: data.Notes || '',
                     },

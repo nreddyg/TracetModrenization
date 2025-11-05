@@ -4,7 +4,7 @@ import { ReusableInput } from '@/components/ui/reusable-input';
 import { ReusableTable } from '@/components/ui/reusable-table';
 import { ReusableDropdown } from '@/components/ui/reusable-dropdown';
 import { ReusableTextarea } from '@/components/ui/reusable-textarea';
-import { Plus, Edit, Trash2, X, Save } from 'lucide-react';
+import { Plus, Edit, Trash2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { setLoading } from '@/store/slices/projectsSlice';
 import { useDispatch } from 'react-redux';
@@ -270,13 +270,13 @@ const Store = () => {
         <div className="h-full bg-gray-50 flex flex-col ">
             <div className="flex flex-1 overflow-hidden">
                 <div className="flex-1 flex flex-col min-w-0 ">
-                    <div className="bg-white border-b shadow-sm px-4 lg:px-6 py-3 flex flex-row xxs:flex-col xs2:flex-row lg:flex-row lg:items-center justify-between gap-4 shrink-0">
+                    <div className="min-h-[53px] bg-white border-b shadow-sm px-4 lg:px-6 py-3 flex flex-row xxs:flex-col xs2:flex-row lg:flex-row lg:items-center justify-between gap-4 shrink-0">
                         <div className="flex items-center gap-4 lg:gap-6 flex-1 min-w-0">
                             <div className="flex items-center gap-2">
                                 <div className="flex items-center gap-2 text-sm text-gray-600">
                                     <span>Masters</span>
                                     <span>/</span>
-                                    <span>Company</span>
+                                    <span>Consumables</span>
                                     <span>/</span>
                                     <span className="text-gray-900 font-medium">Store</span>
                                 </div>

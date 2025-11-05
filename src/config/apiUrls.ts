@@ -203,8 +203,17 @@ export const URL_GET_COSTCENTER_BY_ID = `/api/Masters/GetCostCenterDetailsByComp
 export const URL_DELETE_COSTCENTER = `/api/Masters/DeleteCostCenterDetailsById`;
 
 //Masters Service locations
-export const URL_GET_SERVICELOCATIONS_LIST = `/api/Masters/GetServiceLocationDetailsByCompanyId`;
-export const URL_POST_SERVICELOCATIONS = `/api/Masters/AddServiceMaintenaceLocations`;
+ export const URL_GET_SERVICELOCATIONS_LIST=`/api/Masters/GetServiceLocationDetailsByCompanyId`;
+ export const URL_POST_SERVICELOCATIONS=`/api/Masters/AddServiceMaintenaceLocations`;
+ export const URL_DELETE_SERVICELOCATIONS=`/api/Masters/DeleteServiceLocationById`;
+ export const URL_UPDATE_SERVICE_LOCATIONS=`/api/Masters/UpdateServiceMaintenanceLocations`;
+
+ //Masters Cost Breakup 
+export const URL_GET_COSTBREAKUP_LIST=`/api/Masters/GetCostBreakupAttributesByCompanyId`;
+export const URL_POST_COSTBREAKUP=`/api/Masters/AddCostBreakupAttributesDetails`;
+export const URL_UPDATE_COSTBREAKUP=`/api/Masters/UpdateCostBreakupAttributesDetails`;
+export const URL_EDIT_COSTBREAKUP=`/api/Masters/GetCostBreakupAttributesByCompanyId`;
+export const URL_DELETE_COSTBREAKUP=`/api/Masters/DeleteCostBreakupAttributes`;
 // Master's fixed Assets Asset Category
 export const URL_GET_ASSET_CATEGORY_DATA = `/api/Masters/GetAssetCategoriesByCompanyId`;
 export const URL_POST_ASSET_CATEGORY_DATA = `/api/Masters/AddAssetCategoryDetails`;
@@ -218,6 +227,30 @@ export const URL_GET_ITEM_MASTER_DATA = `/api/Masters/GetItemMasterDetailsByComp
 export const URL_DELETE_ITEM_MASTER = `/api/Masters/DeleteItemMaster`;
 export const URL_POST_NEW_ITEM_MASTER = `/api/Masters/AddItemMasterDetails`;
 export const URL_POST_UPDATE_ITEM_MASTER = `/api/Masters/UpdateItemMasterDetails`;
+//Masters Units of Measure
+
+export const URL_GET_UNITS_OF_MEASURE_DATA = `/api/Masters/GetUOMDetailsByCompanyId`;
+export const URL_GET_MANAGE_UNITS_OF_MEASURE_DATA = `/api/Masters/GetUOMConversionDetails`;
+export const URL_GET_UNITS_OF_MEASURE_DATA_BY_ID = `/api/Masters/GetUOMDetailsByCompanyId`;
+export const URL_DELETE_UNITS_OF_MEASURE = `/api/Masters/DeleteUnitofMeasureById`;
+export const URL_DELETE_CONVERSION = `/api/Masters/DeleteUOMConversionById`;
+export const URL_POST_NEW_UNITS_OF_MEASURE = `/api/Masters/AddUnitOfMeasuresDetails`;
+export const URL_POST_NEW_CONVERSION = `/api/Masters/AddUOMConversionDetails`;
+export const URL_POST_UPDATE_UNITS_OF_MEASURE = `/api/Masters/UpdateUnitOfMeasuresDetails`;
+//Masters Product masters
+export const URL_PRODUCT_MASTERS=`/api/Masters/GetProductMasterDetailsByCompanyId`;
+export const URL_POST_PRODUCTS=`/api/Masters/AddProductDetails`;
+export const URL_EDIT_PRODUCTS=`/api/Masters/GetProductMasterDetailsByCompanyId`;
+export const URL_UPDATE_PRODUCTS=`/api/Masters/UpdateProductDetails`;
+export const URL_DELETE_PRODUCTS=`/api/Masters/DeleteProductMasterById`;
+// Masters User Attributes 
+export const URL_GET_USER_ATTRIBUTES = `/api/Masters/GetUserAttributesByCompanyId`;
+export const URL_POST_NEW_USER_ATTRIBUTES=`/api/Masters/AddUserAttributesDetails`;
+
+
+
+
+
 
 
 // Item Cateory
@@ -228,26 +261,6 @@ export const URL_UPDATE_ITEM_CATEGORY = `/api/Masters/UpdateItemCategoryDetails`
 export const URL_DELETE_ITEM_CATEGORY = `/api/Masters/DeleteItemCategoriesById`;
 export const URL_ITEM_CATEGORY_BY_ID = `/api/Masters/GetItemCategoryDetails`;
 
-//Master Reports
-export const URL_GET_CUSTOMER_LOCATIONS_DATA = '/api/Masters/GetCustomerLocationDetailsByCompanyId';
-export const URL_GET_COMPANY_HIERARCHY_MASTER_REPORT = 'api/Masters/GetCompanyHierarchyMasterReport';
-export const URL_GET_DEPARTMENT_MASTER_REPORT = '/api/Masters/GetDepartmentMasterReport';
-export const URL_GET_COST_CENTER_MASTER_REPORT = '/api/Masters/GetCostCenterDetailsByCompanyId';
-export const URL_GET_ASSET_LOCATION_MASTER_REPORT = '/api/Masters/GetAssetLocationMasterReport';
-export const URL_GET_ASSET_CATEGORY_MASTER_REPORT = '/api/Masters/GetAssetCategoryMasterReport';
-export const URL_GET_USER_MASTER_REPORT = '/api/Masters/GetUserMasterReport';
-export const URL_GET_VENDOR_MASTER_REPORT = '/api/Masters/GetVendorMasterReport';
-export const URL_GET_CUSTOMER_MASTER_REPORT = '/api/Masters/GetCustomerMasterReport';
-export const URL_GET_USER_LOG_MASTER_REPORT = '/api/Masters/GetUserLogMasterReport';
-export const URL_GET_SERVICE_LOCATIONS_MASTER_REPORT = '/api/Masters/GetServiceLocationMasterReport';
-export const URL_GET_CUSTOMER_LOCATIONS_MASTER_REPORT = '/api/Masters/GetCustomerLocationMasterReport';
-
-//Masters book 
-export const URL_GET_ADDITIONAL_DEPRECIATION_BOOK = "/api/Masters/GetAdditionalDepreciationDetails"
-export const URL_POST_ADD_ADDITIONAL_DEPRECIATION = "/api/Masters/AddAdditionalDepreciationDetails"
-export const URL_POST_UPDATE_ADDITIONAL_DEPRECIATION = "/api/Masters/UpdateAdditionalDepreciationDetails"
-export const URL_DELETE_ADDITIONAL_DEPRECIATION = "/api/Masters/DeleteAdditionalDepreciation"
-
 // Asset Mapping Book Catergory
 export const URL_DEP_BOOK_DETAILS = `/api/Masters/GetDepreciationBookDetails`
 export const URL_ASSET_CAT_BOOK_MAPPING_DETAILS = `/api/Masters/GetDepAssetCatBookCatMappingDetails`;
@@ -257,3 +270,37 @@ export const URL_ASSET_CATEGORIES_PREV_NEXT_DATES = `/api/Masters/GetAssetCatego
 export const URL_GET_DATE_LIST = `/api/Masters/GetAssetCatBookCatMapEffFromDatesListLookupsByBookId`;
 export const URL_DOWNLOAD_EXCEL_DATA = `/api/Masters/DownLoadAssetCategoryBookCategoryMapping`;
 export const URL_POST_UPLOAD_EXCEL_DATA = `/api/Masters/ImportAssetCategoryBookCategoryMappingData`;
+export const URL_GET_CUSTOMER_LOCATIONS_DATA='/api/Masters/GetCustomerLocationDetailsByCompanyId';
+export const URL_GET_COMPANY_HIERARCHY_MASTER_REPORT='api/Masters/GetCompanyHierarchyMasterReport';
+export const URL_GET_DEPARTMENT_MASTER_REPORT='/api/Masters/GetDepartmentMasterReport';
+export const URL_GET_COST_CENTER_MASTER_REPORT='/api/Masters/GetCostCenterMasterReport';
+export const URL_GET_ASSET_LOCATION_MASTER_REPORT='/api/Masters/GetAssetLocationMasterReport';
+export const URL_GET_ASSET_CATEGORY_MASTER_REPORT='/api/Masters/GetAssetCategoryMasterReport';
+export const URL_GET_USER_MASTER_REPORT='/api/Masters/GetUserMasterReport';
+export const URL_GET_VENDOR_MASTER_REPORT='/api/Masters/GetVendorMasterReport';
+export const URL_GET_CUSTOMER_MASTER_REPORT='/api/Masters/GetCustomerMasterReport';
+export const URL_GET_USER_LOG_MASTER_REPORT='/api/Masters/GetUserLogMasterReport';
+export const URL_GET_SERVICE_LOCATIONS_MASTER_REPORT='/api/Masters/GetServiceLocationMasterReport';
+export const URL_GET_CUSTOMER_LOCATIONS_MASTER_REPORT='/api/Masters/GetCustomerLocationMasterReport';
+export const URL_GET_MASTER_REPORTS_COLUMNS='/api/Masters/GetMasterDataReportsGridColumnsList';
+export const URL_POST_MASTER_REPORTS_COLUMNS='/api/Masters/SaveMasterDataReportsGridColumns'
+
+//Masters book 
+export const URL_GET_ADDITIONAL_DEPRECIATION_BOOK="/api/Masters/GetAdditionalDepreciationDetails"
+export const URL_POST_ADD_ADDITIONAL_DEPRECIATION="/api/Masters/AddAdditionalDepreciationDetails"
+export const URL_POST_UPDATE_ADDITIONAL_DEPRECIATION="/api/Masters/UpdateAdditionalDepreciationDetails"
+export const URL_DELETE_ADDITIONAL_DEPRECIATION="/api/Masters/DeleteAdditionalDepreciation"
+export const URL_GET_GROUP_BY_BOOK_ID="/api/Masters/GetGroupByBookIdDetails"
+export const URL_GET_DEPRECIATION_BOOK_DETAILS_BY_ID="/api/Masters/GetDepreciationBookDetailsByBookId"
+export const URL_GET_DEPRECIATION_BOOK_DETAILS="/api/Masters/GetDepreciationBookDetails"
+export const URL_GET_BOOK_CATEGORY_LIST="/api/Masters/GetDepreciationBookCategoryDetailsByBookId"
+export const URL_GET_EFFECTIVE_FROM_DATE="/api/Masters/GetEffectiveFromDatesListLookupsByBookId"
+export const URL_GET_CHECK_DEP_RAN_FY="/api/DepreciationAPI/CheckForDepreciationRanForFY"
+export const URL_POST_ADD_OR_UPDATE_BOOK_CAT="/api/Masters/AddorUpdateDepBookCategoryDetailsByEffFrom"
+export const URL_POST_ADD_GROUP_CATEGORY_DETAILS="/api/Masters/AddGroupCategoryDetails"
+export const URL_POST_ADD_DEPRECIATION_MASTER="/api/Masters/AddDepBookMasterDetails"
+export const URL_POST_UPDATE_BOOK_DETAILS="/api/Masters/UpdateDepBookMasterDetails"
+export const URL_POST_UPDATE_GROUP_CATEGORY_DETAILS="/api/Masters/UpdateGroupCategoryDetails"
+export const URL_DELETE_DEPRECIATION_BOOK="/api/Masters/DeleteDepreciationBook"
+export const URL_DELETE_GROUP_BY_ID="/api/Masters/DeleteGroupById"
+export const URL_DELETE_BOOK_CATEGORY="/api/Masters/DeleteDepBookCategory"

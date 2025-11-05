@@ -510,8 +510,6 @@ const Department = () => {
           "Code": code,
         }]
     }
-    // let branchId = recordToEditId ? selectedNode?.id : 0
-    console.log("payload", payload);
     const branchId = Number(recordToEditId ? selectedNode?.id : 0);
     await postOrUpdateDepartmentData(branchId, companyId, payload).then(res => {
       if (res.data.status) {

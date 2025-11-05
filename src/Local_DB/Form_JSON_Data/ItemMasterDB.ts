@@ -4,12 +4,15 @@ export const ITEM_MASTER_DB:BaseField[]=[
         name:'ItemName',
         fieldType:'text',
         label:'Item Name',
+        isRequired:true
         // defaultChecked:false,
     },
     {
         name:'ItemCode',
         fieldType:'text',
         label:'Item Code',
+        isRequired:true
+
         // defaultChecked:false,
     },
      {
@@ -17,8 +20,11 @@ export const ITEM_MASTER_DB:BaseField[]=[
         fieldType: "dropdown",
         name: "MainCategory",
         placeholder: "Select Branch",
-        isRequired: false,
+        isRequired: true,
         options: [],
+        
+        
+
         // selectAll:true,
     },
     {
@@ -26,7 +32,7 @@ export const ITEM_MASTER_DB:BaseField[]=[
         fieldType: "dropdown",
         name: "SubCategory",
         placeholder: "Select Branch",
-        isRequired: false,
+        isRequired: true,
         options: [],
         // selectAll:true,
     },
@@ -35,22 +41,21 @@ export const ITEM_MASTER_DB:BaseField[]=[
         fieldType: "dropdown",
         name: "UnitofMeasure",
         placeholder: "Select Branch",
-        isRequired: false,
+        isRequired: true,
         options: [],
         // selectAll:true,
     },
-  
     {
         name:'UnitPrice',
         fieldType:'text',
         label:'Unit Price',
         // defaultChecked:false,
     },
-    
     {
         name:'ReorderLevel',
         fieldType:'text',
         label:'Reorder Level',
+        isRequired:true
         // defaultChecked:false,
     },
     {

@@ -24,6 +24,7 @@ export interface ReusableInputProps extends Omit<React.InputHTMLAttributes<HTMLI
   suffixIcon?: React.ReactNode;
   addonBefore?: React.ReactNode;
   addonAfter?: React.ReactNode;
+  addonAfterClassName?:string
   
   // Password specific
   showPasswordToggle?: boolean;
@@ -82,7 +83,7 @@ export const ReusableInput = forwardRef<ReusableInputRef, ReusableInputProps>(
     label, 
     labelPosition = 'top',
     tooltip, 
-    error, 
+    error,
     warning,
     isRequired,
     
@@ -91,6 +92,7 @@ export const ReusableInput = forwardRef<ReusableInputRef, ReusableInputProps>(
     suffixIcon, 
     addonBefore,
     addonAfter,
+    addonAfterClassName,
     
     // Password specific
     showPasswordToggle = true,
@@ -402,7 +404,8 @@ export const ReusableInput = forwardRef<ReusableInputRef, ReusableInputProps>(
       
       return (
         <div className={cn(
-          "flex items-center px-3 bg-gray-50 border border-l-0 rounded-r-md",
+          "flex items-center bg-gray-50 border border-l-0   rounded-r-md",addonAfterClassName,
+          focused && "ms-[.1rem]",
           sizeClasses.split(' ').find(cls => cls.startsWith('h-')),
           variantClasses,
           statusClasses,
@@ -499,14 +502,14 @@ export const ReusableInput = forwardRef<ReusableInputRef, ReusableInputProps>(
       "relative flex",
       hasAddon && "rounded-none",
       addonBefore && "rounded-l-none",
-      addonAfter && "rounded-r-none",
+      addonAfter && "rounded-r-none w-full",
       !hasAddon && "rounded-md"
     );
 
     // Render the input field section
     const renderInputSection = () => (
       <div className={labelPosition === 'left' || labelPosition === 'right' ? 'flex-1' : ''}>
-        <div className={""
+        <div className={cn(hasAddon &&"flex")
           // cn(focused && "focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 rounded-md",)
           }>
           {renderAddonBefore()}
@@ -538,9 +541,10 @@ export const ReusableInput = forwardRef<ReusableInputRef, ReusableInputProps>(
                 focused && "ring-2 ring-opacity-50",
                 hasAddon && "border-0",
                 addonBefore && "rounded-l-none border-l-0",
-                addonAfter && "rounded-r-none border-r-0",
+              
                 !hasAddon && "rounded-md",
                 "flex  w-full  rounded-md border border-input bg-background px-3 py-2 text-base ",
+                  addonAfter && "rounded-r-none border-r-0",
                 inputClassName,
                 className,
               )}

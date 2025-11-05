@@ -1,5 +1,3 @@
-
-
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Trash2, Plus, Edit, ChevronRight, ChevronLeft, Search, ArrowLeft, X, Save } from 'lucide-react';
@@ -66,8 +64,8 @@ const Customer = () => {
   const [deletingCustomerData, setDeletingCustomerData] = useState(null)
   const branchName = useAppSelector(state => state.projects.branch);
   const branchesList = useAppSelector(state => state.projects.branchList);
-  const [subLocOptions,setSubLocOptions]=useState([])
-  const [mainLocOptions,setMainLocOptions]=useState([])
+  const [subLocOptions, setSubLocOptions] = useState([])
+  const [mainLocOptions, setMainLocOptions] = useState([])
   let msg = useMessage()
   const filteredOrgs = dataSource.filter(cust => {
     const matchesSearch = cust.CustomerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -85,29 +83,25 @@ const Customer = () => {
   const { control, register, handleSubmit, trigger, watch, setValue, reset, formState: { errors } } = form;
   useEffect(() => {
     if (companyId && branchName) fetchAllCustomerList();
-
   }, [companyId, branchName]);
   useEffect(() => {
     fetchCountryList()
-
-
   }, [branchesList])
-  useEffect(()=>{
-    let fieldData=[...fields]
-    let mainLoc=watch("MainLocation")
+  useEffect(() => {
+    let fieldData = [...fields]
+    let mainLoc = watch("MainLocation")
     if (mainLoc && selectedCustomerData?.CustomerID) {
       let mainLocationId = mainLocOptions.filter((o) => (o.value === mainLoc && o.CustomerId == selectedCustomerData.CustomerID))
       let opts = subLocOptions.filter((o) => o.Parent == (mainLocationId[0].LocationId))
       let subObjInd = fieldData.findIndex((x) => x.name === "SubLocation");
       fieldData[subObjInd].options = opts
       fieldData[subObjInd].value = ""
-       setFields(fieldData)
+      setFields(fieldData)
     }
-  },[watch("MainLocation")])
+  }, [watch("MainLocation")])
   useEffect(() => {
     const mainLocation = watch("MainLocation");
     const isEmpty = !mainLocation || mainLocation.length === 0;
-
     const updatedFields = fields.map(field =>
       field.name === "SubLocation"
         ? { ...field, disabled: isEmpty }
@@ -115,11 +109,9 @@ const Customer = () => {
     );
     setFields(updatedFields);
   }, [watch("MainLocation")]);
-
   const handleSelect = (e, data: CustomerData) => {
     setSelectedCustomerData(data);
     getCustomerDataAPI(data.CustomerID)
-
   }
   const renderField = (field: BaseField) => {
     const { name, label, fieldType, isRequired, show = true } = field;
@@ -129,7 +121,6 @@ const Customer = () => {
     const validationRules = {
       required: isRequired ? `${label} is Required` : false,
     };
-
     switch (fieldType) {
       case 'text':
         return (
@@ -296,8 +287,7 @@ const Customer = () => {
         return null;
     }
   };
-  const setLookupsDataInJson = (data: any, key: string,data2?:any,key2?:string) => {
-
+  const setLookupsDataInJson = (data: any, key: string, data2?: any, key2?: string) => {
     const updatedFields = fields.map(field => {
       if (field.name === key) {
         return { ...field, options: data };
@@ -312,27 +302,21 @@ const Customer = () => {
   const handleDelete = (e, vend) => {
     e.stopPropagation();
     setDeletingCustomerData(vend)
-
     setIsDelModalOpen(true)
-
   }
-
   const handleReset = () => {
-    //       setSelectedCustomerData(null);
-    // setDataSource([{ OrganizationLogo: "", OrganizationLogoName: "", OrganizationLogoType: "", OrganizationLogoConversionType: "" }]);
-    form.reset({ "CustomerName": "", "PAN": "", "GSTIN": "", "EmailId": "", "PhoneNo": "", "ContactPerson": "", "Address": "", "MainLocation": "", "SubLocation": "", "City": "", "State": "", "ZipCode": "", "Description": "" });
-    let formfields=[...fields]
-    formfields.forEach((obj)=>{
-        if(obj.name=="MainLocation"||obj.name=="SubLocation"){
-          obj.fieldType="text"
-          obj.options=[]
-        }
+    form.reset({ "CustomerName": "", "PAN": "", "GSTIN": "", "EmailId": "", "PhoneNo": "", "ContactPerson": "", "AddOnAddress": "", "MainLocation": "", "SubLocation": "", "City": "", "State": "", "ZipCode": "", "Description": "" });
+    let formfields = [...fields]
+    formfields.forEach((obj) => {
+      if (obj.name == "MainLocation" || obj.name == "SubLocation") {
+        obj.fieldType = "text"
+        obj.options = []
+      }
     })
     setFields(formfields)
     setSelectedCustomerData(null)
     setDeletingCustomerData(null)
   };
-
   const handleSave = (data) => {
     const payload = {
       VendorCustomerDetails: [
@@ -365,11 +349,8 @@ const Customer = () => {
     } else {
       AddCustomerAPI(payload)
     }
-
   }
-
-    const settingDropOptions = (mainOpts, subOpts,data,id) => {
-      console.log(data,"inside drop")
+  const settingDropOptions = (mainOpts, subOpts, data, id) => {
     let jsonData = structuredClone(fields);
     let mainLocOpts = [];
     let subLocOpts = [];
@@ -382,19 +363,18 @@ const Customer = () => {
     }
     jsonData.forEach((obj) => {
       if (obj.name === "MainLocation") {
-        let mainLocationName = data.MainLocation? data.MainLocation:"F"
+        let mainLocationName = data.MainLocation ? data.MainLocation : "F"
         mainLocationId = mainLocOpts.filter((o) => o.value === mainLocationName)
         obj.options = mainLocOpts
-        obj.fieldType="dropdown"
+        obj.fieldType = "dropdown"
       } else if (obj.name === "SubLocation") {
         let opts = subLocOpts.filter((o) => o.Parent == (mainLocationId[0]?.LocationId))
-            obj.fieldType="dropdown"
+        obj.fieldType = "dropdown"
         obj.options = opts
-        obj.disabled=false
+        obj.disabled = false
       }
     })
-    console.log(fields,jsonData)
-   setFields(jsonData)
+    setFields(jsonData)
   }
   //API Calls
   //fetch all Customer list
@@ -410,20 +390,6 @@ const Customer = () => {
       dispatch(setLoading(false));
     });
   }
-  // const getCustomerandCstLocationDetails=async (Id)=>{
-  //   try{
-  // let [customerData,CustLocationData]=await Promise.allSettled([getEditCustomerListByCompanyId(companyId, Id, branchName),getCustomerLocations(companyId)])
-  // if (vendors.status === "fulfilled" && vendors.value.data && vendors.value.success && vendors.value.data.Vendors) {
-  //               data["VendorId"] = { data: vendors.value.data.Vendors, label: "VendorName", value: "VendorID", extendedlable: "VendorType" }
-  //      }
-
-  // }catch{
-
-  // }finally{
-
-  // }
-  //   }
-  
   //fetch Country List as dropdown lookup
   const fetchCountryList = async () => {
     dispatch(setLoading(true));
@@ -433,26 +399,22 @@ const Customer = () => {
           label: country.CountryName,
           value: country.CountryName,
         }));
-
-         
         let branchopts = branchesList.slice(1)
-        setLookupsDataInJson(countryOptions, "Country",branchopts, "BranchName");
-      
+        setLookupsDataInJson(countryOptions, "Country", branchopts, "BranchName");
       } else {
         msg.warning("No Country Data Found !!");
         if (branchesList?.length > 0) {
+          let branchopts = branchesList.slice(1)
+          setLookupsDataInJson(branchopts, "BranchName");
+        }
+      }
+    }).catch(err => {
+      console.log(err); if (branchesList?.length > 0) {
         let branchopts = branchesList.slice(1)
         setLookupsDataInJson(branchopts, "BranchName");
       }
-      }
-    }).catch(err => {console.log(err);if (branchesList?.length > 0) {
-        let branchopts = branchesList.slice(1)
-        setLookupsDataInJson(branchopts, "BranchName");
-      }}).finally(() => {
-
-      
+    }).finally(() => {
       dispatch(setLoading(false));
-
     });
   }
   //Add Customer
@@ -492,14 +454,10 @@ const Customer = () => {
   //get particular Customer Details
   const getCustomerDataAPI = async (Id) => {
     dispatch(setLoading(true));
-    console.log(Id, "ss")
     await getEditCustomerListByCompanyId(companyId, Id, branchName).then(res => {
-      console.log("res", res)
       if (res.success && res.data && res.data.status == undefined) {
-        form.reset({ ...form.getValues(), ...res.data[0],BranchName: res.data[0]["BranchName"]?.split(",") })
-        console.log(res.data[0],"dw")
-         getCustomerLocationData(res.data[0],Id)
-
+        form.reset({ ...form.getValues(), ...res.data[0], BranchName: res.data[0]["BranchName"]?.split(",") })
+        getCustomerLocationData(res.data[0], Id)
       } else {
         msg.warning("No Customer Data Found !!");
       }
@@ -508,39 +466,34 @@ const Customer = () => {
     });
   }
   // get customer location data
-    const getCustomerLocationData = async (SelectedData,id) => {
+  const getCustomerLocationData = async (SelectedData, id) => {
     dispatch(setLoading(true));
-
     await getCustomerLocations(companyId).then(res => {
-
-      console.log("res", res)
       if (res.success && res.data && res.data.status == undefined) {
-
-        if(res.data.CustomerLocation){
-           let mainarr = []
-      let subarr = []
-      if (res.data !== undefined) {
-        res.data?.CustomerLocation?.map((obj) => {
-          if (obj.Parent === "#") {
-            mainarr.push({
-              ...obj,
-              label: obj.LocationName,
-              value: obj.LocationName
+        if (res.data.CustomerLocation) {
+          let mainarr = []
+          let subarr = []
+          if (res.data !== undefined) {
+            res.data?.CustomerLocation?.map((obj) => {
+              if (obj.Parent === "#") {
+                mainarr.push({
+                  ...obj,
+                  label: obj.LocationName,
+                  value: obj.LocationName
+                })
+              } else {
+                subarr.push({
+                  ...obj,
+                  label: obj.LocationName,
+                  value: obj.LocationName
+                })
+              }
             })
-          } else {
-            subarr.push({
-              ...obj,
-              label: obj.LocationName,
-              value: obj.LocationName
-            })
+            setSubLocOptions(subarr)
+            setMainLocOptions(mainarr)
+            settingDropOptions(mainarr, subarr, SelectedData, id)
           }
-        })
-        setSubLocOptions(subarr)
-        setMainLocOptions(mainarr)
-        settingDropOptions(mainarr, subarr,SelectedData,id)
         }
-      }
-
       } else {
         msg.warning("No Customer Data Found !!");
       }
@@ -552,35 +505,54 @@ const Customer = () => {
     dispatch(setLoading(true))
     await deleteCustomerByCompanyId(companyId, id).then(res => {
       if (res.success) {
-        if (res.data && res.data[0].status) {
+        if (res.data && Array.isArray(res.data) && res.data.length!==0 && res.data[0].status) {
           msg.success(res.data[0].message || "Customer Deleted Successfully!!");
           fetchAllCustomerList();
           handleReset();
-        } else if (res.data.ErrorDetails && Array.isArray(res.data.ErrorDetails) && res.data.ErrorDetails.length > 0) {
-          msg.warning(res.data.ErrorDetails[0]['Error Message'] || 'Failed to Delete Customer !!');
         } else {
-          msg.warning('Failed to Delete Customer !!')
+          msg.warning(res.data.message || 'Failed to Delete Customer !!')
         }
       }
-    }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
+    }).catch(err => {console.error(err) }).finally(() => { dispatch(setLoading(false)) })
   }
   return (
     <div className="h-full   bg-gray-50 flex flex-col ">
       <div className="flex flex-1 overflow-hidden   ">
         {/* Left Sidebar - Ticket Inbox */}
-        {/* <div className={`${isInboxCollapsed ? 'w-6 p-1' : 'w-34 p-2 mb-2 rounded-b-[5px]'} bg-white border-r    border-0 shadow-lg flex pb-3 flex-col transition-all duration-300 shrink-0 hidden md:flex`}>
-          <div className="pt-1 shrink-0">
+
+        <div
+          className={`
+    ${isInboxCollapsed ? 'w-6 p-1' : 'w-64 p-2 mb-2 rounded-b-[5px]'}
+   bg-white border border-gray-200 border-t-0 border-t-transparent shadow-xl flex flex-col pb-3 transition-all duration-300 shrink-0
+    md:relative
+    ${isInboxCollapsed ? 'relative' : 'fixed md:relative'}
+    ${isInboxCollapsed ? '' : 'top-15 left-0 h-full z-50 md:top-auto md:left-auto md:h-auto'}
+  `}
+        >
+          {/* Header */}
+          <div className="pt-1 shrink-0 sticky top-0 bg-white z-10">
             <div className="flex items-center justify-between mb-2">
-              <h3 className={`font-semibold text-gray-900 ${isInboxCollapsed ? 'hidden' : ''}`}>
+              <h3
+                className={`font-semibold text-gray-900 ${isInboxCollapsed ? 'hidden' : ''
+                  }`}
+              >
                 Customers ({dataSource.length})
               </h3>
-              <div onClick={() => setIsInboxCollapsed(!isInboxCollapsed)} className={`cursor-pointer transition-colors hover:bg-accent hover:text-accent-foreground  ${isInboxCollapsed ? 'me-2  py-1 ' : 'p-1'}`}>
-                {isInboxCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+              <div
+                onClick={() => setIsInboxCollapsed(!isInboxCollapsed)}
+                className={`cursor-pointer transition-colors hover:bg-gray-100 rounded ${isInboxCollapsed ? 'me-2 py-1' : 'p-1'
+                  }`}
+              >
+                {isInboxCollapsed ? (
+                  <ChevronRight className="h-4 w-4" />
+                ) : (
+                  <ChevronLeft className="h-4 w-4" />
+                )}
               </div>
             </div>
+
             {!isInboxCollapsed && (
               <div className="space-y-2 pb-1">
-
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                   <Input
@@ -594,6 +566,7 @@ const Customer = () => {
             )}
           </div>
 
+          {/* Scrollable area */}
           {!isInboxCollapsed && (
             <ScrollArea hideScrollbar={true} className="flex-1 min-h-0 mb-2 truncate max-w-[250px] block">
               <div className="py-2">
@@ -601,225 +574,41 @@ const Customer = () => {
                   <div
                     key={cust.CustomerID}
                     className={`p-2.5 py-2 rounded-lg mb-2 cursor-pointer transition-all hover:bg-gray-50 ${selectedCustomerData?.CustomerID === cust.CustomerID
-                      ? 'bg-blue-50 border-l-4 border-blue-500'
-                      : 'border border-gray-200'
+                        ? 'bg-blue-50 border-l-4 border-blue-500'
+                        : 'border border-gray-200'
                       }`}
                     onClick={(e) => handleSelect(e, cust)}
                   >
                     <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-xs font-medium truncate text-blue-600 me-2 ms-1" title={cust?.CustomerName}>{cust?.CustomerName}</span>
+                      <span
+                        className="text-xs font-medium truncate text-blue-600 me-2 ms-1"
+                        title={cust?.CustomerName}
+                      >
+                        {cust?.CustomerName}
+                      </span>
                     </div>
-
 
                     <div className="flex items-center justify-between gap-1.5 text-[11px] text-gray-500">
                       <Badge
-                        title="Cuatomer EmailId"
+                        title="Customer EmailId"
                         variant="outline"
                         className="bg-green-100 text-green-800 text-[11px] px-2 py-0.5"
                       >
                         {cust?.EmailId}
                       </Badge>
 
-
-                      <div>
-                        <span
-                          title={cust.CustomerName}
-                          className="block max-w-[90px] truncate text-[11px] text-gray-500"
-                        >
-                          <Trash2 onClick={(e) => handleDelete(e, cust)} height={18} className='text-red-400'></Trash2>
-                        </span>
-                      </div>
-
+                      <Trash2
+                        onClick={(e) => handleDelete(e, cust)}
+                        height={18}
+                        className="text-red-400 cursor-pointer"
+                      />
                     </div>
                   </div>
                 ))}
               </div>
             </ScrollArea>
-
           )}
-        </div> */}
-        {/* <div
-  className={`
-    ${isInboxCollapsed ? 'w-6 p-1' : 'w-64 p-2 mb-2 rounded-b-[5px]'}
-    bg-white/95 backdrop-blur-sm border border-gray-200 shadow-xl 
-    flex flex-col pb-3 transition-all duration-300 shrink-0
-  `}
->
-  <div className="pt-1 shrink-0 sticky top-0 bg-white/95 z-10">
-    <div className="flex items-center justify-between mb-2">
-      <h3
-        className={`font-semibold text-gray-900 ${
-          isInboxCollapsed ? 'hidden' : ''
-        }`}
-      >
-        Customers ({dataSource.length})
-      </h3>
-      <div
-        onClick={() => setIsInboxCollapsed(!isInboxCollapsed)}
-        className={`cursor-pointer transition-colors hover:bg-gray-100 rounded ${
-          isInboxCollapsed ? 'me-2 py-1' : 'p-1'
-        }`}
-      >
-        {isInboxCollapsed ? (
-          <ChevronRight className="h-4 w-4" />
-        ) : (
-          <ChevronLeft className="h-4 w-4" />
-        )}
-      </div>
-    </div>
-
-
-    {!isInboxCollapsed && (
-      <div className="space-y-2 pb-1">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-          <Input
-            placeholder="Search Customers..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
         </div>
-      </div>
-    )}
-  </div>
-  {!isInboxCollapsed && (
-    <ScrollArea hideScrollbar={true} className="flex-1 min-h-0 mb-2 truncate max-w-[250px] block">
-      <div className="py-2">
-        {filteredOrgs.map((cust) => (
-          <div
-            key={cust.CustomerID}
-            className={`p-2.5 py-2 rounded-lg mb-2 cursor-pointer transition-all hover:bg-gray-50 ${
-              selectedCustomerData?.CustomerID === cust.CustomerID
-                ? 'bg-blue-50 border-l-4 border-blue-500'
-                : 'border border-gray-200'
-            }`}
-            onClick={(e) => handleSelect(e, cust)}
-          >
-            <div className="flex items-center justify-between mb-1.5">
-              <span
-                className="text-xs font-medium truncate text-blue-600 me-2 ms-1"
-                title={cust?.CustomerName}
-              >
-                {cust?.CustomerName}
-              </span>
-            </div>
-
-            <div className="flex items-center justify-between gap-1.5 text-[11px] text-gray-500">
-              <Badge
-                title="Customer EmailId"
-                variant="outline"
-                className="bg-green-100 text-green-800 text-[11px] px-2 py-0.5"
-              >
-                {cust?.EmailId}
-              </Badge>
-
-              <Trash2
-                onClick={(e) => handleDelete(e, cust)}
-                height={18}
-                className="text-red-400 cursor-pointer"
-              />
-            </div>
-          </div>
-        ))}
-      </div>
-    </ScrollArea>
-  )}
-</div> */}
-
-
-<div
-  className={`
-    ${isInboxCollapsed ? 'w-6 p-1' : 'w-64 p-2 mb-2 rounded-b-[5px]'}
-   bg-white border border-gray-200 border-t-0 border-t-transparent shadow-xl flex flex-col pb-3 transition-all duration-300 shrink-0
-    md:relative
-    ${isInboxCollapsed ? 'relative' : 'fixed md:relative'}
-    ${isInboxCollapsed ? '' : 'top-15 left-0 h-full z-50 md:top-auto md:left-auto md:h-auto'}
-  `}
->
-  {/* Header */}
-  <div className="pt-1 shrink-0 sticky top-0 bg-white z-10">
-    <div className="flex items-center justify-between mb-2">
-      <h3
-        className={`font-semibold text-gray-900 ${
-          isInboxCollapsed ? 'hidden' : ''
-        }`}
-      >
-        Customers ({dataSource.length})
-      </h3>
-      <div
-        onClick={() => setIsInboxCollapsed(!isInboxCollapsed)}
-        className={`cursor-pointer transition-colors hover:bg-gray-100 rounded ${
-          isInboxCollapsed ? 'me-2 py-1' : 'p-1'
-        }`}
-      >
-        {isInboxCollapsed ? (
-          <ChevronRight className="h-4 w-4" />
-        ) : (
-          <ChevronLeft className="h-4 w-4" />
-        )}
-      </div>
-    </div>
-
-    {!isInboxCollapsed && (
-      <div className="space-y-2 pb-1">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-          <Input
-            placeholder="Search Customers..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-      </div>
-    )}
-  </div>
-
-  {/* Scrollable area */}
-  {!isInboxCollapsed && (
-    <ScrollArea hideScrollbar={true} className="flex-1 min-h-0 mb-2 truncate max-w-[250px] block">
-      <div className="py-2">
-        {filteredOrgs.map((cust) => (
-          <div
-            key={cust.CustomerID}
-            className={`p-2.5 py-2 rounded-lg mb-2 cursor-pointer transition-all hover:bg-gray-50 ${
-              selectedCustomerData?.CustomerID === cust.CustomerID
-                ? 'bg-blue-50 border-l-4 border-blue-500'
-                : 'border border-gray-200'
-            }`}
-            onClick={(e) => handleSelect(e, cust)}
-          >
-            <div className="flex items-center justify-between mb-1.5">
-              <span
-                className="text-xs font-medium truncate text-blue-600 me-2 ms-1"
-                title={cust?.CustomerName}
-              >
-                {cust?.CustomerName}
-              </span>
-            </div>
-
-            <div className="flex items-center justify-between gap-1.5 text-[11px] text-gray-500">
-              <Badge
-                title="Customer EmailId"
-                variant="outline"
-                className="bg-green-100 text-green-800 text-[11px] px-2 py-0.5"
-              >
-                {cust?.EmailId}
-              </Badge>
-
-              <Trash2
-                onClick={(e) => handleDelete(e, cust)}
-                height={18}
-                className="text-red-400 cursor-pointer"
-              />
-            </div>
-          </div>
-        ))}
-      </div>
-    </ScrollArea>
-  )}
-</div>
 
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col min-w-0 ">
@@ -873,16 +662,16 @@ const Customer = () => {
                                 if (obj.fieldType === "heading") {
                                   return <h3 key={obj.text} className='text-lg font-semibold text-gray-900 border-b col-span-full pb-2'>{obj.text}</h3>
                                 }
-                                if(obj.fieldType === "dropdown" && obj.name === "MainLocation"){
-                                   return (
-                                  <div key={obj.name}>
-                                   
-                                    {renderField(obj)}
-                                     <div className='text-xs text-cyan-500 font-bold flex justify-end'>
-                                       <NavLink to="/masters/company/customer/customerlocation" state={{ selectedCustomerData }} >Add Locations</NavLink>
+                                if (obj.fieldType === "dropdown" && obj.name === "MainLocation") {
+                                  return (
+                                    <div key={obj.name}>
+
+                                      {renderField(obj)}
+                                      <div className='text-xs text-cyan-500 font-bold flex justify-end'>
+                                        <NavLink to="/masters/company/customer/customerlocation" state={{ selectedCustomerData }} >Add Locations</NavLink>
+                                      </div>
                                     </div>
-                                  </div>
-                                )
+                                  )
                                 }
                                 return (
                                   <div key={obj.name}>
@@ -932,7 +721,6 @@ const Customer = () => {
     </div>
   );
 };
-
 export default Customer;
 
 

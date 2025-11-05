@@ -1,7 +1,7 @@
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import ReusableTable, { TableAction, TablePermissions } from '@/components/ui/reusable-table';
 import { ScrollArea } from '@radix-ui/react-scroll-area';
-import { Edit, Plus, Search, Trash2 } from 'lucide-react';
+import { ArrowLeft, Edit, Plus, Search, Trash2 } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ReusableButton } from '@/components/ui/reusable-button';
@@ -79,7 +79,7 @@ const AdditionalDepreciation = () => {
     const dispatch = useDispatch()
     const companyId = useAppSelector(state => state.projects.companyId);
     const [fields, setFields] = useState<BaseField[]>(Additional_Depreciation_DB);
-    const [isOpenLicenseCard, setIsOpenLicenseCard] = useState(false);
+    const [isOpenCard, setIsOpenCard] = useState(false);
     const [getAllTableData, setGetAllTableData] = useState([])
     const [dataSource, setDatasource] = useState([]);
     const [editRecordId, setEditRecordId] = useState<string>("")
@@ -99,15 +99,15 @@ const AdditionalDepreciation = () => {
         if (companyId)
             getAdditionalDepreciationListAPI()
     }, [companyId])
-const SoftwareDataColumns = [
-    { id: 'Name', accessorKey: "Name", header: "Name" },
-    { id: 'AdditionalDepreciationRate"', accessorKey: "AdditionalDepreciationRate", header: "Rate Of Additional Depreciation" },
-    { id: 'UptoDateRange', accessorKey: "UptoDateRange", header:"Date Range Upto Financial Year" },
-    { id: 'ApplicableFor', accessorKey: "ApplicableFor", header: "Applicable For" },
-    { id: 'Condition', accessorKey: "Condition", header: "Condition" },
-]
- const [columns, setColumns] = useState<ColumnDef<SoftwareData>[]>(SoftwareDataColumns);
- 
+    const SoftwareDataColumns = [
+        { id: 'Name', accessorKey: "Name", header: "Name" },
+        { id: 'AdditionalDepreciationRate"', accessorKey: "AdditionalDepreciationRate", header: "Rate Of Additional Depreciation" },
+        { id: 'UptoDateRange', accessorKey: "UptoDateRange", header: "Date Range Upto Financial Year" },
+        { id: 'ApplicableFor', accessorKey: "ApplicableFor", header: "Applicable For" },
+        { id: 'Condition', accessorKey: "Condition", header: "Condition" },
+    ]
+    const [columns, setColumns] = useState<ColumnDef<SoftwareData>[]>(SoftwareDataColumns);
+
 
     const generateRowsInTable = (num?: number, startNum?: number, data?: any) => {
         const result = [];
@@ -303,24 +303,25 @@ const SoftwareDataColumns = [
     }
     const handleEdit = (data: any): void => {
         form.reset({ ...form.getValues(), ...data })
-             let fieldsData = [...fields]
-                fieldsData.forEach((obj) => {
-                    if (obj.name == "NumberOfLicenses" || obj.name == "LicenseType") {
-                        obj.disabled = true
-                    }
-                })
-                setFields(fieldsData)
+        let fieldsData = [...fields]
+        fieldsData.forEach((obj) => {
+            if (obj.name == "NumberOfLicenses" || obj.name == "LicenseType") {
+                obj.disabled = true
+            }
+        })
+        setFields(fieldsData)
         setDatasource(generateRowsInTable(0, 0, data.LicenseDetails))
-        setIsOpenLicenseCard(true)
+        setIsOpenCard(true)
         setEditRecordId(data.SoftwareId)
     }
     const handleReset = () => {
         setDatasource([])
-        form.reset({ ...form.getValues(), SoftwareName: '', Version: "", VendorId: "", CategoryId: '', LicenseType: '', NumberOfLicenses: '' });
-      
-setEditRecordId("")
+        form.reset({ ...form.getValues(), Name: '', Description: "", ApplicableFor: "", Condition: '', AdditionalDepreciationRate: '', UptoDateRange: '' });
+
+        setEditRecordId("")
 
     }
+    
     const deleteSoftwareAsset = async (id: string) => {
         dispatch(setLoading(true));
         await deleteSoftwareById(companyId, id).then(res => {
@@ -362,46 +363,46 @@ setEditRecordId("")
         toast({ title: "Data Refreshed", description: "Additional Depreciation data has been updated", });
         // fetchAllCustomerList();
         getAdditionalDepreciationListAPI()
-    }, [toast]);
-    const getLicenseDetails = (id?: string):any => {
+    }, [toast,companyId]);
+    const getLicenseDetails = (id?: string): any => {
         let licenseDetails = []
-       
+
         dataSource.some((obj) => {
             let licenseKey = obj.LicenseKey
             let licenseCost = obj.LicenseCost
             let expiryDate = obj.LicenseExpiryDate
 
-            if (licenseKey && licenseCost && (watch("LicenseType") == "Perpetual") ||(expiryDate && watch("LicenseType") !== "Perpetual") ){
+            if (licenseKey && licenseCost && (watch("LicenseType") == "Perpetual") || (expiryDate && watch("LicenseType") !== "Perpetual")) {
                 licenseDetails.push({
                     "LicenseDetailId": id ? obj.LicenseDetailId : "",
                     "LicenseKey": licenseKey,
                     "LicenseCost": licenseCost,
                     "ExpiryDate": (typeof (expiryDate) == "string") ? expiryDate : formatDates(expiryDate, 'YYYY/MM/DD'),
-                                   
+
                     "Status": obj.Status
                 })
-              
-            }else{
 
-                 licenseDetails=[]
+            } else {
+
+                licenseDetails = []
                 return true
-            
+
             }
-             
+
         })
-         return licenseDetails
+        return licenseDetails
     }
     const handleSave = async (data) => {
-        let LicenseDetails = editRecordId ?getLicenseDetails(editRecordId) : getLicenseDetails();
+        let LicenseDetails = editRecordId ? getLicenseDetails(editRecordId) : getLicenseDetails();
         if (LicenseDetails.length > 0) {
             const payload = {
                 "AdditionalDepreciation": [{
-        "Name": data["Name"],
-        "Description":data["Description"],
-        "ApplicableFor":data["ApplicableFor"],
-        "Condition":data["Condition"],
-        "AdditionalDepreciationRate":data["AdditionalDepreciationRate"],
-        "UptoDateRange":data["UptoDateRange"],
+                    "Name": data["Name"],
+                    "Description": data["Description"],
+                    "ApplicableFor": data["ApplicableFor"],
+                    "Condition": data["Condition"],
+                    "AdditionalDepreciationRate": data["AdditionalDepreciationRate"],
+                    "UptoDateRange": data["UptoDateRange"],
                 }]
             }
 
@@ -458,15 +459,30 @@ setEditRecordId("")
                     </div>
                     <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
                         <ReusableButton
+                            variant="text"
+
+                            onClick={() => { navigate("/masters/depreciation/book") }}
+                            icon={""}
+                        >
+                            Back
+                        </ReusableButton>
+                        <ReusableButton
                             size="small"
                             // variant="primary"
                             className=' flex-1 sm:flex-none bg-primary h-[2.38rem] text-white p-4'
-                            onClick={() => setIsOpenLicenseCard((prev) => !prev)}>
-                            <span className="" > Add Additional Depreciation</span>
+                            onClick={() => setIsOpenCard((prev) => !prev)}>
+                          
+                             {isOpenCard ? (
+                                                                <div className='flex items-center gap-2'>
+                                                                    <ArrowLeft className="h-4 w-4 text-current stroke-[3]" /> Grid View
+                                                                </div>
+                                                            ) : (
+                                                                ' Add Additional Depreciation'
+                                                            )}
                         </ReusableButton>
                     </div>
                 </div>
-                {isOpenLicenseCard &&
+                {isOpenCard &&
                     <Card>
                         <CardContent className="pt-6">
                             <div className="">
@@ -497,7 +513,7 @@ setEditRecordId("")
                                         </div>;
                                     })} */}
 
-                                      
+
 
                                     </div>
                                 </div>
@@ -548,7 +564,7 @@ setEditRecordId("")
                             actions={tableActions}
                             enableColumnPinning
                         />
-                      
+
                     </ScrollArea>
                 </div>
             </div>

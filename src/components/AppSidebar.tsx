@@ -46,7 +46,8 @@ import {
   UserPlus,
   User,
   UserCheck,
-  UserCog
+  UserCog,
+  MapPin
 } from 'lucide-react';
 
 interface NavItem {
@@ -498,16 +499,16 @@ const navigation: NavItem[] = [
             icon: UserCog,
             link: '/masters/company/customer',
           },
-          {
-            label: 'Assets & Inventory',
-            icon: Package,
-            link: '/masters/company/assets-inventory',
-          },
-          {
-            label: 'Maintenance',
-            icon: Wrench,
-            link: '/masters/company/maintenance',
-          },
+          // {
+          //   label: 'Assets & Inventory',
+          //   icon: Package,
+          //   link: '/masters/company/assets-inventory',
+          // },
+          // {
+          //   label: 'Maintenance',
+          //   icon: Wrench,
+          //   link: '/masters/company/maintenance',
+          // },
         ],
       },
       {
@@ -519,6 +520,16 @@ const navigation: NavItem[] = [
             label: 'Asset Category',
             icon: Building2,
             link: 'masters/fixed-assets/asset-category',
+          },
+          {
+            label: 'Cost Breakup Attributes',
+            icon: DollarSign,
+            link: 'masters/fixed-assets/costbreakup',
+          },
+          {
+            label: 'User Attributes',
+            icon: DollarSign,
+            link: 'masters/fixed-assets/userattributes',
           }
         ]
       },
@@ -554,6 +565,11 @@ const navigation: NavItem[] = [
             icon: BarChart,
             link: '/masters/consumables/item-master',
           },
+           {
+            label: "Units Of Measure",
+            icon: BarChart,
+            link: '/masters/consumables/unitsofmeasure',
+           },
           {
             label: 'Item Category',
             icon: BarChart,
@@ -563,17 +579,17 @@ const navigation: NavItem[] = [
       },
       {
         label: 'Service Maintenance',
-        icon: Building2,
+        icon:  Wrench,
         link: '/servicemaintenance',
         children: [
           {
             label: 'Service Locations',
-            icon: Building2,
+            icon:MapPin,
             link: '/masters/servicemaintenance/servicelocations',
           },
           {
             label: 'Product Masters',
-            icon: Building2,
+            icon: Package,
             link: '/masters/servicemaintenance/productmaster',
           },
         ],

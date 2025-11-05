@@ -357,7 +357,6 @@ const AssetCategoryMappingBookCategory = () => {
                 );
             },
         }
-
     ]
 
     const handleChange = (value, id, key, flag) => {

@@ -28,8 +28,9 @@ import { ReusableRichTextEditor } from '@/components/ui/reusable-rich-text-edito
 import { BaseField, GenericObject } from '@/Local_DB/types/types';
 import { BOOKS_DB } from '@/Local_DB/Form_JSON_Data/BooksDB';
 import ReusableSingleCheckbox from '@/components/ui/reusable-single-checkbox';
-import { Select, SelectContent, SelectItem, SelectTrigger , SelectValue} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { } from '@radix-ui/react-select';
+import { cn } from '@/lib/utils';
 // import { Select } from '@radix-ui/react-select';
 
 interface Book {
@@ -41,98 +42,24 @@ interface Book {
   fyStartDate: string;
 }
 
-const booksData: Book[] = [
-  {
-    id: '1',
-    name: 'Basic Dep Rules',
-    depreciateWith: 'Rate',
-    depreciateLevel: 'Asset',
-    depreciationOn: 'Purchase Date',
-    fyStartDate: '01/04/2024',
-  },
-  {
-    id: '2',
-    name: 'importBook9',
-    depreciateWith: 'Rate',
-    depreciateLevel: 'Asset',
-    depreciationOn: 'Purchase Date',
-    fyStartDate: '01/03/2025',
-  },
-  {
-    id: '3',
-    name: 'test1',
-    depreciateWith: 'Rate',
-    depreciateLevel: 'Asset',
-    depreciationOn: 'Purchase Date',
-    fyStartDate: '05/03/2025',
-  },
-  {
-    id: '4',
-    name: 'book1',
-    depreciateWith: 'Rate',
-    depreciateLevel: 'Asset',
-    depreciationOn: 'Purchase Date',
-    fyStartDate: '07/03/2025',
-  },
-  {
-    id: '5',
-    name: 'book2',
-    depreciateWith: 'Useful life',
-    depreciateLevel: 'Asset',
-    depreciationOn: 'Placed In Service Date',
-    fyStartDate: '12/03/2025',
-  },
-  {
-    id: '6',
-    name: 'book3',
-    depreciateWith: 'Rate',
-    depreciateLevel: 'Book Category',
-    depreciationOn: 'Purchase Date',
-    fyStartDate: '11/03/2025',
-  },
-  {
-    id: '7',
-    name: 'hj',
-    depreciateWith: 'Useful life',
-    depreciateLevel: 'Asset',
-    depreciationOn: 'Purchase Date',
-    fyStartDate: '18/03/2025',
-  },
-  {
-    id: '8',
-    name: 'book5',
-    depreciateWith: 'Rate',
-    depreciateLevel: 'Asset',
-    depreciationOn: 'Purchase Date',
-    fyStartDate: '24/03/2025',
-  },
-];
 
-const depreciationBasedOnOptions = [
-  { value: 'purchase-date', label: 'Purchase Date' },
-  { value: 'placed-in-service', label: 'Placed In Service Date' },
-];
+const defaultRow = {
+    key: 1,
+    CategoryName: '',
+    GroupName: "",
+    DepreciationMethodName: "SLM",
+    AdditionalDepreciationName: "",
+    CategoryLife: "0",
+    CategoryRate:"0",
+    Usefullife:"0",
+    SalvageValueRate:"0",
+    ShiftApplicable:"NO",
+    DoubleShiftRate:"0",
+    TripleShiftRate:"0"
 
-const depreciationMethodOptions = [
-  { value: 'slm', label: 'SLM' },
-  { value: 'wdv', label: 'WDV' },
-  { value: 'units-of-production', label: 'Units Of Production' },
-];
-
-const depreciateWithOptions = [
-  { value: 'rate', label: 'Rate' },
-  { value: 'useful-life', label: 'Useful life' },
-];
-
-const depreciationLevelOptions = [
-  { value: 'asset', label: 'Asset' },
-  { value: 'book-category', label: 'Book Category' },
-];
-
-const salvageValueOptions = [
-  { value: 'book-category', label: 'Book Category' },
-  { value: 'asset', label: 'Asset' },
-];
+    // cellsData: cellsData,
+};
+const fieldsToDisable = ["DepreciateWith", "DepreciationLevel", "SalvageValueToConsider", "LifeToConsider", "FYStartDate"]
 
 const AddBook = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -141,14 +68,19 @@ const AddBook = () => {
   const [fields, setFields] = useState<BaseField[]>(BOOKS_DB);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('BookDetails');
+  const [effectiveFrom,setEffectiveFrom]=useState("")
+      const [dataSource, setDatasource] = useState([]);
+      const [isFinancialYearOpen,setIsFinancialYearOpen]=useState(false)
   const navigate = useNavigate()
   const form = useForm<GenericObject>({
     defaultValues: fields.reduce((acc, f) => {
       acc[f.name!] = f.defaultValue ?? '';
       return acc;
     }, {} as GenericObject),
-    mode: 'onChange'
+    mode: 'onChange',
+    reValidateMode:"onChange"
   });
+  
   const { control, register, handleSubmit, trigger, watch, setValue, reset, formState: { errors } } = form;
   const [formData, setFormData] = useState({
     bookName: '',
@@ -171,208 +103,428 @@ const AddBook = () => {
     roundOffValue: '2',
   });
 
-  const [bookCategoryData, setBookCategoryData] = useState({
-    effectiveFrom: null as Date | null,
-    categories: [
-      {
-        sNo: 1,
-        bookCategory: '',
-        group: '',
-        depreciationMethod: 'slm',
-        rate: '0',
-        salvageValue: '0',
-      },
-    ],
-  });
 
-  const filteredBooks = booksData.filter(book =>
-    book.BookName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    book.DepreciateWith.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    book.DepreciateLevel.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+useEffect(()=>{
+if(activeTab=="BookDetails"){
+  if(dataSource.length!==0){
+    setTimeout(()=>{
+triggerAccordionItemsValidations()
+    },10)
 
+  }
+
+}
+},[activeTab])
+
+
+     const tableColumnsData = [
+       {
+      header: "S.No",
+      accessorKey: "key",
+      id:"key",
+         size:50,
+      // key: "key",
+    },
+          {
+              accessorKey: "CategoryName",
+              header: "Book category",
+  
+              cell: ({ row }) => (
+  
+                  <span className='flex'>
+                      <ReusableInput
+                          value={row.original.CategoryName}
+                          onChange={(e) => handleChange(e.target.value, row.id, "CategoryName")}
+                          name='CategoryName'
+                          // placeholder='Enter License key'
+                          isRequired={true}
+                          className='m-2 mt-0 me-0 bg-white border-2'
+                          size='small'
+                      ></ReusableInput>
+  
+                  </span>
+              )
+          },
+          {
+              accessorKey: "GroupName",
+              header: "Group",
+              cell: ({ row }) => (
+  
+                  <span className='flex'>
+                         <ReusableInput
+                          value={row.original.GroupName}
+                          onChange={(e) => handleChange(e.target.value, row.id, "GroupName")}
+                          name='GroupName'
+                          // placeholder='Enter License key'
+                          isRequired={true}
+                          className='m-2 mt-0 me-0 bg-white border-2'
+                          size='small'
+                      ></ReusableInput>
+  
+                  </span>
+              )
+          },
+
+              {
+                  accessorKey: "DepreciationMethodName",
+                  header: "Depreciation Method",
+                  cell: ({ row }) => (
+  
+                      <span className='flex' >
+                         <ReusableDropdown
+                          containerClassName=" p-2"
+                          className='h-8 border-2 '
+                          placeholder=" "
+                          options={[
+                              { label: "SLM", value: "SLM" }, { label: "WDV", value: "WDV" },
+                          ]}
+                          allowClear={false}
+                          defaultValue={row.original.DepreciationMethodName}
+                          onChange={(e) => handleChange(e, row.id, "DepreciationMethodName")}
+                          backgroundColor="white"
+                          size={"small"}
+  
+                      >
+  
+                      </ReusableDropdown>
+  
+                      </span>
+                  )
+              },
+       
+           ...(form.watch("DepreciationLevel") ==  "Book Category"? [
+              {
+                  accessorKey: "AdditionalDepreciationName",
+                  header: "Additional Depreciation",
+                  cell: ({ row }) => (
+  
+                      <span className='flex' >
+                         <ReusableDropdown
+                          containerClassName=" p-2"
+                          className='h-8 border-2 '
+                          placeholder=" "
+                          options={[]}
+                          allowClear={false}
+                          defaultValue={row.original.AdditionalDepreciationName}
+                          onChange={(e) => handleChange(e, row.id, "AdditionalDepreciationName")}
+                          backgroundColor="white"
+                          size={"small"}
+  
+                      >
+  
+                      </ReusableDropdown>
+  
+                      </span>
+                  )
+              }
+          ] : []),
+        ...(form.watch("DepreciateWith") == "Rate"? [
+              {
+                  accessorKey: "CategoryRate",
+                  header: "Rate",
+                  cell: ({ row }) => (
+  
+                      <span className='flex' >
+                      <ReusableInput
+                          value={row.original.CategoryRate}
+                          onChange={(e) => handleChange(e.target.value, row.id, "CategoryRate")}
+                          name='CategoryRate'
+                          type='number'
+                          // placeholder='Enter License key'
+                          isRequired={true}
+                          className='m-2 mt-0 me-0 bg-white border-2'
+                          size='small'
+                      ></ReusableInput>
+  
+                      </span>
+                  )
+              }
+          ] : []),
+      ...(form.watch("DepreciateWith") === "Useful life" && form.watch("LifeToConsider") ===  "Book Category" ? [
+              {
+                  accessorKey:"CategoryLife",
+                  header: "Useful life",
+                  cell: ({ row }) => (
+  
+                      <span className='flex' >
+                      <ReusableInput
+                          value={row.original.CategoryLife}
+                          onChange={(e) => handleChange(e.target.value, row.id, "CategoryLife")}
+                          name='CategoryLife'
+                          type='number'
+                          // placeholder='Enter License key'
+                          isRequired={true}
+                          className='m-2 mt-0 me-0 bg-white border-2'
+                          size='small'
+                      ></ReusableInput>
+  
+                      </span>
+                  )
+              }
+          ] : []),
+               ...(form.watch("DepreciationLevel") ===  "Asset" && form.watch("SalvageValueToConsider") ===  "Book Category" ? [
+              {
+                  accessorKey:"SalvageValueRate",
+                  header:"Salvage value (%)",
+                  cell: ({ row }) => (
+  
+                      <span className='flex' >
+                      <ReusableInput
+                          value={row.original.SalvageValueRate}
+                          onChange={(e) => handleChange(e.target.value, row.id, "SalvageValueRate")}
+                          name='SalvageValueRate'
+                          type='number'
+                          // placeholder='Enter License key'
+                          isRequired={true}
+                          className='m-2 mt-0 me-0 bg-white border-2'
+                          size='small'
+                      ></ReusableInput>
+  
+                      </span>
+                  )
+              }
+          ] : []),
+  
+          {
+              accessorKey: "ShiftApplicable",
+              header: "Shifts applicable",
+  
+              cell: ({ row }) => (
+  
+                  <span>
+                      <ReusableDropdown
+                          containerClassName=" p-2"
+                          className='h-8 border-2 '
+                          placeholder=" "
+                          options={[
+                              { label: "Active", value: "Active" }, { label: "Expired", value: "Expired" }, { label: "Suspended", value: "Suspended" },
+                          ]}
+                          allowClear={false}
+                          defaultValue={row.original.ShiftApplicable}
+                          onChange={(e) => handleChange(e, row.id, "ShiftApplicable")}
+                          backgroundColor="white"
+                          size={"small"}
+  
+                      >
+  
+                      </ReusableDropdown>
+  
+                  </span>
+              )
+          },
+           {
+                  accessorKey:"DoubleShiftRate",
+                  header: "Double Shift Rate",
+                  cell: ({ row }) => (
+  
+                      <span className='flex' >
+                      <ReusableInput
+                          value={row.original.DoubleShiftRate}
+                          onChange={(e) => handleChange(e.target.value, row.id, "DoubleShiftRate")}
+                          name='DoubleShiftRate'
+                          type='number'
+                          // placeholder='Enter License key'
+                          isRequired={true}
+                          className='m-2 mt-0 me-0 bg-white border-2'
+                          size='small'
+                      ></ReusableInput>
+  
+                      </span>
+                  )
+              },
+               {
+                  accessorKey:"TripleShiftRate",
+                  header:"Triple Shift Rate",
+                  cell: ({ row }) => (
+  
+                      <span className='flex' >
+                      <ReusableInput
+                          value={row.original.TripleShiftRate}
+                          onChange={(e) => handleChange(e.target.value, row.id, "TripleShiftRate")}
+                          name='TripleShiftRate'
+                          type='number'
+                          // placeholder='Enter License key'
+                          isRequired={true}
+                          className='m-2 mt-0 me-0 bg-white border-2'
+                          size='small'
+                      ></ReusableInput>
+  
+                      </span>
+                  )
+              },
+          {
+              accessorKey: "Actions",
+              header: "Actions  ",
+              size: 100,
+              cell: ({ row }) => (
+                  <div className={cn('flex justify-start', "justify-center")}>
+  
+                      { <Trash2 height={18} className='text-red-400 cursor-pointer '
+                          onClick={() => handleRowDelete(row)} />}
+  
+             
+                  </div>
+              )
+          },
+  
+
+      ]
+      console.log(tableColumnsData,"tabledata",watch("depreciationLevel"))
+      
+         const handleRowDelete = (row) => {
+        console.log("row", row.id)
+        const data = [...dataSource]
+        data.splice(row.id, 1)
+        if(data.length<=0){
+          settingFieldDependencies()
+        }
+        setDatasource(data)
+
+     
+
+    }
+ function handleChange(val, id, accessorKey) {
+        let data = dataSource
+        //  data.forEach((obj)=>{
+        //     if(obj.key==id){
+        //         obj[accessorKey]=val
+        //     }
+        //  })
+        data[parseInt(id)][accessorKey] = val
+        setDatasource(data)
+    }
   useEffect(() => {
     getBookDataAPI()
   }, [])
   useEffect(() => {
     let calculatedDate = getDateAfterYears(watch("FYStartDate"));
     form.setValue("FYEndDate", calculatedDate)
+    setEffectiveFrom(calculatedDate)
   }, [watch("FYStartDate")])
-  const columns = [
-    {
-      id: 'BookName',
-      header: "Book Name",
-      accessorKey: 'BookName',
-
-    },
-    {
-      id: 'DepreciateWith',
-      header: 'Depreciate With',
-      accessorKey: 'DepreciateWith',
-
-    },
-    {
-      id: 'DepreciationLevel',
-      header: 'Depreciate Level',
-      accessorKey: 'DepreciationLevel',
-    },
-    {
-      id: 'DepreciationBasedOn',
-      header: 'Depreciation On',
-      accessorKey: 'DepreciationBasedOn',
-
-    },
-    {
-      id: 'FYStartDate',
-      header: 'FY Start Date',
-      accessorKey: 'FYStartDate',
-      cell:
-        ({ row }) => (
-
-          dayjs(row.getValue('FYStartDate')).format('DD/MM/YYYY')
-        ),
-    },
-    {
-      id: 'actions',
-      accessorKey: 'actions',
-      header: 'Actions',
-      cell: ({ row }: any) => (
-        <div className="flex gap-2">
-          <ReusableButton
-            variant="text"
-            size="small"
-            //   icon={<Edit className="h-4 w-4" />}
-            onClick={() => {
-              // setSelectedStore(row.original);setRecordToEditId(row.original.StoreId);fetchStoreDataByStoreId(companyId,row.original.StoreId) 
-            }}
-          >
-            Edit
-          </ReusableButton>
-          <ReusableButton
-            variant="text"
-            size="small"
-            danger
-            icon={<Trash2 className="h-4 w-4" />}
-            onClick={() => {
-              // setIsDelModalOpen(true);setRecordToEditId(row.original.StoreId);console.log(row.original),"C"
-            }}
-          >
-            Delete
-          </ReusableButton>
-        </div>
-      ),
-    },
-  ];
 
   //handling change dependencies
-  useEffect(()=>{
-    let  depMethod=watch("DefaultDepreciationMethod")
-          let depreciateWith=watch("DepreciateWith")
-      let  depreciationLevel=watch("DepreciationLevel")
-      let fieldData=structuredClone(fields)
-   if(depMethod=='SLM' ){
-    {   
-      if(depreciateWith=="Rate" ){
-      fieldData.forEach((o)=>{
-        if(depreciationLevel=="Asset"){
-         if((o.name!=="FormulaCalculationTypeId" && o.name!=="LifeToConsider") ){o.isDisplay=true;o.disabled=false}
-        }else if(depreciationLevel=="Book Category"){
-         if((o.name==="LifeToConsider" || o.name=="SalvageValueToConsider"|| o.name=="SalvageValueRate"|| o.name=="FirstYearDepreciationConventions" ||o.name=="FirstYearDepreciationConventions"||o.name=="IsWriteOffApplicable"||o.name=="IsForexApplicable"||o.name=="IsRevaluationApplicable"||o.name=="AssetIndependentCalulation"||o.name=="AssetIndependentCalulation"||o.name=="IsRequiredBackDateEntry"||o.name=="FormulaCalculationTypeId") ){o.isDisplay=false;setValue(o.name,"")}
-        }
-         })
-      }else if(depreciateWith=="Useful life")
-      {
- fieldData.forEach((o)=>{
-  if(o.name==="DepreciationLevel"){
-    o.disabled=true;
-    o.defaultValue="Asset";
-    form.setValue(o.name,"Asset")
-  }
-  if(o.name!=="FormulaCalculationTypeId" && o.name!=="DepreciationLevel"){
-o.isDisplay=true;o.disabled=false
-  }
-  
-         })
+  useEffect(() => {
+settingFieldDependencies()
+  }, [watch("DefaultDepreciationMethod"), watch("DepreciateWith"), watch("DepreciationLevel"), watch("IsWriteOffApplicable")])
 
-
-
-        
-      }else{
-
-        fieldData.forEach((o)=>{
-                if(o.name=="SalvageValueRate" || o.name=="SalvageValueToConsider" || o.name=="FormulaCalculationTypeId" || o.name=="LifeToConsider") {o.isDisplay=false;form.setValue(o.name,"")}
-              })
-      }
-    }
-    
-    
-
-
-
-
-
-   if(watch("IsWriteOffApplicable")){
-      fieldData.forEach((o)=>{
-                if(o.name=="WriteOffValue" || o.name=="WriteOffType" ) {o.isDisplay=true;}else{
-
-                }
-              })
-   }else{
-        fieldData.forEach((o)=>{
-                if(o.name=="WriteOffValue" || o.name=="WriteOffType" ) {o.isDisplay=false;form.setValue(o.name,"")}else{
-
-                }
-              })
-   }
-  
-  }
-  setFields(fieldData)
-  },[watch("DefaultDepreciationMethod"),watch("DepreciateWith"),watch("DepreciationLevel"),watch("IsWriteOffApplicable")])
-
+const settingFieldDependencies=()=>{
+    let depMethod = watch("DefaultDepreciationMethod")
+    let depreciateWith = watch("DepreciateWith")
+    let depreciationLevel = watch("DepreciationLevel")
+    let fieldData = structuredClone(fields)
  
+      
+        if (depreciateWith == "Rate") {
+          fieldData.forEach((o) => {
+            if (depreciationLevel == "Asset") {
+              if ((o.name !== "FormulaCalculationTypeId" && o.name !== "LifeToConsider")) { o.isDisplay = true;(o.name=="FYEndDate")?o.disabled = true:o.disabled = false }else{
+                o.isDisplay=false,form.setValue(o.name,o.name=="FormulaCalculationTypeId"?"Net Book Value & Remaining Useful Life":"Book Category")
+              }
+            } else if (depreciationLevel == "Book Category") {
+     
+              if ((o.name === "LifeToConsider" || o.name == "SalvageValueToConsider" || o.name == "SalvageValueRate" || o.name == "FirstYearDepreciationConventions" || o.name == "FirstYearDepreciationConventions" || o.name == "IsWriteOffApplicable" || o.name == "IsForexApplicable" || o.name == "IsRevaluationApplicable" || o.name == "AssetIndependentCalulation" || o.name == "AssetIndependentCalulation" || o.name == "IsRequiredBackDateEntry" || o.name == "FormulaCalculationTypeId")) { 
+                o.isDisplay = false; 
+                setValue(o.name,o.name=="LifeToConsider"||o.name=="SalvageValueToConsider"? "Book Category":o.name=="SalvageValueRate"?"0":o.name=="FormulaCalculationTypeId"?"Net Book Value & Remaining Useful Life":"")
+               }else{
+                o.isDisplay = true; (o.name=="FYEndDate")?o.disabled = true:o.disabled = false
+            }
+            }
+          })
+        } else if (depreciateWith == "Useful life") {
+
+          fieldData.forEach((o) => {
+            if (o.name === "DepreciationLevel") {
+              o.disabled = true;o.defaultValue = "Asset";form.setValue(o.name, "Asset")
+            }
+            if ((o.name == "FormulaCalculationTypeId" && depMethod=="WDV") || (o.name !== "DepreciationLevel") ) {
+              o.isDisplay = true; o.disabled = false
+          
+            }
+             if(o.name == "FormulaCalculationTypeId" && depMethod=="SLM"){
+                o.isDisplay = false;form.setValue(o.name,"Net Book Value & Remaining Useful Life")
+            }
+
+          })
+
+
+
+
+        } else {
+
+          fieldData.forEach((o) => {
+            if (o.name == "SalvageValueRate" || o.name == "SalvageValueToConsider" || o.name == "FormulaCalculationTypeId" || o.name == "LifeToConsider") { o.isDisplay = false; form.setValue(o.name, "") }
+          })
+        }
+      
+
+      if (watch("IsWriteOffApplicable")) {
+        fieldData.forEach((o) => {
+          if (o.name == "WriteOffValue" || o.name == "WriteOffType") { o.isDisplay = true; } else {
+
+          }
+        })
+      } else {
+        fieldData.forEach((o) => {
+          if (o.name == "WriteOffValue" || o.name == "WriteOffType") { o.isDisplay = false; form.setValue(o.name,( o.name == "WriteOffType")?"Proportionate Dep Calculation": "") } else {
+
+          }
+        })
+      
+
+    }
+    setFields(fieldData)
+}
   // const handleSubmit = (e: React.FormEvent) => {
   //   e.preventDefault();
   //   console.log('Book data:', formData, bookCategoryData);
   //   setIsAddDialogOpen(false);
   // };
+ const triggerAccordionItemsValidations=async()=>{
+  
+    await trigger();
+    // handleSubmit(()=>{})()
+   
+  }
+  const handleAddCategory = (e) => {
 
-  const handleAddCategory = () => {
-    setBookCategoryData({
-      ...bookCategoryData,
-      categories: [
-        ...bookCategoryData.categories,
-        {
-          sNo: bookCategoryData.categories.length + 1,
-          bookCategory: '',
-          group: '',
-          depreciationMethod: 'slm',
-          rate: '0',
-          salvageValue: '0',
-        },
-      ],
-    });
+//     const isValidationFailed = fields.filter(f => f.isRequired).every(f=>form.getValues()[f.name] !== undefined && form.getValues()[f.name] !== null && form.getValues()[f.name] !== '');
+// triggerAccordionItemsValidations()
+//     if (!isValidationFailed) {
+//       return;
+//     }
+      if (dataSource.length === 0) {
+        let form = fields
+        form.forEach((obj) => {
+          if (fieldsToDisable.includes(obj.name)) {
+            obj.disabled = true
+          }
+        })
+
+        setFields(form)
+      }
+ setDatasource([...dataSource, { ...defaultRow, key: (dataSource.length+1),DepreciationMethodName:watch("DefaultDepreciationMethod") }]) 
   };
 
-  const handleRemoveCategory = (index: number) => {
-    const newCategories = bookCategoryData.categories.filter((_, i) => i !== index);
-    setBookCategoryData({
-      ...bookCategoryData,
-      categories: newCategories.map((cat, i) => ({ ...cat, sNo: i + 1 })),
-    });
-  };
-  console.log("booksData", booksData, "cols", columns)
+
 
   const renderField = (field: BaseField) => {
     let fieldsToShowInEdit: string[] = ['Status', 'Notify']
-    const { name, label, fieldType, isRequired, show = true } = field;
+    const { name, label, fieldType, isRequired,  validationPattern, patternErrorMessage, show = true } = field;
     //  const overrideShow = !show && fieldsToShowInEdit.includes(name) && !isCreateMode;
     //  const branchLabel=lastLevelsData?.Branch
-     if (!field.isDisplay) {
-       return null;
-     }
+    if (!field.isDisplay) {
+      return null;
+    }
     const validationRules = {
-      required: isRequired ? `${label} is Required` : false,
-    };
+  required: isRequired ? `${label} is required` : false,
+  ...(name === "DepreciatedValueRoundOffUpTo" && {
+    validate: (value) => {
+      return value >= 0 && value <= 2 ? true : "Value should be between 0 and 2";
+    },
+  }),
+}
+
+
 
     switch (fieldType) {
       case 'text':
@@ -386,7 +538,7 @@ o.isDisplay=true;o.disabled=false
               <ReusableInput
                 {...field}
                 value={ctrl.value}
-                
+
                 onChange={ctrl.onChange}
                 error={errors[name]?.message as string}
               />
@@ -498,11 +650,12 @@ o.isDisplay=true;o.disabled=false
               <ReusableInput
                 {...field}
                 type="number"
-                  addonAfter={ctrl.name==="SalvageValueRate"? selectAfter:undefined}
-                  addonAfterClassName={ctrl.name==="SalvageValueRate"?"w-20":""}
+                addonAfter={ctrl.name === "SalvageValueRate" ? selectAfter : undefined}
+                addonAfterClassName={ctrl.name === "SalvageValueRate" ? "w-20" : ""}
                 value={ctrl.value}
                 onChange={ctrl.onChange}
                 error={errors[name]?.message as string}
+           
               />
             )}
           />
@@ -573,26 +726,26 @@ o.isDisplay=true;o.disabled=false
     return result;
   };
 
-    const selectAfter = (
+  const selectAfter = (
 
-<ReusableDropdown 
-placeholder=' '
-        options={[
-            {
-                label: "%",
-                value: "%"
-            },
-            {
-                label: "@",
-                value: "@"
-            },
-        ]}
-        defaultValue={"%"}  className='parent [&>div:first-child]:pr-0 rounded-tl-none rounded-bl-none rounded-br-md rounded-tr-md' />
-        
+    <ReusableDropdown
+      placeholder=' '
+      options={[
+        {
+          label: "%",
+          value: "%"
+        },
+        {
+          label: "@",
+          value: "@"
+        },
+      ]}
+      defaultValue={"%"} className='parent [&>div:first-child]:pr-0 rounded-tl-none rounded-bl-none rounded-br-md rounded-tr-md' />
 
-       
 
-      )
+
+
+  )
   //apis
   let getBookDataAPI = async () => {
     //  dispatch(loaderEnable());
@@ -613,6 +766,7 @@ placeholder=' '
       });
 
   }
+
   const getFieldsByNames = (names: string[]) => fields.filter(f => names.includes(f.name!));
   return (
 
@@ -658,9 +812,9 @@ placeholder=' '
                     <ReusableButton
                       variant="primary"
                       icon={<Plus className="h-4 w-4" />}
-                      onClick={() => { }
-                        // activeTab === 'main' ? handleModalOpen(true) : handleModalOpen(false)
-                      }
+                          onClick={() => { handleSubmit(()=>{})() }}
+                      
+                      
                     >
                       Add
                     </ReusableButton>
@@ -698,8 +852,8 @@ placeholder=' '
                                       //   )
 
                                       // }else
-                                         if(!(obj.name == "salvagevalue_unit"))
-                                    { return(renderField(obj)) }
+
+                                      if (!(obj.name == "salvagevalue_unit")) { return (renderField(obj)) }
                                     })
                                   }
                                 </div>
@@ -717,117 +871,38 @@ placeholder=' '
                     <div className="flex items-center gap-4">
                       <ReusableDatePicker
                         label="Effective From"
-                        value={bookCategoryData.effectiveFrom}
-                        onChange={(value) => setBookCategoryData({ ...bookCategoryData, effectiveFrom: value })}
+                        value={effectiveFrom}
+                        disabled={true}
+                        onChange={()=>{}}
                         placeholder="DD/MM/YYYY"
                       />
                       <div className="flex items-center gap-2 mt-6">
-                        <span className="text-blue-600 cursor-pointer">Add New Financial Year</span>
+                        <span className="text-blue-600 cursor-pointer" onClick={()=>{
+                            // setIsFinancialYearOpen(true)
+                          
+                        }}>Add New Financial Year</span>
                         <ReusableButton variant="default" size="small" icon={<ChevronLeft className="h-4 w-4" />} />
                         <ReusableButton variant="default" size="small" icon={<ChevronRight className="h-4 w-4" />} className="bg-orange-500 hover:bg-orange-600 border-orange-500 text-white" />
                       </div>
                     </div>
                     <div className="flex gap-2">
                       <ReusableButton variant="default">Copy From</ReusableButton>
-                      <ReusableButton variant="primary" className="bg-orange-500 hover:bg-orange-600 border-orange-500">Add Group</ReusableButton>
+                      {/* <ReusableButton variant="primary" className="bg-orange-500 hover:bg-orange-600 border-orange-500">Add Group</ReusableButton> */}
                       <ReusableButton variant="primary" className="bg-orange-500 hover:bg-orange-600 border-orange-500" onClick={handleAddCategory}>Add Category</ReusableButton>
                     </div>
                   </div>
-
-                  <div className="border rounded-lg overflow-hidden">
-                    <table className="w-full">
-                      <thead className="bg-gray-50 border-b">
-                        <tr>
-                          <th className="px-4 py-3 text-left text-sm font-medium">S.No</th>
-                          <th className="px-4 py-3 text-left text-sm font-medium">Book category</th>
-                          <th className="px-4 py-3 text-left text-sm font-medium">Group</th>
-                          <th className="px-4 py-3 text-left text-sm font-medium">Depreciation Method</th>
-                          <th className="px-4 py-3 text-left text-sm font-medium">Rate</th>
-                          <th className="px-4 py-3 text-left text-sm font-medium">Salvage value (%)</th>
-                          <th className="px-4 py-3 text-left text-sm font-medium">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {bookCategoryData.categories.map((category, index) => (
-                          <tr key={index} className="border-b">
-                            <td className="px-4 py-3">{category.sNo}</td>
-                            <td className="px-4 py-3">
-                              <ReusableInput
-                                value={category.bookCategory}
-                               
-                                onChange={(e) => {
-                                  const newCategories = [...bookCategoryData.categories];
-                                  newCategories[index].bookCategory = e.target.value;
-
-                                  setBookCategoryData({ ...bookCategoryData, categories: newCategories });
-                                }}
-                                size="small"
-                              />
-                            </td>
-                            <td className="px-4 py-3">
-                              <ReusableDropdown
-                                options={[]}
-                                value={category.group}
-                                onChange={(value) => {
-                                  const newCategories = [...bookCategoryData.categories];
-                                  newCategories[index].group = value as string;
-                                  setBookCategoryData({ ...bookCategoryData, categories: newCategories });
-                                }}
-                                placeholder="Select"
-                              />
-                            </td>
-                            <td className="px-4 py-3">
-                              <ReusableDropdown
-                                options={depreciationMethodOptions}
-                                value={category.depreciationMethod}
-                                onChange={(value) => {
-                                  const newCategories = [...bookCategoryData.categories];
-                                  newCategories[index].depreciationMethod = value as string;
-                                  setBookCategoryData({ ...bookCategoryData, categories: newCategories });
-                                }}
-                              />
-                            </td>
-                            <td className="px-4 py-3">
-                              <ReusableInput
-                                value={category.rate}
-                                onChange={(e) => {
-                                  const newCategories = [...bookCategoryData.categories];
-                                  newCategories[index].rate = e.target.value;
-                                  setBookCategoryData({ ...bookCategoryData, categories: newCategories });
-                                }}
-                                type="number"
-                                size="small"
-                              />
-                            </td>
-                            <td className="px-4 py-3">
-                              <ReusableInput
-                                value={category.salvageValue}
-                                onChange={(e) => {
-                                  const newCategories = [...bookCategoryData.categories];
-                                  newCategories[index].salvageValue = e.target.value;
-                                  setBookCategoryData({ ...bookCategoryData, categories: newCategories });
-                                }}
-                                type="number"
-                                size="small"
-                              />
-                            </td>
-                            <td className="px-4 py-3">
-                              <ReusableButton
-                                variant="text"
-                                size="small"
-                                danger
-                                icon={<Trash2 className="h-4 w-4" />}
-                                onClick={() => handleRemoveCategory(index)}
-                              />
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                    <div className="px-4 py-3 bg-gray-50 text-sm text-gray-600">
-                      Showing 1 to {bookCategoryData.categories.length} of {bookCategoryData.categories.length} entries
-                    </div>
+              
+                  <div>
+                   {dataSource?.length>0 && <ReusableTable data={dataSource} columns={tableColumnsData} enableSearch={false}
+                                                                enableColumnVisibility={false}
+                                                                enableExport={false}
+                                                                enableSorting={false}
+                                                                enableFiltering={false}
+                                                                headerContentClassName={"justify-center "}
+                                                            />
+                                }
                   </div>
+
                 </TabsContent>
               </Tabs>
             </div>
@@ -837,6 +912,31 @@ placeholder=' '
         </Card>
 
         {/* Main Category Dialog */}
+          <Dialog open={isFinancialYearOpen}
+                                    onOpenChange={(open) => {
+                                        setIsFinancialYearOpen(open);
+                                        if (!open) {
+                                            // handleCancel();
+                                        }
+                                    }}
+                                >
+                                    <DialogTrigger asChild>
+                                    </DialogTrigger>
+                                    <DialogContent className="max-w-2xl">
+                                        <DialogHeader>
+                                            <DialogTitle>{"Add Main Location"}</DialogTitle>
+                                        </DialogHeader>
+                                        <div>
+                                                  <ReusableTable data={dataSource} columns={tableColumnsData} enableSearch={false}
+                                                                enableColumnVisibility={false}
+                                                                enableExport={false}
+                                                                enableSorting={false}
+                                                                enableFiltering={false}
+                                                                headerContentClassName={"justify-center "}></ReusableTable>
+
+                                    </div>
+                                    </DialogContent>
+                                </Dialog>
 
       </div>
 

@@ -12,6 +12,7 @@ export const BOOKS_DB: BaseField[] = [
         isDisplay: true,
         maxLength: 100
     },
+
     {
         label: 'Description',
         fieldType: 'text',
@@ -146,6 +147,7 @@ export const BOOKS_DB: BaseField[] = [
         name: 'SalvageValueRate',
         placeholder: '',
         value: "0",
+        defaultValue:"0",
         isDisplay: false
 
     },
@@ -235,9 +237,12 @@ export const BOOKS_DB: BaseField[] = [
     fieldType: 'numeric',
     name: 'DepreciatedValueRoundOffUpTo',
     placeholder: 'Enter Write Off Value',
-    value: "2",
+    defaultValue: "2",
     isRequired: true,
     isDisplay: true,
+     validationPattern:'/^(0(\.\d+)?|1(\.\d+)?|2(\.0+)?)$/',
+      // patternErrorMessage:"Value must be less than or equal to 2", 
+  
    
   },
   {

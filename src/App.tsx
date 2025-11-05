@@ -22,6 +22,7 @@ import Store from "./pages/masters/Store";
 import AssetCategory from "./pages/masters/fixedAssets/AssetCategory"
 import ItemMaster from "./pages/masters/ItemMaster";
 import ItemCategory from "./pages/masters/ItemCategory";
+import AssetCategoryMappingBookCategory from "./pages/masters/depreciation/AssetCategoryMappingBookCategory";
 
 
 
@@ -224,6 +225,8 @@ const AnimatedRoutes = () => {
                   <Route path="/masters/consumables/item-category" element={<ItemCategory/>} />
                   <Route path="/masters/depreciation/book" element={<Books/>} />
                   <Route path="/masters/depreciation/book/additionaldepreciation" element={<AdditionalDepreciation/> }/>
+                  <Route path="/masters/depreciation/assetcategorybookcategorymapping" element={<AssetCategoryMappingBookCategory/> }/>
+
 
                   {/* CWIP */}
                   <Route path="/cwip/project-management" element={<ProjectManagement />} />

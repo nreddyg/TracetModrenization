@@ -20,7 +20,6 @@ export const getAssetLocationDetals = async (CompId: string, branchName: string)
 }
 
 export const getAssetLocationDataByLocID = async (branchName: string, locationid: number, CompId: string): Promise<APIResponse<any>> => {
-    console.log("id", locationid, "CompId", CompId, branchName,);
     try {
         const response = await api.get(URL_ASSET_LOCATION_BY_LOC_ID, { params: { branchName: branchName, locationid: locationid, CompId: CompId } })
         return { success: true, data: response.data, }

@@ -186,7 +186,7 @@ const AnimatedRoutes = () => {
           <AppSidebar />
           <SidebarInset className="flex flex-col overflow-hidden">
             <FixedHeader />
-            <div className="w-full h-full pt-20 transition-all duration-300 ease-in-out">
+            <div className="w-full h-full pt-1 transition-all duration-200 ease-in-out">
               <Suspense fallback={<ReusableLoader spinning={true} size="lg" position="center" />}>
                 <Routes location={location}>
                   <Route path="/" element={<Navigate to="/login" replace />} />

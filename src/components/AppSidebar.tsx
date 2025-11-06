@@ -49,6 +49,7 @@ import {
   UserCog,
   MapPin
 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface NavItem {
   label: string;
@@ -98,7 +99,7 @@ const navigation: NavItem[] = [
   {
     label: 'Service Desk',
     icon: Headphones,
-    link: '/service-desk',
+    link: '/service-desk/all-requests',
     children: [
       {
         label: 'New Service Request',
@@ -457,7 +458,7 @@ const navigation: NavItem[] = [
   {
     label: 'Masters',
     icon: Building2,
-    link: '/masters',
+    link: '/masters/company/organization',
     children: [
       {
         label: 'Company',
@@ -606,7 +607,7 @@ const navigation: NavItem[] = [
   {
     label: 'Software assets',
     icon: Package,
-    link: '/software-assets',
+    link: '/software-assets/asset-registry',
     children: [
       {
         label: 'Asset Registry',
@@ -643,7 +644,7 @@ const navigation: NavItem[] = [
   {
     label: 'Settings',
     icon: Settings,
-    link: '/settings',
+    link: '/settings/system-configuration',
     children: [
       {
         label: 'System Configuration',
@@ -671,9 +672,8 @@ const navigation: NavItem[] = [
 const AppSidebar: React.FC = () => {
   const location = useLocation();
   const [searchTerm, setSearchTerm] = useState('');
-  const { state } = useSidebar();
+  const { state,toggleSidebar } = useSidebar();
   const collapsed = state === 'collapsed';
-
   const isActive = (link: string) => {
     return location.pathname.includes(link);
   };
@@ -736,12 +736,12 @@ const AppSidebar: React.FC = () => {
   const renderMenuItem = (item: NavItem, depth: number = 0) => {
     if (item.children && !collapsed) {
       return (
-        <Collapsible key={item.label} className="w-full" defaultOpen={isSubMenuOpen(item)}>
+        <Collapsible key={item.label} className={cn("w-full")} defaultOpen={isSubMenuOpen(item)}>
           <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip={item.label}>
               <CollapsibleTrigger className="flex items-center justify-between w-full hover:bg-blue-50">
                 <div className="flex items-center space-x-3">
-                  <item.icon className="h-4 w-4" />
+                  <item.icon className="h-4 w-4"/>
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -819,10 +819,11 @@ const AppSidebar: React.FC = () => {
     }
 
     return (
+      
       <SidebarMenuItem key={item.label}>
         <SidebarMenuButton asChild isActive={isActive(item.link)} tooltip={collapsed ? item.label : undefined}>
           <Link to={item.link} className="flex items-center space-x-1 hover:bg-blue-50">
-            <item.icon className="h-4 w-4 shrink-0" />
+            <item.icon className="h-4 w-4 shrink-0" onClick={toggleSidebar}/>
             {!collapsed && (
               <TooltipProvider>
                 <Tooltip>
@@ -840,6 +841,7 @@ const AppSidebar: React.FC = () => {
           </Link>
         </SidebarMenuButton>
       </SidebarMenuItem>
+       
     );
   };
 
@@ -847,18 +849,18 @@ const AppSidebar: React.FC = () => {
     <Sidebar collapsible="icon">
       <SidebarHeader>
         <Link to="/" className="flex items-center space-x-2 px-2 py-1">
-          <Building2 className="h-8 w-8 text-blue-600 shrink-0" />
-          {!collapsed && (
+          {!collapsed ? (
             <div className="flex flex-col group-data-[collapsible=icon]:hidden">
-              <span className="text-xl font-bold text-gray-900">Tracet</span>
-              <span className="text-xs text-gray-500">Enterprise Suite</span>
+              <span className="text-xl font-bold text-gray-300">Tracet</span>
             </div>
-          )}
+          ):<div>T</div>}
         </Link>
       </SidebarHeader>
 
       <SidebarContent>
-        <SidebarMenu>
+        <SidebarMenu className={cn(
+          collapsed && "mt-2"
+        )}>
           {filteredNavigation.map((item) => renderMenuItem(item))}
         </SidebarMenu>
       </SidebarContent>

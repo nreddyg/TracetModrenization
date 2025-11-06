@@ -1,8 +1,8 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { VariantProps, cva } from "class-variance-authority"
-import { PanelLeft } from "lucide-react"
-
+import { Menu, PanelLeft } from "lucide-react"
+import { GiHamburgerMenu } from "react-icons/gi";
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -16,6 +16,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { ScrollArea } from "./scroll-area"
+import { RxHamburgerMenu } from "react-icons/rx"
 
 const SIDEBAR_COOKIE_NAME = "sidebar:state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
@@ -269,14 +271,14 @@ const SidebarTrigger = React.forwardRef<
       data-sidebar="trigger"
       variant="ghost"
       size="icon"
-      className={cn("h-7 w-7", className)}
+      className={cn("h-9 w-9 bg-[#eef2f7] text-[#313a46] hover:bg-[#f8f9fa] hover:text-[rgb(76_76_92_/_50%)] border border-[#f8f9fa] rounded-full", className)}
       onClick={(event) => {
         onClick?.(event)
         toggleSidebar()
       }}
       {...props}
     >
-      <PanelLeft />
+     <GiHamburgerMenu className="text-gray-500"/>
       <span className="sr-only">Toggle Sidebar</span>
     </Button>
   )
@@ -398,6 +400,7 @@ const SidebarContent = React.forwardRef<
   React.ComponentProps<"div">
 >(({ className, ...props }, ref) => {
   return (
+     <ScrollArea className="flex-1" scrollStyle={'flex-[0.8] bg-[#cdcdce96]'}>
     <div
       ref={ref}
       data-sidebar="content"
@@ -407,6 +410,7 @@ const SidebarContent = React.forwardRef<
       )}
       {...props}
     />
+    </ScrollArea>
   )
 })
 SidebarContent.displayName = "SidebarContent"

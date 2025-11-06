@@ -386,7 +386,7 @@ const Customer = () => {
       } else {
         setDataSource([]);
       }
-    }).catch(err => console.log(err)).finally(() => {
+    }).catch(err =>{}).finally(() => {
       dispatch(setLoading(false));
     });
   }
@@ -409,7 +409,7 @@ const Customer = () => {
         }
       }
     }).catch(err => {
-      console.log(err); if (branchesList?.length > 0) {
+      if (branchesList?.length > 0) {
         let branchopts = branchesList.slice(1)
         setLookupsDataInJson(branchopts, "BranchName");
       }
@@ -461,7 +461,7 @@ const Customer = () => {
       } else {
         msg.warning("No Customer Data Found !!");
       }
-    }).catch(err => console.log(err)).finally(() => {
+    }).catch(err => {}).finally(() => {
       dispatch(setLoading(false));
     });
   }
@@ -497,7 +497,7 @@ const Customer = () => {
       } else {
         msg.warning("No Customer Data Found !!");
       }
-    }).catch(err => console.log(err)).finally(() => {
+    }).catch(err =>{}).finally(() => {
       dispatch(setLoading(false));
     });
   }
@@ -884,11 +884,10 @@ export default Customer;
 //       } else {
 //         setDataSource([]);
 //       }
-//     }).catch(err => console.log(err)).finally(() => {
+//     }).catch(err => {}).finally(() => {
 //       dispatch(setLoading(false));
 //     });
 //   }
-//   console.log("dataSource", dataSource);
 
 //   const handleDelete = (data: CustomerData): void => {
 //   }

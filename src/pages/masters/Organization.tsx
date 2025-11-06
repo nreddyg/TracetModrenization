@@ -719,7 +719,7 @@ export default Organization;
 //       }else{
 //         setDataSource([]);
 //       }
-//     }).catch(err => console.log(err)).finally(() => {
+//     }).catch(err => {}).finally(() => {
 //       dispatch(setLoading(false));
 //     });
 //   }

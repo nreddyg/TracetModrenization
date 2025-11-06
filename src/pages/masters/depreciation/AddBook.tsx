@@ -373,7 +373,6 @@ useEffect(() => {
   ]
   
   const handleRowDelete = (row) => {
-    console.log("row", row.id)
     const data = [...dataSource]
     data.splice(row.id, 1)
     if (data.length <= 0) {
@@ -475,7 +474,6 @@ useEffect(() => {
   }
   // const handleSubmit = (e: React.FormEvent) => {
   //   e.preventDefault();
-  //   console.log('Book data:', formData, bookCategoryData);
   //   setIsAddDialogOpen(false);
   // };
   const triggerAccordionItemsValidations = async () => {
@@ -854,7 +852,6 @@ useEffect(() => {
       });
 
   }
-  console.log(groupOptions,"gpopt")
 
   const getFieldsByNames = (names: string[]) => fields.filter(f => names.includes(f.name!));
     const groupForm = useForm<GenericObject>({

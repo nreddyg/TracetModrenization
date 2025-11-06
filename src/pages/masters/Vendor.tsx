@@ -318,7 +318,7 @@ UpdateVendorAPI(payload,selectedVendorData?.VendorID)
       } else {
         setDataSource([]);
       }
-    }).catch(err => console.log(err)).finally(() => {
+    }).catch(err => {}).finally(() => {
       dispatch(setLoading(false));
     });
   }
@@ -335,7 +335,7 @@ UpdateVendorAPI(payload,selectedVendorData?.VendorID)
       } else {
         msg.warning("No Country Data Found !!");
       }
-    }).catch(err => console.log(err)).finally(() => {
+    }).catch(err => {}).finally(() => {
       dispatch(setLoading(false));
     });
   }
@@ -385,7 +385,7 @@ UpdateVendorAPI(payload,selectedVendorData?.VendorID)
       } else {
         msg.warning("No Vendor Data Found !!");
       }
-    }).catch(err => console.log(err)).finally(() => {
+    }).catch(err =>{}).finally(() => {
       dispatch(setLoading(false));
     });
   }
@@ -682,7 +682,7 @@ export default Vendor;
 //       }else{
 //         setDataSource([]);
 //       }
-//     }).catch(err => console.log(err)).finally(() => {
+//     }).catch(err => {}).finally(() => {
 //       dispatch(setLoading(false));
 //     });
 //   }

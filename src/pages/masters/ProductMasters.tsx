@@ -80,7 +80,6 @@ const ProductMasters = () => {
                 form.reset();
 
             } else {
-                // console.log(res.data.ErrorDetails[0]["Error Message"],"res")
                 message.error(res.data.ErrorDetails[0]["Error Message"]);
             }
         } catch (error) {
@@ -176,7 +175,6 @@ const ProductMasters = () => {
         dispatch(setLoading(true));
         getProducts(compid).then((res) => {
             if (res.data && res.data?.length > 0) {
-                console.log(res.data, "res")
                 setProductList(res.data?.reverse())
             }
             else {

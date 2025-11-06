@@ -57,12 +57,9 @@ const CostBreakupAttributes = () => {
     const [fields, setFields] = useState<BaseField[]>(COST_BREAKUP_DB);
     const [tableData, setTableData] = useState([defaultRow]);
     const [recordData, setRecordData] = useState(null);
-    console.log(recordData,"60")
     const [isDelModalOpen, setIsDelModalOpen] = useState(false);
     const [tableRow, setTableRow] = useState(null);
-    console.log(tableRow, "62")
     const [isUsed, setIsUsed] = useState(false);
-    console.log(recordData, "59")
     const form = useForm<GenericObject>({
         defaultValues: fields.reduce((acc, f) => {
             acc[f.name!] = f.defaultValue ?? '';
@@ -91,9 +88,8 @@ const CostBreakupAttributes = () => {
                 }
             }
             else {
-                console.log('failed to fetch cost breakup')
             }
-        }).catch(err => console.log(err)).finally(() => {
+        }).catch(err => {}).finally(() => {
             dispatch(setLoading(false));
         });
     }
@@ -179,7 +175,6 @@ const CostBreakupAttributes = () => {
             accessorKey: 'attributeName',
             header: 'Attribute Name',
             cell: ({ row }) => {
-                console.log(row, "row")
                 if (row.original.key === 1) {
                     return (
                         <span className="font-medium text-gray-900 text-sm">Base Purchase Price
@@ -276,7 +271,6 @@ const CostBreakupAttributes = () => {
             accessorKey: 'actions',
             header: 'Actions',
             cell: ({ row }: any) => {
-                console.log(row, "row273")
                 if (row.original.key === 1) {
                     return (
                         <span></span>
@@ -309,7 +303,6 @@ const CostBreakupAttributes = () => {
     }
 
     const handleDialog = () => {
-        console.log('open dialog')
     }
 
     const handleSave = async (data) => {
@@ -349,9 +342,8 @@ const CostBreakupAttributes = () => {
 
                 }
                 else {
-                    console.log('failed to Save costbreakup')
                 }
-            }).catch(err => console.log(err)).finally(() => {
+            }).catch(err => {}).finally(() => {
                 dispatch(setLoading(false));
             });
         }
@@ -371,7 +363,7 @@ const CostBreakupAttributes = () => {
                 else {
                     msg.warning('failed to update costbreakup')
                 }
-            }).catch(err => console.log(err)).finally(() => {
+            }).catch(err => {}).finally(() => {
                 dispatch(setLoading(false));
             });
         }
@@ -399,7 +391,7 @@ const CostBreakupAttributes = () => {
             else {
                 msg.warning('failed to fetch details')
             }
-        }).catch(err => console.log(err)).finally(() => {
+        }).catch(err => {}).finally(() => {
             dispatch(setLoading(false));
         });
     }
@@ -424,7 +416,7 @@ const CostBreakupAttributes = () => {
                     msg.warning(res.data.Message)
                 }
             }
-        }).catch(err => console.log(err)).finally(() => {
+        }).catch(err => {}).finally(() => {
             dispatch(setLoading(false));
         });
     }

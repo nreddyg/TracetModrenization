@@ -199,7 +199,6 @@ const LicenseAssignment = () => {
         setIsDelModalOpen(true);
     }
     const handleEdit = (data: SoftwareData): void => {
-        console.log("first", data)
         setEditingRecord(data);
         let selectedData = { ...data, DepartmentId: data.DepartmentId ? `${data.DepartmentId}` : '' }
         setIsOpenLicenseCard(true);

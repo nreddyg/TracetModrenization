@@ -544,11 +544,11 @@ const navigation: NavItem[] = [
             icon: BarChart,
             link: '/masters/depreciation/book',
           },
-          // {
-          //   label: 'Item Master',
-          //   icon: BarChart,
-          //   link: '/masters/consumables/item-master',
-          // },
+          {
+            label: 'Asset Category Book Category Mapping',
+            icon: BarChart,
+            link: '/masters/depreciation/assetcategorybookcategorymapping',
+          },
         ],
       },
       {

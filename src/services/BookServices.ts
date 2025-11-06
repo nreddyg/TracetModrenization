@@ -25,7 +25,7 @@ export const AddAdditionalDepreciationBookDetails= async (CompId: string,Data:an
         return {success: false,message: err.response?.data?.message || err.message,status: err.response?.status,};
     }
 };
-export const updateAdditionalDepreciationDetails= async (CompId: string,Data:string): Promise<APIResponse<any>> => {
+export const updateAdditionalDepreciationDetails= async (CompId: string,Data:any): Promise<APIResponse<any>> => {
     try {
         const response = await api.post(URL_POST_UPDATE_ADDITIONAL_DEPRECIATION,Data, { params: { CompId:CompId} });
         return {success: true,data: response.data};

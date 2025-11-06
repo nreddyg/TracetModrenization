@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Filter, X, BarChart3 } from 'lucide-react';
@@ -351,7 +350,6 @@ const TicketProgressDashboard = () => {
       <header className="bg-white border-b px-4 sm:px-6 py-3 sm:py-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
           <div className="flex items-center gap-2 sm:gap-4">
-            <SidebarTrigger />
             <h1 className="text-lg sm:text-2xl font-bold text-gray-900">Ticket Progress Dashboard</h1>
           </div>
         </div>

@@ -21,6 +21,8 @@ import { FaAngleLeft, FaAngleRight } from 'react-icons/fa';
 import { ReusableUpload } from '@/components/ui/reusable-upload';
 import ExcelJS from 'exceljs';
 import * as XLSX from 'xlsx';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { cn } from '@/lib/utils';
 
 interface AssetCatBookCat {
     AssetMainCategoryName: string;
@@ -64,7 +66,7 @@ const EFFECTIVE_FROM =
 
 const AssetCategoryMappingBookCategory = () => {
     const [selectedBook, setSelectedBook] = useState('basic-dep-rules');
-    // const [effectiveFrom, setEffectiveFrom] = useState<Date | null>(new Date('2024-04-01'));
+    const [effectiveFrominModal, setEffectiveFrominModal] = useState('');
     // const [mappings, setMappings] = useState<CategoryMapping[]>(mockMappings);
     const [fields, setFields] = useState<BaseField[]>(Asset_Category_Book_Category_Mapping_DB);
     // const [effetiveFrom, setEffectiveFrom] = useState(EFFECTIVE_FROM)
@@ -329,7 +331,7 @@ const AssetCategoryMappingBookCategory = () => {
                             ))}
                         </select> */}
                         <div className="relative w-full">
-                            <select
+                            {/* <select
                                 value={row.original.BookCategory === "-- Select Book Category --" ? "" : row.original.BookCategory}
                                 onChange={(e) => handleChange(e.target.value, row.id, "BookCategory", "true")}
                                 disabled={isRanDep}
@@ -346,12 +348,57 @@ const AssetCategoryMappingBookCategory = () => {
                                         {opt.label}
                                     </option>
                                 ))}
-                            </select>
+                            </select> */}
 
                             {/* Chevron Icon */}
-                            <div className="absolute right-0 top-0 h-full flex items-center pr-3 pointer-events-none">
+                            {/* <div className="absolute right-0 top-0 h-full flex items-center pr-3 pointer-events-none">
                                 <ChevronDown size={16} className="text-gray-400" />
-                            </div>
+                            </div> */}
+
+                            {/* <Select onValueChange={(v) => console.log("Selected:", v)}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select a country" />
+                                </SelectTrigger>
+
+                                <SelectContent>
+                                    <SelectItem value="india">India</SelectItem>
+                                    <SelectItem value="usa">United States</SelectItem>
+                                    <SelectItem value="uk">United Kingdom</SelectItem>
+                                    <SelectItem value="germany">Germany</SelectItem>
+                                    <SelectItem value="japan">Japan</SelectItem>
+                                </SelectContent>
+                            </Select> */}
+                            <Select
+                                value={row.original.BookCategory === "-- Select Book Category --" ? "" : row.original.BookCategory}
+                                onValueChange={(newValue) => handleChange(newValue, row.id, "BookCategory", "true")}
+                                disabled={isRanDep}
+                            >
+                                <SelectTrigger
+                                    className={cn(
+                                        "w-full h-8 text-sm px-2 pr-8 rounded-md border border-[hsl(214.29deg_31.82%_91.37%)] transition-colors appearance-none focus:outline-none focus:ring-2 focus:border-blue-400 hover:border-blue-400 cursor-pointer relative",
+                                        isRanDep && "opacity-60 cursor-not-allowed"
+                                    )}
+                                    style={{
+                                        backgroundColor: isRanDep
+                                            ? "#f3f4f6"
+                                            : "hsl(240deg 73.33% 97.06%)",
+                                        borderColor: "hsl(214.29deg 31.82% 91.37%)",
+                                    }}
+                                >
+                                    <SelectValue placeholder="-- Select Book Category --" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {/* <SelectItem value="-- Select Book Category --">
+                                        -- Select Book Category --
+                                    </SelectItem> */}
+                                    {tabDropOptions.map((opt, index) => (
+                                        <SelectItem key={index} value={opt.value || opt.label}>
+                                            {opt.label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+
                         </div>
                     </span>
                 );
@@ -426,12 +473,12 @@ const AssetCategoryMappingBookCategory = () => {
         await getAssetCatBasedOnYear(compId, FYStartDate, selectedBookId)
             .then((res) => {
                 if (res.data && res.data.PrevNextFinancialYearBookCategoryMappingDetails.length > 0) {
-                    // if (modalOpen) {
-                    // setModalDatasource(res.data.PrevNextFinancialYearBookCategoryMappingDetails.map((obj, index) => ({ ...obj, uniqueKey: index })));
-                    // } else {
+                    if (isMainDialogOpen) {
+                    setModalDatasource(res.data.PrevNextFinancialYearBookCategoryMappingDetails.map((obj, index) => ({ ...obj, uniqueKey: index })));
+                    } else {
                     setDataSource(res.data.PrevNextFinancialYearBookCategoryMappingDetails.map((obj, index) => ({ ...obj, uniqueKey: index })));
                     setIsRanDep(res.data.IsRanDep);
-                    // }
+                    }
                 }
                 else {
                     setDataSource([]);
@@ -506,63 +553,49 @@ const AssetCategoryMappingBookCategory = () => {
             })
     }
 
+    // post Or Update NewFinancialYear API
+    const postOrUpdtNewFinYear = async (selectedBookId: any, FYStartDate: any, companyId: any, payload: any, isMain) => {
+        try {
+            dispatch(setLoading(true));
+            const res = await postOrUpdtAddNewFinancialYear(selectedBookId, FYStartDate, companyId, payload);
+            if (res && res.data !== undefined) {
+                if (res.data.status === true) {
+                    msg.success(res.data.message);
+                    if (!isMainDialogOpen) {
+                        GetAssetMapPrevNextDateDetails(companyId, FYStartDate, selectedBookId);
+                    } else {
+                        handleCancel();
+                        getEffectiveFromDateList(companyId, selectedBookId);
+                    }
+                } else {
+                    msg.warning(res.data.message);
+                }
+            }
+        } catch (err) {
+            msg.error("An unexpected error occurred while saving financial year.");
+        } finally {
+            dispatch(setLoading(false));
+        }
+    };
+
     // creation of payload
     function AllTabData(key) {
         let arr = [];
         let apiData = [];
-        if (key === true) {
-            apiData.push(...dataSource);
-        }
-        // else if (key === false) {
-        //   apiData.push(...modalDatasource);
-        // }
-        apiData.map((obj) => {
-            arr.push({
-                "AssetCategoryId": obj.AssetSubCategoryId,
-                "BookCategory": obj.BookCategory,
-            })
-        })
+        if (key === true) { apiData.push(...dataSource) }
+        else if (key === false) { apiData.push(...modalDatasource) }
+        apiData.map((obj) => { arr.push({ "AssetCategoryId": obj.AssetSubCategoryId, "BookCategory": obj.BookCategory }) })
         return arr;
     }
 
     const submit = async (key) => {
-        let payload1 = {
-            "AssetCatBookCatMappingDetails": AllTabData(true)
-        }
-        // let payload2 = {
-        //     "AssetCatBookCatMappingDetails": AllTabData(false)
-        // }
-
+        let payload1 = { "AssetCatBookCatMappingDetails": AllTabData(true) }
+        let payload2 = { "AssetCatBookCatMappingDetails": AllTabData(false) }
         // for mainTable
-        if (key !== "true") {
-            dispatch(setLoading(true));
-            await postOrUpdtAddNewFinancialYear(selectedBookId, FYStartDate, companyId, payload1)
-                .then((res) => {
-                    if (res.data !== undefined) {
-                        if (res.data.status === true) {
-                            msg.success(res.data.message);
-                            GetAssetMapPrevNextDateDetails(companyId, FYStartDate, selectedBookId);
-                        } else {
-                            msg.warning(res.data.message);
-                        }
-                    }
-                }).catch(err => { }).finally(() => { dispatch(setLoading(false)); })
-        }
+        if (key !== "true") { postOrUpdtNewFinYear(selectedBookId, FYStartDate, companyId, payload1, "true") }
         // for modal Table
-        // else {
-        //   dispatch(loaderEnable());
-        //   await AddorUpdNewFinYearData(bookId, effectFromValue, compId, payload2).then((res) => {
-        //     if (res.data !== undefined) {
-        //       if (res.data.status === true) {
-        //         TracetMessage("success", "40vh", res.data.message, "assetMappingBookCategory");
-        //         handleFinancialYearCancel();
-        //         getEffectiveFromDates(bookId, compId);
-        //       } else {
-        //         TracetMessage("success", "40vh", res.data.message, "assetMappingBookCategory");
-        //       }
-        //     }
-        //   }).catch(err => { }).finally(() => { dispatch(loaderDisable()); })
-        // }
+        else if (key === "true") { postOrUpdtNewFinYear(selectedBookId, effectiveFrominModal, companyId, payload2, "false") }
+        // for fileUpload
         if (key === "filesUpload") {
             const assetExcelValue = watch('assetcattemplate');
             if (assetExcelValue && assetExcelValue[0].file.status !== "removed") {
@@ -581,6 +614,7 @@ const AssetCategoryMappingBookCategory = () => {
                 if (res.data) {
                     // navigate("/layout/utilities/backgroundjobstatus");
                     msg.success("yeah i got posted");
+                    handleUploadCancel();
                 }
             }
         }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
@@ -639,6 +673,7 @@ const AssetCategoryMappingBookCategory = () => {
         const filterEffectFrom = watch("effectivefrom");
         const updatedDate = getDateAfterYears(filterEffectFrom);
         setValue("effectivefromInModal", updatedDate)
+        setEffectiveFrominModal(updatedDate);
         setModalDatasource(dataSource)
         setIsMainDialogOpen(true);
     }
@@ -646,9 +681,21 @@ const AssetCategoryMappingBookCategory = () => {
     function handleUploadFileModal() {
         setUploadModal(true);
     }
+
+    const handleCancel = () => {
+        setIsMainDialogOpen(false);
+        GetAssetMapPrevNextDateDetails(companyId, FYStartDate, selectedBookId)
+    };
+
+    function handleUploadCancel(){
+        setUploadModal(false);
+         form.reset({
+             assetcattemplate: []
+        })   
+    }
+
     //export to excel download template
     const downloadExcel = () => {
-        console.log("sachin");
         if (dataSource.length !== 0) {
             let keys = Object.keys(dataSource[0]).filter(k => k !== 'BookCategoryId' && k !== 'AssetMainCategoryId' && k !== 'AssetSubCategoryId' && k !== 'IsRanDep');
             let bookCategoryKeys = Object.keys(dataSource[0]);
@@ -749,7 +796,6 @@ const AssetCategoryMappingBookCategory = () => {
     }
     // processing excel data to json data
     const handleFileProcessing = (event) => {
-        console.log("event", event);
         if (event[0].file) {
             let fileObj = event[0].file;
             let fileName = fileObj.name;
@@ -774,7 +820,7 @@ const AssetCategoryMappingBookCategory = () => {
     };
 
     return (
-        <PageLayout className='h-full overflow-y-scroll bg-gray-50/30 min-h-[100px]'>
+        <div className='h-full overflow-y-scroll bg-gray-50/30 min-h-[100px]'>
             <header className="bg-card flex justify-between border-b px-6 py-4 shadow-sm">
                 <div className="flex items-center gap-4">
                     <SidebarTrigger />
@@ -865,7 +911,7 @@ const AssetCategoryMappingBookCategory = () => {
                             </DialogHeader>
                             <div className='grid w-full grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4'>
                                 <div className="flex items-center space-x-2">
-                                    {getFieldsByNames(['effectivefromInModal', 'inmodaldrop']).map((renderField))}
+                                    {getFieldsByNames(['effectivefromInModal']).map((renderField))}
                                 </div>
                             </div>
                             <div className="pt-0 max-h-[400px] overflow-y-scroll">
@@ -892,7 +938,7 @@ const AssetCategoryMappingBookCategory = () => {
                                     htmlType="submit"
                                     variant="primary"
                                     className="bg-orange-500 hover:bg-orange-600 border-orange-500"
-                                    onClick={null}
+                                    onClick={handleSubmit(() => submit("true"))}
                                 >
                                     Save
                                 </ReusableButton>
@@ -900,12 +946,13 @@ const AssetCategoryMappingBookCategory = () => {
                         </DialogContent>
                     </Dialog>
 
+                    {/* upload Modal */}
                     <Dialog
                         open={newUploadModal}
                         onOpenChange={(open) => {
                             setUploadModal(open);
                             if (!open) {
-                                // handleCancel();
+                                handleUploadCancel();
                             }
                         }}
                     >
@@ -939,7 +986,6 @@ const AssetCategoryMappingBookCategory = () => {
                                     htmlType="submit"
                                     variant="primary"
                                     className="bg-orange-500 hover:bg-orange-600 border-orange-500"
-                                    // onClick={handleSave}
                                     onClick={handleSubmit(() => submit("filesUpload"))}
                                 >
                                     Save
@@ -960,7 +1006,7 @@ const AssetCategoryMappingBookCategory = () => {
                                 <>
                                     <h3 className="text-lg font-semibold mb-4">Asset Category Details :</h3>
                                     {/* Table */}
-                                    <div className="pt-0 overflow-hidden">
+                                    <div className="pt-0">
                                         <ReusableTable
                                             data={dataSource}
                                             columns={assetCatBookCatMappingCols}
@@ -988,7 +1034,7 @@ const AssetCategoryMappingBookCategory = () => {
                     {/* } */}
                 </div>
             </div>
-        </PageLayout>
+        </div>
     );
 };
 

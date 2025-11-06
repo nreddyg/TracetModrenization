@@ -233,7 +233,7 @@ const ComplianceAndAudit = () => {
         // fetchAllCustomerList();
     }, [toast]);
     return (
-        <div className="h-full overflow-y-scroll bg-gray-50/30">
+        <div className="h-full overflow-y-auto bg-gray-50/30">
             <div className="p-4 sm:p-4 space-y-4 sm:space-y-4">
                 {/* Header Section */}
                 <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">

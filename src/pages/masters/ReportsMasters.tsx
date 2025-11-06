@@ -596,10 +596,9 @@ const ReportsMasters = () => {
     }
   };
   return (
-    <div className="h-full overflow-y-scroll bg-gray-50">
+    <div className="h-full overflow-y-auto bg-gray-50">
       <header className="bg-white border-b px-6 py-2 shadow-sm">
         <div className="flex items-center gap-4">
-          <SidebarTrigger />
           <div>
             <h1 className="text-xl font-semibold text-gray-900">Master Reports</h1>
             <p className="text-sm text-gray-600">Generate comprehensive reports with advanced filtering and customization options</p>

@@ -1054,7 +1054,6 @@ const ServiceDeskReports = () => {
       {/* Compact Header */}
       <header className="bg-white border-b px-6 py-3 shadow-sm">
         <div className="flex items-center gap-4">
-          <SidebarTrigger />
           <div>
             <h1 className="text-xl font-semibold text-gray-900">Service Desk Reports</h1>
             <p className="text-sm text-gray-600">Generate comprehensive reports with advanced filtering and customization options</p>

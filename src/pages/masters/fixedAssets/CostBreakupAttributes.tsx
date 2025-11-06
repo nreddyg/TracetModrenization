@@ -430,9 +430,8 @@ const CostBreakupAttributes = () => {
     }
 
     return (
-        <div className="h-full   bg-gray-50 flex flex-col ">
+        <div className="h-full overflow-y-auto  bg-gray-50 flex flex-col ">
             <div className="flex flex-1 overflow-hidden   ">
-                {/* Left Sidebar - Ticket Inbox */}
                 {dataSource.length !== 0 && <div className={`
     ${isInboxCollapsed ? 'w-6 p-1' : 'w-64 p-2 mb-2 rounded-b-[5px]'}
    bg-white border border-gray-200 border-t-0 border-t-transparent shadow-xl flex flex-col pb-3 transition-all duration-300 shrink-0

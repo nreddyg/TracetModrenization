@@ -241,7 +241,6 @@ const ProductMasters = () => {
         <div className="h-full overflow-y-scroll bg-gray-50/30">
             <header className="bg-card flex justify-between border-b px-6 py-4 shadow-sm">
                 <div className="flex items-center gap-4">
-                    <SidebarTrigger />
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <span>Masters</span>
                         <span>/</span>

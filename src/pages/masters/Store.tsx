@@ -267,7 +267,7 @@ const Store = () => {
         setIsAddDialogOpen(true)
     };
     return (
-        <div className="h-full bg-gray-50 flex flex-col ">
+        <div className="h-full overflow-y-auto bg-gray-50 flex flex-col ">
             <div className="flex flex-1 overflow-hidden">
                 <div className="flex-1 flex flex-col min-w-0 ">
                     <div className="min-h-[53px] bg-white border-b shadow-sm px-4 lg:px-6 py-3 flex flex-row xxs:flex-col xs2:flex-row lg:flex-row lg:items-center justify-between gap-4 shrink-0">

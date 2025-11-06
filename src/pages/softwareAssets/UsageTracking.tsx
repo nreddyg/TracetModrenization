@@ -184,7 +184,7 @@ const UsageTracking = () => {
     // fetchAllCustomerList();
   }, [toast]);
   return (
-    <div className="h-full overflow-y-scroll bg-gray-50/30">
+    <div className="h-full overflow-y-auto bg-gray-50/30">
       <div className="p-4 sm:p-4 space-y-4 sm:space-y-4">
         {/* Header Section */}
 

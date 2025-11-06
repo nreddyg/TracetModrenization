@@ -643,7 +643,7 @@ setRec(null)
     }
 
     return (
-        <div className="h-full   bg-gray-50 flex flex-col ">
+        <div className="h-full overflow-y-auto   bg-gray-50 flex flex-col ">
             <div className="flex flex-1 overflow-hidden   ">
                 {/* Left Sidebar - Ticket Inbox */}
                 {listData.length !== 0 && <div className={`

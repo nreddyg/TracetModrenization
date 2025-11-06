@@ -81,11 +81,7 @@ export const CREATE_TICKET_DB: BaseField[] = [
     placeholder: "Select Status",
     isRequired: false,
     allowClear: true,
-    options: [
-      { label: "Low", value: "Low" },
-      { label: "Medium", value: "Medium" },
-      { label: "High", value: "High" },
-    ],
+    options: [],
     defaultValue:'Medium',
     show:false,
     disabled:false

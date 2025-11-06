@@ -191,7 +191,6 @@ const SystemConfiguration = () => {
     <div className="overflow-y-scroll h-full bg-gray-50 transition-all duration-300 ease-in-out">
       <header className="bg-white border-b px-6 py-4 shadow-sm">
         <div className="flex items-center gap-4">
-          <SidebarTrigger />
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <span>Settings</span>
             <span>/</span>

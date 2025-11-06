@@ -26,7 +26,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { cn } from '@/lib/utils';
 import { Progress } from '@/components/ui/progress';
 import { Additional_Depreciation_DB } from '@/Local_DB/Form_JSON_Data/AdditionalDepreciationDB';
-import { AddAdditionalDepreciationBookDetails, GetAdditionalDepreciationBookDetails } from '@/services/BookServices';
+import { AddAdditionalDepreciationBookDetails, GetAdditionalDepreciationBookDetails, updateAdditionalDepreciationDetails } from '@/services/BookServices';
 
 interface SoftwareData {
     SoftwareID: Number,
@@ -82,7 +82,7 @@ const AdditionalDepreciation = () => {
     const [isOpenCard, setIsOpenCard] = useState(false);
     const [getAllTableData, setGetAllTableData] = useState([])
     const [dataSource, setDatasource] = useState([]);
-    const [editRecordId, setEditRecordId] = useState<string>("")
+    const [editingRecord, setEditingRecord] = useState<GenericObject | null>(null)
     const [isDelModalOpen, setIsDelModalOpen] = useState(false);
     const [deletingRecord, setDeletingRecord] = useState(null);
 
@@ -302,24 +302,18 @@ const AdditionalDepreciation = () => {
         setDeletingRecord(data)
     }
     const handleEdit = (data: any): void => {
-        form.reset({ ...form.getValues(), ...data })
-        let fieldsData = [...fields]
-        fieldsData.forEach((obj) => {
-            if (obj.name == "NumberOfLicenses" || obj.name == "LicenseType") {
-                obj.disabled = true
-            }
-        })
-        setFields(fieldsData)
-        setDatasource(generateRowsInTable(0, 0, data.LicenseDetails))
+        dispatch(setLoading(true))
+        setTimeout(()=>{
+            form.reset({ ...form.getValues(), ...data }) ;
+            dispatch(setLoading(false))     
+        },100)
+        setEditingRecord(data)  
         setIsOpenCard(true)
-        setEditRecordId(data.SoftwareId)
     }
     const handleReset = () => {
         setDatasource([])
         form.reset({ ...form.getValues(), Name: '', Description: "", ApplicableFor: "", Condition: '', AdditionalDepreciationRate: '', UptoDateRange: '' });
-
-        setEditRecordId("")
-
+        setEditingRecord(null)
     }
     
     const deleteSoftwareAsset = async (id: string) => {
@@ -393,20 +387,36 @@ const AdditionalDepreciation = () => {
         return licenseDetails
     }
     const handleSave = async (data) => {
-        let LicenseDetails = editRecordId ? getLicenseDetails(editRecordId) : getLicenseDetails();
-        if (LicenseDetails.length > 0) {
-            const payload = {
-                "AdditionalDepreciation": [{
-                    "Name": data["Name"],
-                    "Description": data["Description"],
-                    "ApplicableFor": data["ApplicableFor"],
-                    "Condition": data["Condition"],
-                    "AdditionalDepreciationRate": data["AdditionalDepreciationRate"],
-                    "UptoDateRange": data["UptoDateRange"],
-                }]
-            }
+        const payload = {
+            "AdditionalDepreciation": [{
 
+                AdditionalDepreciationId: editingRecord.AdditionalDepreciationId,
+                "Name": data["Name"],
+                "Description": data["Description"],
+                "ApplicableFor": data["ApplicableFor"],
+                "Condition": data["Condition"],
+                "AdditionalDepreciationRate": data["AdditionalDepreciationRate"],
+                "UptoDateRange": data["UptoDateRange"],
+            }]
+        }
+        if (editingRecord) {
+            try {
+                dispatch(setLoading(true))
+                const res = await updateAdditionalDepreciationDetails(companyId, payload);
+                if (res.success) {
+                    if (res.data.status) {
+                        msg.success(res.data.message)
+                        handleReset()
+                        getAdditionalDepreciationListAPI()
+                    } else {
+                        let errMsg = (res.data.ErrorDetails && res.data.ErrorDetails[0]['Error Message']) ? res.data.ErrorDetails[0]['Error Message'] : res.data.message
+                        msg.warning(errMsg);
+                    }
+                }
 
+            } catch { } finally { dispatch(setLoading(false)) }
+
+        } else {
             dispatch(setLoading(true));
             await AddAdditionalDepreciationBookDetails(companyId, payload).then(res => {
                 if (res.data.status) {
@@ -418,12 +428,7 @@ const AdditionalDepreciation = () => {
                     msg.warning(errMsg);
                 }
             }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
-        } else {
-            msg.warning("Enter All Mandatory License Details");
         }
-
-
-
     };
 
 
@@ -527,7 +532,7 @@ const AdditionalDepreciation = () => {
                                     size="middle"
                                     className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
                                 >
-                                    {'Save'}
+                                    {editingRecord ? 'Update':'Save'}
                                 </ReusableButton>
                                 <ReusableButton
                                     htmlType="button"

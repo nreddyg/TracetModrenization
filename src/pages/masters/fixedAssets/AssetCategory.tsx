@@ -264,7 +264,6 @@ const AssetCategory = () => {
     }
 
     const handleSubEdit = (subData) => {
-        console.log("subdata", subData);
         reset({
             ...watch(),
             subname: subData.Name,

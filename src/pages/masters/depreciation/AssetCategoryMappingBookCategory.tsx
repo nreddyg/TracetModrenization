@@ -592,7 +592,7 @@ const AssetCategoryMappingBookCategory = () => {
         let payload1 = { "AssetCatBookCatMappingDetails": AllTabData(true) }
         let payload2 = { "AssetCatBookCatMappingDetails": AllTabData(false) }
         // for mainTable
-        if (key !== "true") { postOrUpdtNewFinYear(selectedBookId, FYStartDate, companyId, payload1, "true") }
+        if (key === "false") { postOrUpdtNewFinYear(selectedBookId, FYStartDate, companyId, payload1, "true") }
         // for modal Table
         else if (key === "true") { postOrUpdtNewFinYear(selectedBookId, effectiveFrominModal, companyId, payload2, "false") }
         // for fileUpload
@@ -690,7 +690,8 @@ const AssetCategoryMappingBookCategory = () => {
     function handleUploadCancel(){
         setUploadModal(false);
          form.reset({
-             assetcattemplate: []
+            ...watch(),
+            assetcattemplate: []
         })   
     }
 
@@ -842,7 +843,7 @@ const AssetCategoryMappingBookCategory = () => {
                             htmlType="submit"
                             variant="primary"
                             className="bg-orange-500 hover:bg-orange-600 border-orange-500"
-                            onClick={handleSubmit(() => submit(false))}
+                            onClick={handleSubmit(() => submit("false"))}
                         >
                             Submit
                         </ReusableButton>

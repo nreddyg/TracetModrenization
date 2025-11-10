@@ -452,10 +452,10 @@ const ColumnVisibilityManager = ({ table }: { table: TanstackTable<any> }) => {
         </Button>
       </PopoverTrigger>
 
-      <PopoverContent className="w-56 p-2">
+      <PopoverContent className="w-56 p-2 border border-gray-200 shadow-md rounded-lg">
         <div className="space-y-2 overflow-y-auto" style={{ maxHeight: "40vh" }}>
           {/* Select All */}
-          <div className="flex items-center space-x-2 border-b pb-2 mb-2">
+          <div className="flex items-center space-x-2 border-b border-gray-200 pb-2 mb-2">
             <Checkbox
               id="select-all-columns"
               checked={allVisible ? true : someVisible ? "indeterminate" : false}
@@ -639,7 +639,7 @@ const AdvancedFilterBuilder = ({
           Advanced Filters {filters.length > 0 && `(${filters.length})`}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-96 p-4">
+      <PopoverContent className="w-96 p-4 border border-gray-200 shadow-md rounded-lg">
         <div className="space-y-4">
           <div className="flex justify-between items-center">
             <h4 className="font-medium">Advanced Filters</h4>
@@ -739,7 +739,7 @@ const SelectionControls = <T,>({
   if (selectionInfo.totalSelected === 0) return null;
 
   return (
-    <div className="flex items-center gap-2 px-3 py-2 bg-primary/10 rounded-md">
+    <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 border border-blue-100 rounded-lg">
       <Badge variant="secondary">
         {selectionInfo.totalSelected} selected
         {maxSelectable && ` of ${maxSelectable} max`}
@@ -1259,7 +1259,7 @@ const useKeyboardNavigation = (
 };
 
 const Pagination = ({ table }: { table: TanstackTable<any> }) => (
-  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-4 py-3 border-t gap-2">
+  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-4 py-3 bg-gray-50 border-t border-gray-200 gap-2 rounded-b-xl">
     <div className="text-sm text-muted-foreground">
       Showing{' '}
       {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} to{' '}
@@ -1272,7 +1272,7 @@ const Pagination = ({ table }: { table: TanstackTable<any> }) => (
         value={table.getState().pagination.pageSize.toString()}
         onValueChange={(value) => table.setPageSize(Number(value))}
       >
-        <SelectTrigger className="w-32">
+        <SelectTrigger className="w-32 h-9 rounded-1">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -1287,19 +1287,21 @@ const Pagination = ({ table }: { table: TanstackTable<any> }) => (
       <Button
         variant="outline"
         size="sm"
+        className="rounded-2 px-3"
         onClick={() => table.previousPage()}
         disabled={!table.getCanPreviousPage()}
       >
         Previous
       </Button>
 
-      <span className="text-sm font-medium">
+      <span className="text-xs font-medium text-gray-600">
         Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
       </span>
 
       <Button
         variant="outline"
         size="sm"
+        className="rounded-2 px-3"
         onClick={() => table.nextPage()}
         disabled={!table.getCanNextPage()}
       >
@@ -1326,7 +1328,9 @@ function DraggableRow({ row, children }: { row: any; children: React.ReactNode }
       style={style}
       {...attributes}
       {...listeners}
-      className={row.getIsSelected() ? "bg-primary/5 hover:bg-muted/50" : "hover:bg-muted/50"}
+      className={row.getIsSelected()
+        ? "bg-primary/5 hover:bg-gray-50 transition-colors duration-150 border-b border-gray-100"
+        : "hover:bg-gray-50 transition-colors duration-150 border-b border-gray-100"}
     >
       {children}
     </tr>
@@ -1681,64 +1685,48 @@ export function ReusableTable<T = any>({
             }}
           >
             {/* Sorting */}
-{enableSorting && column.getCanSort() && (
-  <div className="space-y-2">
-    <p className="text-sm font-medium">Sort</p>
-    <div className="flex gap-2">
-      {/* Ascending Button */}
-      <Button
-        variant={
-          column.getIsSorted() === 'asc'
-            ? 'default' // active
-            : 'outline' // inactive
-        }
-        size="sm"
-        className={cn(
-          "flex-1",
-          column.getIsSorted() === 'asc'
-            ? "bg-primary text-white hover:bg-primary/90"
-            : "text-foreground"
-        )}
-        onClick={() => {
-          if (column.getIsSorted() === 'asc') {
-            column.clearSorting(); // reset to original
-          } else {
-            column.toggleSorting(false); // sort asc
-          }
-        }}
-      >
-        <ArrowUp className="w-4 h-4 mr-1" />
-        Asc
-      </Button>
+            {enableSorting && column.getCanSort() && (
+              <div className=" flex gap-2">
+                <p className="text-sm pt-1 font-medium">Sort</p>
 
-      {/* Descending Button */}
-      <Button
-        variant={
-          column.getIsSorted() === 'desc'
-            ? 'default'
-            : 'outline'
-        }
-        size="sm"
-        className={cn(
-          "flex-1",
-          column.getIsSorted() === 'desc'
-            ? "bg-primary text-white hover:bg-primary/90"
-            : "text-foreground"
-        )}
-        onClick={() => {
-          if (column.getIsSorted() === 'desc') {
-            column.clearSorting(); // reset to original
-          } else {
-            column.toggleSorting(true); // sort desc
-          }
-        }}
-      >
-        <ArrowDown className="w-4 h-4 mr-1" />
-        Desc
-      </Button>
-    </div>
-  </div>
-)}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className={cn(
+                    "flex items-center justify-center gap-1 px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-100 transition",
+                    column.getIsSorted() ? "bg-gray-50" : ""
+                  )}
+                  onClick={() => {
+                    const isSorted = column.getIsSorted();
+                    if (!isSorted) {
+                      column.toggleSorting(false); // ASC first
+                    } else if (isSorted === "asc") {
+                      column.toggleSorting(true); // DESC next
+                    } else {
+                      column.clearSorting(); // then reset
+                    }
+                  }}
+                >
+                  <ArrowUp
+                    className={cn(
+                      "w-4 h-4",
+                      column.getIsSorted() === "asc"
+                        ? "text-blue-600"
+                        : "text-gray-400"
+                    )}
+                  />
+                  <ArrowDown
+                    className={cn(
+                      "w-4 h-4 -mt-0.5",
+                      column.getIsSorted() === "desc"
+                        ? "text-blue-600"
+                        : "text-gray-400"
+                    )}
+                  />
+                </Button>
+              </div>
+            )}
+
 
 
 
@@ -1996,17 +1984,17 @@ export function ReusableTable<T = any>({
       )}
 
       {/* Table */}
-      <div className="border rounded-lg overflow-hidden">
+      <div className="bg-white shadow-sm rounded-xl border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
-          <table ref={tableRef} className="w-full  table-fixed">
-            <thead className="bg-muted/50">
+          <table ref={tableRef} className="w-full min-w-max border-collapse text-sm text-gray-800">
+            <thead className="bg-gray-100 text-gray-700 uppercase text-xs font-semibold tracking-wide">
               {table.getHeaderGroups().map(headerGroup => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map(header => (
                     <th
                       onClick={() => { console.log(header) }}
                       key={header.id}
-                      className="ps-4 px-2 py-1 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider border-b relative bg-background z-10"
+                      className="px-4 py-3 text-left border-b border-gray-200 whitespace-nowrap bg-gray-50"
                       style={{
                         width: header.getSize(),
                         minWidth: `${calculatedMinWidth}px`,
@@ -2021,25 +2009,6 @@ export function ReusableTable<T = any>({
                       {header.isPlaceholder ? null : (
                         <div className="flex flex-col gap-2">
                           <div className={cn("flex items-center  py-1  gap-2", headerContentClassName)}>
-                            {/* {enableSorting && header.column.getCanSort() ? (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-auto p-0 font-medium"
-                                onClick={header.column.getToggleSortingHandler()}
-                              >
-                                {flexRender(header.column.columnDef.header, header.getContext())}
-                                {header.column.getIsSorted() === 'asc' ? (
-                                  <ArrowUp className="w-4 h-4 ml-1" />
-                                ) : header.column.getIsSorted() === 'desc' ? (
-                                  <ArrowDown className="w-4 h-4 ml-1" />
-                                ) : (
-                                  <ArrowUpDown className="w-4 h-4 ml-1" />
-                                )}
-                              </Button>
-                            ) : (
-                              flexRender(header.column.columnDef.header, header.getContext())
-                            )} */}
                             <DataTableColumnHeader
                               column={header.column}
                               table={table}
@@ -2061,9 +2030,17 @@ export function ReusableTable<T = any>({
                         <div
                           onMouseDown={header.getResizeHandler()}
                           onTouchStart={header.getResizeHandler()}
-                          className="absolute right-0 top-0 h-full w-1 bg-border cursor-col-resize opacity-0 hover:opacity-100"
-                        />
+                          className="absolute right-0 top-0 h-full w-1.5 cursor-col-resize group z-30"
+                          style={{
+                            transform: "translateX(50%)", // ensures correct alignment
+                            backgroundColor: "transparent",
+                          }}
+                        >
+                          {/* visible hover indicator */}
+                          <div className="h-full w-1 bg-transparent group-hover:bg-gray-300 transition-colors" />
+                        </div>
                       )}
+
                     </th>
                   ))}
                 </tr>
@@ -2106,7 +2083,7 @@ export function ReusableTable<T = any>({
                               <td
                                 key={cell.id}
                                 className={cn(
-                                  "px-4 py-3 text-sm bg-background",
+                                  "px-4 py-3 text-gray-600 border-b border-gray-100 last:border-0 transition-colors duration-150",
                                   rowHeightClasses[rowHeight]
                                 )}
                                 style={{
@@ -2169,9 +2146,8 @@ export function ReusableTable<T = any>({
                     <tr
                       key={row.id}
                       className={cn(
-                        "hover:bg-muted/50",
-                        isSelected && "bg-primary/5",
-                        !isSelectable && "opacity-50"
+                        row.getIsSelected() ? "bg-indigo-50 border-b border-gray-100 transition-all duration-150" : "text-gray-700 border-b border-gray-100 last:border-0 transition-all duration-150 hover:bg-indigo-50 cursor-pointer",
+                        "bg-gray-50 hover:bg-gray-100 cursor-pointer"
                       )}
                     >
                       {row.getVisibleCells().map(cell => {
@@ -2184,7 +2160,7 @@ export function ReusableTable<T = any>({
                           <td
                             key={cell.id}
                             className={cn(
-                              "px-4 py-3 text-sm bg-background",
+                              "px-4 py-3 text-gray-600 border-b border-gray-100 last:border-0",
                               rowHeightClasses[rowHeight]
                             )}
                             style={{
@@ -2212,7 +2188,7 @@ export function ReusableTable<T = any>({
                                 type={columnMeta.editType || "text"}
                                 options={columnMeta.options || []}
                               />
-                            ) : <div className="overflow-hidden" style={{   display: '-webkit-box',   WebkitLineClamp: 2,   WebkitBoxOrient: 'vertical',   textOverflow: 'ellipsis', }}
+                            ) : <div className="overflow-hidden" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', textOverflow: 'ellipsis', }}
                               title={String(cell.getValue())}
                             >
                               {flexRender(cell.column.columnDef.cell, cell.getContext())}

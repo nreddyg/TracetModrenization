@@ -31,6 +31,7 @@ import { useDispatch } from 'react-redux';
 import { formatDates } from '@/_Helper_Functions/HelperFunctions';
 import { FaAngleLeft, FaAngleRight } from 'react-icons/fa';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ReUsableSelect } from '@/components/ui/re-usable-select';
 
 
 interface Book {
@@ -80,7 +81,7 @@ const AddBook = () => {
   const [groupOptions,setGroupOptions]=useState([])
   const [copyDepBookOpts,setCopyDepBookOpts]=useState([])
   const [bookCatForEdit,setBookCatForEdit]=useState([])
-  const [modalDatasource, setModalDatasource] = useState([]);
+  const [modalDatasource, setModalDatasource] = useState([{}]);
   const [isNewFYOpen,setIsNewFYOpen]=useState(false)
   
   const companyId = useAppSelector(state => state.projects.companyId);
@@ -133,68 +134,284 @@ useEffect(() => {
     GetBookCatListByIdAPI(companyId, selectedGroup)
   }
    
-    const financialYearColumns= [
-          {
-              accessorKey: 'AssetMainCategoryName',
-              header: 'Asset Main category',
-              cell: ({ row }) => (
-                  <span className="font-medium text-gray-900 text-sm">{row.getValue('AssetMainCategoryName')}</span>
-              ),
-          },
-          {
-              accessorKey: 'AssetSubCategoryName',
-              header: 'Asset Sub Category',
-              cell: ({ row }) => (
-                  <span className="font-medium text-gray-900 text-sm">{row.getValue('AssetSubCategoryName')}</span>
-              ),
-          },
-          {
-              accessorKey: 'BookCategory',
-              header: 'Book Category',
-              cell: ({ row }) => {
-                  return (
-                      <span>
-                   
-                          <div className="relative w-full">
-                              <Select
-                                  value={row.original.BookCategory === "-- Select Book Category --" ? "" : row.original.BookCategory}
-                                  onValueChange={(newValue) =>{}
-                                    //  handleChange(newValue, row.id, "BookCategory", "true")
-                                    }
-                                  // disabled={isRanDep}
-                              >
-                                  <SelectTrigger
-                                      className={cn(
-                                          "w-full h-8 text-sm px-2 pr-8 rounded-md border border-[hsl(214.29deg_31.82%_91.37%)] transition-colors appearance-none focus:outline-none focus:ring-2 focus:border-blue-400 hover:border-blue-400 cursor-pointer relative",
-                                          // isRanDep && "opacity-60 cursor-not-allowed"
-                                      )}
-                                      style={{
-                                          // backgroundColor: isRanDep
-                                          //     ? "#f3f4f6"
-                                          //     : "hsl(240deg 73.33% 97.06%)",
-                                          borderColor: "hsl(214.29deg 31.82% 91.37%)",
-                                      }}
-                                  >
-                                      <SelectValue placeholder="-- Select Book Category --" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                      {/* {tabDropOptions.map((opt, index) => ( */}
-                                          <SelectItem 
-                                          key={""} value={"6"}
-                                          >
-                                              {"tr="}
-                                          </SelectItem>
-                                      {/* ))} */}
-                                  </SelectContent>
-                              </Select>
+    const financialYearColumns= 
+[
+    {
+      header: "S.No",
+      accessorKey: "key",
+      id: "key",
+      size: 50,
+      // key: "key",
+    },
+    {
+      accessorKey: "CategoryName",
+      header: "Book category",
+
+      cell: ({ row }) => (
+
+        <span className='flex'>
+          <ReusableInput
+            value={row.original.CategoryName}
+            onChange={(e) => handleChange(e.target.value, row.id, "CategoryName")}
+            name='CategoryName'
+            // placeholder='Enter License key'
+            isRequired={true}
+            className='m-2 mt-0 me-0 bg-white border-2'
+            size='small'
+          ></ReusableInput>
+
+        </span>
+      )
+    },
+    {
+      accessorKey: "GroupName",
+      header: "Group",
+      cell: ({ row }) => (
+
+        <span className='flex'>
+         
+           <ReusableDropdown
+            containerClassName=" p-2"
+            className='h-8 border-2 '
+            placeholder="GroupName"
+            options={groupOptions.reverse()}
+            allowClear={false}
+            defaultValue={row.original.GroupName}
+            onChange={(e) => handleChange(e, row.id, "GroupName")}
+            backgroundColor="white"
+            size={"small"}
+
+          >
+
+          </ReusableDropdown>
+             <div className="relative w-full">
+                              <ReUsableSelect
+                              name='Hello'
+                              clearable={true}
+                              value={''}
+                              onChange={null}
+                              options={[{label:'Hi',value:'hi'}]}
+                              placeholder='Hello Pallavi'
+                              />
   
                           </div>
-                      </span>
-                  );
-              },
-          }
-      ]
 
+        </span>
+      )
+    },
+
+    {
+      accessorKey: "DepreciationMethodName",
+      header: "Depreciation Method",
+      cell: ({ row }) => (
+
+        <span className='flex' >
+          <ReusableDropdown
+            containerClassName=" p-2"
+            className='h-8 border-2 '
+            placeholder=" "
+            options={[
+              { label: "SLM", value: "SLM" }, { label: "WDV", value: "WDV" },
+            ]}
+            allowClear={false}
+            defaultValue={row.original.DepreciationMethodName}
+            onChange={(e) => handleChange(e, row.id, "DepreciationMethodName")}
+            backgroundColor="white"
+            size={"small"}
+
+          >
+
+          </ReusableDropdown>
+
+        </span>
+      )
+    },
+
+    ...(form.watch("DepreciationLevel") == "Book Category" ? [
+      {
+        accessorKey: "AdditionalDepreciationName",
+        header: "Additional Depreciation",
+        cell: ({ row }) => (
+
+          <span className='flex' >
+            <ReusableDropdown
+              containerClassName=" p-2"
+              className='h-8 border-2 '
+              placeholder=" "
+              options={additionalDepOptions.reverse()}
+              allowClear={false}
+              defaultValue={row.original.AdditionalDepreciationName}
+              onChange={(e) => handleChange(e, row.id, "AdditionalDepreciationName")}
+              backgroundColor="white"
+              size={"small"}
+
+            >
+
+            </ReusableDropdown>
+
+          </span>
+        )
+      }
+    ] : []),
+    ...(form.watch("DepreciateWith") == "Rate" ? [
+      {
+        accessorKey: "CategoryRate",
+        header: "Rate",
+        cell: ({ row }) => (
+
+          <span className='flex' >
+            <ReusableInput
+              value={row.original.CategoryRate}
+              onChange={(e) => handleChange(e.target.value, row.id, "CategoryRate")}
+              name='CategoryRate'
+              type='number'
+              // placeholder='Enter License key'
+              isRequired={true}
+              className='m-2 mt-0 me-0 bg-white border-2'
+              size='small'
+            ></ReusableInput>
+
+          </span>
+        )
+      }
+    ] : []),
+    ...(form.watch("DepreciateWith") === "Useful life" && form.watch("LifeToConsider") === "Book Category" ? [
+      {
+        accessorKey: "CategoryLife",
+        header: "Useful life",
+        cell: ({ row }) => (
+
+          <span className='flex' >
+            <ReusableInput
+              value={row.original.CategoryLife}
+              onChange={(e) => handleChange(e.target.value, row.id, "CategoryLife")}
+              name='CategoryLife'
+              type='number'
+              // placeholder='Enter License key'
+              isRequired={true}
+              className='m-2 mt-0 me-0 bg-white border-2'
+              size='small'
+            ></ReusableInput>
+
+          </span>
+        )
+      }
+    ] : []),
+    ...(form.watch("DepreciationLevel") === "Asset" && form.watch("SalvageValueToConsider") === "Book Category" ? [
+      {
+        accessorKey: "SalvageValueRate",
+        header: "Salvage value (%)",
+        cell: ({ row }) => (
+
+          <span className='flex' >
+            <ReusableInput
+              value={row.original.SalvageValueRate}
+              onChange={(e) => handleChange(e.target.value, row.id, "SalvageValueRate")}
+              name='SalvageValueRate'
+              type='number'
+              // placeholder='Enter License key'
+              isRequired={true}
+              className='m-2 mt-0 me-0 bg-white border-2'
+              size='small'
+            ></ReusableInput>
+
+          </span>
+        )
+      }
+    ] : []),
+
+    {
+      accessorKey: "ShiftApplicable",
+      header: "Shifts applicable",
+
+      cell: ({ row }) => (
+
+        <span>
+          <ReusableDropdown
+            containerClassName=" p-2"
+            className='h-8 border-2 '
+            placeholder=" "
+            options={[
+      {
+        "value": "Yes",
+        "label": "Yes",
+      },
+      {
+        "value": "No",
+        "label": "No",
+      }
+    ]}
+    
+            allowClear={false}
+            defaultValue={row.original.ShiftApplicable}
+            onChange={(e) => handleChange(e, row.id, "ShiftApplicable")}
+            backgroundColor="white"
+            size={"small"}
+
+          >
+
+          </ReusableDropdown>
+
+        </span>
+      )
+    },
+    {
+      accessorKey: "DoubleShiftRate",
+      header: "Double Shift Rate",
+      cell: ({ row }) => (
+
+        <span className='flex' >
+          <ReusableInput
+            value={row.original.DoubleShiftRate}
+            onChange={(e) => handleChange(e.target.value, row.id, "DoubleShiftRate")}
+            name='DoubleShiftRate'
+            type='number'
+            // placeholder='Enter License key'
+            isRequired={true}
+            className='m-2 mt-0 me-0 bg-white border-2'
+            size='small'
+          ></ReusableInput>
+
+        </span>
+      )
+    },
+    {
+      accessorKey: "TripleShiftRate",
+      header: "Triple Shift Rate",
+      cell: ({ row }) => (
+
+        <span className='flex' >
+          <ReusableInput
+            value={row.original.TripleShiftRate}
+            onChange={(e) => handleChange(e.target.value, row.id, "TripleShiftRate")}
+            name='TripleShiftRate'
+            type='number'
+            // placeholder='Enter License key'
+            isRequired={true}
+            className='m-2 mt-0 me-0 bg-white border-2'
+            size='small'
+          ></ReusableInput>
+
+        </span>
+      )
+    },
+    {
+      accessorKey: "Actions",
+      header: "Actions  ",
+      size: 100,
+      cell: ({ row }) => (
+        <div className={cn('flex justify-start', "justify-center")}>
+
+          {<Trash2 height={18} className='text-red-400 cursor-pointer '
+            onClick={() => handleRowDelete(row)} />}
+
+
+        </div>
+      )
+    },
+
+
+  ]
   const tableColumnsData = [
     {
       header: "S.No",

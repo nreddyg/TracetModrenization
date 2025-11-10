@@ -23,6 +23,7 @@ import AssetCategory from "./pages/masters/fixedAssets/AssetCategory"
 import ItemMaster from "./pages/masters/ItemMaster";
 import UnitOfMeasure from "./pages/masters/UnitsOfMeasure";
 import ItemCategory from "./pages/masters/ItemCategory";
+import AssetCategoryMappingBookCategory from "./pages/masters/depreciation/AssetCategoryMappingBookCategory";
 import ManageUnitConversion from "./pages/masters/ManageUnitConvertion";
 import UserAttributes from "./pages/masters/fixedAssets/UserAttributes";
 
@@ -186,7 +187,7 @@ const AnimatedRoutes = () => {
           <AppSidebar />
           <SidebarInset className="flex flex-col overflow-hidden">
             <FixedHeader />
-            <div className="w-full h-full pt-1 transition-all duration-200 ease-in-out">
+            {/* <div className="w-full h-full pt-1 transition-all duration-200 ease-in-out"> */}
               <Suspense fallback={<ReusableLoader spinning={true} size="lg" position="center" />}>
                 <Routes location={location}>
                   <Route path="/" element={<Navigate to="/login" replace />} />
@@ -237,6 +238,8 @@ const AnimatedRoutes = () => {
                   <Route path="/masters/consumables/item-category" element={<ItemCategory/>} />
                   <Route path="/masters/depreciation/book" element={<Books/>} />
                   <Route path="/masters/depreciation/book/additionaldepreciation" element={<AdditionalDepreciation/> }/>
+                  <Route path="/masters/depreciation/assetcategorybookcategorymapping" element={<AssetCategoryMappingBookCategory/> }/>
+
                   <Route path="/masters/depreciation/book/addbook" element={<AddBook/>}/>
 
                   {/* CWIP */}
@@ -321,7 +324,7 @@ const AnimatedRoutes = () => {
                   <Route path="/software-assets/reports" element={<SoftwareAssetsReports />} />
                 </Routes>
               </Suspense>
-            </div>
+            {/* </div> */}
           </SidebarInset>
         </div>
       </SidebarProvider>

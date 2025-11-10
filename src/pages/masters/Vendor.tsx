@@ -318,7 +318,7 @@ UpdateVendorAPI(payload,selectedVendorData?.VendorID)
       } else {
         setDataSource([]);
       }
-    }).catch(err => console.log(err)).finally(() => {
+    }).catch(err => {}).finally(() => {
       dispatch(setLoading(false));
     });
   }
@@ -335,7 +335,7 @@ UpdateVendorAPI(payload,selectedVendorData?.VendorID)
       } else {
         msg.warning("No Country Data Found !!");
       }
-    }).catch(err => console.log(err)).finally(() => {
+    }).catch(err => {}).finally(() => {
       dispatch(setLoading(false));
     });
   }
@@ -385,7 +385,7 @@ UpdateVendorAPI(payload,selectedVendorData?.VendorID)
       } else {
         msg.warning("No Vendor Data Found !!");
       }
-    }).catch(err => console.log(err)).finally(() => {
+    }).catch(err =>{}).finally(() => {
       dispatch(setLoading(false));
     });
   }
@@ -406,7 +406,7 @@ UpdateVendorAPI(payload,selectedVendorData?.VendorID)
     }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
   }
   return (
-    <div className="h-full   bg-gray-50 flex flex-col ">
+    <div className="h-full overflow-y-auto  bg-gray-50 flex flex-col ">
       <div className="flex flex-1 overflow-hidden   ">
         {/* Left Sidebar - Ticket Inbox */}
         {/* <div className={`${isInboxCollapsed ? 'w-6 p-1' : 'w-34 p-2 mb-2 rounded-b-[5px]'} bg-white border-r    border-0 shadow-lg flex pb-3 flex-col transition-all duration-300 shrink-0 hidden lg:flex`}> */}
@@ -682,7 +682,7 @@ export default Vendor;
 //       }else{
 //         setDataSource([]);
 //       }
-//     }).catch(err => console.log(err)).finally(() => {
+//     }).catch(err => {}).finally(() => {
 //       dispatch(setLoading(false));
 //     });
 //   }

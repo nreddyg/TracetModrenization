@@ -31,6 +31,7 @@ import { ReusableButton } from '@/components/ui/reusable-button';
 import { useAppSelector } from '@/store';
 import { getSRBranchList } from '@/services/ticketServices';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 interface OptType {
   data: { [key: string]: any }[];
   label: string;
@@ -70,6 +71,7 @@ const tablePermissions: TablePermissions = {
 };
 
 const Configuration = () => {
+  const navigate=useNavigate()
   const companyId = useAppSelector(state => state.projects.companyId);
   const branch=useAppSelector(state => state.projects.branch) || '';
     const branchId=useAppSelector(state=>state.projects.branchId) || localStorage.getItem('BranchId');
@@ -673,8 +675,7 @@ const Configuration = () => {
     <div className="h-full bg-gray-50 overflow-y-scroll">
       <header className="bg-white border-b px-4 py-3 shadow-sm">
         <div className="flex items-center gap-3">
-          <SidebarTrigger />
-          <Button size="sm" className="bg-primary h-[2.38rem] hover:bg-blue-700  text-white">
+          <Button size="sm" className="bg-primary h-[2.38rem] hover:bg-blue-700  text-white" onClick={()=>navigate('/service-desk/create-ticket')}>
             <span className="hidden sm:inline">New Service Request</span>
             <span className="sm:hidden">New Request</span>
           </Button>

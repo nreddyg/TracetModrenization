@@ -546,7 +546,7 @@ const ItemCategory = () => {
         setIsMainDialogOpen(true);
     }
     return (
-        <div className="h-full overflow-y-scroll bg-gray-50/30">
+        <div className="h-full overflow-y-auto bg-gray-50/30">
             <header className="bg-card flex justify-between border-b px-6 py-4 shadow-sm">
                 <div className="flex items-center gap-4">
                     <SidebarTrigger />

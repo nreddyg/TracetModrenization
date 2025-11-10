@@ -155,9 +155,8 @@ const UserAttributes = () => {
                 }
             }
             else {
-                console.log('failed to fetch user attributes')
             }
-        }).catch(err => console.log(err)).finally(() => {
+        }).catch(err => {}).finally(() => {
             dispatch(setLoading(false));
         });
     }
@@ -306,7 +305,6 @@ setRec(null)
     const handleEdit = (data) => {
 
 
-        console.log(data, "Nag")
         reset({
             ...form.getValues(),
             // GroupName:groupName,
@@ -379,7 +377,6 @@ setRec(null)
     }
 
     const handleDialog = () => {
-        console.log('open dialog')
     }
 
     const handleSave = async () => {
@@ -478,7 +475,6 @@ setRec(null)
                 const attributes = res.data[0]?.ListOfUserAttributes || [];
                 if (attributes.length > 0) {
                     setDataSource(attributes)
-                    console.log(res.data, "Nag")
                 }
                 setGroupName(res.data[0]?.GroupName)
                 reset({
@@ -488,7 +484,7 @@ setRec(null)
             else {
                 msg.warning('failed to fetch details')
             }
-        }).catch(err => console.log(err)).finally(() => {
+        }).catch(err => {}).finally(() => {
             dispatch(setLoading(false));
         });
     }
@@ -617,7 +613,6 @@ setRec(null)
     };
 
 
-    console.log(dataSource, "Nag")
 
     const handleRemove = (attrInd) => {
         const newAttributeList = attributeList.filter((att, ind) => ind !== attrInd)
@@ -637,13 +632,13 @@ setRec(null)
                     msg.warning(res.data.message)
                 }
             }
-        }).catch(err => console.log(err)).finally(() => {
+        }).catch(err => {}).finally(() => {
             dispatch(setLoading(false));
         });
     }
 
     return (
-        <div className="h-full   bg-gray-50 flex flex-col ">
+        <div className="h-full overflow-y-auto   bg-gray-50 flex flex-col ">
             <div className="flex flex-1 overflow-hidden   ">
                 {/* Left Sidebar - Ticket Inbox */}
                 {listData.length !== 0 && <div className={`
@@ -689,7 +684,7 @@ setRec(null)
                                        border border-gray-200
                                       `
                                         }
-                                        onClick={() => { setRecordData(group.GroupId); console.log(group.GroupId, "Nag") }}
+                                        onClick={() => { setRecordData(group.GroupId); }}
                                     >
                                         <div className="flex items-center justify-between mb-1.5">
                                             <span className="text-xs font-medium text-blue-600 me-2 ms-1">{group.GroupName}</span>

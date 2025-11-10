@@ -302,7 +302,6 @@ const handleCancel=()=>{
       });
   
   }
-           console.log(deleteRow,"delRow")
 
   return (
   <div className="h-full overflow-y-scroll  bg-gray-50 flex flex-col ">

@@ -106,9 +106,9 @@ export const AddOrUpdateBookCat= async (CompId: string,EffectiveFrom:string,Book
     }
 };
 
-export const AddGroupCategoryDetails= async (CompId: string,EffectiveFrom:string,BookId:string,Data:any): Promise<APIResponse<any>> => {
+export const AddGroupCategoryDetails= async (CompId: string,BookId:string,Data:any): Promise<APIResponse<any>> => {
     try {
-        const response = await api.post(URL_POST_ADD_GROUP_CATEGORY_DETAILS,Data, { params: { CompId:CompId,BookId:BookId,EffectiveFrom:EffectiveFrom} });
+        const response = await api.post(URL_POST_ADD_GROUP_CATEGORY_DETAILS,Data, { params: { CompId:CompId,bookId:BookId} });
         return {success: true,data: response.data};
     } catch (err: any) {
         return {success: false,message: err.response?.data?.message || err.message,status: err.response?.status,};

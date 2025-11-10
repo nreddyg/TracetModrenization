@@ -20,7 +20,6 @@ import { RiMenuFoldFill } from "react-icons/ri";
 const FixedHeader: React.FC = () => {
   const navigate = useNavigate();
   const breadcrumbs = useAppSelector((state) => state.ui.currentBreadcrumb);
-
   const dispatch = useAppDispatch();
   const storeData = useAppSelector((state) => state.projects);
   const userId = storeData.userId || JSON.parse(localStorage.getItem("LoggedInUser") || "{}")?.UserId;

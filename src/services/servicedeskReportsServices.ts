@@ -20,7 +20,6 @@ export const getServiceRequestDetailsReport=async(compId:string,BranchName:strin
 //GetServiceRequestDetailsHistoryReport
 
 export const getServiceRequestDetailsHistoryReport=async(compId:string | string,BranchName:string,srID:string):Promise<APIResponse<any>>=>{
-    console.log("compId",compId, "branch", BranchName);
     try{
         const response=await api.get(URL_GET_REPORT_FOR_SR_DETAILS_HISTORY,{params:{CompId:compId,branchName:BranchName,ServiceRequestId:srID}})
         return {success:true,data:response.data}

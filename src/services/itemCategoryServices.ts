@@ -28,7 +28,6 @@ export const getUnitOfMeasure = async (CompId: string): Promise<APIResponse<any>
 }
 // URL_ADD_ITEM_CATEGORY
 export const postItemCatDetails = async (CompId: string, data: any): Promise<APIResponse<any>> => {
-    console.log("data", data);
     try {
         const response = await api.post(URL_ADD_ITEM_CATEGORY, data, { params: { CompId: CompId } })
         return { success: true, data: response.data, }

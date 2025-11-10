@@ -1992,7 +1992,6 @@ export function ReusableTable<T = any>({
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map(header => (
                     <th
-                      onClick={() => { console.log(header) }}
                       key={header.id}
                       className="px-4 py-3 text-left border-b border-gray-200 whitespace-nowrap bg-gray-50"
                       style={{

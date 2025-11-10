@@ -63,28 +63,11 @@ const AssetCategory = () => {
         }
     }, [companyId])
 
-    // const dynamicSchema = z.object(
-    //     mainCatfields.reduce((acc, f) => {
-    //         let fieldSchema = z.string();
-    //         if (f.fieldType === 'text' && f.name === "name") {
-    //             fieldSchema = z
-    //                 .string()
-    //                 .min(1, `${f.label} is required`)
-    //                 .max(255, `${f.label} too long`)
-    //                 .regex(/^[a-zA-Z0-9&@#$%^()<>?*][a-zA-Z0-9&@#$%^()<>?* ]*$/, `${f.label} cannot start with a space or contain invalid characters`);
-    //         }
-    //         acc[f.name!] = fieldSchema;
-    //         return acc;
-    //     }, {} as Record<string, z.ZodTypeAny>)
-    // );
-
-    const form = useForm<GenericObject>({
-        // resolver: zodResolver(dynamicSchema),
+   const form = useForm<GenericObject>({
         defaultValues: mainCatfields.reduce((acc, f) => {
             acc[f.name!] = f.defaultValue ?? '';
             return acc;
         }, {} as GenericObject),
-        // salvagevalue_unit: '%',
     });
 
 
@@ -281,7 +264,6 @@ const AssetCategory = () => {
     }
 
     const handleSubEdit = (subData) => {
-        console.log("subdata", subData);
         reset({
             ...watch(),
             subname: subData.Name,
@@ -696,10 +678,9 @@ const AssetCategory = () => {
         setIsMainDialogOpen(true);
     }
     return (
-        <div className="h-full overflow-y-scroll bg-gray-50/30">
+        <div className="h-full overflow-y-auto bg-gray-50/30">
             <header className="bg-card flex justify-between border-b px-6 py-4 shadow-sm">
                 <div className="flex items-center gap-4">
-                    <SidebarTrigger />
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <span>Masters</span>
                         <span>/</span>

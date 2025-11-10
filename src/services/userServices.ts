@@ -1,4 +1,4 @@
-import { URL_DELETE_USER, URL_GET_CATEGORIES, URL_GET_DEPARTMENTS, URL_GET_ROLES, URL_GET_USER_LIST, URL_POST_NEW_USER, URL_POST_UPDATE_USER } from "@/config/apiUrls";
+import { URL_DELETE_USER, URL_GET_MAIN_CATEGORY_DETAILS, URL_GET_DEPARTMENTS, URL_GET_ROLES, URL_GET_USER_LIST, URL_POST_NEW_USER, URL_POST_UPDATE_USER } from "@/config/apiUrls";
 import api from "./api";
 
 interface APIResponse<T> {
@@ -38,7 +38,7 @@ export const getRoleNamesList = async (CompId:string): Promise<APIResponse<any>>
 // Get Category List Based on CompanyId
 export const getCategoryList = async (CompId:string): Promise<APIResponse<any>> => {
   try {
-        const response = await api.get(URL_GET_CATEGORIES, { params: { CompId } })
+        const response = await api.get(URL_GET_MAIN_CATEGORY_DETAILS, { params: { CompId } })
         return {success: true,data: response.data,}
     } catch (err: any) {
         return { success: false,message: err.response?.data?.message || err.message,status: err.response?.status};

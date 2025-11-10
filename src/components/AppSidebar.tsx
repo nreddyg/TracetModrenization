@@ -476,6 +476,11 @@ const navigation: NavItem[] = [
             link: '/masters/company/company-hierarchy',
           },
           {
+            label: 'Asset Location',
+            icon: Building2,
+            link: '/masters/company/asset-location',
+          },
+          {
             label: 'Department',
             icon: Building2,
             link: '/masters/company/department',
@@ -619,21 +624,21 @@ const navigation: NavItem[] = [
         icon: Settings,
         link: '/software-assets/license-assignment',
       },
-      {
-        label: 'Usage Tracking',
-        icon: HardHat,
-        link: '/software-assets/usage-tracking',
-      },
-      {
-        label: 'Compliance & Audit',
-        icon: Cog,
-        link: '/software-assets/compliance&audit',
-      },
-      {
-        label: 'Reports',
-        icon: Cog,
-        link: '/software-assets/reports',
-      },
+      // {
+      //   label: 'Usage Tracking',
+      //   icon: HardHat,
+      //   link: '/software-assets/usage-tracking',
+      // },
+      // {
+      //   label: 'Compliance & Audit',
+      //   icon: Cog,
+      //   link: '/software-assets/compliance&audit',
+      // },
+      // {
+      //   label: 'Reports',
+      //   icon: Cog,
+      //   link: '/software-assets/reports',
+      // },
       // {
       //   label: 'Advanced Setup',
       //   icon: Settings,

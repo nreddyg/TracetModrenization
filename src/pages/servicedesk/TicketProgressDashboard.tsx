@@ -347,14 +347,23 @@ const TicketProgressDashboard = () => {
   const getFieldsByNames = (names: string[]) => fields.filter(f => names.includes(f.name!));
   return (
     <div className="h-full overflow-y-scroll bg-gray-50">
-      <header className="bg-white border-b px-4 sm:px-6 py-3 sm:py-4">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
-          <div className="flex items-center gap-2 sm:gap-4">
-            <h1 className="text-lg sm:text-2xl font-bold text-gray-900">Ticket Progress Dashboard</h1>
+      <header className="bg-white border-b px-6 py-3 shadow-sm">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+            <h1 className="text-lg sm:text-2xl font-bold text-gray-900">
+              Ticket Progress Dashboard
+            </h1>
           </div>
+
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <span>Service Desk</span>
+            <span>/</span>
+            <span className="text-gray-900 font-medium">Ticket Progress Dashboard</span>
+          </div>
+
         </div>
       </header>
-
       <div className="p-4 sm:p-6">
         {/* Enhanced Filters Section */}
         <Card className="mb-6">

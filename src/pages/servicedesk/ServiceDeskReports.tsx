@@ -1052,12 +1052,21 @@ const ServiceDeskReports = () => {
   return (
     <div className="h-full overflow-y-scroll  bg-gray-50">
       {/* Compact Header */}
-      <header className="bg-white border-b px-6 py-3 shadow-sm">
-        <div className="flex items-center gap-4">
+      <header className="bg-white border-b px-6 py-3 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3"
+      >
+        <div className="flex items-start sm:items-center gap-4">
           <div>
             <h1 className="text-xl font-semibold text-gray-900">Service Desk Reports</h1>
-            <p className="text-sm text-gray-600">Generate comprehensive reports with advanced filtering and customization options</p>
+            <p className="text-sm text-gray-600">
+              Generate comprehensive reports with advanced filtering and customization options
+            </p>
           </div>
+        </div>
+
+        <div className="flex items-center gap-2 text-sm text-gray-600">
+          <span>Service Desk</span>
+          <span>/</span>
+          <span className="text-gray-900 font-medium">Service Desk Reports</span>
         </div>
       </header>
 

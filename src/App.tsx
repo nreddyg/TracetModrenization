@@ -241,6 +241,7 @@ const AnimatedRoutes = () => {
                   <Route path="/masters/depreciation/assetcategorybookcategorymapping" element={<AssetCategoryMappingBookCategory/> }/>
 
                   <Route path="/masters/depreciation/book/addbook" element={<AddBook/>}/>
+                  <Route path="/masters/depreciation/book/addbook/:id" element={<AddBook key={`edit`} />} />
 
                   {/* CWIP */}
                   <Route path="/cwip/project-management" element={<ProjectManagement />} />

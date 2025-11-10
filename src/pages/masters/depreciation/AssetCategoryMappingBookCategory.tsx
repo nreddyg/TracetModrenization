@@ -355,7 +355,7 @@ const AssetCategoryMappingBookCategory = () => {
                                 <ChevronDown size={16} className="text-gray-400" />
                             </div> */}
 
-                            {/* <Select onValueChange={(v) => console.log("Selected:", v)}>
+                            {/* <Select onValueChange={null}>
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select a country" />
                                 </SelectTrigger>

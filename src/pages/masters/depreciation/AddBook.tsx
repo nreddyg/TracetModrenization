@@ -16,7 +16,7 @@ import { Label } from '@/components/ui/label';
 import { useNavigate } from 'react-router-dom';
 import { ScrollArea } from '@radix-ui/react-scroll-area';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { GetAdditionalDepreciationBookDetails, GetBookCatListById, GetDepreciationBookDetails } from '@/services/BookServices';
+import { AddGroupCategoryDetails, DeleteGroupById, GetAdditionalDepreciationBookDetails, GetBookCatListById, GetDepreciationBookDetails, GetGroupByBookIdDetails, UpdateGroupCategoryDetails } from '@/services/BookServices';
 import dayjs from 'dayjs';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Controller, useForm } from 'react-hook-form';
@@ -77,10 +77,12 @@ const AddBook = () => {
   const msg = useMessage()
   const [validationTrigger, setValidationTrigger] = useState(false)
   const [isFinancialYearOpen, setIsFinancialYearOpen] = useState(false)
-  const [isCopyFromOpen, setIsCopyFromOpen] = useState(false)
+  const [isCopyFromOpen, setIsCopyFromOpen] = useState(false);
+  const [isAddGroupOpen,setIsAddGroupOpen]=useState(false);
   const [selectedGroup,setSelectedGroup]=useState<string|number|(string | number)[]>("")
   const [groupOptions,setGroupOptions]=useState([])
   const companyId = useAppSelector(state => state.projects.companyId);
+  const [editingRecord,setEditingRecord]=useState({"BookID": 10154});
   const dispatch=useDispatch()
 
   const navigate = useNavigate()
@@ -92,10 +94,7 @@ const AddBook = () => {
     mode: 'onChange',
     reValidateMode: "onChange"
   });
-
   const { control, register, handleSubmit, trigger, watch, setValue, reset, formState: { errors } } = form;
-
-
 
   useEffect(() => {
     if (activeTab == "BookDetails") {
@@ -374,7 +373,6 @@ useEffect(() => {
   ]
   
   const handleRowDelete = (row) => {
-    console.log("row", row.id)
     const data = [...dataSource]
     data.splice(row.id, 1)
     if (data.length <= 0) {
@@ -476,7 +474,6 @@ useEffect(() => {
   }
   // const handleSubmit = (e: React.FormEvent) => {
   //   e.preventDefault();
-  //   console.log('Book data:', formData, bookCategoryData);
   //   setIsAddDialogOpen(false);
   // };
   const triggerAccordionItemsValidations = async () => {
@@ -855,9 +852,107 @@ useEffect(() => {
       });
 
   }
-  console.log(groupOptions,"gpopt")
 
   const getFieldsByNames = (names: string[]) => fields.filter(f => names.includes(f.name!));
+    const groupForm = useForm<GenericObject>({
+    defaultValues:{GroupName:'',GroupDescription:''},
+    mode: 'onChange',
+    reValidateMode: "onChange"
+  });
+
+  //CRUD of Group Category By Ganesh Kalyanam
+  const {control:groupControl, watch:groupWatch, setValue:groupSetValue,handleSubmit:groupHandleSubmit,reset:groupReset,formState:{errors:groupErrors}}=groupForm
+  const [groupData,setGroupData]=useState([])
+  const groupCols = [
+    { header: "Group Name", accessorKey: "GroupName" },
+    { header: "Description", accessorKey: "GroupDescription" },
+    {
+      id: "actions",
+      accessorKey: "actions",
+      header: "Actions",
+      cell: ({ row }: any) => (
+        <div className="flex gap-2">
+          <ReusableButton
+            variant="text"
+            size="small"
+            onClick={() =>{ setEditingGroupData(row.original);groupReset({...row.original})}}
+          >
+            <Edit className="h-4 w-4" />
+          </ReusableButton>
+          <ReusableButton
+            variant="text"
+            size="small"
+            danger
+            onClick={() =>handleDeleteGroup( row.original?.GroupId)}
+          >
+            <Trash2 className="h-4 w-4" />
+          </ReusableButton>
+        </div>
+      ),
+    },
+  ];
+  const [editingGroupData,setEditingGroupData]=useState(null)
+  useEffect(()=>{
+    if(companyId && editingRecord?.BookID){
+      getGroupCategoriesData()
+    }
+  },[companyId,editingRecord])
+  const getGroupCategoriesData = async () => {
+    dispatch(setLoading(true));
+    try {
+      const res = await GetGroupByBookIdDetails(companyId, String(editingRecord?.BookID));
+      if(res.data && res.data?.status===undefined && Array.isArray(res.data)){
+        setGroupData(res.data);
+      }else{
+        setGroupData([])
+      }
+    } catch { } finally { dispatch(setLoading(false)) }
+  }
+  const handleSaveGroup = async () => {
+    const payload = {
+      GroupMasterDetails: [
+        { GroupName: groupWatch('GroupName'), GroupDescription: groupWatch('GroupDescription') }
+      ]
+    }
+    if (editingGroupData) {
+      dispatch(setLoading(true))
+      try {
+        const res = await UpdateGroupCategoryDetails(companyId, String(editingRecord?.BookID), editingGroupData?.GroupId, payload);
+        if (res?.data?.status) {
+          msg.success(res.data.message);
+          groupReset();
+          getGroupCategoriesData();
+          setEditingGroupData(null)
+        } else {
+          msg.warning(res?.data?.message || 'Unable to update group category!!')
+        }
+      } catch { } finally { dispatch(setLoading(false)) }
+    } else {
+      dispatch(setLoading(true))
+      try {
+        const res = await AddGroupCategoryDetails(companyId, String(editingRecord?.BookID), payload);
+        if (res?.data?.status) {
+          msg.success(res.data.message);
+          groupReset();
+          getGroupCategoriesData();
+        } else {
+          msg.warning(res?.data?.message || 'Unable to add group category!!')
+        }
+      } catch { } finally { dispatch(setLoading(false)); }
+    }
+  }
+  const handleDeleteGroup=async(id)=>{
+    dispatch(setLoading(true))
+    try{
+      const res = await DeleteGroupById(companyId,id);
+      if(res?.data?.status){
+        msg.success(res.data.message);
+        getGroupCategoriesData();
+      }else{
+        msg.warning(res?.data?.message || 'Unable to delete group category !!')
+      }
+    }catch{}finally{dispatch(setLoading(false))}
+  }
   return (
 
 
@@ -977,7 +1072,7 @@ useEffect(() => {
                     </div>
                     <div className="flex gap-2">
                       <ReusableButton variant="default" onClick={() => { setIsCopyFromOpen(true) }}>Copy From</ReusableButton>
-                      {/* <ReusableButton variant="primary" className="bg-orange-500 hover:bg-orange-600 border-orange-500">Add Group</ReusableButton> */}
+                      {editingRecord && <ReusableButton variant="primary" className="bg-orange-500 hover:bg-orange-600 border-orange-500" onClick={()=>setIsAddGroupOpen(true)}>Add Group</ReusableButton>}
                       <ReusableButton variant="primary" className="bg-orange-500 hover:bg-orange-600 border-orange-500" onClick={handleAddCategory}>Add Category</ReusableButton>
                     </div>
                   </div>
@@ -1004,7 +1099,8 @@ useEffect(() => {
         {/* Main Category Dialog */}
 
 
-      </div> <Dialog open={isCopyFromOpen}
+      </div> 
+      <Dialog open={isCopyFromOpen}
         onOpenChange={(open) => {
           setIsCopyFromOpen(open);
           if (!open) {
@@ -1029,7 +1125,7 @@ useEffect(() => {
                 options={groupOptions}
                 allowClear={false}
                 defaultValue={""}
-                onChange={(e) => {setSelectedGroup(e)}}
+                onChange={(e) => { setSelectedGroup(e) }}
                 backgroundColor="white"
                 size={"small"}
 
@@ -1046,7 +1142,7 @@ useEffect(() => {
               variant="primary"
               className="bg-orange-500 hover:bg-orange-600 border-orange-500"
               onClick={
-               handleCopyFromSubmit
+                handleCopyFromSubmit
               }
             >
               Submit
@@ -1055,11 +1151,79 @@ useEffect(() => {
         </DialogContent>
       </Dialog>
 
+      <Dialog
+        open={isAddGroupOpen}
+        onOpenChange={(open) => {
+          setIsAddGroupOpen(open);
+        }}
+      >
+        <DialogContent
+          className="max-w-2xl max-h-[80vh] flex flex-col overflow-hidden"
+          onOpenAutoFocus={(e) => e.preventDefault()}
+        >
+          <DialogHeader>
+            <DialogTitle>Group</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-3 overflow-hidden flex-1 p-2">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <Controller
+                key="GroupName"
+                name="GroupName"
+                control={groupControl}
+                render={({ field: ctrl }) => (
+                  <ReusableInput
+                    label="Group Name"
+                    placeholder="Group Name"
+                    maxLength={100}
+                    value={ctrl.value}
+                    onChange={ctrl.onChange}
+                    error={groupErrors["GroupName"]?.message as string}
+                  />
+                )}
+              />
+
+              <Controller
+                key="GroupDescription"
+                name="GroupDescription"
+                control={groupControl}
+                render={({ field: ctrl }) => (
+                  <ReusableInput
+                    label="Group Description"
+                    placeholder="Group Description"
+                    maxLength={100}
+                    value={ctrl.value}
+                    onChange={ctrl.onChange}
+                    error={groupErrors["GroupDescription"]?.message as string}
+                  />
+                )}
+              />
+            </div>
+            <div className="flex justify-end gap-2 shrink-0">
+              <ReusableButton variant="default" onClick={groupReset}>
+                Clear
+              </ReusableButton>
+
+              <ReusableButton
+                htmlType="submit"
+                variant="primary"
+                className="bg-orange-500 hover:bg-orange-600 border-orange-500"
+                onClick={handleSaveGroup}
+              >
+                {editingGroupData?'Update':'Save'}
+              </ReusableButton>
+            </div>
+            <ScrollArea className="flex-1 overflow-y-auto rounded-md border bg-gray-50/30">
+              <ReusableTable
+                title="List of Groups"
+                data={groupData}
+                columns={groupCols}
+                enableExport={false}
+              />
+            </ScrollArea>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
-
-
-
-
   )
 }
 

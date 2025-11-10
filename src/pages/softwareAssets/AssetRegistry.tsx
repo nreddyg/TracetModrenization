@@ -107,7 +107,6 @@ const SoftwareDataColumns = [
     { id: 'NumberOfLicenses', accessorKey: "NumberOfLicenses", header: "Total Licenses" },
     { id: 'AssignedLicenseCount', accessorKey: "AssignedLicenseCount", header: "Assigned" ,
         cell: ({ row }: any) => {
-            console.log(row.original)
         const assigned = row.original.NumberOfLicenses as number;
         const total = row.original.NumberOfLicenses;
         const percentage = (assigned / total) * 100;
@@ -240,7 +239,6 @@ const SoftwareDataColumns = [
     ]
 
     const handleRowDelete = (row) => {
-        console.log("row", row.id)
         const data = [...dataSource]
         data.splice(row.id, 1)
         setDatasource(data)
@@ -271,7 +269,6 @@ const SoftwareDataColumns = [
 
 
     const setLookupsDataInJson = (lookupsData: allResponsesType): void => {
-        console.log("look",lookupsData)
         const arr = Object.keys(lookupsData)
         const opts: { [key: string]: any } = {}
         arr.forEach((obj) => {
@@ -659,7 +656,7 @@ const SoftwareDataColumns = [
 
 
     return (
-        <div className="h-full overflow-y-scroll bg-gray-50/30">
+        <div className="h-full overflow-y-auto bg-gray-50/30">
             <div className="p-4 sm:p-4 space-y-4 sm:space-y-4">
                 {/* Header Section */}
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">

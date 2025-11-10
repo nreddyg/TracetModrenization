@@ -1,7 +1,6 @@
 
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
-
 dayjs.extend(customParseFormat);
 
 //you can format the dates into various formats like dd/mm/yyyy || dd-mm-yyyy || dd-mm-yy || mm-dd-yyyy || yyyy-mm-dd etc other formats
@@ -24,19 +23,14 @@ export function formatDateToDDMMYYYY(dateTimeStr: string) {
   );
 }
 
-
 //you can format the dates into various formats like dd/mm/yyyy || dd-mm-yyyy || dd-mm-yy || mm-dd-yyyy || yyyy-mm-dd etc other formats and also accepts String in in given format
-
 export const formatDates = (date: Date | string | number, format: string = 'YYYY-MM-DD'): string => {
   if (!date) return '';
-  // If the input is a string, parse it using a specific format
   if (typeof date === 'string') {
-    return dayjs(date, format, true).format(format);  // true => strict parsing
+    return dayjs(date, format, true).format(format);
   }
-  // For Date objects or timestamps
   return dayjs(date).format(format);
 };
-
 
 //upload helper function 
  export const fileToByteArray = (blob: Blob): Promise<Uint8Array> => {
@@ -61,6 +55,7 @@ export const formatDates = (date: Date | string | number, format: string = 'YYYY
       default: return 'bg-gray-100 text-gray-800';
     }
 };
+
 //get a color based on the status
 export const getStatusColor = (status: string) => {
     switch (status) {
@@ -71,6 +66,7 @@ export const getStatusColor = (status: string) => {
       default: return 'bg-gray-100 text-gray-800';
     }
 };
+
 //get a color based on the activity status
 export const getActivityStatusColor = (status: string) => {
     switch (status) {
@@ -141,7 +137,6 @@ const statusColors: Record<string, string> = {
   Closed: GRAY,
 };
 export const getColorForStatus = (status: string): string => statusColors[status] || GRAY;
-
 
 export const convertOrgLogoFromApi = async (apiData: {
   OrganizationLogo: string;

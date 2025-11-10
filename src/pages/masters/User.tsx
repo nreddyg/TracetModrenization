@@ -488,7 +488,7 @@ const User = () => {
     }
   };
   return (
-    <div className="h-full bg-gray-50 flex flex-col ">
+    <div className="h-full overflow-y-auto bg-gray-50 flex flex-col ">
       <div className="flex flex-1 overflow-hidden   ">
         {dataSource.length !== 0 &&
           <div
@@ -751,7 +751,7 @@ export default User;
 //       } else {
 //         setDataSource([]);
 //       }
-//     }).catch(err => console.log(err)).finally(() => {
+//     }).catch(err => {}).finally(() => {
 //       dispatch(setLoading(false));
 //     });
 //   }

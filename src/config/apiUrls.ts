@@ -18,7 +18,6 @@ export const URL_GET_SR_TYPE_LOOKUPS = "/api/ServiceDeskAPI/GetServiceRequestTyp
 export const URL_CREATE_SERVICE_REQUEST = "/api/ServiceDeskAPI/CreateServiceRequestwithAdditionalFields";
 export const URL_SAVE_FILE_UPLOAD = "/api/ServiceDeskAPI/SaveFileUploadByServiceRequestId";
 export const URL_GET_SR_ASSIGN_TO_LOOKUPS = "/api/ServiceDeskAPI/GetServiceRequestAssignToLookups";
-export const URL_GET_HEIRARCHY_DETAILS_LAST_LEVEL = "/api/Masters/GetHeirarchyDetailsLastLevelByCompanyId";
 export const URL_GET_SR_REQUESTED_BY_LOOKUPS = "/api/ServiceDeskAPI/GetServiceRequestRequestedByLookups";
 export const URL_GET_SR_CUSTOMER_LOOKUPS = "/api/ServiceDeskAPI/GetServiceRequestCustomerLookups";
 export const URL_GET_SR_ADDITIONAL_FIELDS = "/api/ServiceDeskAPI/GetServiceRequestsAdditionalFieldsByServiceRequestTypeName";
@@ -39,12 +38,14 @@ export const URL_GET_UPLOADED_FILES_API_BY_SERVICE_REQUEST_ID = '/api/ServiceDes
 export const URL_POST_DELETE_UPLOADED_FILES = '/api/ServiceDeskAPI/DeleteFileUploadById';
 export const URL_POST_UPDATE_SERVICE_REQUEST = '/api/ServiceDeskAPI/UpdateServiceRequestwithAdditionalFields';
 export const URL_GET_SR_ASSETS_LIST = '/api/ServiceDeskAPI/GetServiceRequestAssetsList';
+
 //userGroup screen
 export const URL_GET_USER_GROUP_TABLE_DATA = "/api/ServiceDeskAPI/GetUserGroupList";
 export const URL_GET_USER_GROUP_BY_ID = '/api/ServiceDeskAPI/GetUserGroup';
 export const URL_ADD_USER_GROUP = "/api/ServiceDeskAPI/AddUserGroupDetails";
 export const URL_UPDATE_USER_GROUP = "/api/ServiceDeskAPI/UpdateUserGroupDetails";
 export const URL_DELETE_USER_GROUP = "/api/ServiceDeskAPI/DeleteUserGroup";
+
 //Reports 
 export const URL_GET_REPORT_FOR_SR_DETAILS = "/api/ServiceDeskAPI/GetServiceRequestDetailsReport";
 export const URL_GET_REPORT_FOR_SR_DETAILS_COLUMNS = "/api/ServiceDeskAPI/GetDefaultColumnsServiceRequests";
@@ -55,23 +56,14 @@ export const URL_GET_SR_SEVERITY = "api/ServiceDeskAPI/GetServiceRequestSeverity
 export const URL_GET_SR_PRIORITY = 'api/ServiceDeskAPI/GetServiceRequestPriorityLookups';
 export const URL_GET_MAIN_CATEGORY_DETAILS = "/api/Masters/GetCategoryLookups";
 export const URL_GET_SUB_CATEGORY_DETAILS = "/api/Masters/GetSubCategoryLookups";
-export const URL_GET_DEPARTMENT_DETAILS = "api/Masters/GetDepartmentDetailsByCompanyId";
+export const URL_GET_DEPARTMENT_DETAILS = "/api/Masters/GetDepartmentDetailsByCompanyId";
 export const URL_GET_SLA_STATUS = "api/ServiceDeskAPI/GetServiceRequestSLAStatusLookups";
 export const URL_GET_LEVEL_FIVE_COMPANY = "api/Masters/GetHeirarchyDetailsByCompanyId";
 export const URL_POST_COLUMNS_FOR_SR_DETAILS = "api/ServiceDeskAPI/SaveDefaultServiceRequestDetailsColumns";
 export const URL_POST_COLUMNS_FOR_SR_MET_VIOLATED = "api/ServiceDeskAPI/SaveDefaultServiceRequestSLADetailsColumns";
 export const URL_ADDITIONAL_FIELD_CONFIG_DETAILS = "api/Settings/GetAllAdditionalFieldConfigurationDetails"
 
-// export const URL_GET_WORK_ORDER_LIST="/api/ServiceDeskAPI/DeleteUserGroup";
-// export const URL_GET_WORK_ORDER_DETAILS="/api/ServiceDeskAPI/DeleteUserGroup";
-// export const URL_GET_SCHEDULED_WORK_ORDER_LIST="/api/ServiceDeskAPI/DeleteUserGroup";
-// export const URL_GET_WORK_ORDER_TASK_DETAILS="/api/ServiceDeskAPI/DeleteUserGroup";
-// export const URL_GET_WORK_ORDER_PENALITY="/api/ServiceDeskAPI/DeleteUserGroup";
-
-
-
 //configuration
-
 export const URL_GET_SERVICE_REQUEST_TYPES = '/api/ServiceDeskAPI/GetServiceRequestTypes'
 export const URL_GET_SERVICE_REQUEST_TYPES_BY_ID = '/api/ServiceDeskAPI/GetServiceRequestTypesById'
 export const URL_GET_VENDOR_DETAILS_BY_COMPID = "/api/Masters/GetVendorDetailsByCompanyId"
@@ -101,7 +93,6 @@ export const URL_DUPLICATE_UPDATE_CHECK_NO = '/api/ServiceDeskAPI/CheckUpdateDup
 export const URL_GET_USER_LIST = '/api/Masters/GetUserDetailsByCompanyId';
 export const URL_GET_DEPARTMENTS = '/api/Masters/GetDepartmentLookups';
 export const URL_GET_ROLES = '/api/Masters/GetUserRoleNameLookups';
-export const URL_GET_CATEGORIES = '/api/Masters/GetCategoryLookups';
 export const URL_POST_NEW_USER = '/api/Masters/AddUserDetails';
 export const URL_DELETE_USER = '/api/Masters/DeleteUserById';
 export const URL_POST_UPDATE_USER = '/api/Masters/UpdateUserDetails';
@@ -163,16 +154,10 @@ export const URL_GET_LICENSE_ASSIGNMENT_LIST = '/api/ITAssetAPI/GetLicenseAssign
 export const URL_DELETE_LICENSE_ASSIGNMENT_BY_ID = '/api/ITAssetAPI/DeleteLicenseAssignment';
 
 // Master's Department API's
-// export const URL_POST_DEPARTMENT_DATA=`/api/Masters/GetDepartmentDetailsByCompanyId`;
-export const URL_GET_DEPARTMENT_DATA = `/api/Masters/GetDepartmentDetailsByCompanyId`;
 export const URL_POST_DEPARTMENT_DATA = `/api/Masters/SubmitdepartmentLevels`;
 export const URL_DELETE_DEPARTMENT_DATA = `/api/Masters/DeleteDepartmentDetailsById`;
-export const URL_GET_DEPARTMENT_DATA_BY_DEPId = `/api/Masters/GetDepartmentDetailsByCompanyId`;
 
-// hierarchy Level Data based on Id
-export const HIERARCHY_LEVEL_DATA = `/api/Settings/GetHierarchyLevelsData`;
 // Master's Company Hierarchy Screen
-
 export const URL_GET_COMPANY_HIERARCHY_DATA = `/api/Masters/GetHeirarchyDetailsByCompanyId`;
 export const URL_GET_STATE_LOOKUP_DATA = `/api/Masters/StateLookup`;
 export const URL_POST_COMPANY_HIERARCHY_DATA = `/api/Masters/SubmitBrachLevels`;

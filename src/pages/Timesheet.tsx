@@ -202,7 +202,6 @@ const Timesheet = () => {
           pendingHours={pendingHours}
           status="draft"
           onSubmit={handleSubmitTimesheet}
-          onSaveDraft={() => console.log('Draft saved')}
           isOpen={showSubmissionPanel}
           onClose={() => setShowSubmissionPanel(false)}
         />

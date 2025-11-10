@@ -34,6 +34,7 @@ interface SoftwareData {
     LicenseKey: string,
     LicenseKeyId?: string,
     AssignmentDate: string,
+    AssignmentExpiryDate:string,
     ExpiryDate: string,
     Status: string
 }
@@ -53,6 +54,7 @@ const LicenseAssignment = () => {
         { id: 'Licensekey', accessorKey: "LicenseKey", header: "License Key" },
         { id: 'AssignmentDate', accessorKey: "AssignmentDate", header: "Assignment Date" },
         { id: 'ExpiryDate', accessorKey: "ExpiryDate", header: "License Expiry Date" },
+        { id: 'AssignmentExpiryDate', accessorKey: "AssignmentExpiryDate", header: "Assignment Expiry Date" },
         { id: 'Status', accessorKey: 'Status', header: 'Status' }
     ]);
     const [fields, setFields] = useState<BaseField[]>(SOFTWARE_DB);
@@ -89,7 +91,7 @@ const LicenseAssignment = () => {
                     let licenseOptions = []
                     if (res.success && Array.isArray(res.data) && res.data?.length > 0) {
                         if (res.data[0].LicenseDetails && Array.isArray(res.data[0].LicenseDetails) && res.data[0].LicenseDetails?.length > 0) {
-                            licenseOptions = res.data[0].LicenseDetails.filter(k => !k.LicenseAssignToId && k.Status === "Active").map(ele => ({ label: ele.LicenseKey, value: ele.LicenseDetailId }));
+                            licenseOptions = res.data[0].LicenseDetails.filter(k => !k.LicenseAssignToId && k.Status === "Active").map(ele => ({...ele,label: ele.LicenseKey, value: ele.LicenseDetailId }));
                             setLookupsDataInJson({ LicenseKeyId: licenseOptions })
                         }
                     }
@@ -161,8 +163,8 @@ const LicenseAssignment = () => {
                         SoftwareName: '',
                         LicenseKeyId: data.LicenseKeyId,
                         LicenseKey: licenseKey || data.LicenseKey,
-                        AssignmentDate: formatDate(data.AssignmentDate, 'DD/MM/YYYY'),
-                        AssignmentExpiryDate: selectedLicenseData?.LicenseExpiryDate || '',
+                        AssignmentDate:data.AssignmentDate? formatDate(data.AssignmentDate,'DD/MM/YYYY') || '':'',
+                        AssignmentExpiryDate:data.AssignmentExpiryDate? formatDate(data.AssignmentExpiryDate,'DD/MM/YYYY')||'':'',
                         Status: selectedLicenseData?.Status || '',
                         Notes: data.Notes || '',
                     },
@@ -232,6 +234,17 @@ const LicenseAssignment = () => {
     const renderField = (field: BaseField) => {
         const { name, label, fieldType, isRequired, validationPattern, patternErrorMessage, show = true } = field;
         let isdisable = editingRecord ? true : false
+        let minDate = editingRecord ? null : (() => {
+            const d = new Date();
+            d.setDate(d.getDate() - 1);
+            return d;
+        })();
+        let licenseOptions=fields.find(obj=>obj.name==='LicenseKeyId').options;
+        let licenseObj=licenseOptions? licenseOptions.find(obj=>obj.value==watch('LicenseKeyId')) || null:null
+        let maxDate=licenseObj ? licenseObj['LicenseExpiryDate']|| null:null;
+        if(maxDate){
+            setValue('AssignmentExpiryDate',new Date(maxDate))
+        }
         if (name === "LicenseKeyId" && editingRecord) {
             return null
         }
@@ -274,9 +287,11 @@ const LicenseAssignment = () => {
                         render={({ field: ctrl }) => (
                             <ReusableDatePicker
                                 {...field}
-                                disabled={isdisable}
+                                disabled={(!watch('LicenseKeyId') && name==='AssignmentExpiryDate') || isdisable}
                                 value={ctrl.value}
                                 onChange={ctrl.onChange}
+                                minDate={minDate}
+                                maxDate={name==='AssignmentExpiryDate' && maxDate ? new Date(maxDate) : null}
                                 error={errors[name]?.message as string}
                             />
                         )}
@@ -396,7 +411,7 @@ const LicenseAssignment = () => {
                                 <div className="space-y-4">
                                     <span className='text-2xl'>Assign License To Employee</span>
                                     <div className={`grid xxs:grid-cols-1 xs2:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-6`}>
-                                        {getFieldsByNames(['EmployeeId', 'DepartmentId', 'SoftwareId', 'LicenseKeyId', 'AssignmentDate']).map((field) => {
+                                        {getFieldsByNames(['EmployeeId', 'DepartmentId', 'SoftwareId', 'LicenseKeyId', 'AssignmentDate','AssignmentExpiryDate']).map((field) => {
                                             return (renderField(field))
 
                                         })}

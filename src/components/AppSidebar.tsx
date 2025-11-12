@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   Sidebar,
@@ -53,7 +53,7 @@ import { cn } from '@/lib/utils';
 
 interface NavItem {
   label: string;
-  icon: React.ComponentType<any>;
+  icon?: React.ComponentType<any>;
   link: string;
   children?: NavItem[];
 }
@@ -103,27 +103,27 @@ const navigation: NavItem[] = [
     children: [
       {
         label: 'New Service Request',
-        icon: AlertCircle,
+        // icon: AlertCircle,
         link: '/service-desk/create-ticket',
       },
       {
         label: 'My Workbench',
-        icon: Users,
+        // icon: Users,
         link: '/service-desk/my-workbench',
       },
       {
         label: 'My Requests',
-        icon: FileText,
+        // icon: FileText,
         link: '/service-desk/my-requests',
       },
       {
         label: 'All Service Requests',
-        icon: FileText,
+        // icon: FileText,
         link: '/service-desk/all-requests',
       },
       {
         label: 'Ticket Progress Dashboard',
-        icon: TrendingUp,
+        // icon: TrendingUp,
         link: '/service-desk/ticket-progress-dashboard',
       },
 
@@ -139,22 +139,22 @@ const navigation: NavItem[] = [
       // },
       {
         label: 'User Groups',
-        icon: Users,
+        // icon: Users,
         link: '/service-desk/user-groups',
       },
       {
         label: 'Configuration',
-        icon: Settings,
+        // icon: Settings,
         link: '/service-desk/configuration',
       },
       {
         label: 'Subscription',
-        icon: Star,
+        // icon: Star,
         link: '/service-desk/subscription',
       },
       {
         label: 'Reports',
-        icon: BarChart,
+        // icon: BarChart,
         link: '/service-desk/reports',
       },
       // {
@@ -231,24 +231,24 @@ const navigation: NavItem[] = [
   //           ],
 
   //         },
-          // {
-          //   label: 'Service Maintenance',
-          //   icon: Building2,
-          //   link: '/servicemaintenance',
-          //   children: [
-          //     {
-          //       label: 'Service Locations',
-          //       icon: Building2,
-          //       link: '/masters/servicemaintenance/servicelocations',
-          //     },
-          //     {
-          //       label: 'Product Masters',
-          //       icon: Building2,
-          //       link: '/masters/servicemaintenance/productmaster',
-          //     },
-          //   ],
+  // {
+  //   label: 'Service Maintenance',
+  //   icon: Building2,
+  //   link: '/servicemaintenance',
+  //   children: [
+  //     {
+  //       label: 'Service Locations',
+  //       icon: Building2,
+  //       link: '/masters/servicemaintenance/servicelocations',
+  //     },
+  //     {
+  //       label: 'Product Masters',
+  //       icon: Building2,
+  //       link: '/masters/servicemaintenance/productmaster',
+  //     },
+  //   ],
 
-          // },
+  // },
 
   //         ,
 
@@ -462,42 +462,47 @@ const navigation: NavItem[] = [
     children: [
       {
         label: 'Company',
-        icon: Building2,
+        // icon: Building2,
         link: '/company',
         children: [
           {
             label: 'Organization',
-            icon: Building2,
+            // icon: Building2,
             link: '/masters/company/organization',
           },
           {
             label: 'Company Hierarchy',
-            icon: Building2,
+            // icon: Building2,
             link: '/masters/company/company-hierarchy',
           },
           {
+            label: 'Asset Location',
+            // icon: Building2,
+            link: '/masters/company/asset-location',
+          },
+          {
             label: 'Department',
-            icon: Building2,
+            // icon: Building2,
             link: '/masters/company/department',
           },
           {
             label: 'Cost Center',
-            icon: DollarSign,
+            // icon: DollarSign,
             link: '/masters/company/costcenter',
           },
           {
             label: 'User',
-            icon: User,
+            // icon: User,
             link: '/masters/company/user',
           },
           {
             label: 'Vendor',
-            icon: UserCheck,
+            // icon: UserCheck,
             link: '/masters/company/vendor',
           },
           {
             label: 'Customer',
-            icon: UserCog,
+            // icon: UserCog,
             link: '/masters/company/customer',
           },
           // {
@@ -514,83 +519,83 @@ const navigation: NavItem[] = [
       },
       {
         label: 'Fixed Assets',
-        icon: Building2,
+        // icon: Building2,
         link: '/company',
         children: [
           {
             label: 'Asset Category',
-            icon: Building2,
+            // icon: Building2,
             link: 'masters/fixed-assets/asset-category',
           },
           {
             label: 'Cost Breakup Attributes',
-            icon: DollarSign,
+            // icon: DollarSign,
             link: 'masters/fixed-assets/costbreakup',
           },
           {
             label: 'User Attributes',
-            icon: DollarSign,
+            // icon: DollarSign,
             link: 'masters/fixed-assets/userattributes',
           }
         ]
       },
-         {
+      {
         label: 'Depreciation',
-        icon: Building2,
+        // icon: Building2,
         link: '/depreciation',
         children: [
           {
             label: 'Books',
-            icon: BarChart,
+            // icon: BarChart,
             link: '/masters/depreciation/book',
           },
           {
             label: 'Asset Category Book Category Mapping',
-            icon: BarChart,
+            // icon: BarChart,
             link: '/masters/depreciation/assetcategorybookcategorymapping',
           },
         ],
       },
       {
         label: 'Consumables',
-        icon: Building2,
+        // icon: Building2,
         link: '/consumables',
         children: [
           {
             label: 'Store',
-            icon: BarChart,
+            // icon: BarChart,
             link: '/masters/consumables/store',
           },
           {
             label: 'Item Master',
-            icon: BarChart,
+            // icon: BarChart,
             link: '/masters/consumables/item-master',
           },
-           {
+          {
             label: "Units Of Measure",
-            icon: BarChart,
+            // icon: BarChart,
             link: '/masters/consumables/unitsofmeasure',
-           },
+          },
           {
             label: 'Item Category',
-            icon: BarChart,
+            // icon: BarChart,
             link: '/masters/consumables/item-category',
           },
         ],
       },
       {
         label: 'Service Maintenance',
-        icon:  Wrench,
+        // icon:  Wrench,
         link: '/servicemaintenance',
         children: [
           {
             label: 'Service Locations',
-            icon:MapPin,
+            // icon:MapPin,
             link: '/masters/servicemaintenance/servicelocations',
           },
           {
             label: 'Product Masters',
-            icon: Package,
+            // icon: Package,
             link: '/masters/servicemaintenance/productmaster',
           },
         ],
@@ -598,7 +603,7 @@ const navigation: NavItem[] = [
       },
       {
         label: 'Reports',
-        icon: FileText,
+        // icon: FileText,
         link: '/masters/reports',
       },
       // masters/fixed-assets/asset-category
@@ -611,29 +616,29 @@ const navigation: NavItem[] = [
     children: [
       {
         label: 'Asset Registry',
-        icon: Package,
+        // icon: Package,
         link: '/software-assets/asset-registry',
       },
       {
         label: 'License Assignment',
-        icon: Settings,
+        // icon: Settings,
         link: '/software-assets/license-assignment',
       },
-      {
-        label: 'Usage Tracking',
-        icon: HardHat,
-        link: '/software-assets/usage-tracking',
-      },
-      {
-        label: 'Compliance & Audit',
-        icon: Cog,
-        link: '/software-assets/compliance&audit',
-      },
-      {
-        label: 'Reports',
-        icon: Cog,
-        link: '/software-assets/reports',
-      },
+      // {
+      //   label: 'Usage Tracking',
+      //   icon: HardHat,
+      //   link: '/software-assets/usage-tracking',
+      // },
+      // {
+      //   label: 'Compliance & Audit',
+      //   icon: Cog,
+      //   link: '/software-assets/compliance&audit',
+      // },
+      // {
+      //   label: 'Reports',
+      //   icon: Cog,
+      //   link: '/software-assets/reports',
+      // },
       // {
       //   label: 'Advanced Setup',
       //   icon: Settings,
@@ -648,7 +653,7 @@ const navigation: NavItem[] = [
     children: [
       {
         label: 'System Configuration',
-        icon: Settings,
+        // icon: Settings,
         link: '/settings/system-configuration',
       },
       // {
@@ -672,8 +677,22 @@ const navigation: NavItem[] = [
 const AppSidebar: React.FC = () => {
   const location = useLocation();
   const [searchTerm, setSearchTerm] = useState('');
-  const { state,toggleSidebar } = useSidebar();
+  const { state, toggleSidebar } = useSidebar();
   const collapsed = state === 'collapsed';
+  const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
+  const toggleMenu = (label: string) => {
+    setOpenMenus(prev => ({
+      ...prev,
+      [label]: !prev[label],
+    }));
+  };
+
+  useEffect(() => {
+    navigation.forEach(item => {
+      if (isSubMenuOpen(item))
+        setOpenMenus(prev => ({ ...prev, [item.label]: true }));
+    });
+  }, [location]);
   const isActive = (link: string) => {
     return location.pathname.includes(link);
   };
@@ -736,12 +755,12 @@ const AppSidebar: React.FC = () => {
   const renderMenuItem = (item: NavItem, depth: number = 0) => {
     if (item.children && !collapsed) {
       return (
-        <Collapsible key={item.label} className={cn("w-full")} defaultOpen={isSubMenuOpen(item)}>
+        <Collapsible key={item.label} className={cn("w-full")} open={openMenus[item.label] ?? false} onOpenChange={() => toggleMenu(item.label)}>
           <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip={item.label}>
               <CollapsibleTrigger className="flex items-center justify-between w-full hover:bg-blue-50">
-                <div className="flex items-center space-x-3">
-                  <item.icon className="h-4 w-4"/>
+                <div className="flex items-center space-x-3 gap-1">
+                  {item.icon && <item.icon className="h-4 w-4" />}
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -756,7 +775,11 @@ const AppSidebar: React.FC = () => {
                   </TooltipProvider>
                 </div>
                 <div className="group-data-[collapsible=icon]:hidden">
-                  {isSubMenuOpen(item) ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                  {openMenus[item.label] ? (
+                    <ChevronDown className="h-4 w-4" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4" />
+                  )}
                 </div>
               </CollapsibleTrigger>
             </SidebarMenuButton>
@@ -765,24 +788,25 @@ const AppSidebar: React.FC = () => {
                 {item.children.map((child) => {
                   if (child.children) {
                     return (
-                      <Collapsible key={child.label} className="w-full" defaultOpen={isNestedSubMenuOpen(child)}>
+                      <Collapsible key={child.label} className="w-full" open={openMenus[child.label] ?? false} onOpenChange={() => toggleMenu(child.label)}>
                         <SidebarMenuSubItem>
                           <SidebarMenuSubButton asChild>
                             <CollapsibleTrigger className="flex items-center justify-between w-full hover:bg-blue-50">
                               <div className="flex items-center space-x-2">
-                                <child.icon className="h-3 w-3" />
+                                {child.icon ? <child.icon className="h-3 w-3" /> : <pre></pre>}
                                 <span className="truncate" title={child.label}>{child.label}</span>
                               </div>
-                              {isNestedSubMenuOpen(child) ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+                              {/* {isNestedSubMenuOpen(child) ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />} */}
+                              {openMenus[child.label] ? <ChevronDown /> : <ChevronRight />}
                             </CollapsibleTrigger>
                           </SidebarMenuSubButton>
                           <CollapsibleContent>
-                            <SidebarMenuSub className="ml-4">
+                            <SidebarMenuSub className="ml-0">
                               {child.children.map((grandChild) => (
                                 <SidebarMenuSubItem key={grandChild.label}>
                                   <SidebarMenuSubButton asChild isActive={isActive(grandChild.link)}>
                                     <Link to={grandChild.link} className="flex items-center space-x-2">
-                                      <grandChild.icon className="h-3 w-3" />
+                                      {grandChild.icon ? <grandChild.icon className="h-3 w-3" /> : <pre></pre>}
                                       <span
                                         className="truncate"
                                         title={String(grandChild.label)}
@@ -800,13 +824,15 @@ const AppSidebar: React.FC = () => {
                   return (
                     <SidebarMenuSubItem key={child.label}>
                       <SidebarMenuSubButton asChild isActive={isActive(child.link)}>
-                        <Link to={child.link} className="flex items-center space-x-2">
-                          <child.icon className="h-3 w-3" />
-                          <span
-                            className="truncate"
-                            title={String(child.label)}
-                          >{child.label}</span>
-                        </Link>
+                        <div>
+                          <Link to={child.link} className="flex items-center space-x-2">
+                            {child?.icon ? <child.icon className="h-3 w-3" /> : <pre></pre>}
+                            <span
+                              className="truncate"
+                              title={String(child.label)}
+                            >{child.label}</span>
+                          </Link>
+                        </div>
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                   );
@@ -819,11 +845,11 @@ const AppSidebar: React.FC = () => {
     }
 
     return (
-      
+
       <SidebarMenuItem key={item.label}>
         <SidebarMenuButton asChild isActive={isActive(item.link)} tooltip={collapsed ? item.label : undefined}>
           <Link to={item.link} className="flex items-center space-x-1 hover:bg-blue-50">
-            <item.icon className="h-4 w-4 shrink-0" onClick={toggleSidebar}/>
+            <item.icon className="h-4 w-4 shrink-0" onClick={toggleSidebar} />
             {!collapsed && (
               <TooltipProvider>
                 <Tooltip>
@@ -841,19 +867,19 @@ const AppSidebar: React.FC = () => {
           </Link>
         </SidebarMenuButton>
       </SidebarMenuItem>
-       
+
     );
   };
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader>
+      <SidebarHeader className='py-[18px] shadow-[0_2px_8px_0_rgba(0,0,0,0.05)]'>
         <Link to="/" className="flex items-center space-x-2 px-2 py-1">
           {!collapsed ? (
             <div className="flex flex-col group-data-[collapsible=icon]:hidden">
-              <span className="text-xl font-bold text-gray-300">Tracet</span>
+              <div className="text-xl font-bold text-gray-300">Tracet</div>
             </div>
-          ):<div>T</div>}
+          ) : <div>T</div>}
         </Link>
       </SidebarHeader>
 

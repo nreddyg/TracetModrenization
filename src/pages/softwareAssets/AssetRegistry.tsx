@@ -97,37 +97,38 @@ const AssetRegistry = () => {
         if (companyId)
             fetchAllLookups()
     }, [companyId])
-const SoftwareDataColumns = [
-    { id: 'SoftwareId', accessorKey: "SoftwareId", header: "Software ID" },
-    { id: 'SoftwareName', accessorKey: "SoftwareName", header: "Software Name" },
-    { id: 'Version', accessorKey: "Version", header: "Version" },
-    { id: 'VendorId', accessorKey: "VendorId", header: "Vendor" },
-    { id: 'CategoryId', accessorKey: "CategoryId", header: "Category" },
-    { id: 'AssignmentDate', accessorKey: "LicenseType", header: "License Type" },
-    { id: 'NumberOfLicenses', accessorKey: "NumberOfLicenses", header: "Total Licenses" },
-    { id: 'AssignedLicenseCount', accessorKey: "AssignedLicenseCount", header: "Assigned" ,
-        cell: ({ row }: any) => {
-        const assigned = row.original.NumberOfLicenses as number;
-        const total = row.original.NumberOfLicenses;
-        const percentage = (assigned / total) * 100;
-        return (
-          <div className="flex items-center gap-2">
-            <span>{assigned}</span>
-            <div className="w-16 h-2 bg-muted rounded-full">
-              <div 
-                className="h-full bg-primary rounded-full" 
-                style={{ width: `${percentage}%` }}
-              />
-            </div>
-          </div>
-        );
-    }
-     },
-    // { id: 'Status', accessorKey: "Status", header: "Status" },
-    { id: 'AssignedLicenseTotalCost', accessorKey: "AssignedLicenseTotalCost", header: "Total Cost",  }
-      
-]
- const [columns, setColumns] = useState<ColumnDef<SoftwareData>[]>(SoftwareDataColumns);
+    const SoftwareDataColumns = [
+        { id: 'SoftwareId', accessorKey: "SoftwareId", header: "Software ID" },
+        { id: 'SoftwareName', accessorKey: "SoftwareName", header: "Software Name" },
+        { id: 'Version', accessorKey: "Version", header: "Version" },
+        { id: 'VendorId', accessorKey: "VendorId", header: "Vendor" },
+        { id: 'CategoryId', accessorKey: "CategoryId", header: "Category" },
+        { id: 'AssignmentDate', accessorKey: "LicenseType", header: "License Type" },
+        { id: 'NumberOfLicenses', accessorKey: "NumberOfLicenses", header: "Total Licenses" },
+        {
+            id: 'AssignedLicenseCount', accessorKey: "AssignedLicenseCount", header: "Assigned",
+            cell: ({ row }: any) => {
+                const assigned = row.original.NumberOfLicenses as number;
+                const total = row.original.NumberOfLicenses;
+                const percentage = (assigned / total) * 100;
+                return (
+                    <div className="flex items-center gap-2">
+                        <span>{assigned}</span>
+                        <div className="w-16 h-2 bg-muted rounded-full">
+                            <div
+                                className="h-full bg-primary rounded-full"
+                                style={{ width: `${percentage}%` }}
+                            />
+                        </div>
+                    </div>
+                );
+            }
+        },
+        // { id: 'Status', accessorKey: "Status", header: "Status" },
+        { id: 'AssignedLicenseTotalCost', accessorKey: "AssignedLicenseTotalCost", header: "Total Cost", }
+
+    ]
+    const [columns, setColumns] = useState<ColumnDef<SoftwareData>[]>(SoftwareDataColumns);
     const tableColumnsData = [
         {
             accessorKey: "LicenseKey",
@@ -226,9 +227,9 @@ const SoftwareDataColumns = [
             header: "Actions  ",
             size: 70,
             cell: ({ row }) => (
-                <div className={cn('flex justify-start',(row.id == dataSource.length - 1) && editRecordId!=="" && "justify-center")}>
+                <div className={cn('flex justify-start', (row.id == dataSource.length - 1) && editRecordId !== "" && "justify-center")}>
 
-                    {row.id != 0 && editRecordId=="" && <Trash2 height={18} className='display-inline text-red-400 cursor-pointer '
+                    {row.id != 0 && editRecordId == "" && <Trash2 height={18} className='display-inline text-red-400 cursor-pointer '
                         onClick={() => handleRowDelete(row)} />}
 
                     {row.id == dataSource.length - 1 && <Plus className='display-inline   cursor-pointer text-blue-500' onClick={() => { setDatasource([...dataSource, { ...defaultRow, key: dataSource.length }]); form.setValue("NumberOfLicenses", parseInt(watch("NumberOfLicenses")) + 1) }} height={18} />}
@@ -256,7 +257,7 @@ const SoftwareDataColumns = [
             if (category.status === "fulfilled" && category.value.data && category.value.success && category.value.data) {
                 data["CategoryId"] = { data: category.value.data, label: "CategoryName", value: "CategoryId" }
             }
-            if (getAllTableData.status === "fulfilled" && getAllTableData.value.success && getAllTableData.value.data && (getAllTableData.value.data.status==undefined)) {
+            if (getAllTableData.status === "fulfilled" && getAllTableData.value.success && getAllTableData.value.data && (getAllTableData.value.data.status == undefined)) {
                 setGetAllTableData((getAllTableData.value.data).reverse())
             }
             setLookupsDataInJson(data)
@@ -498,24 +499,24 @@ const SoftwareDataColumns = [
     }
     const handleEdit = (data: any): void => {
         dispatch(setLoading(true))
-        setTimeout(()=>{
+        setTimeout(() => {
 
-              form.reset({ ...form.getValues(), ...data })
-             let fieldsData = [...fields]
-                fieldsData.forEach((obj) => {
-                    if (obj.name == "NumberOfLicenses" || obj.name == "LicenseType") {
-                        obj.disabled = true
-                    }
-                })
-                setFields(fieldsData)
+            form.reset({ ...form.getValues(), ...data })
+            let fieldsData = [...fields]
+            fieldsData.forEach((obj) => {
+                if (obj.name == "NumberOfLicenses" || obj.name == "LicenseType") {
+                    obj.disabled = true
+                }
+            })
+            setFields(fieldsData)
 
-        setDatasource(generateRowsInTable(0, 0, data.LicenseDetails))
-        setIsOpenLicenseCard(true)
-        setEditRecordId(data.SoftwareId)
-          dispatch(setLoading(false))
+            setDatasource(generateRowsInTable(0, 0, data.LicenseDetails))
+            setIsOpenLicenseCard(true)
+            setEditRecordId(data.SoftwareId)
+            dispatch(setLoading(false))
 
-        },2000)
-       
+        }, 2000)
+
     }
     const handleReset = () => {
         setDatasource([])
@@ -529,7 +530,7 @@ const SoftwareDataColumns = [
         setFields(fieldsData)
         setEditRecordId("")
         setDeletingRecord(null)
-        
+
 
     }
     const deleteSoftwareAsset = async (id: string) => {
@@ -574,36 +575,36 @@ const SoftwareDataColumns = [
         // fetchAllCustomerList();
         getSoftwaresListAPI(companyId)
     }, [toast]);
-    const getLicenseDetails = (id?: string):any => {
+    const getLicenseDetails = (id?: string): any => {
         let licenseDetails = []
-       
+
         dataSource.some((obj) => {
             let licenseKey = obj.LicenseKey
             let licenseCost = obj.LicenseCost
             let expiryDate = obj.LicenseExpiryDate
 
-            if (licenseKey && licenseCost && (watch("LicenseType") == "Perpetual") ||(expiryDate && watch("LicenseType") !== "Perpetual") ){
+            if (licenseKey && licenseCost && (watch("LicenseType") == "Perpetual") || (expiryDate && watch("LicenseType") !== "Perpetual")) {
                 licenseDetails.push({
                     "LicenseDetailId": id ? obj.LicenseDetailId : "",
                     "LicenseKey": licenseKey,
                     "LicenseCost": licenseCost,
                     "ExpiryDate": (typeof (expiryDate) == "string") ? expiryDate : formatDates(expiryDate, 'YYYY/MM/DD'),
-                                   
+
                     "Status": obj.Status
                 })
-              
-            }else{
 
-                 licenseDetails=[]
+            } else {
+
+                licenseDetails = []
                 return true
-            
+
             }
-             
+
         })
-         return licenseDetails
+        return licenseDetails
     }
     const handleSave = async (data) => {
-        let LicenseDetails = editRecordId ?getLicenseDetails(editRecordId) : getLicenseDetails();
+        let LicenseDetails = editRecordId ? getLicenseDetails(editRecordId) : getLicenseDetails();
         if (LicenseDetails.length > 0) {
             const payload = {
                 "SoftwareLicenses": [{
@@ -657,102 +658,96 @@ const SoftwareDataColumns = [
 
     return (
         <div className="h-full overflow-y-auto bg-gray-50/30">
-            <div className="p-4 sm:p-4 space-y-4 sm:space-y-4">
-                {/* Header Section */}
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                    <div className="relative">
-                        {/* <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                        <Input
-                            placeholder="Search tickets..."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            className="pl-10 bg-hsl(214.3 31.8% 91.4%)"
-                        /> */}
-                    </div>
-                    <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
-                        <ReusableButton
-                            size="small"
-                            // variant="primary"
-                            className=' flex-1 sm:flex-none bg-primary h-[2.38rem] text-white p-4'
-                            onClick={() => setIsOpenLicenseCard((prev) => !prev)}>
-                            {/* <span className="" > + Add Software Asset</span> */}
-                              {isOpenLicenseCard ? (
-                                    <div className='flex items-center gap-2'>
-                                        <ArrowLeft className="h-4 w-4 text-current stroke-[3]" /> Grid View
-                                    </div>
-                                ) : (
-                                    '+ Add Software Asset'
-                                )}
-                        </ReusableButton>
-                    </div>
+            <header className="bg-white rounded border-b px-6 py-2 shadow-sm flex flex-col sm:flex-row shrink-0 justify-between gap-4">
+                <div className="flex items-center gap-2 text-sm text-gray-600 flex-wrap">
+                    <span>Software Assets</span>
+                    <span>/</span>
+                    <span className="text-gray-900 font-medium">Asset Registry</span>
                 </div>
-                {isOpenLicenseCard &&
-                    <Card>
-                        <CardContent className="pt-6">
-                            <div className="">
-                                <div className="space-y-4">
-                                    <span className='text-2xl'>Add New Software Asset</span>
-                                    <div className={`grid xxs:grid-cols-1 xs2:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-6`}>
-                                        {getFieldsByNames(['SoftwareName', 'Version', 'VendorId', 'CategoryId', 'LicenseType', 'NumberOfLicenses']).map((field) => {
-                                            return <> <div className="flex-1 items-center space-x-2">
-                                                {renderField(field)}
-                                                {(field.name === 'NumberOfLicenses') && <div className='mt-2 float-right'><ReusableButton
-                                                    htmlType="button"
-                                                    variant="default"
-                                                    onClick={() => { handleEnterLicenseDetails() }}
-                                                    iconPosition="left"
-                                                    size="middle"
-                                                    className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
-                                                > {'Click To Enter License Details'}
-                                                </ReusableButton></div>}
-                                            </div>
-                                            </>
-                                        })}
+                <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                    <ReusableButton
+                        size="small"
+                        // variant="primary"
+                        className=' flex-1 sm:flex-none bg-primary h-[2.38rem] text-white p-4'
+                        onClick={() => setIsOpenLicenseCard((prev) => !prev)}>
+                        {/* <span className="" > + Add Software Asset</span> */}
+                        {isOpenLicenseCard ? (
+                            <div className='flex items-center gap-2'>
+                                <ArrowLeft className="h-4 w-4 text-current stroke-[3]" /> Grid View
+                            </div>
+                        ) : (
+                            '+ Add Software Asset'
+                        )}
+                    </ReusableButton>
+                </div>
+            </header>
+            {isOpenLicenseCard &&
+                <div className='p-2 rounded-lg'>
+                    <div className=" bg-white rounded-lg p-4">
+                        <Card className=''>
+                            <CardContent className="pt-6">
+                                <div className="">
+                                    <div className="space-y-4">
+                                        <span className='text-2xl'>Add New Software Asset</span>
+                                        <div className={`grid xxs:grid-cols-1 xs2:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-6`}>
+                                            {getFieldsByNames(['SoftwareName', 'Version', 'VendorId', 'CategoryId', 'LicenseType', 'NumberOfLicenses']).map((field) => {
+                                                return <> <div className="flex-1 items-center space-x-2">
+                                                    {renderField(field)}
+                                                    {(field.name === 'NumberOfLicenses') && <div className='mt-2 float-right'><ReusableButton
+                                                        htmlType="button"
+                                                        variant="default"
+                                                        onClick={() => { handleEnterLicenseDetails() }}
+                                                        iconPosition="left"
+                                                        size="middle"
+                                                        className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+                                                    > {'Click To Enter License Details'}
+                                                    </ReusableButton></div>}
+                                                </div>
+                                                </>
+                                            })}
 
-                                    </div>
-                                    <div className={`grid xxs:grid-cols-1 xs2:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-1 gap-6 mb-6`}>
-                                        {/* {getFieldsByNames(['description']).map((field) => {
-                                        return <div className="flex-1 items-center space-x-2">
-                                            {renderField(field)}
-                                        </div>;
-                                    })} */}
+                                        </div>
+                                        <div className={`grid xxs:grid-cols-1 xs2:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-1 gap-6 mb-6`}>
+                                            {dataSource.length !== 0 && <ReusableTable data={dataSource} columns={tableColumnsData} enableSearch={false}
+                                                enableColumnVisibility={false}
+                                                enableExport={false}
+                                                enableSorting={false}
+                                                enableFiltering={false}
+                                                headerContentClassName={"justify-center "}
+                                            />}
 
-                                        {dataSource.length !== 0 && <ReusableTable data={dataSource} columns={tableColumnsData} enableSearch={false}
-                                            enableColumnVisibility={false}
-                                            enableExport={false}
-                                            enableSorting={false}
-                                            enableFiltering={false}
-                                            headerContentClassName={"justify-center "}
-                                        />}
-
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div className="flex gap-2 mt-6">
-                                <ReusableButton
-                                    htmlType="button"
-                                    variant="default"
-                                    onClick={() => { handleSubmit(handleSave)() }}
-                                    iconPosition="left"
-                                    size="middle"
-                                    className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
-                                >
-                                    {editRecordId?'Update':'Save'}
-                                </ReusableButton>
-                                <ReusableButton
-                                    htmlType="button"
-                                    variant="default"
-                                    onClick={() => handleReset()}
-                                    iconPosition="left"
-                                    size="middle"
-                                >
-                                    {editRecordId?'Cancel':'Clear'}
-                                </ReusableButton>
-                            </div>
-                        </CardContent>
-                    </Card>
-                }
-                <div className="bg-white p-6 rounded-lg">
+                                <div className="flex gap-2 mt-6">
+                                    <ReusableButton
+                                        htmlType="button"
+                                        variant="default"
+                                        onClick={() => { handleSubmit(handleSave)() }}
+                                        iconPosition="left"
+                                        size="middle"
+                                        className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+                                    >
+                                        {editRecordId ? 'Update' : 'Save'}
+                                    </ReusableButton>
+                                    <ReusableButton
+                                        htmlType="button"
+                                        variant="default"
+                                        onClick={() => handleReset()}
+                                        iconPosition="left"
+                                        size="middle"
+                                    >
+                                        {editRecordId ? 'Cancel' : 'Clear'}
+                                    </ReusableButton>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                    </div>
+                </div>
+            }
+            <div className=" p-3 rounded-lg">
+                <div className=" bg-white rounded-lg p-4 border">
                     <ScrollArea className=" w-full ">
                         <ReusableTable
                             data={getAllTableData} columns={columns}
@@ -774,7 +769,7 @@ const SoftwareDataColumns = [
                             actions={tableActions}
                             enableColumnPinning
                         />
-                      
+
                     </ScrollArea>
                 </div>
             </div>
@@ -790,7 +785,7 @@ const SoftwareDataColumns = [
                     <DialogFooter>
                         <ReusableButton
                             variant="default"
-                            onClick={() => {setIsDelModalOpen(false);setDeletingRecord(null)}}
+                            onClick={() => { setIsDelModalOpen(false); setDeletingRecord(null) }}
                         >
                             Cancel
                         </ReusableButton>
@@ -804,7 +799,6 @@ const SoftwareDataColumns = [
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-
         </div>
     );
 }

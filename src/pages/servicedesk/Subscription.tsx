@@ -1042,7 +1042,7 @@ const SubscriptionManagement = () => {
 
   return (
     <div className="bg-gray-50/30 h-full overflow-y-scroll">
-      <header className="bg-white border-b px-4 py-3 shadow-sm">
+      <header className="bg-white border-b px-6 py-3 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div className="flex items-center gap-3">
           <SidebarTrigger />
           <ReusableButton
@@ -1054,6 +1054,11 @@ const SubscriptionManagement = () => {
             New Service Request
           </ReusableButton>
         </div>
+        <div className="flex items-center gap-2 text-sm text-gray-600">
+              <span>Service Desk</span>
+              <span>/</span>
+              <span className="text-gray-900 font-medium">Subscription</span>
+            </div>
       </header>
 
       <div className="p-4 space-y-4 " >

@@ -227,6 +227,7 @@ getBookDataAPI()
                          //   icon={<Edit className="h-4 w-4" />}
                          onClick={() => { 
                           // setSelectedStore(row.original);setRecordToEditId(row.original.StoreId);fetchStoreDataByStoreId(companyId,row.original.StoreId) 
+                          navigate(`/masters/depreciation/book/addbook/${row.original.BookID}`)
                         }}
                      >
                          Edit

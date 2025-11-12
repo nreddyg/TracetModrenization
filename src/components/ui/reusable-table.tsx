@@ -992,6 +992,16 @@ const exportToPDF = (exportData: any[], table: TanstackTable<any>) => {
       Object.fromEntries(headers.map((h, i) => [h, row[i]]))
     ),
   };
+const msg = useMessage()
+
+    const validateVisibleColumns = (table: TanstackTable<any>) => {
+  const visibleColumns = table.getAllLeafColumns().filter(col => col.getIsVisible());
+  if (visibleColumns.length < 3) {
+    msg.warning("Please select at least 3 columns before exporting.");
+    return false;
+  }
+  return true;
+};
 
   const blob = new Blob([JSON.stringify(jsonData, null, 2)], {
     type: "application/json",

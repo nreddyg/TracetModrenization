@@ -1,23 +1,18 @@
 
 import React, { useEffect, useState } from 'react';
-import PageLayout from '@/components/common/PageLayout';
-import PageHeader from '@/components/common/PageHeader';
 import { ReusableButton } from '@/components/ui/reusable-button';
 import { ReusableInput } from '@/components/ui/reusable-input';
 import { ReusableTable } from '@/components/ui/reusable-table';
 import { ReusableDropdown } from '@/components/ui/reusable-dropdown';
 import { ReusableTextarea } from '@/components/ui/reusable-textarea';
 import { ReusableDatePicker } from '@/components/ui/reusable-datepicker';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Plus, Edit, Trash2, ChevronLeft, ChevronRight, X, Save } from 'lucide-react';
+import { Search, Plus, Edit, Trash2, ChevronLeft, ChevronRight, X, Save, LeafyGreen, Key } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { ScrollArea } from '@radix-ui/react-scroll-area';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { AddGroupCategoryDetails, DeleteGroupById, GetAdditionalDepreciationBookDetails, GetBookCatListById, GetDepreciationBookDetails, GetGroupByBookIdDetails, UpdateGroupCategoryDetails } from '@/services/BookServices';
-import dayjs from 'dayjs';
+import { AddDepBookMasterDetails, AddGroupCategoryDetails, DeleteGroupById, GetAdditionalDepreciationBookDetails, GetBookCatListById, GetBookDetailsById, GetDepreciationBookDetails, GetGroupByBookIdDetails, UpdateGroupCategoryDetails } from '@/services/BookServices';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Controller, useForm } from 'react-hook-form';
 import { ReusableRadio } from '@/components/ui/reusable-radio';
@@ -27,15 +22,17 @@ import ReusableMultiSelect from '@/components/ui/reusable-multi-select';
 import { BaseField, GenericObject } from '@/Local_DB/types/types';
 import { BOOKS_DB } from '@/Local_DB/Form_JSON_Data/BooksDB';
 import ReusableSingleCheckbox from '@/components/ui/reusable-single-checkbox';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { } from '@radix-ui/react-select';
 import { cn } from '@/lib/utils';
-import { matchesGlob } from 'path';
 import { useMessage } from '@/components/ui/reusable-message';
 import { setLoading } from '@/store/slices/projectsSlice';
 import { useAppSelector } from '@/store';
 import { useDispatch } from 'react-redux';
-// import { Select } from '@radix-ui/react-select';
+import { formatDates } from '@/_Helper_Functions/HelperFunctions';
+import { FaAngleLeft, FaAngleRight } from 'react-icons/fa';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ReUsableSelect } from '@/components/ui/re-usable-select';
+
 
 interface Book {
   id: string;
@@ -66,7 +63,7 @@ const defaultRow = {
 const fieldsToDisable = ["DepreciateWith", "DepreciationLevel", "SalvageValueToConsider", "LifeToConsider", "FYStartDate"]
 
 const AddBook = () => {
-  const [searchQuery, setSearchQuery] = useState('');
+   const { id } = useParams()
   const [booksData, setBooksData] = useState([])
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [fields, setFields] = useState<BaseField[]>(BOOKS_DB);
@@ -78,11 +75,25 @@ const AddBook = () => {
   const [validationTrigger, setValidationTrigger] = useState(false)
   const [isFinancialYearOpen, setIsFinancialYearOpen] = useState(false)
   const [isCopyFromOpen, setIsCopyFromOpen] = useState(false);
+   const [isDepRan, setIsDepRan] = useState(false)
   const [isAddGroupOpen,setIsAddGroupOpen]=useState(false);
   const [selectedGroup,setSelectedGroup]=useState<string|number|(string | number)[]>("")
   const [groupOptions,setGroupOptions]=useState([])
+  const [copyDepBookOpts,setCopyDepBookOpts]=useState([])
+  const [bookCatForEdit,setBookCatForEdit]=useState([])
+  const [modalDatasource, setModalDatasource] = useState([{}]);
+  const [isNewFYOpen,setIsNewFYOpen]=useState(false)
+  
   const companyId = useAppSelector(state => state.projects.companyId);
-  const [editingRecord,setEditingRecord]=useState({"BookID": 10154});
+
+  const [editingRecordId,setEditingRecordId]=useState(id||"");
+  const [salvalueType,setSalvalueType]=useState<string|number|(string | number)[]>("%")
+  const [additionalDepOptions, setAdditionalDepOptions] = useState([
+      {
+        "value": "None",
+        "label": "None",
+      }
+    ],)
   const dispatch=useDispatch()
 
   const navigate = useNavigate()
@@ -95,7 +106,7 @@ const AddBook = () => {
     reValidateMode: "onChange"
   });
   const { control, register, handleSubmit, trigger, watch, setValue, reset, formState: { errors } } = form;
-
+console.log("id",id,editingRecordId)
   useEffect(() => {
     if (activeTab == "BookDetails") {
       if (validationTrigger) {
@@ -103,9 +114,7 @@ const AddBook = () => {
           triggerAccordionItemsValidations()
           setValidationTrigger(false)
         }, 10)
-
       }
-
     }
   }, [activeTab])
 
@@ -114,12 +123,19 @@ useEffect(() => {
   getBookDataAPI()
   }
   }, [companyId,watch("DepreciationLevel")])
+
+  useEffect(()=>{
+    if(companyId){
+    getAdditionalDepreciationListAPI()
+    }
+  },[companyId])
+
   const handleCopyFromSubmit = () => {
     GetBookCatListByIdAPI(companyId, selectedGroup)
   }
    
-
-  const tableColumnsData = [
+    const financialYearColumns= 
+[
     {
       header: "S.No",
       accessorKey: "key",
@@ -153,15 +169,32 @@ useEffect(() => {
       cell: ({ row }) => (
 
         <span className='flex'>
-          <ReusableInput
-            value={row.original.GroupName}
-            onChange={(e) => handleChange(e.target.value, row.id, "GroupName")}
-            name='GroupName'
-            // placeholder='Enter License key'
-            isRequired={true}
-            className='m-2 mt-0 me-0 bg-white border-2'
-            size='small'
-          ></ReusableInput>
+         
+           <ReusableDropdown
+            containerClassName=" p-2"
+            className='h-8 border-2 '
+            placeholder="GroupName"
+            options={groupOptions.reverse()}
+            allowClear={false}
+            defaultValue={row.original.GroupName}
+            onChange={(e) => handleChange(e, row.id, "GroupName")}
+            backgroundColor="white"
+            size={"small"}
+
+          >
+
+          </ReusableDropdown>
+             <div className="relative w-full">
+                              <ReUsableSelect
+                              name='Hello'
+                              clearable={true}
+                              value={''}
+                              onChange={null}
+                              options={[{label:'Hi',value:'hi'}]}
+                              placeholder='Hello Pallavi'
+                              />
+  
+                          </div>
 
         </span>
       )
@@ -205,7 +238,7 @@ useEffect(() => {
               containerClassName=" p-2"
               className='h-8 border-2 '
               placeholder=" "
-              options={[]}
+              options={additionalDepOptions.reverse()}
               allowClear={false}
               defaultValue={row.original.AdditionalDepreciationName}
               onChange={(e) => handleChange(e, row.id, "AdditionalDepreciationName")}
@@ -299,8 +332,282 @@ useEffect(() => {
             className='h-8 border-2 '
             placeholder=" "
             options={[
-              { label: "Active", value: "Active" }, { label: "Expired", value: "Expired" }, { label: "Suspended", value: "Suspended" },
+      {
+        "value": "Yes",
+        "label": "Yes",
+      },
+      {
+        "value": "No",
+        "label": "No",
+      }
+    ]}
+    
+            allowClear={false}
+            defaultValue={row.original.ShiftApplicable}
+            onChange={(e) => handleChange(e, row.id, "ShiftApplicable")}
+            backgroundColor="white"
+            size={"small"}
+
+          >
+
+          </ReusableDropdown>
+
+        </span>
+      )
+    },
+    {
+      accessorKey: "DoubleShiftRate",
+      header: "Double Shift Rate",
+      cell: ({ row }) => (
+
+        <span className='flex' >
+          <ReusableInput
+            value={row.original.DoubleShiftRate}
+            onChange={(e) => handleChange(e.target.value, row.id, "DoubleShiftRate")}
+            name='DoubleShiftRate'
+            type='number'
+            // placeholder='Enter License key'
+            isRequired={true}
+            className='m-2 mt-0 me-0 bg-white border-2'
+            size='small'
+          ></ReusableInput>
+
+        </span>
+      )
+    },
+    {
+      accessorKey: "TripleShiftRate",
+      header: "Triple Shift Rate",
+      cell: ({ row }) => (
+
+        <span className='flex' >
+          <ReusableInput
+            value={row.original.TripleShiftRate}
+            onChange={(e) => handleChange(e.target.value, row.id, "TripleShiftRate")}
+            name='TripleShiftRate'
+            type='number'
+            // placeholder='Enter License key'
+            isRequired={true}
+            className='m-2 mt-0 me-0 bg-white border-2'
+            size='small'
+          ></ReusableInput>
+
+        </span>
+      )
+    },
+    {
+      accessorKey: "Actions",
+      header: "Actions  ",
+      size: 100,
+      cell: ({ row }) => (
+        <div className={cn('flex justify-start', "justify-center")}>
+
+          {<Trash2 height={18} className='text-red-400 cursor-pointer '
+            onClick={() => handleRowDelete(row)} />}
+
+
+        </div>
+      )
+    },
+
+
+  ]
+  const tableColumnsData = [
+    {
+      header: "S.No",
+      accessorKey: "key",
+      id: "key",
+      size: 50,
+      // key: "key",
+    },
+    {
+      accessorKey: "CategoryName",
+      header: "Book category",
+
+      cell: ({ row }) => (
+
+        <span className='flex'>
+          <ReusableInput
+            value={row.original.CategoryName}
+            onChange={(e) => handleChange(e.target.value, row.id, "CategoryName")}
+            name='CategoryName'
+            // placeholder='Enter License key'
+            isRequired={true}
+            className='m-2 mt-0 me-0 bg-white border-2'
+            size='small'
+          ></ReusableInput>
+
+        </span>
+      )
+    },
+    {
+      accessorKey: "GroupName",
+      header: "Group",
+      cell: ({ row }) => (
+
+        <span className='flex'>
+         
+           <ReusableDropdown
+            containerClassName=" p-2"
+            className='h-8 border-2 '
+            placeholder="GroupName"
+            options={groupOptions.reverse()}
+            allowClear={false}
+            defaultValue={row.original.GroupName}
+            onChange={(e) => handleChange(e, row.id, "GroupName")}
+            backgroundColor="white"
+            size={"small"}
+
+          >
+
+          </ReusableDropdown>
+
+        </span>
+      )
+    },
+
+    {
+      accessorKey: "DepreciationMethodName",
+      header: "Depreciation Method",
+      cell: ({ row }) => (
+
+        <span className='flex' >
+          <ReusableDropdown
+            containerClassName=" p-2"
+            className='h-8 border-2 '
+            placeholder=" "
+            options={[
+              { label: "SLM", value: "SLM" }, { label: "WDV", value: "WDV" },
             ]}
+            allowClear={false}
+            defaultValue={row.original.DepreciationMethodName}
+            onChange={(e) => handleChange(e, row.id, "DepreciationMethodName")}
+            backgroundColor="white"
+            size={"small"}
+
+          >
+
+          </ReusableDropdown>
+
+        </span>
+      )
+    },
+
+    ...(form.watch("DepreciationLevel") == "Book Category" ? [
+      {
+        accessorKey: "AdditionalDepreciationName",
+        header: "Additional Depreciation",
+        cell: ({ row }) => (
+
+          <span className='flex' >
+            <ReusableDropdown
+              containerClassName=" p-2"
+              className='h-8 border-2 '
+              placeholder=" "
+              options={additionalDepOptions.reverse()}
+              allowClear={false}
+              defaultValue={row.original.AdditionalDepreciationName}
+              onChange={(e) => handleChange(e, row.id, "AdditionalDepreciationName")}
+              backgroundColor="white"
+              size={"small"}
+
+            >
+
+            </ReusableDropdown>
+
+          </span>
+        )
+      }
+    ] : []),
+    ...(form.watch("DepreciateWith") == "Rate" ? [
+      {
+        accessorKey: "CategoryRate",
+        header: "Rate",
+        cell: ({ row }) => (
+
+          <span className='flex' >
+            <ReusableInput
+              value={row.original.CategoryRate}
+              onChange={(e) => handleChange(e.target.value, row.id, "CategoryRate")}
+              name='CategoryRate'
+              type='number'
+              // placeholder='Enter License key'
+              isRequired={true}
+              className='m-2 mt-0 me-0 bg-white border-2'
+              size='small'
+            ></ReusableInput>
+
+          </span>
+        )
+      }
+    ] : []),
+    ...(form.watch("DepreciateWith") === "Useful life" && form.watch("LifeToConsider") === "Book Category" ? [
+      {
+        accessorKey: "CategoryLife",
+        header: "Useful life",
+        cell: ({ row }) => (
+
+          <span className='flex' >
+            <ReusableInput
+              value={row.original.CategoryLife}
+              onChange={(e) => handleChange(e.target.value, row.id, "CategoryLife")}
+              name='CategoryLife'
+              type='number'
+              // placeholder='Enter License key'
+              isRequired={true}
+              className='m-2 mt-0 me-0 bg-white border-2'
+              size='small'
+            ></ReusableInput>
+
+          </span>
+        )
+      }
+    ] : []),
+    ...(form.watch("DepreciationLevel") === "Asset" && form.watch("SalvageValueToConsider") === "Book Category" ? [
+      {
+        accessorKey: "SalvageValueRate",
+        header: "Salvage value (%)",
+        cell: ({ row }) => (
+
+          <span className='flex' >
+            <ReusableInput
+              value={row.original.SalvageValueRate}
+              onChange={(e) => handleChange(e.target.value, row.id, "SalvageValueRate")}
+              name='SalvageValueRate'
+              type='number'
+              // placeholder='Enter License key'
+              isRequired={true}
+              className='m-2 mt-0 me-0 bg-white border-2'
+              size='small'
+            ></ReusableInput>
+
+          </span>
+        )
+      }
+    ] : []),
+
+    {
+      accessorKey: "ShiftApplicable",
+      header: "Shifts applicable",
+
+      cell: ({ row }) => (
+
+        <span>
+          <ReusableDropdown
+            containerClassName=" p-2"
+            className='h-8 border-2 '
+            placeholder=" "
+            options={[
+      {
+        "value": "Yes",
+        "label": "Yes",
+      },
+      {
+        "value": "No",
+        "label": "No",
+      }
+    ]}
+    
             allowClear={false}
             defaultValue={row.original.ShiftApplicable}
             onChange={(e) => handleChange(e, row.id, "ShiftApplicable")}
@@ -402,15 +709,24 @@ useEffect(() => {
 
   //handling change dependencies
   useEffect(() => {
-    settingFieldDependencies()
-  }, [watch("DefaultDepreciationMethod"), watch("DepreciateWith"), watch("DepreciationLevel"), watch("IsWriteOffApplicable")])
+    // if(editingRecordId){
+    //   if(bookCatForEdit?.length>0){
+    //     settingFieldDependencies()
+    //   }
+    // }else{
+      
+         settingFieldDependencies()
+    // }
+  
+  }, [watch("DefaultDepreciationMethod"), watch("DepreciateWith"), watch("DepreciationLevel"), watch("IsWriteOffApplicable"),bookCatForEdit])
 
   const settingFieldDependencies = () => {
+  
     let depMethod = watch("DefaultDepreciationMethod")
     let depreciateWith = watch("DepreciateWith")
     let depreciationLevel = watch("DepreciationLevel")
     let fieldData = structuredClone(fields)
-
+    console.log("useEffect of dependencies",depMethod,depreciateWith,depreciationLevel)
 
     if (depreciateWith == "Rate") {
       fieldData.forEach((o) => {
@@ -455,19 +771,26 @@ useEffect(() => {
     }
 
 
+
     if (watch("IsWriteOffApplicable")) {
       fieldData.forEach((o) => {
-        if (o.name == "WriteOffValue" || o.name == "WriteOffType") { o.isDisplay = true; } else {
-
+        if (o.name == "WriteOffValue" || o.name == "WriteOffType") { o.isDisplay = true; } 
+        if (fieldsToDisable.includes(o.name) && bookCatForEdit.length>0) {
+          o.disabled = true
         }
       })
     } else {
       fieldData.forEach((o) => {
-        if (o.name == "WriteOffValue" || o.name == "WriteOffType") { o.isDisplay = false; form.setValue(o.name, (o.name == "WriteOffType") ? "Proportionate Dep Calculation" : "") } else {
-
+        if (o.name == "WriteOffValue" || o.name == "WriteOffType") { o.isDisplay = false; form.setValue(o.name, (o.name == "WriteOffType") ? "Proportionate Dep Calculation" : "") }
+      
+        if (fieldsToDisable.includes(o.name) &&  bookCatForEdit.length>0) {
+          o.disabled = true
         }
       })
+     
+      if(editingRecordId){
 
+      }
 
     }
     setFields(fieldData)
@@ -741,7 +1064,10 @@ useEffect(() => {
           value: "@"
         },
       ]}
-      defaultValue={"%"} className='parent [&>div:first-child]:pr-0 rounded-tl-none rounded-bl-none rounded-br-md rounded-tr-md' />
+      onChange={(e) => { setSalvalueType(e) }}
+      defaultValue={"%"} 
+      className='parent [&>div:first-child]:pr-0 rounded-tl-none rounded-bl-none rounded-br-md rounded-tr-md' />
+     
 
 
 
@@ -783,7 +1109,7 @@ useEffect(() => {
       opts=opt2
     }
 
-     setGroupOptions(opts )
+     setCopyDepBookOpts(opts )
   }
    const settingCopyFromToDataSource = (catdata) => {
     if (catdata.length !== 0) {
@@ -805,13 +1131,180 @@ useEffect(() => {
 
       setDataSource([...dataSource, ...cd]);
 
-    // setIsCopyFromOpen(false) 
+      setIsCopyFromOpen(false) 
     } else {
       msg.warning("There are no categories in the selected book");
     }
 
   }
+
+
+      const handleSubmitFunction = () => {
+let isBookCatScreen=(activeTab=="BookCat")
+
+        if(!isBookCatScreen){
+          //  if (!bookId) {
+                submit()
+          //   } else{
+              // updateSubmit()}
+        }else{
+
+            const isValidationFailed = fields.filter(f => f.isDisplay && f.isRequired).every(f => form.getValues()[f.name] !== undefined && form.getValues()[f.name] !== null && form.getValues()[f.name] !== '');
+   
+      if (!isValidationFailed) {
+        setValidationTrigger(true)
+       msg.warning("Please Enter Mandatory Fields In Book");
+        return;
+      }else{
+          submit()
+        //  UpdateBookCategory()
+      }
+        }
+     
+ 
+    };
+     const submit = () => {
+        var payloadObj = {
+            "BookDetails": getPayLoadForBooks(""),
+            "CategoryDetails": getPayLoadForcatDetails("")
+        
+
+        };
+        console.log(payloadObj)
+        addDepBookMasterDetailsAPI(companyId, payloadObj)
+    }
+
+
+      const settingBookCatForEdit=(data)=>{
+        let catList=[]
+       data.forEach((obj,i)=>{
+          catList.push({...defaultRow,Key:i+1,...obj})
+       })
+       setDataSource(catList)
+      }
+     const getPayLoadForcatDetails = (key) => {
+        let categoryDetails = [];
+        if (dataSource.length != 0) {
+            if (key === "update") {
+                categoryDetails = dataSource.map((record, ind) => {
+                    return {
+                        "CategoryName": record["CategoryName"],
+                        "GroupName": record["GroupName"],
+                        "AdditionalDepreciationName": record["AdditionalDepreciationName"],
+                        "DepreciationMethodName": record["DepreciationMethodName"],
+                        "CategoryLife": record["CategoryLife"],
+                        "CategoryRate": Number(record["CategoryRate"]),
+                        "SalvageValueRate": Number(record["SalvageValueRate"]),
+                        "ShiftApplicable": record["ShiftApplicable"],
+                        "DoubleShiftRate": Number(record["DoubleShiftRate"]),
+                        "TripleShiftRate": Number(record["TripleShiftRate"]),
+                    }
+                })
+            } else {
+                categoryDetails = dataSource.map((record, ind) => {
+                    return {
+                        "CategoryName": record["CategoryName"],
+                        "GroupName":  record["GroupName"],
+                        "AdditionalDepreciationName": record["AdditionalDepreciationName"],
+                        "DepreciationMethodName": record["DepreciationMethodName"],
+                        "CategoryLife": record["CategoryLife"],
+                        "CategoryRate":record["CategoryRate"],
+                        "SalvageValueRate": record["SalvageValueRate"],
+                        "ShiftApplicable": record["ShiftApplicable"],
+                        "DoubleShiftRate": record["DoubleShiftRate"],
+                        "TripleShiftRate": record["TripleShiftRate"],
+                    }
+                })
+            }
+        }
+        return (categoryDetails)
+
+    }
+
+     const getPayLoadForBooks = (key) => {
+      let fyStartDate= watch("FYStartDate")
+      let FYEndDate=watch("FYEndDate")
+        return ([{
+            "BookName": watch("BookName"),
+            "Description": watch("Description"),
+            "DepreciateBasedOn": watch("DepreciationBasedOn"),
+            "DepreciationMethod": watch("DefaultDepreciationMethod"),
+            "FirstFinancialYearStartDate": (typeof (fyStartDate) == "string") ? fyStartDate : formatDates(fyStartDate, 'DD/MM/YYYY'),
+            "DepreciateWith": watch("DepreciateWith"),
+            "DepreciationLevel": watch("DepreciationLevel"),
+            "OverwriteSalvageValueFrom": watch("SalvageValueToConsider"),
+            "SalvageValueRate": watch("SalvageValueRate"),
+            "SalvageValueType": salvalueType,
+            "FirstYearConventionType": watch("FirstYearDepreciationConventions"),
+            "OverWriteAssetLifeFrom": watch("LifeToConsider"),
+            "IsWriteOffApplicable": watch("IsWriteOffApplicable")?true:false,
+            "WriteOffValue": watch("WriteOffValue"),
+            "WriteOffType": watch("WriteOffType"),
+            "IsForexApplicable": watch("IsForexApplicable")?true:false,
+            "IsRevaluationApplicable": watch("IsRevaluationApplicable")?true:false,
+            "AssetIndependentCalulation": watch("AssetIndependentCalulation")?true:false,
+            "IsRequiredBackDateEntry": watch("IsRequiredBackDateEntry")?true:false,
+            "DepreciatedValueRoundOffUpTo": watch("DepreciatedValueRoundOffUpTo"),
+            "FormulaCalculationTypeId": watch("FormulaCalculationTypeId"),
+            "FirstFinancialYearEndDate": (key == "update") ?(typeof (FYEndDate) == "string") ? FYEndDate : formatDates(FYEndDate, 'DD/MM/YYYY'): undefined
+        }])
+    }
+
+
   //apis
+    const getAdditionalDepreciationListAPI = async () => {
+          dispatch(setLoading(true))
+          await GetAdditionalDepreciationBookDetails(companyId).then(res => {
+              if (res.success && res.data.status === undefined) {
+                let data=res.data.AdditionalDepreciationDetails
+                let opts=[]
+                   data?.forEach((element) => {
+                opts.push(
+                    {
+                        "label": element["Name"],
+                        "value": element["Name"],
+                        "obj": element
+                    }
+                )
+
+            })
+                opts.push({
+                "value": "None",
+                "label": "None",
+            })
+
+                  setAdditionalDepOptions(opts)
+              } else {
+                  setAdditionalDepOptions([
+      {
+        "value": "None",
+        "label": "None",
+      }
+    ],);
+              }
+          })
+              .catch(err => {
+              }).finally(() => {
+                  dispatch(setLoading(false));
+              })
+      }
+  const addDepBookMasterDetailsAPI=async (companyId,payload)=>{
+     dispatch(setLoading(true));
+            await AddDepBookMasterDetails(companyId, payload).then(res => {
+              if (res.success) {
+                if (res.data.status) {
+                  msg.success(res.data.message);
+                 navigate("/masters/depreciation/book")
+                } else if(res.data.status==false){
+                  msg.warning(res.data.message || 'Failed to Add Book!!')
+                }else {
+                msg.warning(res.data.ErrorDetails[0]["Error Message"]||'Failed to Add Book !!')
+              }
+              } 
+    
+            }).catch(err => { { } }).finally(() => { dispatch(setLoading(false)) })
+  }
+  
    const GetBookCatListByIdAPI = async (compid, id) => {
     dispatch(setLoading(true));
     await GetBookCatListById(compid, id).then((res) => {
@@ -819,12 +1312,18 @@ useEffect(() => {
          if (res.success && res.data && res.data.status !== false) {
         if (Array.isArray(res.data.BookCategoryDetails)) {
                settingCopyFromToDataSource(res.data.BookCategoryDetails)
+               if(id){
+                settingBookCatForEdit(res.data.BookCategoryDetails)
+                setBookCatForEdit(res.data.BookCategoryDetails)
+               }
         } else {
           setBooksData([])
+          setBookCatForEdit([])
         }
 
       } else {
         setBooksData([])
+        setBookCatForEdit([[]])
       }
 
       
@@ -833,6 +1332,8 @@ useEffect(() => {
         dispatch(setLoading(false));
       });
   }
+  
+
   let getBookDataAPI = async () => {
     //  dispatch(loaderEnable());
     await GetDepreciationBookDetails(companyId).then((res) => {
@@ -893,14 +1394,52 @@ useEffect(() => {
   ];
   const [editingGroupData,setEditingGroupData]=useState(null)
   useEffect(()=>{
-    if(companyId && editingRecord?.BookID){
+    if(companyId && editingRecordId){
       getGroupCategoriesData()
+      GetBookDetailsByIdAPI()
+
     }
-  },[companyId,editingRecord])
+  },[companyId,editingRecordId])
+   const GetBookDetailsByIdAPI = async () => {
+    dispatch(setLoading(true));
+    try {
+      const res = await GetBookDetailsById(companyId, String(editingRecordId));
+      console.log(res.data)
+      if(res.data && res.data?.status===undefined ){
+       setValuesForEdit(res.data["BookDetails"][0])
+      setIsDepRan(res.data["BookDetails"][0]["IsRanDep"])
+      GetBookCatListByIdAPI(companyId, String(editingRecordId))
+      }else{
+        
+      }
+    } catch { } finally { dispatch(setLoading(false)) }
+  }
+   const setValuesForEdit = (details) => {
+    console.log(details,"dd")
+        setSalvalueType(details["SalvageValueType"])
+       form.reset({...form.getValues(),...details})
+    };
+
+  useEffect(()=>{
+   if(groupData){
+    let groupOpts=[]
+      groupData?.forEach((element) => {
+                groupOpts.push(
+                    {
+                        "label": element["GroupName"],
+                        "value": element["GroupName"],
+                        "obj": element
+                    })
+            })
+
+            setGroupOptions([])
+   }
+  },[groupData])
+
   const getGroupCategoriesData = async () => {
     dispatch(setLoading(true));
     try {
-      const res = await GetGroupByBookIdDetails(companyId, String(editingRecord?.BookID));
+      const res = await GetGroupByBookIdDetails(companyId, String(editingRecordId));
       if(res.data && res.data?.status===undefined && Array.isArray(res.data)){
         setGroupData(res.data);
       }else{
@@ -917,7 +1456,7 @@ useEffect(() => {
     if (editingGroupData) {
       dispatch(setLoading(true))
       try {
-        const res = await UpdateGroupCategoryDetails(companyId, String(editingRecord?.BookID), editingGroupData?.GroupId, payload);
+        const res = await UpdateGroupCategoryDetails(companyId, String(editingRecordId), editingGroupData?.GroupId, payload);
         if (res?.data?.status) {
           msg.success(res.data.message);
           groupReset();
@@ -930,7 +1469,7 @@ useEffect(() => {
     } else {
       dispatch(setLoading(true))
       try {
-        const res = await AddGroupCategoryDetails(companyId, String(editingRecord?.BookID), payload);
+        const res = await AddGroupCategoryDetails(companyId, String(editingRecordId), payload);
         if (res?.data?.status) {
           msg.success(res.data.message);
           groupReset();
@@ -997,7 +1536,7 @@ useEffect(() => {
                     <ReusableButton
                       variant="primary"
                       icon={<Plus className="h-4 w-4" />}
-                      onClick={() => { handleSubmit(() => { })() }}
+                      onClick={() => { handleSubmit(handleSubmitFunction)()}}
 
 
                     >
@@ -1061,18 +1600,47 @@ useEffect(() => {
                         onChange={() => { }}
                         placeholder="DD/MM/YYYY"
                       />
-                      {/* <div className="flex items-center gap-2 mt-6">
+                      {
+                        editingRecordId &&     <div className="flex items-center gap-2 mt-6">
                         <span className="text-blue-600 cursor-pointer" onClick={()=>{
                             // setIsFinancialYearOpen(true)
+                            setIsNewFYOpen(true)
                           
                         }}>Add New Financial Year</span>
-                        <ReusableButton variant="default" size="small" icon={<ChevronLeft className="h-4 w-4" />} />
-                        <ReusableButton variant="default" size="small" icon={<ChevronRight className="h-4 w-4" />} className="bg-orange-500 hover:bg-orange-600 border-orange-500 text-white" />
-                      </div> */}
+                        {/* <ReusableButton variant="default" size="small" icon={<ChevronLeft className="h-4 w-4" />} />
+                        <ReusableButton variant="default" size="small" icon={<ChevronRight className="h-4 w-4" />} className="bg-orange-500 hover:bg-orange-600 border-orange-500 text-white" /> */}
+                        <ReusableButton
+                                                            variant="default"
+                                                            size="small"
+                                                            className={`bg-hsl(24.12deg 100% 80%)`}
+                                                            onClick={() => { 
+                                                              // handleWindow("Dec");
+                                                             }}
+                                                        >
+                                                            <span>
+                                                                {<FaAngleLeft className="h-2 w-2" />}
+                                                            </span>
+                                                        </ReusableButton>
+                        
+                                                        <ReusableButton
+                                                            // variant=""
+                                                            size="small"
+                                                            className={`bg-hsl(24.12deg 100% 80%) `}
+                                                            onClick={() => { 
+                                                              // handleWindow("Inc"); 
+                                                            }}
+                                                        >
+                                                            <span>
+                                                                {<FaAngleRight className="h-2 w-2" />}
+                                                            </span>
+                                                        </ReusableButton>
+                      </div>
+                      }
+                  
                     </div>
                     <div className="flex gap-2">
                       <ReusableButton variant="default" onClick={() => { setIsCopyFromOpen(true) }}>Copy From</ReusableButton>
-                      {editingRecord && <ReusableButton variant="primary" className="bg-orange-500 hover:bg-orange-600 border-orange-500" onClick={()=>setIsAddGroupOpen(true)}>Add Group</ReusableButton>}
+                      {editingRecordId && <ReusableButton variant="primary" className="bg-orange-500 hover:bg-orange-600 border-orange-500" onClick={()=>setIsAddGroupOpen(true)}>Add Group</ReusableButton>}
                       <ReusableButton variant="primary" className="bg-orange-500 hover:bg-orange-600 border-orange-500" onClick={handleAddCategory}>Add Category</ReusableButton>
                     </div>
                   </div>
@@ -1100,6 +1668,68 @@ useEffect(() => {
 
 
       </div> 
+
+      {/* financial Year modal */}
+                          <Dialog open={isNewFYOpen}
+                              onOpenChange={(open) => {
+                                  setIsNewFYOpen(open);
+                                  if (!open) {
+                                      // handleCancel(); 
+                                  }
+                              }}
+                          >
+                              <DialogTrigger asChild>
+                              </DialogTrigger>
+                              <DialogContent className="w-full max-w-[60rem] h-[31rem]">
+                                  <DialogHeader>
+                                      <DialogTitle>Add New Financial Year</DialogTitle>
+                                  </DialogHeader>
+                                  <div className='grid w-full grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4'>
+                                      <div className="flex items-center space-x-2">
+                                           <ReusableDatePicker
+                        label="Effective From"
+                        value={effectiveFrom}
+                        disabled={false}
+                        onChange={() => { }}
+                        placeholder="DD/MM/YYYY"
+                      />
+                                      </div>
+                                  </div>
+                                  <div className="pt-0 max-h-[400px] overflow-y-scroll">
+                                      <ReusableTable
+                                          data={modalDatasource}
+                                          columns={financialYearColumns}
+                                          // permissions={tablePermissions}
+                                          title=""
+                                          enableSearch={false}
+                                          enableSelection={false}
+                                          // enableExport={true}
+                                          enableColumnVisibility={true}
+                                          enablePagination={true}
+                                          enableSorting={true}
+                                          enableFiltering={true}
+                                          pageSize={5}
+                                          emptyMessage="No user groups found"
+                                          rowHeight="normal"
+                                          storageKey="usergroups-table"
+                                      />
+                                  </div>
+                                  <div className="flex justify-end gap-2">
+                                      <ReusableButton
+                                          htmlType="submit"
+                                          variant="primary"
+                                          className="bg-orange-500 hover:bg-orange-600 border-orange-500"
+                                          onClick={()=>{}
+                                            // handleSubmit(() =>
+                                            //  submit("true")
+                                            // )
+                                            }
+                                      >
+                                          Save
+                                      </ReusableButton>
+                                  </div>
+                              </DialogContent>
+                          </Dialog>
       <Dialog open={isCopyFromOpen}
         onOpenChange={(open) => {
           setIsCopyFromOpen(open);
@@ -1121,8 +1751,8 @@ useEffect(() => {
                 usePortal={false}
                 containerClassName=" p-2"
                 className='h-8 border-2 '
-                placeholder=" "
-                options={groupOptions}
+                placeholder="select book"
+                options={copyDepBookOpts}
                 allowClear={false}
                 defaultValue={""}
                 onChange={(e) => { setSelectedGroup(e) }}

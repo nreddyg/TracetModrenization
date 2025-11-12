@@ -667,6 +667,26 @@ const navigation: NavItem[] = [
       // },
     ],
   },
+
+   {
+    label: 'Depreciation',
+    icon: DollarSign,
+    link: '/depreciation',
+    children: [
+      {
+        label: 'Forex Adjustment',
+        icon: DollarSign,
+        link: '/depreciation/forexadjustment',
+      },
+
+       {
+        label: 'Import Asset Wise',
+        icon: DollarSign,
+        link: '/depreciation/importassetwise',
+      },
+      
+    ],
+  },
 ]
 const AppSidebar: React.FC = () => {
   const location = useLocation();

@@ -115,3 +115,6 @@ export const URL_GET_TICKET_PROGRESS_DASHBOARD_DATA = '/api/ServiceDeskAPI/GetSe
 
 // Change password
 export const URL_CHANGE_PASSWORD = '/api/PasswordAPI/ChangePassword';
+
+// User Roles 
+export const URL_USER_WISE_MODULE_LIST = '/api/Settings/GetUserwiseModulesList';

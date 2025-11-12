@@ -36,13 +36,13 @@ export const treeConfig: TreeConfig = {
   Multiple: true,
   expandAll: true,
 };
-let lastLevelData:BaseField[] = [
+let lastLevelData: BaseField[] = [
   {
     label: "Branch Name",
     fieldType: "text",
     name: "Name",
     // value: "",
-   
+
     isRequired: true,
   },
   {
@@ -151,24 +151,25 @@ const CompanyHierarchy = () => {
   const [selectedId, setSelectedId] = useState(null)
   const [tree, setTree] = useState([])
   const [isDelModalOpen, setIsDelModalOpen] = useState(false);
-  const [treeViewData,setTreeViewData]=useState([])
+  const [treeViewData, setTreeViewData] = useState([])
   const [disable, setDisable] = useState(true);
   const [search, setSearch] = useState(SearchButton);
   const [expandedKeys, setExpandedKeys] = useState<Set<string>>(new Set());
 
   const dispatch = useDispatch()
-    const [selectedNodeParents, setSelectedNodeParents] = useState([]);
-    const [selectedNode, setSelectedNode] = useState({
-      BranchName: "",
-      BranchCode: "",
-      TypeId: 0,
-      id: 99999,
-      parent: 0,});
-    const [recordToEditId, setRecordToEditId] = useState(null);
+  const [selectedNodeParents, setSelectedNodeParents] = useState([]);
+  const [selectedNode, setSelectedNode] = useState({
+    BranchName: "",
+    BranchCode: "",
+    TypeId: 0,
+    id: 99999,
+    parent: 0,
+  });
+  const [recordToEditId, setRecordToEditId] = useState(null);
   const [breadCrumb, setBreadCrumb] = useState(["Company"]);
   const [open, setOpen] = useState(false)
- 
- 
+
+
   const msg = useMessage()
 
 
@@ -177,17 +178,17 @@ const CompanyHierarchy = () => {
       fetchCompanyGetData(companyId)
     }
   }, [companyId])
-  useEffect(()=>{
-    if(companyId && selectedLevel){
+  useEffect(() => {
+    if (companyId && selectedLevel) {
       fetchHierarchyLevelsData(companyId)
-    }  
-  },[companyId,selectedLevel])
+    }
+  }, [companyId, selectedLevel])
   useEffect(() => {
     if (recordToEditId) {
       fetchCompanyGetDataByBranchId(companyId, recordToEditId)
     }
   }, [recordToEditId])
- useEffect(() => {
+  useEffect(() => {
     let name = []
     for (let i = 0; i <= level.length; i++) {
       if (selectedLevel !== 99) {
@@ -241,23 +242,23 @@ const CompanyHierarchy = () => {
             )}
           />
         );
-        case 'dropdown':
-                return (
-                  <Controller
-                    key={name}
-                    name={name}
-                    control={control}
-                    rules={validationRules}
-                    render={({ field: ctrl }) => (
-                      <ReusableDropdown
-                        {...field}
-                        value={ctrl.value}
-                        onChange={ctrl.onChange}
-                        error={errors[name]?.message as string}
-                      />
-                    )}
-                  />
-                );
+      case 'dropdown':
+        return (
+          <Controller
+            key={name}
+            name={name}
+            control={control}
+            rules={validationRules}
+            render={({ field: ctrl }) => (
+              <ReusableDropdown
+                {...field}
+                value={ctrl.value}
+                onChange={ctrl.onChange}
+                error={errors[name]?.message as string}
+              />
+            )}
+          />
+        );
     }
   }
   // const handleExpand = (keys: string[]) => {
@@ -290,7 +291,7 @@ const CompanyHierarchy = () => {
     // setExpandedKeys(keys);
     return treeData;
   };
-    const getParents = (node, id, parents = []) => {
+  const getParents = (node, id, parents = []) => {
     if (node.id === id || node.id === 99999) return parents;
     for (let child of node.children) {
       const result = getParents(child, id, [...parents, node]);
@@ -298,7 +299,7 @@ const CompanyHierarchy = () => {
     }
     return null;
   };
-    const submit = async () => {
+  const submit = async () => {
     dispatch(setLoading(true));
     let payload = {
       "Details": [
@@ -307,19 +308,19 @@ const CompanyHierarchy = () => {
           "TypeId": selectedLevel,
           "Name": watch("Name"),
           "Code": watch("Code"),
-           "RegPan": watch('PAN') || "", 
-        "GstinUin": watch('GSTIN') || "", 
-        "Address": watch('Address') || "", 
-        "StateId": watch('State') || "", 
-        "City": watch('City') || "", 
-        "ZipCode": watch('ZipCode') || "", 
-        "EmailId": watch('EmailId') || "",
-        "MobileNo": watch('MobileNo') || ""
+          "RegPan": watch('PAN') || "",
+          "GstinUin": watch('GSTIN') || "",
+          "Address": watch('Address') || "",
+          "StateId": watch('State') || "",
+          "City": watch('City') || "",
+          "ZipCode": watch('ZipCode') || "",
+          "EmailId": watch('EmailId') || "",
+          "MobileNo": watch('MobileNo') || ""
         }]
     }
     // let branchId = recordToEditId ? selectedNode?.id : 0
     const branchId = Number(recordToEditId ? selectedNode?.id : 0);
-    await addOrUpdateHierarchyLevel( companyId,branchId, payload).then(res => {
+    await addOrUpdateHierarchyLevel(companyId, branchId, payload).then(res => {
       if (res.data.status) {
         fetchCompanyGetData(companyId);
         msg.success(`${res.data.message}`);
@@ -333,7 +334,7 @@ const CompanyHierarchy = () => {
     }).catch(err => { })
       .finally(() => { dispatch(setLoading(false)) })
   }
-   const handleRoute = () => {
+  const handleRoute = () => {
     setRecordToEditId(null);
     handleReset()
     const treeData = structuredClone(tree);
@@ -354,7 +355,7 @@ const CompanyHierarchy = () => {
     setSelectedNodeParents(findroots);
     setSelectedLevel(tempObj.TypeId);
     setSelectedNode(tempObj);
-    setFields(allLevelsJson[selectedLevel+1])
+    setFields(allLevelsJson[selectedLevel + 1])
   };
 
 
@@ -365,36 +366,36 @@ const CompanyHierarchy = () => {
         setTree(res.data)
 
         const result = treefun(res.data, "#")
-          // if (selectedLevel === 99) {
-          //   let data = allLevelsJson;
-          //   data[selectedLevel][0].value = res.data[0].Name;
-          //   data[selectedLevel][1].value = res.data[0].Code;
-          //   setAllLevelsJson(data);
-          // }
-           if (selectedLevel === 99) {
+        // if (selectedLevel === 99) {
+        //   let data = allLevelsJson;
+        //   data[selectedLevel][0].value = res.data[0].Name;
+        //   data[selectedLevel][1].value = res.data[0].Code;
+        //   setAllLevelsJson(data);
+        // }
+        if (selectedLevel === 99) {
           const { Name, Code } = res.data[0];
           reset({
             Name: Name || "",
             Code: Code || "",
           });
- 
+
           const data = fields;
           data[0].disabled = true
           data[1].disabled = true
           setFields(data)
         }
- 
-          setTreeViewData(result)
+
+        setTreeViewData(result)
       } else {
         msg.warning(res.data.message || "No Data Found")
       }
     }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
   }
-   async function fetchStateLookUpData(companyId) {
+  async function fetchStateLookUpData(companyId) {
     dispatch(setLoading(true))
-   await getStateData( companyId)
+    await getStateData(companyId)
       .then((res) => {
-        if (res.data ) {
+        if (res.data) {
           res.data.Details?.forEach((element) => {
             element["label"] = element.StateName;
             element["value"] = element.Id;
@@ -406,19 +407,19 @@ const CompanyHierarchy = () => {
             const stateIndex = lastData.findIndex((x) => x.name === "State");
             lastData[stateIndex].options = res.data.Details;
 
-            setAllLevelsJson({ ...last,lastLevel:lastData });
+            setAllLevelsJson({ ...last, lastLevel: lastData });
           }
         } else {
           // TracetMessage("warning", "65vh", "Please Add Company Hierarchy Levels in Hierarchy configuration", "comapnyHierarchyLevels");
         }
       }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
   }
-    async function fetchHierarchyLevelsData(companyId) {
+  async function fetchHierarchyLevelsData(companyId) {
     dispatch(setLoading(true))
-   await getHierarchyLevelsData( companyId,100)
+    await getHierarchyLevelsData(companyId, 100)
       .then((res) => {
         if (res.data && typeof res.data === "object") {
-          setLevel(res.data["Company Hierarchy"][0].LevelName); 
+          setLevel(res.data["Company Hierarchy"][0].LevelName);
           setNextLevel(res.data["Company Hierarchy"][0].LevelName[0].LevelName);
           setLastLevel(res.data["Company Hierarchy"][0].LevelName.at(-1)["Id"]);
           let lastData = allLevelsJson;
@@ -429,11 +430,12 @@ const CompanyHierarchy = () => {
         } else {
           // TracetMessage("warning", "65vh", "Please Add Company Hierarchy Levels in Hierarchy configuration", "comapnyHierarchyLevels");
         }
-      }).catch(err => { }).finally(() => { 
+      }).catch(err => { }).finally(() => {
         fetchStateLookUpData(companyId)
-        dispatch(setLoading(false)) })
+        dispatch(setLoading(false))
+      })
   }
-    const getjsonMapping = (leveldata) => {
+  const getjsonMapping = (leveldata) => {
     let Labels = Object.keys(allLevelsJson);
     Labels.forEach((element) => {
       var index = leveldata.findIndex((x) => x.Id === parseInt(element));
@@ -451,26 +453,26 @@ const CompanyHierarchy = () => {
     });
   };
   const handleReset = () => {
-      if(selectedLevel!==lastLevel){
-  reset({
-            Name: "",
-            Code: ""
-          })
-          }
-          else{
-              reset({
-            Name: "",
-            Code: "",
-            PAN:"",
-            GSTIN : "",
-            Address : "",
-            State : "",
-            City : "",
-            ZipCode : "",
-            EmailId : "",
-            MobileNo : ""
-          })
-          }
+    if (selectedLevel !== lastLevel) {
+      reset({
+        Name: "",
+        Code: ""
+      })
+    }
+    else {
+      reset({
+        Name: "",
+        Code: "",
+        PAN: "",
+        GSTIN: "",
+        Address: "",
+        State: "",
+        City: "",
+        ZipCode: "",
+        EmailId: "",
+        MobileNo: ""
+      })
+    }
     // form.reset()
   };
 
@@ -480,27 +482,27 @@ const CompanyHierarchy = () => {
       if (res.data && res.data.length > 0) {
         const details = res.data[0];
         if (details) {
-          if(selectedLevel!==lastLevel){
-  reset({
-            Name: details.BranchName,
-            Code: details.BranchCode
-          })
+          if (selectedLevel !== lastLevel) {
+            reset({
+              Name: details.BranchName,
+              Code: details.BranchCode
+            })
           }
-          else{
-              reset({
-            Name: details.BranchName,
-            Code: details.BranchCode,
-            PAN:details.PAN,
-            GSTIN : details.GSTIN,
-            Address : details.Address,
-            State : details.State,
-            City : details.City,
-            ZipCode : details.ZipCode,
-            EmailId : details.EmailId,
-            MobileNo : details.MobileNo
-          })
+          else {
+            reset({
+              Name: details.BranchName,
+              Code: details.BranchCode,
+              PAN: details.PAN,
+              GSTIN: details.GSTIN,
+              Address: details.Address,
+              State: details.State,
+              City: details.City,
+              ZipCode: details.ZipCode,
+              EmailId: details.EmailId,
+              MobileNo: details.MobileNo
+            })
           }
-        
+
         }
       } else {
         msg.warning(res.data.message || "No Data Found")
@@ -516,7 +518,7 @@ const CompanyHierarchy = () => {
         fetchCompanyGetData(companyId)
         handleReset()
         setRecordToEditId(null);
-      setSelectedId(null)
+        setSelectedId(null)
 
       }
       else {
@@ -537,7 +539,7 @@ const CompanyHierarchy = () => {
 
   const handleSearch = (val: string) => {
     setSearch((prev) => ({ ...prev, value: val }));
-  
+
     if (!val) {
       const allKeys: string[] = [];
       const collectKeys = (nodes: any[]) => {
@@ -550,9 +552,9 @@ const CompanyHierarchy = () => {
       setExpandedKeys(new Set(allKeys));
       return;
     }
-  
+
     const matchedKeys: string[] = [];
-  
+
     const findMatchingNodes = (nodes: any[]) => {
       nodes.forEach((node) => {
         const title = (node.title || node.name || '').toLowerCase();
@@ -561,7 +563,7 @@ const CompanyHierarchy = () => {
       });
     };
     findMatchingNodes(treeViewData);
-  
+
     const parentKeys = new Set<string>();
     const findParentKeys = (nodes: any[], targets: string[]) => {
       nodes.forEach((node) => {
@@ -574,17 +576,17 @@ const CompanyHierarchy = () => {
       });
     };
     findParentKeys(treeViewData, matchedKeys);
-  
+
     // ✅ Collapse all, then expand only matched + parents
     const newExpanded = new Set([...matchedKeys, ...parentKeys]);
     setExpandedKeys(newExpanded);
   };
-  
-  
+
+
   useEffect(() => {
     if (treeViewData?.length) {
       const allKeys: string[] = [];
-  
+
       const collectKeys = (nodes: any[]) => {
         nodes.forEach((node) => {
           allKeys.push(node.key);
@@ -593,67 +595,67 @@ const CompanyHierarchy = () => {
           }
         });
       };
-  
+
       collectKeys(treeViewData);
       setExpandedKeys(new Set(allKeys)); // expand everything initially
     }
   }, [treeViewData]);
 
   const mainTreeData = useMemo(() => {
-  const loop = (data) =>
-    data.map((item) => {
-      const titleStr = item.title || item.name || '';
-      const searchVal = search.value.trim().toLowerCase();
+    const loop = (data) =>
+      data.map((item) => {
+        const titleStr = item.title || item.name || '';
+        const searchVal = search.value.trim().toLowerCase();
 
-      if (!searchVal) {
+        if (!searchVal) {
+          return {
+            ...item,
+            title: <span key={item.key}>{titleStr}</span>,
+            children: item.children ? loop(item.children) : [],
+          };
+        }
+
+        const index = titleStr.toLowerCase().indexOf(searchVal);
+        if (index === -1) {
+          return {
+            ...item,
+            title: <span key={item.key}>{titleStr}</span>,
+            children: item.children ? loop(item.children) : [],
+          };
+        }
+
+        const beforeStr = titleStr.substring(0, index);
+        const matchStr = titleStr.substring(index, index + searchVal.length); // ✅ keep original case
+        const afterStr = titleStr.substring(index + searchVal.length);
+
+        const title = (
+          <span key={item.key}>
+            {beforeStr}
+            <span className="text-blue-500 font-medium">{matchStr}</span>
+            {afterStr}
+          </span>
+        );
+
         return {
           ...item,
-          title: <span key={item.key}>{titleStr}</span>,
+          title,
           children: item.children ? loop(item.children) : [],
         };
-      }
+      });
 
-      const index = titleStr.toLowerCase().indexOf(searchVal);
-      if (index === -1) {
-        return {
-          ...item,
-          title: <span key={item.key}>{titleStr}</span>,
-          children: item.children ? loop(item.children) : [],
-        };
-      }
+    return loop(treeViewData);
+  }, [treeViewData, search.value]);
 
-      const beforeStr = titleStr.substring(0, index);
-      const matchStr = titleStr.substring(index, index + searchVal.length); // ✅ keep original case
-      const afterStr = titleStr.substring(index + searchVal.length);
-
-      const title = (
-        <span key={item.key}>
-          {beforeStr}
-          <span className="text-blue-500 font-medium">{matchStr}</span>
-          {afterStr}
-        </span>
-      );
-
-      return {
-        ...item,
-        title,
-        children: item.children ? loop(item.children) : [],
-      };
-    });
-
-  return loop(treeViewData);
-}, [treeViewData, search.value]);
-
-const handleToggleNode = (
-  newExpandedKeys: string[],
-  info: { expanded: boolean; node: any }
-) => {
-  setExpandedKeys(new Set(newExpandedKeys));
-};
+  const handleToggleNode = (
+    newExpandedKeys: string[],
+    info: { expanded: boolean; node: any }
+  ) => {
+    setExpandedKeys(new Set(newExpandedKeys));
+  };
 
   return (
-    <div className="bg-hsl(214.3 31.8% 91.4%) overflow-y-auto">
-      <header className="bg-card flex justify-between border-b px-6 py-4 shadow-sm">
+    <div className="bg-hsl(214.3 31.8% 91.4%)">
+      <header className="bg-card flex justify-between border-b px-6 py-4">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <span>Masters</span>
@@ -667,7 +669,7 @@ const handleToggleNode = (
           <ReusableButton
             htmlType="button"
             variant="default"
-            onClick={()=>handleReset()}
+            onClick={() => handleReset()}
             iconPosition="left"
             size="middle"
             className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
@@ -687,128 +689,131 @@ const handleToggleNode = (
         </div>
       </header>
 
-      <div className="flex h-full">
+      <div className="flex h-full p-2">
         {/* Tree Structure Panel */}
-        <div className="w-[26vw] border-r bg-card flex flex-col">
-          <div className=" flex items-center justify-center pt-4 pb-4 ps-0 ms-0 border-b gap-3">
-            <div className="relative">
+        <div className="w-[26vw] h-[75vh] rounded-lg shadow-lg border-r bg-card flex flex-col">
+          <div className="px-2 flex items-center justify-center pt-4 pb-4 ps-0 ms-0 border-b gap-3">
+            <div className="relative ps-2">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search..."
                 value={searchQuery}
-                onChange={(e) => {setSearchQuery(e.target.value);handleSearch(e.target.value)}}
+                onChange={(e) => { setSearchQuery(e.target.value); handleSearch(e.target.value) }}
                 className="pl-9 "
               />
             </div>
             <div className="flex gap-2 flex items-center justify-center">
-                        <ReusableButton
-                        size="small"
-                        className="bg-primary h-[2rem] hover:bg-blue-700 text-white"
-                        style={{
-                          cursor: selectedLevel >= 99 + level.length || disable ? "not-allowed" : "pointer",
-                        }}
-                        disabled={selectedLevel >= 99 + level.length || disable}
-                        onClick={() => {
-                          if (!(selectedLevel >= 99 + level.length || disable)) {
-                            handleRoute();
-                            setDisable(true);
-                          }
-                        }}
-                      >
-                        <Plus className="h-4 w-4" />
-                      </ReusableButton>
-                <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>
-                                              <DialogContent className="sm:max-w-[425px]">
-                                                <DialogHeader>
-                                                  <DialogTitle>Confirm the action</DialogTitle>
-                                                  <DialogDescription>
-                                                    Are you sure you want to delete Hierarchy level?
-                                                    {/* {currentTab === "service-request-type"
+              <ReusableButton
+                size="small"
+                className="bg-primary h-[2rem] hover:bg-blue-700 text-white"
+                style={{
+                  cursor: selectedLevel >= 99 + level.length || disable ? "not-allowed" : "pointer",
+                }}
+                disabled={selectedLevel >= 99 + level.length || disable}
+                onClick={() => {
+                  if (!(selectedLevel >= 99 + level.length || disable)) {
+                    handleRoute();
+                    setDisable(true);
+                  }
+                }}
+              >
+                <Plus className="h-4 w-4" />
+              </ReusableButton>
+              <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>
+                <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                    <DialogTitle>Confirm the action</DialogTitle>
+                    <DialogDescription>
+                      Are you sure you want to delete Hierarchy level?
+                      {/* {currentTab === "service-request-type"
                                                       ? `${selectedRecord?.ServiceRequestType || "this"} Service Request Type`
                                                       : `${selectedStatusRec?.StatusType || "this"} Status`
                                                     } */}
-                                                  </DialogDescription>
-                                                </DialogHeader>
-                                                <DialogFooter>
-                                                  <ReusableButton
-                                                    variant="default"
-                                                    onClick={() => setIsDelModalOpen(false)}
-                                                  >
-                                                    Cancel
-                                                  </ReusableButton>
-                                                  <ReusableButton
-                                                    variant="primary"
-                                                    danger={true}
-                                                    onClick={()=>{handleDelete();setIsDelModalOpen(false);}}
-                                                    // onClick={currentTab === "service-request-type" ? () => { deleteServiceRequestType(selectedRecord?.Id); setIsDelModalOpen(false) } : () => { deleteStatus(selectedStatusRec?.Id); setIsDelModalOpen(false) }}
-                                                  >
-                                                    Delete
-                                                  </ReusableButton>
-                                                </DialogFooter>
-                                              </DialogContent>
-                                            </Dialog>
-                  <Button size="sm" variant="outline" className="h-8" onClick={()=>setIsDelModalOpen(true)}>
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
+                    </DialogDescription>
+                  </DialogHeader>
+                  <DialogFooter>
+                    <ReusableButton
+                      variant="default"
+                      onClick={() => setIsDelModalOpen(false)}
+                    >
+                      Cancel
+                    </ReusableButton>
+                    <ReusableButton
+                      variant="primary"
+                      danger={true}
+                      onClick={() => { handleDelete(); setIsDelModalOpen(false); }}
+                    // onClick={currentTab === "service-request-type" ? () => { deleteServiceRequestType(selectedRecord?.Id); setIsDelModalOpen(false) } : () => { deleteStatus(selectedStatusRec?.Id); setIsDelModalOpen(false) }}
+                    >
+                      Delete
+                    </ReusableButton>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+              <Button size="sm" variant="outline" className="h-8" onClick={() => setIsDelModalOpen(true)}>
+                <Trash2 className="h-4 w-4 text-destructive" />
+              </Button>
             </div>
           </div>
           <div className="min-h-20 h-[63vh] overflow-y-auto p-2">
-            <TreeView treeData={mainTreeData} config={treeConfig} onSelect={handleSelect} selectKeys={selectedKeys}   onExpand={handleToggleNode}
-             expandedKeys={Array.from(expandedKeys)} />
+            <TreeView treeData={mainTreeData} config={treeConfig} onSelect={handleSelect} selectKeys={selectedKeys} onExpand={handleToggleNode}
+              expandedKeys={Array.from(expandedKeys)} />
           </div>
         </div>
 
         {/* Details Panel */}
-         <div className="flex-1 overflow-y-auto">
-          <div className="p-6 space-y-6" style={{height:"77vh",overflowY:"auto"}}>
-            <div className="flex flex-col gap-2">
-              <div>
-              <h4 className="master-heading mb-2 flex items-center gap-2">
-                {!recordToEditId
-                  ? selectedLevel === 99
-                    ? "Company Hierarchy"
-                    : "Add Company Hierarchy"
-                  : selectedLevel === 99
-                    ? "Company Hierarchy"
-                    : "Update Company Hierarchy"}
-                {selectedLevel !== lastLevel && (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <button type="button">
-                          <Info className="mb-1 cursor-pointer" fontSize={22} />
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        To Add {nextLevel || "Department/Unit"} to{" "}
-                        {breadCrumb?.at(-1) || "the selected department"}, click on{" "}
-                        {breadCrumb?.at(-1) || "the name"} and then click on the plus icon.
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                )}
-              </h4>
-             </div>
-              <div className="text-sm text-primary">
-                <h6 className="breadCrumb">{breadCrumb.map(x => { return `${x} >` })}</h6>
-              </div>
-            </div>
-            <div className="space-y-6">
-              {/* <h5 className="text-base font-semibold">Department Details</h5> */}
-              <h5>{recordToEditId && selectedLevel !== 99 ? `Update ${fields[0].heading}` : `${selectedLevel !== 99 ? "Enter" : ""} ${fields[0].heading}`}</h5>
-              <div className="px-1">
-                <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4">
-                  {getFieldsByNames((selectedLevel!=lastLevel)?['Name', 'Code']:['Name', 'Code',"PAN","GSTIN","Address","State","City","ZipCode","EmailId","MobileNo"]).map((field) => {
-                    return <div className="flex items-center space-x-2">
-                      {renderField(field)}
-                    </div>;
-                  })}
+        <div className="flex-1 h-[75vh]  ps-2 shadow-xl">
+          <div className="bg-card border-b rounded-lg shadow-lg lg:px-6 py-3 flex flex-row xxs:flex-col xs2:flex-row lg:flex-row lg:items-center justify-between gap-4">
+            <div className="p-1 space-y-6 h-[71vh] overflow-y-auto">
+              <div className="flex flex-col gap-2">
+                <div>
+                  <h4 className="master-heading mb-2 flex items-center gap-2">
+                    {!recordToEditId
+                      ? selectedLevel === 99
+                        ? "Company Hierarchy"
+                        : "Add Company Hierarchy"
+                      : selectedLevel === 99
+                        ? "Company Hierarchy"
+                        : "Update Company Hierarchy"}
+                    {selectedLevel !== lastLevel && (
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button type="button">
+                              <Info className="mb-1 cursor-pointer" fontSize={22} />
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            To Add {nextLevel || "Department/Unit"} to{" "}
+                            {breadCrumb?.at(-1) || "the selected department"}, click on{" "}
+                            {breadCrumb?.at(-1) || "the name"} and then click on the plus icon.
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
+                  </h4>
+                </div>
+                <div className="text-sm text-primary">
+                  <h6 className="breadCrumb">{breadCrumb.map(x => { return `${x} >` })}</h6>
                 </div>
               </div>
+             
+              <div className="space-y-6">
+                <h5>{recordToEditId && selectedLevel !== 99 ? `Update ${fields[0].heading}` : `${selectedLevel !== 99 ? "Enter" : ""} ${fields[0].heading}`}</h5>
+                <div className="px-1">
+                  <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4">
+                    {getFieldsByNames((selectedLevel != lastLevel) ? ['Name', 'Code'] : ['Name', 'Code', "PAN", "GSTIN", "Address", "State", "City", "ZipCode", "EmailId", "MobileNo"]).map((field) => {
+                      return <div className="flex items-center space-x-2">
+                        {renderField(field)}
+                      </div>;
+                    })}
+                  </div>
+                </div>
+              </div>
+            
             </div>
           </div>
         </div>
- 
+
       </div>
     </div>
   );

@@ -185,7 +185,7 @@ const AnimatedRoutes = () => {
       <SidebarProvider>
         <div className="h-screen flex w-full bg-app-background overflow-hidden">
           <AppSidebar />
-          <SidebarInset className="flex flex-col overflow-hidden">
+          <SidebarInset className="flex flex-col overflow-hidden bg-[#f9fafb]">
             <FixedHeader />
             {/* <div className="w-full h-full pt-1 transition-all duration-200 ease-in-out"> */}
               <Suspense fallback={<ReusableLoader spinning={true} size="lg" position="center" />}>

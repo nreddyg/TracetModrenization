@@ -17,6 +17,8 @@ import { useAppDispatch, useAppSelector } from '@/store';
 import { getAnalyticsData } from '@/services/ticketProgressDashboardServices';
 import { setLoading } from '@/store/slices/projectsSlice';
 import { formatDate } from '@/_Helper_Functions/HelperFunctions';
+import { FaAngleRight } from 'react-icons/fa';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const TicketProgressDashboard = () => {
   const dispatch = useAppDispatch();
@@ -346,8 +348,9 @@ const TicketProgressDashboard = () => {
   // Helper function to get fields by names (similar to TicketView)
   const getFieldsByNames = (names: string[]) => fields.filter(f => names.includes(f.name!));
   return (
-    <div className="h-full overflow-y-scroll bg-gray-50">
-      <header className="bg-white border-b px-6 py-3 shadow-sm">
+    <ScrollArea scrollStyle={'flex-[0.8] bg-[#aab4ca]'}>
+    <div className="h-full">
+      <header className="px-6 py-4">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
 
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
@@ -358,13 +361,13 @@ const TicketProgressDashboard = () => {
 
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <span>Service Desk</span>
-            <span>/</span>
+            <FaAngleRight />
             <span className="text-gray-900 font-medium">Ticket Progress Dashboard</span>
           </div>
 
         </div>
       </header>
-      <div className="p-4 sm:p-6">
+      <div className="p-4 pt-0">
         {/* Enhanced Filters Section */}
         <Card className="mb-6">
           <CardHeader className="pb-4">
@@ -442,6 +445,7 @@ const TicketProgressDashboard = () => {
         </Card>
       </div>
     </div>
+    </ScrollArea>
   );
 };
 

@@ -144,7 +144,7 @@ const Store = () => {
                         size="small"
                         onClick={() => { setSelectedStore(row.original); setRecordToEditId(row.original.StoreId); fetchStoreDataByStoreId(companyId, row.original.StoreId) }}
                     >
-                        <Edit className="h-4 w-4" />
+                        <Edit className="h-4 w-4 text-blue-600" />
                     </ReusableButton>
                     <ReusableButton
                         variant="text"

@@ -1044,6 +1044,7 @@ const SubscriptionManagement = () => {
     <div className="bg-gray-50/30 h-full overflow-y-scroll">
       <header className="bg-white border-b px-4 py-3 shadow-sm">
         <div className="flex items-center gap-3">
+          <SidebarTrigger />
           <ReusableButton
             size="small"
             // variant="primary"

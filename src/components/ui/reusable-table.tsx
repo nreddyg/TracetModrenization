@@ -7,7 +7,8 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import {
-  ChevronDown, ChevronRight, Search, Filter, Download, Edit, Trash2, Eye, Settings, MoreHorizontal, ArrowUpDown, ArrowUp, ArrowDown, Plus, X, Check, AlertCircle, Loader2, Moon, Sun, Columns, RefreshCw, PrinterIcon, FileSpreadsheet, FileImage, Keyboard, Volume2, Calendar, Users, Shield, History, Globe, Save, Undo, Redo, Maximize2, Minimize2, Pin, PinOff, FileText, Group, CheckSquare, Square, MoreVertical
+  ChevronDown, ChevronRight, Search, Filter, Download, Edit, Trash2, Eye, Settings, MoreHorizontal, ArrowUpDown, ArrowUp, ArrowDown, Plus, X, Check, AlertCircle, Loader2, Moon, Sun, Columns, RefreshCw, PrinterIcon, FileSpreadsheet, FileImage, Keyboard, Volume2, Calendar, Users, Shield, History, Globe, Save, Undo, Redo, Maximize2, Minimize2, Pin, PinOff, FileText, Group, CheckSquare, Square, MoreVertical,
+  ChevronLeft
 } from 'lucide-react';
 import { Button } from './button';
 import { Input } from './input';
@@ -21,6 +22,7 @@ import { DndContext, closestCenter, MouseSensor, TouchSensor, useSensor, useSens
 import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy, } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { ReusableMultiSelect } from './reusable-multi-select';
+import { useMessage } from './reusable-message';
 // Enhanced types for enterprise features
 export interface TablePermissions {
   canEdit: boolean;
@@ -107,6 +109,12 @@ export interface ReusableTableProps<T = any> {
   title?: string;
   permissions?: TablePermissions;
   actions?: TableAction<T>[];
+    exportMeta?: {
+    companyName?: string;
+    name?: string;
+  };
+  exportOptions?: ("csv" | "excel" | "json" | "pdf")[]; // formats allowed
+  onExport?: (type: "csv" | "excel" | "json" | "pdf", rows: T[], table: TanstackTable<T>) => void;
   onAdd?: () => void;
   onRefresh?: () => void;
   onBulkDelete?: (selectedRows: T[]) => void;
@@ -740,10 +748,17 @@ const SelectionControls = <T,>({
 
   return (
     <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 border border-blue-100 rounded-lg">
-      <Badge variant="secondary">
-        {selectionInfo.totalSelected} selected
-        {maxSelectable && ` of ${maxSelectable} max`}
-      </Badge>
+      <span
+  className="inline-flex items-center px-3 py-1.5 rounded-xl bg-blue-200 text-blue-600 text-xs font-semibold shadow-sm"
+>
+  {selectionInfo.totalSelected} selected
+  {maxSelectable && (
+    <span className="ml-1 text-blue-100 font-normal">
+      of {maxSelectable} max
+    </span>
+  )}
+</span>
+
 
       {selectionMode === 'multiple' && (
         <>
@@ -819,11 +834,23 @@ function getVisibleData(table: TanstackTable<any>, exportData: any[]) {
     col => (col.columnDef.header as string) || col.id
   );
 
-  const body = exportData.map(row =>
-    visibleCols.map(col => {
+  const body = exportData.map((row) =>
+    visibleCols.map((col) => {
       try {
-        const tableRow = table.getRowModel().rows.find(r => r.original === row);
-        return String(tableRow?.getValue(col.id) ?? "");
+        const def = col.columnDef as any;
+
+        // Prefer accessorFn if present
+        if (typeof def.accessorFn === "function") {
+          return String(def.accessorFn(row, 0) ?? "");
+        }
+
+        // accessorKey fallback
+        if (def.accessorKey) {
+          return String(row[def.accessorKey] ?? "");
+        }
+
+        // id fallback (if your data uses ids matching column ids)
+        return String(row[col.id] ?? "");
       } catch {
         return "";
       }
@@ -834,6 +861,7 @@ function getVisibleData(table: TanstackTable<any>, exportData: any[]) {
 }
 
 
+
 // Enhanced Export Menu with multiple formats
 const ExportMenu = ({
   data,
@@ -841,95 +869,151 @@ const ExportMenu = ({
   permissions,
   filename = 'export',
   table,
+  exportOptions = ["csv", "excel", "json", "pdf"],
+  exportMeta,
 }: {
   data: any[];
   selectedRows: any[];
   permissions?: TablePermissions;
   filename?: string;
-  columns?: ColumnDef<any>[];
   table: TanstackTable<any>;
+  exportOptions?: ("csv" | "excel" | "json" | "pdf")[];
+  exportMeta?: { companyName?: string; name?: string };
 }) => {
-  const exportToCSV = (exportData: any[], table: TanstackTable<any>) => {
-    if (exportData.length === 0) return;
-
-    const { headers, body } = getVisibleData(table, exportData);
-
-    const csvContent = [
-      headers.join(","),
-      ...body.map(row =>
-        row.map(val => `"${val.replace(/"/g, '""')}"`).join(",")
-      ),
-    ].join("\n");
-
-    const blob = new Blob([csvContent], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${filename}-${new Date().toISOString().split("T")[0]}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+const getExportMetadata = (data: any[], meta?: { companyName?: string; name?: string }) => {
+  const totalCount = data.length;
+  const downloadDate = new Date().toLocaleString();
+  return {
+    companyName: meta?.companyName || "",
+    name: meta?.name || "",
+    totalCount,
+    downloadDate,
   };
+};
 
+const exportToCSV = (exportData: any[], table: TanstackTable<any>) => {
+  if (exportData.length === 0) return;
 
-  const exportToExcel = (exportData: any[], table: TanstackTable<any>) => {
-    if (exportData.length === 0) return;
+  const { headers, body } = getVisibleData(table, exportData);
+  const meta = getExportMetadata(exportData, exportMeta);
 
-    const { headers, body } = getVisibleData(table, exportData);
+  const metaSection = [
+    `"${meta.companyName}"`,
+    `"Exported by: ${meta.name}"`,
+    `"Download Date: ${meta.downloadDate}"`,
+    `"Total Records: ${meta.totalCount}"`,
+    "", // spacer line
+  ];
 
-    const worksheet = XLSX.utils.aoa_to_sheet([headers, ...body]);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Data");
+  const csvContent = [
+    ...metaSection,
+    headers.join(","),
+    ...body.map(row =>
+      row.map(val => `"${val.replace(/"/g, '""')}"`).join(",")
+    ),
+  ].join("\n");
 
-    worksheet["!cols"] = headers.map(() => ({ wch: 20 }));
-
-    XLSX.writeFile(workbook, `${filename}-${new Date().toISOString().split("T")[0]}.xlsx`);
-  };
-
-
-  const exportToPDF = (exportData: any[], table: TanstackTable<any>) => {
-    if (exportData.length === 0) return;
-
-    const doc = new jsPDF();
-    const { headers, body } = getVisibleData(table, exportData);
-
-    doc.setFontSize(14);
-    doc.text(filename, 14, 20);
-
-    autoTable(doc, {
-      head: [headers],
-      body,
-      startY: 30,
-      styles: { fontSize: 8, cellPadding: 2 },
-      headStyles: { fillColor: [66, 135, 245] },
-      alternateRowStyles: { fillColor: [240, 240, 240] },
-      theme: "grid",
-      margin: { top: 30 },
-    });
-
-    doc.save(`${filename}-${new Date().toISOString().split("T")[0]}.pdf`);
-  };
+  const blob = new Blob([csvContent], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${filename}-${new Date().toISOString().split("T")[0]}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+};
 
 
 
-  const exportToJSON = (exportData: any[], table: TanstackTable<any>) => {
-    if (exportData.length === 0) return;
 
-    const { headers, body } = getVisibleData(table, exportData);
+const exportToExcel = (exportData: any[], table: TanstackTable<any>) => {
+  if (exportData.length === 0) return;
 
-    const jsonData = body.map(row =>
+  const { headers, body } = getVisibleData(table, exportData);
+  const meta = getExportMetadata(exportData, exportMeta);
+
+  const metaSheet = [
+    ["Company Name:", meta.companyName],
+    ["Name:", meta.name],
+    ["Total Records:", meta.totalCount],
+    ["Download Date:", meta.downloadDate],
+    [],
+  ];
+
+  const worksheet = XLSX.utils.aoa_to_sheet([...metaSheet, headers, ...body]);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Data");
+
+  worksheet["!cols"] = headers.map(() => ({ wch: 20 }));
+  XLSX.writeFile(workbook, `${filename}-${new Date().toISOString().split("T")[0]}.xlsx`);
+};
+
+
+
+const exportToPDF = (exportData: any[], table: TanstackTable<any>) => {
+  if (exportData.length === 0) return;
+
+  const { headers, body } = getVisibleData(table, exportData);
+  const meta = getExportMetadata(exportData, exportMeta);
+
+  const doc = new jsPDF();
+  doc.setFontSize(14);
+  doc.text(filename, 14, 15);
+  doc.setFontSize(10);
+  doc.text(`Company Name: ${meta.companyName}`, 14, 25);
+  doc.text(`Name: ${meta.name}`, 14, 30);
+  doc.text(`Total Records: ${meta.totalCount}`, 14, 35);
+  doc.text(`Download Date: ${meta.downloadDate}`, 14, 40);
+
+  autoTable(doc, {
+    head: [headers],
+    body,
+    startY: 45,
+    styles: { fontSize: 8, cellPadding: 2 },
+    headStyles: { fillColor: [66, 135, 245] },
+    alternateRowStyles: { fillColor: [240, 240, 240] },
+    theme: "grid",
+  });
+
+  doc.save(`${filename}-${new Date().toISOString().split("T")[0]}.pdf`);
+};
+
+
+
+
+ const exportToJSON = (exportData: any[], table: TanstackTable<any>) => {
+  if (exportData.length === 0) return;
+
+  const { headers, body } = getVisibleData(table, exportData);
+  const meta = getExportMetadata(exportData, exportMeta);
+
+  const jsonData = {
+    metadata: meta,
+    records: body.map(row =>
       Object.fromEntries(headers.map((h, i) => [h, row[i]]))
-    );
-
-    const blob = new Blob([JSON.stringify(jsonData, null, 2)], {
-      type: "application/json",
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${filename}-${new Date().toISOString().split("T")[0]}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+    ),
   };
+
+  const blob = new Blob([JSON.stringify(jsonData, null, 2)], {
+    type: "application/json",
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${filename}-${new Date().toISOString().split("T")[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+};
+
+const msg = useMessage()
+
+    const validateVisibleColumns = (table: TanstackTable<any>) => {
+  const visibleColumns = table.getAllLeafColumns().filter(col => col.getIsVisible());
+  if (visibleColumns.length < 3) {
+    msg.warning("Please select at least 3 columns before exporting.");
+    return false;
+  }
+  return true;
+};
 
 
   const printTable = () => {
@@ -991,48 +1075,80 @@ const ExportMenu = ({
 
   if (!permissions?.canExport) return null;
 
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm">
-          <Download className="w-4 h-4 mr-2" />
-          Export
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent>
-        <DropdownMenuItem onClick={() => exportToCSV(data, table)}>
-          Export All to CSV
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => exportToExcel(data, table)}>
-          Export All to Excel
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => exportToJSON(data, table)}>
-          Export All to JSON
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => exportToPDF(data, table)}>
-          Export All to PDF
-        </DropdownMenuItem>
+return (
+  <DropdownMenu>
+    <DropdownMenuTrigger asChild>
+      <Button variant="outline" size="sm">
+        <Download className="w-4 h-4 mr-2" />
+        Export
+      </Button>
+    </DropdownMenuTrigger>
+    <DropdownMenuContent>
+      {exportOptions.includes("csv") && (
+       <DropdownMenuItem onClick={() => {
+  const allRows = table.getFilteredRowModel().rows.map(r => r.original);
+  if (!validateVisibleColumns(table)) return; // all pages, honors filters/sort
+  exportToCSV(allRows, table);
+}}>
+  Export All to CSV
+</DropdownMenuItem>
+      )}
+      {exportOptions.includes("excel") && (
+       <DropdownMenuItem onClick={() => {
+  const allRows = table.getFilteredRowModel().rows.map(r => r.original);
+  if (!validateVisibleColumns(table)) return;
+  exportToExcel(allRows, table);
+}}>
+  Export All to Excel
+</DropdownMenuItem>
+      )}
+      {exportOptions.includes("json") && (
+        <DropdownMenuItem onClick={() => {
+  const allRows = table.getFilteredRowModel().rows.map(r => r.original);
+  if (!validateVisibleColumns(table)) return;
+  exportToJSON(allRows, table);
+}}>
+  Export All to JSON
+</DropdownMenuItem>
+      )}
+      {exportOptions.includes("pdf") && (
+        <DropdownMenuItem onClick={() => {
+  const allRows = table.getFilteredRowModel().rows.map(r => r.original);
+  if (!validateVisibleColumns(table)) return;
+  exportToPDF(allRows, table);
+}}>
+  Export All to PDF
+</DropdownMenuItem>
+      )}
 
-        {selectedRows.length > 0 && (
-          <>
+      {selectedRows.length > 0 && (
+        <>
+          {exportOptions.includes("csv") && (
             <DropdownMenuItem onClick={() => exportToCSV(selectedRows, table)}>
               Export Selected to CSV ({selectedRows.length})
             </DropdownMenuItem>
+          )}
+          {exportOptions.includes("excel") && (
             <DropdownMenuItem onClick={() => exportToExcel(selectedRows, table)}>
               Export Selected to Excel ({selectedRows.length})
             </DropdownMenuItem>
+          )}
+          {exportOptions.includes("json") && (
             <DropdownMenuItem onClick={() => exportToJSON(selectedRows, table)}>
               Export Selected to JSON ({selectedRows.length})
             </DropdownMenuItem>
+          )}
+          {exportOptions.includes("pdf") && (
             <DropdownMenuItem onClick={() => exportToPDF(selectedRows, table)}>
               Export Selected to PDF ({selectedRows.length})
             </DropdownMenuItem>
-          </>
-        )}
+          )}
+        </>
+      )}
+    </DropdownMenuContent>
+  </DropdownMenu>
+);
 
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
 };
 
 // Inline Edit Cell Component
@@ -1258,58 +1374,134 @@ const useKeyboardNavigation = (
   }, [enabled, tableRef]);
 };
 
-const Pagination = ({ table }: { table: TanstackTable<any> }) => (
-  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-4 py-3 bg-gray-50 border-t border-gray-200 gap-2 rounded-b-xl">
-    <div className="text-sm text-muted-foreground">
-      Showing{' '}
-      {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} to{' '}
-      {Math.min((table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize, table.getFilteredRowModel().rows.length)} of{' '}
-      {table.getFilteredRowModel().rows.length} results
+
+const Pagination = ({ table }: { table: TanstackTable<any> }) => {
+  const pageCount = table.getPageCount();
+  const currentPage = table.getState().pagination.pageIndex + 1;
+  const totalRows = table.getFilteredRowModel().rows.length;
+  const pageSize = table.getState().pagination.pageSize;
+  const start = (currentPage - 1) * pageSize + 1;
+  const end = Math.min(currentPage * pageSize, totalRows);
+
+  // 3-page window logic
+  const [pageWindow, setPageWindow] = React.useState(0);
+  const pagesPerWindow = 3;
+  const totalWindows = Math.ceil(pageCount / pagesPerWindow);
+  const currentWindow = Math.floor((currentPage - 1) / pagesPerWindow);
+
+  React.useEffect(() => {
+    setPageWindow(currentWindow);
+  }, [currentWindow]);
+
+  const startPage = pageWindow * pagesPerWindow + 1;
+  const endPage = Math.min(startPage + pagesPerWindow - 1, pageCount);
+  const visiblePages = Array.from({ length: pagesPerWindow }, (_, i) => {
+    const page = startPage + i;
+    return page <= pageCount ? page : null;
+  });
+
+  const shiftWindowLeft = () => {
+    if (pageWindow > 0) setPageWindow(pageWindow - 1);
+  };
+
+  const shiftWindowRight = () => {
+    if (pageWindow < totalWindows - 1) setPageWindow(pageWindow + 1);
+  };
+
+  return (
+    <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-3 border-t border-gray-200 bg-white text-sm rounded-b-lg gap-3">
+      {/* Left info */}
+      <div className="text-gray-600">
+        Showing {start} to {end} of {totalRows} entries
+      </div>
+
+      {/* Right side controls */}
+      <div className="flex items-center flex-wrap gap-2 mt-1 sm:mt-0">
+         <Select
+          value={pageSize.toString()}
+          onValueChange={(value) => table.setPageSize(Number(value))}
+        >
+          <SelectTrigger className="w-28 h-8 text-sm">
+            <SelectValue placeholder="Rows per page" />
+          </SelectTrigger>
+          <SelectContent>
+            {[10, 20, 50, 100].map((size) => (
+              <SelectItem key={size} value={size.toString()}>
+                {size} per page
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        
+
+        
+       
+
+        {/* Left shift */}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={shiftWindowLeft}
+          disabled={pageWindow === 0}
+        >
+          <ChevronLeft />
+        </Button>
+        {/* Previous */}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => table.previousPage()}
+          disabled={!table.getCanPreviousPage()}
+        >
+          Prev
+        </Button>
+
+        {/* 3-page buttons */}
+        <div className="flex items-center gap-2 min-w-[150px] justify-center">
+          {visiblePages.map((page, idx) =>
+            page ? (
+              <button
+                key={page}
+                onClick={() => table.setPageIndex(page - 1)}
+                className={`w-8 h-8 text-sm font-medium rounded-md border transition-all duration-150 ${
+                  page === currentPage
+                    ? "bg-blue-600 text-white border-blue-600 shadow-sm"
+                    : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
+                }`}
+              >
+                {page}
+              </button>
+            ) : (
+              <div key={`empty-${idx}`} className="w-10 h-9" />
+            )
+          )}
+        </div>
+
+      
+
+        {/* Next */}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => table.nextPage()}
+          disabled={!table.getCanNextPage()}
+        >
+          Next
+        </Button>
+          {/* Right shift */}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={shiftWindowRight}
+          disabled={pageWindow >= totalWindows - 1}
+        >
+          <ChevronRight />
+        </Button>
+      </div>
     </div>
+  );
+};
 
-    <div className="flex flex-wrap items-center gap-2">
-      <Select
-        value={table.getState().pagination.pageSize.toString()}
-        onValueChange={(value) => table.setPageSize(Number(value))}
-      >
-        <SelectTrigger className="w-32 h-9 rounded-1">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {[10, 20, 50, 100].map(size => (
-            <SelectItem key={size} value={size.toString()}>
-              {size} per page
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-
-      <Button
-        variant="outline"
-        size="sm"
-        className="rounded-2 px-3"
-        onClick={() => table.previousPage()}
-        disabled={!table.getCanPreviousPage()}
-      >
-        Previous
-      </Button>
-
-      <span className="text-xs font-medium text-gray-600">
-        Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
-      </span>
-
-      <Button
-        variant="outline"
-        size="sm"
-        className="rounded-2 px-3"
-        onClick={() => table.nextPage()}
-        disabled={!table.getCanNextPage()}
-      >
-        Next
-      </Button>
-    </div>
-  </div>
-);
 function DraggableRow({ row, children }: { row: any; children: React.ReactNode }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: row.id,
@@ -1356,14 +1548,16 @@ export function ReusableTable<T = any>({
     canInlineEdit: false,
     canManageColumns: true
   },
+  exportOptions,
+  exportMeta,
   actions = [],
   onAdd,
+  onExport,
   onRefresh,
   onBulkDelete,
   onBulkEdit,
   onRowEdit,
   onAuditLog,
-
   // NEW: Enhanced Selection Props
   selectedRowIds: controlledSelectedRowIds,
   onSelectionChange,
@@ -1543,7 +1737,8 @@ export function ReusableTable<T = any>({
         },
         enableSorting: false,
         enableHiding: false,
-        size: 50,
+        size: 28, minSize: 24, 
+    maxSize: 36,
       });
     }
 
@@ -1603,8 +1798,9 @@ export function ReusableTable<T = any>({
       if (headerRef.current) {
         const actualWidth = headerRef.current.offsetWidth + 16;
 
-        const minCharsWidth = getMinWidthFromChars(10);  // Minimum width based on 4 chars
-        const calculated = Math.max(actualWidth, minCharsWidth);
+       const headerText = title?.toString() ?? '';
+const minCharsWidth = getMinWidthFromChars(headerText.length);
+const calculated = Math.max(actualWidth, minCharsWidth);
 
         setCalculatedMinWidth(calculated);
       }
@@ -1726,12 +1922,6 @@ export function ReusableTable<T = any>({
                 </Button>
               </div>
             )}
-
-
-
-
-
-
             {/* Filtering */}
             {enableFiltering && column.getCanFilter() && (
               <div className="space-y-2">
@@ -1865,7 +2055,6 @@ export function ReusableTable<T = any>({
     if (selectedRows.length === 0 || !onBulkEdit) return;
     onBulkEdit(selectedRows);
   };
-
   if (loading) {
     return (
       <div className="p-8 text-center">
@@ -1924,16 +2113,41 @@ export function ReusableTable<T = any>({
         {enableGrouping && (
           <ColumnGroupingManager table={table} />
         )}
-        {enableExport && (
-          <ExportMenu
-            data={table?.getCoreRowModel().rows.map(r => r.original)}
-            selectedRows={selectedRows}
-            permissions={permissions}
-            filename={title || 'export'}
-            columns={enhancedColumns}
-            table={table}
-          />
+        {enableExport && permissions.canExport && (
+          onExport ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Download className="w-4 h-4 mr-2" />
+                  Export
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                {(exportOptions || ["csv", "excel", "json", "pdf"]).map((type) => (
+                  <DropdownMenuItem
+                    key={type}
+                    onClick={() => onExport(type, selectedRows.length ? selectedRows : data, table)}
+                  >
+                    Export to {type.toUpperCase()}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            // fallback to internal ExportMenu if no external handler provided
+           <ExportMenu
+  data={table?.getPrePaginationRowModel().rows.map(r => r.original)} // ✅ include ALL rows
+  selectedRows={selectedRows}
+  permissions={permissions}
+  filename={title || "export"}
+  table={table}
+  exportOptions={exportOptions}
+  exportMeta={exportMeta}
+/>
+
+          )
         )}
+
 
         {/* Accessibility and keyboard shortcuts info */}
         {enableKeyboardNav && (
@@ -1987,13 +2201,13 @@ export function ReusableTable<T = any>({
       <div className="bg-white shadow-sm rounded-xl border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table ref={tableRef} className="w-full min-w-max border-collapse text-sm text-gray-800">
-            <thead className="bg-gray-100 text-gray-700 uppercase text-xs font-semibold tracking-wide">
+            <thead className="bg-white text-gray-700 uppercase text-sm font-semibold tracking-wide">
               {table.getHeaderGroups().map(headerGroup => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map(header => (
                     <th
                       key={header.id}
-                      className="px-4 py-3 text-left border-b border-gray-200 whitespace-nowrap bg-gray-50"
+                      className="px-4 py-3 text-left border-b border-gray-200 whitespace-nowrap bg-white"
                       style={{
                         width: header.getSize(),
                         minWidth: `${calculatedMinWidth}px`,
@@ -2082,7 +2296,7 @@ export function ReusableTable<T = any>({
                               <td
                                 key={cell.id}
                                 className={cn(
-                                  "px-4 py-3 text-gray-600 border-b border-gray-100 last:border-0 transition-colors duration-150",
+                                  "px-4 py-3 text-gray-600 border-b border-gray-200 last:border-0 transition-colors duration-150",
                                   rowHeightClasses[rowHeight]
                                 )}
                                 style={{
@@ -2145,8 +2359,8 @@ export function ReusableTable<T = any>({
                     <tr
                       key={row.id}
                       className={cn(
-                        row.getIsSelected() ? "bg-indigo-50 border-b border-gray-100 transition-all duration-150" : "text-gray-700 border-b border-gray-100 last:border-0 transition-all duration-150 hover:bg-indigo-50 cursor-pointer",
-                        "bg-gray-50 hover:bg-gray-100 cursor-pointer"
+                        row.getIsSelected() ? "bg-white border-b border-gray-200 transition-all duration-150" : "text-gray-700 border-b border-gray-200 last:border-0 transition-all duration-150 hover:bg-indigo-50 cursor-pointer",
+                        "bg-white hover:bg-gray-100 cursor-pointer"
                       )}
                     >
                       {row.getVisibleCells().map(cell => {
@@ -2159,7 +2373,7 @@ export function ReusableTable<T = any>({
                           <td
                             key={cell.id}
                             className={cn(
-                              "px-4 py-3 text-gray-600 border-b border-gray-100 last:border-0",
+                              "px-4 py-3 text-gray-600 border-b border-gray-200 last:border-0",
                               rowHeightClasses[rowHeight]
                             )}
                             style={{

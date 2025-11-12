@@ -762,7 +762,7 @@ const CompanyHierarchy = () => {
 
         {/* Details Panel */}
         <div className="flex-1 h-[75vh]  ps-2 shadow-xl">
-          <div className="bg-card border-b rounded-lg shadow-lg lg:px-6 py-3 flex flex-row xxs:flex-col xs2:flex-row lg:flex-row lg:items-center justify-between gap-4">
+          <div className="bg-card border-b rounded-lg shadow-lg lg:ps-6 py-3 flex flex-row xxs:flex-col xs2:flex-row lg:flex-row lg:items-center justify-between gap-4">
             <div className="p-1 space-y-6 h-[71vh] overflow-y-auto">
               <div className="flex flex-col gap-2">
                 <div>

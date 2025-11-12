@@ -135,6 +135,7 @@ const ServiceDeskReports = () => {
   const [serviceHistoryDetail, setServiceHistoryDetail] = useState<BaseField[]>()
   const [columnVisibility, setColumnVisibility] = useState({});
   const companyId = useAppSelector(state => state.projects.companyId);
+  const companyName = useAppSelector(state => state.projects.companyName);
   const branch = useAppSelector(state => state.projects.branch);
   const branchId = useAppSelector(state => state.projects.branchId);
   // const dispatch =useDispatch();
@@ -422,7 +423,7 @@ const ServiceDeskReports = () => {
   }
 
 
-  
+
 
   const handleViewReport = async () => {
     setIsGeneratingReport(true);
@@ -1230,11 +1231,16 @@ const ServiceDeskReports = () => {
                     enableSorting={true}
                     enablePagination={true}
                     title={`${activeTab} Report`}
+                    exportMeta={{
+                      companyName: `${companyName || ""}`,
+                      name: `${activeTab} Report`,
+                    }}
                     // enableRowReordering
                     // onRowReorder={(newData) => setDataSourse(newData)}
                     enableColumnVisibility
                     columnVisibility={columnVisibility} // 👈 pass down
                     onColumnVisibilityChange={setColumnVisibility}
+                    exportOptions={["csv", "excel"]}
                     permissions={{
                       canEdit: false,          // required
                       canDelete: false,        // required
@@ -1242,6 +1248,7 @@ const ServiceDeskReports = () => {
                       canExport: true,         // required
                       canManageColumns: true,  // optional
                     }}
+
                     enableColumnPinning
                     storageKey={activeTab === "Service Request Details" ? "SRdetails-Report" : activeTab === "Service Request SLA Met/SLA Violated" ? "SLA-Report" : "History-Report"}
                     pageSize={10}

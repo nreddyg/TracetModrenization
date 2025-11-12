@@ -218,8 +218,8 @@ const FixedHeader: React.FC = () => {
   };
   const getInitial = (name?: string) => name && name.length > 0 ? name.charAt(0).toUpperCase() : '';
   return (
-    <header className="sticky top-0 right-0  bg-white border-b border-gray-200 shadow-sm">
-      <div className="flex items-center justify-between gap-2 px-4 lg:px-6 py-3">
+    <header className="sticky top-0 right-0  bg-white border-b border-gray-200 shadow-[0_2px_8px_0_rgba(0,0,0,0.05)]">
+      <div className="flex items-center justify-between gap-2 px-4 lg:px-6 py-4">
         {/* Left Section - Sidebar Trigger + Company Logo + Breadcrumbs */}
         <div className="flex items-center gap-2 lg:gap-4 flex-1 min-w-0">
           <SidebarTrigger />
@@ -383,7 +383,8 @@ const FixedHeader: React.FC = () => {
               placeholder="Select company"
               size="small"
               disabled={!(LoggedInUser.RoleName === "Root Admin")}
-              className="min-w-[120px]"
+              className="w-auto h-9"
+              containerClassName='max-w-[50%]'
             />
 
             <ReusableDropdown
@@ -392,7 +393,8 @@ const FixedHeader: React.FC = () => {
               onChange={(value) => handleChange('Branch', value)}
               placeholder="Select location"
               size="small"
-              className="min-w-[120px]"
+              className="w-auto h-9"
+              containerClassName='max-w-[50%]'
             />
           </div>
 

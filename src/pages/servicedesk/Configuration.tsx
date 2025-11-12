@@ -673,13 +673,18 @@ const Configuration = () => {
   }
   return (
     <div className="h-full bg-gray-50 overflow-y-scroll">
-      <header className="bg-white border-b px-4 py-3 shadow-sm">
+      <header className="bg-white border-b px-6 py-3 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div className="flex items-center gap-3">
           <Button size="sm" className="bg-primary h-[2.38rem] hover:bg-blue-700  text-white" onClick={()=>navigate('/service-desk/create-ticket')}>
             <span className="hidden sm:inline">New Service Request</span>
             <span className="sm:hidden">New Request</span>
           </Button>
         </div>
+        <div className="flex items-center gap-2 text-sm text-gray-600">
+              <span>Service Desk</span>
+              <span>/</span>
+              <span className="text-gray-900 font-medium">Configuration</span>
+            </div>
       </header>
       <div className="p-4 space-y-4">
         <div>

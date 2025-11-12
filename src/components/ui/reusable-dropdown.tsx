@@ -2052,7 +2052,7 @@ export const ReusableDropdown: React.FC<SelectProps> = ({
     const top = openAbove ? inputRect.top : inputRect.bottom;
     const transform = openAbove ? "translateY(-100%)" : "translateY(0)";
 
-    const needsScroll = filteredOptions.length > 8; // keep your heuristic
+    const needsScroll = filteredOptions.length > 4; // keep your heuristic
 
     return (
       <div

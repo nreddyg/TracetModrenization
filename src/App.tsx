@@ -185,7 +185,7 @@ const AnimatedRoutes = () => {
       <SidebarProvider>
         <div className="h-screen flex w-full bg-app-background overflow-hidden">
           <AppSidebar />
-          <SidebarInset className="flex flex-col overflow-hidden">
+          <SidebarInset className="flex flex-col overflow-hidden bg-[#f9fafb]">
             <FixedHeader />
             {/* <div className="w-full h-full pt-1 transition-all duration-200 ease-in-out"> */}
               <Suspense fallback={<ReusableLoader spinning={true} size="lg" position="center" />}>
@@ -222,7 +222,7 @@ const AnimatedRoutes = () => {
                   <Route path="/masters/company/assets-inventory" element={<AssetsMasters />} />
                   <Route path="/masters/company/maintenance" element={<MaintenanceMasters />} />
                   <Route path="/masters/reports" element={<ReportsMasters />} />
-                  <Route path="/masters/asset-location" element={<AssetLocation />} />
+                  <Route path="/masters/company/asset-location" element={<AssetLocation />} />
                   <Route path="/masters/servicemaintenance/servicelocations" element={<ServiceLocations />} />
                   <Route path='/masters/servicemaintenance/productmaster' element={<ProductMasters/>}/>
                   <Route path="/masters/store" element={<Store/>} />
@@ -241,6 +241,7 @@ const AnimatedRoutes = () => {
                   <Route path="/masters/depreciation/assetcategorybookcategorymapping" element={<AssetCategoryMappingBookCategory/> }/>
 
                   <Route path="/masters/depreciation/book/addbook" element={<AddBook/>}/>
+                  <Route path="/masters/depreciation/book/addbook/:id" element={<AddBook key={`edit`} />} />
 
                   {/* CWIP */}
                   <Route path="/cwip/project-management" element={<ProjectManagement />} />

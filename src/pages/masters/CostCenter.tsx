@@ -633,7 +633,7 @@ const CostCenter = () => {
 
   return (
     <div className="bg-hsl(214.3 31.8% 91.4%) overflow-y-auto">
-      <header className="bg-card flex justify-between border-b px-6 py-4 shadow-sm">
+      <header className="bg-card min-h-[53px] flex flex-col sm:flex-row gap-4 shrink-0 justify-between border-b px-6 py-3 shadow-sm">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <span>Masters</span>

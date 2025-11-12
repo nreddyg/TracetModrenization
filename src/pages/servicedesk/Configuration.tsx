@@ -31,6 +31,7 @@ import { ReusableButton } from '@/components/ui/reusable-button';
 import { useAppSelector } from '@/store';
 import { getSRBranchList } from '@/services/ticketServices';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 interface OptType {
   data: { [key: string]: any }[];
   label: string;
@@ -70,8 +71,10 @@ const tablePermissions: TablePermissions = {
 };
 
 const Configuration = () => {
+  const navigate=useNavigate()
   const companyId = useAppSelector(state => state.projects.companyId);
   const branch=useAppSelector(state => state.projects.branch) || '';
+    const branchId=useAppSelector(state=>state.projects.branchId) || localStorage.getItem('BranchId');
   const [fields, setFields] = useState<BaseField[]>(CONFIGURATION_DB);
   const dispatch = useDispatch()
   const msg = useMessage()
@@ -104,7 +107,9 @@ const Configuration = () => {
   const [serviceRequestTypeData, setServiceRequestTypeData] = useState<serviceRequestType[]>([]);
   const [isDelModalOpen, setIsDelModalOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<serviceRequestType | null>(null);
+  const [deletingRecord,setDeletingRecord]=useState<serviceRequestType|null>(null);
   const [selectedStatusRec, setSelectedStatusRec] = useState<Status | null>(null);
+  const [deletingStatusRec,setDeletingStatusRec]=useState<Status|null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isEditStatusMode, setIsEditStatusMode] = useState(false);
   const { toast } = useToast();
@@ -116,11 +121,11 @@ const Configuration = () => {
   };
   const handleDelete = (data: serviceRequestType): void => {
     setIsDelModalOpen(true);
-    setSelectedRecord(data);
+    setDeletingRecord(data);
   };
   const handleDeleteStatus = (data: Status): void => {
     setIsDelModalOpen(true);
-    setSelectedStatusRec(data);
+    setDeletingStatusRec(data);
   }
   const handleEditStatus = (data: Status): void => {
     dispatch(setLoading(true));
@@ -181,9 +186,14 @@ const Configuration = () => {
   }, [companyId, branch])
   const fetchAllServiceRequests = async () => {
     dispatch(setLoading(true));
-    await getServiceRequestTypes(companyId,branch).then(res => {
+    await getServiceRequestTypes(companyId,branchId).then(res => {
       if (res.success && res.data) {
-        setServiceRequestTypeData(res.data)
+        if(Array.isArray(res.data)){
+          setServiceRequestTypeData(res.data)
+        }else{
+            setServiceRequestTypeData([])
+        }
+       
       } else {
         setServiceRequestTypeData([])
       }
@@ -429,7 +439,7 @@ const Configuration = () => {
     if (type) {
       form.reset({ ...form.getValues(), Status: '' });
       setIsEditStatusMode(false);
-      setSelectedStatusRec(null)
+      setSelectedStatusRec(null);
     } else {
       form.reset({ ...form.getValues(), ServiceRequestType: '', UserGroups: [], Vendors: [], SLAHoursMinutes: '', ReminderForSLAHoursMinutes: '', EscalationTo: [], StatusToCalculate: '', ServiceRequestTypeAdmin: [], Branches: [], Description: '' });
       setIsEditMode(false);
@@ -519,6 +529,8 @@ const Configuration = () => {
                   value={ctrl.value}
                   onChange={ctrl.onChange}
                   error={errors[name]?.message as string}
+                  maxTagCount={2}
+                  maxTagTextLength = {15}
                 />
               )}
             />
@@ -623,6 +635,7 @@ const Configuration = () => {
   }
   //delete status
   const deleteStatus = async (id: number) => {
+    dispatch(setLoading(true));
     await postDeleteServiceRequestStatus(companyId, id).then(res => {
       if (res.success) {
         if (res.data.status) {
@@ -637,9 +650,7 @@ const Configuration = () => {
       } else {
         msg.warning('Failed to delete status !!')
       }
-    }).catch(err => { }).finally(() => {
-
-    })
+    }).catch(err => { }).finally(() => {dispatch(setLoading(false))})
   }
   //update service request status sequence
   const handleUpdateStatusSequence = async () => {
@@ -662,14 +673,18 @@ const Configuration = () => {
   }
   return (
     <div className="h-full bg-gray-50 overflow-y-scroll">
-      <header className="bg-white border-b px-4 py-3 shadow-sm">
+      <header className="bg-white border-b px-6 py-3 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div className="flex items-center gap-3">
-          <SidebarTrigger />
-          <Button size="sm" className="bg-primary h-[2.38rem] hover:bg-blue-700  text-white">
+          <Button size="sm" className="bg-primary h-[2.38rem] hover:bg-blue-700  text-white" onClick={()=>navigate('/service-desk/create-ticket')}>
             <span className="hidden sm:inline">New Service Request</span>
             <span className="sm:hidden">New Request</span>
           </Button>
         </div>
+        <div className="flex items-center gap-2 text-sm text-gray-600">
+              <span>Service Desk</span>
+              <span>/</span>
+              <span className="text-gray-900 font-medium">Configuration</span>
+            </div>
       </header>
       <div className="p-4 space-y-4">
         <div>
@@ -863,8 +878,8 @@ const Configuration = () => {
               <DialogDescription>
                 Are you sure you want to delete{" "}
                 {currentTab === "service-request-type"
-                  ? `${selectedRecord?.ServiceRequestType || "this"} Service Request Type`
-                  : `${selectedStatusRec?.StatusType || "this"} Status`
+                  ? `${deletingRecord?.ServiceRequestType || "this"} Service Request Type`
+                  : `${deletingStatusRec?.StatusType || "this"} Status`
                 }
               </DialogDescription>
             </DialogHeader>
@@ -878,7 +893,7 @@ const Configuration = () => {
               <ReusableButton
                 variant="primary"
                 danger={true}
-                onClick={currentTab === "service-request-type" ? () => { deleteServiceRequestType(selectedRecord?.Id); setIsDelModalOpen(false) } : () => { deleteStatus(selectedStatusRec?.Id); setIsDelModalOpen(false) }}
+                onClick={currentTab === "service-request-type" ? () => { deleteServiceRequestType(deletingRecord?.Id); setIsDelModalOpen(false) } : () => { deleteStatus(deletingStatusRec?.Id); setIsDelModalOpen(false) }}
               >
                 Delete
               </ReusableButton>

@@ -876,7 +876,6 @@
 //         </div>
 //     );
 // };
-
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ChevronDown, ChevronRight, X, Search, Check } from 'lucide-react';
 import { createPortal } from 'react-dom';
@@ -929,6 +928,7 @@ interface TracetTreeSelectProps {
     path?: string;
     errorMessage?: string;
     usePortal?: boolean;
+    selectAll?: boolean;
 }
 
 interface PopupPosition {
@@ -1092,7 +1092,8 @@ export const TracetTreeSelect: React.FC<TracetTreeSelectProps> = ({
     listHeight = 256,
     showLevelPath = false,
     path,
-    usePortal = true
+    usePortal = true,
+    selectAll = false
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchValue, setSearchValue] = useState('');
@@ -1111,6 +1112,34 @@ export const TracetTreeSelect: React.FC<TracetTreeSelectProps> = ({
     const containerRef = useRef<HTMLDivElement>(null);
 
     const showSearch = multiSelectConfig.showSearch !== false; // Default to true
+
+    // Get all leaf node values from tree
+    const getAllLeafValues = useCallback((nodes: TreeNode[]): (string | number)[] => {
+        let values: (string | number)[] = [];
+        nodes.forEach(node => {
+            if (node.children && node.children.length > 0) {
+                values.push(...getAllLeafValues(node.children));
+            } else {
+                values.push(node.value);
+            }
+        });
+        return values;
+    }, []);
+
+    // Track if all items are selected
+    const allLeafValues = React.useMemo(() => getAllLeafValues(treeData), [treeData, getAllLeafValues]);
+    const areAllSelected = allLeafValues.length > 0 && allLeafValues.every(val => selectedValues.includes(val));
+
+    // Handle select all checkbox
+    const handleSelectAllChange = (checked: boolean) => {
+        if (checked) {
+            setSelectedValues(allLeafValues);
+            handleSelectChange(allLeafValues, '', treeData);
+        } else {
+            setSelectedValues([]);
+            handleSelectChange([], '', treeData);
+        }
+    };
 
     // Smart position calculation - same as MultiSelect
     const calculatePopupPosition = (): PopupPosition => {
@@ -1630,6 +1659,27 @@ export const TracetTreeSelect: React.FC<TracetTreeSelectProps> = ({
                                 value={searchValue}
                                 onChange={(e) => setSearchValue(e.target.value)}
                             />
+                        </div>
+                    </div>
+                )}
+
+                {/* Select All Checkbox - Show if selectAll prop is true */}
+                {selectAll && treeData.length > 0 && (
+                    <div className="border-b border-gray-200 px-2 py-2">
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="checkbox"
+                                id="select-all-checkbox"
+                                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                checked={areAllSelected}
+                                onChange={(e) => handleSelectAllChange(e.target.checked)}
+                            />
+                            <label
+                                htmlFor="select-all-checkbox"
+                                className="text-sm font-medium text-gray-700 cursor-pointer select-none"
+                            >
+                                Select All
+                            </label>
                         </div>
                     </div>
                 )}

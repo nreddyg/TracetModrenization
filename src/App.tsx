@@ -14,12 +14,21 @@ import { MessageProvider } from "./components/ui/reusable-message";
 import WrapperLazyComponent from "./components/common/WrapperLazyComponent";
 import AssetCodeTable from "./pages/servicedesk/AssetCodeTable";
 import ServiceRequestReport from "./pages/servicedesk/ServiceRequestDetailsHistory";
-import { getOrganizationDetailsByToken, getUserDetailsByUserName } from "./services/appService";
-import { useAppDispatch } from "./store";
-import { setCompanyId, setLoading, setUserId } from "./store/slices/projectsSlice";
 import ComplianceAndAudit from "./pages/softwareAssets/ComplianceAndAudit";
 import SoftwareAssetsReports from "./pages/softwareAssets/SoftwareAssetsReports";
 import ChangePassword from "./pages/changePassword/ChangePassword";
+import AssetLocation from "./pages/masters/AssetLocation";
+import Store from "./pages/masters/Store";
+import AssetCategory from "./pages/masters/fixedAssets/AssetCategory"
+import ItemMaster from "./pages/masters/ItemMaster";
+import UnitOfMeasure from "./pages/masters/UnitsOfMeasure";
+import ItemCategory from "./pages/masters/ItemCategory";
+import AssetCategoryMappingBookCategory from "./pages/masters/depreciation/AssetCategoryMappingBookCategory";
+import ManageUnitConversion from "./pages/masters/ManageUnitConvertion";
+import UserAttributes from "./pages/masters/fixedAssets/UserAttributes";
+
+
+
 
 // Lazy load all pages
 const Index = WrapperLazyComponent(() => import("./pages/Index"));
@@ -42,11 +51,19 @@ const Organization = WrapperLazyComponent(() => import("./pages/masters/Organiza
 const User = WrapperLazyComponent(() => import("./pages/masters/User"));
 const Vendor = WrapperLazyComponent(() => import("./pages/masters/Vendor"));
 const Customer = WrapperLazyComponent(() => import("./pages/masters/Customer"));
+const CustomerLocation = WrapperLazyComponent(() => import("./pages/masters/CustomerLocation"));
 const CompanyHierarchy = WrapperLazyComponent(() => import("./pages/masters/CompanyHierarchy"));
 const Department = WrapperLazyComponent(() => import("./pages/masters/Department"));
+const CostCenter=WrapperLazyComponent(() => import("./pages/masters/CostCenter"));
 const AssetsMasters = WrapperLazyComponent(() => import("./pages/masters/AssetsMasters"));
 const MaintenanceMasters = WrapperLazyComponent(() => import("./pages/masters/MaintenanceMasters"));
 const ReportsMasters = WrapperLazyComponent(() => import("./pages/masters/ReportsMasters"));
+const ServiceLocations=WrapperLazyComponent(() => import("./pages/masters/ServiceLocations"));
+const ProductMasters=WrapperLazyComponent(() => import("./pages/masters/ProductMasters"));
+const CostBreakupAttributes=WrapperLazyComponent(() => import("./pages/masters/fixedAssets/CostBreakupAttributes"));
+const Books=WrapperLazyComponent(()=>import("./pages/masters/depreciation/Books"));
+const AdditionalDepreciation=WrapperLazyComponent(()=>import("./pages/masters/depreciation/AdditionalDepreciation"));
+const AddBook=WrapperLazyComponent(()=>import("./pages/masters/depreciation/AddBook"))
 
 // CWIP
 const ProjectManagement = WrapperLazyComponent(() => import("./pages/cwip/ProjectManagement"));
@@ -168,9 +185,9 @@ const AnimatedRoutes = () => {
       <SidebarProvider>
         <div className="h-screen flex w-full bg-app-background overflow-hidden">
           <AppSidebar />
-          <SidebarInset className="flex flex-col overflow-hidden">
+          <SidebarInset className="flex flex-col overflow-hidden bg-[#f9fafb]">
             <FixedHeader />
-            <div className="w-full h-full pt-20 transition-all duration-300 ease-in-out">
+            {/* <div className="w-full h-full pt-1 transition-all duration-200 ease-in-out"> */}
               <Suspense fallback={<ReusableLoader spinning={true} size="lg" position="center" />}>
                 <Routes location={location}>
                   <Route path="/" element={<Navigate to="/login" replace />} />
@@ -194,15 +211,37 @@ const AnimatedRoutes = () => {
                   <Route path="/tickets/dashboard" element={<TicketsDashboard />} />
 
                   {/* Masters */}
-                  <Route path="/masters/organization" element={<Organization />} />
-                  <Route path="/masters/customer" element={<Customer />} />
-                  <Route path="/masters/vendor" element={<Vendor />} />
-                  <Route path="/masters/user" element={<User />} />
-                  <Route path="/masters/company-hierarchy" element={<CompanyHierarchy />} />
-                  <Route path="/masters/department" element={<Department />} />
-                  <Route path="/masters/assets-inventory" element={<AssetsMasters />} />
-                  <Route path="/masters/maintenance" element={<MaintenanceMasters />} />
+                  <Route path="/masters/company/customer" element={<Customer />} />
+                  <Route path="/masters/company/customer/customerlocation" element={<CustomerLocation/>}/>
+                  <Route path="/masters/company/vendor" element={<Vendor />} />
+                  <Route path="/masters/company/user" element={<User />} />
+                  <Route path="/masters/company/organization" element={<Organization />} />
+                  <Route path="/masters/company/company-hierarchy" element={<CompanyHierarchy />} />
+                  <Route path="/masters/company/department" element={<Department />} />
+                  <Route path='/masters/company/costcenter' element={<CostCenter/>}/>
+                  <Route path="/masters/company/assets-inventory" element={<AssetsMasters />} />
+                  <Route path="/masters/company/maintenance" element={<MaintenanceMasters />} />
                   <Route path="/masters/reports" element={<ReportsMasters />} />
+                  <Route path="/masters/company/asset-location" element={<AssetLocation />} />
+                  <Route path="/masters/servicemaintenance/servicelocations" element={<ServiceLocations />} />
+                  <Route path='/masters/servicemaintenance/productmaster' element={<ProductMasters/>}/>
+                  <Route path="/masters/store" element={<Store/>} />
+                  <Route path="/masters/fixed-assets/asset-category" element={<AssetCategory/>} />
+                  <Route path="masters/fixed-assets/costbreakup" element={<CostBreakupAttributes/>}/>
+                  <Route path="masters/fixed-assets/userattributes" element={<UserAttributes/>}/>
+                  
+
+                  <Route path="/masters/consumables/store" element={<Store/>} />
+                  <Route path="/masters/consumables/item-master" element={<ItemMaster/>} />
+                  <Route path="/masters/consumables/unitsofmeasure" element={<UnitOfMeasure/>} />
+                  <Route path="/masters/consumables/unitsofmeasure/manageunitconverstion" element={<ManageUnitConversion/>} />
+                  <Route path="/masters/consumables/item-category" element={<ItemCategory/>} />
+                  <Route path="/masters/depreciation/book" element={<Books/>} />
+                  <Route path="/masters/depreciation/book/additionaldepreciation" element={<AdditionalDepreciation/> }/>
+                  <Route path="/masters/depreciation/assetcategorybookcategorymapping" element={<AssetCategoryMappingBookCategory/> }/>
+
+                  <Route path="/masters/depreciation/book/addbook" element={<AddBook/>}/>
+                  <Route path="/masters/depreciation/book/addbook/:id" element={<AddBook key={`edit`} />} />
 
                   {/* CWIP */}
                   <Route path="/cwip/project-management" element={<ProjectManagement />} />
@@ -262,7 +301,7 @@ const AnimatedRoutes = () => {
                   <Route path="/service-desk/work-management" element={<WorkManagement />} />
                   <Route path="/service-desk/administration" element={<Administration />} />
                   <Route path="/service-desk/reports" element={<ServiceDeskReports />} />
-                  <Route path="/service-desk/ticket-progress" element={<TicketProgressDashboard />} />
+                  <Route path="/service-desk/ticket-progress-dashboard" element={<TicketProgressDashboard />} />
 
                   {/* Utilities */}
                   <Route path="/utilities/printing-codes" element={<PrintingCodes />} />
@@ -286,7 +325,7 @@ const AnimatedRoutes = () => {
                   <Route path="/software-assets/reports" element={<SoftwareAssetsReports />} />
                 </Routes>
               </Suspense>
-            </div>
+            {/* </div> */}
           </SidebarInset>
         </div>
       </SidebarProvider>

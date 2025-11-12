@@ -1,5 +1,5 @@
-import {useEffect, useState } from 'react';
-import { Card, CardContent} from '@/components/ui/card';
+import { useEffect, useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
 import { ChevronRight, ChevronLeft, Search, X, Save } from 'lucide-react';
 import { ReusableButton } from '@/components/ui/reusable-button';
 import { useAppDispatch, useAppSelector } from '@/store';
@@ -482,19 +482,19 @@ const Organization = () => {
     }
   };
   return (
-    <div className="h-full   bg-gray-50 flex flex-col ">
+    <div className="h-full overflow-y-auto  bg-gray-50 flex flex-col ">
       <div className="flex flex-1 overflow-hidden   ">
         {/* Left Sidebar - Ticket Inbox */}
         {/* {dataSource.length!==0 && <div className={`${isInboxCollapsed ? 'w-6 p-1' : 'w-34 p-2 mb-2 rounded-b-[5px]'} bg-white border-r    border-0 shadow-lg flex pb-3 flex-col transition-all duration-300 shrink-0 hidden lg:flex`}> */}
-             <div
-  className={`
+        <div
+          className={`
     ${isInboxCollapsed ? 'w-6 p-1' : 'w-64 p-2 mb-2 rounded-b-[5px]'}
    bg-white border border-gray-200 border-t-0 border-t-transparent shadow-xl flex flex-col pb-3 transition-all duration-300 shrink-0
     md:relative
     ${isInboxCollapsed ? 'relative' : 'fixed md:relative'}
     ${isInboxCollapsed ? '' : 'top-15 left-0 h-full z-50 md:top-auto md:left-auto md:h-auto'}
   `}
->
+        >
           <div className="pt-1 shrink-0">
             <div className="flex items-center justify-between mb-2">
               <h3 className={`font-semibold text-gray-900 ${isInboxCollapsed ? 'hidden' : ''}`}>
@@ -580,20 +580,20 @@ const Organization = () => {
 
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col min-w-0 ">
-          {/* Navigation and Action Bar */}
-          <div className="bg-white border-b shadow-sm px-4 lg:px-6 py-3 flex flex-row xxs:flex-col xs2:flex-row lg:flex-row lg:items-center justify-between gap-4 shrink-0">
-            <div className="flex items-center gap-4 lg:gap-6 flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <span>Masters</span>
-                  <span>/</span>
-                  <span>Company</span>
-                  <span>/</span>
-                  <span className="text-gray-900 font-medium">Organization</span>
-                </div>
+          <div className="bg-white border-b shadow-sm px-4 lg:px-6 py-3
+  flex flex-col sm:flex-row justify-between gap-4 shrink-0"
+          >
+            <div className="flex items-start sm:items-center gap-4 lg:gap-6 flex-1 min-w-0">
+              <div className="flex items-center gap-2 text-sm text-gray-600 flex-wrap">
+                <span>Masters</span>
+                <span>/</span>
+                <span>Company</span>
+                <span>/</span>
+                <span className="text-gray-900 font-medium">Organization</span>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+
+            <div className="flex items-center gap-2 self-start sm:self-auto">
               <ReusableButton
                 variant="text"
                 size="small"
@@ -602,6 +602,7 @@ const Organization = () => {
               >
                 {selectedOrganizationData ? "Cancel" : "Reset"}
               </ReusableButton>
+
               <ReusableButton
                 size="small"
                 variant="primary"
@@ -612,6 +613,7 @@ const Organization = () => {
               </ReusableButton>
             </div>
           </div>
+
 
           {/* Content Grid with Individual Scroll Areas */}
           <div className="flex-1 p-3 overflow-hidden min-h-0  ">
@@ -719,7 +721,7 @@ export default Organization;
 //       }else{
 //         setDataSource([]);
 //       }
-//     }).catch(err => console.log(err)).finally(() => {
+//     }).catch(err => {}).finally(() => {
 //       dispatch(setLoading(false));
 //     });
 //   }

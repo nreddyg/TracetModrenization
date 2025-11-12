@@ -596,15 +596,19 @@ const ReportsMasters = () => {
     }
   };
   return (
-    <div className="h-full overflow-y-scroll bg-gray-50">
-      <header className="bg-white border-b px-6 py-2 shadow-sm">
+    <div className="h-full overflow-y-auto bg-gray-50">
+      <header className="bg-white border-b px-6 py-2 shadow-sm flex flex-col sm:flex-row shrink-0 justify-between gap-4">
         <div className="flex items-center gap-4">
-          <SidebarTrigger />
           <div>
             <h1 className="text-xl font-semibold text-gray-900">Master Reports</h1>
             <p className="text-sm text-gray-600">Generate comprehensive reports with advanced filtering and customization options</p>
           </div>
         </div>
+        <div className="flex items-center gap-2 text-sm text-gray-600 flex-wrap">
+                <span>Masters</span>
+                <span>/</span>
+                <span className="text-gray-900 font-medium">Master Reports</span>
+              </div>
       </header>
       <div className="px-3 pb-3 pt-3 space-y-3 ">
         <div className="grid grid-cols-1 xl:grid-cols-4 gap-3 ">

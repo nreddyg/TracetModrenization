@@ -75,6 +75,8 @@ export interface field {
   labelInfo?:string;
   heading?:string
   isDisplay?:boolean
+  min?:number
+  max?:number
 }
  
 export type BaseField = field;

@@ -227,6 +227,7 @@ getBookDataAPI()
                          //   icon={<Edit className="h-4 w-4" />}
                          onClick={() => { 
                           // setSelectedStore(row.original);setRecordToEditId(row.original.StoreId);fetchStoreDataByStoreId(companyId,row.original.StoreId) 
+                          navigate(`/masters/depreciation/book/addbook/${row.original.BookID}`)
                         }}
                      >
                          Edit
@@ -302,7 +303,6 @@ const handleCancel=()=>{
       });
   
   }
-           console.log(deleteRow,"delRow")
 
   return (
   <div className="h-full overflow-y-scroll  bg-gray-50 flex flex-col ">

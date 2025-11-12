@@ -13,35 +13,36 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { GetBranchListBasedonCompanyId, GetCompanyListBasedonUserId } from '@/services/headerServices';
 import { useAppDispatch } from '@/store';
 import { getHierarchyLevelsData, getOrganizationDetailsByToken, getUserDetailsByUserName } from '@/services/appService';
-import {setAllLevelsData, setLastLevelsData, setBranch, setBranchCode, setBranchId, setCompanyId, setLoading, setUserId, setBranchesList } from '@/store/slices/projectsSlice';
-
+import { setAllLevelsData, setLastLevelsData, setBranch, setBranchCode, setBranchId, setCompanyId, setCompanyName,setLoading, setUserId, setBranchesList } from '@/store/slices/projectsSlice';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { RiMenuFoldFill } from "react-icons/ri";
+ 
 const FixedHeader: React.FC = () => {
-  const navigate=useNavigate();
+  const navigate = useNavigate();
   const breadcrumbs = useAppSelector((state) => state.ui.currentBreadcrumb);
-  
   const dispatch = useAppDispatch();
-  const storeData= useAppSelector((state) => state.projects);
+  const storeData = useAppSelector((state) => state.projects);
   const userId = storeData.userId || JSON.parse(localStorage.getItem("LoggedInUser") || "{}")?.UserId;
-  const LoggedInUser= JSON.parse(localStorage.getItem("LoggedInUser") || "{}");
+  const LoggedInUser = JSON.parse(localStorage.getItem("LoggedInUser") || "{}");
   const [companyList, setCompanyList] = useState<{ value: number; label: string }[]>([]);
-  const [branchList, setBranchList] = useState<{ value: string; label: string;id?:string;code?:string }[]>([]);
+  const [branchList, setBranchList] = useState<{ value: string; label: string; id?: string; code?: string }[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<string | null>('');
   const [selectedBranch, setSelectedBranch] = useState<string>();
-
-  useEffect(()=>{
-   fetchUserDetailsByUserName()
-  },[])
-  useEffect(()=>{
-   if(userId){
-     apiCalls()
-   }
-  },[userId])
-  useEffect(()=>{
-    if(selectedCompany){
+ 
+  useEffect(() => {
+    fetchUserDetailsByUserName()
+  }, [])
+  useEffect(() => {
+    if (userId) {
+      apiCalls()
+    }
+  }, [userId])
+  useEffect(() => {
+    if (selectedCompany) {
       getHierarchyLevels();
       fetchBranchList(selectedCompany)
     }
-  },[selectedCompany])
+  }, [selectedCompany])
   const fetchUserDetailsByUserName = async () => {
     dispatch(setLoading(true));
     await getUserDetailsByUserName(JSON.parse(localStorage.getItem('UserName'))).then(res => {
@@ -67,19 +68,25 @@ const FixedHeader: React.FC = () => {
         OrgData: LoggedInCompany.status === 'fulfilled' && LoggedInCompany.value.data && LoggedInCompany.value.data.organizations && LoggedInCompany.value.data.organizations.length !== 0 ? LoggedInCompany.value.data.organizations[0] : {}
       }
       const lookupData = companyData?.Options?.map((item: any) => ({
-        value: item.OrganizationId?item.OrganizationId.toString():'',
+        value: item.OrganizationId ? item.OrganizationId.toString() : '',
         label: item.OrganizationName,
       }));
       setCompanyList(lookupData);
-      if(!localStorage.getItem("CompanyId")){
+      if (!localStorage.getItem("CompanyId")) {
         setSelectedCompany(companyData?.OrgData?.OrganizationId.toString())
         dispatch(setCompanyId(companyData?.OrgData?.OrganizationId.toString()))
         localStorage.setItem('CompanyId', companyData?.OrgData?.OrganizationId);
-      }else{
+      } else {
         dispatch(setCompanyId(localStorage.getItem("CompanyId")))
         setSelectedCompany(localStorage.getItem("CompanyId"))
       }
-    } catch {}finally {
+      if (!localStorage.getItem("CompanyName")) {
+        dispatch(setCompanyName(companyData?.OrgData?.OrganizationName.toString()))
+        localStorage.setItem('CompanyName', companyData?.OrgData?.OrganizationName);
+      } else {
+        dispatch(setCompanyName(localStorage.getItem("CompanyName")))
+      }
+    } catch { } finally {
       dispatch(setLoading(false));
     }
   }
@@ -88,38 +95,38 @@ const FixedHeader: React.FC = () => {
     try {
       const res = await GetBranchListBasedonCompanyId(compId);
       if (res.success && Array.isArray(res.data) && res.data.length > 0) {
-        const updated = [{ id: "0", Name: "All",Code:'All' }, ...res.data.slice(1)];
+        const updated = [{ id: "0", Name: "All", Code: 'All' }, ...res.data.slice(1)];
         const lookupData = updated.map((item: any) => ({
           value: item.Name,
           label: item.Name,
-          id:item.id,
-          code:item.Code
+          id: item.id,
+          code: item.Code
         }));
-      dispatch(setBranchesList(lookupData))
+        dispatch(setBranchesList(lookupData))
         setBranchList(lookupData);
-        if(!localStorage.getItem("Branch")){
-          let branch = lookupData.length>1?lookupData[1].value: lookupData[0].value;
+        if (!localStorage.getItem("Branch")) {
+          let branch = lookupData.length > 1 ? lookupData[1].value : lookupData[0].value;
           setSelectedBranch(branch);
           dispatch(setBranch(branch));
-          localStorage.setItem("Branch",branch);
-        }else{
+          localStorage.setItem("Branch", branch);
+        } else {
           setSelectedBranch(localStorage.getItem("Branch"))
           dispatch(setBranch(localStorage.getItem("Branch")));
         }
-       
-        if(localStorage.getItem("BranchId")){
+ 
+        if (localStorage.getItem("BranchId")) {
           dispatch(setBranchId(localStorage.getItem("BranchId")))
-        }else{
-          let branchId=lookupData.length>1?lookupData[1].id:lookupData[0].id;
+        } else {
+          let branchId = lookupData.length > 1 ? lookupData[1].id : lookupData[0].id;
           dispatch(setBranchId(branchId));
-          localStorage.setItem("BranchId",branchId);
+          localStorage.setItem("BranchId", branchId);
         }
-        if(localStorage.getItem("BranchCode")){
+        if (localStorage.getItem("BranchCode")) {
           dispatch(setBranchCode(localStorage.getItem("BranchCode")))
-        }else{
-          let branchCode=lookupData.length>1?lookupData[1].code:lookupData[0].code;
+        } else {
+          let branchCode = lookupData.length > 1 ? lookupData[1].code : lookupData[0].code;
           dispatch(setBranchCode(branchCode));
-          localStorage.setItem("BranchCode",branchCode);
+          localStorage.setItem("BranchCode", branchCode);
         }
       }
     } catch (err) {
@@ -185,19 +192,19 @@ const FixedHeader: React.FC = () => {
     } else if (name === "Branch") {
       setSelectedBranch(value);
       dispatch(setBranch(value || 'All'));
-      if(value && branchList.length>0){
-        const branchObj=branchList.find(branch=>branch.value===value);
-        if(branchObj && branchObj.id){
+      if (value && branchList.length > 0) {
+        const branchObj = branchList.find(branch => branch.value === value);
+        if (branchObj && branchObj.id) {
           dispatch(setBranchId(branchObj.id));
           localStorage.setItem("BranchId", String(branchObj.id));
-        }else{
+        } else {
           dispatch(setBranchId("0"));
           localStorage.setItem("BranchId", "0");
         }
-        if(branchObj && branchObj.code){
+        if (branchObj && branchObj.code) {
           dispatch(setBranchCode(branchObj.code));
           localStorage.setItem("BranchCode", String(branchObj.code));
-        }else{
+        } else {
           dispatch(setBranchCode(""));
           localStorage.setItem("BranchCode", "");
         }
@@ -206,34 +213,34 @@ const FixedHeader: React.FC = () => {
     }
   };
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
+ 
   const changePassword = () => {
     navigate('/changePassword');
   }
-
+ 
   const logoutFunction = () => {
     localStorage.clear();
     window.location.href = "/login";
   };
-  const getInitial = (name?: string) =>name && name.length > 0 ? name.charAt(0).toUpperCase() : '';
+  const getInitial = (name?: string) => name && name.length > 0 ? name.charAt(0).toUpperCase() : '';
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 shadow-sm">
-      <div className="flex items-center justify-between gap-2 px-4 lg:px-6 py-3">
+    <header className="sticky top-0 right-0  bg-white border-b border-gray-200 shadow-[0_2px_8px_0_rgba(0,0,0,0.05)]">
+      <div className="flex items-center justify-between gap-2 px-4 lg:px-6 py-4">
         {/* Left Section - Sidebar Trigger + Company Logo + Breadcrumbs */}
         <div className="flex items-center gap-2 lg:gap-4 flex-1 min-w-0">
           <SidebarTrigger />
-
+ 
           {/* Company Branding */}
-          <div className="flex items-center gap-2 lg:gap-3 shrink-0">
+          {/* <div className="flex items-center gap-2 lg:gap-3 shrink-0">
             <div className="flex items-center gap-2 px-2 lg:px-3 py-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg">
               <div className="w-6 h-6 lg:w-8 lg:h-8 bg-white rounded flex items-center justify-center">
                 <span className="text-blue-600 font-bold text-xs lg:text-sm">T</span>
               </div>
-              <span className="hidden sm:block text-white font-semibold text-xs lg:text-sm">Tracet</span>
+              <span className="hidden sm:block text-white font-semibold text-xs lg:text-sm">Tracetjhrfguf</span>
             </div>
             <div className="hidden md:block h-6 w-px bg-gray-300"></div>
-          </div>
-
+          </div> */}
+ 
           {/* Breadcrumbs - Hidden on mobile */}
           <div className="hidden lg:block flex-1 min-w-0">
             <Breadcrumb>
@@ -246,7 +253,7 @@ const FixedHeader: React.FC = () => {
                     </Link>
                   </BreadcrumbLink>
                 </BreadcrumbItem>
-
+ 
                 {breadcrumbs.map((breadcrumb, index) => (
                   <React.Fragment key={index}>
                     <BreadcrumbSeparator />
@@ -271,22 +278,84 @@ const FixedHeader: React.FC = () => {
             </Breadcrumb>
           </div>
         </div>
-
+ 
         {/* Right Section - Company + Location + Notifications + Profile */}
         <div className="flex items-center gap-1 lg:gap-3 shrink-0">
           {/* Mobile Menu Trigger */}
           <div className="lg:hidden">
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>
+                <Button variant="outline" size="sm" title='Company & Location'>
+                  {/* <Menu className="h-4 w-4" /> */}
+                  <RiMenuFoldFill className='h-4 2-4' />
+                </Button>
+              </SheetTrigger>
+ 
+              <SheetContent
+                side="right"
+                className="w-80"
+                onOpenAutoFocus={(e) => e.preventDefault()}
+              >
+                <SheetHeader>
+                  <SheetTitle>Navigation Menu</SheetTitle>
+                </SheetHeader>
+ 
+                <div className="mt-6 space-y-4">
+                  <div>
+                    <label className="text-sm font-medium">Company</label>
+                    <Select
+                      value={selectedCompany}
+                      onValueChange={(value) => handleChange("CompanyId", value)}
+                    >
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="Select company" />
+                      </SelectTrigger>
+ 
+                      <SelectContent>
+                        {companyList?.map((c) => (
+                          <SelectItem key={c.value} value={String(c.value)}>
+                            {c.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+ 
+                  <div>
+                    <label className="text-sm font-medium">Location</label>
+                    <Select
+                      value={selectedBranch}
+                      onValueChange={(value) => handleChange("Branch", value)}
+                    >
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="Select location" />
+                      </SelectTrigger>
+ 
+                      <SelectContent>
+                        {branchList?.map((b) => (
+                          <SelectItem key={b.value} value={b.value}>
+                            {b.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
+ 
+            {/* <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild>
                 <Button variant="outline" size="sm">
                   <Menu className="h-4 w-4" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-80">
+              <SheetContent side="right" className="w-80" onOpenAutoFocus={(e) => e.preventDefault()}>
                 <SheetHeader>
                   <SheetTitle>Navigation Menu</SheetTitle>
                 </SheetHeader>
                 <div className="mt-6 space-y-4">
+                 
                   <ReusableDropdown
                     label="Company"
                     options={companyList}
@@ -294,8 +363,9 @@ const FixedHeader: React.FC = () => {
                     onChange={(value) => handleChange('CompanyId', value)}
                     placeholder="Select company"
                     size="middle"
+                    usePortal={true}
                   />
-
+ 
                   <ReusableDropdown
                     label="Location"
                     options={branchList}
@@ -303,34 +373,37 @@ const FixedHeader: React.FC = () => {
                     onChange={(value) => handleChange('Branch', value)}
                     placeholder="Select location"
                     size="middle"
+                    usePortal={true}
                   />
                 </div>
               </SheetContent>
-            </Sheet>
+            </Sheet> */}
           </div>
-
+ 
           {/* Desktop Dropdowns */}
           <div className="hidden lg:flex items-center gap-3">
             <ReusableDropdown
               options={companyList}
               value={selectedCompany}
-              onChange={(value,...args) => handleChange('CompanyId', value)}
+              onChange={(value, ...args) => handleChange('CompanyId', value)}
               placeholder="Select company"
               size="small"
-              disabled={!(LoggedInUser.RoleName==="Root Admin")}
-              className="min-w-[120px]"
+              disabled={!(LoggedInUser.RoleName === "Root Admin")}
+              className="w-auto h-9"
+              containerClassName='max-w-[50%]'
             />
-
+ 
             <ReusableDropdown
               options={branchList}
               value={selectedBranch}
               onChange={(value) => handleChange('Branch', value)}
               placeholder="Select location"
               size="small"
-              className="min-w-[120px]"
+              className="w-auto h-9"
+              containerClassName='max-w-[50%]'
             />
           </div>
-
+ 
           {/* Notifications */}
           <Button variant="outline" size="sm" className="relative h-8 w-8 lg:h-9 lg:w-9 p-0">
             <Bell className="h-3 w-3 lg:h-4 lg:w-4" />
@@ -338,7 +411,7 @@ const FixedHeader: React.FC = () => {
               3
             </Badge>
           </Button>
-
+ 
           {/* Profile Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -357,7 +430,7 @@ const FixedHeader: React.FC = () => {
                 <div className="flex flex-col space-y-1">
                   <p className="text-sm font-medium leading-none">{LoggedInUser?.FirstName} {LoggedInUser?.LastName}</p>
                   <p className="text-xs leading-none text-muted-foreground">
-                   {LoggedInUser?.Email}
+                    {LoggedInUser?.Email}
                   </p>
                 </div>
               </DropdownMenuLabel>
@@ -379,7 +452,7 @@ const FixedHeader: React.FC = () => {
           </DropdownMenu>
         </div>
       </div>
-
+ 
       {/* Mobile Breadcrumbs */}
       <div className="lg:hidden px-4 pb-2">
         <Breadcrumb>
@@ -392,7 +465,7 @@ const FixedHeader: React.FC = () => {
                 </Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
-
+ 
             {breadcrumbs.slice(-2).map((breadcrumb, index) => (
               <React.Fragment key={index}>
                 <BreadcrumbSeparator />
@@ -419,5 +492,6 @@ const FixedHeader: React.FC = () => {
     </header>
   );
 };
-
+ 
 export default FixedHeader;
+ 

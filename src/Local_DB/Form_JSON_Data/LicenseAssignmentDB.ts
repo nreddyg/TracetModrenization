@@ -49,6 +49,14 @@ export const SOFTWARE_DB: BaseField[] = [
         defaultValue:new Date(),
     },
     {
+        label: "Assignment Expiry Date",
+        fieldType: "date",
+        name: "AssignmentExpiryDate",
+        placeholder: "Pick a date",
+        isRequired: true,
+        format: "DD/MM/YYYY",
+    },
+    {
         label: 'Description',
         placeholder: "Enter Description",
         defaultValue: '',

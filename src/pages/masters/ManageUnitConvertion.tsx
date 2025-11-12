@@ -234,7 +234,7 @@ const ManageUnitConversion = () => {
         canManageColumns: false,
     };
     return (
-        <div className="bg-gray-50/30 h-full overflow-y-scroll">
+        <div className="bg-gray-50/30 h-full overflow-y-auto">
             <div className="p-4 space-y-4 " >
                 <div className='flex w-full justify-between'>
                     <h1 className='text-lg font-semibold text-gray-900'>Add Unit of Conversion</h1>

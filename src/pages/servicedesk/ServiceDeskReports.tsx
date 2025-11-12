@@ -135,6 +135,7 @@ const ServiceDeskReports = () => {
   const [serviceHistoryDetail, setServiceHistoryDetail] = useState<BaseField[]>()
   const [columnVisibility, setColumnVisibility] = useState({});
   const companyId = useAppSelector(state => state.projects.companyId);
+  const companyName = useAppSelector(state => state.projects.companyName);
   const branch = useAppSelector(state => state.projects.branch);
   const branchId = useAppSelector(state => state.projects.branchId);
   // const dispatch =useDispatch();
@@ -176,6 +177,8 @@ const ServiceDeskReports = () => {
       setFields(jsonCopy);
     }
   }, [activeTab])
+
+  const datesInSRDetail = watch('dateRange');
 
   useEffect(() => {
   }, [columnVisibility])
@@ -313,7 +316,7 @@ const ServiceDeskReports = () => {
     dispatch(setLoading(true))
     await getServiceRequestSLAMetViolatedReport(compId, BranchID, srType, srNo, srStatus, requestedBy, fromDate, toDate, customer, AssigneeUsers, AssigneeGroups, severity, priority, SLAStatus, dept, mainCategory, subCategory, assetCode).then(res => {
       if (res.success && res.data.status === undefined) {
-        const tabData = res.data.ServiceRequestDetails.ServiceRequestDetailsReport
+        const tabData = res.data.ServiceRequestDetailsReport
         setDataSourse(tabData)
       } else {
         setDataSourse([]);
@@ -362,7 +365,7 @@ const ServiceDeskReports = () => {
       }
     }).catch(err => { }).finally(() => {
       //  dispatch(setLoading(false)) 
-      fetchServiceRequestDetailsReport(companyId, formatToString(watch("LevelFiveCompany")), formatToString(watch("ServiceRequestType")), formatToString(watch("ServiceRequest")), formatToString(watch("Status")), formatToString(watch("RequestedBy")), "", "", formatToString(watch("Customer")), formatToString(watch("AssignTo")["Users"]), formatToString(watch("AssignTo")["User Group"]), formatToString(watch("Severity")), formatToString(watch("Priority")), formatToString(watch("slastatus")), formatToString(watch("LevelFiveDepartment")), formatToString(watch("MainCategory")), formatToString(watch("SubCategory")), formatToString(watch("AssetCode")))
+      fetchServiceRequestDetailsReport(companyId, formatToString(watch("LevelFiveCompany")), formatToString(watch("ServiceRequestType")), formatToString(watch("ServiceRequest")), formatToString(watch("Status")), formatToString(watch("RequestedBy")), formatToString(datesInSRDetail.from), formatToString(datesInSRDetail.to), formatToString(watch("Customer")), formatToString(watch("AssignTo")["Users"]), formatToString(watch("AssignTo")["User Group"]), formatToString(watch("Severity")), formatToString(watch("Priority")), formatToString(watch("slastatus")), formatToString(watch("LevelFiveDepartment")), formatToString(watch("MainCategory")), formatToString(watch("SubCategory")), formatToString(watch("AssetCode")))
     })
   }
   async function fetchServiceRequestSLAViolatedColumns(compId: string) {
@@ -420,7 +423,7 @@ const ServiceDeskReports = () => {
   }
 
 
-  
+
 
   const handleViewReport = async () => {
     setIsGeneratingReport(true);
@@ -1052,13 +1055,21 @@ const ServiceDeskReports = () => {
   return (
     <div className="h-full overflow-y-scroll  bg-gray-50">
       {/* Compact Header */}
-      <header className="bg-white border-b px-6 py-3 shadow-sm">
-        <div className="flex items-center gap-4">
-          <SidebarTrigger />
+      <header className="bg-white border-b px-6 py-3 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3"
+      >
+        <div className="flex items-start sm:items-center gap-4">
           <div>
             <h1 className="text-xl font-semibold text-gray-900">Service Desk Reports</h1>
-            <p className="text-sm text-gray-600">Generate comprehensive reports with advanced filtering and customization options</p>
+            <p className="text-sm text-gray-600">
+              Generate comprehensive reports with advanced filtering and customization options
+            </p>
           </div>
+        </div>
+
+        <div className="flex items-center gap-2 text-sm text-gray-600">
+          <span>Service Desk</span>
+          <span>/</span>
+          <span className="text-gray-900 font-medium">Service Desk Reports</span>
         </div>
       </header>
 
@@ -1220,11 +1231,16 @@ const ServiceDeskReports = () => {
                     enableSorting={true}
                     enablePagination={true}
                     title={`${activeTab} Report`}
+                    exportMeta={{
+                      companyName: `${companyName || ""}`,
+                      name: `${activeTab} Report`,
+                    }}
                     // enableRowReordering
                     // onRowReorder={(newData) => setDataSourse(newData)}
                     enableColumnVisibility
                     columnVisibility={columnVisibility} // 👈 pass down
                     onColumnVisibilityChange={setColumnVisibility}
+                    exportOptions={["csv", "excel"]}
                     permissions={{
                       canEdit: false,          // required
                       canDelete: false,        // required
@@ -1232,6 +1248,7 @@ const ServiceDeskReports = () => {
                       canExport: true,         // required
                       canManageColumns: true,  // optional
                     }}
+
                     enableColumnPinning
                     storageKey={activeTab === "Service Request Details" ? "SRdetails-Report" : activeTab === "Service Request SLA Met/SLA Violated" ? "SLA-Report" : "History-Report"}
                     pageSize={10}

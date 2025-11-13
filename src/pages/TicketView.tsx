@@ -254,7 +254,7 @@ const TicketView = () => {
     if (watch('Customer') && companyId && branch) fetchSubscriptionByCustomer(watch('Customer'), companyId, branch);
   }, [watch('Customer'), companyId, branch])
   useEffect(() => {
-    if (isEditing && selectedTicket) {
+    if (isEditing && selectedTicket && watch('Status')) {
       let fieldsCopy = structuredClone(fields);
       let ind = fieldsCopy.findIndex(ele => ele?.name === 'Priority');
       if ((selectedTicket.Status === 'Open' && watch('Status') != 'Open') || selectedTicket.Status !== 'Open') {
@@ -902,11 +902,12 @@ const TicketView = () => {
     dispatch(setLoading(true));
     let additionalCheckBoxNames = []
     let additionalDateNames = []
+    const baseFieldsOnly = fields.filter(f => !f.isAdditionalField);
     let updatedFields = []
     try {
       const res = await getSRAdditionalFieldsByServiceRequestType(name, compId);
       if (res.success && res.data && res.data.AdditionalFields) {
-        const baseFieldsOnly = fields.filter(f => !f.isAdditionalField);
+        // const baseFieldsOnly = fields.filter(f => !f.isAdditionalField);
         if (res.data.AdditionalFields.length === 0) {
           updatedFields = [...baseFieldsOnly]
           setShowAccordion(false);
@@ -999,7 +1000,8 @@ const TicketView = () => {
         setSelectedTicket({ ...fieldData, ...additionalFields, ...notifyValues });
         resetValue(updatedFields)
       } else {
-        setFields(updatedFields)
+        if (updatedFields.length > 0) setFields(updatedFields)
+        else setFields(baseFieldsOnly)
       }
       dispatch(setLoading(false));
     }

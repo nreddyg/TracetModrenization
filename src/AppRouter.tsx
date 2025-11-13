@@ -1,9 +1,34 @@
+import AssetLocation from "./pages/masters/AssetLocation";
 import CompanyHierarchy from "./pages/masters/CompanyHierarchy";
+import CostCenter from "./pages/masters/CostCenter";
+import Customer from "./pages/masters/Customer";
+import CustomerLocation from "./pages/masters/CustomerLocation";
 import Department from "./pages/masters/Department";
+import AddBook from "./pages/masters/depreciation/AddBook";
+import AssetCategoryMappingBookCategory from "./pages/masters/depreciation/AssetCategoryMappingBookCategory";
+import Books from "./pages/masters/depreciation/Books";
 import AssetCategory from "./pages/masters/fixedAssets/AssetCategory";
+import UserAttributes from "./pages/masters/fixedAssets/UserAttributes";
+import ItemCategory from "./pages/masters/ItemCategory";
+import ItemMaster from "./pages/masters/ItemMaster";
 import Organization from "./pages/masters/Organization";
+import ProductMasters from "./pages/masters/ProductMasters";
+import ReportsMasters from "./pages/masters/ReportsMasters";
+import ServiceLocations from "./pages/masters/ServiceLocations";
+import Store from "./pages/masters/Store";
+import UnitOfMeasure from "./pages/masters/UnitsOfMeasure";
 import User from "./pages/masters/User";
 import Vendor from "./pages/masters/Vendor";
+import AllRequests from "./pages/servicedesk/AllRequests";
+import AssetCodeTable from "./pages/servicedesk/AssetCodeTable";
+import Configuration from "./pages/servicedesk/Configuration";
+import MyWorkbench from "./pages/servicedesk/MyWorkbench";
+import PaymentDetails from "./pages/servicedesk/PaymentDetails";
+import ServiceDeskReports from "./pages/servicedesk/ServiceDeskReports";
+import SubscriptionManagement from "./pages/servicedesk/Subscription";
+import UserGroups from "./pages/servicedesk/UserGroups";
+import TicketCreate from "./pages/TicketCreate";
+import TicketView from "./pages/TicketView";
 
 export const appRoutesObj={
  'masters-fixedassets-assetcategory': {
@@ -36,84 +61,84 @@ export const appRoutesObj={
     component: <Department />,
     index: false,
   },
-//   "masters-company-customer": {
-//     path: 'masters/addnewcustomer',
-//     component: <AddNewCustomer />,
-//     index: false,
-//     dependent:[{
-//       path: 'masters/customerlocation',
-//       component: <CustomerLocation/>,
-//       index:false
-//     }]
-//   },
-//   'masters-company-assetlocation': {
-//     path: 'masters/assetlocation',
-//     component: <AssetLocation />,
-//     index: false,
-//   },
-//  'masters-company-costcenter':  {
-//     path: 'masters/costcenter',
-//     component: <CostCenter />,
-//     index: false,
-//   },
-//  "masters-consumables-itemmaster":  {
-//     path:"masters/itemmaster",
-//     component:<ItemMaster/>,
-//     index:false,
-//   },
-//  "masters-consumables-unitsofmeasure":  {
-//     path:"masters/unitsofmeasure",
-//     component:<UnitsOfMeasure/>,
-//     index:false,
-//   },
-//   "masters-consumables-store": {
-//     path:"masters/store",
-//     component:<Store/>,
-//     index:false
-//   },
-//  "masters-consumables-itemcategories":  {
-//     path: 'masters/itemcategory',
-//     component: <ItemCategory/>,
-//     index: false,
-//   },
+  "masters-company-customer": {
+    path: 'masters/addnewcustomer',
+    component: <Customer />,
+    index: false,
+    dependent:[{
+      path: 'masters/customerlocation',
+      component: <CustomerLocation/>,
+      index:false
+    }]
+  },
+  'masters-company-assetlocation': {
+    path: 'masters/assetlocation',
+    component: <AssetLocation />,
+    index: false,
+  },
+ 'masters-company-costcenter':  {
+    path: 'masters/costcenter',
+    component: <CostCenter />,
+    index: false,
+  },
+ "masters-consumables-itemmaster":  {
+    path:"masters/itemmaster",
+    component:<ItemMaster/>,
+    index:false,
+  },
+ "masters-consumables-unitsofmeasure":  {
+    path:"masters/unitsofmeasure",
+    component:<UnitOfMeasure/>,
+    index:false,
+  },
+  "masters-consumables-store": {
+    path:"masters/store",
+    component:<Store/>,
+    index:false
+  },
+ "masters-consumables-itemcategories":  {
+    path: 'masters/itemcategory',
+    component: <ItemCategory/>,
+    index: false,
+  },
 
-//   "masters-depreciation-book": {
-//     path: 'masters/Book',
-//     component: <Book/>,
-//     index: false,
-//     dependent:[ {
-//       path: 'masters/AddDepreciationBook',
-//       component: <AddBook/>,
-//       index: false,
-//     },]
-//   },
-//   "masters-depreciation-assetcategorybookcategorymapping": {
-//   path:'masters/AssetcategoryMappingWithBookCategory',
-//   component:<AssetCategoryMappingWithBookCategory/>,
-//   index:false
-// },
+  "masters-depreciation-book": {
+    path: 'masters/Book',
+    component: <Books/>,
+    index: false,
+    dependent:[ {
+      path: 'masters/AddDepreciationBook',
+      component: <AddBook/>,
+      index: false,
+    },]
+  },
+  "masters-depreciation-assetcategorybookcategorymapping": {
+  path:'masters/AssetcategoryMappingWithBookCategory',
+  component:<AssetCategoryMappingBookCategory/>,
+  index:false
+},
 
-//  "masters-servicemaintenance-productmaster":  {
-//     path:'masters/productMaster',
-//     component:<ProductMaster />,
-//     index:false
-//   },
-//  'masters-servicemaintenance-servicelocations':  {
-//     path:'masters/servicelocations',
-//     component:<ServiceLocations />,
-//     index:false
-//   },
+ "masters-servicemaintenance-productmaster":  {
+    path:'masters/productMaster',
+    component:<ProductMasters />,
+    index:false
+  },
+ 'masters-servicemaintenance-servicelocations':  {
+    path:'masters/servicelocations',
+    component:<ServiceLocations />,
+    index:false
+  },
   
-//   'masters-masterreports':{
-//     path:'masters/MasterReports',
-//     component:<MasterReports/>,
-//     index:false
-//   },
-//   'masters-fixedassets-userattributes': {
-//     path: 'masters/userattributes',
-//     component: <UserAttributes/>,
-//     index: false,
-//   },
+  'masters-masterreports':{
+    path:'masters/MasterReports',
+    component:<ReportsMasters/>,
+    index:false
+  },
+  'masters-fixedassets-userattributes': {
+    path: 'masters/userattributes',
+    component: <UserAttributes/>,
+    index: false,
+  },
 
 
 //   "fixedassets-assetacquisition": {
@@ -468,146 +493,83 @@ export const appRoutesObj={
 
 
 
-// "servicedesk-createservicerequest":{
-//   path:'servicedesk/newservicerequest',
-//   component: <NewServiceRequest/>,
+"servicedesk-createservicerequest":{
+  path:'servicedesk/newservicerequest',
+  component: <TicketView key={'create'} />,
+  index: false,
+  dependent:[
+    {
+      path:'servicedesk/newservicerequest/assettable',
+      component: <AssetCodeTable />,
+      index: false,
+     },
+  ]
+},
+"servicedesk-usergroups":{
+ path:'servicedesk/usergroups',
+ component: <UserGroups/>,
+ index: false,
+},
+"servicedesk-subscription":{
+ path:'servicedesk/subscription',
+ component: <SubscriptionManagement />,
+ index: false,
+ dependent:[
+  {
+    path:'servicedesk/subscriptionpaymentdetails',
+    component: <PaymentDetails />,
+    index: false,
+   },
+ ]
+},
+// {
+//   path:'servicedesk/createworkorder',
+//   component: <CreateWorkOrder />,
 //   index: false,
-//   dependent:[
-//     {
-//       path:'servicedesk/newservicerequest/assettable',
-//       component: <ServiceRequestTable />,
-//       index: false,
-//      },
-//   ]
 // },
-// "servicedesk-usergroups":{
-//  path:'servicedesk/usergroups',
-//  component: <UserGroups/>,
-//  index: false,
-// },
-// "servicedesk-subscription":{
-//  path:'servicedesk/subscription',
-//  component: <Subscription />,
-//  index: false,
-//  dependent:[
-//   {
-//     path:'servicedesk/subscriptionpaymentdetails',
-//     component: <SubscriptionPaymentDetails />,
-//     index: false,
-//    },
-//  ]
-// },
-// // {
-// //   path:'servicedesk/createworkorder',
-// //   component: <CreateWorkOrder />,
-// //   index: false,
-// // },
 
-// "servicedesk-myrequests-open":{
-//  path:'servicedesk/open',
-//  component: <Open/>,
-//  index: false,
-//  dependent:[ {
-//   path:'servicedesk/editscreen',
-//   component:<ServiceDeskCommonEditScreen/>,
-//   index:false
-// },]
-//  },
-//  // {
-//  //   path:'servicedesk/newservicerequest',
-//  //   component: <Open/>,
-//  //   index: false,
-//  // },
-//  "servicedesk-myrequests-draft":{
-//    path:'servicedesk/draft',
-//    component: <Draft/>,
-//    index: false,
-//    dependent:[ {
-//     path:'servicedesk/editscreen',
-//     component:<ServiceDeskCommonEditScreen/>,
-//     index:false
-//   },]
-//  },
-//  "servicedesk-myrequests-closed":{
-//    path:'servicedesk/closed',
-//    component: <Closed/>,
-//    index: false,
-//    dependent:[ {
-//     path:'servicedesk/editscreen',
-//     component:<ServiceDeskCommonEditScreen/>,
-//     index:false
-//   },]
-//  },
-//  "servicedesk-allservicerequests":{
-//    path:'servicedesk/allservicerequests',
-//    component: <AllServiceRequests/>,
-//    index: false,
-//    dependent:[ {
-//     path:'servicedesk/editscreen',
-//     component:<ServiceDeskCommonEditScreen/>,
-//     index:false
-//   },]
-//  },
-//  "servicedesk-configuration":{
-//    path:'servicedesk/configuration',
-//    component: <Configuration/>,
-//    index: false,
-//    dependent:[ {
-//     path:'servicedesk/editscreen',
-//     component:<ServiceDeskCommonEditScreen/>,
-//     index:false
-//   },]
-//  },
-//  "servicedesk-myworkbench-slaviolated":{
-//    path:'servicedesk/myworkbenchsla',
-//    component: <MyWorkbenchSLA/>,
-//    index: false,
-//    dependent:[ {
-//     path:'servicedesk/editscreen',
-//     component:<ServiceDeskCommonEditScreen/>,
-//     index:false
-//   },]
-//  },
-//  "servicedesk-myworkbench-open":{
-//    path:'servicedesk/myworkbenchopen',
-//    component: <MyWorkbenchOpen/>,
-//    index: false,
-//    dependent:[ {
-//     path:'servicedesk/editscreen',
-//     component:<ServiceDeskCommonEditScreen/>,
-//     index:false
-//   },]
-//  },
-//  // {
-//  //   path:'servicedesk/manageworkorder',
-//  //   component: <ManageWorkOrder/>,
-//  //   index: false,
-//  // },
-//  "servicedesk-myworkbench-ticketsinmygroups":{
-//    path:'servicedesk/ticketsinmygroup',
-//    component: <TicketsInMyGroups/>,
-//    index: false,
-//    dependent:[ {
-//     path:'servicedesk/editscreen',
-//     component:<ServiceDeskCommonEditScreen/>,
-//     index:false
-//   },]
-//  },
-//  "servicedesk-myworkbench-closed":{
-//    path:'servicedesk/myworkbenchclosed',
-//    component: <WorkBenchClosed/>,
-//    index: false,
-//    dependent:[ {
-//     path:'servicedesk/editscreen',
-//     component:<ServiceDeskCommonEditScreen/>,
-//     index:false
-//   },]
-//  },
-// "servicedesk-reports": {
-//   path:'servicedesk/reports',
-//   component:<ServiceDeskReports/>,
-//   index:false
-// },
+"servicedesk-myrequests":{
+ path:'servicedesk/myrequest',
+ component: <MyWorkbench key={"myrequest"} />,
+ index: false,
+ dependent:[ {
+  path:'servicedesk/editscreen',
+  component:<TicketView key={`editMyReq`} />,
+  index:false
+},]
+ },
+ // {
+ //   path:'servicedesk/newservicerequest',
+ //   component: <Open/>,
+ //   index: false,
+ // },
+
+ "servicedesk-allservicerequests":{
+   path:'servicedesk/allservicerequests',
+   component: <AllRequests/>,
+   index: false,
+   dependent:[ {
+    path:'servicedesk/editscreen',
+    component:<TicketView key={`edit`} />,
+    index:false
+  },]
+ },
+ "servicedesk-configuration":{
+   path:'servicedesk/configuration',
+   component: <Configuration/>,
+   index: false,
+ },
+ // {
+ //   path:'servicedesk/manageworkorder',
+ //   component: <ManageWorkOrder/>,
+ //   index: false,
+ // },
+
+"servicedesk-reports": {
+  path:'servicedesk/reports',
+  component:<ServiceDeskReports/>,
+  index:false
+},
 
 
 

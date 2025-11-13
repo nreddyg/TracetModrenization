@@ -22,6 +22,7 @@ import { getSMTPConfig, postSMTPconfiguration } from '@/services/smtpServices';
 import { setLoading } from '@/store/slices/projectsSlice';
 import { useMessage } from '@/components/ui/reusable-message';
 import { ReusableButton } from '@/components/ui/reusable-button';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const SystemConfiguration = () => {
   const dispatch = useAppDispatch();
@@ -188,7 +189,8 @@ const SystemConfiguration = () => {
   };
   const getFieldsByNames = (names: string[]) => smtpFields.filter(f => names.includes(f.name!));
   return (
-    <div className=" h-full overflow-y-auto bg-gray-50 transition-all duration-300 ease-in-out">
+    <ScrollArea>
+    <div className=" h-full transition-all duration-300 ease-in-out">
       <header className="bg-white border-b px-6 py-4 shadow-sm">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -431,6 +433,7 @@ const SystemConfiguration = () => {
         </Tabs>
       </div>
     </div>
+    </ScrollArea>
   );
 };
 

@@ -1,35 +1,156 @@
-import AssetLocation from "./pages/masters/AssetLocation";
-import CompanyHierarchy from "./pages/masters/CompanyHierarchy";
-import CostCenter from "./pages/masters/CostCenter";
-import Customer from "./pages/masters/Customer";
-import CustomerLocation from "./pages/masters/CustomerLocation";
-import Department from "./pages/masters/Department";
-import AddBook from "./pages/masters/depreciation/AddBook";
-import AssetCategoryMappingBookCategory from "./pages/masters/depreciation/AssetCategoryMappingBookCategory";
-import Books from "./pages/masters/depreciation/Books";
-import AssetCategory from "./pages/masters/fixedAssets/AssetCategory";
-import UserAttributes from "./pages/masters/fixedAssets/UserAttributes";
-import ItemCategory from "./pages/masters/ItemCategory";
-import ItemMaster from "./pages/masters/ItemMaster";
-import Organization from "./pages/masters/Organization";
-import ProductMasters from "./pages/masters/ProductMasters";
-import ReportsMasters from "./pages/masters/ReportsMasters";
-import ServiceLocations from "./pages/masters/ServiceLocations";
-import Store from "./pages/masters/Store";
-import UnitOfMeasure from "./pages/masters/UnitsOfMeasure";
-import User from "./pages/masters/User";
-import Vendor from "./pages/masters/Vendor";
-import AllRequests from "./pages/servicedesk/AllRequests";
-import AssetCodeTable from "./pages/servicedesk/AssetCodeTable";
-import Configuration from "./pages/servicedesk/Configuration";
-import MyWorkbench from "./pages/servicedesk/MyWorkbench";
-import PaymentDetails from "./pages/servicedesk/PaymentDetails";
-import ServiceDeskReports from "./pages/servicedesk/ServiceDeskReports";
-import SubscriptionManagement from "./pages/servicedesk/Subscription";
-import TicketProgressDashboard from "./pages/servicedesk/TicketProgressDashboard";
-import UserGroups from "./pages/servicedesk/UserGroups";
-import TicketCreate from "./pages/TicketCreate";
-import TicketView from "./pages/TicketView";
+// import AssetLocation from "./pages/masters/AssetLocation";
+// import CompanyHierarchy from "./pages/masters/CompanyHierarchy";
+// import CostCenter from "./pages/masters/CostCenter";
+// import Customer from "./pages/masters/Customer";
+// import CustomerLocation from "./pages/masters/CustomerLocation";
+// import Department from "./pages/masters/Department";
+// import AddBook from "./pages/masters/depreciation/AddBook";
+// import AssetCategoryMappingBookCategory from "./pages/masters/depreciation/AssetCategoryMappingBookCategory";
+// import Books from "./pages/masters/depreciation/Books";
+// import AssetCategory from "./pages/masters/fixedAssets/AssetCategory";
+// import UserAttributes from "./pages/masters/fixedAssets/UserAttributes";
+// import ItemCategory from "./pages/masters/ItemCategory";
+// import ItemMaster from "./pages/masters/ItemMaster";
+// import Organization from "./pages/masters/Organization";
+// import ProductMasters from "./pages/masters/ProductMasters";
+// import ReportsMasters from "./pages/masters/ReportsMasters";
+// import ServiceLocations from "./pages/masters/ServiceLocations";
+// import Store from "./pages/masters/Store";
+// import UnitOfMeasure from "./pages/masters/UnitsOfMeasure";
+// import User from "./pages/masters/User";
+// import Vendor from "./pages/masters/Vendor";
+// import AllRequests from "./pages/servicedesk/AllRequests";
+// import AssetCodeTable from "./pages/servicedesk/AssetCodeTable";
+// import Configuration from "./pages/servicedesk/Configuration";
+// import MyWorkbench from "./pages/servicedesk/MyWorkbench";
+// import PaymentDetails from "./pages/servicedesk/PaymentDetails";
+// import ServiceDeskReports from "./pages/servicedesk/ServiceDeskReports";
+// import SubscriptionManagement from "./pages/servicedesk/Subscription";
+// import TicketProgressDashboard from "./pages/servicedesk/TicketProgressDashboard";
+// import UserGroups from "./pages/servicedesk/UserGroups";
+// import TicketCreate from "./pages/TicketCreate";
+// import TicketView from "./pages/TicketView";
+
+import WrapperLazyComponent from "./components/common/WrapperLazyComponent";
+
+
+
+// Lazy load all pages
+const Index = WrapperLazyComponent(() => import("./pages/Index"));
+const Login = WrapperLazyComponent(() => import("./pages/Login"));
+const Timesheet = WrapperLazyComponent(() => import("./pages/Timesheet"));
+const Projects = WrapperLazyComponent(() => import("./pages/Projects"));
+const ProjectCreate = WrapperLazyComponent(() => import("./pages/ProjectCreate"));
+const TaskCreate = WrapperLazyComponent(() => import("./pages/TaskCreate"));
+
+// Payroll
+const PayrollDashboard = WrapperLazyComponent(() => import("./pages/payroll/PayrollDashboard"));
+const IndianPayroll = WrapperLazyComponent(() => import("./pages/payroll/IndianPayroll"));
+const USPayroll = WrapperLazyComponent(() => import("./pages/payroll/USPayroll"));
+const TicketsList = WrapperLazyComponent(() => import("./pages/TicketsList"));
+const TicketView = WrapperLazyComponent(() => import("./pages/TicketView"));
+const TicketCreate = WrapperLazyComponent(() => import("./pages/TicketCreate"));
+
+// Masters
+const Organization = WrapperLazyComponent(() => import("./pages/masters/Organization"));
+const User = WrapperLazyComponent(() => import("./pages/masters/User"));
+const Vendor = WrapperLazyComponent(() => import("./pages/masters/Vendor"));
+const Customer = WrapperLazyComponent(() => import("./pages/masters/Customer"));
+const CustomerLocation = WrapperLazyComponent(() => import("./pages/masters/CustomerLocation"));
+const CompanyHierarchy = WrapperLazyComponent(() => import("./pages/masters/CompanyHierarchy"));
+const Department = WrapperLazyComponent(() => import("./pages/masters/Department"));
+const CostCenter=WrapperLazyComponent(() => import("./pages/masters/CostCenter"));
+const AssetCategory=WrapperLazyComponent(() => import("./pages/masters/fixedAssets/AssetCategory"));
+const ItemMaster=WrapperLazyComponent(() => import("./pages/masters/ItemMaster"));
+const AssetLocation=WrapperLazyComponent(() => import("./pages/masters/AssetLocation"));
+const UnitOfMeasure=WrapperLazyComponent(() => import("./pages/masters/UnitsOfMeasure"));
+const Store=WrapperLazyComponent(() => import("./pages/masters/Store"));
+const ItemCategory=WrapperLazyComponent(() => import("./pages/masters/ItemCategory"));
+const AssetCategoryMappingBookCategory=WrapperLazyComponent(() => import("./pages/masters/depreciation/AssetCategoryMappingBookCategory"));
+const UserAttributes=WrapperLazyComponent(() => import("./pages/masters/fixedAssets/UserAttributes"));
+const AssetCodeTable=WrapperLazyComponent(() => import("./pages/servicedesk/AssetCodeTable"));
+const SubscriptionManagement=WrapperLazyComponent(() => import("./pages/servicedesk/Subscription"));
+const AssetsMasters = WrapperLazyComponent(() => import("./pages/masters/AssetsMasters"));
+const MaintenanceMasters = WrapperLazyComponent(() => import("./pages/masters/MaintenanceMasters"));
+const ReportsMasters = WrapperLazyComponent(() => import("./pages/masters/ReportsMasters"));
+const ServiceLocations=WrapperLazyComponent(() => import("./pages/masters/ServiceLocations"));
+const ProductMasters=WrapperLazyComponent(() => import("./pages/masters/ProductMasters"));
+const CostBreakupAttributes=WrapperLazyComponent(() => import("./pages/masters/fixedAssets/CostBreakupAttributes"));
+const Books=WrapperLazyComponent(()=>import("./pages/masters/depreciation/Books"));
+const AdditionalDepreciation=WrapperLazyComponent(()=>import("./pages/masters/depreciation/AdditionalDepreciation"));
+const AddBook=WrapperLazyComponent(()=>import("./pages/masters/depreciation/AddBook"))
+
+// CWIP
+const ProjectManagement = WrapperLazyComponent(() => import("./pages/cwip/ProjectManagement"));
+const AssetOperations = WrapperLazyComponent(() => import("./pages/cwip/AssetOperations"));
+const VerificationTracking = WrapperLazyComponent(() => import("./pages/cwip/VerificationTracking"));
+const DataManagement = WrapperLazyComponent(() => import("./pages/cwip/DataManagement"));
+const CwipReports = WrapperLazyComponent(() => import("./pages/cwip/CwipReports"));
+
+// Procurement
+const PurchaseRequests = WrapperLazyComponent(() => import("./pages/procurement/PurchaseRequests"));
+const PurchaseOrders = WrapperLazyComponent(() => import("./pages/procurement/PurchaseOrders"));
+const GoodsManagement = WrapperLazyComponent(() => import("./pages/procurement/GoodsManagement"));
+const ProcurementReports = WrapperLazyComponent(() => import("./pages/procurement/ProcurementReports"));
+
+// Fixed Assets
+const AssetManagement = WrapperLazyComponent(() => import("./pages/fixedassets/AssetManagement"));
+const AssetOps = WrapperLazyComponent(() => import("./pages/fixedassets/AssetOps"));
+const AssetMaintenance = WrapperLazyComponent(() => import("./pages/fixedassets/AssetMaintenance"));
+const FixedAssetsReports = WrapperLazyComponent(() => import("./pages/fixedassets/FixedAssetsReports"));
+
+// Depreciation
+const DepreciationProcess = WrapperLazyComponent(() => import("./pages/depreciation/DepreciationProcess"));
+const Adjustments = WrapperLazyComponent(() => import("./pages/depreciation/Adjustments"));
+const Analysis = WrapperLazyComponent(() => import("./pages/depreciation/Analysis"));
+const DepreciationReports = WrapperLazyComponent(() => import("./pages/depreciation/DepreciationReports"));
+
+// Consumables
+const Receiving = WrapperLazyComponent(() => import("./pages/consumables/Receiving"));
+const InventoryOperations = WrapperLazyComponent(() => import("./pages/consumables/InventoryOperations"));
+const Verification = WrapperLazyComponent(() => import("./pages/consumables/Verification"));
+const ConsumablesReports = WrapperLazyComponent(() => import("./pages/consumables/ConsumablesReports"));
+
+// Physical Verification
+const AuditPlanning = WrapperLazyComponent(() => import("./pages/physicalverification/AuditPlanning"));
+const VerificationMethods = WrapperLazyComponent(() => import("./pages/physicalverification/VerificationMethods"));
+const Reconciliation = WrapperLazyComponent(() => import("./pages/physicalverification/Reconciliation"));
+const CategoryManagement = WrapperLazyComponent(() => import("./pages/physicalverification/CategoryManagement"));
+
+// Service Desk
+const QuickActions = WrapperLazyComponent(() => import("./pages/servicedesk/QuickActions"));
+const MyWorkbench = WrapperLazyComponent(() => import("./pages/servicedesk/MyWorkbench"));
+const AllRequests = WrapperLazyComponent(() => import("./pages/servicedesk/AllRequests"));
+const WorkManagement = WrapperLazyComponent(() => import("./pages/servicedesk/WorkManagement"));
+const Administration = WrapperLazyComponent(() => import("./pages/servicedesk/Administration"));
+const Configuration = WrapperLazyComponent(() => import("./pages/servicedesk/Configuration"));
+const ServiceDeskReports = WrapperLazyComponent(() => import("./pages/servicedesk/ServiceDeskReports"));
+const Subscription = WrapperLazyComponent(() => import("./pages/servicedesk/Subscription"));
+const UserGroups = WrapperLazyComponent(() => import("./pages/servicedesk/UserGroups"));
+const PaymentDetails = WrapperLazyComponent(() => import("./pages/servicedesk/PaymentDetails"));
+const TicketProgressDashboard = WrapperLazyComponent(() => import("./pages/servicedesk/TicketProgressDashboard"));
+const CreateWorkOrder = WrapperLazyComponent(() => import("./pages/servicedesk/CreateWorkOrder"));
+const ManageWorkOrder = WrapperLazyComponent(() => import("./pages/servicedesk/ManageWorkOrder"));
+const TicketsDashboard = WrapperLazyComponent(() => import("./pages/TicketsDashboard"));
+
+// Utilities
+const PrintingCodes = WrapperLazyComponent(() => import("./pages/utilities/PrintingCodes"));
+const UtilitiesDataManagement = WrapperLazyComponent(() => import("./pages/utilities/UtilitiesDataManagement"));
+const TrackingMonitoring = WrapperLazyComponent(() => import("./pages/utilities/TrackingMonitoring"));
+const Notifications = WrapperLazyComponent(() => import("./pages/utilities/Notifications"));
+
+// Settings
+const Settings = WrapperLazyComponent(() => import("./pages/settings/Settings"));
+const SystemConfiguration = WrapperLazyComponent(() => import("./pages/settings/SystemConfiguration"));
+const UserManagement = WrapperLazyComponent(() => import("./pages/settings/UserManagement"));
+const ProcessConfiguration = WrapperLazyComponent(() => import("./pages/settings/ProcessConfiguration"));
+const AdvancedSetup = WrapperLazyComponent(() => import("./pages/settings/AdvancedSetup"));
+const NotFound = WrapperLazyComponent(() => import("./pages/NotFound"));
+
+// software assets
+const AssetRegistry = WrapperLazyComponent(()=> import("./pages/softwareAssets/AssetRegistry"))
+const LicenseAssignment = WrapperLazyComponent(()=> import("./pages/softwareAssets/LicenseAssignment"))
+const UsageTracking = WrapperLazyComponent(()=> import("./pages/softwareAssets/UsageTracking"))
 
 
 

@@ -26,6 +26,9 @@ import ItemCategory from "./pages/masters/ItemCategory";
 import AssetCategoryMappingBookCategory from "./pages/masters/depreciation/AssetCategoryMappingBookCategory";
 import ManageUnitConversion from "./pages/masters/ManageUnitConvertion";
 import UserAttributes from "./pages/masters/fixedAssets/UserAttributes";
+import PrivateRoute from "./components/common/PrivateRoute";
+import Layout from "./pages/layout/Layout";
+
 
 
 
@@ -182,9 +185,10 @@ const AnimatedRoutes = () => {
   }
   return (
     <MessageProvider duration={3} maxCount={5} offset={24}>
+  
       <SidebarProvider>
         <div className="h-screen flex w-full bg-app-background overflow-hidden">
-          <AppSidebar />
+          <AppSidebar navigation={[]}/>
           <SidebarInset className="flex flex-col overflow-hidden bg-[#f9fafb]">
             <FixedHeader />
             {/* <div className="w-full h-full pt-1 transition-all duration-200 ease-in-out"> */}
@@ -341,7 +345,34 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <AnimatedRoutes />
+         <MessageProvider duration={3} maxCount={5} offset={24}>
+         {/* <AnimatedRoutes /> */}
+           <Routes>
+      <Route  path='/login' element={<Login />}/>
+      {/* <Route  path='/forgot' element={<ForgotPage/>}/> */}
+      {/* <Route path='/authentication' element={<Authentication/>}/>
+       */}
+      <Route element= {<PrivateRoute/>}>
+      <Route  path='/layout/*' element={<Layout/>}/>
+      {/* <Route  path='/' element = {<Home/>}/> */}
+       <Route  path='/' element = {<Layout/>}/>
+      <Route  path='/changepassword' element={<ChangePassword/>}/>
+      <Route  path='"/service-desk/srdetailshistoryview"' element={<ServiceRequestReport />}/>
+      {/* <Route path='/assetTransReportPreview' element={<AssetTransferReport/>}/>
+      <Route  path='/assetTransReportView' element={<AssetTransView/>}/>
+      <Route  path='/assetsaleinvoiceView' element={<AssetInvoiceView/>}/>
+      <Route  path='/assetcountView' element={<AssetCountView/>}/>
+      <Route path='/viewAssetCard' element={<ViewAsset/>}/>
+      <Route path='/groupAssetCard' element={<GroupAsset/>}/>
+      <Route path='/retireViewSaleMemo' element={<SaleMemoView/>}/>
+      <Route path='/retireViewInvoiceMemo' element={<SaleInvoiceView/>}/>
+      <Route path='/profile' element={<TracetProfileDetail/>}/>
+      <Route path="/userAssetVerification" element={<UserAssetVerification/>}/> */}
+    </Route>
+      <Route path="*"  element={<NotFound />}/>
+    </Routes>
+         </MessageProvider>
+     
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>

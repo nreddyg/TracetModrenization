@@ -700,6 +700,17 @@ export const appRoutesObj={
   index:false
 },
 
+"softwareassets-assetregistry": {
+  path:'software-assets/asset-registry',
+  component:<AssetRegistry/>,
+  index:false
+},
+"softwareassets-licenseassignment": {
+  path:'software-assets/license-assignment',
+  component:<LicenseAssignment/>,
+  index:false
+}
+
 
 
 

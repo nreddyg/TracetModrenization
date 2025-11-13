@@ -60,622 +60,622 @@ const icons={
 }
 
 
-const navigation: NavItem[] = [
-  // {
-  //   label: 'Dashboard',
-  //   icon: Home,
-  //   link: '/dashboard',
-  // },
-  // {
-  //   label: 'Timesheet',
-  //   icon: Calculator,
-  //   link: '/timesheet',
-  // },
-  // {
-  //   label: 'Projects',
-  //   icon: Calendar,
-  //   link: '/projects',
-  // },
-  // {
-  //   label: 'Payroll',
-  //   icon: Calculator,
-  //   link: '/payroll',
-  //   children: [
-  //     {
-  //       label: 'Dashboard',
-  //       icon: BarChart,
-  //       link: '/payroll',
-  //     },
-  //     {
-  //       label: 'Indian Payroll',
-  //       icon: Building2,
-  //       link: '/payroll/indian',
-  //     },
-  //     {
-  //       label: 'US Payroll',
-  //       icon: Building2,
-  //       link: '/payroll/us',
-  //     },
-  //   ],
-  // },
-  {
-    label: 'Service Desk',
-    icon: Headphones,
-    link: '/service-desk/all-requests',
-    children: [
-      {
-        label: 'New Service Request',
-        // icon: AlertCircle,
-        link: '/service-desk/create-ticket',
-      },
-      {
-        label: 'My Workbench',
-        // icon: Users,
-        link: '/service-desk/my-workbench',
-      },
-      {
-        label: 'My Requests',
-        // icon: FileText,
-        link: '/service-desk/my-requests',
-      },
-      {
-        label: 'All Service Requests',
-        // icon: FileText,
-        link: '/service-desk/all-requests',
-      },
-      {
-        label: 'Ticket Progress Dashboard',
-        // icon: TrendingUp,
-        link: '/service-desk/ticket-progress-dashboard',
-      },
+// const navigation: NavItem[] = [
+//   // {
+//   //   label: 'Dashboard',
+//   //   icon: Home,
+//   //   link: '/dashboard',
+//   // },
+//   // {
+//   //   label: 'Timesheet',
+//   //   icon: Calculator,
+//   //   link: '/timesheet',
+//   // },
+//   // {
+//   //   label: 'Projects',
+//   //   icon: Calendar,
+//   //   link: '/projects',
+//   // },
+//   // {
+//   //   label: 'Payroll',
+//   //   icon: Calculator,
+//   //   link: '/payroll',
+//   //   children: [
+//   //     {
+//   //       label: 'Dashboard',
+//   //       icon: BarChart,
+//   //       link: '/payroll',
+//   //     },
+//   //     {
+//   //       label: 'Indian Payroll',
+//   //       icon: Building2,
+//   //       link: '/payroll/indian',
+//   //     },
+//   //     {
+//   //       label: 'US Payroll',
+//   //       icon: Building2,
+//   //       link: '/payroll/us',
+//   //     },
+//   //   ],
+//   // },
+//   {
+//     label: 'Service Desk',
+//     icon: Headphones,
+//     link: '/service-desk/all-requests',
+//     children: [
+//       {
+//         label: 'New Service Request',
+//         // icon: AlertCircle,
+//         link: '/service-desk/create-ticket',
+//       },
+//       {
+//         label: 'My Workbench',
+//         // icon: Users,
+//         link: '/service-desk/my-workbench',
+//       },
+//       {
+//         label: 'My Requests',
+//         // icon: FileText,
+//         link: '/service-desk/my-requests',
+//       },
+//       {
+//         label: 'All Service Requests',
+//         // icon: FileText,
+//         link: '/service-desk/all-requests',
+//       },
+//       {
+//         label: 'Ticket Progress Dashboard',
+//         // icon: TrendingUp,
+//         link: '/service-desk/ticket-progress-dashboard',
+//       },
 
-      // {
-      //   label: 'Create Work Order',
-      //   icon: Wrench,
-      //   link: '/service-desk/create-work-order',
-      // },
-      // {
-      //   label: 'Manage Work Order',
-      //   icon: Wrench,
-      //   link: '/service-desk/work-management',
-      // },
-      {
-        label: 'User Groups',
-        // icon: Users,
-        link: '/service-desk/user-groups',
-      },
-      {
-        label: 'Configuration',
-        // icon: Settings,
-        link: '/service-desk/configuration',
-      },
-      {
-        label: 'Subscription',
-        // icon: Star,
-        link: '/service-desk/subscription',
-      },
-      {
-        label: 'Reports',
-        // icon: BarChart,
-        link: '/service-desk/reports',
-      },
-      // {
-      //   label: 'MIS Reports',
-      //   icon: BarChart,
-      //   link: '/service-desk/mis-reports',
-      // },
+//       // {
+//       //   label: 'Create Work Order',
+//       //   icon: Wrench,
+//       //   link: '/service-desk/create-work-order',
+//       // },
+//       // {
+//       //   label: 'Manage Work Order',
+//       //   icon: Wrench,
+//       //   link: '/service-desk/work-management',
+//       // },
+//       {
+//         label: 'User Groups',
+//         // icon: Users,
+//         link: '/service-desk/user-groups',
+//       },
+//       {
+//         label: 'Configuration',
+//         // icon: Settings,
+//         link: '/service-desk/configuration',
+//       },
+//       {
+//         label: 'Subscription',
+//         // icon: Star,
+//         link: '/service-desk/subscription',
+//       },
+//       {
+//         label: 'Reports',
+//         // icon: BarChart,
+//         link: '/service-desk/reports',
+//       },
+//       // {
+//       //   label: 'MIS Reports',
+//       //   icon: BarChart,
+//       //   link: '/service-desk/mis-reports',
+//       // },
 
-    ],
-  },
-  // {
-  //   label: 'Masters',
-  //   icon: Building2,
-  //   link: '/masters',
-  //   children: [
-  //     {
-  //       label: 'Company',
-  //       icon: Building2,
-  //       link: '/company',
-  //       children: [
-  //         {
-  //           label: 'Organization',
-  //           icon: Building2,
-  //           link: '/masters/company/organization',
-  //         },
-  //         {
-  //           label: 'Company Hierarchy',
-  //           icon: Building2,
-  //           link: '/masters/company/company-hierarchy',
-  //         },
-  //         {
-  //           label: 'Department',
-  //           icon: Building2,
-  //           link: '/masters/company/department',
-  //         },
-  //         {
-  //           label: 'Cost Center',
-  //           icon: DollarSign,
-  //           link: '/masters/company/costcenter',
-  //         },
-  //         {
-  //           label: 'Assets & Inventory',
-  //           icon: Package,
-  //           link: '/masters/company/assets-inventory',
-  //         },
-  //         {
-  //           label: 'Maintenance',
-  //           icon: Wrench,
-  //           link: '/masters/company/maintenance',
-  //         },
-  //       ],
-  //     },
+//     ],
+//   },
+//   // {
+//   //   label: 'Masters',
+//   //   icon: Building2,
+//   //   link: '/masters',
+//   //   children: [
+//   //     {
+//   //       label: 'Company',
+//   //       icon: Building2,
+//   //       link: '/company',
+//   //       children: [
+//   //         {
+//   //           label: 'Organization',
+//   //           icon: Building2,
+//   //           link: '/masters/company/organization',
+//   //         },
+//   //         {
+//   //           label: 'Company Hierarchy',
+//   //           icon: Building2,
+//   //           link: '/masters/company/company-hierarchy',
+//   //         },
+//   //         {
+//   //           label: 'Department',
+//   //           icon: Building2,
+//   //           link: '/masters/company/department',
+//   //         },
+//   //         {
+//   //           label: 'Cost Center',
+//   //           icon: DollarSign,
+//   //           link: '/masters/company/costcenter',
+//   //         },
+//   //         {
+//   //           label: 'Assets & Inventory',
+//   //           icon: Package,
+//   //           link: '/masters/company/assets-inventory',
+//   //         },
+//   //         {
+//   //           label: 'Maintenance',
+//   //           icon: Wrench,
+//   //           link: '/masters/company/maintenance',
+//   //         },
+//   //       ],
+//   //     },
 
-  //     {
-  //       label: 'Fixed Assets',
-  //       icon: Building2,
-  //       link: '/company',
-  //       children: [
-  //         {
-  //           label: 'Consumables',
-  //           icon: Building2,
-  //           link: '/consumables',
-  //           children: [
-  //             {
-  //               label: 'Store',
-  //               icon: BarChart,
-  //               link: '/masters/consumables/store',
-  //             },
-  //             //  {
-  //             //   label: 'Item Master',
-  //             //   icon: BarChart,
-  //             //   link: '/masters/consumables/item-master',
-  //             // },
-  //           ],
+//   //     {
+//   //       label: 'Fixed Assets',
+//   //       icon: Building2,
+//   //       link: '/company',
+//   //       children: [
+//   //         {
+//   //           label: 'Consumables',
+//   //           icon: Building2,
+//   //           link: '/consumables',
+//   //           children: [
+//   //             {
+//   //               label: 'Store',
+//   //               icon: BarChart,
+//   //               link: '/masters/consumables/store',
+//   //             },
+//   //             //  {
+//   //             //   label: 'Item Master',
+//   //             //   icon: BarChart,
+//   //             //   link: '/masters/consumables/item-master',
+//   //             // },
+//   //           ],
 
-  //         },
-  // {
-  //   label: 'Service Maintenance',
-  //   icon: Building2,
-  //   link: '/servicemaintenance',
-  //   children: [
-  //     {
-  //       label: 'Service Locations',
-  //       icon: Building2,
-  //       link: '/masters/servicemaintenance/servicelocations',
-  //     },
-  //     {
-  //       label: 'Product Masters',
-  //       icon: Building2,
-  //       link: '/masters/servicemaintenance/productmaster',
-  //     },
-  //   ],
+//   //         },
+//   // {
+//   //   label: 'Service Maintenance',
+//   //   icon: Building2,
+//   //   link: '/servicemaintenance',
+//   //   children: [
+//   //     {
+//   //       label: 'Service Locations',
+//   //       icon: Building2,
+//   //       link: '/masters/servicemaintenance/servicelocations',
+//   //     },
+//   //     {
+//   //       label: 'Product Masters',
+//   //       icon: Building2,
+//   //       link: '/masters/servicemaintenance/productmaster',
+//   //     },
+//   //   ],
 
-  // },
+//   // },
 
-  //         ,
+//   //         ,
 
-  //       ]
-  //     },
-  //     // {
-  //     //   label: 'CWIP',
-  //     //   icon: HardHat,
-  //     //   link: '/cwip',
-  //     //   children: [
-  //     //     {
-  //     //       label: 'Project Management',
-  //     //       icon: HardHat,
-  //     //       link: '/cwip/project-management',
-  //     //     },
-  //     //     {
-  //     //       label: 'Asset Operations',
-  //     //       icon: Package,
-  //     //       link: '/cwip/asset-operations',
-  //     //     },
-  //     //     {
-  //     //       label: 'Verification Tracking',
-  //     //       icon: Search,
-  //     //       link: '/cwip/verification-tracking',
-  //     //     },
-  //     //     {
-  //     //       label: 'Data Management',
-  //     //       icon: FileText,
-  //     //       link: '/cwip/data-management',
-  //     //     },
-  //     //     {
-  //     //       label: 'Reports',
-  //     //       icon: FileText,
-  //     //       link: '/cwip/reports',
-  //     //     },
-  //     //   ],
-  //     // },
-  //     // {
-  //     //   label: 'Procurement',
-  //     //   icon: ShoppingCart,
-  //     //   link: '/procurement',
-  //     //   children: [
-  //     //     {
-  //     //       label: 'Purchase Requests',
-  //     //       icon: FileText,
-  //     //       link: '/procurement/purchase-requests',
-  //     //     },
-  //     //     {
-  //     //       label: 'Purchase Orders',
-  //     //       icon: ShoppingCart,
-  //     //       link: '/procurement/purchase-orders',
-  //     //     },
-  //     //     {
-  //     //       label: 'Goods Management',
-  //     //       icon: Package,
-  //     //       link: '/procurement/goods-management',
-  //     //     },
-  //     //     {
-  //     //       label: 'Reports',
-  //     //       icon: FileText,
-  //     //       link: '/procurement/reports',
-  //     //     },
-  //     //   ],
-  //     // },
-  //     // {
-  //     //   label: 'Fixed Assets',
-  //     //   icon: Package,
-  //     //   link: '/fixed-assets',
-  //     //   children: [
-  //     //     {
-  //     //       label: 'Asset Management',
-  //     //       icon: Package,
-  //     //       link: '/fixed-assets/asset-management',
-  //     //     },
-  //     //     {
-  //     //       label: 'Asset Operations',
-  //     //       icon: Wrench,
-  //     //       link: '/fixed-assets/asset-operations',
-  //     //     },
-  //     //     {
-  //     //       label: 'Asset Maintenance',
-  //     //       icon: Wrench,
-  //     //       link: '/fixed-assets/asset-maintenance',
-  //     //     },
-  //     //     {
-  //     //       label: 'Reports',
-  //     //       icon: FileText,
-  //     //       link: '/fixed-assets/reports',
-  //     //     },
-  //     //   ],
-  //     // },
-      {
-        label: 'Depreciation',
-        icon: DollarSign,
-        link: '/depreciation',
-        children: [
-          {
-            label: 'Process',
-            icon: DollarSign,
-            link: '/depreciation/process',
-          },
-          {
-            label: 'Adjustments',
-            icon: DollarSign,
-            link: '/depreciation/adjustments',
-          },
-          {
-            label: 'Analysis',
-            icon: DollarSign,
-            link: '/depreciation/analysis',
-          },
-          {
-            label: 'Reports',
-            icon: FileText,
-            link: '/depreciation/reports',
-          },
-        ],
-      },
-  //     // {
-  //     //   label: 'Consumables',
-  //     //   icon: Package,
-  //     //   link: '/consumables',
-  //     //   children: [
-  //     //     {
-  //     //       label: 'Receiving',
-  //     //       icon: Package,
-  //     //       link: '/consumables/receiving',
-  //     //     },
-  //     //     {
-  //     //       label: 'Inventory Operations',
-  //     //       icon: Package,
-  //     //       link: '/consumables/inventory-operations',
-  //     //     },
-  //     //     {
-  //     //       label: 'Verification',
-  //     //       icon: Search,
-  //     //       link: '/consumables/verification',
-  //     //     },
-  //     //     {
-  //     //       label: 'Reports',
-  //     //       icon: FileText,
-  //     //       link: '/consumables/reports',
-  //     //     },
-  //     //   ],
-  //     // },
-  //     // {
-  //     //   label: 'Physical Verification',
-  //     //   icon: Search,
-  //     //   link: '/physical-verification',
-  //     //   children: [
-  //     //     {
-  //     //       label: 'Audit Planning',
-  //     //       icon: Search,
-  //     //       link: '/physical-verification/audit-planning',
-  //     //     },
-  //     //     {
-  //     //       label: 'Verification Methods',
-  //     //       icon: Search,
-  //     //       link: '/physical-verification/verification-methods',
-  //     //     },
-  //     //     {
-  //     //       label: 'Reconciliation',
-  //     //       icon: Search,
-  //     //       link: '/physical-verification/reconciliation',
-  //     //     },
-  //     //     {
-  //     //       label: 'Category Management',
-  //     //       icon: Search,
-  //     //       link: '/physical-verification/category-management',
-  //     //     },
-  //     //   ],
-  //     // },
-  //     // {
-  //     //   label: 'Utilities',
-  //     //   icon: Cog,
-  //     //   link: '/utilities',
-  //     //   children: [
-  //     //     {
-  //     //       label: 'Printing Codes',
-  //     //       icon: Cog,
-  //     //       link: '/utilities/printing-codes',
-  //     //     },
-  //     //     {
-  //     //       label: 'Data Management',
-  //     //       icon: FileText,
-  //     //       link: '/utilities/data-management',
-  //     //     },
-  //     //     {
-  //     //       label: 'Tracking Monitoring',
-  //     //       icon: Search,
-  //     //       link: '/utilities/tracking-monitoring',
-  //     //     },
-  //     //     {
-  //     //       label: 'Notifications',
-  //     //       icon: AlertCircle,
-  //     //       link: '/utilities/notifications',
-  //     //     },
-  //     //   ],
-  //     // },
-  //     // {
-  //     //   label:'Change Password',
-  //     //   icon: Package,
-  //     //   link: '/changepassword'
-  //     // },  
-  //   ]
-  // },
-  {
-    label: 'Masters',
-    icon: Building2,
-    link: '/masters/company/organization',
-    children: [
-      {
-        label: 'Company',
-        // icon: Building2,
-        link: '/company',
-        children: [
-          {
-            label: 'Organization',
-            // icon: Building2,
-            link: '/masters/company/organization',
-          },
-          {
-            label: 'Company Hierarchy',
-            // icon: Building2,
-            link: '/masters/company/company-hierarchy',
-          },
-          {
-            label: 'Asset Location',
-            // icon: Building2,
-            link: '/masters/company/asset-location',
-          },
-          {
-            label: 'Department',
-            // icon: Building2,
-            link: '/masters/company/department',
-          },
-          {
-            label: 'Cost Center',
-            // icon: DollarSign,
-            link: '/masters/company/costcenter',
-          },
-          {
-            label: 'User',
-            // icon: User,
-            link: '/masters/company/user',
-          },
-          {
-            label: 'Vendor',
-            // icon: UserCheck,
-            link: '/masters/company/vendor',
-          },
-          {
-            label: 'Customer',
-            // icon: UserCog,
-            link: '/masters/company/customer',
-          },
-          // {
-          //   label: 'Assets & Inventory',
-          //   icon: Package,
-          //   link: '/masters/company/assets-inventory',
-          // },
-          // {
-          //   label: 'Maintenance',
-          //   icon: Wrench,
-          //   link: '/masters/company/maintenance',
-          // },
-        ],
-      },
-      {
-        label: 'Fixed Assets',
-        // icon: Building2,
-        link: '/company',
-        children: [
-          {
-            label: 'Asset Category',
-            // icon: Building2,
-            link: 'masters/fixed-assets/asset-category',
-          },
-          {
-            label: 'Cost Breakup Attributes',
-            // icon: DollarSign,
-            link: 'masters/fixed-assets/costbreakup',
-          },
-          {
-            label: 'User Attributes',
-            // icon: DollarSign,
-            link: 'masters/fixed-assets/userattributes',
-          }
-        ]
-      },
-      {
-        label: 'Depreciation',
-        // icon: Building2,
-        link: '/depreciation',
-        children: [
-          {
-            label: 'Books',
-            // icon: BarChart,
-            link: '/masters/depreciation/book',
-          },
-          {
-            label: 'Asset Category Book Category Mapping',
-            // icon: BarChart,
-            link: '/masters/depreciation/assetcategorybookcategorymapping',
-          },
-        ],
-      },
-      {
-        label: 'Consumables',
-        // icon: Building2,
-        link: '/consumables',
-        children: [
-          {
-            label: 'Store',
-            // icon: BarChart,
-            link: '/masters/consumables/store',
-          },
-          {
-            label: 'Item Master',
-            // icon: BarChart,
-            link: '/masters/consumables/item-master',
-          },
-          {
-            label: "Units Of Measure",
-            // icon: BarChart,
-            link: '/masters/consumables/unitsofmeasure',
-          },
-          {
-            label: 'Item Category',
-            // icon: BarChart,
-            link: '/masters/consumables/item-category',
-          },
-        ],
-      },
-      {
-        label: 'Service Maintenance',
-        // icon:  Wrench,
-        link: '/servicemaintenance',
-        children: [
-          {
-            label: 'Service Locations',
-            // icon:MapPin,
-            link: '/masters/servicemaintenance/servicelocations',
-          },
-          {
-            label: 'Product Masters',
-            // icon: Package,
-            link: '/masters/servicemaintenance/productmaster',
-          },
-        ],
+//   //       ]
+//   //     },
+//   //     // {
+//   //     //   label: 'CWIP',
+//   //     //   icon: HardHat,
+//   //     //   link: '/cwip',
+//   //     //   children: [
+//   //     //     {
+//   //     //       label: 'Project Management',
+//   //     //       icon: HardHat,
+//   //     //       link: '/cwip/project-management',
+//   //     //     },
+//   //     //     {
+//   //     //       label: 'Asset Operations',
+//   //     //       icon: Package,
+//   //     //       link: '/cwip/asset-operations',
+//   //     //     },
+//   //     //     {
+//   //     //       label: 'Verification Tracking',
+//   //     //       icon: Search,
+//   //     //       link: '/cwip/verification-tracking',
+//   //     //     },
+//   //     //     {
+//   //     //       label: 'Data Management',
+//   //     //       icon: FileText,
+//   //     //       link: '/cwip/data-management',
+//   //     //     },
+//   //     //     {
+//   //     //       label: 'Reports',
+//   //     //       icon: FileText,
+//   //     //       link: '/cwip/reports',
+//   //     //     },
+//   //     //   ],
+//   //     // },
+//   //     // {
+//   //     //   label: 'Procurement',
+//   //     //   icon: ShoppingCart,
+//   //     //   link: '/procurement',
+//   //     //   children: [
+//   //     //     {
+//   //     //       label: 'Purchase Requests',
+//   //     //       icon: FileText,
+//   //     //       link: '/procurement/purchase-requests',
+//   //     //     },
+//   //     //     {
+//   //     //       label: 'Purchase Orders',
+//   //     //       icon: ShoppingCart,
+//   //     //       link: '/procurement/purchase-orders',
+//   //     //     },
+//   //     //     {
+//   //     //       label: 'Goods Management',
+//   //     //       icon: Package,
+//   //     //       link: '/procurement/goods-management',
+//   //     //     },
+//   //     //     {
+//   //     //       label: 'Reports',
+//   //     //       icon: FileText,
+//   //     //       link: '/procurement/reports',
+//   //     //     },
+//   //     //   ],
+//   //     // },
+//   //     // {
+//   //     //   label: 'Fixed Assets',
+//   //     //   icon: Package,
+//   //     //   link: '/fixed-assets',
+//   //     //   children: [
+//   //     //     {
+//   //     //       label: 'Asset Management',
+//   //     //       icon: Package,
+//   //     //       link: '/fixed-assets/asset-management',
+//   //     //     },
+//   //     //     {
+//   //     //       label: 'Asset Operations',
+//   //     //       icon: Wrench,
+//   //     //       link: '/fixed-assets/asset-operations',
+//   //     //     },
+//   //     //     {
+//   //     //       label: 'Asset Maintenance',
+//   //     //       icon: Wrench,
+//   //     //       link: '/fixed-assets/asset-maintenance',
+//   //     //     },
+//   //     //     {
+//   //     //       label: 'Reports',
+//   //     //       icon: FileText,
+//   //     //       link: '/fixed-assets/reports',
+//   //     //     },
+//   //     //   ],
+//   //     // },
+//       {
+//         label: 'Depreciation',
+//         icon: DollarSign,
+//         link: '/depreciation',
+//         children: [
+//           {
+//             label: 'Process',
+//             icon: DollarSign,
+//             link: '/depreciation/process',
+//           },
+//           {
+//             label: 'Adjustments',
+//             icon: DollarSign,
+//             link: '/depreciation/adjustments',
+//           },
+//           {
+//             label: 'Analysis',
+//             icon: DollarSign,
+//             link: '/depreciation/analysis',
+//           },
+//           {
+//             label: 'Reports',
+//             icon: FileText,
+//             link: '/depreciation/reports',
+//           },
+//         ],
+//       },
+//   //     // {
+//   //     //   label: 'Consumables',
+//   //     //   icon: Package,
+//   //     //   link: '/consumables',
+//   //     //   children: [
+//   //     //     {
+//   //     //       label: 'Receiving',
+//   //     //       icon: Package,
+//   //     //       link: '/consumables/receiving',
+//   //     //     },
+//   //     //     {
+//   //     //       label: 'Inventory Operations',
+//   //     //       icon: Package,
+//   //     //       link: '/consumables/inventory-operations',
+//   //     //     },
+//   //     //     {
+//   //     //       label: 'Verification',
+//   //     //       icon: Search,
+//   //     //       link: '/consumables/verification',
+//   //     //     },
+//   //     //     {
+//   //     //       label: 'Reports',
+//   //     //       icon: FileText,
+//   //     //       link: '/consumables/reports',
+//   //     //     },
+//   //     //   ],
+//   //     // },
+//   //     // {
+//   //     //   label: 'Physical Verification',
+//   //     //   icon: Search,
+//   //     //   link: '/physical-verification',
+//   //     //   children: [
+//   //     //     {
+//   //     //       label: 'Audit Planning',
+//   //     //       icon: Search,
+//   //     //       link: '/physical-verification/audit-planning',
+//   //     //     },
+//   //     //     {
+//   //     //       label: 'Verification Methods',
+//   //     //       icon: Search,
+//   //     //       link: '/physical-verification/verification-methods',
+//   //     //     },
+//   //     //     {
+//   //     //       label: 'Reconciliation',
+//   //     //       icon: Search,
+//   //     //       link: '/physical-verification/reconciliation',
+//   //     //     },
+//   //     //     {
+//   //     //       label: 'Category Management',
+//   //     //       icon: Search,
+//   //     //       link: '/physical-verification/category-management',
+//   //     //     },
+//   //     //   ],
+//   //     // },
+//   //     // {
+//   //     //   label: 'Utilities',
+//   //     //   icon: Cog,
+//   //     //   link: '/utilities',
+//   //     //   children: [
+//   //     //     {
+//   //     //       label: 'Printing Codes',
+//   //     //       icon: Cog,
+//   //     //       link: '/utilities/printing-codes',
+//   //     //     },
+//   //     //     {
+//   //     //       label: 'Data Management',
+//   //     //       icon: FileText,
+//   //     //       link: '/utilities/data-management',
+//   //     //     },
+//   //     //     {
+//   //     //       label: 'Tracking Monitoring',
+//   //     //       icon: Search,
+//   //     //       link: '/utilities/tracking-monitoring',
+//   //     //     },
+//   //     //     {
+//   //     //       label: 'Notifications',
+//   //     //       icon: AlertCircle,
+//   //     //       link: '/utilities/notifications',
+//   //     //     },
+//   //     //   ],
+//   //     // },
+//   //     // {
+//   //     //   label:'Change Password',
+//   //     //   icon: Package,
+//   //     //   link: '/changepassword'
+//   //     // },  
+//   //   ]
+//   // },
+//   {
+//     label: 'Masters',
+//     icon: Building2,
+//     link: '/masters/company/organization',
+//     children: [
+//       {
+//         label: 'Company',
+//         // icon: Building2,
+//         link: '/company',
+//         children: [
+//           {
+//             label: 'Organization',
+//             // icon: Building2,
+//             link: '/masters/company/organization',
+//           },
+//           {
+//             label: 'Company Hierarchy',
+//             // icon: Building2,
+//             link: '/masters/company/company-hierarchy',
+//           },
+//           {
+//             label: 'Asset Location',
+//             // icon: Building2,
+//             link: '/masters/company/asset-location',
+//           },
+//           {
+//             label: 'Department',
+//             // icon: Building2,
+//             link: '/masters/company/department',
+//           },
+//           {
+//             label: 'Cost Center',
+//             // icon: DollarSign,
+//             link: '/masters/company/costcenter',
+//           },
+//           {
+//             label: 'User',
+//             // icon: User,
+//             link: '/masters/company/user',
+//           },
+//           {
+//             label: 'Vendor',
+//             // icon: UserCheck,
+//             link: '/masters/company/vendor',
+//           },
+//           {
+//             label: 'Customer',
+//             // icon: UserCog,
+//             link: '/masters/company/customer',
+//           },
+//           // {
+//           //   label: 'Assets & Inventory',
+//           //   icon: Package,
+//           //   link: '/masters/company/assets-inventory',
+//           // },
+//           // {
+//           //   label: 'Maintenance',
+//           //   icon: Wrench,
+//           //   link: '/masters/company/maintenance',
+//           // },
+//         ],
+//       },
+//       {
+//         label: 'Fixed Assets',
+//         // icon: Building2,
+//         link: '/company',
+//         children: [
+//           {
+//             label: 'Asset Category',
+//             // icon: Building2,
+//             link: 'masters/fixed-assets/asset-category',
+//           },
+//           {
+//             label: 'Cost Breakup Attributes',
+//             // icon: DollarSign,
+//             link: 'masters/fixed-assets/costbreakup',
+//           },
+//           {
+//             label: 'User Attributes',
+//             // icon: DollarSign,
+//             link: 'masters/fixed-assets/userattributes',
+//           }
+//         ]
+//       },
+//       {
+//         label: 'Depreciation',
+//         // icon: Building2,
+//         link: '/depreciation',
+//         children: [
+//           {
+//             label: 'Books',
+//             // icon: BarChart,
+//             link: '/masters/depreciation/book',
+//           },
+//           {
+//             label: 'Asset Category Book Category Mapping',
+//             // icon: BarChart,
+//             link: '/masters/depreciation/assetcategorybookcategorymapping',
+//           },
+//         ],
+//       },
+//       {
+//         label: 'Consumables',
+//         // icon: Building2,
+//         link: '/consumables',
+//         children: [
+//           {
+//             label: 'Store',
+//             // icon: BarChart,
+//             link: '/masters/consumables/store',
+//           },
+//           {
+//             label: 'Item Master',
+//             // icon: BarChart,
+//             link: '/masters/consumables/item-master',
+//           },
+//           {
+//             label: "Units Of Measure",
+//             // icon: BarChart,
+//             link: '/masters/consumables/unitsofmeasure',
+//           },
+//           {
+//             label: 'Item Category',
+//             // icon: BarChart,
+//             link: '/masters/consumables/item-category',
+//           },
+//         ],
+//       },
+//       {
+//         label: 'Service Maintenance',
+//         // icon:  Wrench,
+//         link: '/servicemaintenance',
+//         children: [
+//           {
+//             label: 'Service Locations',
+//             // icon:MapPin,
+//             link: '/masters/servicemaintenance/servicelocations',
+//           },
+//           {
+//             label: 'Product Masters',
+//             // icon: Package,
+//             link: '/masters/servicemaintenance/productmaster',
+//           },
+//         ],
 
-      },
-      {
-        label: 'Reports',
-        // icon: FileText,
-        link: '/masters/reports',
-      },
-      // masters/fixed-assets/asset-category
-    ],
-  },
-  {
-    label: 'Software assets',
-    icon: Package,
-    link: '/software-assets/asset-registry',
-    children: [
-      {
-        label: 'Asset Registry',
-        // icon: Package,
-        link: '/software-assets/asset-registry',
-      },
-      {
-        label: 'License Assignment',
-        // icon: Settings,
-        link: '/software-assets/license-assignment',
-      },
-      // {
-      //   label: 'Usage Tracking',
-      //   icon: HardHat,
-      //   link: '/software-assets/usage-tracking',
-      // },
-      // {
-      //   label: 'Compliance & Audit',
-      //   icon: Cog,
-      //   link: '/software-assets/compliance&audit',
-      // },
-      // {
-      //   label: 'Reports',
-      //   icon: Cog,
-      //   link: '/software-assets/reports',
-      // },
-      // {
-      //   label: 'Advanced Setup',
-      //   icon: Settings,
-      //   link: '/settings/advanced-setup',
-      // },
-    ],
-  },
-  {
-    label: 'Settings',
-    icon: Settings,
-    link: '/settings/system-configuration',
-    children: [
-      {
-        label: 'System Configuration',
-        // icon: Settings,
-        link: '/settings/system-configuration',
-      },
-      // {
-      //   label: 'User Management',
-      //   icon: HardHat,
-      //   link: '/settings/user-management',
-      // },
-      // {
-      //   label: 'Process Configuration',
-      //   icon: Cog,
-      //   link: '/settings/process-configuration',
-      // },
-      // {
-      //   label: 'Advanced Setup',
-      //   icon: Settings,
-      //   link: '/settings/advanced-setup',
-      // },
-    ],
-  },
-]
+//       },
+//       {
+//         label: 'Reports',
+//         // icon: FileText,
+//         link: '/masters/reports',
+//       },
+//       // masters/fixed-assets/asset-category
+//     ],
+//   },
+//   {
+//     label: 'Software assets',
+//     icon: Package,
+//     link: '/software-assets/asset-registry',
+//     children: [
+//       {
+//         label: 'Asset Registry',
+//         // icon: Package,
+//         link: '/software-assets/asset-registry',
+//       },
+//       {
+//         label: 'License Assignment',
+//         // icon: Settings,
+//         link: '/software-assets/license-assignment',
+//       },
+//       // {
+//       //   label: 'Usage Tracking',
+//       //   icon: HardHat,
+//       //   link: '/software-assets/usage-tracking',
+//       // },
+//       // {
+//       //   label: 'Compliance & Audit',
+//       //   icon: Cog,
+//       //   link: '/software-assets/compliance&audit',
+//       // },
+//       // {
+//       //   label: 'Reports',
+//       //   icon: Cog,
+//       //   link: '/software-assets/reports',
+//       // },
+//       // {
+//       //   label: 'Advanced Setup',
+//       //   icon: Settings,
+//       //   link: '/settings/advanced-setup',
+//       // },
+//     ],
+//   },
+//   {
+//     label: 'Settings',
+//     icon: Settings,
+//     link: '/settings/system-configuration',
+//     children: [
+//       {
+//         label: 'System Configuration',
+//         // icon: Settings,
+//         link: '/settings/system-configuration',
+//       },
+//       // {
+//       //   label: 'User Management',
+//       //   icon: HardHat,
+//       //   link: '/settings/user-management',
+//       // },
+//       // {
+//       //   label: 'Process Configuration',
+//       //   icon: Cog,
+//       //   link: '/settings/process-configuration',
+//       // },
+//       // {
+//       //   label: 'Advanced Setup',
+//       //   icon: Settings,
+//       //   link: '/settings/advanced-setup',
+//       // },
+//     ],
+//   },
+// ]
 
 
 
@@ -851,7 +851,7 @@ const Layout = () => {
       if (module.ModuleName.toLowerCase() === "service desk" && !(LoggedInUser.IsServiceDesk)) {
         return;
       }
-console.log(module.ModuleName.toLowerCase(),"hgewvyuhfgewhwefhwuehru")
+      
       if (modulesOverride[module.ModuleName.toLowerCase()]) {
         let res = modulesOverride[module.ModuleName.toLowerCase()]?.action(module,parent)
         if (!res) {
@@ -949,7 +949,7 @@ console.log(module.ModuleName.toLowerCase(),"hgewvyuhfgewhwefhwuehru")
           <SidebarInset className="flex flex-col overflow-hidden bg-[#f9fafb]">
             <FixedHeader />
             {/* <div className="w-full h-full pt-1 transition-all duration-200 ease-in-out"> */}
-              <Suspense fallback={<ReusableLoader spinning={true} size="lg" position="center" />}>
+               {menuList.length!=0 && <Suspense fallback={<ReusableLoader spinning={true} size="lg" position="center" />}>
              {appRoutesState.length > 1 ? 
              <Routes location={location}>
               {appRoutesState.map((route, index) => (
@@ -981,7 +981,7 @@ console.log(module.ModuleName.toLowerCase(),"hgewvyuhfgewhwefhwuehru")
             </Routes> :""
               // <>{enableSupportText && <HomePage />}</>
             }
-              </Suspense>
+              </Suspense>}
             {/* </div> */}
           </SidebarInset>
         </div>

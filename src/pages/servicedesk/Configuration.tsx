@@ -71,10 +71,10 @@ const tablePermissions: TablePermissions = {
 };
 
 const Configuration = () => {
-  const navigate=useNavigate()
+  const navigate = useNavigate()
   const companyId = useAppSelector(state => state.projects.companyId);
-  const branch=useAppSelector(state => state.projects.branch) || '';
-    const branchId=useAppSelector(state=>state.projects.branchId) || localStorage.getItem('BranchId');
+  const branch = useAppSelector(state => state.projects.branch) || '';
+  const branchId = useAppSelector(state => state.projects.branchId) || localStorage.getItem('BranchId');
   const [fields, setFields] = useState<BaseField[]>(CONFIGURATION_DB);
   const dispatch = useDispatch()
   const msg = useMessage()
@@ -107,9 +107,9 @@ const Configuration = () => {
   const [serviceRequestTypeData, setServiceRequestTypeData] = useState<serviceRequestType[]>([]);
   const [isDelModalOpen, setIsDelModalOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<serviceRequestType | null>(null);
-  const [deletingRecord,setDeletingRecord]=useState<serviceRequestType|null>(null);
+  const [deletingRecord, setDeletingRecord] = useState<serviceRequestType | null>(null);
   const [selectedStatusRec, setSelectedStatusRec] = useState<Status | null>(null);
-  const [deletingStatusRec,setDeletingStatusRec]=useState<Status|null>(null);
+  const [deletingStatusRec, setDeletingStatusRec] = useState<Status | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isEditStatusMode, setIsEditStatusMode] = useState(false);
   const { toast } = useToast();
@@ -174,7 +174,7 @@ const Configuration = () => {
         console.error('Error fetching lookups:', err);
       } finally {
         if (companyId) {
-          getSRConfiguration(companyId,branch);
+          getSRConfiguration(companyId, branch);
           fetchAllServiceRequests();
           fetchAllStatusList();
         }
@@ -186,14 +186,14 @@ const Configuration = () => {
   }, [companyId, branch])
   const fetchAllServiceRequests = async () => {
     dispatch(setLoading(true));
-    await getServiceRequestTypes(companyId,branchId).then(res => {
+    await getServiceRequestTypes(companyId, branchId).then(res => {
       if (res.success && res.data) {
-        if(Array.isArray(res.data)){
+        if (Array.isArray(res.data)) {
           setServiceRequestTypeData(res.data)
-        }else{
-            setServiceRequestTypeData([])
+        } else {
+          setServiceRequestTypeData([])
         }
-       
+
       } else {
         setServiceRequestTypeData([])
       }
@@ -272,7 +272,7 @@ const Configuration = () => {
         }).catch(err => { { } }).finally(() => { dispatch(setLoading(false)) })
       } else {
         dispatch(setLoading(true));
-        await postServiceRequestType(companyId,branch, payload).then(res => {
+        await postServiceRequestType(companyId, branch, payload).then(res => {
           if (res.success && res.data.status) {
             msg.success(res.data.message);
             fetchAllServiceRequests();
@@ -530,7 +530,7 @@ const Configuration = () => {
                   onChange={ctrl.onChange}
                   error={errors[name]?.message as string}
                   maxTagCount={2}
-                  maxTagTextLength = {15}
+                  maxTagTextLength={15}
                 />
               )}
             />
@@ -574,15 +574,15 @@ const Configuration = () => {
     }
   };
   // handle refresh
-    const handleRefresh = useCallback((type?: string) => {
-     if (type) {
-      toast({title: "Data Refreshed",description: "All status data has been updated",});
+  const handleRefresh = useCallback((type?: string) => {
+    if (type) {
+      toast({ title: "Data Refreshed", description: "All status data has been updated", });
       fetchAllStatusList()
     } else {
-      toast({title: "Data Refreshed",description: "All service request types data has been updated",});
+      toast({ title: "Data Refreshed", description: "All service request types data has been updated", });
       fetchAllServiceRequests();
     }
-    },[toast]);
+  }, [toast]);
   const formatSLAHoursMinutes = (val?: string) => {
     if (!val) return "";
     const [hours, minutes] = val.split("/");
@@ -650,7 +650,7 @@ const Configuration = () => {
       } else {
         msg.warning('Failed to delete status !!')
       }
-    }).catch(err => { }).finally(() => {dispatch(setLoading(false))})
+    }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
   }
   //update service request status sequence
   const handleUpdateStatusSequence = async () => {
@@ -672,10 +672,13 @@ const Configuration = () => {
     })
   }
   return (
-    <div className="h-full bg-gray-50 overflow-y-scroll">
-      <header className="bg-white border-b px-6 py-3 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+    <div className="h-full bg-gray-50 overflow-y-auto">
+      {/* <header className="bg-white border-b px-6 py-3 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div className="flex items-center gap-3">
-          <Button size="sm" className="bg-primary h-[2.38rem] hover:bg-blue-700  text-white" onClick={()=>navigate('/service-desk/create-ticket')}>
+          <Button 
+          size="sm" 
+          className="btn-submit-style" 
+          onClick={()=>navigate('/service-desk/create-ticket')}>
             <span className="hidden sm:inline">New Service Request</span>
             <span className="sm:hidden">New Request</span>
           </Button>
@@ -685,18 +688,40 @@ const Configuration = () => {
               <span>/</span>
               <span className="text-gray-900 font-medium">Configuration</span>
             </div>
-      </header>
+      </header> */}
       <div className="p-4 space-y-4">
         <div>
-          <h1 className="text-base sm:text-lg font-semibold text-gray-900">Service Desk Configuration</h1>
+          <h1 className="text-lg sm:text-2xl font-bold text-gray-900">Service Desk Configuration</h1>
         </div>
         <Tabs value={currentTab} onValueChange={setCurrentTab} className="space-y-4">
-          <div className="hidden sm:block">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="service-request-config" className="text-sm">Service Request Configuration</TabsTrigger>
-              <TabsTrigger value="service-request-type" className="text-sm">Service Request Type</TabsTrigger>
-              <TabsTrigger value="service-request-status" className="text-sm">Service Request Status</TabsTrigger>
+          <div className="hidden sm:block tabs">
+            {/* <TabsList className="grid w-full grid-cols-3 pb-[35px] pt-[20px] px-4 ">
+              <TabsTrigger value="service-request-config" className="text-sm text-sm border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:text-blue-600 hover:text-blue-500 transition font-medium">Service Request Configuration</TabsTrigger>
+              <TabsTrigger value="service-request-type" className="text-sm text-sm border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:text-blue-600 hover:text-blue-500 transition font-medium">Service Request Type</TabsTrigger>
+              <TabsTrigger value="service-request-status" className="text-sm text-sm border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:text-blue-600 hover:text-blue-500 transition font-medium">Service Request Status</TabsTrigger>
+            </TabsList> */}
+            <TabsList className="grid w-full grid-cols-3 h-10 bg-hsl(0deg 0% 100%) border-b border-gray-300 pb-[2.375rem] rounded-none">
+              <TabsTrigger value="service-request-config" className="text-sm leading-[1.5rem] text-gray-700 border-b-2 border-transparent data-[state=active]:border-[hsl(229.09deg_44%_44.12%)] data-[state=active]:bg-[#00000000] data-[state=active]:text-[hsl(239.29deg_34.69%_48.04%)] data-[state=active]:rounded-none  font-medium transition-colors"
+              >
+                Service Request Configuration
+              </TabsTrigger>
+
+              <TabsTrigger
+                value="service-request-type"
+                className="text-sm leading-[1.5rem] text-gray-700 border-b-2 border-transparent data-[state=active]:border-[hsl(229.09deg_44%_44.12%)] data-[state=active]:bg-[#00000000] data-[state=active]:text-[hsl(239.29deg_34.69%_48.04%)] data-[state=active]:rounded-none font-medium transition-colors"
+              >
+                Service Request Type
+              </TabsTrigger>
+
+              <TabsTrigger
+                value="service-request-status"
+                className="text-sm leading-[1.5rem] text-gray-700 border-b-2 border-transparent data-[state=active]:border-[hsl(229.09deg_44%_44.12%)] data-[state=active]:bg-[#00000000] data-[state=active]:text-[hsl(239.29deg_34.69%_48.04%)] data-[state=active]:rounded-none font-medium transition-colors"
+              >
+                Service Request Status
+              </TabsTrigger>
             </TabsList>
+
+
           </div>
           <div className="sm:hidden">
             <TabsList className="flex flex-col gap-1 h-auto p-1">
@@ -708,14 +733,14 @@ const Configuration = () => {
           <TabsContent value="service-request-config" className="space-y-4">
             <Card>
               <CardContent className="pt-6">
-                <div className="grid xxs:grid-cols-1 xs2:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-6">  
-                <div className="space-y-4 ">
-                  {getFieldsByNames(['CustomerFieldinMyRequest', 'AssetFieldinCreateEditServiceRequest', 'IsDefaultNotifyUsers', 'NotifyUserTypes']).map((field) => {
-                    return <div className="flex-1 items-center space-x-2">
-                      {renderField(field)}
-                    </div>;
-                  })}
-                </div>
+                <div className="grid xxs:grid-cols-1 xs2:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-6">
+                  <div className="space-y-4 ">
+                    {getFieldsByNames(['CustomerFieldinMyRequest', 'AssetFieldinCreateEditServiceRequest', 'IsDefaultNotifyUsers', 'NotifyUserTypes']).map((field) => {
+                      return <div className="flex-1 items-center space-x-2">
+                        {renderField(field)}
+                      </div>;
+                    })}
+                  </div>
                   <div className="space-y-4">
                     {getFieldsByNames(['AllowWorkOrderCreation', 'PauseSLAcalculation', 'DefaultSLAStatusDataList']).map((field) => {
                       return <div className={`flex-1 items-center space-x-2 ${field.name === 'PauseSLAcalculation' ? ' sm:!mb-4 lg:!mb-8' : ''}`}>
@@ -731,7 +756,8 @@ const Configuration = () => {
                     onClick={handleSubmit((data) => { handleSave(data, "configuration") })}
                     iconPosition="left"
                     size="middle"
-                    className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+                    // className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+                    className="btn-submit-style"
                   >
                     Save
                   </ReusableButton>
@@ -743,15 +769,15 @@ const Configuration = () => {
             <Card>
               <CardContent className="pt-6">
                 <div className="grid xxs:grid-cols-1 xs2:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-6">
-                <div className="space-y-4">
-                  <div className="space-y-2 ">
-                    {getFieldsByNames(['ServiceRequestType', 'UserGroups', 'Vendors', 'SLAHoursMinutes', 'ReminderForSLAHoursMinutes', "Branches"]).map((field) => {
-                      return <div className="flex-1 items-center space-x-2">
-                        {renderField(field)}
-                      </div>;
-                    })}
+                  <div className="space-y-4">
+                    <div className="space-y-2 ">
+                      {getFieldsByNames(['ServiceRequestType', 'UserGroups', 'Vendors', 'SLAHoursMinutes', 'ReminderForSLAHoursMinutes', "Branches"]).map((field) => {
+                        return <div className="flex-1 items-center space-x-2">
+                          {renderField(field)}
+                        </div>;
+                      })}
+                    </div>
                   </div>
-                </div>
                   <div className="space-y-4">
                     <div className="space-y-2">
                       {getFieldsByNames(['EscalationTo', 'StatusToCalculate', 'ServiceRequestTypeAdmin', 'Description']).map((field) => {
@@ -769,7 +795,8 @@ const Configuration = () => {
                     onClick={handleSubmit((data) => { handleSave(data, "ServiceRequestType") })}
                     iconPosition="left"
                     size="middle"
-                    className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+                    // className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+                    className='btn-submit-style'
                   >
                     {isEditMode && currentTab === 'service-request-type' ? 'Update' : 'Save'}
                   </ReusableButton>
@@ -779,6 +806,7 @@ const Configuration = () => {
                     onClick={() => handleReset('')}
                     iconPosition="left"
                     size="middle"
+                    className='btn-reset-clear-style'
                   >
                     Cancel
                   </ReusableButton>
@@ -801,7 +829,7 @@ const Configuration = () => {
                   pageSize={10}
                   emptyMessage="No Data found"
                   storageKey="service-request-type-list-table"
-                  enableColumnPinning
+                // enableColumnPinning
                 />
               </CardContent>
             </Card>
@@ -823,7 +851,8 @@ const Configuration = () => {
                     onClick={handleSubmit((data) => { handleSave(data, "AddNewStatus") })}
                     iconPosition="left"
                     size="middle"
-                    className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+                    // className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+                    className='btn-submit-style'
                   >
                     {currentTab === 'service-request-status' && isEditStatusMode ? 'Update' : 'Save'}
                   </ReusableButton>
@@ -833,6 +862,7 @@ const Configuration = () => {
                     onClick={() => handleReset('AddNewStatus')}
                     iconPosition="left"
                     size="middle"
+                    className='btn-reset-clear-style'
                   >
                     Cancel
                   </ReusableButton>
@@ -861,7 +891,8 @@ const Configuration = () => {
                       onClick={handleUpdateStatusSequence}
                       iconPosition="left"
                       size="middle"
-                      className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+                      // className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+                      className='btn-submit-style'
                     >
                       Update Index Sequence
                     </ReusableButton>

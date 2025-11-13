@@ -934,9 +934,10 @@ const SubscriptionManagement = () => {
           <div className="flex">
             <ReusableButton
               variant="text"
+              title='Edit'
               onClick={() => { console.log(row?.original); navigate('/service-desk/payment-details', { state: { subscriptionData: row?.original } }) }}
             >
-              <Edit height={18}
+              <Edit height={18} className="h-4 w-4 text-blue-600"
               />
             </ReusableButton>
           </div>
@@ -1061,52 +1062,52 @@ const SubscriptionManagement = () => {
 
   return (
     <div className="bg-gray-50/30 h-full overflow-y-scroll">
-      <header className="bg-white border-b px-6 py-3 shadow-sm flex flex-col sm:flex-row  items-start sm:items-center gap-3">
+      {/* <header className="bg-white border-b px-6 py-3 shadow-sm flex flex-col sm:flex-row  items-start sm:items-center gap-3">
         <div className="flex items-center gap-3">
-          {/* <SidebarTrigger /> */}
-          {/* <ReusableButton
+          <ReusableButton
             size="small"
             // variant="primary"
-            className='bg-primary h-[2.38rem] hover:bg-blue-700  text-white'
+            // className='bg-primary h-[2.38rem] hover:bg-blue-700  text-white'
+            className='btn-submit-style'
             onClick={() => { navigate('/service-desk/create-ticket') }}
           >
             New Service Request
-          </ReusableButton> */}
+          </ReusableButton>
         </div>
         <div className="flex items-center gap-2 text-sm text-gray-600 p-2">
           <span>Service Desk</span>
           <span>/</span>
           <span className="text-gray-900 font-medium">Subscription</span>
         </div>
-      </header>
+      </header> */}
 
       <div className="p-4 space-y-4 " >
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           <div >
-            <h1 className="text-lg font-semibold text-gray-900 px-2">Subscription</h1>
-            <p className="text-sm text-gray-600 mt-0.5 px-2">Subscription Management</p>
+            <h1 className="text-lg sm:text-2xl font-bold text-gray-900">Subscription</h1>
+            {/* <p className="text-sm text-gray-600 mt-0.5 px-2">Subscription Management</p> */}
           </div>
-          <div className='flex gap-2 w-full sm:w-64 justify-center'>
+          <div className='flex gap-2 justify-center'>
             <ReusableButton
               size="small"
               variant="primary"
               icon={<Plus className="h-3 w-3" />}
               iconPosition="left"
               onClick={handleNavigation}
-              className="whitespace-nowrap"
-
+              className="whitespace-nowrap hover:bg-none"
             >
               Payment Details
             </ReusableButton>
             <ReusableButton
               size="small"
-              variant="primary"
+              // variant="primary"
               icon={<></>}
               // iconPosition="left"
               onClick={() => downloadExcel(dataSource, columns)}
-              className="whitespace-nowrap"
-            >
+              // className="bg-[rgb(122,132,148)] text-white hover:bg-[rgb(122,132,148)] hover:text-white hover:border-0 border-0"
+            className='btn-submit-style'
+>
               Export to Excel
             </ReusableButton>
           </div>

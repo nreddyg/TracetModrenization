@@ -431,8 +431,8 @@ const UserGroups = () => {
         {/* Header Section */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-lg font-semibold text-gray-900">User Groups</h1>
-            <p className="text-sm text-gray-600 mt-0.5">Manage user groups and permissions</p>
+            <h1 className="text-lg sm:text-2xl font-bold text-gray-900">User Groups</h1>
+            {/* <p className="text-sm text-gray-600 mt-0.5">Manage user groups and permissions</p> */}
           </div>
           {!selectedRecord && <ReusableButton
             size="small"
@@ -440,7 +440,7 @@ const UserGroups = () => {
             icon={<Plus className="h-3 w-3" />}
             iconPosition="left"
             onClick={handleAddUserGroup}
-            className="whitespace-nowrap"
+            className="whitespace-nowrap btn-submit-style"
           >Add User Group
           </ReusableButton>
           }

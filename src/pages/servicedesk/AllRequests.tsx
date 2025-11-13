@@ -4,7 +4,7 @@ import { Card, CardContent, CardTitle} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ReusableTable} from '@/components/ui/reusable-table';
-import { Users,Package,RefreshCw,Plus,AlertTriangle,CheckCircle} from 'lucide-react';
+import { Users,Package,RefreshCw,Plus,AlertTriangle,CheckCircle, Search} from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import  ReusableRangePicker  from '@/components/ui/reusable-range-picker';
@@ -180,16 +180,16 @@ const AllRequests = () => {
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">All Service Requests</h1>
-            <p className="text-gray-600 mt-1 text-sm sm:text-base">View and manage all your service requests in one place</p>
+            <h1 className="text-lg sm:text-2xl font-bold text-gray-900">All Service Requests</h1>
+            {/* <p className="text-gray-600 mt-1 text-sm sm:text-base">View and manage all your service requests in one place</p> */}
           </div>
           <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
-            <Button variant="outline" size="sm" onClick={handleRefresh} className="flex-1 sm:flex-none">
+            <Button variant="outline" size="sm" onClick={handleRefresh} className="flex-1 sm:flex-none hover:bg-background hover:text-black">
               <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
               <span className="hidden sm:inline">Refresh</span>
               <span className="sm:hidden">Refresh</span>
             </Button>
-            <Button size="sm" onClick={()=>navigate('/service-desk/create-ticket')} className="flex-1 sm:flex-none">
+            <Button size="sm" onClick={()=>navigate('/service-desk/create-ticket')} className="flex-1 sm:flex-none btn-submit-style">
               <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
               <span className="hidden sm:inline">New Service Request</span>
               <span className="sm:hidden">New</span>
@@ -284,7 +284,10 @@ const AllRequests = () => {
                         format='DD/MM/YYYY'
                       />
                   <div className="flex items-end mt-4  ">
-                  <ReusableButton  size={"middle"} onClick={handleSearch} variant="primary" className='h-10'>Search</ReusableButton>
+                  {/* <ReusableButton  size={"middle"} onClick={handleSearch} variant="primary" className='h-10'>Search</ReusableButton> */}
+                  <ReusableButton size={"small"} htmlType='submit' onClick={handleSearch} className='h-10 mt-1 bg-background hover:border-[rgb(209 213 219)] hover:bg-background'>
+                                        <Search size={18} color='#000'/>
+                                      </ReusableButton>
                   </div>
               </div>     
             </CardContent>

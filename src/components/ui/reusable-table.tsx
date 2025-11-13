@@ -380,8 +380,8 @@ const ActionMenu = <T,>({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-          <MoreHorizontal className="w-4 h-4" />
+        <Button variant="ghost" size="sm" className="h-8 w-8 p-0"  title="Actions">
+          <MoreHorizontal className="w-4 h-4"   />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
@@ -391,6 +391,7 @@ const ActionMenu = <T,>({
             <DropdownMenuItem
               key={index}
               onClick={() => action.onClick(row)}
+             
               className={cn(
                 action.variant === 'destructive' && 'text-destructive focus:text-destructive'
               )}
@@ -467,6 +468,7 @@ const ColumnVisibilityManager = ({ table }: { table: TanstackTable<any> }) => {
             <Checkbox
               id="select-all-columns"
               checked={allVisible ? true : someVisible ? "indeterminate" : false}
+              title='Select'
               onCheckedChange={(checked) => handleToggleAll(checked === true)}
             />
             <label htmlFor="select-all-columns" className="text-sm font-medium">
@@ -486,6 +488,7 @@ const ColumnVisibilityManager = ({ table }: { table: TanstackTable<any> }) => {
                 <Checkbox
                   id={column.id}
                   checked={column.getIsVisible()}
+                  title='Select'
                   disabled={!canHide}
                   onCheckedChange={(checked) => {
                     if (canHide) handleToggleColumn(column, checked === true);
@@ -579,6 +582,7 @@ const ColumnGroupingManager = ({
               <div key={column.id} className="flex items-center space-x-2">
                 <Checkbox
                   checked={column.getIsGrouped()}
+                  title='Select'
                   onCheckedChange={() => column.toggleGrouping()}
                   id={`group-${column.id}`}
                 />
@@ -1419,14 +1423,14 @@ const Pagination = ({ table }: { table: TanstackTable<any> }) => {
   };
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-3 border-t border-gray-200 bg-white text-sm rounded-b-lg gap-3">
+ <div className="flex items-center justify-between flex-wrap sm:flex-nowrap px-4 py-3 border-t border-gray-200 bg-white text-sm rounded-b-lg gap-3">
       {/* Left info */}
       <div className="text-gray-600">
         Showing {start} to {end} of {totalRows} entries
       </div>
 
       {/* Right side controls */}
-      <div className="flex items-center flex-wrap gap-2 mt-1 sm:mt-0">
+      <div className="flex items-center gap-2 flex-nowrap overflow-x-auto sm:overflow-visible">
          <Select
           value={pageSize.toString()}
           onValueChange={(value) => table.setPageSize(Number(value))}
@@ -1711,6 +1715,7 @@ export function ReusableTable<T = any>({
           return (
             <Checkbox
               checked={selectionInfo.isAllSelected}
+              title='Select'
               ref={(el) => {
                 if (el && 'indeterminate' in el) {
                   (el as HTMLInputElement).indeterminate = selectionInfo.isPartiallySelected;
@@ -1739,6 +1744,7 @@ export function ReusableTable<T = any>({
           return (
             <Checkbox
               checked={isSelected}
+              title='Select'
               onCheckedChange={() => selectionActions.toggleRowSelection(rowId)}
               aria-label="Select row"
               disabled={!isSelectable || (maxSelectable && !isSelected && selectionInfo.totalSelected >= maxSelectable)}
@@ -1847,6 +1853,7 @@ const calculated = Math.max(actualWidth, minCharsWidth);
     if (column.id === "select") {
       return (
         <Checkbox
+        title='Select'
           checked={
             table.getIsAllPageRowsSelected()
               ? true
@@ -1899,8 +1906,8 @@ const calculated = Math.max(actualWidth, minCharsWidth);
                   variant="outline"
                   size="sm"
                   className={cn(
-                    "flex items-center justify-center gap-1 px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-100 transition",
-                    column.getIsSorted() ? "bg-gray-50" : ""
+                    "flex items-center justify-center gap-1 px-3 py-1.5 rounded-md border border-gray-200 bg-white hover:bg-gray-50 transition",
+                    // column.getIsSorted() ? "bg-gray-50" : ""
                   )}
                   onClick={() => {
                     const isSorted = column.getIsSorted();
@@ -1935,7 +1942,7 @@ const calculated = Math.max(actualWidth, minCharsWidth);
             {/* Filtering */}
             {enableFiltering && column.getCanFilter() && (
               <div className="space-y-2">
-                <label className="text-xs font-medium text-muted-foreground">Filter</label>
+                <label className="text-sm pt-1 font-medium">Filter</label>
 
                 <ReusableMultiSelect
                   options={options}
@@ -2087,7 +2094,7 @@ const calculated = Math.max(actualWidth, minCharsWidth);
           <div className="flex items-center gap-2">
             {customActions}
             {onRefresh && (
-              <Button variant="outline" size="sm" onClick={onRefresh}>
+              <Button variant="outline" size="sm" onClick={onRefresh} className="flex-1 sm:flex-none hover:bg-background hover:text-black">
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Refresh
               </Button>

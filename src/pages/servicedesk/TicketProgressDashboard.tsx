@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Filter, X, BarChart3 } from 'lucide-react';
+import { Filter, X, BarChart3, Search } from 'lucide-react';
 import TicketGraphsView from '@/components/tickets/TicketGraphsView';
 import { Form } from '@/components/ui/form';
 import { Controller, useForm } from 'react-hook-form';
@@ -28,7 +28,7 @@ const TicketProgressDashboard = () => {
     defaultValues: fields.reduce((acc, f) => {
       acc[f.name!] = f.defaultValue ?? ''
       return acc;
-    },{} as GenericObject),
+    }, {} as GenericObject),
     mode: 'onChange',
     reValidateMode: "onChange"
   });
@@ -64,14 +64,14 @@ const TicketProgressDashboard = () => {
 
   }
   function generateHSLColor(index: number, total: number): string {
-  const hue = Math.floor((360 / total) * index); // Spread hues evenly
-  return `hsl(${hue}, 70%, 60%)`; // Keep saturation and lightness constant
-}
+    const hue = Math.floor((360 / total) * index); // Spread hues evenly
+    return `hsl(${hue}, 70%, 60%)`; // Keep saturation and lightness constant
+  }
   //helper function
   function generateData(data: any, type: string) {
     switch (type) {
       case 'pie':
-        return data.length !== 0 ? Object.keys(data[0]).map((key,index) => ({ name: key, value: data[0][key], color: generateHSLColor(index, Object.keys(data[0]).length) })) : []
+        return data.length !== 0 ? Object.keys(data[0]).map((key, index) => ({ name: key, value: data[0][key], color: generateHSLColor(index, Object.keys(data[0]).length) })) : []
       case 'createdvsclosed':
         return data.length !== 0 ? data.map(obj => ({ ...obj, created: parseInt(obj.created), closed: parseInt(obj.closed) })) : []
       case 'issuetype':
@@ -85,7 +85,7 @@ const TicketProgressDashboard = () => {
   const clearAllFilters = () => {
     form.reset();
   };
-  const fetchAnalyticsData = async (payload:any) => {
+  const fetchAnalyticsData = async (payload: any) => {
     try {
       dispatch(setLoading(true));
       const results = await Promise.allSettled([
@@ -97,8 +97,8 @@ const TicketProgressDashboard = () => {
         getAnalyticsData(companyId, branchId, 'openhighprioritybar', payload),
         getAnalyticsData(companyId, branchId, 'reopenratetrendbar', payload),
       ]);
-      const [TicketsByStatusData,CreatedVsClosed,TicketsHandledPerAgent,TicketsByIssueType,TicketsByPriority,
-        OpenHighPriorityTickets,ReOpenTrend] = results;
+      const [TicketsByStatusData, CreatedVsClosed, TicketsHandledPerAgent, TicketsByIssueType, TicketsByPriority,
+        OpenHighPriorityTickets, ReOpenTrend] = results;
       let allChartsData = {
         TicketsByStatusData:
           TicketsByStatusData.status === "fulfilled"
@@ -144,10 +144,10 @@ const TicketProgressDashboard = () => {
   };
   const userGroups = watch("UserGroups");
   useEffect(() => {
-    if (userGroups && userGroups?.length!==0 && companyId && branchId) {
+    if (userGroups && userGroups?.length !== 0 && companyId && branchId) {
       handleSearch('UserGroups')
     }
-  }, [userGroups,companyId,branchId]);
+  }, [userGroups, companyId, branchId]);
   useEffect(() => {
     if (companyId && branchId && branchName) fetchAllLookupsAndChartsData();
   }, [companyId, branchId, branchName])
@@ -189,12 +189,12 @@ const TicketProgressDashboard = () => {
     dispatch(setLoading(true));
     let payload = {
       FiltersPayloadDetails: [
-        {projectids: "",statusids: "",categoryids: "",startdate: "",enddate: "",assigneeids: "",usergroupids: ""}
+        { projectids: "", statusids: "", categoryids: "", startdate: "", enddate: "", assigneeids: "", usergroupids: "" }
       ]
     };
     try {
-      const [statusValues,assigneesValues,serviceRequestTypeValues,TicketsByStatusData,CreatedVsClosed,
-        TicketsHandledPerAgent,TicketsByIssueType,TicketsByPriority,OpenHighPriorityTickets,ReOpenTrend
+      const [statusValues, assigneesValues, serviceRequestTypeValues, TicketsByStatusData, CreatedVsClosed,
+        TicketsHandledPerAgent, TicketsByIssueType, TicketsByPriority, OpenHighPriorityTickets, ReOpenTrend
       ] = await Promise.allSettled([
         getStatusLookups(companyId),
         GetServiceRequestAssignToLookups(companyId, branchName),
@@ -208,20 +208,20 @@ const TicketProgressDashboard = () => {
         getAnalyticsData(companyId, branchId, "reopenratetrendbar", payload)
       ]);
       let allLookupsData = {
-        Status: {data: getSettledValue(statusValues, "data.ServiceRequestStatusLookup"),label: "ServiceRequestStatusName",value: "ServiceRequestStatusId"},
-        Assignees: {data: getSettledValue(assigneesValues, "data.ServiceRequestAssignToUsersLookup"),label: "UserName",value: "UserId"},
-        ServiceRequestType: {data: getSettledValue(serviceRequestTypeValues, "data.ServiceRequestTypesLookup"),label: "ServiceRequestTypeName",value: "ServiceRequestTypeId"},
-        UserGroups: {data: getSettledValue(assigneesValues, "data.ServiceRequestAssignToUserGroupLookup"),label: "UserGroupName",value: "UserGroupId"}
+        Status: { data: getSettledValue(statusValues, "data.ServiceRequestStatusLookup"), label: "ServiceRequestStatusName", value: "ServiceRequestStatusId" },
+        Assignees: { data: getSettledValue(assigneesValues, "data.ServiceRequestAssignToUsersLookup"), label: "UserName", value: "UserId" },
+        ServiceRequestType: { data: getSettledValue(serviceRequestTypeValues, "data.ServiceRequestTypesLookup"), label: "ServiceRequestTypeName", value: "ServiceRequestTypeId" },
+        UserGroups: { data: getSettledValue(assigneesValues, "data.ServiceRequestAssignToUserGroupLookup"), label: "UserGroupName", value: "UserGroupId" }
       };
-      
+
       setLookupsDataInJson(allLookupsData);
       let allChartsData = {
-        TicketsByStatusData: generateData(getSettledValue(TicketsByStatusData, "data.data"),"pie"),
-        CreatedVsClosed: generateData(getSettledValue(CreatedVsClosed,"data.data"),"createdvsclosed"),
-        TicketsHandledPerAgent: getSettledValue(TicketsHandledPerAgent,"data.data"),
-        TicketsByIssueType: generateData(getSettledValue(TicketsByIssueType, "data.data"),"issuetype"),
-        TicketsByPriority: generateData(getSettledValue(TicketsByPriority, "data.data"),"priority"),
-        OpenHighPriorityTickets: getSettledValue(OpenHighPriorityTickets,"data.data"),
+        TicketsByStatusData: generateData(getSettledValue(TicketsByStatusData, "data.data"), "pie"),
+        CreatedVsClosed: generateData(getSettledValue(CreatedVsClosed, "data.data"), "createdvsclosed"),
+        TicketsHandledPerAgent: getSettledValue(TicketsHandledPerAgent, "data.data"),
+        TicketsByIssueType: generateData(getSettledValue(TicketsByIssueType, "data.data"), "issuetype"),
+        TicketsByPriority: generateData(getSettledValue(TicketsByPriority, "data.data"), "priority"),
+        OpenHighPriorityTickets: getSettledValue(OpenHighPriorityTickets, "data.data"),
         ReOpenTrend: getSettledValue(ReOpenTrend, "data.data")
       };
 
@@ -349,49 +349,49 @@ const TicketProgressDashboard = () => {
   const getFieldsByNames = (names: string[]) => fields.filter(f => names.includes(f.name!));
   return (
     <ScrollArea scrollStyle={'flex-[0.8] bg-[#aab4ca]'}>
-    <div className="h-full">
-      <header className="px-6 py-4">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+      <div className="h-full">
+        <header className="px-6 py-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
 
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-            <h1 className="text-lg sm:text-2xl font-bold text-gray-900">
-              Ticket Progress Dashboard
-            </h1>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+              <h1 className="text-lg sm:text-2xl font-bold text-gray-900">
+                Ticket Progress Dashboard
+              </h1>
+            </div>
+
+            {/* <div className="flex items-center gap-2 text-sm text-gray-600">
+              <span>Service Desk</span>
+              <FaAngleRight />
+              <span className="text-gray-900 font-medium">Ticket Progress Dashboard</span>
+            </div> */}
+
           </div>
+        </header>
+        <div className="p-4 pt-0">
+          {/* Enhanced Filters Section */}
+          <Card className="mb-6">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Filter className="h-5 w-5" />
+                Dashboard Filters
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
 
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <span>Service Desk</span>
-            <FaAngleRight />
-            <span className="text-gray-900 font-medium">Ticket Progress Dashboard</span>
-          </div>
-
-        </div>
-      </header>
-      <div className="p-4 pt-0">
-        {/* Enhanced Filters Section */}
-        <Card className="mb-6">
-          <CardHeader className="pb-4">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Filter className="h-5 w-5" />
-              Dashboard Filters
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-
-            <Form {...form}>
-              <form onSubmit={(e) => e.preventDefault()}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                  }
-                }} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {getFieldsByNames(['Status', 'ServiceRequestType', 'Assignees', 'StartDate', 'EndDate']).map(renderField)}
-                </div>
-                {/* Action Buttons */}
-                <div className='flex justify-between items-center'>
-                  <div className="flex gap-3">
-                    <ReusableButton
+              <Form {...form}>
+                <form onSubmit={(e) => e.preventDefault()}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                    }
+                  }} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {getFieldsByNames(['Status', 'ServiceRequestType', 'Assignees', 'StartDate', 'EndDate']).map(renderField)}
+                  </div>
+                  {/* Action Buttons */}
+                  <div className='flex justify-end'>
+                    <div className="flex gap-3">
+                      <ReusableButton
                       htmlType="submit"
                       variant="default"
                       className="bg-orange-500 border-orange-500 text-white hover:bg-orange-600 hover:border-orange-600 hover:text-white"
@@ -401,50 +401,57 @@ const TicketProgressDashboard = () => {
                     >
                       Search
                     </ReusableButton>
-                    <ReusableButton
-                      htmlType="button"
-                      variant="default"
-                      onClick={clearAllFilters}
-                      className="border-orange-500 text-orange-500 hover:bg-orange-50"
-                      icon={<X className="h-4 w-4" />}
-                      iconPosition="left"
-                    >
-                      Clear Filters
-                    </ReusableButton>
+                      {/* <ReusableButton
+                        size={"small"}
+                        htmlType='submit'
+                        className='h-8 bg-background hover:border-[rgb(209 213 219)] hover:bg-background'
+                        onClick={() => handleSearch('FetchAll')}>
+                        <Search size={18} color='#000' />
+                      </ReusableButton> */}
+                      <ReusableButton
+                        htmlType="button"
+                        variant="default"
+                        onClick={clearAllFilters}
+                        className="btn-reset-clear-style hover:border-[hsl(214.3 31.8% 91.4%)]"
+                        icon={<X className="h-4 w-4" />}
+                        iconPosition="left"
+                      >
+                        Clear Filters
+                      </ReusableButton>
+                    </div>
                   </div>
-                </div>
-              </form>
-            </Form>
-          </CardContent>
-        </Card>
+                </form>
+              </Form>
+            </CardContent>
+          </Card>
 
-        {/* Main Content with Tabs */}
-        <Card>
-          <CardHeader>
-            <Tabs value={activeView} onValueChange={setActiveView} className="w-full">
-              <TabsList className="grid w-full grid-cols-2 h-auto">
+          {/* Main Content with Tabs */}
+          <Card>
+            <CardHeader>
+              <Tabs value={activeView} onValueChange={setActiveView} className="w-full">
+                <TabsList className="grid w-full grid-cols-2 h-auto">
 
-                <TabsTrigger value="graphs" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4 py-2">
-                  <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4" />
-                  <span className="hidden sm:inline">Analytics Dashboard</span>
-                  <span className="sm:hidden">Analytics</span>
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </CardHeader>
-          <CardContent>
-            <Tabs value={activeView} className="w-full">
-              <TabsContent value="graphs">
-                <div className="grid grid-cols-1 gap-0 sm:grid-cols-2 sm:gap-6 mb-4">
-                  {getFieldsByNames(['UserGroups']).map(renderField)}
-                </div>
-                <TicketGraphsView data={analyticsData} groupsPie={watch('UserGroups')} />
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
+                  <TabsTrigger value="graphs" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4 py-2">
+                    <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">Analytics Dashboard</span>
+                    <span className="sm:hidden">Analytics</span>
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </CardHeader>
+            <CardContent>
+              <Tabs value={activeView} className="w-full">
+                <TabsContent value="graphs">
+                  <div className="grid grid-cols-1 gap-0 sm:grid-cols-2 sm:gap-6 mb-4">
+                    {getFieldsByNames(['UserGroups']).map(renderField)}
+                  </div>
+                  <TicketGraphsView data={analyticsData} groupsPie={watch('UserGroups')} />
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+        </div>
       </div>
-    </div>
     </ScrollArea>
   );
 };

@@ -924,6 +924,25 @@ const SubscriptionManagement = () => {
         </Badge>
       ),
     },
+
+    {
+      id: 'actions',
+      accessorKey: 'actions',
+      header: 'Actions',
+      cell: ({ row }: any) => {
+        return (
+          <div className="flex">
+            <ReusableButton
+              variant="text"
+              onClick={() => { console.log(row?.original); navigate('/service-desk/payment-details', { state: { subscriptionData: row?.original } }) }}
+            >
+              <Edit height={18}
+              />
+            </ReusableButton>
+          </div>
+        )
+      },
+    },
   ];
 
   // Define table actions
@@ -953,7 +972,7 @@ const SubscriptionManagement = () => {
   // Handle refresh
   const handleRefresh = () => {
     // message.info("Refreshing Subscriptions...");
-       getSubscriptionData(companyId, branchName);
+    getSubscriptionData(companyId, branchName);
     // Add refresh logic here
   };
 
@@ -1042,31 +1061,31 @@ const SubscriptionManagement = () => {
 
   return (
     <div className="bg-gray-50/30 h-full overflow-y-scroll">
-      <header className="bg-white border-b px-6 py-3 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+      <header className="bg-white border-b px-6 py-3 shadow-sm flex flex-col sm:flex-row  items-start sm:items-center gap-3">
         <div className="flex items-center gap-3">
-          <SidebarTrigger />
-          <ReusableButton
+          {/* <SidebarTrigger /> */}
+          {/* <ReusableButton
             size="small"
             // variant="primary"
             className='bg-primary h-[2.38rem] hover:bg-blue-700  text-white'
             onClick={() => { navigate('/service-desk/create-ticket') }}
           >
             New Service Request
-          </ReusableButton>
+          </ReusableButton> */}
         </div>
-        <div className="flex items-center gap-2 text-sm text-gray-600">
-              <span>Service Desk</span>
-              <span>/</span>
-              <span className="text-gray-900 font-medium">Subscription</span>
-            </div>
+        <div className="flex items-center gap-2 text-sm text-gray-600 p-2">
+          <span>Service Desk</span>
+          <span>/</span>
+          <span className="text-gray-900 font-medium">Subscription</span>
+        </div>
       </header>
 
       <div className="p-4 space-y-4 " >
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           <div >
-            <h1 className="text-lg font-semibold text-gray-900">Subscription</h1>
-            <p className="text-sm text-gray-600 mt-0.5">Subscription Management</p>
+            <h1 className="text-lg font-semibold text-gray-900 px-2">Subscription</h1>
+            <p className="text-sm text-gray-600 mt-0.5 px-2">Subscription Management</p>
           </div>
           <div className='flex gap-2 w-full sm:w-64 justify-center'>
             <ReusableButton
@@ -1120,7 +1139,7 @@ const SubscriptionManagement = () => {
         {/* User Group List with ReusableTable */}
         <Card className="border-0 shadow-sm">
           <CardHeader className="pb-3 pt-2">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
               <CardTitle className="text-base font-semibold">Subscription List</CardTitle>
               <div className="w-full sm:w-64">
                 <ReusableInput
@@ -1140,11 +1159,11 @@ const SubscriptionManagement = () => {
             <ReusableTable
               data={filteredData}
               columns={columns}
-              actions={tableActions}
+              // actions={tableActions}
               permissions={tablePermissions}
               // loading={loading}
               title=""
-              onRefresh={handleRefresh}
+              // onRefresh={handleRefresh}
               enableSearch={false}
               enableSelection={false}
               enableExport={true}

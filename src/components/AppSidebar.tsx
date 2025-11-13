@@ -340,33 +340,33 @@ const navigation: NavItem[] = [
   //     //     },
   //     //   ],
   //     // },
-      {
-        label: 'Depreciation',
-        icon: DollarSign,
-        link: '/depreciation',
-        children: [
-          {
-            label: 'Process',
-            icon: DollarSign,
-            link: '/depreciation/process',
-          },
-          {
-            label: 'Adjustments',
-            icon: DollarSign,
-            link: '/depreciation/adjustments',
-          },
-          {
-            label: 'Analysis',
-            icon: DollarSign,
-            link: '/depreciation/analysis',
-          },
-          {
-            label: 'Reports',
-            icon: FileText,
-            link: '/depreciation/reports',
-          },
-        ],
-      },
+      // {
+      //   label: 'Depreciation',
+      //   icon: DollarSign,
+      //   link: '/depreciation',
+      //   children: [
+      //     {
+      //       label: 'Process',
+      //       icon: DollarSign,
+      //       link: '/depreciation/process',
+      //     },
+      //     {
+      //       label: 'Adjustments',
+      //       icon: DollarSign,
+      //       link: '/depreciation/adjustments',
+      //     },
+      //     {
+      //       label: 'Analysis',
+      //       icon: DollarSign,
+      //       link: '/depreciation/analysis',
+      //     },
+      //     {
+      //       label: 'Reports',
+      //       icon: FileText,
+      //       link: '/depreciation/reports',
+      //     },
+      //   ],
+      // },
   //     // {
   //     //   label: 'Consumables',
   //     //   icon: Package,

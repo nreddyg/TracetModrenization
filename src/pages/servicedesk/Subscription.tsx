@@ -1076,18 +1076,17 @@ const SubscriptionManagement = () => {
               icon={<Plus className="h-3 w-3" />}
               iconPosition="left"
               onClick={handleNavigation}
-              className="whitespace-nowrap btn-submit-style"
-
+              className="whitespace-nowrap hover:bg-none"
             >
               Payment Details
             </ReusableButton>
             <ReusableButton
               size="small"
-              variant="primary"
+              // variant="primary"
               icon={<></>}
               // iconPosition="left"
               onClick={() => downloadExcel(dataSource, columns)}
-              className="btn-submit-style"
+              className="bg-[rgb(122,132,148)] text-white hover:bg-[rgb(122,132,148)] hover:text-white hover:border-0 border-0"
             >
               Export to Excel
             </ReusableButton>

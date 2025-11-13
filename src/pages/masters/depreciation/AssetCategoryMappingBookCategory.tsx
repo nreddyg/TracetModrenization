@@ -474,10 +474,10 @@ const AssetCategoryMappingBookCategory = () => {
             .then((res) => {
                 if (res.data && res.data.PrevNextFinancialYearBookCategoryMappingDetails.length > 0) {
                     if (isMainDialogOpen) {
-                    setModalDatasource(res.data.PrevNextFinancialYearBookCategoryMappingDetails.map((obj, index) => ({ ...obj, uniqueKey: index })));
+                        setModalDatasource(res.data.PrevNextFinancialYearBookCategoryMappingDetails.map((obj, index) => ({ ...obj, uniqueKey: index })));
                     } else {
-                    setDataSource(res.data.PrevNextFinancialYearBookCategoryMappingDetails.map((obj, index) => ({ ...obj, uniqueKey: index })));
-                    setIsRanDep(res.data.IsRanDep);
+                        setDataSource(res.data.PrevNextFinancialYearBookCategoryMappingDetails.map((obj, index) => ({ ...obj, uniqueKey: index })));
+                        setIsRanDep(res.data.IsRanDep);
                     }
                 }
                 else {
@@ -587,7 +587,7 @@ const AssetCategoryMappingBookCategory = () => {
         apiData.map((obj) => { arr.push({ "AssetCategoryId": obj.AssetSubCategoryId, "BookCategory": obj.BookCategory }) })
         return arr;
     }
-
+    // pauload1 is for mainTable, payload2 is for table in modal
     const submit = async (key) => {
         let payload1 = { "AssetCatBookCatMappingDetails": AllTabData(true) }
         let payload2 = { "AssetCatBookCatMappingDetails": AllTabData(false) }
@@ -668,7 +668,7 @@ const AssetCategoryMappingBookCategory = () => {
         return day
     }
 
-    // add new financial year modal 
+    // add new financial year modal function 
     function handleFinancialModal() {
         const filterEffectFrom = watch("effectivefrom");
         const updatedDate = getDateAfterYears(filterEffectFrom);
@@ -687,12 +687,12 @@ const AssetCategoryMappingBookCategory = () => {
         GetAssetMapPrevNextDateDetails(companyId, FYStartDate, selectedBookId)
     };
 
-    function handleUploadCancel(){
+    function handleUploadCancel() {
         setUploadModal(false);
-         form.reset({
+        form.reset({
             ...watch(),
             assetcattemplate: []
-        })   
+        })
     }
 
     //export to excel download template
@@ -848,53 +848,65 @@ const AssetCategoryMappingBookCategory = () => {
                             Submit
                         </ReusableButton>
                     </div>
-
+                    {/* 
                     <div className="grid grid-cols-2 gap-6">
                         {getFieldsByNames(['book', 'effectivefrom']).map((renderField))}
-                    </div>
+                    </div> */}
 
                     {/* Action Buttons */}
-                    {selectedBookId &&
-                        <div className="flex justify-end items-center gap-5">
-                            <div className='flex w-full justify-end'>
-                                <button
-                                    onClick={handleUploadFileModal}
-                                    className="text-blue-600 hover:text-blue-700 underline flex items-center gap-2"
-                                >
-                                    <Upload className="h-4 w-4" />
-                                    Upload File
-                                </button>
+                    <div className="grid grid-cols-2 gap-3 xxs:grid-cols-1 xxs:justify-center xs2:flex-row md:grid-cols-2 lg:flex-row">
+                        <div className='flex flex-col gap-3'>
+                            <div className="">
+                                {getFieldsByNames(['book']).map((renderField))}
                             </div>
-                            <div className="flex items-center gap-2 flex justify-end w-full">
-                                <button
-                                    onClick={handleFinancialModal}
-                                    className="text-blue-600 cursor-pointer border-0 hover:bg-0">
-                                    Add New Financial Year
-                                </button>
-                                <ReusableButton
-                                    variant="default"
-                                    size="small"
-                                    className={`bg-hsl(24.12deg 100% 80%) ${(windowCount === 0) ? "cursor-not-allowed bg-[#929292] hover:bg-[#929292]" : "hover:bg-[hsl(24.12deg_100%_70%)]"}`}
-                                    onClick={() => { handleWindow("Dec"); }}
-                                >
-                                    <span>
-                                        {<FaAngleLeft className="h-2 w-2" />}
-                                    </span>
-                                </ReusableButton>
-
-                                <ReusableButton
-                                    // variant=""
-                                    size="small"
-                                    className={`bg-hsl(24.12deg 100% 80%) ${(windowCount === (dateList.length - 1)) ? "cursor-not-allowed bg-[#929292] hover:bg-[#929292]" : "hover:bg-[hsl(24.12deg_100%_70%)]"}`}
-                                    onClick={() => { handleWindow("Inc"); }}
-                                >
-                                    <span>
-                                        {<FaAngleRight className="h-2 w-2" />}
-                                    </span>
-                                </ReusableButton>
-                            </div>
+                            {selectedBookId &&
+                                <div className='flex w-full justify-end'>
+                                    <button
+                                        onClick={handleUploadFileModal}
+                                        className="text-blue-600 hover:text-blue-700 underline flex items-center gap-2"
+                                    >
+                                        <Upload className="h-4 w-4" />
+                                        Upload File
+                                    </button>
+                                </div>
+                            }
                         </div>
-                    }
+                        <div className={`flex flex-col gap-3 ${selectedBookId && 'xxs: mb-5'} `}>
+                            <div className="">
+                                {getFieldsByNames(['effectivefrom']).map((renderField))}
+                            </div>
+                            {selectedBookId &&
+                                <div className="flex items-center gap-2 flex justify-end w-full">
+                                    <button
+                                        onClick={handleFinancialModal}
+                                        className="text-blue-600 cursor-pointer border-0 hover:bg-0">
+                                        Add New Financial Year
+                                    </button>
+                                    <ReusableButton
+                                        variant="default"
+                                        size="small"
+                                        className={`bg-hsl(24.12deg 100% 80%) ${(windowCount === 0) ? "cursor-not-allowed bg-[#929292] hover:bg-[#929292]" : "hover:bg-[hsl(24.12deg_100%_70%)]"}`}
+                                        onClick={() => { handleWindow("Dec"); }}
+                                    >
+                                        <span>
+                                            {<FaAngleLeft className="h-2 w-2" />}
+                                        </span>
+                                    </ReusableButton>
+
+                                    <ReusableButton
+                                        // variant=""
+                                        size="small"
+                                        className={`bg-hsl(24.12deg 100% 80%) ${(windowCount === (dateList.length - 1)) ? "cursor-not-allowed bg-[#929292] hover:bg-[#929292]" : "hover:bg-[hsl(24.12deg_100%_70%)]"}`}
+                                        onClick={() => { handleWindow("Inc"); }}
+                                    >
+                                        <span>
+                                            {<FaAngleRight className="h-2 w-2" />}
+                                        </span>
+                                    </ReusableButton>
+                                </div>
+                            }
+                        </div>
+                    </div>
                     {/* financial Year modal */}
                     <Dialog open={isMainDialogOpen}
                         onOpenChange={(open) => {

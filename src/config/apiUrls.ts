@@ -235,15 +235,6 @@ export const URL_POST_NEW_USER_ATTRIBUTES=`/api/Masters/AddUserAttributesDetails
 export const URL_DELETE_GROUP=`/api/Masters/DeleteUserAttributes`;
 export const URL_UPDATE_GROUP=`/api/Masters/UpdateUserAttributesDetails`;
 
-
-
-
-
-
-
-
-
-
 // Item Cateory
 export const URL_GET_ITEM_CATEGORY = `/api/Masters/GetItemCategoryDetailsByCompanyId`;
 export const URL_UNIT_OF_MEASURE = `/api/Masters/GetUOMDetailsByCompanyId`;
@@ -295,3 +286,17 @@ export const URL_POST_UPDATE_GROUP_CATEGORY_DETAILS="/api/Masters/UpdateGroupCat
 export const URL_DELETE_DEPRECIATION_BOOK="/api/Masters/DeleteDepreciationBook"
 export const URL_DELETE_GROUP_BY_ID="/api/Masters/DeleteGroupById"
 export const URL_DELETE_BOOK_CATEGORY="/api/Masters/DeleteDepBookCategory"
+
+
+//Depreciation Forex Adjustment
+export const URL_GET_CALCULATION_LIST_LOOKUP='/api/Masters/GetCalculationBasedListLookups';
+export const URL_GET_FOREX_ADJUSTMENT='/api/DepreciationAPI/GetForexAdjustment';
+
+//import asset wise
+export const URL_DOWNLOAD_IMPORT_ASSET_WISE='/api/DepreciationAPI/DownloadAssetwiseAccumulatedValues';
+export const URL_POST_IMPORT_WISE_ACCUMULATED_VALUE='/api/DepreciationAPI/ImportAssetWiseAccumulatedValue';
+// AssetTransfer Asset 1st Tab
+export const URL_ASSET_TRANSFER_LIST="/api/FixedAssetAPI/GetAssetsTransferList";
+export const URL_BASIC_SEARCH = `/api/FixedAssetAPI/GetAssetTransferDetailsListByBasicSearch`;
+export const URL_FILTER_SEARCH = `/api/FixedAssetAPI/GetManageAssetTransferListByFilter`;
+export const URL_GRID_COLS = `/api/FixedAssetAPI/GetAllGridColumnsList`;

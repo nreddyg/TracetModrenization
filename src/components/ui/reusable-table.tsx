@@ -109,6 +109,10 @@ export interface ReusableTableProps<T = any> {
   title?: string;
   permissions?: TablePermissions;
   actions?: TableAction<T>[];
+    exportMeta?: {
+    companyName?: string;
+    name?: string;
+  };
   exportOptions?: ("csv" | "excel" | "json" | "pdf")[]; // formats allowed
   onExport?: (type: "csv" | "excel" | "json" | "pdf", rows: T[], table: TanstackTable<T>) => void;
   onAdd?: () => void;
@@ -830,11 +834,23 @@ function getVisibleData(table: TanstackTable<any>, exportData: any[]) {
     col => (col.columnDef.header as string) || col.id
   );
 
-  const body = exportData.map(row =>
-    visibleCols.map(col => {
+  const body = exportData.map((row) =>
+    visibleCols.map((col) => {
       try {
-        const tableRow = table.getRowModel().rows.find(r => r.original === row);
-        return String(tableRow?.getValue(col.id) ?? "");
+        const def = col.columnDef as any;
+
+        // Prefer accessorFn if present
+        if (typeof def.accessorFn === "function") {
+          return String(def.accessorFn(row, 0) ?? "");
+        }
+
+        // accessorKey fallback
+        if (def.accessorKey) {
+          return String(row[def.accessorKey] ?? "");
+        }
+
+        // id fallback (if your data uses ids matching column ids)
+        return String(row[col.id] ?? "");
       } catch {
         return "";
       }
@@ -845,6 +861,7 @@ function getVisibleData(table: TanstackTable<any>, exportData: any[]) {
 }
 
 
+
 // Enhanced Export Menu with multiple formats
 const ExportMenu = ({
   data,
@@ -853,6 +870,7 @@ const ExportMenu = ({
   filename = 'export',
   table,
   exportOptions = ["csv", "excel", "json", "pdf"],
+  exportMeta,
 }: {
   data: any[];
   selectedRows: any[];
@@ -860,88 +878,142 @@ const ExportMenu = ({
   filename?: string;
   table: TanstackTable<any>;
   exportOptions?: ("csv" | "excel" | "json" | "pdf")[];
+  exportMeta?: { companyName?: string; name?: string };
 }) => {
-  const exportToCSV = (exportData: any[], table: TanstackTable<any>) => {
-    if (exportData.length === 0) return;
-
-    const { headers, body } = getVisibleData(table, exportData);
-
-    const csvContent = [
-      headers.join(","),
-      ...body.map(row =>
-        row.map(val => `"${val.replace(/"/g, '""')}"`).join(",")
-      ),
-    ].join("\n");
-
-    const blob = new Blob([csvContent], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${filename}-${new Date().toISOString().split("T")[0]}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+const getExportMetadata = (data: any[], meta?: { companyName?: string; name?: string }) => {
+  const totalCount = data.length;
+  const downloadDate = new Date().toLocaleString();
+  return {
+    companyName: meta?.companyName || "",
+    name: meta?.name || "",
+    totalCount,
+    downloadDate,
   };
+};
 
+const exportToCSV = (exportData: any[], table: TanstackTable<any>) => {
+  if (exportData.length === 0) return;
 
-  const exportToExcel = (exportData: any[], table: TanstackTable<any>) => {
-    if (exportData.length === 0) return;
+  const { headers, body } = getVisibleData(table, exportData);
+  const meta = getExportMetadata(exportData, exportMeta);
 
-    const { headers, body } = getVisibleData(table, exportData);
+  const metaSection = [
+    `"${meta.companyName}"`,
+    `"Exported by: ${meta.name}"`,
+    `"Download Date: ${meta.downloadDate}"`,
+    `"Total Records: ${meta.totalCount}"`,
+    "", // spacer line
+  ];
 
-    const worksheet = XLSX.utils.aoa_to_sheet([headers, ...body]);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Data");
+  const csvContent = [
+    ...metaSection,
+    headers.join(","),
+    ...body.map(row =>
+      row.map(val => `"${val.replace(/"/g, '""')}"`).join(",")
+    ),
+  ].join("\n");
 
-    worksheet["!cols"] = headers.map(() => ({ wch: 20 }));
-
-    XLSX.writeFile(workbook, `${filename}-${new Date().toISOString().split("T")[0]}.xlsx`);
-  };
-
-
-  const exportToPDF = (exportData: any[], table: TanstackTable<any>) => {
-    if (exportData.length === 0) return;
-
-    const doc = new jsPDF();
-    const { headers, body } = getVisibleData(table, exportData);
-
-    doc.setFontSize(14);
-    doc.text(filename, 14, 20);
-
-    autoTable(doc, {
-      head: [headers],
-      body,
-      startY: 30,
-      styles: { fontSize: 8, cellPadding: 2 },
-      headStyles: { fillColor: [66, 135, 245] },
-      alternateRowStyles: { fillColor: [240, 240, 240] },
-      theme: "grid",
-      margin: { top: 30 },
-    });
-
-    doc.save(`${filename}-${new Date().toISOString().split("T")[0]}.pdf`);
-  };
+  const blob = new Blob([csvContent], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${filename}-${new Date().toISOString().split("T")[0]}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+};
 
 
 
-  const exportToJSON = (exportData: any[], table: TanstackTable<any>) => {
-    if (exportData.length === 0) return;
 
-    const { headers, body } = getVisibleData(table, exportData);
+const exportToExcel = (exportData: any[], table: TanstackTable<any>) => {
+  if (exportData.length === 0) return;
 
-    const jsonData = body.map(row =>
+  const { headers, body } = getVisibleData(table, exportData);
+  const meta = getExportMetadata(exportData, exportMeta);
+
+  const metaSheet = [
+    ["Company Name:", meta.companyName],
+    ["Name:", meta.name],
+    ["Total Records:", meta.totalCount],
+    ["Download Date:", meta.downloadDate],
+    [],
+  ];
+
+  const worksheet = XLSX.utils.aoa_to_sheet([...metaSheet, headers, ...body]);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Data");
+
+  worksheet["!cols"] = headers.map(() => ({ wch: 20 }));
+  XLSX.writeFile(workbook, `${filename}-${new Date().toISOString().split("T")[0]}.xlsx`);
+};
+
+
+
+const exportToPDF = (exportData: any[], table: TanstackTable<any>) => {
+  if (exportData.length === 0) return;
+
+  const { headers, body } = getVisibleData(table, exportData);
+  const meta = getExportMetadata(exportData, exportMeta);
+
+  const doc = new jsPDF();
+  doc.setFontSize(14);
+  doc.text(filename, 14, 15);
+  doc.setFontSize(10);
+  doc.text(`Company Name: ${meta.companyName}`, 14, 25);
+  doc.text(`Name: ${meta.name}`, 14, 30);
+  doc.text(`Total Records: ${meta.totalCount}`, 14, 35);
+  doc.text(`Download Date: ${meta.downloadDate}`, 14, 40);
+
+  autoTable(doc, {
+    head: [headers],
+    body,
+    startY: 45,
+    styles: { fontSize: 8, cellPadding: 2 },
+    headStyles: { fillColor: [66, 135, 245] },
+    alternateRowStyles: { fillColor: [240, 240, 240] },
+    theme: "grid",
+  });
+
+  doc.save(`${filename}-${new Date().toISOString().split("T")[0]}.pdf`);
+};
+
+
+
+
+ const exportToJSON = (exportData: any[], table: TanstackTable<any>) => {
+  if (exportData.length === 0) return;
+
+  const { headers, body } = getVisibleData(table, exportData);
+  const meta = getExportMetadata(exportData, exportMeta);
+
+  const jsonData = {
+    metadata: meta,
+    records: body.map(row =>
       Object.fromEntries(headers.map((h, i) => [h, row[i]]))
-    );
-
-    const blob = new Blob([JSON.stringify(jsonData, null, 2)], {
-      type: "application/json",
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${filename}-${new Date().toISOString().split("T")[0]}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+    ),
   };
+const msg = useMessage()
+
+    const validateVisibleColumns = (table: TanstackTable<any>) => {
+  const visibleColumns = table.getAllLeafColumns().filter(col => col.getIsVisible());
+  if (visibleColumns.length < 3) {
+    msg.warning("Please select at least 3 columns before exporting.");
+    return false;
+  }
+  return true;
+};
+
+  const blob = new Blob([JSON.stringify(jsonData, null, 2)], {
+    type: "application/json",
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${filename}-${new Date().toISOString().split("T")[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+};
+
 const msg = useMessage()
 
     const validateVisibleColumns = (table: TanstackTable<any>) => {
@@ -1023,44 +1095,40 @@ return (
     </DropdownMenuTrigger>
     <DropdownMenuContent>
       {exportOptions.includes("csv") && (
-        <DropdownMenuItem 
-         onClick={() => {
-      if (!validateVisibleColumns(table)) return;
-      exportToCSV(data, table);
-    }}
-        >
-          Export All to CSV
-        </DropdownMenuItem>
+       <DropdownMenuItem onClick={() => {
+  const allRows = table.getFilteredRowModel().rows.map(r => r.original);
+  if (!validateVisibleColumns(table)) return; // all pages, honors filters/sort
+  exportToCSV(allRows, table);
+}}>
+  Export All to CSV
+</DropdownMenuItem>
       )}
       {exportOptions.includes("excel") && (
-        <DropdownMenuItem 
-         onClick={() => {
-      if (!validateVisibleColumns(table)) return;
-      exportToExcel(data, table);
-    }}
-        >
-          Export All to Excel
-        </DropdownMenuItem>
+       <DropdownMenuItem onClick={() => {
+  const allRows = table.getFilteredRowModel().rows.map(r => r.original);
+  if (!validateVisibleColumns(table)) return;
+  exportToExcel(allRows, table);
+}}>
+  Export All to Excel
+</DropdownMenuItem>
       )}
       {exportOptions.includes("json") && (
-        <DropdownMenuItem 
-         onClick={() => {
-      if (!validateVisibleColumns(table)) return;
-      exportToJSON(data, table);
-    }}
-        >
-          Export All to JSON
-        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => {
+  const allRows = table.getFilteredRowModel().rows.map(r => r.original);
+  if (!validateVisibleColumns(table)) return;
+  exportToJSON(allRows, table);
+}}>
+  Export All to JSON
+</DropdownMenuItem>
       )}
       {exportOptions.includes("pdf") && (
-        <DropdownMenuItem 
-         onClick={() => {
-      if (!validateVisibleColumns(table)) return;
-      exportToPDF(data, table);
-    }}
-        >
-          Export All to PDF
-        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => {
+  const allRows = table.getFilteredRowModel().rows.map(r => r.original);
+  if (!validateVisibleColumns(table)) return;
+  exportToPDF(allRows, table);
+}}>
+  Export All to PDF
+</DropdownMenuItem>
       )}
 
       {selectedRows.length > 0 && (
@@ -1491,6 +1559,7 @@ export function ReusableTable<T = any>({
     canManageColumns: true
   },
   exportOptions,
+  exportMeta,
   actions = [],
   onAdd,
   onExport,
@@ -2076,14 +2145,16 @@ const calculated = Math.max(actualWidth, minCharsWidth);
             </DropdownMenu>
           ) : (
             // fallback to internal ExportMenu if no external handler provided
-            <ExportMenu
-              data={table?.getCoreRowModel().rows.map(r => r.original)}
-              selectedRows={selectedRows}
-              permissions={permissions}
-              filename={title || "export"}
-              table={table}
-              exportOptions={exportOptions}
-            />
+           <ExportMenu
+  data={table?.getPrePaginationRowModel().rows.map(r => r.original)} // ✅ include ALL rows
+  selectedRows={selectedRows}
+  permissions={permissions}
+  filename={title || "export"}
+  table={table}
+  exportOptions={exportOptions}
+  exportMeta={exportMeta}
+/>
+
           )
         )}
 

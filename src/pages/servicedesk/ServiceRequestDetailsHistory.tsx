@@ -205,11 +205,11 @@ const ServiceRequestReport: React.FC = () => {
           </div>
           <div className="flex mb-2">
             <span className="w-56 font-semibold">Assignee</span>
-            <span>: {details?.Assignee || "-"}</span>
+            <span>: {details?.Assignee || ""}</span>
           </div>
           <div className="flex mb-2">
             <span className="w-56 font-semibold">Linked To</span>
-            <span>: {details?.LinkedTo || "-"}</span>
+            <span>: {details?.LinkedTo || ""}</span>
           </div>
           <div className="flex mb-2">
             <span className="w-56 font-semibold">Customer Name</span>
@@ -217,11 +217,13 @@ const ServiceRequestReport: React.FC = () => {
           </div>
           <div className="flex mb-2">
             <span className="w-56 font-semibold">Title</span>
-            <span>: {details?.Title}</span>
+            <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;</span>
+            <span>{details?.Title}</span>
           </div>
           <div className="flex mb-2">
-            <span className="w-56 font-semibold">Description</span>
-            <span>: {details?.Description}</span>
+            <span className=" font-semibold">Description</span>
+            <span className="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;</span>
+            <span className="">{details?.Description}</span>
           </div>
         </div>
 
@@ -245,19 +247,19 @@ const ServiceRequestReport: React.FC = () => {
           </div>
           <div className="flex mb-2">
             <span className="w-56 font-semibold">Resolution time (In Hrs)</span>
-            <span>: {details?.ResolutionTimeInHrs || "-"}</span>
+            <span>: {details?.ResolutionTimeInHrs || ""}</span>
           </div>
           <div className="flex mb-2">
             <span className="w-56 font-semibold">Resolved Date & time</span>
-            <span>: {details?.ResolvedDateTime || "-"}</span>
+            <span>: {details?.ResolvedDateTime || ""}</span>
           </div>
           <div className="flex mb-2">
             <span className="w-56 font-semibold">Closed date & time</span>
-            <span>: {details?.ClosedDateTime || "-"}</span>
+            <span>: {details?.ClosedDateTime || ""}</span>
           </div>
           <div className="flex mb-2">
             <span className="w-56 font-semibold">SLA Status</span>
-            <span>: {details?.SLAStatus || "-"}</span>
+            <span>: {details?.SLAStatus || ""}</span>
           </div>
         </div>
       </div>

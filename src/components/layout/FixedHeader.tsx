@@ -13,10 +13,10 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { GetBranchListBasedonCompanyId, GetCompanyListBasedonUserId } from '@/services/headerServices';
 import { useAppDispatch } from '@/store';
 import { getHierarchyLevelsData, getOrganizationDetailsByToken, getUserDetailsByUserName } from '@/services/appService';
-import { setAllLevelsData, setLastLevelsData, setBranch, setBranchCode, setBranchId, setCompanyId, setLoading, setUserId, setBranchesList } from '@/store/slices/projectsSlice';
+import { setAllLevelsData, setLastLevelsData, setBranch, setBranchCode, setBranchId, setCompanyId, setCompanyName,setLoading, setUserId, setBranchesList } from '@/store/slices/projectsSlice';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { RiMenuFoldFill } from "react-icons/ri";
-
+ 
 const FixedHeader: React.FC = () => {
   const navigate = useNavigate();
   const breadcrumbs = useAppSelector((state) => state.ui.currentBreadcrumb);
@@ -28,7 +28,7 @@ const FixedHeader: React.FC = () => {
   const [branchList, setBranchList] = useState<{ value: string; label: string; id?: string; code?: string }[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<string | null>('');
   const [selectedBranch, setSelectedBranch] = useState<string>();
-
+ 
   useEffect(() => {
     fetchUserDetailsByUserName()
   }, [])
@@ -80,6 +80,12 @@ const FixedHeader: React.FC = () => {
         dispatch(setCompanyId(localStorage.getItem("CompanyId")))
         setSelectedCompany(localStorage.getItem("CompanyId"))
       }
+      if (!localStorage.getItem("CompanyName")) {
+        dispatch(setCompanyName(companyData?.OrgData?.OrganizationName.toString()))
+        localStorage.setItem('CompanyName', companyData?.OrgData?.OrganizationName);
+      } else {
+        dispatch(setCompanyName(localStorage.getItem("CompanyName")))
+      }
     } catch { } finally {
       dispatch(setLoading(false));
     }
@@ -107,7 +113,7 @@ const FixedHeader: React.FC = () => {
           setSelectedBranch(localStorage.getItem("Branch"))
           dispatch(setBranch(localStorage.getItem("Branch")));
         }
-
+ 
         if (localStorage.getItem("BranchId")) {
           dispatch(setBranchId(localStorage.getItem("BranchId")))
         } else {
@@ -207,11 +213,11 @@ const FixedHeader: React.FC = () => {
     }
   };
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
+ 
   const changePassword = () => {
     navigate('/changePassword');
   }
-
+ 
   const logoutFunction = () => {
     localStorage.clear();
     window.location.href = "/login";
@@ -223,7 +229,7 @@ const FixedHeader: React.FC = () => {
         {/* Left Section - Sidebar Trigger + Company Logo + Breadcrumbs */}
         <div className="flex items-center gap-2 lg:gap-4 flex-1 min-w-0">
           <SidebarTrigger />
-
+ 
           {/* Company Branding */}
           {/* <div className="flex items-center gap-2 lg:gap-3 shrink-0">
             <div className="flex items-center gap-2 px-2 lg:px-3 py-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg">
@@ -234,7 +240,7 @@ const FixedHeader: React.FC = () => {
             </div>
             <div className="hidden md:block h-6 w-px bg-gray-300"></div>
           </div> */}
-
+ 
           {/* Breadcrumbs - Hidden on mobile */}
           <div className="hidden lg:block flex-1 min-w-0">
             <Breadcrumb>
@@ -247,7 +253,7 @@ const FixedHeader: React.FC = () => {
                     </div>
                   </BreadcrumbLink>
                 </BreadcrumbItem>
-
+ 
                 {breadcrumbs.map((breadcrumb, index) => (
                   <React.Fragment key={index}>
                     <BreadcrumbSeparator />
@@ -272,7 +278,7 @@ const FixedHeader: React.FC = () => {
             </Breadcrumb>
           </div>
         </div>
-
+ 
         {/* Right Section - Company + Location + Notifications + Profile */}
         <div className="flex items-center gap-1 lg:gap-3 shrink-0">
           {/* Mobile Menu Trigger */}
@@ -284,7 +290,7 @@ const FixedHeader: React.FC = () => {
                   <RiMenuFoldFill className='h-4 2-4' />
                 </Button>
               </SheetTrigger>
-
+ 
               <SheetContent
                 side="right"
                 className="w-80"
@@ -293,7 +299,7 @@ const FixedHeader: React.FC = () => {
                 <SheetHeader>
                   <SheetTitle>Navigation Menu</SheetTitle>
                 </SheetHeader>
-
+ 
                 <div className="mt-6 space-y-4">
                   <div>
                     <label className="text-sm font-medium">Company</label>
@@ -304,7 +310,7 @@ const FixedHeader: React.FC = () => {
                       <SelectTrigger className="mt-1">
                         <SelectValue placeholder="Select company" />
                       </SelectTrigger>
-
+ 
                       <SelectContent>
                         {companyList?.map((c) => (
                           <SelectItem key={c.value} value={String(c.value)}>
@@ -314,7 +320,7 @@ const FixedHeader: React.FC = () => {
                       </SelectContent>
                     </Select>
                   </div>
-
+ 
                   <div>
                     <label className="text-sm font-medium">Location</label>
                     <Select
@@ -324,7 +330,7 @@ const FixedHeader: React.FC = () => {
                       <SelectTrigger className="mt-1">
                         <SelectValue placeholder="Select location" />
                       </SelectTrigger>
-
+ 
                       <SelectContent>
                         {branchList?.map((b) => (
                           <SelectItem key={b.value} value={b.value}>
@@ -337,7 +343,7 @@ const FixedHeader: React.FC = () => {
                 </div>
               </SheetContent>
             </Sheet>
-
+ 
             {/* <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>
                 <Button variant="outline" size="sm">
@@ -349,7 +355,7 @@ const FixedHeader: React.FC = () => {
                   <SheetTitle>Navigation Menu</SheetTitle>
                 </SheetHeader>
                 <div className="mt-6 space-y-4">
-                  
+                 
                   <ReusableDropdown
                     label="Company"
                     options={companyList}
@@ -359,7 +365,7 @@ const FixedHeader: React.FC = () => {
                     size="middle"
                     usePortal={true}
                   />
-
+ 
                   <ReusableDropdown
                     label="Location"
                     options={branchList}
@@ -373,7 +379,7 @@ const FixedHeader: React.FC = () => {
               </SheetContent>
             </Sheet> */}
           </div>
-
+ 
           {/* Desktop Dropdowns */}
           <div className="hidden lg:flex items-center gap-3">
             <ReusableDropdown
@@ -386,7 +392,7 @@ const FixedHeader: React.FC = () => {
               className="w-auto h-9"
               containerClassName='max-w-[50%]'
             />
-
+ 
             <ReusableDropdown
               options={branchList}
               value={selectedBranch}
@@ -397,7 +403,7 @@ const FixedHeader: React.FC = () => {
               containerClassName='max-w-[50%]'
             />
           </div>
-
+ 
           {/* Notifications */}
           <Button variant="outline" size="sm" className="relative h-8 w-8 lg:h-9 lg:w-9 p-0">
             <Bell className="h-3 w-3 lg:h-4 lg:w-4" />
@@ -405,7 +411,7 @@ const FixedHeader: React.FC = () => {
               3
             </Badge>
           </Button>
-
+ 
           {/* Profile Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -446,7 +452,7 @@ const FixedHeader: React.FC = () => {
           </DropdownMenu>
         </div>
       </div>
-
+ 
       {/* Mobile Breadcrumbs */}
       <div className="lg:hidden px-4 pb-2">
         <Breadcrumb>
@@ -459,7 +465,7 @@ const FixedHeader: React.FC = () => {
                 </Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
-
+ 
             {breadcrumbs.slice(-2).map((breadcrumb, index) => (
               <React.Fragment key={index}>
                 <BreadcrumbSeparator />
@@ -486,5 +492,6 @@ const FixedHeader: React.FC = () => {
     </header>
   );
 };
-
+ 
 export default FixedHeader;
+ 

@@ -19,6 +19,7 @@ interface ProjectsState {
   loading: boolean;
   error: string | null;
   companyId:string | null;
+  companyName?:string | null;
   userId?:number | null;
   branch?:string;
   branchId?:string;
@@ -33,6 +34,7 @@ const initialState: ProjectsState = {
   loading: false,
   error: null,
   companyId:'',
+  companyName:'',
   userId:null,
   branch:'',
   branchId:"",
@@ -70,6 +72,9 @@ const projectsSlice = createSlice({
     setCompanyId:(state,action:PayloadAction<string | null>)=>{
       state.companyId=action.payload
     },
+    setCompanyName:(state,action:PayloadAction<string | null>)=>{
+      state.companyName=action.payload
+    },
     setBranch:(state,action:PayloadAction<string>)=>{
       state.branch=action.payload
     },
@@ -99,5 +104,5 @@ const projectsSlice = createSlice({
 });
 
 export const { setProjects, addProject, updateProject, deleteProject, setLoading,
-  setCompanyId,setBranch,setBranchId,setUserId,setLastLevelsData,setAllLevelsData,setBranchCode,setError,setBranchesList } = projectsSlice.actions;
+  setCompanyId,setCompanyName,setBranch,setBranchId,setUserId,setLastLevelsData,setAllLevelsData,setBranchCode,setError,setBranchesList } = projectsSlice.actions;
 export default projectsSlice.reducer;

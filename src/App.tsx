@@ -84,11 +84,15 @@ const AssetOps = WrapperLazyComponent(() => import("./pages/fixedassets/AssetOps
 const AssetMaintenance = WrapperLazyComponent(() => import("./pages/fixedassets/AssetMaintenance"));
 const FixedAssetsReports = WrapperLazyComponent(() => import("./pages/fixedassets/FixedAssetsReports"));
 
-// Depreciation
-const DepreciationProcess = WrapperLazyComponent(() => import("./pages/depreciation/DepreciationProcess"));
-const Adjustments = WrapperLazyComponent(() => import("./pages/depreciation/Adjustments"));
-const Analysis = WrapperLazyComponent(() => import("./pages/depreciation/Analysis"));
-const DepreciationReports = WrapperLazyComponent(() => import("./pages/depreciation/DepreciationReports"));
+// // Depreciation
+// const DepreciationProcess = WrapperLazyComponent(() => import("./pages/depreciation/DepreciationProcess"));
+// const Adjustments = WrapperLazyComponent(() => import("./pages/depreciation/Adjustments"));
+// const Analysis = WrapperLazyComponent(() => import("./pages/depreciation/Analysis"));
+// const DepreciationReports = WrapperLazyComponent(() => import("./pages/depreciation/DepreciationReports"));
+
+const ForexAdjustment= WrapperLazyComponent(() => import("./pages/Deprecation/ForexAdjustment"));
+const ImportAssetWise= WrapperLazyComponent(() => import("./pages/Deprecation/ImportAssetWise"));
+
 
 // Consumables
 const Receiving = WrapperLazyComponent(() => import("./pages/consumables/Receiving"));
@@ -263,10 +267,13 @@ const AnimatedRoutes = () => {
                   <Route path="/fixed-assets/reports" element={<FixedAssetsReports />} />
 
                   {/* Depreciation */}
-                  <Route path="/depreciation/process" element={<DepreciationProcess />} />
+                  {/* <Route path="/depreciation/process" element={<DepreciationProcess />} />
                   <Route path="/depreciation/adjustments" element={<Adjustments />} />
                   <Route path="/depreciation/analysis" element={<Analysis />} />
-                  <Route path="/depreciation/reports" element={<DepreciationReports />} />
+                  <Route path="/depreciation/reports" element={<DepreciationReports />} /> */}
+
+                  <Route path="depreciation/forexadjustment" element={<ForexAdjustment/>}/>
+                  <Route path="depreciation/importassetwise" element={<ImportAssetWise/>}/>
 
                   {/* Consumables */}
                   <Route path="/consumables/receiving" element={<Receiving />} />

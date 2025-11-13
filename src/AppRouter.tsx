@@ -26,6 +26,7 @@ import MyWorkbench from "./pages/servicedesk/MyWorkbench";
 import PaymentDetails from "./pages/servicedesk/PaymentDetails";
 import ServiceDeskReports from "./pages/servicedesk/ServiceDeskReports";
 import SubscriptionManagement from "./pages/servicedesk/Subscription";
+import TicketProgressDashboard from "./pages/servicedesk/TicketProgressDashboard";
 import UserGroups from "./pages/servicedesk/UserGroups";
 import TicketCreate from "./pages/TicketCreate";
 import TicketView from "./pages/TicketView";
@@ -107,7 +108,7 @@ export const appRoutesObj={
     component: <Books/>,
     index: false,
     dependent:[ {
-      path: 'masters/AddDepreciationBook',
+      path: '/masters/depreciation/book/addbook',
       component: <AddBook/>,
       index: false,
     },]
@@ -568,6 +569,11 @@ export const appRoutesObj={
 "servicedesk-reports": {
   path:'servicedesk/reports',
   component:<ServiceDeskReports/>,
+  index:false
+},
+"servicedesk-ticketprogressdashboard": {
+  path:'servicedesk/ticket-progress-dashboard',
+  component:<TicketProgressDashboard/>,
   index:false
 },
 

@@ -46,11 +46,17 @@ import { getUserWiseModuleList } from '@/services/userRoleServices'
 import NotFound from '../NotFound'
 import { appRoutesObj } from '@/AppRouter'
 import { useAppDispatch } from '@/store/reduxStore'
+import { modulesOverride } from '@/Local_DB/userWiseModulesOverride'
 interface NavItem {
   label: string;
   icon?: React.ComponentType<any>;
   link: string;
   children?: NavItem[];
+}
+const icons={
+
+"masters":Building2, "servicedesk":Headphones, "fixedassets":Building2, "depreciation":DollarSign, "utilities":Building2, "cwip":Building2, "procurement":Building2, "consumables":Building2, "physicalverification":Building2,"settings":Settings
+
 }
 
 
@@ -673,12 +679,12 @@ const navigation: NavItem[] = [
 
 
 
-const parentModules = ["masters", "servicedesk", "fixedassets", "depreciation", "utilities", "cwip", "procurement", "consumables", "physicalverification"]
+const parentModules = ["masters", "servicedesk", "fixedassets", "depreciation", "utilities", "cwip", "procurement", "consumables", "physicalverification","settings"]
 const Layout = () => {
   console.log("layout")
     const location = useLocation();
     const navigate=useNavigate()
-    
+     const LoggedInUser = JSON.parse(localStorage.getItem("LoggedInUser") || "{}");
     const dispatch=useAppDispatch();
     const [showCreateBtn,setShowCreateBtn]=useState(true)
     
@@ -817,9 +823,9 @@ const Layout = () => {
       const modulePath = currentPath ? `${currentPath}-${moduleName.toLowerCase().replace(/\s+/g, '')}` : moduleName.toLowerCase().replace(/\s+/g, '');
       if (module.ModuleName.toLowerCase() === "reports") {
         const reportsPathArr = storingReportsMenu(module, parent, modulePath)
-        // if (reportsPathArr && reportsPathArr?.length !== 0) {
-        //   pathsArray.push(...reportsPathArr)
-        // }
+        if (reportsPathArr && reportsPathArr?.length !== 0) {
+          pathsArray.push(...reportsPathArr)
+        }
       }
       if (module.ModuleName.toLowerCase() === "create service request") {
         pathsArray.push(appRoutesObj[modulePath])
@@ -828,16 +834,16 @@ const Layout = () => {
         }
         setShowCreateBtn(true)
       }
-      // if (module.ModuleName.toLowerCase() === "service desk" && !(loggedinUser.IsServiceDesk)) {
-      //   return;
-      // }
-
-      // if (modulesOverride[module.ModuleName.toLowerCase()]) {
-      //   let res = modulesOverride[module.ModuleName.toLowerCase()]?.action(module)
-      //   if (!res) {
-      //     return;
-      //   } else module = res
-      // }
+      if (module.ModuleName.toLowerCase() === "service desk" && !(LoggedInUser.IsServiceDesk)) {
+        return;
+      }
+console.log(module.ModuleName.toLowerCase(),"hgewvyuhfgewhwefhwuehru")
+      if (modulesOverride[module.ModuleName.toLowerCase()]) {
+        let res = modulesOverride[module.ModuleName.toLowerCase()]?.action(module,parent)
+        if (!res) {
+          return;
+        } else module = res
+      }
 
       if (hasNoChildren(module)) {
         if (modulePath?.split("-")[0] === "settings") {
@@ -856,8 +862,8 @@ const Layout = () => {
         // key: `${hasNoChildren(module)?routesObject[module.ModuleName] : module.ModuleName}`,
         // key: `${hasNoChildren(module) ? routesObject[modulePath] : module.ModuleName}`,
         link: `${hasNoChildren(module) ? appRoutesObj[modulePath]?.path : module.ModuleName}`,
-        label: createLabel(module, parent, modulePath),
-        icon:parentModules.includes(modulePath) ? Settings : null,
+        label: module.ModuleName,
+        icon:parentModules.includes(modulePath) ? icons[modulePath] : null,
       };
       
       if (module.Children && module.Children?.length > 0) {
@@ -877,9 +883,7 @@ const Layout = () => {
 
   const storingReportsMenu = (module, parent, prevPath) => {
     if (parent === "servicedesk") {
-      // dispatch(updateServiceDeskReportsMenu(module.Children ? module.Children : []))
       dispatch(setReportsMenu({serviceDeskReportsMenu:module.Children ? module.Children : []}))
-      console.log("re",module.Children)
     }
      else if (parent === "fixedassets") {
       const reportsPathsArray = []
@@ -912,7 +916,7 @@ const Layout = () => {
 
     // }
   }
-console.log("report",reportsData)
+
   const hasNoChildren = (module) => {
     return (!module.Children || module.Children?.length == 0)
   }

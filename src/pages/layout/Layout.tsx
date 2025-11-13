@@ -681,7 +681,6 @@ const icons={
 
 const parentModules = ["masters", "servicedesk", "fixedassets", "depreciation", "utilities", "cwip", "procurement", "consumables", "physicalverification","settings","softwareassets"]
 const Layout = () => {
-  console.log("layout")
     const location = useLocation();
     const navigate=useNavigate()
      const LoggedInUser = JSON.parse(localStorage.getItem("LoggedInUser") || "{}");
@@ -690,7 +689,7 @@ const Layout = () => {
     
       const companyId = useAppSelector(state => state.projects.companyId);
       const userId = useAppSelector(state => state.projects.userId);
-      const reportsData = useAppSelector(state => state.projects.reportsMenu);
+
       
         const [roleModuleUsedParams, setRoleModuleUsedParams] = useState({ companyId: "", userId: "" })
       
@@ -746,7 +745,6 @@ const Layout = () => {
       dispatch(setLoading(true));
       try {
         const res = await getUserWiseModuleList(userId, CompId);
-        console.log(res.data)
         if(res.data && res.data?.status===undefined ){
                  settingMenus(res.data)
         }else{
@@ -755,7 +753,6 @@ const Layout = () => {
       } catch { } finally { dispatch(setLoading(false)) }
     }
     const settingMenus = (data) => {
-    console.log(data)
     data.push( {
         "ModuleId": 1,
         "ModuleName": "Software Assets",
@@ -773,8 +770,7 @@ const Layout = () => {
     let regExp=/^\/layout(\/+|\?+\/?)?$/
     let settingsPath=""
     const result = formattingMenuAPIData(data)
-    console.log(result,"result")
-
+    console.log("result",result)
     // if (result.settingsPaths?.length > 0) {
     //   result.settingsPaths[0].index = true
     //   settingsPath=`/layout/settingspagelayout/${result.settingsPaths[0].path}`
@@ -829,13 +825,15 @@ const Layout = () => {
     setMenuList(result.children)
   }
   const formattingMenuAPIData = (data, parent = '', currentPath = '', pathsArray = [], settingsPaths = []) => {
-    console.log("formattingMenuAPIData",data,parent)
     parent = parent.toLowerCase().replace(/\s+/g, '')
     const menuItems = [];
+
     data?.forEach((module, ind) => {
       const moduleName = module.ModuleName.split('-')[0];
       const modulePath = currentPath ? `${currentPath}-${moduleName.toLowerCase().replace(/\s+/g, '')}` : moduleName.toLowerCase().replace(/\s+/g, '');
+          console.log("data",data,module)
       if (module.ModuleName.toLowerCase() === "reports") {
+        
         const reportsPathArr = storingReportsMenu(module, parent, modulePath)
         if (reportsPathArr && reportsPathArr?.length !== 0) {
           pathsArray.push(...reportsPathArr)
@@ -881,13 +879,10 @@ const Layout = () => {
       };
       
       if (module.Children && module.Children?.length > 0) {
-        console.log("children",formattingMenuAPIData(module.Children, module.ModuleName, modulePath, pathsArray, settingsPaths).children)
-         console.log("menuItems",menuItem)
         menuItem.children = formattingMenuAPIData(module.Children, module.ModuleName, modulePath, pathsArray, settingsPaths).children;
       }
 
       if (!menuItem.children || menuItem.children.length > 0) {
-        console.log("menueItem",menuItem)
         menuItems.push(menuItem);
        
       }
@@ -897,6 +892,7 @@ const Layout = () => {
 
   const storingReportsMenu = (module, parent, prevPath) => {
     if (parent === "servicedesk") {
+        console.log("reports",module)
       dispatch(setReportsMenu({serviceDeskReportsMenu:module.Children ? module.Children : []}))
     }
      else if (parent === "fixedassets") {

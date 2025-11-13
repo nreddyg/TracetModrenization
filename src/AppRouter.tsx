@@ -618,7 +618,7 @@ export const appRoutesObj={
 
 
 "servicedesk-createservicerequest":{
-  path:'servicedesk/newservicerequest',
+  path:'service-desk/create-ticket',
   component: <TicketView key={'create'} />,
   index: false,
   dependent:[
@@ -653,12 +653,23 @@ export const appRoutesObj={
 // },
 
 "servicedesk-myrequests":{
- path:'servicedesk/myrequest',
+ path:'service-desk/my-requests',
  component: <MyWorkbench key={"myrequest"} />,
  index: false,
  dependent:[ {
-  path:'servicedesk/editscreen',
+  path:'service-desk/my-requests/tickets/:Did/:id',
   component:<TicketView key={`editMyReq`} />,
+  index:false
+},]
+ },
+
+ "servicedesk-myworkbench":{
+ path:'servicedesk/myworkbench',
+ component: <MyWorkbench key={"myworkbench"} />,
+ index: false,
+ dependent:[ {
+  path:'service-desk/my-workbench/tickets/:Did/:id',
+  component:<TicketView key={`editMyWorkbench`} />,
   index:false
 },]
  },
@@ -673,7 +684,7 @@ export const appRoutesObj={
    component: <AllRequests/>,
    index: false,
    dependent:[ {
-    path:'servicedesk/editscreen',
+    path:'/service-desk/all-requests/tickets/:Did/:id',
     component:<TicketView key={`edit`} />,
     index:false
   },]

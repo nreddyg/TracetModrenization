@@ -164,8 +164,7 @@ if (index !== -1) {
              "ModuleName": "Ticket Progress Dashboard"
            }); // insert newObj after it
 }
-
-        
+  
          return module;
        },
      },

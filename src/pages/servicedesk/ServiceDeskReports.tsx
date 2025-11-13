@@ -117,6 +117,8 @@ const ServiceDeskReports = () => {
     availableColumns.map(col => col.key) // Default to all columns selected
   );
   const [columnDropdownOpen, setColumnDropdownOpen] = useState(false);
+        const reportsData = useAppSelector(state => state.projects.reportsMenu);
+        console.log("reportdata",reportsData)
   const dispatch = useAppDispatch();
   const [reportTabs] = useState([
     'Service Request Details',

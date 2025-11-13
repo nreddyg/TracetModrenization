@@ -223,7 +223,7 @@ const Organization = () => {
         setValue("CurrencySymbol", "");
         msg.warning("No Currency Data Found For This Country !!");
       }
-    } catch { } finally { dispatch(setLoading(true)) }
+    } catch { } finally { dispatch(setLoading(false)) }
   }
   const handleSelect = (data: OrganizationData) => {
     // handleReset();

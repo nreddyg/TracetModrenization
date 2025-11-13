@@ -194,13 +194,13 @@ const SystemConfiguration = () => {
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <span>Settings</span>
             <span>/</span>
-            <span className="text-gray-900 font-medium">System Configuration</span>
+            <span className="text-gray-900 font-medium">SMTP Configuration</span>
           </div>
         </div>
       </header>
 
       <div className="p-6 space-y-6 animate-fade-in">
-        <h1 className="text-2xl font-bold text-gray-900">System Configuration</h1>
+        {/* <h1 className="text-2xl font-bold text-gray-900">SMTP Configuration</h1> */}
 
         <Tabs defaultValue="smtp" className="space-y-6">
           <TabsList className="grid w-full grid-cols-4">

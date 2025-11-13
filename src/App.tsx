@@ -311,7 +311,7 @@ const AnimatedRoutes = () => {
 
                   {/* Settings */}
                   <Route path="/settings" element={<Settings />} />
-                  <Route path="/settings/system-configuration" element={<SystemConfiguration />} />
+                  <Route path="/settings/smtp-configuration" element={<SystemConfiguration />} />
                   <Route path="/settings/user-management" element={<UserManagement />} />
                   <Route path="/settings/process-configuration" element={<ProcessConfiguration />} />
                   <Route path="/settings/advanced-setup" element={<AdvancedSetup />} />

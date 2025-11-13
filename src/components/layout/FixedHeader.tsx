@@ -241,10 +241,10 @@ const FixedHeader: React.FC = () => {
               <BreadcrumbList>
                 <BreadcrumbItem>
                   <BreadcrumbLink asChild>
-                    <Link to="/service-desk/all-requests" className="flex items-center gap-1 hover:text-blue-600 transition-colors">
+                    <div className="flex items-center gap-1 hover:text-blue-600 transition-colors">
                       <Home className="h-3 w-3 lg:h-4 lg:w-4" />
                       <span className="text-xs lg:text-sm">Dashboard</span>
-                    </Link>
+                    </div>
                   </BreadcrumbLink>
                 </BreadcrumbItem>
 

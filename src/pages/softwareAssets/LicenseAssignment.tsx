@@ -53,7 +53,7 @@ const LicenseAssignment = () => {
         { id: 'Software', accessorKey: "SoftwareName", header: "Software" },
         { id: 'Licensekey', accessorKey: "LicenseKey", header: "License Key" },
         { id: 'AssignmentDate', accessorKey: "AssignmentDate", header: "Assignment Date" },
-        { id: 'ExpiryDate', accessorKey: "ExpiryDate", header: "License Expiry Date" },
+        { id: 'ExpiryDate', accessorKey: "LicenseExpiryDate", header: "License Expiry Date" },
         { id: 'AssignmentExpiryDate', accessorKey: "AssignmentExpiryDate", header: "Assignment Expiry Date" },
         { id: 'Status', accessorKey: 'Status', header: 'Status' }
     ]);

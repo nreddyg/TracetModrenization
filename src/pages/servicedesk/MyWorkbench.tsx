@@ -284,7 +284,7 @@ const MyWorkbench = () => {
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">{isMyRequest ? "My Requests" : "My Workbench"}</h1>
+            <h1 className="text-lg sm:text-2xl font-bold text-gray-900">{isMyRequest ? "My Requests" : "My Workbench"}</h1>
             {/* <p className="text-gray-600 mt-1 text-sm sm:text-base">View and manage all your service requests in one place</p> */}
           </div>
           <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
@@ -316,7 +316,12 @@ const MyWorkbench = () => {
                   }
                   <div className="flex items-center xxs:mt-1 xs2:mt-2 sm:mt-6 md:mt-6" >
                     <ReusableButton size={"small"} htmlType='submit' className='h-9 mt-1 bg-background hover:border-[rgb(209 213 219)] hover:bg-background'>
-                      <Search size={18} color='#000'/>
+                      {/* <Search size={18} color='#000'/> */}
+                      <Search
+                        size={18}
+                        className="text-black hover:text-blue-500 transition-colors duration-200 cursor-pointer"
+                      />
+
 
                     </ReusableButton>
                   </div>

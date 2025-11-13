@@ -1061,10 +1061,9 @@ const SubscriptionManagement = () => {
 
   return (
     <div className="bg-gray-50/30 h-full overflow-y-scroll">
-      <header className="bg-white border-b px-6 py-3 shadow-sm flex flex-col sm:flex-row  items-start sm:items-center gap-3">
+      {/* <header className="bg-white border-b px-6 py-3 shadow-sm flex flex-col sm:flex-row  items-start sm:items-center gap-3">
         <div className="flex items-center gap-3">
-          {/* <SidebarTrigger /> */}
-          {/* <ReusableButton
+          <ReusableButton
             size="small"
             // variant="primary"
             // className='bg-primary h-[2.38rem] hover:bg-blue-700  text-white'
@@ -1072,21 +1071,21 @@ const SubscriptionManagement = () => {
             onClick={() => { navigate('/service-desk/create-ticket') }}
           >
             New Service Request
-          </ReusableButton> */}
+          </ReusableButton>
         </div>
         <div className="flex items-center gap-2 text-sm text-gray-600 p-2">
           <span>Service Desk</span>
           <span>/</span>
           <span className="text-gray-900 font-medium">Subscription</span>
         </div>
-      </header>
+      </header> */}
 
       <div className="p-4 space-y-4 " >
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           <div >
-            <h1 className="text-lg font-semibold text-gray-900 px-2">Subscription</h1>
-            <p className="text-sm text-gray-600 mt-0.5 px-2">Subscription Management</p>
+            <h1 className="text-lg sm:text-2xl font-bold text-gray-900">Subscription</h1>
+            {/* <p className="text-sm text-gray-600 mt-0.5 px-2">Subscription Management</p> */}
           </div>
           <div className='flex gap-2 justify-center'>
             <ReusableButton
@@ -1105,8 +1104,9 @@ const SubscriptionManagement = () => {
               icon={<></>}
               // iconPosition="left"
               onClick={() => downloadExcel(dataSource, columns)}
-              className="bg-[rgb(122,132,148)] text-white hover:bg-[rgb(122,132,148)] hover:text-white hover:border-0 border-0"
-            >
+              // className="bg-[rgb(122,132,148)] text-white hover:bg-[rgb(122,132,148)] hover:text-white hover:border-0 border-0"
+            className='btn-submit-style'
+>
               Export to Excel
             </ReusableButton>
           </div>

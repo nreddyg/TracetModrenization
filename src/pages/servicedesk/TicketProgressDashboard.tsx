@@ -359,11 +359,11 @@ const TicketProgressDashboard = () => {
               </h1>
             </div>
 
-            <div className="flex items-center gap-2 text-sm text-gray-600">
+            {/* <div className="flex items-center gap-2 text-sm text-gray-600">
               <span>Service Desk</span>
               <FaAngleRight />
               <span className="text-gray-900 font-medium">Ticket Progress Dashboard</span>
-            </div>
+            </div> */}
 
           </div>
         </header>

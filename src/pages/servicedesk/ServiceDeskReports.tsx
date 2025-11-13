@@ -1064,18 +1064,18 @@ const ServiceDeskReports = () => {
       >
         <div className="flex items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-xl font-semibold text-gray-900">Service Desk Reports</h1>
-            <p className="text-sm text-gray-600">
+            <h1 className="text-lg sm:text-2xl font-bold text-gray-900">Service Desk Reports</h1>
+            {/* <p className="text-sm text-gray-600">
               Generate comprehensive reports with advanced filtering and customization options
-            </p>
+            </p> */}
           </div>
         </div>
 
-        <div className="flex items-center gap-2 text-sm text-gray-600">
+        {/* <div className="flex items-center gap-2 text-sm text-gray-600">
           <span>Service Desk</span>
           <span>/</span>
           <span className="text-gray-900 font-medium">Service Desk Reports</span>
-        </div>
+        </div> */}
       </header>
 
       <div className="px-6 pb-6 pt-6 space-y-6 ">
@@ -1131,7 +1131,7 @@ const ServiceDeskReports = () => {
                   <Button
                     onClick={handleViewReport}
                     disabled={isGeneratingReport}
-                    className="bg-blue-600 hover:bg-blue-700"
+                    className="btn-submit-style"
                   >
                     {isGeneratingReport ? (
                       <>
@@ -1148,6 +1148,7 @@ const ServiceDeskReports = () => {
                   <Button
                     onClick={handleClearFilters}
                     variant="outline"
+                    className='btn-reset-clear-style'
                   >
                     Clear All
                   </Button>

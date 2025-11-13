@@ -180,8 +180,8 @@ const AllRequests = () => {
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">All Service Requests</h1>
-            <p className="text-gray-600 mt-1 text-sm sm:text-base">View and manage all your service requests in one place</p>
+            <h1 className="text-lg sm:text-2xl font-bold text-gray-900">All Service Requests</h1>
+            {/* <p className="text-gray-600 mt-1 text-sm sm:text-base">View and manage all your service requests in one place</p> */}
           </div>
           <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
             <Button variant="outline" size="sm" onClick={handleRefresh} className="flex-1 sm:flex-none hover:bg-background hover:text-black">

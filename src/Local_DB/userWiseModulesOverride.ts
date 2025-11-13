@@ -83,11 +83,11 @@ export const modulesOverride = {
          return;
        }
      },
-     "software assets": {
-       "action": (module) => {  // Hide this module
-         return;
-       }
-     },
+    //  "software assets": {
+    //    "action": (module) => {  // Hide this module
+    //      return;
+    //    }
+    //  },
      "mis reports": {
        "action": (module) => {  // Hide this module
          return;
@@ -151,13 +151,21 @@ export const modulesOverride = {
 
      "service desk": {
        "action": (module) => {  // Add few childrren
-         module.Children = [... module.Children ,
-        
-           {
+        let data=  module.Children 
+        // data.forEach(element => {
+        // element.ModuleName
+        // });
+ 
+        const index = data.findIndex(obj => obj.ModuleName === "All Service Requests"); // find the index of target object
+
+if (index !== -1) {
+  data.splice(index + 1, 0,    {
              "ModuleId": 2,
              "ModuleName": "Ticket Progress Dashboard"
-           }
-         ];
+           }); // insert newObj after it
+}
+
+        
          return module;
        },
      },

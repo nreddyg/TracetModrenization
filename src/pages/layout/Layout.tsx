@@ -55,7 +55,7 @@ interface NavItem {
 }
 const icons={
 
-"masters":Building2, "servicedesk":Headphones, "fixedassets":Building2, "depreciation":DollarSign, "utilities":Building2, "cwip":Building2, "procurement":Building2, "consumables":Building2, "physicalverification":Building2,"settings":Settings
+"masters":Building2, "servicedesk":Headphones, "fixedassets":Building2, "depreciation":DollarSign, "utilities":Building2, "cwip":Building2, "procurement":Building2, "consumables":Building2, "physicalverification":Building2,"settings":Settings,"softwareassets":Building2
 
 }
 
@@ -679,7 +679,7 @@ const navigation: NavItem[] = [
 
 
 
-const parentModules = ["masters", "servicedesk", "fixedassets", "depreciation", "utilities", "cwip", "procurement", "consumables", "physicalverification","settings"]
+const parentModules = ["masters", "servicedesk", "fixedassets", "depreciation", "utilities", "cwip", "procurement", "consumables", "physicalverification","settings","softwareassets"]
 const Layout = () => {
   console.log("layout")
     const location = useLocation();
@@ -756,6 +756,20 @@ const Layout = () => {
     }
     const settingMenus = (data) => {
     console.log(data)
+    data.push( {
+        "ModuleId": 1,
+        "ModuleName": "Software Assets",
+        "Children": [
+            {
+                "ModuleId": 1,
+                "ModuleName": "Asset Registry"
+            },
+            {
+                "ModuleId": 2,
+                "ModuleName": "License Assignment"
+            },          
+        ]
+    })
     let regExp=/^\/layout(\/+|\?+\/?)?$/
     let settingsPath=""
     const result = formattingMenuAPIData(data)
@@ -811,7 +825,7 @@ const Layout = () => {
     // setSettingsData(settingsList)
     // settingsPath && setSettingsIndexPath(settingsPath)
     // dispatch(updateSettingsMenueList(settingsList))
-    console.log(result.children,"data")
+    result.children.push(result.children.shift());
     setMenuList(result.children)
   }
   const formattingMenuAPIData = (data, parent = '', currentPath = '', pathsArray = [], settingsPaths = []) => {

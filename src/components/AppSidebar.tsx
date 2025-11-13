@@ -828,7 +828,7 @@ const AppSidebar: React.FC<MyComponentProps> = ({navigation}) => {
                     <SidebarMenuSubItem key={child.label}>
                       <SidebarMenuSubButton asChild isActive={isActive(child.link)}>
                         <div>
-                          <Link to={child.link} className="flex items-center space-x-2">
+                          <Link to={`/layout/${child.link}`} className="flex items-center space-x-2">
                             {child?.icon ? <child.icon className="h-3 w-3" /> : <pre></pre>}
                             <span
                               className="truncate"

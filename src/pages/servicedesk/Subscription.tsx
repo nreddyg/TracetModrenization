@@ -934,9 +934,10 @@ const SubscriptionManagement = () => {
           <div className="flex">
             <ReusableButton
               variant="text"
+              title='Edit'
               onClick={() => { console.log(row?.original); navigate('/service-desk/payment-details', { state: { subscriptionData: row?.original } }) }}
             >
-              <Edit height={18}
+              <Edit height={18} className="h-4 w-4 text-blue-600"
               />
             </ReusableButton>
           </div>

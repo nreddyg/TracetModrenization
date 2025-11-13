@@ -142,6 +142,7 @@ const Store = () => {
                     <ReusableButton
                         variant="text"
                         size="small"
+                        title='Edit'
                         onClick={() => { setSelectedStore(row.original); setRecordToEditId(row.original.StoreId); fetchStoreDataByStoreId(companyId, row.original.StoreId) }}
                     >
                         <Edit className="h-4 w-4 text-blue-600" />
@@ -149,6 +150,7 @@ const Store = () => {
                     <ReusableButton
                         variant="text"
                         size="small"
+                        title='Delete'
                         danger
                         icon={<Trash2 className="h-4 w-4" />}
                         onClick={() => { setIsDelModalOpen(true); setRecordToEditId(row.original.StoreId) }}

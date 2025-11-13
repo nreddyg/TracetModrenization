@@ -507,7 +507,7 @@ const UserGroups = () => {
         {/* User Group List with ReusableTable */}
         <Card className="border-0 shadow-sm">
           <CardHeader className="pb-2 pt-2">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
               <CardTitle className="text-base font-semibold">
                 User Group List
               </CardTitle>
@@ -534,7 +534,7 @@ const UserGroups = () => {
               actions={tableActions}
               permissions={tablePermissions}
               title=""
-              onRefresh={handleRefresh}
+              // onRefresh={handleRefresh}
               enableSearch={false}
               enableSelection={false}
               enableExport={true}

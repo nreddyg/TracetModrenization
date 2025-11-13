@@ -1899,8 +1899,8 @@ const calculated = Math.max(actualWidth, minCharsWidth);
                   variant="outline"
                   size="sm"
                   className={cn(
-                    "flex items-center justify-center gap-1 px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-100 transition",
-                    column.getIsSorted() ? "bg-gray-50" : ""
+                    "flex items-center justify-center gap-1 px-3 py-1.5 rounded-md border border-gray-200 bg-white hover:bg-gray-50 transition",
+                    // column.getIsSorted() ? "bg-gray-50" : ""
                   )}
                   onClick={() => {
                     const isSorted = column.getIsSorted();
@@ -1935,7 +1935,7 @@ const calculated = Math.max(actualWidth, minCharsWidth);
             {/* Filtering */}
             {enableFiltering && column.getCanFilter() && (
               <div className="space-y-2">
-                <label className="text-xs font-medium text-muted-foreground">Filter</label>
+                <label className="text-sm pt-1 font-medium">Filter</label>
 
                 <ReusableMultiSelect
                   options={options}
@@ -2087,7 +2087,7 @@ const calculated = Math.max(actualWidth, minCharsWidth);
           <div className="flex items-center gap-2">
             {customActions}
             {onRefresh && (
-              <Button variant="outline" size="sm" onClick={onRefresh}>
+              <Button variant="outline" size="sm" onClick={onRefresh} className="flex-1 sm:flex-none hover:bg-background hover:text-black">
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Refresh
               </Button>

@@ -440,7 +440,7 @@ const UserGroups = () => {
             icon={<Plus className="h-3 w-3" />}
             iconPosition="left"
             onClick={handleAddUserGroup}
-            className="whitespace-nowrap"
+            className="whitespace-nowrap btn-submit-style"
           >Add User Group
           </ReusableButton>
           }

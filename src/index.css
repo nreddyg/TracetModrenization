@@ -135,9 +135,39 @@
  
   div {
     font-size: 15px
-  }
- 
+  } 
 }
+
+  .btn-submit-style{
+  background-color: #f47e27;
+  color: hsl(210 40% 98%);
+  font-size: 0.875rem;
+  font-weight: 500; 
+  border-color: hsl(214.3 31.8% 91.4%);
+  padding-left: 0.75rem !important;
+  padding-right: 0.75rem !important;
+  transition: background-color 0.2s ease-in-out;
+  border: 0 !important;
+  }
+  .btn-submit-style:hover{
+    background-color: #f47e27 !important;
+    color: hsl(210 40% 98%) !important
+  }
+
+  .btn-reset-clear-style{
+    background-color: hsl(238 73% 97%) !important;
+    color: #000;
+    font-size: 0.875rem;
+    border-color: hsl(214.3 31.8% 91.4%);
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+    border: hsl(214.3 31.8% 91.4%) !important;
+  }
+  .btn-reset-clear-style:hover{
+    background-color: hsl(238 73% 97%) !important;
+    color: #000 !important;
+    border: hsl(214.3 31.8% 91.4%) !important;
+  }
 }
 
 @keyframes fadeIn {

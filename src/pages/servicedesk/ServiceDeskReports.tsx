@@ -32,6 +32,7 @@ import { GetServiceRequestAssignToLookups, getSRBranchList, getSRCustomerLookups
 import ReusableTable from '@/components/ui/reusable-table';
 import dayjs from 'dayjs';
 import { ReusableButton } from '@/components/ui/reusable-button';
+import { ScrollArea } from '@/components/ui/scroll-area';
 interface MultiSelectConfig {
   isHierarchy?: boolean;
   labelClassName?: string;
@@ -303,7 +304,11 @@ const ServiceDeskReports = () => {
     await getServiceRequestDetailsReport(compId, BranchID, srType, srNo, srStatus, requestedBy, fromDate, toDate, customer, AssigneeUsers, AssigneeGroups, severity, priority, SLAStatus, dept, mainCategory, subCategory, assetCode).then(res => {
       if (res.success && res.data.status === undefined) {
         const tabData = res.data.ServiceRequestDetailsReport
+        if(tabData.length > 0){
         setDataSourse(tabData)
+        }else{
+        msg.warning("no records available");
+        }
       } else {
         setDataSourse([]);
         msg.warning(`${res.data.message}`)
@@ -1053,7 +1058,7 @@ const ServiceDeskReports = () => {
   };
 
   return (
-    <div className="h-full overflow-y-scroll  bg-gray-50">
+    <ScrollArea className="h-full  bg-gray-50">
       {/* Compact Header */}
       <header className="bg-white border-b px-6 py-3 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3"
       >
@@ -1149,19 +1154,21 @@ const ServiceDeskReports = () => {
                 </div>
               }
             >
-              <div className="space-y-2 h-full overflow-y-hidden">
-                {/* Primary Filters */}
-                <div className='px-1'>
-                  <h4 className="text-sm font-semibold text-gray-900 mb-3">Primary Filters</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {activeTab === "Service Request SLA Met/SLA Violated"
-                      ? getFieldsByNames(["slastatus", "assignedto", "serviceReqTypeSLA"]).map(renderField)
-                      : activeTab === "Service Request Detail History"
-                        ? getFieldsByNames(["ServiceRequestDetailHistory"]).map(renderField)
-                        : getFieldsByNames(["ServiceRequestType", "ServiceRequest", "Status"]).map(renderField)
-                    }
+              <div className="space-y-2 h-full">
+                <ScrollArea>
+                  {/* Primary Filters */}
+                  <div className='px-1'>
+                    <h4 className="text-sm font-semibold text-gray-900 mb-3">Primary Filters</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {activeTab === "Service Request SLA Met/SLA Violated"
+                        ? getFieldsByNames(["slastatus", "assignedto", "serviceReqTypeSLA"]).map(renderField)
+                        : activeTab === "Service Request Detail History"
+                          ? getFieldsByNames(["ServiceRequestDetailHistory"]).map(renderField)
+                          : getFieldsByNames(["ServiceRequestType", "ServiceRequest", "Status"]).map(renderField)
+                      }
+                    </div>
                   </div>
-                </div>
+                </ScrollArea>
                 {activeTab !== "Service Request Detail History" ?
                   <Accordion type="single" collapsible className="w-full">
                     <AccordionItem value="additional-filters">
@@ -1261,7 +1268,7 @@ const ServiceDeskReports = () => {
           </div>
         </div>
       </div>
-    </div>
+    </ScrollArea>
   );
 
 

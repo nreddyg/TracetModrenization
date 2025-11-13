@@ -1746,6 +1746,7 @@ const TicketView = () => {
                   size="small"
                   onClick={() => handleEdit('edit')}
                   icon={<Edit className="h-4 w-4" />}
+                  className='btn-submit-style'
                 >
                   Edit
                 </ReusableButton>
@@ -1754,6 +1755,7 @@ const TicketView = () => {
                   <ReusableButton
                     variant="text"
                     size="small"
+                    className='btn-reset-clear-style'
                     onClick={() => handleEdit('cancel')}
                     icon={<X className="h-4 w-4" />}
                   >
@@ -1773,6 +1775,7 @@ const TicketView = () => {
                       }
                     }
                     icon={<Save className="h-4 w-4" />}
+                    className='btn-submit-style'
                   >
                     {isCreateMode ? "Save" : "Update"}
                   </ReusableButton>

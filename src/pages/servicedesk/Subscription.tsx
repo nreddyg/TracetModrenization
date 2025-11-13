@@ -1048,7 +1048,8 @@ const SubscriptionManagement = () => {
           <ReusableButton
             size="small"
             // variant="primary"
-            className='bg-primary h-[2.38rem] hover:bg-blue-700  text-white'
+            // className='bg-primary h-[2.38rem] hover:bg-blue-700  text-white'
+            className='btn-submit-style'
             onClick={() => { navigate('/service-desk/create-ticket') }}
           >
             New Service Request
@@ -1068,14 +1069,14 @@ const SubscriptionManagement = () => {
             <h1 className="text-lg font-semibold text-gray-900">Subscription</h1>
             <p className="text-sm text-gray-600 mt-0.5">Subscription Management</p>
           </div>
-          <div className='flex gap-2 w-full sm:w-64 justify-center'>
+          <div className='flex gap-2 justify-center'>
             <ReusableButton
               size="small"
               variant="primary"
               icon={<Plus className="h-3 w-3" />}
               iconPosition="left"
               onClick={handleNavigation}
-              className="whitespace-nowrap"
+              className="whitespace-nowrap btn-submit-style"
 
             >
               Payment Details
@@ -1086,7 +1087,7 @@ const SubscriptionManagement = () => {
               icon={<></>}
               // iconPosition="left"
               onClick={() => downloadExcel(dataSource, columns)}
-              className="whitespace-nowrap"
+              className="btn-submit-style"
             >
               Export to Excel
             </ReusableButton>

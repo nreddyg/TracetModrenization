@@ -675,7 +675,10 @@ const Configuration = () => {
     <div className="h-full bg-gray-50 overflow-y-scroll">
       <header className="bg-white border-b px-6 py-3 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div className="flex items-center gap-3">
-          <Button size="sm" className="bg-primary h-[2.38rem] hover:bg-blue-700  text-white" onClick={()=>navigate('/service-desk/create-ticket')}>
+          <Button 
+          size="sm" 
+          className="btn-submit-style" 
+          onClick={()=>navigate('/service-desk/create-ticket')}>
             <span className="hidden sm:inline">New Service Request</span>
             <span className="sm:hidden">New Request</span>
           </Button>
@@ -731,7 +734,8 @@ const Configuration = () => {
                     onClick={handleSubmit((data) => { handleSave(data, "configuration") })}
                     iconPosition="left"
                     size="middle"
-                    className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+                    // className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+                    className="btn-submit-style"
                   >
                     Save
                   </ReusableButton>
@@ -769,7 +773,8 @@ const Configuration = () => {
                     onClick={handleSubmit((data) => { handleSave(data, "ServiceRequestType") })}
                     iconPosition="left"
                     size="middle"
-                    className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+                    // className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+                    className='btn-submit-style'
                   >
                     {isEditMode && currentTab === 'service-request-type' ? 'Update' : 'Save'}
                   </ReusableButton>
@@ -779,6 +784,7 @@ const Configuration = () => {
                     onClick={() => handleReset('')}
                     iconPosition="left"
                     size="middle"
+                    className='btn-reset-clear-style'
                   >
                     Cancel
                   </ReusableButton>
@@ -801,7 +807,7 @@ const Configuration = () => {
                   pageSize={10}
                   emptyMessage="No Data found"
                   storageKey="service-request-type-list-table"
-                  enableColumnPinning
+                  // enableColumnPinning
                 />
               </CardContent>
             </Card>
@@ -823,7 +829,8 @@ const Configuration = () => {
                     onClick={handleSubmit((data) => { handleSave(data, "AddNewStatus") })}
                     iconPosition="left"
                     size="middle"
-                    className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+                    // className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+                    className='btn-submit-style'
                   >
                     {currentTab === 'service-request-status' && isEditStatusMode ? 'Update' : 'Save'}
                   </ReusableButton>
@@ -833,6 +840,7 @@ const Configuration = () => {
                     onClick={() => handleReset('AddNewStatus')}
                     iconPosition="left"
                     size="middle"
+                    className='btn-reset-clear-style'
                   >
                     Cancel
                   </ReusableButton>
@@ -861,7 +869,8 @@ const Configuration = () => {
                       onClick={handleUpdateStatusSequence}
                       iconPosition="left"
                       size="middle"
-                      className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+                      // className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+                      className='btn-submit-style'
                     >
                       Update Index Sequence
                     </ReusableButton>

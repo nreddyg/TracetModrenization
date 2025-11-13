@@ -299,33 +299,33 @@ const navigation: NavItem[] = [
   //     //     },
   //     //   ],
   //     // },
-      // {
-      //   label: 'Depreciation',
-      //   icon: DollarSign,
-      //   link: '/depreciation',
-      //   children: [
-      //     {
-      //       label: 'Process',
-      //       icon: DollarSign,
-      //       link: '/depreciation/process',
-      //     },
-      //     {
-      //       label: 'Adjustments',
-      //       icon: DollarSign,
-      //       link: '/depreciation/adjustments',
-      //     },
-      //     {
-      //       label: 'Analysis',
-      //       icon: DollarSign,
-      //       link: '/depreciation/analysis',
-      //     },
-      //     {
-      //       label: 'Reports',
-      //       icon: FileText,
-      //       link: '/depreciation/reports',
-      //     },
-      //   ],
-      // },
+  //     // {
+  //     //   label: 'Depreciation',
+  //     //   icon: DollarSign,
+  //     //   link: '/depreciation',
+  //     //   children: [
+  //     //     {
+  //     //       label: 'Process',
+  //     //       icon: DollarSign,
+  //     //       link: '/depreciation/process',
+  //     //     },
+  //     //     {
+  //     //       label: 'Adjustments',
+  //     //       icon: DollarSign,
+  //     //       link: '/depreciation/adjustments',
+  //     //     },
+  //     //     {
+  //     //       label: 'Analysis',
+  //     //       icon: DollarSign,
+  //     //       link: '/depreciation/analysis',
+  //     //     },
+  //     //     {
+  //     //       label: 'Reports',
+  //     //       icon: FileText,
+  //     //       link: '/depreciation/reports',
+  //     //     },
+  //     //   ],
+  //     // },
   //     // {
   //     //   label: 'Consumables',
   //     //   icon: Package,
@@ -498,23 +498,23 @@ const navigation: NavItem[] = [
           }
         ]
       },
-      // {
-      //   label: 'Depreciation',
-      //   // icon: Building2,
-      //   link: '/depreciation',
-      //   children: [
-      //     {
-      //       label: 'Books',
-      //       icon: RxDotFilled,
-      //       link: '/masters/depreciation/book',
-      //     },
-      //     {
-      //       label: 'Asset Category Mapping With Book Category',
-      //       icon: RxDotFilled,
-      //       link: '/masters/depreciation/assetcategorybookcategorymapping',
-      //     },
-      //   ],
-      // },
+      {
+        label: 'Depreciation',
+        // icon: Building2,
+        link: '/depreciation',
+        children: [
+          {
+            label: 'Books',
+            icon: RxDotFilled,
+            link: '/masters/depreciation/book',
+          },
+          {
+            label: 'Asset Category Mapping With Book Category',
+            icon: RxDotFilled,
+            link: '/masters/depreciation/assetcategorybookcategorymapping',
+          },
+        ],
+      },
       {
         label: 'Consumables',
         // icon: Building2,
@@ -611,9 +611,9 @@ const navigation: NavItem[] = [
     link: '/settings/system-configuration',
     children: [
       {
-        label: 'SMTP Configuration',
+        label: 'System Configuration',
         icon: RxDotFilled,
-        link: '/settings/smtp-configuration',
+        link: '/settings/system-configuration',
       },
       // {
       //   label: 'User Management',
@@ -630,26 +630,6 @@ const navigation: NavItem[] = [
       //   icon: Settings,
       //   link: '/settings/advanced-setup',
       // },
-    ],
-  },
-
-   {
-    label: 'Depreciation',
-    icon: DollarSign,
-    link: '/depreciation',
-    children: [
-      {
-        label: 'Forex Adjustment',
-        icon: DollarSign,
-        link: '/depreciation/forexadjustment',
-      },
-
-       {
-        label: 'Import Asset Wise',
-        icon: DollarSign,
-        link: '/depreciation/importassetwise',
-      },
-      
     ],
   },
 ]
@@ -1020,9 +1000,9 @@ const AppSidebar: React.FC = () => {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="py-[16px] shadow-[0_2px_8px_0_rgba(0,0,0,0.05)]">
-        <div  className="flex items-center space-x-2 px-2 py-1">
+        <Link to="/" className="flex items-center space-x-2 px-2 py-1">
           {!collapsed ? <div className="text-xl font-bold text-gray-300">Tracet</div> : <div>T</div>}
-        </div>
+        </Link>
       </SidebarHeader>
 
       <SidebarContent>

@@ -25,7 +25,7 @@ const NewServiceTicket = () => {
     
     dispatch(addTicket(ticketData));
     toast.success('Service ticket created successfully!');
-    navigate('/service-desk/my-workspace');
+    navigate('/layout/service-desk/my-workspace');
   };
 
   return (

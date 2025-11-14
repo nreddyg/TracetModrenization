@@ -188,7 +188,7 @@ const FixedHeader: React.FC = () => {
       localStorage.removeItem("Branch");
       localStorage.removeItem("BranchId");
       localStorage.removeItem("BranchCode");
-      navigate('/service-desk/all-requests');
+      navigate('/layout/service-desk/all-requests');
     } else if (name === "Branch") {
       setSelectedBranch(value);
       dispatch(setBranch(value || 'All'));
@@ -215,7 +215,7 @@ const FixedHeader: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
  
   const changePassword = () => {
-    navigate('/changePassword');
+    navigate('/changepassword');
   }
  
   const logoutFunction = () => {

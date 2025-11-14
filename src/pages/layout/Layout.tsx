@@ -733,6 +733,7 @@ const Layout = () => {
  )
       const [menuList, setMenuList] = useState([])
 
+      console.log("clg",LoggedInUser)
   useLayoutEffect(() => {
     if (companyId && userId) {
       if (roleModuleUsedParams.companyId !== companyId || roleModuleUsedParams.userId !==String(userId)) {
@@ -765,23 +766,32 @@ const Layout = () => {
             {
                 "ModuleId": 2,
                 "ModuleName": "License Assignment"
-            },          
+            },  
+            {
+                "ModuleId": 3,
+                "ModuleName": "Usage Tracking"
+            },  
+              {
+                "ModuleId": 4,
+                "ModuleName": "Reports"
+            },        
         ]
     })
     let regExp=/^\/layout(\/+|\?+\/?)?$/
     let settingsPath=""
     const result = formattingMenuAPIData(data)
-    console.log("result",result)
-    // if (result.settingsPaths?.length > 0) {
-    //   result.settingsPaths[0].index = true
-    //   settingsPath=`/layout/settingspagelayout/${result.settingsPaths[0].path}`
-    //   result.pathArray.push({
-    //     path: 'settingspagelayout',
-    //     component: <SettingsPageLayout />,
-    //     index: false,
-    //     children: result.settingsPaths
-    //   })
-    // }
+
+    if (result.settingsPaths?.length > 0) {
+      // result.settingsPaths[0].index = true
+      // settingsPath=`/layout/settingspagelayout/${result.settingsPaths}`
+         result.pathArray.push(...result.settingsPaths)
+      // result.pathArray.push({
+      //   path: 'settingspagelayout',
+      //   component: <SettingsPageLayout />,
+      //   index: false,
+      //   children: result.settingsPaths
+      // })
+    }
     result.pathArray.push({
       path: '*',
       component: <NotFound />,
@@ -823,7 +833,7 @@ const Layout = () => {
     // settingsPath && setSettingsIndexPath(settingsPath)
     // dispatch(updateSettingsMenueList(settingsList))
     result.children.push(result.children.shift());
-    setMenuList(result.children)
+    setMenuList(result.children.filter(f=>f))
   }
   const formattingMenuAPIData = (data, parent = '', currentPath = '', pathsArray = [], settingsPaths = []) => {
     parent = parent.toLowerCase().replace(/\s+/g, '')
@@ -850,6 +860,9 @@ const Layout = () => {
       if (module.ModuleName.toLowerCase() === "service desk" && !(LoggedInUser.IsServiceDesk)) {
         return;
       }
+      if(module.ModuleName.toLowerCase()=="software assets" && !(LoggedInUser.RoleName==="Root Admin")){
+ return;
+      }
       
       if (modulesOverride[module.ModuleName.toLowerCase()]) {
         let res = modulesOverride[module.ModuleName.toLowerCase()]?.action(module,parent)
@@ -859,15 +872,15 @@ const Layout = () => {
       }
 
       if (hasNoChildren(module)) {
-        // if (modulePath?.split("-")[0] === "settings") {
-        //   if (appRoutesObj[modulePath]) { settingsPaths.push(appRoutesObj[modulePath]) }
-        // } else {
+        if (modulePath?.split("-")[0] === "settings") {
+          if (appRoutesObj[modulePath]) { settingsPaths.push(appRoutesObj[modulePath]) }
+        } else {
           if (appRoutesObj[modulePath])
             pathsArray.push(appRoutesObj[modulePath])
           if (appRoutesObj[modulePath]?.dependent) {
             pathsArray.push(...appRoutesObj[modulePath].dependent)
           }
-        // }
+        }
       }
       const menuItem:NavItem = {
         // id: module.ModuleId,

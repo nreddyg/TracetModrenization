@@ -353,8 +353,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-         <MessageProvider duration={3} maxCount={5} offset={24}>
-         {/* <AnimatedRoutes /> */}
+         <MessageProvider duration={5} maxCount={5} offset={24}>
            <Routes>
       <Route  path='/login' element={<Login />}/>
       {/* <Route  path='/forgot' element={<ForgotPage/>}/> */}

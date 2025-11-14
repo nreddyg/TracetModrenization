@@ -466,7 +466,7 @@ const AdditionalDepreciation = () => {
                         <ReusableButton
                             variant="text"
 
-                            onClick={() => { navigate("/masters/depreciation/book") }}
+                            onClick={() => { navigate("/layout/masters/depreciation/book") }}
                             icon={""}
                         >
                             Back

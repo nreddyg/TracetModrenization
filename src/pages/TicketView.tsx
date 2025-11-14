@@ -2041,7 +2041,7 @@ const TicketView = () => {
                       <CardContent className="p-0">
                         <Tabs defaultValue="details" className="w-full">
                           <TabsList className="grid w-full grid-cols-3 rounded-t-lg">
-                            <TabsTrigger value="details" className="text-xs data-[state=active]:shadow-lg data-[state=active]:shadow-gray-300">Details</TabsTrigger>
+                            <TabsTrigger value="details" className="text-sm data-[state=active]:shadow-lg data-[state=active]:shadow-gray-200">Details</TabsTrigger>
                             {!isCreateMode && <TabsTrigger value="linkedissues" className="text-xs data-[state=active]:shadow-lg data-[state=active]:shadow-gray-300">Links</TabsTrigger>}
                           </TabsList>
 

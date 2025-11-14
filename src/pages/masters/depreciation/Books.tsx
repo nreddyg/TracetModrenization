@@ -227,7 +227,7 @@ getBookDataAPI()
                          //   icon={<Edit className="h-4 w-4" />}
                          onClick={() => { 
                           // setSelectedStore(row.original);setRecordToEditId(row.original.StoreId);fetchStoreDataByStoreId(companyId,row.original.StoreId) 
-                          navigate(`/masters/depreciation/book/addbook/${row.original.BookID}`)
+                          navigate(`/layout/masters/depreciation/book/addbook/${row.original.BookID}`)
                         }}
                      >
                          Edit
@@ -325,7 +325,7 @@ const handleCancel=()=>{
                     <ReusableButton
               variant="primary"
               className="bg-orange-500 hover:bg-orange-600 border-orange-500"
-              onClick={()=>{navigate("/masters/depreciation/book/additionaldepreciation")}}
+              onClick={()=>{navigate("/layout/masters/depreciation/book/additionaldepreciation")}}
             >
               Additional Depreciation
             </ReusableButton>
@@ -333,7 +333,7 @@ const handleCancel=()=>{
                   variant="primary"
                   icon={<Plus className="h-4 w-4" />}
                   className="bg-orange-500 hover:bg-orange-600 border-orange-500"
-                  onClick={()=>{navigate("/masters/depreciation/book/addbook")}}
+                  onClick={()=>{navigate("/layout/masters/depreciation/book/addbook")}}
                 >
                   Add
                 </ReusableButton>

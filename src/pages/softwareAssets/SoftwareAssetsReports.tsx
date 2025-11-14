@@ -32,6 +32,7 @@ import { GetServiceRequestAssignToLookups, getSRBranchList, getSRCustomerLookups
 import ReusableTable from '@/components/ui/reusable-table';
 import dayjs from 'dayjs';
 import { ReusableButton } from '@/components/ui/reusable-button';
+import { BsExclamationTriangle } from 'react-icons/bs';
 interface MultiSelectConfig {
   isHierarchy?: boolean;
   labelClassName?: string;
@@ -315,7 +316,7 @@ function buildColumnsFromApi<T extends Record<string, any>>(
   // }
 
 
-  async function fetchServiceRequestDetailsReport(compId: number, BranchID: string, srType: string, srNo: string, srStatus: string, requestedBy: string, fromDate: string, toDate: string, customer: string, AssigneeUsers: string, AssigneeGroups: string, severity: string, priority: string, SLAStatus: string, dept: string, mainCategory: string, subCategory: string, assetCode: string) {
+  async function fetchServiceRequestDetailsReport(compId: string, BranchID: string, srType: string, srNo: string, srStatus: string, requestedBy: string, fromDate: string, toDate: string, customer: string, AssigneeUsers: string, AssigneeGroups: string, severity: string, priority: string, SLAStatus: string, dept: string, mainCategory: string, subCategory: string, assetCode: string) {
     // dispatch(setLoading(true))
     await getServiceRequestDetailsReport(compId, BranchID, srType, srNo, srStatus, requestedBy, fromDate, toDate, customer, AssigneeUsers, AssigneeGroups, severity, priority, SLAStatus, dept, mainCategory, subCategory, assetCode).then(res => {
       if (res.success && res.data.status === undefined) {
@@ -327,7 +328,7 @@ function buildColumnsFromApi<T extends Record<string, any>>(
     }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
   }
 
-  async function fetchServiceRequestSLAmetViolatedReport(compId: number, BranchID: string, srType: string, srNo: string, srStatus: string, requestedBy: string, fromDate: string, toDate: string, customer: string, AssigneeUsers: string, AssigneeGroups: string, severity: string, priority: string, SLAStatus: string, dept: string, mainCategory: string, subCategory: string, assetCode: string) {
+  async function fetchServiceRequestSLAmetViolatedReport(compId: string, BranchID: string, srType: string, srNo: string, srStatus: string, requestedBy: string, fromDate: string, toDate: string, customer: string, AssigneeUsers: string, AssigneeGroups: string, severity: string, priority: string, SLAStatus: string, dept: string, mainCategory: string, subCategory: string, assetCode: string) {
     dispatch(setLoading(true))
     await getServiceRequestSLAMetViolatedReport(compId, BranchID, srType, srNo, srStatus, requestedBy, fromDate, toDate, customer, AssigneeUsers, AssigneeGroups, severity, priority, SLAStatus, dept, mainCategory, subCategory, assetCode).then(res => {
       if (res.success && res.data.status === undefined) {
@@ -356,7 +357,7 @@ function buildColumnsFromApi<T extends Record<string, any>>(
   //     }
   //   }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
   // }
-  async function fetchAdditionalFieldConfigurationDetails(compId: number) {
+  async function fetchAdditionalFieldConfigurationDetails(compId: string) {
     dispatch(setLoading(true))
     await getAdditionaliFieldsConfigurationDetails(compId).then(res => {
       if (res.success && res.data.status === undefined) {
@@ -369,7 +370,7 @@ function buildColumnsFromApi<T extends Record<string, any>>(
       }
     }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
   }
-  async function fetchServiceRequestDetailsColumns(compId: number) {
+  async function fetchServiceRequestDetailsColumns(compId: string) {
     dispatch(setLoading(true))
     await getServiceRequestDetailsColumns(compId).then(res => {
       if (res.success && res.data.status === undefined) {
@@ -386,7 +387,7 @@ function buildColumnsFromApi<T extends Record<string, any>>(
       fetchServiceRequestDetailsReport(companyId, formatToString(watch("LevelFiveCompany")), formatToString(watch("ServiceRequestType")), formatToString(watch("ServiceRequest")), formatToString(watch("Status")), formatToString(watch("RequestedBy")), "", "", formatToString(watch("Customer")), formatToString(watch("AssignTo")["Users"]), formatToString(watch("AssignTo")["User Group"]), formatToString(watch("Severity")), formatToString(watch("Priority")), formatToString(watch("slastatus")), formatToString(watch("LevelFiveDepartment")), formatToString(watch("MainCategory")), formatToString(watch("SubCategory")), formatToString(watch("AssetCode")))
     })
   }
-  async function fetchServiceRequestSLAViolatedColumns(compId: number) {
+  async function fetchServiceRequestSLAViolatedColumns(compId: string) {
     dispatch(setLoading(true))
     await getServiceRequestSLAMetViolatedColumns(compId).then(res => {
       if (res.success && res.data.status === undefined) {
@@ -582,7 +583,7 @@ function buildColumnsFromApi<T extends Record<string, any>>(
 
 
   // fetching SubCategories list based on main Asset selected
-  async function getSubCategoryDetails(compId: number, id: number | null) {
+  async function getSubCategoryDetails(compId: string, id: number | null) {
     dispatch(setLoading(true));
     try {
       if (id == null) {
@@ -911,7 +912,7 @@ function buildColumnsFromApi<T extends Record<string, any>>(
   // }
 
   //postServiceRequestDetailsColumns met violated post api integration
-  async function postServiceRequestColumns(compId: number, data: any) {
+  async function postServiceRequestColumns(compId: string, data: any) {
     dispatch(setLoading(true));
     await postServiceRequestDetailsColumns(compId, data).then(res => {
       if (res.data.status === true) {
@@ -928,7 +929,7 @@ function buildColumnsFromApi<T extends Record<string, any>>(
   }
 
   //SLA met violated post api integration
-  async function postSLAMetViolatedColumns(compId: number, data: any) {
+  async function postSLAMetViolatedColumns(compId: string, data: any) {
     dispatch(setLoading(true));
     await postServiceRequestMetViolatedColumns(compId, data).then(res => {
       if (res.data.status === true) {
@@ -1069,199 +1070,209 @@ function buildColumnsFromApi<T extends Record<string, any>>(
   };
 
   return (
-    <div className="h-full overflow-y-auto  bg-gray-50">
-      {/* Compact Header */}
-      <header className="bg-white border-b px-6 py-3 shadow-sm">
-        <div className="flex items-center gap-4">
-          <SidebarTrigger />
-          <div>
-            <h1 className="text-xl font-semibold text-gray-900">Software Assets Reports</h1>
-            <p className="text-sm text-gray-600">Generate comprehensive reports with advanced filtering and customization options</p>
-          </div>
-        </div>
-      </header>
+    // <div className="h-full overflow-y-auto  bg-gray-50">
+    //   {/* Compact Header */}
+    //   <header className="bg-white border-b px-6 py-3 shadow-sm">
+    //     <div className="flex items-center gap-4">
+    //       <SidebarTrigger />
+    //       <div>
+    //         <h1 className="text-xl font-semibold text-gray-900">Software Assets Reports</h1>
+    //         <p className="text-sm text-gray-600">Generate comprehensive reports with advanced filtering and customization options</p>
+    //       </div>
+    //     </div>
+    //   </header>
 
-      <div className="px-6 pb-6 pt-6 space-y-6 ">
-        <div className="grid grid-cols-1 xl:grid-cols-4 gap-6 ">
-          {/* Enhanced Left Sidebar - Report Types */}
-          <div className="xl:col-span-1">
-            <Card className="sticky top-6">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Settings2 className="h-5 w-5 text-blue-600" />
-                  Report Types
-                </CardTitle>
-                <div className="relative">
-                  <Search className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                  <Input
-                    placeholder="Search reports..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-1 max-h-96 overflow-y-auto">
-                {filteredReportTabs.map((tab) => (
-                  <button
-                    key={tab}
-                    onClick={() => { setActiveTab(tab); form.reset() }}
-                    className={cn(
-                      "w-full text-left px-3 py-3 rounded-lg text-sm transition-all duration-200 flex items-center gap-2",
-                      activeTab === tab
-                        ? "bg-orange-100 text-orange-700 font-medium border border-orange-200 shadow-sm"
-                        : "hover:bg-gray-100 text-gray-700 hover:text-gray-900"
-                    )}
-                  >
-                    <div className={cn(
-                      "w-2 h-2 rounded-full",
-                      activeTab === tab ? "bg-orange-500" : "bg-gray-300"
-                    )} />
-                    <span className="leading-tight">{tab}</span>
-                  </button>
-                ))}
-              </CardContent>
-            </Card>
-          </div>
+    //   <div className="px-6 pb-6 pt-6 space-y-6 ">
+    //     <div className="grid grid-cols-1 xl:grid-cols-4 gap-6 ">
+    //       {/* Enhanced Left Sidebar - Report Types */}
+    //       <div className="xl:col-span-1">
+    //         <Card className="sticky top-6">
+    //           <CardHeader className="pb-3">
+    //             <CardTitle className="text-lg flex items-center gap-2">
+    //               <Settings2 className="h-5 w-5 text-blue-600" />
+    //               Report Types
+    //             </CardTitle>
+    //             <div className="relative">
+    //               <Search className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+    //               <Input
+    //                 placeholder="Search reports..."
+    //                 value={searchTerm}
+    //                 onChange={(e) => setSearchTerm(e.target.value)}
+    //                 className="pl-10"
+    //               />
+    //             </div>
+    //           </CardHeader>
+    //           <CardContent className="space-y-1 max-h-96 overflow-y-auto">
+    //             {filteredReportTabs.map((tab) => (
+    //               <button
+    //                 key={tab}
+    //                 onClick={() => { setActiveTab(tab); form.reset() }}
+    //                 className={cn(
+    //                   "w-full text-left px-3 py-3 rounded-lg text-sm transition-all duration-200 flex items-center gap-2",
+    //                   activeTab === tab
+    //                     ? "bg-orange-100 text-orange-700 font-medium border border-orange-200 shadow-sm"
+    //                     : "hover:bg-gray-100 text-gray-700 hover:text-gray-900"
+    //                 )}
+    //               >
+    //                 <div className={cn(
+    //                   "w-2 h-2 rounded-full",
+    //                   activeTab === tab ? "bg-orange-500" : "bg-gray-300"
+    //                 )} />
+    //                 <span className="leading-tight">{tab}</span>
+    //               </button>
+    //             ))}
+    //           </CardContent>
+    //         </Card>
+    //       </div>
 
-          {/* Main Content */}
-          <div className="xl:col-span-3 space-y-6">
-            {/* Enhanced Filters Section */}
-            <FilterCard
-              actions={
-                <div className='flex items-center gap-3 xxs:flex-col xxs:justify-center xs2:flex-row md:flex-row lg:flex-row '>
+    //       {/* Main Content */}
+    //       <div className="xl:col-span-3 space-y-6">
+    //         {/* Enhanced Filters Section */}
+    //         <FilterCard
+    //           actions={
+    //             <div className='flex items-center gap-3 xxs:flex-col xxs:justify-center xs2:flex-row md:flex-row lg:flex-row '>
 
-                  <Button
-                    onClick={handleViewReport}
-                    disabled={isGeneratingReport}
-                    className="bg-blue-600 hover:bg-blue-700"
-                  >
-                    {isGeneratingReport ? (
-                      <>
-                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                        Generating...
-                      </>
-                    ) : (
-                      <>
-                        <Eye className="h-4 w-4 mr-2" />
-                        Generate Report
-                      </>
-                    )}
-                  </Button>
-                  <Button
-                    onClick={handleClearFilters}
-                    variant="outline"
-                  >
-                    Clear All
-                  </Button>
-                </div>
-              }
-            >
-              <div className="space-y-2 h-full overflow-y-hidden">
-                {/* Primary Filters */}
-                <div className='px-1'>
-                  <h4 className="text-sm font-semibold text-gray-900 mb-3">Primary Filters</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {activeTab === "Service Request SLA Met/SLA Violated"
-                      ? getFieldsByNames(["slastatus", "assignedto", "serviceReqTypeSLA"]).map(renderField)
-                      : activeTab === "Service Request Detail History"
-                        ? getFieldsByNames(["ServiceRequestDetailHistory"]).map(renderField)
-                        : getFieldsByNames(["ServiceRequestType", "ServiceRequest", "Status"]).map(renderField)
-                    }
-                  </div>
-                </div>
-                {activeTab !== "Service Request Detail History" ?
-                  <Accordion type="single" collapsible className="w-full">
-                    <AccordionItem value="additional-filters">
-                      <AccordionTrigger className="text-sm font-semibold text-gray-900 px-1">
-                        Additional Filters
-                      </AccordionTrigger>
-                      <AccordionContent>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-1">
-                          {activeTab === "Service Request SLA Met/SLA Violated"
-                            ? getFieldsByNames(["servicereqno", "LevelFiveCompanyinSLA", "Customersla", "slarequestedby", "statusinSLA", "severityinSLA", "priorityinSLA", "assetcode", "levelfivedepartment", 'maincategoryinSLA', 'subcategoryinSLA']).map(renderField)
-                            : getFieldsByNames(['RequestedBy', 'LevelFiveCompany', 'Customer', 'AssignTo', 'Severity', 'Priority', 'AssetCode', 'LevelFiveDepartment', 'MainCategory', 'SubCategory']).map(renderField)
-                          }
-                          {/* {getFieldsByNames(['RequestedBy', 'LevelFiveCompany', 'Customer', 'AssignTo', 'Severity', 'Priority', 'AssetCode', 'LevelFiveDepartment', 'MainCategory', 'SubCategory',]).map(renderField)} */}
-                        </div>
-                      </AccordionContent>
-                    </AccordionItem>
-                  </Accordion>
-                  : ""
-                }
-                {activeTab !== "Service Request Detail History" ?
-                  <div className='px-1'>
-                    {/* <h4 className="text-sm font-semibold text-gray-900 mb-3">Date Range</h4> */}
-                    {getFieldsByNames(['dateRange', 'dateRangeinSLA']).map(renderField)}
-                  </div>
-                  : ""
-                }
-              </div>
-            </FilterCard>
+    //               <Button
+    //                 onClick={handleViewReport}
+    //                 disabled={isGeneratingReport}
+    //                 className="bg-blue-600 hover:bg-blue-700"
+    //               >
+    //                 {isGeneratingReport ? (
+    //                   <>
+    //                     <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+    //                     Generating...
+    //                   </>
+    //                 ) : (
+    //                   <>
+    //                     <Eye className="h-4 w-4 mr-2" />
+    //                     Generate Report
+    //                   </>
+    //                 )}
+    //               </Button>
+    //               <Button
+    //                 onClick={handleClearFilters}
+    //                 variant="outline"
+    //               >
+    //                 Clear All
+    //               </Button>
+    //             </div>
+    //           }
+    //         >
+    //           <div className="space-y-2 h-full overflow-y-hidden">
+    //             {/* Primary Filters */}
+    //             <div className='px-1'>
+    //               <h4 className="text-sm font-semibold text-gray-900 mb-3">Primary Filters</h4>
+    //               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    //                 {activeTab === "Service Request SLA Met/SLA Violated"
+    //                   ? getFieldsByNames(["slastatus", "assignedto", "serviceReqTypeSLA"]).map(renderField)
+    //                   : activeTab === "Service Request Detail History"
+    //                     ? getFieldsByNames(["ServiceRequestDetailHistory"]).map(renderField)
+    //                     : getFieldsByNames(["ServiceRequestType", "ServiceRequest", "Status"]).map(renderField)
+    //                 }
+    //               </div>
+    //             </div>
+    //             {activeTab !== "Service Request Detail History" ?
+    //               <Accordion type="single" collapsible className="w-full">
+    //                 <AccordionItem value="additional-filters">
+    //                   <AccordionTrigger className="text-sm font-semibold text-gray-900 px-1">
+    //                     Additional Filters
+    //                   </AccordionTrigger>
+    //                   <AccordionContent>
+    //                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-1">
+    //                       {activeTab === "Service Request SLA Met/SLA Violated"
+    //                         ? getFieldsByNames(["servicereqno", "LevelFiveCompanyinSLA", "Customersla", "slarequestedby", "statusinSLA", "severityinSLA", "priorityinSLA", "assetcode", "levelfivedepartment", 'maincategoryinSLA', 'subcategoryinSLA']).map(renderField)
+    //                         : getFieldsByNames(['RequestedBy', 'LevelFiveCompany', 'Customer', 'AssignTo', 'Severity', 'Priority', 'AssetCode', 'LevelFiveDepartment', 'MainCategory', 'SubCategory']).map(renderField)
+    //                       }
+    //                       {/* {getFieldsByNames(['RequestedBy', 'LevelFiveCompany', 'Customer', 'AssignTo', 'Severity', 'Priority', 'AssetCode', 'LevelFiveDepartment', 'MainCategory', 'SubCategory',]).map(renderField)} */}
+    //                     </div>
+    //                   </AccordionContent>
+    //                 </AccordionItem>
+    //               </Accordion>
+    //               : ""
+    //             }
+    //             {activeTab !== "Service Request Detail History" ?
+    //               <div className='px-1'>
+    //                 {/* <h4 className="text-sm font-semibold text-gray-900 mb-3">Date Range</h4> */}
+    //                 {getFieldsByNames(['dateRange', 'dateRangeinSLA']).map(renderField)}
+    //               </div>
+    //               : ""
+    //             }
+    //           </div>
+    //         </FilterCard>
 
-            {/* Report Preview Section */}
-            {isGeneratingReport && (
-              <Card>
-                <CardContent className="py-12">
-                  <div className="text-center">
-                    <RefreshCw className="h-8 w-8 animate-spin mx-auto text-orange-600 mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">Generating Report</h3>
-                    <p className="text-gray-600">Please wait while we process your request...</p>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+    //         {/* Report Preview Section */}
+    //         {isGeneratingReport && (
+    //           <Card>
+    //             <CardContent className="py-12">
+    //               <div className="text-center">
+    //                 <RefreshCw className="h-8 w-8 animate-spin mx-auto text-orange-600 mb-4" />
+    //                 <h3 className="text-lg font-medium text-gray-900 mb-2">Generating Report</h3>
+    //                 <p className="text-gray-600">Please wait while we process your request...</p>
+    //               </div>
+    //             </CardContent>
+    //           </Card>
+    //         )}
 
-            {/* Report Results Table */}
-            {showReport && !isGeneratingReport && (activeTab !== "Service Request Detail History") && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Report Results - {activeTab}</CardTitle>
-                  <div>
-                    <ReusableButton
-                      onClick={handlePostColumns}
-                      icon={<Save
-                        className="h-4 w-4" />}
-                      className="bg-primary text-white hover:bg-primary/90 hover:text-white"
-                      variant="default"
-                    >
-                      Apply As Default Grid Columns
-                    </ReusableButton>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <ReusableTable
-                    // key={activeTab}
-                    data={dataSource}
-                    columns={cols}
-                    enableSearch={true}
-                    enableFiltering={true}
-                    enableSorting={true}
-                    enablePagination={true}
-                    title={`${activeTab} Report`}
-                    // enableRowReordering
-                    // onRowReorder={(newData) => setDataSourse(newData)}
-                    enableColumnVisibility
-                    columnVisibility={columnVisibility} // 👈 pass down
-                    onColumnVisibilityChange={setColumnVisibility}
-                    permissions={{
-                      canEdit: false,          // required
-                      canDelete: false,        // required
-                      canView: true,           // required
-                      canExport: true,         // required
-                      canManageColumns: true,  // optional
-                    }}
-                    enableColumnPinning
-                    storageKey={activeTab === "Service Request Details" ? "SRdetails-Report" : activeTab === "Service Request SLA Met/SLA Violated" ? "SLA-Report" : "History-Report"}
-                    pageSize={10}
-                    enableSelection={false}
-                    className="w-full"
-                  />
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </div>
+    //         {/* Report Results Table */}
+    //         {showReport && !isGeneratingReport && (activeTab !== "Service Request Detail History") && (
+    //           <Card>
+    //             <CardHeader>
+    //               <CardTitle className="text-lg">Report Results - {activeTab}</CardTitle>
+    //               <div>
+    //                 <ReusableButton
+    //                   onClick={handlePostColumns}
+    //                   icon={<Save
+    //                     className="h-4 w-4" />}
+    //                   className="bg-primary text-white hover:bg-primary/90 hover:text-white"
+    //                   variant="default"
+    //                 >
+    //                   Apply As Default Grid Columns
+    //                 </ReusableButton>
+    //               </div>
+    //             </CardHeader>
+    //             <CardContent>
+    //               <ReusableTable
+    //                 // key={activeTab}
+    //                 data={dataSource}
+    //                 columns={cols}
+    //                 enableSearch={true}
+    //                 enableFiltering={true}
+    //                 enableSorting={true}
+    //                 enablePagination={true}
+    //                 title={`${activeTab} Report`}
+    //                 // enableRowReordering
+    //                 // onRowReorder={(newData) => setDataSourse(newData)}
+    //                 enableColumnVisibility
+    //                 columnVisibility={columnVisibility} // 👈 pass down
+    //                 onColumnVisibilityChange={setColumnVisibility}
+    //                 permissions={{
+    //                   canEdit: false,          // required
+    //                   canDelete: false,        // required
+    //                   canView: true,           // required
+    //                   canExport: true,         // required
+    //                   canManageColumns: true,  // optional
+    //                 }}
+    //                 enableColumnPinning
+    //                 storageKey={activeTab === "Service Request Details" ? "SRdetails-Report" : activeTab === "Service Request SLA Met/SLA Violated" ? "SLA-Report" : "History-Report"}
+    //                 pageSize={10}
+    //                 enableSelection={false}
+    //                 className="w-full"
+    //               />
+    //             </CardContent>
+    //           </Card>
+    //         )}
+    //       </div>
+    //     </div>
+    //   </div>
+    // </div>
+  
+<div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="text-center flex flex-col justify-center items-center">
+        <h1 className="text-4xl font-bold mb-4 text-center"><BsExclamationTriangle /></h1>
+        <p className="text-xl text-gray-600 mb-4"> Work in Progress</p>
+        <a href="/" className="text-blue-500 hover:text-blue-700 underline">
+          Return to Home
+        </a>
       </div>
     </div>
   );

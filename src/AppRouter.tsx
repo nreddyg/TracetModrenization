@@ -118,7 +118,7 @@ const NotFound = WrapperLazyComponent(() => import("./pages/NotFound"));
 const AssetRegistry = WrapperLazyComponent(()=> import("./pages/softwareAssets/AssetRegistry"))
 const LicenseAssignment = WrapperLazyComponent(()=> import("./pages/softwareAssets/LicenseAssignment"))
 const UsageTracking = WrapperLazyComponent(()=> import("./pages/softwareAssets/UsageTracking"))
-
+import SoftwareAssetsReports from "./pages/softwareAssets/SoftwareAssetsReports";
 
 
 export const appRoutesObj={
@@ -336,11 +336,11 @@ export const appRoutesObj={
 //     component:<AssetSplit/>,
 //     index:false
 //   },
-//   'masters-fixedassets-costbreakupattributes': {
-//     path: 'masters/costbreakupattributes',
-//     component: <CostBreakupAttributes/>,
-//     index: false,
-//   },
+  'masters-fixedassets-costbreakupattributes': {
+    path: 'masters/fixed-assets/costbreakup',
+    component: <CostBreakupAttributes/>,
+    index: false,
+  },
 //   "fixedassets-assettransfer-intratransfer":{
 //     path:'fixedassets/intratransfer',
 //     component:<IntraTransfer/>,
@@ -702,6 +702,16 @@ export const appRoutesObj={
 "softwareassets-licenseassignment": {
   path:'software-assets/license-assignment',
   component:<LicenseAssignment/>,
+  index:false
+},
+"softwareassets-usagetracking": {
+  path:'software-assets/usage-tracking',
+  component:<UsageTracking />,
+  index:false
+},
+"softwareassets-reports": {
+  path:'software-assets/reports',
+  component:<SoftwareAssetsReports />,
   index:false
 },
 "settings-smtpconfiguration": {

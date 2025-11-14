@@ -643,7 +643,7 @@ const AppSidebar: React.FC<MyComponentProps> = ({navigation}) => {
   const collapsed = state === "collapsed";
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
   const [hoveredLabel, setHoveredLabel] = useState<string | null>(null);
-
+  console.log('navigation',navigation)
   const isActive = (link: string) => location.pathname.includes(link);
 
   const isItemOrDescendantActive = (item: NavItem): boolean => {
@@ -656,14 +656,14 @@ const AppSidebar: React.FC<MyComponentProps> = ({navigation}) => {
     isActive(child.link) || !!child.children?.some(gc => isActive(gc.link));
 
   const isParentOrHasActiveDescendant = (item: NavItem) =>
-    isActive(item.link) || !!item.children?.some(c => isChildOrHasActiveGrandchild(c));
+    isActive(item?.link) || !!item.children?.some(c => isChildOrHasActiveGrandchild(c));
 
   const toggleMenu = (label: string) =>
     setOpenMenus(prev => ({ ...prev, [label]: !prev[label] }));
 
   useEffect(() => {
     const newOpen: Record<string, boolean> = {};
-    navigation.forEach(p => {
+    navigation.filter(f=>f).forEach(p => {
       if (isParentOrHasActiveDescendant(p)) {
         newOpen[p.label] = true;
         p.children?.forEach(c => {

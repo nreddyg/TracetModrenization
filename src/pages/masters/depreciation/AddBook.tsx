@@ -1294,7 +1294,7 @@ let isBookCatScreen=(activeTab=="BookCat")
               if (res.success) {
                 if (res.data.status) {
                   msg.success(res.data.message);
-                 navigate("/masters/depreciation/book")
+                 navigate("/layout/masters/depreciation/book")
                 } else if(res.data.status==false){
                   msg.warning(res.data.message || 'Failed to Add Book!!')
                 }else {
@@ -1505,7 +1505,7 @@ let isBookCatScreen=(activeTab=="BookCat")
             <span>/</span>
             <span>Depreciation</span>
             <span>/</span>
-            <span className='cursor-pointer' onClick={() => { navigate("/masters/depreciation/book") }}>Books</span>
+            <span className='cursor-pointer' onClick={() => { navigate("/layout/masters/depreciation/book") }}>Books</span>
             <span>/</span>
             <span className="text-foreground font-medium">Add Book</span>
           </div>

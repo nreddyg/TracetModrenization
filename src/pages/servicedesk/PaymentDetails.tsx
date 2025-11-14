@@ -487,7 +487,7 @@ const PaymentDetails = () => {
             <span>/</span> */}
             <Link to="/service-desk" className="hover:text-blue-600 transition-colors">Service Desk</Link>
             <span>/</span>
-            <Link to="/service-desk/subscription" className="hover:text-blue-600 transition-colors">Subscription</Link>
+            <Link to="/layout/service-desk/subscription" className="hover:text-blue-600 transition-colors">Subscription</Link>
             <span>/</span>
             <span className="text-gray-900 font-medium">Payment Details</span>
           </nav>

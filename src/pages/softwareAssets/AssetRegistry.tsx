@@ -125,7 +125,33 @@ const AssetRegistry = () => {
             }
         },
         // { id: 'Status', accessorKey: "Status", header: "Status" },
-        { id: 'AssignedLicenseTotalCost', accessorKey: "AssignedLicenseTotalCost", header: "Total Cost", }
+        { id: 'AssignedLicenseTotalCost', accessorKey: "AssignedLicenseTotalCost", header: "Total Cost", },
+        {
+              id: 'actions',
+              accessorKey: 'actions',
+              header: 'Actions',
+              cell: ({ row }: any) => (
+                <div className="flex gap-2" title='Actions'>
+                  <ReusableButton
+                    variant="text"
+                    size="small"
+                    title='Edit'
+                    onClick={() => {handleEdit(row?.original)}}
+                  >
+                    <Edit className="h-4 w-4 text-blue-600" />
+                  </ReusableButton>
+                  <ReusableButton
+                    variant="text"
+                    size="small"
+                    title='Delete'
+                    danger
+                    onClick={() => {handleDelete(row?.original)}}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </ReusableButton>
+                </div>
+              ),
+            },
 
     ]
     const [columns, setColumns] = useState<ColumnDef<SoftwareData>[]>(SoftwareDataColumns);
@@ -494,10 +520,12 @@ const AssetRegistry = () => {
         }
     };
     const handleDelete = (data: any): void => {
+        console.log(data,"delete")
         setIsDelModalOpen(true);
         setDeletingRecord(data)
     }
     const handleEdit = (data: any): void => {
+        console.log(data,"edit")
         dispatch(setLoading(true))
         setTimeout(() => {
 
@@ -766,7 +794,7 @@ const AssetRegistry = () => {
                                 emptyMessage="No Data found"
                                 // rowHeight="normal"
                                 // storageKey="service-request-type-list-table"
-                                actions={tableActions}
+                                // actions={tableActions}
                                 enableColumnPinning
                             />
                     </div>

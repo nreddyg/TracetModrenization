@@ -217,10 +217,10 @@ const Store = () => {
                     fetchStoreDataByBranchName(companyId, branch)
 
                 } else {
-                    msg.warning(res.data.message);
+                    msg.warning(res.data.ErrorDetails[0]["Error Message"]);
                 }
             } else {
-                msg.warning('Failed to delete status !!')
+                msg.warning('Failed to Add Store')
             }
         }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
     }
@@ -233,10 +233,11 @@ const Store = () => {
                     fetchStoreDataByBranchName(companyId, branch)
 
                 } else {
-                    msg.warning(res.data.message);
+                                        msg.warning(res.data.ErrorDetails[0]["Error Message"]);
+
                 }
             } else {
-                msg.warning('Failed to delete status !!')
+                msg.warning('Failed to Update Store')
             }
         }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
     }
@@ -252,12 +253,22 @@ const Store = () => {
             ]
         }
         if (recordToEditId == null && companyId) {
+            if(watch("StoreName")!=""){
             addNewStoreData(branch, Payload)
             setIsAddDialogOpen(false)
+            }
+            else{
+                msg.warning("Name should not be empty")
+            }
         }
         else if (recordToEditId !== null && companyId) {
+            if(watch("StoreName")!=""){
             updateStoreData(recordToEditId, Payload)
             setIsAddDialogOpen(false)
+            }
+            else{
+                msg.warning("Name should not be empty")
+            }
 
         }
     }
@@ -304,19 +315,19 @@ const Store = () => {
                                         <DialogTitle>{recordToEditId ? "Update Store" : "Add Store"}</DialogTitle>
                                     </DialogHeader>
                                     <div className='grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4'>
-                                        {getFieldsByNames(['StoreName', 'Branch']).map((field) => {
+                                        {getFieldsByNames(['StoreName', 'StoreDescription']).map((field) => {
                                             return <div className="flex items-center space-x-2">
                                                 {renderField(field)}
                                             </div>;
                                         })}
                                     </div>
-                                    <div className='w-100'>
+                                    {/* <div className='w-100'>
                                         {getFieldsByNames(['StoreDescription']).map((field) => {
                                             return <div className=" space-x-2">
                                                 {renderField(field)}
                                             </div>;
                                         })}
-                                    </div>
+                                    </div> */}
                                     <div className="flex justify-end gap-2">
                                         <ReusableButton
                                             variant="default"

@@ -2224,14 +2224,14 @@ const calculated = Math.max(actualWidth, minCharsWidth);
       {/* Table */}
       <div className="bg-white shadow-sm rounded-xl border border-gray-200">
         <div className="overflow-x-auto">
-          <table ref={tableRef} className="w-full min-w-max border-collapse text-sm text-gray-800">
-            <thead className="bg-white text-gray-700 uppercase text-sm font-semibold tracking-wide">
+          <table ref={tableRef} className="w-full  min-w-max border-collapse text-sm text-gray-800">
+            <thead className="bg-white text-gray-700  uppercase text-sm font-semibold tracking-wide">
               {table.getHeaderGroups().map(headerGroup => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map(header => (
                     <th
                       key={header.id}
-                      className="px-4 py-3 text-left border-b border-gray-200 whitespace-nowrap bg-white"
+                      className="px-4 py-3 text-left rounded-xl border-b border-gray-200 whitespace-nowrap bg-white"
                       style={{
                         width: header.getSize(),
                         minWidth: `${calculatedMinWidth}px`,

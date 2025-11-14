@@ -98,10 +98,75 @@ const Configuration = () => {
     { id: 'Description', accessorKey: "Description", header: "Description" },
     { id: 'Branches', accessorKey: "Branches", header: "Branches" },
     { id: 'ServiceRequestTypeAdmin', accessorKey: "ServiceRequestTypeAdmin", header: "Service Request Type Admin", },
+    {
+      id: 'actions',
+      accessorKey: 'actions',
+      header: 'Actions',
+      cell: ({ row }: any) => (
+        <div className="flex gap-2" title='Actions'>
+          <ReusableButton
+            variant="text"
+            size="small"
+            title='Edit'
+            onClick={() => { handleEdit(row?.original) }}
+          >
+            <Edit className="h-4 w-4 text-blue-600" />
+          </ReusableButton>
+          <ReusableButton
+            variant="text"
+            size="small"
+            title='Delete'
+            danger
+            onClick={() => { handleDelete(row?.original) }}
+          >
+            <Trash2 className="h-4 w-4" />
+          </ReusableButton>
+        </div>
+      ),
+    },
   ]);
   const [statusColumns, setStatusColumns] = useState<ColumnDef<Status>[]>([
     { id: 'StatusType', accessorKey: "StatusType", header: "Status Type" },
     { id: 'Index', accessorKey: "Index", header: "Index" },
+    {
+      id: 'actions',
+      accessorKey: 'actions',
+      header: 'Actions',
+      cell: ({ row }: any) => {
+        if (row?.original.StatusType === 'Open' || row?.original.StatusType === 'Closed') {
+          return (
+            <span></span>
+          )
+
+        }
+        else {
+          return (
+            <div className="flex gap-2" title='Actions'>
+              <ReusableButton
+                variant="text"
+                size="small"
+                title='Edit'
+                onClick={() => { handleEditStatus(row?.original) }}
+              >
+                <Edit className="h-4 w-4 text-blue-600" />
+              </ReusableButton>
+              <ReusableButton
+                variant="text"
+                size="small"
+                title='Delete'
+                danger
+                onClick={() => { handleDeleteStatus(row?.original) }}
+              >
+                <Trash2 className="h-4 w-4" />
+              </ReusableButton>
+            </div>
+          )
+        }
+
+      }
+      ,
+    },
+
   ])
   const [statusTableData, setStatusTableData] = useState<Status[]>([]);
   const [serviceRequestTypeData, setServiceRequestTypeData] = useState<serviceRequestType[]>([]);
@@ -813,7 +878,8 @@ const Configuration = () => {
                 <CardContent className="pt-3">
                   <ReusableTable
                     data={serviceRequestTypeData} columns={columns}
-                    actions={tableActions} permissions={tablePermissions}
+                    // actions={tableActions}
+                    permissions={tablePermissions}
                     title="Service Request Type List" onRefresh={() => handleRefresh('')}
                     enableSearch={true}
                     enableSelection={false}
@@ -877,7 +943,7 @@ const Configuration = () => {
                         rowHeight="normal" storageKey="service-request-type-list-table"
                         enableRowReordering
                         onRowReorder={(newData) => setStatusTableData(newData)}
-                        actions={statusTableActions}
+                      // actions={statusTableActions}
                       />
                     </div>
                     <div className="mt-4 flex justify-end">

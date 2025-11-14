@@ -19,6 +19,7 @@ import { setLoading } from '@/store/slices/projectsSlice';
 import { formatDate } from '@/_Helper_Functions/HelperFunctions';
 import { FaAngleRight } from 'react-icons/fa';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 const TicketProgressDashboard = () => {
   const dispatch = useAppDispatch();
@@ -367,61 +368,74 @@ const TicketProgressDashboard = () => {
         </header>
         <div className="p-4 pt-0">
           {/* Enhanced Filters Section */}
-          <Card className="mb-6">
-            <CardHeader className="pb-4">
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Filter className="h-5 w-5" />
-                Dashboard Filters
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
 
-              <Form {...form}>
-                <form onSubmit={(e) => e.preventDefault()}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                    }
-                  }} className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {getFieldsByNames(['Status', 'ServiceRequestType', 'Assignees', 'StartDate', 'EndDate']).map(renderField)}
-                  </div>
-                  {/* Action Buttons */}
-                  <div className='flex justify-end'>
-                    <div className="flex gap-3">
-                      <ReusableButton
-                      htmlType="submit"
-                      variant="default"
-                      className="bg-orange-500 border-orange-500 text-white hover:bg-orange-600 hover:border-orange-600 hover:text-white"
-                      // icon={<Save className="h-4 w-4" />}
-                      iconPosition="left"
-                      onClick={() => handleSearch('FetchAll')}
-                    >
-                      Search
-                    </ReusableButton>
-                      {/* <ReusableButton
-                        size={"small"}
-                        htmlType='submit'
-                        className='h-8 bg-background hover:border-[rgb(209 213 219)] hover:bg-background'
-                        onClick={() => handleSearch('FetchAll')}>
-                        <Search size={18} color='#000' />
-                      </ReusableButton> */}
-                      <ReusableButton
-                        htmlType="button"
-                        variant="default"
-                        onClick={clearAllFilters}
-                        className="btn-reset-clear-style hover:border-[hsl(214.3 31.8% 91.4%)]"
-                        icon={<X className="h-4 w-4" />}
-                        iconPosition="left"
-                      >
-                        Clear Filters
-                      </ReusableButton>
+          <Accordion
+            type="single"
+            collapsible
+            className="w-full shadow-sm rounded-lg bg-white mb-3"
+          >
+            <AccordionItem value="Dashboard Filters" className="rounded-lg border border-gray-200 shadow-sm">
+              <AccordionTrigger
+                className="text-lg font-semibold text-gray-900 px-3 py-3 flex items-center justify-between rounded-lg hover:no-underline"
+              >
+                <div className="flex items-center gap-2">
+                  <Filter className="h-5 w-5 text-gray-700" />
+                  <span>Dashboard Filters</span>
+                </div>
+              </AccordionTrigger>
+
+              <AccordionContent
+                className="mt-2 bg-white p-5 rounded-lg"
+              >
+                <Form {...form}>
+                  <form
+                    onSubmit={(e) => e.preventDefault()}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") e.preventDefault();
+                    }}
+                    className="space-y-6"
+                  >
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {getFieldsByNames([
+                        "Status",
+                        "ServiceRequestType",
+                        "Assignees",
+                        "StartDate",
+                        "EndDate",
+                      ]).map(renderField)}
                     </div>
-                  </div>
-                </form>
-              </Form>
-            </CardContent>
-          </Card>
+
+                    <div className="flex justify-end">
+                      <div className="flex gap-3">
+                        <ReusableButton
+                          htmlType="submit"
+                          variant="default"
+                          className="bg-orange-500 border-orange-500 text-white hover:bg-orange-600 hover:border-orange-600 hover:text-white"
+                          iconPosition="left"
+                          onClick={() => handleSearch("FetchAll")}
+                        >
+                          Search
+                        </ReusableButton>
+
+                        <ReusableButton
+                          htmlType="button"
+                          variant="default"
+                          onClick={clearAllFilters}
+                          className="btn-reset-clear-style hover:border-[hsl(214.3 31.8% 91.4%)]"
+                          icon={<X className="h-4 w-4" />}
+                          iconPosition="left"
+                        >
+                          Clear Filters
+                        </ReusableButton>
+                      </div>
+                    </div>
+                  </form>
+                </Form>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+
+
 
           {/* Main Content with Tabs */}
           <Card>

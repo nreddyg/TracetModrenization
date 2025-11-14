@@ -352,7 +352,6 @@ const TicketProgressDashboard = () => {
       <div className="h-full">
         <header className="px-6 py-4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
               <h1 className="text-lg sm:text-2xl font-bold text-gray-900">
                 Ticket Progress Dashboard

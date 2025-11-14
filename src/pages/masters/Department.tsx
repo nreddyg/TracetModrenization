@@ -586,48 +586,46 @@ const Department = () => {
     }
   }, [treeView]);
 
-  console.log("recordId", recordToEditId, "selectedLevel", selectedLevel);
-
   return (
     <div className="bg-hsl(214.3 31.8% 91.4%)">
-      <header className="bg-card flex justify-between border-b px-6 py-4 shadow-sm">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+      <header className="px-6 py-3">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+          <div className="flex items-center gap-2 text-sm text-gray-600">
             <span>Masters</span>
             <FaAngleRight />
             <span>Company</span>
             <FaAngleRight />
-            <span className="text-foreground font-medium">Department</span>
+            <span className="text-gray-900 font-medium">Department</span>
           </div>
-        </div>
-        <div className='flex gap-2'>
-          <ReusableButton
-            htmlType="button"
-            variant="default"
-            onClick={handleReset}
-            iconPosition="left"
-            size="middle"
-            // className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
-            className='btn-reset-clear-style'
-          >
-            Reset
-          </ReusableButton>
-          <ReusableButton
-            htmlType="button"
-            variant="default"
-            onClick={handleSubmit(onSubmit)}
-            iconPosition="left"
-            size="middle"
-            // className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
-            className='btn-submit-style'
+          <div className='flex gap-2'>
+            <ReusableButton
+              htmlType="button"
+              variant="default"
+              onClick={handleReset}
+              iconPosition="left"
+              size="middle"
+              // className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+              className='btn-reset-clear-style'
+            >
+              Reset
+            </ReusableButton>
+            <ReusableButton
+              htmlType="button"
+              variant="default"
+              onClick={handleSubmit(onSubmit)}
+              iconPosition="left"
+              size="middle"
+              // className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+              className='btn-submit-style'
 
-          >
-            {selectedLevel <= 99 || recordToEditId === null ? "Save" : "Update"}
-          </ReusableButton>
+            >
+              {selectedLevel <= 99 || recordToEditId === null ? "Save" : "Update"}
+            </ReusableButton>
+          </div>
         </div>
       </header>
 
-      <div className="flex h-full p-2">
+      <div className="flex h-full p-2 pt-0">
         {/* Tree Structure Panel */}
         <div className="w-[26vw] h-[75vh] rounded-lg shadow-lg border-r bg-card flex flex-col">
           <div className="px-2 flex items-center justify-center pt-4 pb-4 ps-0 ms-0 border-b gap-3">

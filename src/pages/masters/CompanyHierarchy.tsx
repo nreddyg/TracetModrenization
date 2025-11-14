@@ -1515,7 +1515,7 @@ const CompanyHierarchy = () => {
         </div>
       </header>
 
-      <div className="flex h-full p-2 pt-0">
+      <div className="flex h-full pt-1 px-2 gap-3">
         {/* Tree Structure Panel */}
         <div className="w-[26vw] h-[75vh] rounded-lg shadow-lg border-r bg-card flex flex-col">
           <div className="px-2 flex items-center justify-center pt-4 pb-4 ps-0 ms-0 border-b gap-3">
@@ -1575,7 +1575,7 @@ const CompanyHierarchy = () => {
                 className="h-8 hover:bg-background bg-background hover:border-red-500 hover:text-destructive"
                 style={{ cursor: disable || selectedLevel === 99 ? "not-allowed" : "pointer" }}
                 onClick={() => setIsDelModalOpen(true)}>
-                <Trash2 className="h-4 w-4  hover:bg-background hover:text-destructive" />
+                <Trash2 className="h-4 w-4 text-destructive hover:bg-background hover:text-destructive" />
               </ReusableButton>
             </div>
           </div>
@@ -1586,8 +1586,8 @@ const CompanyHierarchy = () => {
         </div>
 
         {/* Details Panel */}
-        <div className="flex-1 h-[75vh]  ps-2 shadow-xl">
-          <div className="bg-card border-b rounded-lg shadow-lg lg:ps-6 py-3 flex flex-row xxs:flex-col xs2:flex-row lg:flex-row lg:items-center justify-between gap-4">
+        <div className="flex-1 h-[75vh]  ps-2 shadow-xl bg-card border-b rounded-lg shadow-lg lg:ps-6 py-3 flex flex-row xxs:flex-col xs2:flex-row lg:flex-row lg:items-center justify-between gap-4">
+          {/* <div className="bg-card border-b rounded-lg shadow-lg lg:ps-6 py-3 flex flex-row xxs:flex-col xs2:flex-row lg:flex-row lg:items-center justify-between gap-4"> */}
             <div className="p-1 w-full space-y-6 h-[71vh] overflow-y-auto">
               <div className="flex flex-col gap-2">
                 <div>
@@ -1634,7 +1634,7 @@ const CompanyHierarchy = () => {
                 </div>
               </div>
             </div>
-          </div>
+          {/* </div> */}
         </div>
       </div>
     </div>

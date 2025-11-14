@@ -624,7 +624,7 @@ const Department = () => {
         </div>
       </header>
 
-      <div className="flex h-full p-2 pt-0">
+      <div className="flex h-full px-2 pt-1 gap-3">
         {/* Tree Structure Panel */}
         <div className="w-[26vw] h-[75vh] rounded-lg shadow-lg border-r bg-card flex flex-col">
           <div className="px-2 flex items-center justify-center pt-4 pb-4 ps-0 ms-0 border-b gap-3">
@@ -705,7 +705,7 @@ const Department = () => {
                     if (!disable && selectedLevel !== 99) { setIsDelModalOpen(true) }
                   }}
                 >
-                  <Trash2 className="h-4 w-4 hover:bg-background hover:text-destructive" />
+                  <Trash2 className="h-4 w-4 text-destructive hover:bg-background hover:text-destructive" />
                 </ReusableButton>
               </div>
             </div>
@@ -765,8 +765,8 @@ const Department = () => {
             </div>
           </div>
         </div> */}
-        <div className="flex-1 h-[75vh] ps-2 shadow-xl">
-          <div className="bg-card border-b rounded-lg shadow-lg lg:px-6 py-3 flex flex-row xxs:flex-col xs2:flex-row lg:flex-row lg:items-center justify-between gap-4">
+        <div className="flex-1 h-[75vh] ps-2 shadow-xl bg-card border-b rounded-lg shadow-lg lg:px-6 py-3 flex flex-row xxs:flex-col xs2:flex-row lg:flex-row lg:items-center justify-between gap-4">
+          {/* <div className="bg-card border-b rounded-lg shadow-lg lg:px-6 py-3 flex flex-row xxs:flex-col xs2:flex-row lg:flex-row lg:items-center justify-between gap-4"> */}
             <div className="p-1 space-y-6 h-[71vh]">
 
               <div className="flex flex-col gap-2">
@@ -816,7 +816,7 @@ const Department = () => {
               </div>
 
             </div>
-          </div>
+          {/* </div> */}
         </div>
       </div>
     </div>

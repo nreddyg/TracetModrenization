@@ -18,6 +18,7 @@ import { ASSET_LOCATION_DB } from '@/Local_DB/Form_JSON_Data/AssetLocationDB';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { deleteAssetLocData, getAssetLocationDataByLocID, getAssetLocationDetals, postOrUpdateAssetLocationDetails } from '@/services/assetLocationServices';
 import { FaAngleRight } from 'react-icons/fa';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface TreeNode {
     id: string;
@@ -924,7 +925,8 @@ const AssetLocation = () => {
                                         <TooltipTrigger asChild>
                                             <ReusableButton
                                                 size="small"
-                                                className="bg-primary h-[2rem] hover:bg-blue-700 text-white"
+                                                // className="bg-primary h-[2rem] hover:bg-blue-700 text-white"
+                                                className="bg-background hover:bg-background h-[2rem]"
                                                 style={{
                                                     cursor: selectedLevel >= 99 + level.length || disable ? "not-allowed" : "pointer",
                                                 }}
@@ -937,7 +939,8 @@ const AssetLocation = () => {
                                                     }
                                                 }}
                                             >
-                                                <Plus className="h-4 w-4" />
+                                                {/* <Plus className="h-4 w-4" /> */}
+                                                <Plus className="h-4 w-4 hover:text-blue hover:bg-background" />
                                             </ReusableButton>
                                         </TooltipTrigger>
                                         {selectedLevel !== lastLevel && recordToEditId && (
@@ -976,22 +979,26 @@ const AssetLocation = () => {
                                 </Dialog>
                                 <ReusableButton
                                     size="small"
-                                    className="bg-primary h-[2rem] hover:bg-blue-700 text-white"
+                                    // className="bg-primary h-[2rem] hover:bg-blue-700 text-white"
+                                    className="h-8 hover:bg-background bg-background hover:border-red-500 hover:text-destructive"
+
                                     style={{ cursor: disable || selectedLevel === 99 ? "not-allowed" : "pointer" }}
                                     onClick={() => {
                                         if (!disable && selectedLevel !== 99) { setIsDelModalOpen(true) }
                                     }}
                                 >
-                                    <Trash2 className="h-4 w-4 text-destructive" />
+                                    {/* <Trash2 className="h-4 w-4 text-destructive" /> */}
+                                    <Trash2 className="h-4 w-4 hover:bg-background hover:text-destructive" />
+
                                 </ReusableButton>
                             </div>
                         </div>
                     </div>
 
-                    <div className="min-h-20 h-[63vh] overflow-y-auto p-2">
+                    <ScrollArea className="min-h-20 h-[63vh] overflow-y-auto p-2" horizontal>
                         <TreeView treeData={mainTreeData} config={treeConfig} onSelect={onSelect} selectKeys={selectedKeys} onExpand={handleToggleNode}
                             expandedKeys={Array.from(expandedKeys)} />
-                    </div>
+                    </ScrollArea>
                 </div>
 
                 {/* Details Panel */}
@@ -1047,7 +1054,7 @@ const AssetLocation = () => {
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }
 

@@ -110,7 +110,7 @@ export interface ReusableTableProps<T = any> {
   title?: string;
   permissions?: TablePermissions;
   actions?: TableAction<T>[];
-    exportMeta?: {
+  exportMeta?: {
     companyName?: string;
     name?: string;
   };
@@ -381,8 +381,8 @@ const ActionMenu = <T,>({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className="h-8 w-8 p-0"  title="Actions">
-          <MoreHorizontal className="w-4 h-4"   />
+        <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Actions">
+          <MoreHorizontal className="w-4 h-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
@@ -392,7 +392,7 @@ const ActionMenu = <T,>({
             <DropdownMenuItem
               key={index}
               onClick={() => action.onClick(row)}
-             
+
               className={cn(
                 action.variant === 'destructive' && 'text-destructive focus:text-destructive'
               )}
@@ -758,15 +758,15 @@ const SelectionControls = <T,>({
   return (
     <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 border border-blue-100 rounded-lg">
       <span
-  className="inline-flex items-center px-3 py-1.5 rounded-xl bg-blue-200 text-blue-600 text-xs font-semibold shadow-sm"
->
-  {selectionInfo.totalSelected} selected
-  {maxSelectable && (
-    <span className="ml-1 text-blue-100 font-normal">
-      of {maxSelectable} max
-    </span>
-  )}
-</span>
+        className="inline-flex items-center px-3 py-1.5 rounded-xl bg-blue-200 text-blue-600 text-xs font-semibold shadow-sm"
+      >
+        {selectionInfo.totalSelected} selected
+        {maxSelectable && (
+          <span className="ml-1 text-blue-100 font-normal">
+            of {maxSelectable} max
+          </span>
+        )}
+      </span>
 
 
       {selectionMode === 'multiple' && (
@@ -889,150 +889,150 @@ const ExportMenu = ({
   exportOptions?: ("csv" | "excel" | "json" | "pdf")[];
   exportMeta?: { companyName?: string; name?: string };
 }) => {
-const getExportMetadata = (data: any[], meta?: { companyName?: string; name?: string }) => {
-  const totalCount = data.length;
-  const downloadDate = new Date().toLocaleString();
-  return {
-    companyName: meta?.companyName || "",
-    name: meta?.name || "",
-    totalCount,
-    downloadDate,
+  const getExportMetadata = (data: any[], meta?: { companyName?: string; name?: string }) => {
+    const totalCount = data.length;
+    const downloadDate = new Date().toLocaleString();
+    return {
+      companyName: meta?.companyName || "",
+      name: meta?.name || "",
+      totalCount,
+      downloadDate,
+    };
   };
-};
 
-const exportToCSV = (exportData: any[], table: TanstackTable<any>) => {
-  if (exportData.length === 0) return;
+  const exportToCSV = (exportData: any[], table: TanstackTable<any>) => {
+    if (exportData.length === 0) return;
 
-  const { headers, body } = getVisibleData(table, exportData);
-  const meta = getExportMetadata(exportData, exportMeta);
+    const { headers, body } = getVisibleData(table, exportData);
+    const meta = getExportMetadata(exportData, exportMeta);
 
-  const metaSection = [
-    `"${meta.companyName}"`,
-    `"Exported by: ${meta.name}"`,
-    `"Download Date: ${meta.downloadDate}"`,
-    `"Total Records: ${meta.totalCount}"`,
-    "", // spacer line
-  ];
+    const metaSection = [
+      `"${meta.companyName}"`,
+      `"Exported by: ${meta.name}"`,
+      `"Download Date: ${meta.downloadDate}"`,
+      `"Total Records: ${meta.totalCount}"`,
+      "", // spacer line
+    ];
 
-  const csvContent = [
-    ...metaSection,
-    headers.join(","),
-    ...body.map(row =>
-      row.map(val => `"${val.replace(/"/g, '""')}"`).join(",")
-    ),
-  ].join("\n");
+    const csvContent = [
+      ...metaSection,
+      headers.join(","),
+      ...body.map(row =>
+        row.map(val => `"${val.replace(/"/g, '""')}"`).join(",")
+      ),
+    ].join("\n");
 
-  const blob = new Blob([csvContent], { type: "text/csv" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `${filename}-${new Date().toISOString().split("T")[0]}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
-};
-
-
-
-
-const exportToExcel = (exportData: any[], table: TanstackTable<any>) => {
-  if (exportData.length === 0) return;
-
-  const { headers, body } = getVisibleData(table, exportData);
-  const meta = getExportMetadata(exportData, exportMeta);
-
-  const metaSheet = [
-    ["Company Name:", meta.companyName],
-    ["Name:", meta.name],
-    ["Total Records:", meta.totalCount],
-    ["Download Date:", meta.downloadDate],
-    [],
-  ];
-
-  const worksheet = XLSX.utils.aoa_to_sheet([...metaSheet, headers, ...body]);
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Data");
-
-  worksheet["!cols"] = headers.map(() => ({ wch: 20 }));
-  XLSX.writeFile(workbook, `${filename}-${new Date().toISOString().split("T")[0]}.xlsx`);
-};
-
-
-
-const exportToPDF = (exportData: any[], table: TanstackTable<any>) => {
-  if (exportData.length === 0) return;
-
-  const { headers, body } = getVisibleData(table, exportData);
-  const meta = getExportMetadata(exportData, exportMeta);
-
-  const doc = new jsPDF();
-  doc.setFontSize(14);
-  doc.text(filename, 14, 15);
-  doc.setFontSize(10);
-  doc.text(`Company Name: ${meta.companyName}`, 14, 25);
-  doc.text(`Name: ${meta.name}`, 14, 30);
-  doc.text(`Total Records: ${meta.totalCount}`, 14, 35);
-  doc.text(`Download Date: ${meta.downloadDate}`, 14, 40);
-
-  autoTable(doc, {
-    head: [headers],
-    body,
-    startY: 45,
-    styles: { fontSize: 8, cellPadding: 2 },
-    headStyles: { fillColor: [66, 135, 245] },
-    alternateRowStyles: { fillColor: [240, 240, 240] },
-    theme: "grid",
-  });
-
-  doc.save(`${filename}-${new Date().toISOString().split("T")[0]}.pdf`);
-};
-
-
-
-
- const exportToJSON = (exportData: any[], table: TanstackTable<any>) => {
-  if (exportData.length === 0) return;
-
-  const { headers, body } = getVisibleData(table, exportData);
-  const meta = getExportMetadata(exportData, exportMeta);
-
-  const jsonData = {
-    metadata: meta,
-    records: body.map(row =>
-      Object.fromEntries(headers.map((h, i) => [h, row[i]]))
-    ),
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${filename}-${new Date().toISOString().split("T")[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
-const msg = useMessage()
+
+
+
+
+  const exportToExcel = (exportData: any[], table: TanstackTable<any>) => {
+    if (exportData.length === 0) return;
+
+    const { headers, body } = getVisibleData(table, exportData);
+    const meta = getExportMetadata(exportData, exportMeta);
+
+    const metaSheet = [
+      ["Company Name:", meta.companyName],
+      ["Name:", meta.name],
+      ["Total Records:", meta.totalCount],
+      ["Download Date:", meta.downloadDate],
+      [],
+    ];
+
+    const worksheet = XLSX.utils.aoa_to_sheet([...metaSheet, headers, ...body]);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Data");
+
+    worksheet["!cols"] = headers.map(() => ({ wch: 20 }));
+    XLSX.writeFile(workbook, `${filename}-${new Date().toISOString().split("T")[0]}.xlsx`);
+  };
+
+
+
+  const exportToPDF = (exportData: any[], table: TanstackTable<any>) => {
+    if (exportData.length === 0) return;
+
+    const { headers, body } = getVisibleData(table, exportData);
+    const meta = getExportMetadata(exportData, exportMeta);
+
+    const doc = new jsPDF();
+    doc.setFontSize(14);
+    doc.text(filename, 14, 15);
+    doc.setFontSize(10);
+    doc.text(`Company Name: ${meta.companyName}`, 14, 25);
+    doc.text(`Name: ${meta.name}`, 14, 30);
+    doc.text(`Total Records: ${meta.totalCount}`, 14, 35);
+    doc.text(`Download Date: ${meta.downloadDate}`, 14, 40);
+
+    autoTable(doc, {
+      head: [headers],
+      body,
+      startY: 45,
+      styles: { fontSize: 8, cellPadding: 2 },
+      headStyles: { fillColor: [66, 135, 245] },
+      alternateRowStyles: { fillColor: [240, 240, 240] },
+      theme: "grid",
+    });
+
+    doc.save(`${filename}-${new Date().toISOString().split("T")[0]}.pdf`);
+  };
+
+
+
+
+  const exportToJSON = (exportData: any[], table: TanstackTable<any>) => {
+    if (exportData.length === 0) return;
+
+    const { headers, body } = getVisibleData(table, exportData);
+    const meta = getExportMetadata(exportData, exportMeta);
+
+    const jsonData = {
+      metadata: meta,
+      records: body.map(row =>
+        Object.fromEntries(headers.map((h, i) => [h, row[i]]))
+      ),
+    };
+    const msg = useMessage()
 
     const validateVisibleColumns = (table: TanstackTable<any>) => {
-  const visibleColumns = table.getAllLeafColumns().filter(col => col.getIsVisible());
-  if (visibleColumns.length < 3) {
-    msg.warning("Please select at least 3 columns before exporting.");
-    return false;
-  }
-  return true;
-};
+      const visibleColumns = table.getAllLeafColumns().filter(col => col.getIsVisible());
+      if (visibleColumns.length < 3) {
+        msg.warning("Please select at least 3 columns before exporting.");
+        return false;
+      }
+      return true;
+    };
 
-  const blob = new Blob([JSON.stringify(jsonData, null, 2)], {
-    type: "application/json",
-  });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `${filename}-${new Date().toISOString().split("T")[0]}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-};
+    const blob = new Blob([JSON.stringify(jsonData, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${filename}-${new Date().toISOString().split("T")[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
-const msg = useMessage()
+  const msg = useMessage()
 
-    const validateVisibleColumns = (table: TanstackTable<any>) => {
-  const visibleColumns = table.getAllLeafColumns().filter(col => col.getIsVisible());
-  if (visibleColumns.length < 3) {
-    msg.warning("Please select at least 3 columns before exporting.");
-    return false;
-  }
-  return true;
-};
+  const validateVisibleColumns = (table: TanstackTable<any>) => {
+    const visibleColumns = table.getAllLeafColumns().filter(col => col.getIsVisible());
+    if (visibleColumns.length < 3) {
+      msg.warning("Please select at least 3 columns before exporting.");
+      return false;
+    }
+    return true;
+  };
 
 
   const printTable = () => {
@@ -1094,79 +1094,79 @@ const msg = useMessage()
 
   if (!permissions?.canExport) return null;
 
-return (
-  <DropdownMenu>
-    <DropdownMenuTrigger asChild>
-      <Button variant="outline" size="sm">
-        <Download className="w-4 h-4 mr-2" />
-        Export
-      </Button>
-    </DropdownMenuTrigger>
-    <DropdownMenuContent>
-      {exportOptions.includes("csv") && (
-       <DropdownMenuItem onClick={() => {
-  const allRows = table.getFilteredRowModel().rows.map(r => r.original);
-  if (!validateVisibleColumns(table)) return; // all pages, honors filters/sort
-  exportToCSV(allRows, table);
-}}>
-  Export All to CSV
-</DropdownMenuItem>
-      )}
-      {exportOptions.includes("excel") && (
-       <DropdownMenuItem onClick={() => {
-  const allRows = table.getFilteredRowModel().rows.map(r => r.original);
-  if (!validateVisibleColumns(table)) return;
-  exportToExcel(allRows, table);
-}}>
-  Export All to Excel
-</DropdownMenuItem>
-      )}
-      {exportOptions.includes("json") && (
-        <DropdownMenuItem onClick={() => {
-  const allRows = table.getFilteredRowModel().rows.map(r => r.original);
-  if (!validateVisibleColumns(table)) return;
-  exportToJSON(allRows, table);
-}}>
-  Export All to JSON
-</DropdownMenuItem>
-      )}
-      {exportOptions.includes("pdf") && (
-        <DropdownMenuItem onClick={() => {
-  const allRows = table.getFilteredRowModel().rows.map(r => r.original);
-  if (!validateVisibleColumns(table)) return;
-  exportToPDF(allRows, table);
-}}>
-  Export All to PDF
-</DropdownMenuItem>
-      )}
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" size="sm">
+          <Download className="w-4 h-4 mr-2" />
+          Export
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        {exportOptions.includes("csv") && (
+          <DropdownMenuItem onClick={() => {
+            const allRows = table.getFilteredRowModel().rows.map(r => r.original);
+            if (!validateVisibleColumns(table)) return; // all pages, honors filters/sort
+            exportToCSV(allRows, table);
+          }}>
+            Export All to CSV
+          </DropdownMenuItem>
+        )}
+        {exportOptions.includes("excel") && (
+          <DropdownMenuItem onClick={() => {
+            const allRows = table.getFilteredRowModel().rows.map(r => r.original);
+            if (!validateVisibleColumns(table)) return;
+            exportToExcel(allRows, table);
+          }}>
+            Export All to Excel
+          </DropdownMenuItem>
+        )}
+        {exportOptions.includes("json") && (
+          <DropdownMenuItem onClick={() => {
+            const allRows = table.getFilteredRowModel().rows.map(r => r.original);
+            if (!validateVisibleColumns(table)) return;
+            exportToJSON(allRows, table);
+          }}>
+            Export All to JSON
+          </DropdownMenuItem>
+        )}
+        {exportOptions.includes("pdf") && (
+          <DropdownMenuItem onClick={() => {
+            const allRows = table.getFilteredRowModel().rows.map(r => r.original);
+            if (!validateVisibleColumns(table)) return;
+            exportToPDF(allRows, table);
+          }}>
+            Export All to PDF
+          </DropdownMenuItem>
+        )}
 
-      {selectedRows.length > 0 && (
-        <>
-          {exportOptions.includes("csv") && (
-            <DropdownMenuItem onClick={() => exportToCSV(selectedRows, table)}>
-              Export Selected to CSV ({selectedRows.length})
-            </DropdownMenuItem>
-          )}
-          {exportOptions.includes("excel") && (
-            <DropdownMenuItem onClick={() => exportToExcel(selectedRows, table)}>
-              Export Selected to Excel ({selectedRows.length})
-            </DropdownMenuItem>
-          )}
-          {exportOptions.includes("json") && (
-            <DropdownMenuItem onClick={() => exportToJSON(selectedRows, table)}>
-              Export Selected to JSON ({selectedRows.length})
-            </DropdownMenuItem>
-          )}
-          {exportOptions.includes("pdf") && (
-            <DropdownMenuItem onClick={() => exportToPDF(selectedRows, table)}>
-              Export Selected to PDF ({selectedRows.length})
-            </DropdownMenuItem>
-          )}
-        </>
-      )}
-    </DropdownMenuContent>
-  </DropdownMenu>
-);
+        {selectedRows.length > 0 && (
+          <>
+            {exportOptions.includes("csv") && (
+              <DropdownMenuItem onClick={() => exportToCSV(selectedRows, table)}>
+                Export Selected to CSV ({selectedRows.length})
+              </DropdownMenuItem>
+            )}
+            {exportOptions.includes("excel") && (
+              <DropdownMenuItem onClick={() => exportToExcel(selectedRows, table)}>
+                Export Selected to Excel ({selectedRows.length})
+              </DropdownMenuItem>
+            )}
+            {exportOptions.includes("json") && (
+              <DropdownMenuItem onClick={() => exportToJSON(selectedRows, table)}>
+                Export Selected to JSON ({selectedRows.length})
+              </DropdownMenuItem>
+            )}
+            {exportOptions.includes("pdf") && (
+              <DropdownMenuItem onClick={() => exportToPDF(selectedRows, table)}>
+                Export Selected to PDF ({selectedRows.length})
+              </DropdownMenuItem>
+            )}
+          </>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 
 };
 
@@ -1428,96 +1428,95 @@ const Pagination = ({ table }: { table: TanstackTable<any> }) => {
   };
 
   return (
- <div className="flex items-center justify-between flex-wrap sm:flex-nowrap px-4 py-3 border-t border-gray-200 bg-white text-sm rounded-b-lg gap-3">
+    <div className="flex items-center justify-between flex-wrap sm:flex-nowrap px-4 py-3 border-t border-gray-200 bg-white text-sm rounded-b-lg gap-3">
       {/* Left info */}
       <div className="text-gray-600">
         Showing {start} to {end} of {totalRows} entries
       </div>
 
       {/* Right side controls */}
-          <ScrollArea scrollStyle={'flex-[0.8] bg-[#aab4ca]'}>
-      <div className="flex items-center gap-2 flex-nowrap">
-         <Select
-          value={pageSize.toString()}
-          onValueChange={(value) => table.setPageSize(Number(value))}
-        >
-          <SelectTrigger className="w-28 h-8 text-sm">
-            <SelectValue placeholder="Rows per page" />
-          </SelectTrigger>
-          <SelectContent>
-            {[10, 20, 50, 100].map((size) => (
-              <SelectItem key={size} value={size.toString()}>
-                {size} per page
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        
+      <ScrollArea scrollStyle={'flex-[0.8] bg-[#aab4ca]'}>
+        <div className="flex items-center gap-2 flex-nowrap">
+          <Select
+            value={pageSize.toString()}
+            onValueChange={(value) => table.setPageSize(Number(value))}
+          >
+            <SelectTrigger className="w-28 h-8 text-sm">
+              <SelectValue placeholder="Rows per page" />
+            </SelectTrigger>
+            <SelectContent>
+              {[10, 20, 50, 100].map((size) => (
+                <SelectItem key={size} value={size.toString()}>
+                  {size} per page
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-        
-       
 
-        {/* Left shift */}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={shiftWindowLeft}
-          disabled={pageWindow === 0}
-        >
-          <ChevronLeft />
-        </Button>
-        {/* Previous */}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Prev
-        </Button>
 
-        {/* 3-page buttons */}
-        <div className="flex items-center gap-2 min-w-[150px] justify-center">
-          {visiblePages.map((page, idx) =>
-            page ? (
-              <button
-                key={page}
-                onClick={() => table.setPageIndex(page - 1)}
-                className={`w-8 h-8 text-sm font-medium rounded-md border transition-all duration-150 ${
-                  page === currentPage
-                    ? "bg-blue-600 text-white border-blue-600 shadow-sm"
-                    : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
-                }`}
-              >
-                {page}
-              </button>
-            ) : (
-              <div key={`empty-${idx}`} className="w-10 h-9" />
-            )
-          )}
-        </div>
 
-      
 
-        {/* Next */}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Next
-        </Button>
+          {/* Left shift */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={shiftWindowLeft}
+            disabled={pageWindow === 0}
+          >
+            <ChevronLeft />
+          </Button>
+          {/* Previous */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+          >
+            Prev
+          </Button>
+
+          {/* 3-page buttons */}
+          <div className="flex items-center gap-2 min-w-[150px] justify-center">
+            {visiblePages.map((page, idx) =>
+              page ? (
+                <button
+                  key={page}
+                  onClick={() => table.setPageIndex(page - 1)}
+                  className={`w-8 h-8 text-sm font-medium rounded-md border transition-all duration-150 ${page === currentPage
+                      ? "bg-blue-600 text-white border-blue-600 shadow-sm"
+                      : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
+                    }`}
+                >
+                  {page}
+                </button>
+              ) : (
+                <div key={`empty-${idx}`} className="w-10 h-9" />
+              )
+            )}
+          </div>
+
+
+
+          {/* Next */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+          >
+            Next
+          </Button>
           {/* Right shift */}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={shiftWindowRight}
-          disabled={pageWindow >= totalWindows - 1}
-        >
-          <ChevronRight />
-        </Button>
-      </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={shiftWindowRight}
+            disabled={pageWindow >= totalWindows - 1}
+          >
+            <ChevronRight />
+          </Button>
+        </div>
       </ScrollArea>
     </div>
   );
@@ -1760,8 +1759,8 @@ export function ReusableTable<T = any>({
         },
         enableSorting: false,
         enableHiding: false,
-        size: 28, minSize: 24, 
-    maxSize: 36,
+        size: 28, minSize: 24,
+        maxSize: 36,
       });
     }
 
@@ -1821,9 +1820,9 @@ export function ReusableTable<T = any>({
       if (headerRef.current) {
         const actualWidth = headerRef.current.offsetWidth + 16;
 
-       const headerText = title?.toString() ?? '';
-const minCharsWidth = getMinWidthFromChars(headerText.length);
-const calculated = Math.max(actualWidth, minCharsWidth);
+        const headerText = title?.toString() ?? '';
+        const minCharsWidth = getMinWidthFromChars(headerText.length);
+        const calculated = Math.max(actualWidth, minCharsWidth);
 
         setCalculatedMinWidth(calculated);
       }
@@ -1860,7 +1859,7 @@ const calculated = Math.max(actualWidth, minCharsWidth);
     if (column.id === "select") {
       return (
         <Checkbox
-        title='Select'
+          title='Select'
           checked={
             table.getIsAllPageRowsSelected()
               ? true
@@ -2159,15 +2158,15 @@ const calculated = Math.max(actualWidth, minCharsWidth);
             </DropdownMenu>
           ) : (
             // fallback to internal ExportMenu if no external handler provided
-           <ExportMenu
-  data={table?.getPrePaginationRowModel().rows.map(r => r.original)} // ✅ include ALL rows
-  selectedRows={selectedRows}
-  permissions={permissions}
-  filename={title || "export"}
-  table={table}
-  exportOptions={exportOptions}
-  exportMeta={exportMeta}
-/>
+            <ExportMenu
+              data={table?.getPrePaginationRowModel().rows.map(r => r.original)} // ✅ include ALL rows
+              selectedRows={selectedRows}
+              permissions={permissions}
+              filename={title || "export"}
+              table={table}
+              exportOptions={exportOptions}
+              exportMeta={exportMeta}
+            />
 
           )
         )}
@@ -2223,7 +2222,7 @@ const calculated = Math.max(actualWidth, minCharsWidth);
 
       {/* Table */}
       <div className="bg-white shadow-sm rounded-xl border border-gray-200">
-        <div className="overflow-x-auto">
+          <ScrollArea horizontal>
           <table ref={tableRef} className="w-full min-w-max border-collapse text-sm text-gray-800">
             <thead className="bg-white text-gray-700 uppercase text-sm font-semibold tracking-wide">
               {table.getHeaderGroups().map(headerGroup => (
@@ -2441,7 +2440,7 @@ const calculated = Math.max(actualWidth, minCharsWidth);
             )}
 
           </table>
-        </div>
+          </ScrollArea>
 
         {/* Pagination */}
         {enablePagination && <Pagination table={table} />}

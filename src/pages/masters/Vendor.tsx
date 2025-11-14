@@ -23,6 +23,7 @@ import { deleteVendorByCompanyId, GetCountryList, getEditVendorListByCompanyId, 
 import { VENDOR_DETAILS } from '@/Local_DB/Form_JSON_Data/VendorDB';
 import { useMessage } from '@/components/ui/reusable-message';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, } from '@/components/ui/dialog';
+import { FaAngleRight } from 'react-icons/fa';
 interface VendorData {
   "VendorID": number | string,
   "VendorName": string,
@@ -516,9 +517,9 @@ UpdateVendorAPI(payload,selectedVendorData?.VendorID)
               <div className="flex items-center gap-2">
                 <div className="flex items-center gap-2 text-sm text-gray-600">
                   <span>Masters</span>
-                  <span>/</span>
+                  <FaAngleRight />
                   <span>Company</span>
-                  <span>/</span>
+                  <FaAngleRight />
                   <span className="text-gray-900 font-medium">Vendor</span>
                 </div>
               </div>

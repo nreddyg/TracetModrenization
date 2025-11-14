@@ -22,6 +22,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { CUSTOMER_DETAILS } from '@/Local_DB/Form_JSON_Data/CustomerDB';
 import { deleteCustomerByCompanyId, getBranchList, GetCountryList, getCustomerLocations, GetCustomersList, getEditCustomerListByCompanyId, postNewCustomer, updateCustomer } from '@/services/customerServices';
 import { NavLink } from 'react-router-dom';
+import { FaAngleRight } from 'react-icons/fa';
 interface CustomerData {
   "CustomerID": number | string,
   "CustomerName": string,
@@ -618,9 +619,9 @@ const Customer = () => {
               <div className="flex items-center gap-2">
                 <div className="flex items-center gap-2 text-sm text-gray-600">
                   <span>Masters</span>
-                  <span>/</span>
+                  <FaAngleRight />
                   <span>Company</span>
-                  <span>/</span>
+                  <FaAngleRight />
                   <span className="text-gray-900 font-medium">Customer</span>
                 </div>
               </div>

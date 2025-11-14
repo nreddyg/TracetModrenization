@@ -19,9 +19,10 @@ import { Controller, useForm } from 'react-hook-form';
 import { Asset_Main_Category_DB } from '@/Local_DB/Form_JSON_Data/AssetCategoryDB';
 import { BaseField, GenericObject } from '@/Local_DB/types/types';
 import ReusableMultiSelect from '@/components/ui/reusable-multi-select';
-import { FaSearch } from 'react-icons/fa';
+import { FaAngleRight, FaSearch } from 'react-icons/fa';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from "zod";
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 
 interface MainCategory {
@@ -678,22 +679,25 @@ const AssetCategory = () => {
         setIsMainDialogOpen(true);
     }
     return (
-        <div className="h-full overflow-y-auto bg-gray-50/30">
-            <header className="bg-card flex justify-between border-b px-6 py-4 shadow-sm">
-                <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <ScrollArea>
+        <div className="h-full">
+            <header className="px-6 py-4">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+                        <h1 className="text-lg sm:text-2xl font-bold text-gray-900">
+                            Asset Category
+                        </h1>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
                         <span>Masters</span>
-                        <span>/</span>
+                        <FaAngleRight />
                         <span>Fixed Assets</span>
-                        <span>/</span>
-                        <span className="text-foreground font-medium">Asset Category</span>
+                        <FaAngleRight />
+                        <span className="text-gray-900 font-medium">Asset Category</span>
                     </div>
                 </div>
             </header>
-            <div className="p-4 space-y-4">
-                <div className='ps-3'>
-                    <h1 className="text-3xl font-bold text-gray-900">Asset Category</h1>
-                </div>
+            <div className="p-4 space-y-4 pt-0">
                 <Card className="border-0 shadow-sm mt-2">
                     <CardHeader className="pb-2 pt-2">
                         <div className='mt-2 p-2'>
@@ -888,6 +892,7 @@ const AssetCategory = () => {
                 </div>
             </div>
         </div>
+        </ScrollArea>
     );
 };
 

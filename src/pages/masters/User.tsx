@@ -19,6 +19,7 @@ import { createUser, deleteUser, getCategoryList, getDepartmentList, getRoleName
 import { USER_DETAILS } from '@/Local_DB/Form_JSON_Data/UserDB';
 import { GetBranchListBasedonCompanyId } from '@/services/headerServices';
 import ReusableSingleCheckbox from '@/components/ui/reusable-single-checkbox';
+import { FaAngleRight } from 'react-icons/fa';
 
 interface User {
   UserId: number,
@@ -587,9 +588,9 @@ const User = () => {
               <div className="flex items-center gap-2">
                 <div className="flex items-center gap-2 text-sm text-gray-600">
                   <span>Masters</span>
-                  <span>/</span>
+                  <FaAngleRight />
                   <span>Company</span>
-                  <span>/</span>
+                  <FaAngleRight />
                   <span className="text-gray-900 font-medium">User</span>
                 </div>
               </div>

@@ -33,6 +33,7 @@ import ReusableTable from '@/components/ui/reusable-table';
 import dayjs from 'dayjs';
 import { ReusableButton } from '@/components/ui/reusable-button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { FaAngleRight } from 'react-icons/fa';
 interface MultiSelectConfig {
   isHierarchy?: boolean;
   labelClassName?: string;
@@ -1060,25 +1061,22 @@ const ServiceDeskReports = () => {
   return (
     <ScrollArea className="h-full">
       {/* Compact Header */}
-      <header className="bg-white border-b px-6 py-3 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3"
-      >
-        <div className="flex items-start sm:items-center gap-4">
-          <div>
-            <h1 className="text-lg sm:text-2xl font-bold text-gray-900">Service Desk Reports</h1>
-            {/* <p className="text-sm text-gray-600">
-              Generate comprehensive reports with advanced filtering and customization options
-            </p> */}
+      <header className="px-6 py-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+            <h1 className="text-lg sm:text-2xl font-bold text-gray-900">
+              Service Desk Reports
+            </h1>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <span>Service Desk</span>
+            <FaAngleRight />
+            <span className="text-gray-900 font-medium">Reports</span>
           </div>
         </div>
-
-        {/* <div className="flex items-center gap-2 text-sm text-gray-600">
-          <span>Service Desk</span>
-          <span>/</span>
-          <span className="text-gray-900 font-medium">Service Desk Reports</span>
-        </div> */}
       </header>
 
-      <div className="px-6 pb-6 pt-6 space-y-6 ">
+      <div className="px-6 pb-6 pt-0 space-y-6 ">
         <div className="grid grid-cols-1 xl:grid-cols-4 gap-6 ">
           {/* Enhanced Left Sidebar - Report Types */}
           <div className="xl:col-span-1">

@@ -844,6 +844,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@radix-ui/react-popover
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ReusableDropdown } from '@/components/ui/reusable-dropdown';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { FaAngleRight } from 'react-icons/fa';
 interface TreeNode {
   id: string;
   name: string;
@@ -1481,9 +1482,9 @@ const CompanyHierarchy = () => {
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <span>Masters</span>
-            <span>/</span>
+            <FaAngleRight />
             <span>Company</span>
-            <span>/</span>
+            <FaAngleRight />
             <span className="text-foreground font-medium">CompanyHierarchy</span>
           </div>
         </div>

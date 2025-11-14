@@ -22,6 +22,7 @@ import { ORGANIZATION_DETAILS } from '@/Local_DB/Form_JSON_Data/OrganizationDB';
 import { useMessage } from '@/components/ui/reusable-message';
 import { convertOrgLogoFromApi, fileToByteArray } from '@/_Helper_Functions/HelperFunctions';
 import axios from 'axios';
+import { FaAngleRight } from 'react-icons/fa';
 interface OrganizationData {
   OrganizationId: number,
   OrganizationName: string,
@@ -586,9 +587,9 @@ const Organization = () => {
             <div className="flex items-start sm:items-center gap-4 lg:gap-6 flex-1 min-w-0">
               <div className="flex items-center gap-2 text-sm text-gray-600 flex-wrap">
                 <span>Masters</span>
-                <span>/</span>
+                <FaAngleRight />
                 <span>Company</span>
-                <span>/</span>
+                <FaAngleRight />
                 <span className="text-gray-900 font-medium">Organization</span>
               </div>
             </div>

@@ -19,6 +19,7 @@ import { TreeConfig, TreeView } from '@/components/ui/reusable-treeView';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { MenubarShortcut } from '@/components/ui/menubar';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { FaAngleRight } from 'react-icons/fa';
 
 
 interface TreeNode {
@@ -589,9 +590,9 @@ const Department = () => {
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <span>Masters</span>
-            <span>/</span>
+            <FaAngleRight />
             <span>Company</span>
-            <span>/</span>
+            <FaAngleRight />
             <span className="text-foreground font-medium">Department</span>
           </div>
         </div>

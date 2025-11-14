@@ -31,6 +31,7 @@ import { getSRBranchList } from '@/services/ticketServices';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { FaAngleRight } from 'react-icons/fa';
 interface OptType {
   data: { [key: string]: any }[];
   label: string;
@@ -673,26 +674,21 @@ const Configuration = () => {
   return (
     <ScrollArea>
       <div className="h-full">
-        {/* <header className="bg-white border-b px-6 py-3 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-          <div className="flex items-center gap-3">
-            <Button 
-            size="sm" 
-            className="btn-submit-style" 
-            onClick={()=>navigate('/service-desk/create-ticket')}>
-              <span className="hidden sm:inline">New Service Request</span>
-              <span className="sm:hidden">New Request</span>
-            </Button>
-          </div>
-          <div className="flex items-center gap-2 text-sm text-gray-600">
+        <div className="p-4 space-y-4">
+          <header className="px-2 py-0">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+                <h1 className="text-lg sm:text-2xl font-bold text-gray-900">
+                  Service Desk Configuration
+                </h1>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-gray-600">
                 <span>Service Desk</span>
-                <span>/</span>
+                <FaAngleRight />
                 <span className="text-gray-900 font-medium">Configuration</span>
               </div>
-        </header> */}
-        <div className="p-4 space-y-4">
-          <div>
-            <h1 className="text-lg sm:text-2xl font-bold text-gray-900">Service Desk Configuration</h1>
-          </div>
+            </div>
+          </header>
           <Tabs value={currentTab} onValueChange={setCurrentTab} className="space-y-4">
             <div className="hidden sm:block tabs">
               {/* <TabsList className="grid w-full grid-cols-3 pb-[35px] pt-[20px] px-4 ">

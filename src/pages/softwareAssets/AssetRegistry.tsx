@@ -670,7 +670,9 @@ const AssetRegistry = () => {
                     <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
                         <ReusableButton
                             size="small"
-                            className=' flex-1 sm:flex-none bg-primary h-[2.38rem] text-white p-4'
+                            // className=' flex-1 sm:flex-none bg-primary h-[2.38rem] text-white p-4'
+                                        className='btn-submit-style'
+
                             onClick={() => setIsOpenLicenseCard((prev) => !prev)}>
                             {isOpenLicenseCard ? (
                                 <div className='flex items-center gap-2'>

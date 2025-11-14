@@ -396,7 +396,9 @@ const LicenseAssignment = () => {
                             <ReusableButton
                                 size="small"
                                 // variant="primary"
-                                className=' flex-1 sm:flex-none bg-primary h-[2.38rem] text-white p-4'
+                                // className=' flex-1 sm:flex-none bg-primary h-[2.38rem] text-white p-4'
+                                className='btn-submit-style'
+
                                 onClick={() => setIsOpenLicenseCard((prev) => !prev)}>
                                 <span className="">
                                     {isOpenLicenseCard ? (
@@ -442,7 +444,9 @@ const LicenseAssignment = () => {
                                                 onClick={handleSubmit((data) => handleSave(data))}
                                                 iconPosition="left"
                                                 size="middle"
-                                                className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+                                                // className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+                                                className='btn-submit-style'
+
                                             >
                                                 {editingRecord ? 'Update' : 'Save'}
                                             </ReusableButton>
@@ -452,6 +456,8 @@ const LicenseAssignment = () => {
                                                 onClick={handleReset}
                                                 iconPosition="left"
                                                 size="middle"
+                                                className='btn-reset-clear-style'
+
                                             >
                                                 Cancel
                                             </ReusableButton>
@@ -498,6 +504,8 @@ const LicenseAssignment = () => {
                                 <ReusableButton
                                     variant="default"
                                     onClick={() => setIsDelModalOpen(false)}
+                                    className='btn-reset-clear-style'
+
                                 >
                                     Cancel
                                 </ReusableButton>
@@ -505,6 +513,8 @@ const LicenseAssignment = () => {
                                     variant="primary"
                                     danger={true}
                                     onClick={callDeleteAPI}
+                                    className='btn-submit-style'
+
                                 >
                                     Delete
                                 </ReusableButton>

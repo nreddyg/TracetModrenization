@@ -670,7 +670,9 @@ const AssetRegistry = () => {
                     <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
                         <ReusableButton
                             size="small"
-                            className=' flex-1 sm:flex-none bg-primary h-[2.38rem] text-white p-4'
+                            // className=' flex-1 sm:flex-none bg-primary h-[2.38rem] text-white p-4'
+                                        className='btn-submit-style'
+
                             onClick={() => setIsOpenLicenseCard((prev) => !prev)}>
                             {isOpenLicenseCard ? (
                                 <div className='flex items-center gap-2'>
@@ -729,7 +731,10 @@ const AssetRegistry = () => {
                                             onClick={() => { handleSubmit(handleSave)() }}
                                             iconPosition="left"
                                             size="middle"
-                                            className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+                                            className='btn-submit-style'
+
+                                        // className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+
                                         >
                                             {editRecordId ? 'Update' : 'Save'}
                                         </ReusableButton>
@@ -739,6 +744,8 @@ const AssetRegistry = () => {
                                             onClick={() => handleReset()}
                                             iconPosition="left"
                                             size="middle"
+                                            className='btn-reset-clear-style'
+
                                         >
                                             {editRecordId ? 'Cancel' : 'Clear'}
                                         </ReusableButton>

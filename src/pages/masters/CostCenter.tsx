@@ -20,6 +20,7 @@ import { deleteCostCenter, getCostcenterById, getCostCenterData, postCostCenter 
 import { CostCenter_DB } from '@/Local_DB/Form_JSON_Data/CostCenterDB';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { FaAngleRight } from 'react-icons/fa';
 
 
 
@@ -793,9 +794,9 @@ const CostCenter = () => {
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <span>Masters</span>
-            <span>/</span>
+            <FaAngleRight />
             <span>Company</span>
-            <span>/</span>
+            <FaAngleRight />
             <span className="text-foreground font-medium">Cost Center</span>
           </div>
         </div>

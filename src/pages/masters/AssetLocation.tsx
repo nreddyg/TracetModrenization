@@ -17,6 +17,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { ASSET_LOCATION_DB } from '@/Local_DB/Form_JSON_Data/AssetLocationDB';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { deleteAssetLocData, getAssetLocationDataByLocID, getAssetLocationDetals, postOrUpdateAssetLocationDetails } from '@/services/assetLocationServices';
+import { FaAngleRight } from 'react-icons/fa';
 
 interface TreeNode {
     id: string;
@@ -823,9 +824,9 @@ const AssetLocation = () => {
                 <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <span>Masters</span>
-                        <span>/</span>
+                        <FaAngleRight />
                         <span>Company</span>
-                        <span>/</span>
+                        <FaAngleRight />
                         <span className="text-foreground font-medium">Asset Location</span>
                     </div>
                 </div>

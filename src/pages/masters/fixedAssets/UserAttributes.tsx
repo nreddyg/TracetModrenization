@@ -20,6 +20,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { getUserAttributes } from '@/services/assetCategoryServices';
 import ReusableSingleCheckbox from '@/components/ui/reusable-single-checkbox';
 import { addNewUserAttribute, deleteUserAttribute, getEditUserAttributeData, updateUserAttribute } from '@/services/userAttributesServices';
+import { FaAngleRight } from 'react-icons/fa';
 interface CostBreakupData {
     GroupId: number,
     GroupName: string
@@ -706,9 +707,9 @@ setRec(null)
                             <div className="flex items-center gap-2">
                                 <div className="flex items-center gap-2 text-sm text-gray-600">
                                     <span>Masters</span>
-                                    <span>/</span>
+                                    <FaAngleRight />
                                     <span>Fixed Assets</span>
-                                    <span>/</span>
+                                    <FaAngleRight />
                                     <span className="text-gray-900 font-medium">User Attributes</span>
                                 </div>
                             </div>

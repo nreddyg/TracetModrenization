@@ -17,6 +17,7 @@ import { deleteCostBreakup, editCostBreakup, getCostBreakUpList, postCostBreakup
 import { ColumnDef } from '@tanstack/react-table';
 import ReusableTable, { TableAction, TablePermissions } from '@/components/ui/reusable-table';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { FaAngleRight } from 'react-icons/fa';
 interface CostBreakupData {
     GroupId: number,
     GroupName: string
@@ -489,9 +490,9 @@ const CostBreakupAttributes = () => {
                             <div className="flex items-center gap-2">
                                 <div className="flex items-center gap-2 text-sm text-gray-600">
                                     <span>Masters</span>
-                                    <span>/</span>
+                                    <FaAngleRight />
                                     <span>Fixed Assets</span>
-                                    <span>/</span>
+                                    <FaAngleRight />
                                     <span className="text-gray-900 font-medium">Cost Breakup Attributes</span>
                                 </div>
                             </div>

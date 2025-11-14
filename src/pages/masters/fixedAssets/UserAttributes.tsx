@@ -348,18 +348,20 @@ setRec(null)
             accessorKey: 'actions',
             header: 'Actions',
             cell: ({ row }: any) => (
-                <div className="flex gap-2">
+                <div className="flex gap-2" title='Actions'>
                     <ReusableButton
                         variant="text"
                         size="small"
+                        title='Edit'
                         onClick={() => { handleEdit(row.original); setRec(row.original) }}
                     >
-                        <Edit className="h-4 w-4" />
+                        <Edit className="h-4 w-4 text-blue-600" />
                     </ReusableButton>
                     <ReusableButton
                         variant="text"
                         size="small"
                         danger
+                        title='Delete'
                         icon={<Trash2 className="h-4 w-4" />}
                         onClick={() => { setIsDelModalOpen(true);setTableDelete(true) ;setRec(row.original)}}
                     >

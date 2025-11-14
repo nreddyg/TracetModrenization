@@ -139,7 +139,7 @@ const Store = () => {
             accessorKey: 'actions',
             header: 'Actions',
             cell: ({ row }: any) => (
-                <div className="flex gap-2">
+                <div className="flex gap-2" title='Actions'>
                     <ReusableButton
                         variant="text"
                         size="small"

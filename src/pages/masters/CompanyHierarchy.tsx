@@ -796,7 +796,7 @@
 //                   <h6 className="breadCrumb">{breadCrumb.map(x => { return `${x} >` })}</h6>
 //                 </div>
 //               </div>
-             
+
 //               <div className="space-y-6">
 //                 <h5>{recordToEditId && selectedLevel !== 99 ? `Update ${fields[0].heading}` : `${selectedLevel !== 99 ? "Enter" : ""} ${fields[0].heading}`}</h5>
 //                 <div className="px-1">
@@ -809,7 +809,7 @@
 //                   </div>
 //                 </div>
 //               </div>
-            
+
 //             </div>
 //           </div>
 //         </div>
@@ -853,7 +853,7 @@ interface TreeNode {
   children?: TreeNode[];
   type: 'company' | 'department' | 'unit';
 }
- 
+
 export const treeConfig: TreeConfig = {
   isCheckable: false,
   showIcon: true,     // ✅ Enables automatic icons
@@ -866,7 +866,7 @@ let lastLevelData: BaseField[] = [
     fieldType: "text",
     name: "Name",
     // value: "",
- 
+
     isRequired: true,
   },
   {
@@ -953,14 +953,14 @@ let lastLevelData: BaseField[] = [
     isRequired: false,
   },
 ];
- 
+
 const SearchButton = {
   type: "text",
   name: "searchValue",
   value: "",
   placeholder: "Search...",
 };
- 
+
 const CompanyHierarchy = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedKeys, setSelectedKeys] = useState([]);
@@ -979,7 +979,7 @@ const CompanyHierarchy = () => {
   const [disable, setDisable] = useState(true);
   const [search, setSearch] = useState(SearchButton);
   const [expandedKeys, setExpandedKeys] = useState<Set<string>>(new Set());
- 
+
   const dispatch = useDispatch()
   const [selectedNodeParents, setSelectedNodeParents] = useState([]);
   const [selectedNode, setSelectedNode] = useState({
@@ -992,11 +992,11 @@ const CompanyHierarchy = () => {
   const [recordToEditId, setRecordToEditId] = useState(null);
   const [breadCrumb, setBreadCrumb] = useState(["Company"]);
   const [open, setOpen] = useState(false)
- 
- 
+
+
   const msg = useMessage()
- 
- 
+
+
   useEffect(() => {
     if (companyId) {
       fetchCompanyGetData(companyId)
@@ -1036,10 +1036,10 @@ const CompanyHierarchy = () => {
     // mode: 'onChange',
     // reValidateMode: "onChange"
   });
- 
+
   const { control, register, handleSubmit, trigger, watch, setValue, reset, formState: { errors } } = form;
   const getFieldsByNames = (names: string[]) => fields.filter(f => names.includes(f.name!));
- 
+
   const renderField = (field: BaseField) => {
     const { name, label, fieldType, isRequired, validationPattern, patternErrorMessage, dependsOn, show = true } = field;
     if (!show && dependsOn && !watch(dependsOn)) {
@@ -1048,7 +1048,7 @@ const CompanyHierarchy = () => {
     const validationRules = {
       required: isRequired ? `${label} is Required` : false,
     };
- 
+
     switch (fieldType) {
       case 'text':
         return (
@@ -1096,7 +1096,7 @@ const CompanyHierarchy = () => {
     setSelectedLevel(Number(info.node.type))
     setSelectedId(info.node.id)
     setFields(allLevelsJson[Number(info.node.type)])
- 
+
   };
   const treefun = (data, id) => {
     const treeData = [];
@@ -1181,14 +1181,14 @@ const CompanyHierarchy = () => {
     setSelectedNode(tempObj);
     setFields(allLevelsJson[selectedLevel + 1])
   };
- 
- 
+
+
   async function fetchCompanyGetData(companyId) {
     dispatch(setLoading(true))
     await getCompanyData(companyId).then(res => {
       if (res.data && res.data.length > 0) {
         setTree(res.data)
- 
+
         const result = treefun(res.data, "#")
         // if (selectedLevel === 99) {
         //   let data = allLevelsJson;
@@ -1202,13 +1202,13 @@ const CompanyHierarchy = () => {
             Name: Name || "",
             Code: Code || "",
           });
- 
+
           const data = fields;
           data[0].disabled = true
           data[1].disabled = true
           setFields(data)
         }
- 
+
         setTreeViewData(result)
       } else {
         msg.warning(res.data.message || "No Data Found")
@@ -1230,7 +1230,7 @@ const CompanyHierarchy = () => {
             let lastData = last[lastLevel];
             const stateIndex = lastData.findIndex((x) => x.name === "State");
             lastData[stateIndex].options = res.data.Details;
- 
+
             setAllLevelsJson({ ...last, lastLevel: lastData });
           }
         } else {
@@ -1299,7 +1299,7 @@ const CompanyHierarchy = () => {
     }
     // form.reset()
   };
- 
+
   async function fetchCompanyGetDataByBranchId(companyId: any, branchid: any) {
     dispatch(setLoading(true))
     await getCompanyDataBybranchId(companyId, branchid).then(res => {
@@ -1326,14 +1326,14 @@ const CompanyHierarchy = () => {
               MobileNo: details.MobileNo
             })
           }
- 
+
         }
       } else {
         msg.warning(res.data.message || "No Data Found")
       }
     }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
   }
- 
+
   async function deleteLevel(compId: string, id: any, data: any) {
     dispatch(setLoading(true));
     await deleteHierarchyLevel(compId, id, data).then(res => {
@@ -1343,7 +1343,7 @@ const CompanyHierarchy = () => {
         handleReset()
         setRecordToEditId(null);
         setSelectedId(null)
- 
+
       }
       else {
         msg.error(res.data.message)
@@ -1360,10 +1360,10 @@ const CompanyHierarchy = () => {
       // recordToEditId(null)
     }
   }
- 
+
   const handleSearch = (val: string) => {
     setSearch((prev) => ({ ...prev, value: val }));
- 
+
     if (!val) {
       const allKeys: string[] = [];
       const collectKeys = (nodes: any[]) => {
@@ -1376,9 +1376,9 @@ const CompanyHierarchy = () => {
       setExpandedKeys(new Set(allKeys));
       return;
     }
- 
+
     const matchedKeys: string[] = [];
- 
+
     const findMatchingNodes = (nodes: any[]) => {
       nodes.forEach((node) => {
         const title = (node.title || node.name || '').toLowerCase();
@@ -1387,7 +1387,7 @@ const CompanyHierarchy = () => {
       });
     };
     findMatchingNodes(treeViewData);
- 
+
     const parentKeys = new Set<string>();
     const findParentKeys = (nodes: any[], targets: string[]) => {
       nodes.forEach((node) => {
@@ -1400,17 +1400,17 @@ const CompanyHierarchy = () => {
       });
     };
     findParentKeys(treeViewData, matchedKeys);
- 
+
     // ✅ Collapse all, then expand only matched + parents
     const newExpanded = new Set([...matchedKeys, ...parentKeys]);
     setExpandedKeys(newExpanded);
   };
- 
- 
+
+
   useEffect(() => {
     if (treeViewData?.length) {
       const allKeys: string[] = [];
- 
+
       const collectKeys = (nodes: any[]) => {
         nodes.forEach((node) => {
           allKeys.push(node.key);
@@ -1419,18 +1419,18 @@ const CompanyHierarchy = () => {
           }
         });
       };
- 
+
       collectKeys(treeViewData);
       setExpandedKeys(new Set(allKeys)); // expand everything initially
     }
   }, [treeViewData]);
- 
+
   const mainTreeData = useMemo(() => {
     const loop = (data) =>
       data.map((item) => {
         const titleStr = item.title || item.name || '';
         const searchVal = search.value.trim().toLowerCase();
- 
+
         if (!searchVal) {
           return {
             ...item,
@@ -1438,7 +1438,7 @@ const CompanyHierarchy = () => {
             children: item.children ? loop(item.children) : [],
           };
         }
- 
+
         const index = titleStr.toLowerCase().indexOf(searchVal);
         if (index === -1) {
           return {
@@ -1447,11 +1447,11 @@ const CompanyHierarchy = () => {
             children: item.children ? loop(item.children) : [],
           };
         }
- 
+
         const beforeStr = titleStr.substring(0, index);
         const matchStr = titleStr.substring(index, index + searchVal.length); // ✅ keep original case
         const afterStr = titleStr.substring(index + searchVal.length);
- 
+
         const title = (
           <span key={item.key}>
             {beforeStr}
@@ -1459,24 +1459,24 @@ const CompanyHierarchy = () => {
             {afterStr}
           </span>
         );
- 
+
         return {
           ...item,
           title,
           children: item.children ? loop(item.children) : [],
         };
       });
- 
+
     return loop(treeViewData);
   }, [treeViewData, search.value]);
- 
+
   const handleToggleNode = (
     newExpandedKeys: string[],
     info: { expanded: boolean; node: any }
   ) => {
     setExpandedKeys(new Set(newExpandedKeys));
   };
- 
+
   return (
     <div className="bg-hsl(214.3 31.8% 91.4%)">
       <header className="bg-card flex justify-between border-b px-6 py-4">
@@ -1514,7 +1514,7 @@ const CompanyHierarchy = () => {
           </ReusableButton>
         </div>
       </header>
- 
+
       <div className="flex h-full p-2">
         {/* Tree Structure Panel */}
         <div className="w-[26vw] h-[75vh] rounded-lg shadow-lg border-r bg-card flex flex-col">
@@ -1531,7 +1531,7 @@ const CompanyHierarchy = () => {
             <div className="flex gap-2 flex items-center justify-center">
               <ReusableButton
                 size="small"
-                className="bg-primary h-[2rem] hover:bg-blue-700 text-white"
+                className="bg-background hover:bg-background h-[2rem]"
                 style={{
                   cursor: selectedLevel >= 99 + level.length || disable ? "not-allowed" : "pointer",
                 }}
@@ -1543,7 +1543,7 @@ const CompanyHierarchy = () => {
                   }
                 }}
               >
-                <Plus className="h-4 w-4" />
+                <Plus className="h-4 w-4 hover:text-blue hover:bg-background" />
               </ReusableButton>
               <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>
                 <DialogContent className="sm:max-w-[425px]">
@@ -1571,17 +1571,20 @@ const CompanyHierarchy = () => {
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
-              <Button size="sm" variant="outline" className="h-8" onClick={() => setIsDelModalOpen(true)}>
-                <Trash2 className="h-4 w-4 text-destructive" />
-              </Button>
+              <ReusableButton size="small"
+                className="h-8 hover:bg-background bg-background hover:border-red-500 hover:text-destructive"
+                style={{ cursor: disable || selectedLevel === 99 ? "not-allowed" : "pointer" }}
+                onClick={() => setIsDelModalOpen(true)}>
+                <Trash2 className="h-4 w-4  hover:bg-background hover:text-destructive" />
+              </ReusableButton>
             </div>
           </div>
-          <ScrollArea className="min-h-20 h-[63vh] p-2">
+          <ScrollArea className="min-h-20 h-[63vh] overflow-y-auto p-2">
             <TreeView treeData={mainTreeData} config={treeConfig} onSelect={handleSelect} selectKeys={selectedKeys} onExpand={handleToggleNode}
               expandedKeys={Array.from(expandedKeys)} />
           </ScrollArea>
         </div>
- 
+
         {/* Details Panel */}
         <div className="flex-1 h-[75vh]  ps-2 shadow-xl">
           <div className="bg-card border-b rounded-lg shadow-lg lg:ps-6 py-3 flex flex-row xxs:flex-col xs2:flex-row lg:flex-row lg:items-center justify-between gap-4">
@@ -1618,7 +1621,7 @@ const CompanyHierarchy = () => {
                   <h6 className="breadCrumb">{breadCrumb.map(x => { return `${x} >` })}</h6>
                 </div>
               </div>
-             
+
               <div className="space-y-6">
                 <h5>{recordToEditId && selectedLevel !== 99 ? `Update ${fields[0].heading}` : `${selectedLevel !== 99 ? "Enter" : ""} ${fields[0].heading}`}</h5>
                 <div className="px-1">
@@ -1631,14 +1634,14 @@ const CompanyHierarchy = () => {
                   </div>
                 </div>
               </div>
-           
+
             </div>
           </div>
         </div>
- 
+
       </div>
     </div>
   );
 };
- 
+
 export default CompanyHierarchy;

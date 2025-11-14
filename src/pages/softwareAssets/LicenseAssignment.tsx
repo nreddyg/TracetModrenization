@@ -382,133 +382,138 @@ const LicenseAssignment = () => {
     }
     return (
         <ScrollArea>
-        <div className="h-full">
-            <header className="bg-white rounded border-b px-6 py-2 shadow-sm flex flex-col sm:flex-row shrink-0 justify-between gap-4">
-                <div className="flex items-center gap-2 text-sm text-gray-600 flex-wrap">
-                    <span>Software Assets</span>
-                    <span>/</span>
-                    <span className="text-gray-900 font-medium">License Assignment</span>
-                </div>
-                <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
-                    <ReusableButton
-                        size="small"
-                        // variant="primary"
-                        className=' flex-1 sm:flex-none bg-primary h-[2.38rem] text-white p-4'
-                        onClick={() => setIsOpenLicenseCard((prev) => !prev)}>
-                        <span className="">
-                            {isOpenLicenseCard ? (
-                                <div className='flex items-center gap-2'>
-                                    <ArrowLeft className="h-4 w-4 text-current stroke-[3]" /> Grid View
-                                </div>
-                            ) : (
-                                'Assign License'
-                            )}
-                        </span>
-                    </ReusableButton>
-                </div>
-            </header>
-            <div className="p-4 sm:p-4 space-y-4 sm:space-y-4">
-                {isOpenLicenseCard &&
-                    <div className='p-2 rounded-lg'>
-                        <div className=" bg-white rounded-lg p-4">
-                            <Card>
-                                <CardContent className="pt-6">
-                                    <div className="">
-                                        <div className="space-y-4">
-                                            <span className='text-2xl'>Assign License To Employee</span>
-                                            <div className={`grid xxs:grid-cols-1 xs2:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-6`}>
-                                                {getFieldsByNames(['EmployeeId', 'DepartmentId', 'SoftwareId', 'LicenseKeyId', 'AssignmentDate', 'AssignmentExpiryDate']).map((field) => {
-                                                    return (renderField(field))
+            <div className="h-full">
+                <header className="bg-white rounded border-b px-6 py-2 shadow-sm flex flex-col sm:flex-row shrink-0 justify-between gap-4">
+                    <div className="flex items-center gap-2 text-sm text-gray-600 flex-wrap">
+                        <span>Software Assets</span>
+                        <span>/</span>
+                        <span className="text-gray-900 font-medium">License Assignment</span>
+                    </div>
+                    <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                        <ReusableButton
+                            size="small"
+                            // variant="primary"
+                            // className=' flex-1 sm:flex-none bg-primary h-[2.38rem] text-white p-4'
+                            className='btn-submit-style'
 
-                                                })}
-                                            </div>
-                                            <div className={`grid xxs:grid-cols-1 xs2:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-1 gap-6 mb-6`}>
-                                                {getFieldsByNames(['Notes']).map((field) => {
-                                                    return <div className="flex-1 items-center space-x-2">
-                                                        {renderField(field)}
-                                                    </div>;
-                                                })}
+                            onClick={() => setIsOpenLicenseCard((prev) => !prev)}>
+                            <span className="">
+                                {isOpenLicenseCard ? (
+                                    <div className='flex items-center gap-2'>
+                                        <ArrowLeft className="h-4 w-4 text-current stroke-[3]" /> Grid View
+                                    </div>
+                                ) : (
+                                    'Assign License'
+                                )}
+                            </span>
+                        </ReusableButton>
+                    </div>
+                </header>
+                <div className="p-4 sm:p-4 space-y-4 sm:space-y-4">
+                    {isOpenLicenseCard &&
+                        <div className='p-2 rounded-lg'>
+                            <div className=" bg-white rounded-lg p-4">
+                                <Card>
+                                    <CardContent className="pt-6">
+                                        <div className="">
+                                            <div className="space-y-4">
+                                                <span className='text-2xl'>Assign License To Employee</span>
+                                                <div className={`grid xxs:grid-cols-1 xs2:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-6`}>
+                                                    {getFieldsByNames(['EmployeeId', 'DepartmentId', 'SoftwareId', 'LicenseKeyId', 'AssignmentDate', 'AssignmentExpiryDate']).map((field) => {
+                                                        return (renderField(field))
+
+                                                    })}
+                                                </div>
+                                                <div className={`grid xxs:grid-cols-1 xs2:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-1 gap-6 mb-6`}>
+                                                    {getFieldsByNames(['Notes']).map((field) => {
+                                                        return <div className="flex-1 items-center space-x-2">
+                                                            {renderField(field)}
+                                                        </div>;
+                                                    })}
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div className="flex gap-2 mt-6">
-                                        <ReusableButton
-                                            htmlType="button"
-                                            variant="default"
-                                            onClick={handleSubmit((data) => handleSave(data))}
-                                            iconPosition="left"
-                                            size="middle"
-                                            className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
-                                        >
-                                            {editingRecord ? 'Update' : 'Save'}
-                                        </ReusableButton>
-                                        <ReusableButton
-                                            htmlType="button"
-                                            variant="default"
-                                            onClick={handleReset}
-                                            iconPosition="left"
-                                            size="middle"
-                                        >
-                                            Cancel
-                                        </ReusableButton>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </div>
-                    </div>
-                }
-                <div className="bg-white p-6 rounded-lg">
-                    <ScrollArea className=" w-full ">
-                        <ReusableTable
-                            data={dataSource}
-                            columns={columns}
-                            permissions={tablePermissions}
-                            title="License Assignments"
-                            onRefresh={handleRefresh}
-                            enableSearch={true}
-                            enableSelection={false}
-                            enableExport={true}
-                            enableColumnVisibility={true}
-                            enablePagination={true}
-                            enableSorting={true}
-                            enableFiltering={true}
-                            pageSize={10}
-                            emptyMessage="No Data found"
-                            rowHeight="normal"
-                            storageKey="service-request-type-list-table"
-                            actions={tableActions}
-                            enableColumnPinning
-                        />
-                    </ScrollArea>
-                </div>
-                <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>
-                    <DialogContent className="sm:max-w-[450px]">
-                        <DialogHeader>
-                            <DialogTitle>Confirm the action</DialogTitle>
-                            <DialogDescription>
-                                Are you sure you want to delete this License Assignment to {deletingRecord?.EmployeeName}?
+                                        <div className="flex gap-2 mt-6">
+                                            <ReusableButton
+                                                htmlType="button"
+                                                variant="default"
+                                                onClick={handleSubmit((data) => handleSave(data))}
+                                                iconPosition="left"
+                                                size="middle"
+                                                // className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+                                                className='btn-submit-style'
 
-                            </DialogDescription>
-                        </DialogHeader>
-                        <DialogFooter>
-                            <ReusableButton
-                                variant="default"
-                                onClick={() => setIsDelModalOpen(false)}
-                            >
-                                Cancel
-                            </ReusableButton>
-                            <ReusableButton
-                                variant="primary"
-                                danger={true}
-                                onClick={callDeleteAPI}
-                            >
-                                Delete
-                            </ReusableButton>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
+                                            >
+                                                {editingRecord ? 'Update' : 'Save'}
+                                            </ReusableButton>
+                                            <ReusableButton
+                                                htmlType="button"
+                                                variant="default"
+                                                onClick={handleReset}
+                                                iconPosition="left"
+                                                size="middle"
+                                                className='btn-reset-clear-style'
+                                            >
+                                                Cancel
+                                            </ReusableButton>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            </div>
+                        </div>
+                    }
+                    <div className="bg-white p-6 rounded-lg">
+                        <ScrollArea className=" w-full ">
+                            <ReusableTable
+                                data={dataSource}
+                                columns={columns}
+                                permissions={tablePermissions}
+                                title="License Assignments"
+                                onRefresh={handleRefresh}
+                                enableSearch={true}
+                                enableSelection={false}
+                                enableExport={true}
+                                enableColumnVisibility={true}
+                                enablePagination={true}
+                                enableSorting={true}
+                                enableFiltering={true}
+                                pageSize={10}
+                                emptyMessage="No Data found"
+                                rowHeight="normal"
+                                storageKey="service-request-type-list-table"
+                                actions={tableActions}
+                                enableColumnPinning
+                            />
+                        </ScrollArea>
+                    </div>
+                    <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>
+                        <DialogContent className="sm:max-w-[450px]">
+                            <DialogHeader>
+                                <DialogTitle>Confirm the action</DialogTitle>
+                                <DialogDescription>
+                                    Are you sure you want to delete this License Assignment to {deletingRecord?.EmployeeName}?
+
+                                </DialogDescription>
+                            </DialogHeader>
+                            <DialogFooter>
+                                <ReusableButton
+                                    variant="default"
+                                    onClick={() => setIsDelModalOpen(false)}
+                                >
+                                    Cancel
+                                </ReusableButton>
+                                <ReusableButton
+                                    variant="primary"
+                                    danger={true}
+                                    onClick={callDeleteAPI}
+                                >
+                                    Delete
+                                </ReusableButton>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
+                </div>
             </div>
-        </div>
         </ScrollArea>
     );
 }

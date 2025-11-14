@@ -659,28 +659,30 @@ const AssetRegistry = () => {
     return (
         <ScrollArea>
             <header className="bg-white rounded border-b px-6 py-2 shadow-sm flex flex-col sm:flex-row shrink-0 justify-between gap-4">
-                    <div className="flex items-center gap-2 text-sm text-gray-600 flex-wrap">
-                        <span>Software Assets</span>
-                        <span>/</span>
-                        <span className="text-gray-900 font-medium">Asset Registry</span>
-                    </div>
-                    <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
-                        <ReusableButton
-                            size="small"
-                            // variant="primary"
-                            className=' flex-1 sm:flex-none bg-primary h-[2.38rem] text-white p-4'
-                            onClick={() => setIsOpenLicenseCard((prev) => !prev)}>
-                            {/* <span className="" > + Add Software Asset</span> */}
-                            {isOpenLicenseCard ? (
-                                <div className='flex items-center gap-2'>
-                                    <ArrowLeft className="h-4 w-4 text-current stroke-[3]" /> Grid View
-                                </div>
-                            ) : (
-                                '+ Add Software Asset'
-                            )}
-                        </ReusableButton>
-                    </div>
-                </header>
+                <div className="flex items-center gap-2 text-sm text-gray-600 flex-wrap">
+                    <span>Software Assets</span>
+                    <span>/</span>
+                    <span className="text-gray-900 font-medium">Asset Registry</span>
+                </div>
+                <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                    <ReusableButton
+                        size="small"
+                        // variant="primary"
+                        // className=' flex-1 sm:flex-none bg-primary h-[2.38rem] text-white p-4'
+                        className='btn-submit-style'
+
+                        onClick={() => setIsOpenLicenseCard((prev) => !prev)}>
+                        {/* <span className="" > + Add Software Asset</span> */}
+                        {isOpenLicenseCard ? (
+                            <div className='flex items-center gap-2'>
+                                <ArrowLeft className="h-4 w-4 text-current stroke-[3]" /> Grid View
+                            </div>
+                        ) : (
+                            '+ Add Software Asset'
+                        )}
+                    </ReusableButton>
+                </div>
+            </header>
             <div className="h-full">
                 {isOpenLicenseCard &&
                     <div className='p-2 rounded-lg'>
@@ -727,7 +729,10 @@ const AssetRegistry = () => {
                                             onClick={() => { handleSubmit(handleSave)() }}
                                             iconPosition="left"
                                             size="middle"
-                                            className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+                                            className='btn-submit-style'
+
+                                        // className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+
                                         >
                                             {editRecordId ? 'Update' : 'Save'}
                                         </ReusableButton>
@@ -737,6 +742,8 @@ const AssetRegistry = () => {
                                             onClick={() => handleReset()}
                                             iconPosition="left"
                                             size="middle"
+                                            className='btn-reset-clear-style'
+
                                         >
                                             {editRecordId ? 'Cancel' : 'Clear'}
                                         </ReusableButton>
@@ -749,26 +756,26 @@ const AssetRegistry = () => {
                 }
                 <div className=" p-3 rounded-lg">
                     <div className=" bg-white rounded-lg p-4 border">
-                            <ReusableTable
-                                data={getAllTableData} columns={columns}
-                                // permissions={""}
-                                permissions={tablePermissions}
-                                title="Software Assets Overview"
-                                onRefresh={handleRefresh}
-                                enableSearch={true}
-                                enableSelection={false}
-                                enableExport={true}
-                                enableColumnVisibility={true}
-                                enablePagination={true}
-                                enableSorting={true}
-                                enableFiltering={true}
-                                pageSize={10}
-                                emptyMessage="No Data found"
-                                // rowHeight="normal"
-                                // storageKey="service-request-type-list-table"
-                                actions={tableActions}
-                                enableColumnPinning
-                            />
+                        <ReusableTable
+                            data={getAllTableData} columns={columns}
+                            // permissions={""}
+                            permissions={tablePermissions}
+                            title="Software Assets Overview"
+                            onRefresh={handleRefresh}
+                            enableSearch={true}
+                            enableSelection={false}
+                            enableExport={true}
+                            enableColumnVisibility={true}
+                            enablePagination={true}
+                            enableSorting={true}
+                            enableFiltering={true}
+                            pageSize={10}
+                            emptyMessage="No Data found"
+                            // rowHeight="normal"
+                            // storageKey="service-request-type-list-table"
+                            actions={tableActions}
+                            enableColumnPinning
+                        />
                     </div>
                 </div>
                 <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>

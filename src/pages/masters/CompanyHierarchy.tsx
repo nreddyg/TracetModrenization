@@ -845,6 +845,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { ReusableDropdown } from '@/components/ui/reusable-dropdown';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { FaAngleRight } from 'react-icons/fa';
+import { ScrollArea } from '@/components/ui/scroll-area';
 interface TreeNode {
   id: string;
   name: string;
@@ -1575,10 +1576,10 @@ const CompanyHierarchy = () => {
               </Button>
             </div>
           </div>
-          <div className="min-h-20 h-[63vh] overflow-y-auto p-2">
+          <ScrollArea className="min-h-20 h-[63vh] p-2">
             <TreeView treeData={mainTreeData} config={treeConfig} onSelect={handleSelect} selectKeys={selectedKeys} onExpand={handleToggleNode}
               expandedKeys={Array.from(expandedKeys)} />
-          </div>
+          </ScrollArea>
         </div>
  
         {/* Details Panel */}

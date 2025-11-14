@@ -19,6 +19,7 @@ import { BaseField, GenericObject } from '@/Local_DB/types/types';
 import { Controller, useForm } from 'react-hook-form';
 import { Form, } from '@/components/ui/form';
 import { useMessage } from '@/components/ui/reusable-message';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface MainLocation {
     name: string;
@@ -358,7 +359,8 @@ const ServiceLocations = () => {
 
 
     return (
-        <div className="h-full overflow-y-auto bg-gray-50/30">
+        <ScrollArea>
+        <div className="h-full">
             <header className="bg-card flex justify-between border-b px-6 py-4 shadow-sm">
                 <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -546,6 +548,7 @@ const ServiceLocations = () => {
                 </Dialog>
             </div>
         </div>
+        </ScrollArea>
     );
 };
 export default ServiceLocations;

@@ -290,12 +290,12 @@ const SystemConfiguration = () => {
                 </div>
                 <div className="flex gap-2">
                   <ReusableButton
-                    htmlType="button"
+                    htmlType="submit"
                     variant="default"
                     onClick={handleSubmit((data) => { handleSave(data, "SMTPSettings") })}
                     iconPosition="left"
                     size="middle"
-                    className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white w-full"
+                    className="w-full bg-orange-500 border-orange-500 text-white hover:bg-orange-600 hover:border-orange-600 hover:text-white"
                   >
                     Save SMTP Settings
                   </ReusableButton>

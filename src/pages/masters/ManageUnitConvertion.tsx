@@ -203,11 +203,12 @@ const ManageUnitConversion = () => {
             accessorKey: 'actions',
             header: 'Actions',
             cell: ({ row }: any) => (
-                <div className="flex gap-2">
+                <div className="flex gap-2" title='Actions'>
 
                     <ReusableButton
                         variant="text"
                         size="small"
+                        title='Delete'
                         danger
                         onClick={() => { setIsDelModalOpen(true); setRecordToEditId(row.original.UnitConversionId); }}
                     >

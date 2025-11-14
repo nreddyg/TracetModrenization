@@ -124,17 +124,19 @@ const UnitOfMeasure = () => {
             accessorKey: 'actions',
             header: 'Actions',
             cell: ({ row }: any) => (
-                <div className="flex gap-2">
+                <div className="flex gap-2" title='Actions'>
                     <ReusableButton
                         variant="text"
                         size="small"
+                        title='Edit'
                         onClick={() => { setRecordToEditId(row.original.UOMId); fetchUOMById(companyId, row.original.UOMId) }}
                     >
-                        <Edit className="h-4 w-4" />
+                        <Edit className="h-4 w-4 text-blue-600" />
                     </ReusableButton>
                     <ReusableButton
                         variant="text"
                         size="small"
+                        title="Delete"
                         danger
                         onClick={() => { setIsDelModalOpen(true); setRecordToEditId(row.original.UOMId) }}
                     >

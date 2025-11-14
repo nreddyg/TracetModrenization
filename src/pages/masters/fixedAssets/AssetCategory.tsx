@@ -63,7 +63,7 @@ const AssetCategory = () => {
         }
     }, [companyId])
 
-   const form = useForm<GenericObject>({
+    const form = useForm<GenericObject>({
         defaultValues: mainCatfields.reduce((acc, f) => {
             acc[f.name!] = f.defaultValue ?? '';
             return acc;
@@ -146,23 +146,26 @@ const AssetCategory = () => {
             accessorKey: 'actions',
             header: 'Actions',
             cell: ({ row }: any) => (
-                <div className="flex gap-2">
+                <div className="flex gap-2" title='Actions'>
                     <ReusableButton
                         variant="text"
                         size="small"
+                        title='Edit'
                         //   icon={<Edit className="h-4 w-4" />}
                         onClick={() => { setRecordToEditId(row.original.AssetCategoryId); getAssetCategoryByID(row.original.AssetCategoryId, companyId, true) }}
                     >
-                        Edit
+                        <Edit className="h-4 w-4 text-blue-600" />
                     </ReusableButton>
                     <ReusableButton
                         variant="text"
                         size="small"
                         danger
+                        title='Delete'
                         icon={<Trash2 className="h-4 w-4" />}
                         onClick={() => { setRecordToEditId(row.original.AssetCategoryId); setMainDelRec(row.original); setIsMainDelOpen(true) }}
                     >
-                        Delete
+                        <Trash2 className="h-4 w-4" />
+
                     </ReusableButton>
                 </div>
             ),
@@ -193,19 +196,22 @@ const AssetCategory = () => {
                     <ReusableButton
                         variant="text"
                         size="small"
+                        title='Edit'
                         //   icon={<Edit className="h-4 w-4" />}
                         onClick={() => { setSubRecID(row.original.AssetCategoryId); setSubRecord(row.original); handleSubEdit(row.original); }}
                     >
-                        Edit
+                        <Edit className="h-4 w-4 text-blue-600" />
                     </ReusableButton>
                     <ReusableButton
                         variant="text"
                         size="small"
                         danger
+                        title='Delete'
                         icon={<Trash2 className="h-4 w-4" />}
                         onClick={() => { setSubRecID(row.original.AssetCategoryId); setIsSubDelOpen(true) }}
                     >
-                        Delete
+                        <Trash2 className="h-4 w-4" />
+
                     </ReusableButton>
                 </div>
             ),

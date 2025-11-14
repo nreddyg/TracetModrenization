@@ -277,10 +277,11 @@ const CostBreakupAttributes = () => {
                     )
                 }
                 return (
-                    <div className="flex">
+                    <div className="flex" title='Actions'>
                         {!isUsed && <ReusableButton
                             variant="text"
                             size="small"
+                            title='Delete'
                             danger
                             onClick={() => { row?.original.attributeName === "" ? handleDelete(row) : setIsDelModalOpen(true); setTableRow(row) }}
                         >
@@ -511,7 +512,7 @@ const CostBreakupAttributes = () => {
                                 onClick={() => { handleSubmit(handleSave)() }}
                                 icon={<Save className="h-4 w-4" />}
                             >
-                                {recordData ? 'Update' : 'Add'}
+                                {recordData ? 'Update' : 'Save'}
                             </ReusableButton>
                         </div>
                     </div>

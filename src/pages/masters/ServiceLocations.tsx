@@ -154,7 +154,34 @@ const ServiceLocations = () => {
             cell: ({ row }) => (
                 <span className="font-medium text-gray-900 text-sm">{row.getValue('LocationName')}</span>
             ),
-        }
+        },
+
+        {
+              id: 'actions',
+              accessorKey: 'actions',
+              header: 'Actions',
+              cell: ({ row }: any) => (
+                <div className="flex gap-2" title='Actions'>
+                  <ReusableButton
+                    variant="text"
+                    size="small"
+                    title='Edit'
+                    onClick={() => {handleEdit(row?.original)}}
+                  >
+                    <Edit className="h-4 w-4 text-blue-600" />
+                  </ReusableButton>
+                  <ReusableButton
+                    variant="text"
+                    size="small"
+                    title='Delete'
+                    danger
+                    onClick={() => {handleDelete(row?.original)}}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </ReusableButton>
+                </div>
+              ),
+            },
     ]
 
     const subLocationColumns: ColumnDef<SubLocation>[] = [
@@ -164,15 +191,43 @@ const ServiceLocations = () => {
             cell: ({ row }) => (
                 <span className="font-medium text-gray-900 text-sm">{row.getValue('LocationName')}</span>
             ),
-        }
+        },
+        {
+              id: 'actions',
+              accessorKey: 'actions',
+              header: 'Actions',
+              cell: ({ row }: any) => (
+                <div className="flex gap-2" title='Actions'>
+                  <ReusableButton
+                    variant="text"
+                    size="small"
+                    title='Edit'
+                    onClick={() => {handleEdit(row?.original)}}
+                  >
+                    <Edit className="h-4 w-4 text-blue-600" />
+                  </ReusableButton>
+                  <ReusableButton
+                    variant="text"
+                    size="small"
+                    title='Delete'
+                    danger
+                    onClick={() => {handleDelete(row?.original)}}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </ReusableButton>
+                </div>
+              ),
+            },
     ];
 
     const handleEdit = (record: MainLocation) => {
+        console.log(record,"224")
         setIsMainDialogOpen(true);
         setEditRecord(record)
     }
 
     const handleDelete = (main: MainLocation): void => {
+        console.log(main,"224")
         setDeleteRecord(main);
         setIsDelModalOpen(true);
     };
@@ -395,7 +450,7 @@ const ServiceLocations = () => {
                                     <ReusableTable
                                         data={mainLocations}
                                         columns={mainLocationColumns}
-                                        actions={tableActions}
+                                        // actions={tableActions}
                                         permissions={tablePermissions}
                                         title=""
                                         //    onRefresh={handleRefresh}
@@ -426,7 +481,7 @@ const ServiceLocations = () => {
                                     <ReusableTable
                                         data={filteredSub}
                                         columns={subLocationColumns}
-                                        actions={tableActions}
+                                        // actions={tableActions}
                                         permissions={tablePermissions}
                                         title=""
                                         //    onRefresh={handleRefresh}

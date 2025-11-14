@@ -931,7 +931,7 @@ const SubscriptionManagement = () => {
       header: 'Actions',
       cell: ({ row }: any) => {
         return (
-          <div className="flex">
+          <div className="flex" title='Actions'>
             <ReusableButton
               variant="text"
               title='Edit'

@@ -19,6 +19,7 @@ import { TreeConfig, TreeView } from '@/components/ui/reusable-treeView';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { MenubarShortcut } from '@/components/ui/menubar';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { FaAngleRight } from 'react-icons/fa';
 
 
 interface TreeNode {
@@ -418,6 +419,7 @@ const Department = () => {
     setSelectedKeys(selectedKeys)
     setSelectedId(info.node.id)
     setDisable(false);
+    console.log(info)
     setRecordToEditId(info.node.id);
     setSelectedNode(info.node);
     setDepartmentData(fields[info.node.type])
@@ -581,7 +583,9 @@ const Department = () => {
       collectKeys(treeView);
       setExpandedKeys(new Set(allKeys));
     }
-  }, [treeView]);
+    }, [treeView]);
+
+    console.log("recordId", recordToEditId, "selectedLevel", selectedLevel);
 
   return (
     <div className="bg-hsl(214.3 31.8% 91.4%)">
@@ -589,9 +593,9 @@ const Department = () => {
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <span>Masters</span>
-            <span>/</span>
+            <FaAngleRight />
             <span>Company</span>
-            <span>/</span>
+            <FaAngleRight />
             <span className="text-foreground font-medium">Department</span>
           </div>
         </div>
@@ -602,7 +606,8 @@ const Department = () => {
             onClick={handleReset}
             iconPosition="left"
             size="middle"
-            className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+            // className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+            className='btn-reset-clear-style'
           >
             Reset
           </ReusableButton>
@@ -612,7 +617,9 @@ const Department = () => {
             onClick={handleSubmit(onSubmit)}
             iconPosition="left"
             size="middle"
-            className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+            // className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+                        className='btn-submit-style'
+
           >
             {selectedLevel <= 99 || recordToEditId === null ? "Save" : "Update"}
           </ReusableButton>

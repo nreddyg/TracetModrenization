@@ -23,6 +23,7 @@ import { FaSearch } from 'react-icons/fa';
 import { ITEM_CATEGORY_DB } from '@/Local_DB/Form_JSON_Data/ItemCategoryDB';
 import { deleteItemCat, getItemCategoryData, getItemtCatByID, getUnitOfMeasure, postItemCatDetails, updateItemCat } from '@/services/itemCategoryServices';
 import { sub } from 'date-fns';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface MainCategory {
     CategoryName: string
@@ -554,10 +555,10 @@ const ItemCategory = () => {
         setIsMainDialogOpen(true);
     }
     return (
-        <div className="h-full overflow-y-auto bg-gray-50/30">
+        <ScrollArea>
+        <div className="h-full">
             <header className="bg-card flex justify-between border-b px-6 py-4 shadow-sm">
                 <div className="flex items-center gap-4">
-                    <SidebarTrigger />
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <span>Masters</span>
                         <span>/</span>
@@ -759,6 +760,7 @@ const ItemCategory = () => {
                 </div>
             </div>
         </div>
+        </ScrollArea>
     );
 };
 

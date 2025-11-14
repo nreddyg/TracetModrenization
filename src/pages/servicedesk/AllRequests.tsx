@@ -4,11 +4,10 @@ import { Card, CardContent, CardTitle} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ReusableTable} from '@/components/ui/reusable-table';
-import { Users,Package,RefreshCw,Plus,AlertTriangle,CheckCircle} from 'lucide-react';
+import { Users,Package,RefreshCw,Plus,AlertTriangle,CheckCircle, Search} from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import  ReusableRangePicker  from '@/components/ui/reusable-range-picker';
-import { ScrollArea } from '@radix-ui/react-scroll-area';
 import { getAllSRDetailsList } from '@/services/ticketServices';
 import { useAppDispatch } from '@/store/reduxStore';
 import { setLoading } from '@/store/slices/projectsSlice';
@@ -17,6 +16,7 @@ import { ReusableButton } from '@/components/ui/reusable-button';
 import { useAppSelector } from '@/store';
 import { useMessage } from '@/components/ui/reusable-message';
 import { getColorForStatus } from '@/_Helper_Functions/HelperFunctions';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const AllRequests = () => {
   const navigate=useNavigate();
@@ -175,128 +175,131 @@ const AllRequests = () => {
   };
 
   return (
-    <div className="h-full overflow-y-scroll bg-gray-50/30">
-      <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
-        {/* Header Section */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">All Service Requests</h1>
-            <p className="text-gray-600 mt-1 text-sm sm:text-base">View and manage all your service requests in one place</p>
+    <ScrollArea>
+      <div className="h-full">
+        <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+          {/* Header Section */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-lg sm:text-2xl font-bold text-gray-900">All Service Requests</h1>
+              {/* <p className="text-gray-600 mt-1 text-sm sm:text-base">View and manage all your service requests in one place</p> */}
+            </div>
+            <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+              <Button variant="outline" size="sm" onClick={handleRefresh} className="flex-1 sm:flex-none hover:bg-background hover:text-black">
+                <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
+                <span className="hidden sm:inline">Refresh</span>
+                <span className="sm:hidden">Refresh</span>
+              </Button>
+              <Button size="sm" onClick={()=>navigate('/service-desk/create-ticket')} className="flex-1 sm:flex-none btn-submit-style">
+                <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
+                <span className="hidden sm:inline">New Service Request</span>
+                <span className="sm:hidden">New</span>
+              </Button>
+            </div>
           </div>
-          <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
-            <Button variant="outline" size="sm" onClick={handleRefresh} className="flex-1 sm:flex-none">
-              <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
-              <span className="hidden sm:inline">Refresh</span>
-              <span className="sm:hidden">Refresh</span>
-            </Button>
-            <Button size="sm" onClick={()=>navigate('/service-desk/create-ticket')} className="flex-1 sm:flex-none">
-              <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
-              <span className="hidden sm:inline">New Service Request</span>
-              <span className="sm:hidden">New</span>
-            </Button>
-          </div>
-        </div>
 
-        {/* Enhanced Stats Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-6">
+          {/* Enhanced Stats Cards */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-6">
 
-          <Card className="border-0 shadow-sm bg-gradient-to-br from-blue-50 to-blue-100/50">
-            <CardContent className="p-3 sm:p-4 lg:p-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs md:text-sm font-medium text-blue-600 mb-1">Total Tickets</p>
-                  <p className="text-lg sm:text-xl lg:text-2xl font-bold text-blue-900">{stats.totalRequests}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-sm bg-gradient-to-br from-red-50 to-red-100/50">
-            <CardContent className="p-3 sm:p-4 lg:p-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs sm:text-sm font-medium text-red-600 mb-1">Open</p>
-                  <p className="text-lg sm:text-xl lg:text-2xl font-bold text-red-900">{stats.OpenTicketsCount}</p>
-                </div>
-                <div className="p-2 sm:p-3 bg-red-500 rounded-lg">
-                  <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-white" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-sm bg-gradient-to-br from-amber-50 to-amber-100/50">
-            <CardContent className="p-3 sm:p-4 lg:p-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs sm:text-sm font-medium text-amber-600 mb-1">In Progress</p>
-                  <p className="text-lg sm:text-xl lg:text-2xl font-bold text-amber-900">{stats.InProgressTicketsCount}</p>
-                </div>
-                <div className="p-2 sm:p-3 bg-amber-500 rounded-lg">
-                  <Package className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-white" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-sm bg-gradient-to-br from-purple-50 to-purple-100/50">
-            <CardContent className="p-3 sm:p-4 lg:p-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs sm:text-sm font-medium text-purple-600 mb-1">Resolved</p>
-                  <p className="text-lg sm:text-xl lg:text-2xl font-bold text-purple-900">{stats.ResolvedTicketsCount}</p>
-                </div>
-                <div className="p-2 sm:p-3 bg-purple-500 rounded-lg">
-                  <Users className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-white" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-sm bg-gradient-to-br from-emerald-50 to-emerald-100/50">
-            <CardContent className="p-3 sm:p-4 lg:p-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs sm:text-sm font-medium text-emerald-600 mb-1">Closed</p>
-                  <p className="text-lg sm:text-xl lg:text-2xl font-bold text-emerald-900">{stats.ClosedTicketsCount}</p>
-                </div>
-                <div className="p-2 sm:p-3 bg-emerald-500 rounded-lg">
-                  <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-white" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div>
-          <Card>
-            <CardTitle className="text-lg flex px-6 py-1 pt-2 items-center gap-2">{"Filters"}</CardTitle>
-            <CardContent>
-              <div className=" grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    <ReusableRangePicker
-                        label='Date Range'
-                        tooltip='Select a date range'
-                        value={dateRange}
-                        onChange={(value) => handleChange(value)}
-                        className=''
-                        placeholder={['From Date', 'To Date']}
-                        allowClear={true}
-                        format='DD/MM/YYYY'
-                      />
-                  <div className="flex items-end mt-4  ">
-                  <ReusableButton  size={"middle"} onClick={handleSearch} variant="primary" className='h-10'>Search</ReusableButton>
+            <Card className="border-0 shadow-sm bg-gradient-to-br from-blue-50 to-blue-100/50">
+              <CardContent className="p-3 sm:p-4 lg:p-5">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs md:text-sm font-medium text-blue-600 mb-1">Total Tickets</p>
+                    <p className="text-lg sm:text-xl lg:text-2xl font-bold text-blue-900">{stats.totalRequests}</p>
                   </div>
-              </div>     
-            </CardContent>
-          </Card>
-        </div>
-        <div className="bg-white p-6 rounded-lg">
-          <ScrollArea className=" w-full ">
-            <ReusableTable data={filteredRequests} columns={columns} enableExport={false}/>
-          </ScrollArea>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-0 shadow-sm bg-gradient-to-br from-red-50 to-red-100/50">
+              <CardContent className="p-3 sm:p-4 lg:p-5">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs sm:text-sm font-medium text-red-600 mb-1">Open</p>
+                    <p className="text-lg sm:text-xl lg:text-2xl font-bold text-red-900">{stats.OpenTicketsCount}</p>
+                  </div>
+                  <div className="p-2 sm:p-3 bg-red-500 rounded-lg">
+                    <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-white" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-0 shadow-sm bg-gradient-to-br from-amber-50 to-amber-100/50">
+              <CardContent className="p-3 sm:p-4 lg:p-5">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs sm:text-sm font-medium text-amber-600 mb-1">In Progress</p>
+                    <p className="text-lg sm:text-xl lg:text-2xl font-bold text-amber-900">{stats.InProgressTicketsCount}</p>
+                  </div>
+                  <div className="p-2 sm:p-3 bg-amber-500 rounded-lg">
+                    <Package className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-white" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-0 shadow-sm bg-gradient-to-br from-purple-50 to-purple-100/50">
+              <CardContent className="p-3 sm:p-4 lg:p-5">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs sm:text-sm font-medium text-purple-600 mb-1">Resolved</p>
+                    <p className="text-lg sm:text-xl lg:text-2xl font-bold text-purple-900">{stats.ResolvedTicketsCount}</p>
+                  </div>
+                  <div className="p-2 sm:p-3 bg-purple-500 rounded-lg">
+                    <Users className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-white" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-0 shadow-sm bg-gradient-to-br from-emerald-50 to-emerald-100/50">
+              <CardContent className="p-3 sm:p-4 lg:p-5">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs sm:text-sm font-medium text-emerald-600 mb-1">Closed</p>
+                    <p className="text-lg sm:text-xl lg:text-2xl font-bold text-emerald-900">{stats.ClosedTicketsCount}</p>
+                  </div>
+                  <div className="p-2 sm:p-3 bg-emerald-500 rounded-lg">
+                    <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-white" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div>
+            <Card>
+              <CardTitle className="text-lg flex px-6 py-1 pt-2 items-center gap-2">{"Filters"}</CardTitle>
+              <CardContent>
+                <div className=" grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                      <ReusableRangePicker
+                          label='Date Range'
+                          tooltip='Select a date range'
+                          value={dateRange}
+                          onChange={(value) => handleChange(value)}
+                          className=''
+                          placeholder={['From Date', 'To Date']}
+                          allowClear={true}
+                          format='DD/MM/YYYY'
+                        />
+                    <div className="flex items-end mt-4  ">
+                    {/* <ReusableButton  size={"middle"} onClick={handleSearch} variant="primary" className='h-10'>Search</ReusableButton> */}
+                    <ReusableButton size={"small"} htmlType='submit' onClick={handleSearch} className='h-10 mt-1 bg-background hover:border-[rgb(209 213 219)] hover:bg-background'>
+                                          <Search size={18} color='#000'/>
+                                        </ReusableButton>
+                    </div>
+                </div>     
+              </CardContent>
+            </Card>
+          </div>
+          <div className="bg-white p-6 rounded-lg">
+              <ReusableTable data={filteredRequests} columns={columns} enableExport={false}/>
+          </div>
         </div>
       </div>
-    </div>
+    </ScrollArea>
   );
 };
 

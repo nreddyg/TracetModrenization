@@ -4,11 +4,10 @@ import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ReusableTable } from '@/components/ui/reusable-table';
-import { RefreshCw, Plus} from 'lucide-react';
+import { RefreshCw, Plus, Search } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import ReusableRangePicker from '@/components/ui/reusable-range-picker';
-import { ScrollArea } from '@radix-ui/react-scroll-area';
 import { getAllSRDetailsList } from '@/services/ticketServices';
 import { useAppDispatch } from '@/store/reduxStore';
 import { setLoading } from '@/store/slices/projectsSlice';
@@ -21,22 +20,23 @@ import { MyRequest_Filter_DB, workbench_Filter_DB } from '@/Local_DB/Form_JSON_D
 import { getRequestTypeById } from '@/_Helper_Functions/HelperFunctions';
 import { useAppSelector } from '@/store';
 import { useMessage } from '@/components/ui/reusable-message';
+import { ScrollArea } from '@/components/ui/scroll-area';
 interface Filters {
   TicketCategory: string;
   CreatedDate: any[]; // Assuming these are ISO date strings
 }
 const MyWorkbench = () => {
   const navigate = useNavigate();
-  const companyId=useAppSelector(state=>state.projects.companyId);
-  const branch=useAppSelector(state=>state.projects.branch) || '';
+  const companyId = useAppSelector(state => state.projects.companyId);
+  const branch = useAppSelector(state => state.projects.branch) || '';
   const dispatch = useAppDispatch();
-  const location=useLocation()
+  const location = useLocation()
   const { toast } = useToast();
-  const msg=useMessage()
+  const msg = useMessage()
   const [dataSource, setDataSource] = useState<Request[]>([]);
   const [dataSourceToShow, setDataSourceToShow] = useState<Request[]>([]);
-  const [isMyRequest,setMyRequest]=useState(location.pathname==="/service-desk/my-requests")
-  const [fields, setFields] = useState<BaseField[]>(isMyRequest? MyRequest_Filter_DB: workbench_Filter_DB);
+  const [isMyRequest, setMyRequest] = useState(location.pathname === "/service-desk/my-requests")
+  const [fields, setFields] = useState<BaseField[]>(isMyRequest ? MyRequest_Filter_DB : workbench_Filter_DB);
   const [filters, setFilters] = useState<Filters>({
     TicketCategory: isMyRequest ? "104" : "101",
     CreatedDate: ["", ""], // Empty strings initially
@@ -45,14 +45,14 @@ const MyWorkbench = () => {
     {
       accessorKey: "ServiceRequestNo", header: "Service Request No",
       cell: ({ row }) => (
-              <span onClick={()=>{localStorage.setItem("editBranchFromParent", branch)}}> 
-              <Link
-          to={(isMyRequest) ? `/service-desk/my-requests/tickets/${filters.TicketCategory}/${row.original.ServiceRequestId}` : `/service-desk/my-workbench/tickets/${filters.TicketCategory}/${row.original.ServiceRequestId}`}
-          className="text-blue-500"
+        <span onClick={() => { localStorage.setItem("editBranchFromParent", branch) }}>
+          <Link
+            to={(isMyRequest) ? `/service-desk/my-requests/tickets/${filters.TicketCategory}/${row.original.ServiceRequestId}` : `/service-desk/my-workbench/tickets/${filters.TicketCategory}/${row.original.ServiceRequestId}`}
+            className="text-blue-500"
 
-        >
-          {row.getValue('ServiceRequestNo')}
-        </Link>
+          >
+            {row.getValue('ServiceRequestNo')}
+          </Link>
         </span>
       )
     },
@@ -94,7 +94,7 @@ const MyWorkbench = () => {
       ),
     },
     { accessorKey: "Customer", header: "Customer" },
-  ], [filters.TicketCategory,branch]);
+  ], [filters.TicketCategory, branch]);
 
   const form = useForm<GenericObject>({
     defaultValues: fields.reduce((acc, f) => {
@@ -158,13 +158,13 @@ const MyWorkbench = () => {
   };
 
   useEffect(() => {
-    if(companyId && branch){
+    if (companyId && branch) {
       fetchAllServiceRequests(getRequestTypeById(filters.TicketCategory), false);
     }
-  }, [companyId,branch])
+  }, [companyId, branch])
   async function fetchAllServiceRequests(requestType: string, isDateSelected: boolean, filtersCopy?: Filters) {
     dispatch(setLoading(true))
-    await getAllSRDetailsList(branch,companyId, requestType).then(res => {
+    await getAllSRDetailsList(branch, companyId, requestType).then(res => {
       if (res.success && res.data.status === undefined) {
         if (Array.isArray(res.data)) {
           let getData = res.data.map(item => ({ ...item, AssignedTo: item.AssigneeSelectedUsers || '' + '' + item.AssigneeSelectedUserGroups || '' }))
@@ -217,16 +217,16 @@ const MyWorkbench = () => {
   // Enhanced action handlers with audit trail
   const handleRefresh = useCallback(() => {
     setFilters({
-      TicketCategory:isMyRequest?"104": "101",
+      TicketCategory: isMyRequest ? "104" : "101",
       CreatedDate: ["", ""], // Empty strings initially
     })
     form.reset({
       defaultValues: {
-        TicketCategory:isMyRequest?"104": "101",
+        TicketCategory: isMyRequest ? "104" : "101",
         CreatedDate: "", // Empty strings initially
       }
     })
-    fetchAllServiceRequests(getRequestTypeById( isMyRequest?"104": "101"), false);
+    fetchAllServiceRequests(getRequestTypeById(isMyRequest ? "104" : "101"), false);
     toast({
       title: "Data Refreshed",
       description: "Service Requests data has been updated",
@@ -279,56 +279,64 @@ const MyWorkbench = () => {
   };
 
   return (
-    <div className="h-full overflow-y-scroll bg-gray-50/30">
-      <div className="p-4 sm:p-4 space-y-4 sm:space-y-4">
-        {/* Header Section */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <ScrollArea>
+      <div className="h-full">
+        <div className="p-4 sm:p-4 space-y-4 sm:space-y-4">
+          {/* Header Section */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-lg sm:text-2xl font-bold text-gray-900">{isMyRequest ? "My Requests" : "My Workbench"}</h1>
+              {/* <p className="text-gray-600 mt-1 text-sm sm:text-base">View and manage all your service requests in one place</p> */}
+            </div>
+            <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+              <Button variant="outline" size="sm" onClick={handleRefresh} className="flex-1 sm:flex-none hover:bg-background hover:text-black">
+                <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
+                <span className="hidden sm:inline">Refresh</span>
+                <span className="sm:hidden">Refresh</span>
+              </Button>
+              <Button size="sm" onClick={() => navigate('/service-desk/create-ticket')} className="flex-1 btn-submit-style sm:flex-none">
+                <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
+                <span className="hidden sm:inline">New Service Request</span>
+                <span className="sm:hidden">New</span>
+              </Button>
+            </div>
+          </div>
           <div>
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">{isMyRequest ? "My Requests" : "My Workbench"}</h1>
-            {/* <p className="text-gray-600 mt-1 text-sm sm:text-base">View and manage all your service requests in one place</p> */}
-          </div>
-          <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
-            <Button variant="outline" size="sm" onClick={handleRefresh} className="flex-1 sm:flex-none">
-              <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
-              <span className="hidden sm:inline">Refresh</span>
-              <span className="sm:hidden">Refresh</span>
-            </Button>
-            <Button size="sm" onClick={() => navigate('/service-desk/create-ticket')} className="flex-1 sm:flex-none">
-              <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
-              <span className="hidden sm:inline">New Service Request</span>
-              <span className="sm:hidden">New</span>
-            </Button>
-          </div>
-        </div>
-        <div>
-          <Card>
-            <CardTitle className="text-lg flex px-6 py-1 pt-2 items-center gap-2">
-              {"Filters"}
-            </CardTitle>
-            <CardContent>
-              <form onSubmit={form.handleSubmit(onSubmit)}>
-                <div className=" grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {
-                    fields.map((field) => (
-                      <div key={field.name}>
-                        {renderField(field)}
-                      </div>))
-                  }
-                  <div className="flex items-center xxs:mt-1 xs2:mt-2 sm:mt-6 md:mt-6" >
-                    <ReusableButton size={"middle"} htmlType='submit' variant="primary" className='h-9 mt-1'>Search</ReusableButton>
+            <Card>
+              <CardTitle className="text-lg flex px-6 py-1 pt-2 items-center gap-2">
+                {"Filters"}
+              </CardTitle>
+              <CardContent>
+                <form onSubmit={form.handleSubmit(onSubmit)}>
+                  <div className=" grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {
+                      fields.map((field) => (
+                        <div key={field.name}>
+                          {renderField(field)}
+                        </div>))
+                    }
+                    <div className="flex items-center xxs:mt-1 xs2:mt-2 sm:mt-6 md:mt-6" >
+                      <ReusableButton size={"small"} htmlType='submit' className='h-9 mt-1 bg-background hover:border-[rgb(209 213 219)] hover:bg-background'>
+                        {/* <Search size={18} color='#000'/> */}
+                        <Search
+                          size={18}
+                          className="text-black hover:text-blue-500 transition-colors duration-200 cursor-pointer"
+                        />
+
+
+                      </ReusableButton>
+                    </div>
                   </div>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-        </div>
-        <div className="bg-white p-6 rounded-lg">
-          <ScrollArea className=" w-full ">
-            <ReusableTable data={dataSourceToShow} columns={columns} enableExport={false} />
-          </ScrollArea>
+                </form>
+              </CardContent>
+            </Card>
+          </div>
+          <div className="bg-white p-6 rounded-lg">
+              <ReusableTable data={dataSourceToShow} columns={columns} enableExport={false} />
+          </div>
         </div>
       </div>
-    </div>
+    </ScrollArea>
   );
 };
 

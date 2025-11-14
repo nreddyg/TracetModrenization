@@ -22,6 +22,7 @@ import { ORGANIZATION_DETAILS } from '@/Local_DB/Form_JSON_Data/OrganizationDB';
 import { useMessage } from '@/components/ui/reusable-message';
 import { convertOrgLogoFromApi, fileToByteArray } from '@/_Helper_Functions/HelperFunctions';
 import axios from 'axios';
+import { FaAngleRight } from 'react-icons/fa';
 interface OrganizationData {
   OrganizationId: number,
   OrganizationName: string,
@@ -482,7 +483,7 @@ const Organization = () => {
     }
   };
   return (
-    <div className="h-full overflow-y-auto  bg-gray-50 flex flex-col ">
+    <div className="h-full overflow-y-auto   flex flex-col ">
       <div className="flex flex-1 overflow-hidden   ">
         {/* Left Sidebar - Ticket Inbox */}
         {/* {dataSource.length!==0 && <div className={`${isInboxCollapsed ? 'w-6 p-1' : 'w-34 p-2 mb-2 rounded-b-[5px]'} bg-white border-r    border-0 shadow-lg flex pb-3 flex-col transition-all duration-300 shrink-0 hidden lg:flex`}> */}
@@ -586,9 +587,9 @@ const Organization = () => {
             <div className="flex items-start sm:items-center gap-4 lg:gap-6 flex-1 min-w-0">
               <div className="flex items-center gap-2 text-sm text-gray-600 flex-wrap">
                 <span>Masters</span>
-                <span>/</span>
+                <FaAngleRight />
                 <span>Company</span>
-                <span>/</span>
+                <FaAngleRight />
                 <span className="text-gray-900 font-medium">Organization</span>
               </div>
             </div>
@@ -599,6 +600,7 @@ const Organization = () => {
                 size="small"
                 onClick={handleReset}
                 icon={<X className="h-4 w-4" />}
+                className='btn-reset-clear-style'
               >
                 {selectedOrganizationData ? "Cancel" : "Reset"}
               </ReusableButton>
@@ -608,6 +610,7 @@ const Organization = () => {
                 variant="primary"
                 onClick={(data) => handleSubmit(handleSave)(data)}
                 icon={<Save className="h-4 w-4" />}
+                className='btn-submit-style'
               >
                 {selectedOrganizationData ? "Update" : "Save"}
               </ReusableButton>

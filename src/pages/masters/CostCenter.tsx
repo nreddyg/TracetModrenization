@@ -19,6 +19,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { deleteCostCenter, getCostcenterById, getCostCenterData, postCostCenter } from '@/services/costCenterServices';
 import { CostCenter_DB } from '@/Local_DB/Form_JSON_Data/CostCenterDB';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { FaAngleRight } from 'react-icons/fa';
 
 
 
@@ -141,6 +143,7 @@ const CostCenter = () => {
   const [tree, setTree] = useState([]);
   const [lastLevel, setLastLevel] = useState(null);
   const [level, setLevel] = useState([]);
+  const [selectedKeys, setSelectedKeys] = useState([]);
   const [nextLevel, setNextLevel] = useState("");
   const [search, setSearch] = useState(SearchButton);
   const [breadCrumb, setBreadCrumb] = useState(["Company"]);
@@ -444,6 +447,7 @@ const CostCenter = () => {
     setSelectedNode(info.node);
     setCostCenterData(fields[info.node.type])
     setSelectedLevel(parseInt(info.node.type));
+    setSelectedKeys(selectedKeys)
   };
 
   const handleDelete = () => {
@@ -600,26 +604,210 @@ const CostCenter = () => {
 
 
 
+  // return (
+  //   <div className="bg-hsl(214.3 31.8% 91.4%) overflow-y-auto">
+  //     <header className="bg-card min-h-[53px] flex flex-col sm:flex-row gap-4 shrink-0 justify-between border-b px-6 py-3 shadow-sm">
+  //       <div className="flex items-center gap-4">
+  //         <div className="flex items-center gap-2 text-sm text-muted-foreground">
+  //           <span>Masters</span>
+  //           <span>/</span>
+  //           <span>Company</span>
+  //           <span>/</span>
+  //           <span className="text-foreground font-medium">Cost Center</span>
+  //         </div>
+  //       </div>
+  //       <div className={`flex gap-2 ${selectedLevel === 99 ? "hidden" : ""}`}>
+  //         <ReusableButton
+  //           htmlType="button"
+  //           variant="default"
+  //           onClick={handleReset}
+  //           iconPosition="left"
+  //           size="middle"
+  //           className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+  //         >
+  //           Reset
+  //         </ReusableButton>
+  //         <ReusableButton
+  //           htmlType="button"
+  //           variant="default"
+  //           onClick={handleSubmit(onSubmit)}
+  //           iconPosition="left"
+  //           size="middle"
+  //           className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+  //         >
+  //           {selectedLevel <= 99 || recordToEditId === null ? "Save" : "Update"}
+  //         </ReusableButton>
+  //       </div>
+  //     </header>
+
+  //     <div className="flex h-[calc(100vh-73px)]">
+  //       {/* Tree Structure Panel */}
+  //       <div className="w-[400px] border-r bg-card flex flex-col">
+  //         <div className=" flex items-center justify-center pt-4 pb-4 ps-0 ms-0 border-b gap-3">
+  //           <div className="relative">
+  //             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+  //             <Input
+  //               placeholder="Search..."
+  //               value={searchQuery}
+  //               onChange={(e) => { setSearchQuery(e.target.value); handleSearch(e.target.value) }}
+  //               className="pl-9 "
+  //             />
+  //           </div>
+  //           <div className="flex gap-3 flex items-center justify-center">
+  //             <div>
+  //               <TooltipProvider>
+  //                 <Tooltip>
+  //                   <TooltipTrigger asChild>
+  //                     <ReusableButton
+  //                       size="small"
+  //                       className="bg-primary h-[2rem] hover:bg-blue-700 text-white"
+  //                       style={{
+  //                         cursor: selectedLevel >= 99 + level.length || disable ? "not-allowed" : "pointer",
+  //                       }}
+  //                       disabled={selectedLevel >= 99 + level.length || disable}
+  //                       onClick={() => {
+  //                         if (!(selectedLevel >= 99 + level.length || disable)) {
+  //                           handleRoute();
+  //                           handleReset();
+  //                           setDisable(true);
+  //                         }
+  //                       }}
+  //                     >
+  //                       <Plus className="h-4 w-4" />
+  //                     </ReusableButton>
+  //                   </TooltipTrigger>
+  //                   {selectedLevel !== lastLevel && recordToEditId && (
+  //                     <TooltipContent>
+  //                       Add {nextLevel ? nextLevel : "Cost Center"}
+  //                     </TooltipContent>
+  //                   )}
+  //                 </Tooltip>
+  //               </TooltipProvider>
+  //             </div>
+  //             <div>
+  //               <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>
+  //                 <DialogContent className="sm:max-w-[425px]">
+  //                   <DialogHeader>
+  //                     <DialogTitle>Confirm the action</DialogTitle>
+  //                     <DialogDescription>
+  //                       Are you sure you want to delete Hierarchy level?
+  //                     </DialogDescription>
+  //                   </DialogHeader>
+  //                   <DialogFooter>
+  //                     <ReusableButton
+  //                       variant="default"
+  //                       onClick={() => setIsDelModalOpen(false)}
+  //                     >
+  //                       Cancel
+  //                     </ReusableButton>
+  //                     <ReusableButton
+  //                       variant="primary"
+  //                       danger={true}
+  //                       onClick={() => { handleDelete(); setIsDelModalOpen(false); setRecordToEditId(null); handleReset() }}
+  //                     // onClick={currentTab === "service-request-type" ? () => { deleteServiceRequestType(selectedRecord?.Id); setIsDelModalOpen(false) } : () => { deleteStatus(selectedStatusRec?.Id); setIsDelModalOpen(false) }}
+  //                     >
+  //                       Delete
+  //                     </ReusableButton>
+  //                   </DialogFooter>
+  //                 </DialogContent>
+  //               </Dialog>
+  //               <ReusableButton
+  //                 size="small"
+  //                 // className="border border-0 h-8 w-8 flex items-center justify-center"
+  //                 className="bg-primary h-[2rem] hover:bg-blue-700 text-white"
+  //                 style={{
+  //                   cursor: disable || selectedLevel === 99 ? "not-allowed" : "pointer",
+  //                 }}
+  //                 onClick={() => {
+  //                   if (!disable && selectedLevel !== 99) {
+  //                     //   handleDelete();
+  //                     setIsDelModalOpen(true)
+  //                   }
+  //                 }}
+  //               >
+  //                 <Trash2 className="h-4 w-4" />
+  //               </ReusableButton>
+  //             </div>
+  //           </div>
+  //         </div>
+  //         <div className="h-[370px] overflow-y-scroll p-2">
+  //           {renderTreeNode(mockData)}
+  //         </div>
+  //       </div>
+
+  //       {/* Details Panel */}
+  //       <div className="flex-1 overflow-y-auto">
+  //         <div className="p-6 space-y-6">
+  //           <div className="flex flex-col gap-2">
+  //             <div>
+  //               <h4 className="master-heading mb-2 flex items-center gap-2">
+  //                 {!recordToEditId
+  //                   ? selectedLevel === 99
+  //                     ? "Cost Center"
+  //                     : "Add Cost Center"
+  //                   : selectedLevel === 99
+  //                     ? "Cost Center"
+  //                     : "Update Cost Center"}
+  //                 {selectedLevel !== lastLevel && (
+  //                   <TooltipProvider>
+  //                     <Tooltip>
+  //                       <TooltipTrigger asChild>
+  //                         <button type="button">
+  //                           <Info className="mb-1 cursor-pointer" fontSize={22} />
+  //                         </button>
+  //                       </TooltipTrigger>
+  //                       <TooltipContent>
+  //                         To Add {nextLevel || "Cost Center"} to{" "}
+  //                         {breadCrumb?.at(-1) || "the selected costcenter"}, click on{" "}
+  //                         {breadCrumb?.at(-1) || "the name"} and then click on the plus icon.
+  //                       </TooltipContent>
+  //                     </Tooltip>
+  //                   </TooltipProvider>
+  //                 )}
+  //               </h4>
+  //             </div>
+  //             <div className="text-sm text-primary">
+  //               <h6 className="breadCrumb">{breadCrumb.map(x => { return `${x} >` })}</h6>
+  //             </div>
+  //           </div>
+  //           <div className="space-y-6">
+  //             <h5>{recordToEditId && selectedLevel !== 99 ? `Update ${costCenterData[0].heading}` : `${selectedLevel !== 99 ? "Enter" : ""} ${costCenterData[0].heading}`}</h5>
+  //             <div className="px-1">
+  //               <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4">
+  //                 {getFieldsByNames(['Name', 'Code']).map((field) => {
+  //                   return <div className="flex items-center space-x-2">
+  //                     {renderField(field)}
+  //                   </div>;
+  //                 })}
+  //               </div>
+  //             </div>
+  //           </div>
+  //         </div>
+  //       </div>
+  //     </div>
+  //   </div>
+  // );
+
   return (
-    <div className="bg-hsl(214.3 31.8% 91.4%) overflow-y-auto">
-      <header className="bg-card min-h-[53px] flex flex-col sm:flex-row gap-4 shrink-0 justify-between border-b px-6 py-3 shadow-sm">
+    <div className="bg-hsl(214.3 31.8% 91.4%)">
+      <header className="bg-card flex justify-between border-b px-6 py-4">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <span>Masters</span>
-            <span>/</span>
+            <FaAngleRight />
             <span>Company</span>
-            <span>/</span>
+            <FaAngleRight />
             <span className="text-foreground font-medium">Cost Center</span>
           </div>
         </div>
-        <div className={`flex gap-2 ${selectedLevel === 99 ? "hidden" : ""}`}>
+        <div className='flex gap-2'>
           <ReusableButton
             htmlType="button"
             variant="default"
-            onClick={handleReset}
+            onClick={() => handleReset()}
             iconPosition="left"
             size="middle"
-            className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+            className='btn-reset-clear-style'
           >
             Reset
           </ReusableButton>
@@ -629,18 +817,18 @@ const CostCenter = () => {
             onClick={handleSubmit(onSubmit)}
             iconPosition="left"
             size="middle"
-            className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+            className='btn-submit-style'
           >
             {selectedLevel <= 99 || recordToEditId === null ? "Save" : "Update"}
           </ReusableButton>
         </div>
       </header>
 
-      <div className="flex h-[calc(100vh-73px)]">
+      <div className="flex h-full p-2">
         {/* Tree Structure Panel */}
-        <div className="w-[400px] border-r bg-card flex flex-col">
-          <div className=" flex items-center justify-center pt-4 pb-4 ps-0 ms-0 border-b gap-3">
-            <div className="relative">
+        <div className="w-[26vw] h-[75vh] rounded-lg shadow-lg border-r bg-card flex flex-col">
+          <div className="px-2 flex items-center justify-center pt-4 pb-4 ps-0 ms-0 border-b gap-3">
+            <div className="relative ps-2">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search..."
@@ -649,6 +837,53 @@ const CostCenter = () => {
                 className="pl-9 "
               />
             </div>
+
+            {/* <div className="flex gap-2 flex items-center justify-center">
+              <ReusableButton
+                size="small"
+                className="bg-primary h-[2rem] hover:bg-blue-700 text-white"
+                style={{
+                  cursor: selectedLevel >= 99 + level.length || disable ? "not-allowed" : "pointer",
+                }}
+                disabled={selectedLevel >= 99 + level.length || disable}
+                onClick={() => {
+                  if (!(selectedLevel >= 99 + level.length || disable)) {
+                    handleRoute();
+                    setDisable(true);
+                  }
+                }}
+              >
+                <Plus className="h-4 w-4" />
+              </ReusableButton>
+              <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>
+                <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                    <DialogTitle>Confirm the action</DialogTitle>
+                    <DialogDescription>
+                      Are you sure you want to delete Hierarchy level?
+                    </DialogDescription>
+                  </DialogHeader>
+                  <DialogFooter>
+                    <ReusableButton
+                      variant="default"
+                      onClick={() => setIsDelModalOpen(false)}
+                    >
+                      Cancel
+                    </ReusableButton>
+                    <ReusableButton
+                      variant="primary"
+                      danger={true}
+                      onClick={() => { handleDelete(); setIsDelModalOpen(false); }}
+                    >
+                      Delete
+                    </ReusableButton>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+              <Button size="sm" variant="outline" className="h-8" onClick={() => setIsDelModalOpen(true)}>
+                <Trash2 className="h-4 w-4 text-destructive" />
+              </Button>
+            </div> */}
             <div className="flex gap-3 flex items-center justify-center">
               <div>
                 <TooltipProvider>
@@ -674,7 +909,7 @@ const CostCenter = () => {
                     </TooltipTrigger>
                     {selectedLevel !== lastLevel && recordToEditId && (
                       <TooltipContent>
-                        Add {nextLevel ? nextLevel : "Cost Center"}
+                        Add {nextLevel ? nextLevel : "Department/Unit"}
                       </TooltipContent>
                     )}
                   </Tooltip>
@@ -682,107 +917,103 @@ const CostCenter = () => {
               </div>
               <div>
                 <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>
-                                                                              <DialogContent className="sm:max-w-[425px]">
-                                                                                <DialogHeader>
-                                                                                  <DialogTitle>Confirm the action</DialogTitle>
-                                                                                  <DialogDescription>
-                                                                                    Are you sure you want to delete Hierarchy level?
-                                                                                    {/* {currentTab === "service-request-type"
-                                                                                      ? `${selectedRecord?.ServiceRequestType || "this"} Service Request Type`
-                                                                                      : `${selectedStatusRec?.StatusType || "this"} Status`
-                                                                                    } */}
-                                                                                  </DialogDescription>
-                                                                                </DialogHeader>
-                                                                                <DialogFooter>
-                                                                                  <ReusableButton
-                                                                                    variant="default"
-                                                                                    onClick={() => setIsDelModalOpen(false)}
-                                                                                  >
-                                                                                    Cancel
-                                                                                  </ReusableButton>
-                                                                                  <ReusableButton
-                                                                                    variant="primary"
-                                                                                    danger={true}
-                                                                                    onClick={()=>{handleDelete();setIsDelModalOpen(false);setRecordToEditId(null);handleReset()}}
-                                                                                    // onClick={currentTab === "service-request-type" ? () => { deleteServiceRequestType(selectedRecord?.Id); setIsDelModalOpen(false) } : () => { deleteStatus(selectedStatusRec?.Id); setIsDelModalOpen(false) }}
-                                                                                  >
-                                                                                    Delete
-                                                                                  </ReusableButton>
-                                                                                </DialogFooter>
-                                                                              </DialogContent>
-                                                                            </Dialog>
+                  <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                      <DialogTitle>Confirm the action</DialogTitle>
+                      <DialogDescription>
+                        Are you sure you want to delete Hierarchy level?
+                      </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                      <ReusableButton
+                        variant="default"
+                        onClick={() => setIsDelModalOpen(false)}
+                      >
+                        Cancel
+                      </ReusableButton>
+                      <ReusableButton
+                        variant="primary"
+                        danger={true}
+                        onClick={() => { handleDelete(); setIsDelModalOpen(false); setRecordToEditId(null); handleReset() }}
+                      >
+                        Delete
+                      </ReusableButton>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
                 <ReusableButton
                   size="small"
-                  // className="border border-0 h-8 w-8 flex items-center justify-center"
                   className="bg-primary h-[2rem] hover:bg-blue-700 text-white"
-                  style={{
-                    cursor: disable || selectedLevel === 99 ? "not-allowed" : "pointer",
-                  }}
+                  style={{ cursor: disable || selectedLevel === 99 ? "not-allowed" : "pointer" }}
                   onClick={() => {
-                    if (!disable && selectedLevel !== 99) {
-                    //   handleDelete();
-                    setIsDelModalOpen(true)
-                    }
+                    if (!disable && selectedLevel !== 99) { setIsDelModalOpen(true) }
                   }}
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-4 w-4 text-destructive" />
                 </ReusableButton>
               </div>
             </div>
+
           </div>
-          <div className="h-[370px] overflow-y-scroll p-2">
-            {renderTreeNode(mockData)}
+
+          <div className="min-h-20 h-[63vh] overflow-y-auto p-2">
+            <TreeView treeData={mainTreeData} config={treeConfig} onSelect={onSelect} selectKeys={selectedKeys} onExpand={handleToggleNode}
+              expandedKeys={Array.from(expandedKeys)} />
           </div>
         </div>
 
         {/* Details Panel */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="p-6 space-y-6">
-            <div className="flex flex-col gap-2">
-              <div>
-                <h4 className="master-heading mb-2 flex items-center gap-2">
-                  {!recordToEditId
-                    ? selectedLevel === 99
-                      ? "Cost Center"
-                      : "Add Cost Center"
-                    : selectedLevel === 99
-                      ? "Cost Center"
-                      : "Update Cost Center"}
-                  {selectedLevel !== lastLevel && (
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <button type="button">
-                            <Info className="mb-1 cursor-pointer" fontSize={22} />
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          To Add {nextLevel || "Cost Center"} to{" "}
-                          {breadCrumb?.at(-1) || "the selected costcenter"}, click on{" "}
-                          {breadCrumb?.at(-1) || "the name"} and then click on the plus icon.
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  )}
-                </h4>
+        <div className="flex-1 h-[75vh]  ps-2 shadow-xl">
+          <div className="bg-card border-b rounded-lg shadow-lg lg:ps-6 py-3 flex flex-row xxs:flex-col xs2:flex-row lg:flex-row lg:items-center justify-between gap-4">
+            <div className="p-1 w-full space-y-6 h-[71vh] overflow-y-auto">
+              <div className="flex flex-col gap-2">
+                <div>
+                  <h4 className="master-heading mb-2 flex items-center gap-2">
+                    {!recordToEditId
+                      ? selectedLevel === 99
+                        ? "Cost Center"
+                        : "Add Cost Center"
+                      : selectedLevel === 99
+                        ? "Cost Center"
+                        : "Update Cost Center"}
+                    {selectedLevel !== lastLevel && (
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button type="button">
+                              <Info className="mb-1 cursor-pointer" fontSize={22} />
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            To Add {nextLevel || "Cost Center"} to{" "}
+                            {breadCrumb?.at(-1) || "the selected costcenter"}, click on{" "}
+                            {breadCrumb?.at(-1) || "the name"} and then click on the plus icon.
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
+                  </h4>
+                </div>
+                <div className="text-sm text-primary">
+                  <h6 className="breadCrumb">{breadCrumb.map(x => { return `${x} >` })}</h6>
+                </div>
               </div>
-              <div className="text-sm text-primary">
-                <h6 className="breadCrumb">{breadCrumb.map(x => { return `${x} >` })}</h6>
-              </div>
-            </div>
-            <div className="space-y-6">
-              <h5>{recordToEditId && selectedLevel !== 99 ? `Update ${costCenterData[0].heading}` : `${selectedLevel !== 99 ? "Enter" : ""} ${costCenterData[0].heading}`}</h5>
-              <div className="px-1">
-                <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4">
-                  {getFieldsByNames(['Name', 'Code']).map((field) => {
-                    return <div className="flex items-center space-x-2">
-                      {renderField(field)}
-                    </div>;
-                  })}
+
+              <div className="space-y-6">
+                <h5>{recordToEditId && selectedLevel !== 99 ? `Update ${costCenterData[0].heading}` : `${selectedLevel !== 99 ? "Enter" : ""} ${costCenterData[0].heading}`}</h5>
+                <div className="px-1">
+                  <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4">
+                    {getFieldsByNames(['Name', 'Code']).map((field) => {
+                      return <div className="flex items-center space-x-2">
+                        {renderField(field)}
+                      </div>;
+                    })}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
+
         </div>
       </div>
     </div>

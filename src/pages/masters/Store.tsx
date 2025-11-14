@@ -16,6 +16,7 @@ import { BaseField, GenericObject } from '@/Local_DB/types/types';
 import { STORE_DB } from '@/Local_DB/Form_JSON_Data/StoreDB';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardContent } from '@/components/ui/card';
+import { FaAngleRight } from 'react-icons/fa';
 interface Store {
     id: string;
     name: string;
@@ -277,9 +278,9 @@ const Store = () => {
                             <div className="flex items-center gap-2">
                                 <div className="flex items-center gap-2 text-sm text-gray-600">
                                     <span>Masters</span>
-                                    <span>/</span>
+                                    <FaAngleRight />
                                     <span>Consumables</span>
-                                    <span>/</span>
+                                    <FaAngleRight />
                                     <span className="text-gray-900 font-medium">Store</span>
                                 </div>
                             </div>

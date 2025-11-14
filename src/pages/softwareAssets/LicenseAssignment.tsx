@@ -1,6 +1,5 @@
 import { Card, CardContent } from '@/components/ui/card';
 import ReusableTable, { TableAction, TablePermissions } from '@/components/ui/reusable-table';
-import { ScrollArea } from '@radix-ui/react-scroll-area';
 import { ArrowLeft, Edit, Trash2 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { ReusableButton } from '@/components/ui/reusable-button';
@@ -9,7 +8,6 @@ import { useToast } from '@/hooks/use-toast';
 import { SOFTWARE_DB } from '@/Local_DB/Form_JSON_Data/LicenseAssignmentDB';
 import { ReusableTextarea } from '@/components/ui/reusable-textarea';
 import { Controller, useForm } from 'react-hook-form';
-import ReusableSingleCheckbox from '@/components/ui/reusable-single-checkbox';
 import { ReusableMultiSelect } from '@/components/ui/reusable-multi-select';
 import { ReusableDropdown } from '@/components/ui/reusable-dropdown';
 import { ReusableInput } from '@/components/ui/reusable-input';
@@ -23,7 +21,8 @@ import { getSoftwaresList } from '@/services/assetRegistryServices';
 import { setLoading } from '@/store/slices/projectsSlice';
 import { useMessage } from '@/components/ui/reusable-message';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, } from '@/components/ui/dialog';
-import { formatDate, formatDateToDDMMYYYY } from '@/_Helper_Functions/HelperFunctions';
+import { formatDate } from '@/_Helper_Functions/HelperFunctions';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface SoftwareData {
     LicenseAssignmentId: Number,
@@ -382,7 +381,8 @@ const LicenseAssignment = () => {
 
     }
     return (
-        <div className="h-full overflow-y-auto bg-gray-50/30">
+        <ScrollArea>
+        <div className="h-full">
             <header className="bg-white rounded border-b px-6 py-2 shadow-sm flex flex-col sm:flex-row shrink-0 justify-between gap-4">
                 <div className="flex items-center gap-2 text-sm text-gray-600 flex-wrap">
                     <span>Software Assets</span>
@@ -509,6 +509,7 @@ const LicenseAssignment = () => {
                 </Dialog>
             </div>
         </div>
+        </ScrollArea>
     );
 }
 export default LicenseAssignment;

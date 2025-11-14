@@ -498,23 +498,23 @@ const navigation: NavItem[] = [
           }
         ]
       },
-      {
-        label: 'Depreciation',
-        // icon: Building2,
-        link: '/depreciation',
-        children: [
-          {
-            label: 'Books',
-            icon: RxDotFilled,
-            link: '/masters/depreciation/book',
-          },
-          {
-            label: 'Asset Category Mapping With Book Category',
-            icon: RxDotFilled,
-            link: '/masters/depreciation/assetcategorybookcategorymapping',
-          },
-        ],
-      },
+      // {
+      //   label: 'Depreciation',
+      //   // icon: Building2,
+      //   link: '/depreciation',
+      //   children: [
+      //     {
+      //       label: 'Books',
+      //       icon: RxDotFilled,
+      //       link: '/masters/depreciation/book',
+      //     },
+      //     {
+      //       label: 'Asset Category Mapping With Book Category',
+      //       icon: RxDotFilled,
+      //       link: '/masters/depreciation/assetcategorybookcategorymapping',
+      //     },
+      //   ],
+      // },
       {
         label: 'Consumables',
         // icon: Building2,
@@ -608,12 +608,12 @@ const navigation: NavItem[] = [
   {
     label: 'Settings',
     icon: Settings,
-    link: '/settings/system-configuration',
+    link: '/settings/smtp-configuration',
     children: [
       {
-        label: 'System Configuration',
+        label: 'SMTP Configuration',
         icon: RxDotFilled,
-        link: '/settings/system-configuration',
+        link: '/settings/smtp-configuration',
       },
       // {
       //   label: 'User Management',
@@ -1000,9 +1000,9 @@ const AppSidebar: React.FC = () => {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="py-[16px] shadow-[0_2px_8px_0_rgba(0,0,0,0.05)]">
-        <Link to="/" className="flex items-center space-x-2 px-2 py-1">
+        <div className="flex items-center space-x-2 px-2 py-1">
           {!collapsed ? <div className="text-xl font-bold text-gray-300">Tracet</div> : <div>T</div>}
-        </Link>
+        </div>
       </SidebarHeader>
 
       <SidebarContent>

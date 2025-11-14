@@ -15,6 +15,7 @@ import { useAppSelector } from '@/store';
 import { TreeConfig, TreeView } from '@/components/ui/reusable-treeView';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ASSET_LOCATION_DB } from '@/Local_DB/Form_JSON_Data/AssetLocationDB';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { deleteAssetLocData, getAssetLocationDataByLocID, getAssetLocationDetals, postOrUpdateAssetLocationDetails } from '@/services/assetLocationServices';
 
 interface TreeNode {
@@ -138,6 +139,7 @@ const AssetLocation = () => {
     const [recordToEditId, setRecordToEditId] = useState(null);
     // const [selectedNode, setSelectedNode] = useState<SelectedNode>({});
     const [selectedId, setSelectedId] = useState('');
+    const [selectedKeys, setSelectedKeys] = useState([]);
     const [treeView, setTreeview] = useState([]);
     const [tree, setTree] = useState([]);
     const [lastLevel, setLastLevel] = useState(null);
@@ -146,6 +148,7 @@ const AssetLocation = () => {
     const [search, setSearch] = useState(SearchButton);
     const [breadCrumb, setBreadCrumb] = useState(["Company"]);
     const companyId = useAppSelector(state => state.projects.companyId);
+    const [isDelModalOpen, setIsDelModalOpen] = useState(false);
     const branchName = useAppSelector(state => state.projects.branch);
     const [isClearDisable, setIsClearDisable] = useState(true);
     const [disable, setDisable] = useState(true);
@@ -205,43 +208,8 @@ const AssetLocation = () => {
         setSelectedNode(info.node);
         setAssetLocData(fields[info.node.type])
         setSelectedLevel(parseInt(info.node.type));
+        setSelectedKeys(selectedKeys)
     };
-
-    // const mainTreeData = useMemo(() => {
-    //     const loop = (data) =>
-    //         data?.map((item) => {
-    //             const title = item.title?.toLowerCase()?.includes(search.value?.toLowerCase()) ? (
-    //                 <span key={item.key}>
-    //                     <span className={`${search.value === "" ? "" : "site-tree-search-value"}`}>{item.title}</span>
-    //                 </span>
-    //             ) : (
-    //                 <span key={item.key}>{item.title}</span>
-    //             )
-    //             if (item.children) {
-    //                 return {
-    //                     type: item.type,
-    //                     id: item.id,
-    //                     title,
-    //                     name: item.Name,
-    //                     key: item.key,
-    //                     branchId: item.branchId,
-    //                     orginalId: item.orginalId,
-    //                     children: loop(item.children),
-    //                 };
-    //             }
-    //             return {
-    //                 type: item.type,
-    //                 id: item.id,
-    //                 title,
-    //                 name: item.Name,
-    //                 key: item.key,
-    //                 branchId: item.branchId,
-    //                 orginalId: item.orginalId,
-    //             };
-    //         });
-    //     return loop(treeView);
-    // }, [search, treeView]);
-
 
     const mainTreeData = useMemo(() => {
         const loop = (data) =>
@@ -635,9 +603,221 @@ const AssetLocation = () => {
         }
     }, [treeView]);
 
+    // return (
+    //     <div className="bg-hsl(214.3 31.8% 91.4%)">
+    //       <header className="bg-card flex justify-between border-b px-6 py-4 shadow-sm">
+    //               <div className="flex items-center gap-4">
+    //                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
+    //                   <span>Masters</span>
+    //                   <span>/</span>
+    //                   <span>Company</span>
+    //                   <span>/</span>
+    //                   <span className="text-foreground font-medium">Asset Location</span>
+    //                 </div>
+    //               </div>
+    //               <div className='flex gap-2'>
+    //                 <ReusableButton
+    //                   htmlType="button"
+    //                   variant="default"
+    //                   onClick={handleReset}
+    //                   iconPosition="left"
+    //                   size="middle"
+    //                   className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+    //                 >
+    //                   Reset
+    //                 </ReusableButton>
+    //                 <ReusableButton
+    //                   htmlType="button"
+    //                   variant="default"
+    //                   onClick={handleSubmit(onSubmit)}
+    //                   iconPosition="left"
+    //                   size="middle"
+    //                   className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+    //                 >
+    //                   {selectedLevel <= 99 || recordToEditId === null ? "Save" : "Update"}
+    //                 </ReusableButton>
+    //               </div>
+    //             </header>
+
+    //         <div className="flex h-full p-2">
+    //             {/* Tree Structure Panel */}
+    //             <div className="w-[26vw] h-[75vh] rounded-lg shadow-lg border-r bg-card flex flex-col">
+    //                 <div className="px-2 flex items-center justify-center pt-4 pb-4 ps-0 ms-0 border-b gap-3">
+    //                     <div className="relative ps-2">
+    //                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+    //                         <Input
+    //                             placeholder="Search..."
+    //                             value={searchQuery}
+    //                             onChange={(e) => { setSearchQuery(e.target.value); handleSearch(e.target.value) }}
+    //                             className="pl-9 "
+    //                         />
+    //                     </div>
+    //                     <div className="flex gap-3 flex items-center justify-center">
+    //                         <div>
+    //                             <TooltipProvider>
+    //                                 <Tooltip>
+    //                                     <TooltipTrigger asChild>
+    //                                         <ReusableButton
+    //                                             size="small"
+    //                                             className="bg-primary h-[2rem] hover:bg-blue-700 text-white"
+    //                                             style={{
+    //                                                 cursor: selectedLevel >= 99 + level.length || disable ? "not-allowed" : "pointer",
+    //                                             }}
+    //                                             disabled={selectedLevel >= 99 + level.length || disable}
+    //                                             onClick={() => {
+    //                                                 if (!(selectedLevel >= 99 + level.length || disable)) {
+    //                                                     handleRoute();
+    //                                                     handleReset();
+    //                                                     setDisable(true);
+    //                                                 }
+    //                                             }}
+    //                                         >
+    //                                             <Plus className="h-4 w-4" />
+    //                                         </ReusableButton>
+    //                                     </TooltipTrigger>
+    //                                     {selectedLevel !== lastLevel && recordToEditId && (
+    //                                         <TooltipContent>
+    //                                             Add {nextLevel ? nextLevel : "Asset location"}
+    //                                         </TooltipContent>
+    //                                     )}
+    //                                 </Tooltip>
+    //                             </TooltipProvider>
+    //                         </div>
+    //                         <div>
+    //                             <ReusableButton
+    //                                 size="small"
+    //                                 className="bg-primary h-[2rem] hover:bg-blue-700 text-white"
+    //                                 style={{
+    //                                     cursor: disable || selectedLevel === 99 ? "not-allowed" : "pointer",
+    //                                 }}
+    //                                 onClick={() => {
+    //                                     if (!disable && selectedLevel !== 99) {
+    //                                         handleDelete();
+    //                                     }
+    //                                 }}
+    //                             >
+    //                                 <Trash2 className="h-4 w-4" />
+    //                             </ReusableButton>
+    //                         </div>
+    //                     </div>
+    //                 </div>
+    //                 <div className="min-h-20 h-[63vh] overflow-y-auto p-2">
+    //                             <TreeView treeData={mainTreeData} config={treeConfig} onSelect={onSelect} selectKeys={selectedKeys} onExpand={handleToggleNode}
+    //                               expandedKeys={Array.from(expandedKeys)} />
+    //                           </div>
+    //             </div>
+
+    //             {/* Details Panel */}
+    //             <div className="flex-1 h-[75vh] shadow-xl">
+    //       <div className="bg-card border-b rounded-lg shadow-lg lg:px-6 py-3 flex flex-row xxs:flex-col xs2:flex-row lg:flex-row lg:items-center justify-between gap-4">
+    //                 <div className="w-full p-1 space-y-6 h-[71vh]">
+    //                     <div className="flex flex-col gap-2">
+    //                         <div>
+    //                             <h4 className="master-heading mb-2 flex items-center gap-2">
+    //                                 {!recordToEditId
+    //                                     ? selectedLevel === 99
+    //                                         ? "Asset Location"
+    //                                         : "Add Location"
+    //                                     : selectedLevel === 99
+    //                                         ? "Asset Location"
+    //                                         : "Update Location"}
+    //                                 {selectedLevel !== lastLevel && (
+    //                                     <TooltipProvider>
+    //                                         <Tooltip>
+    //                                             <TooltipTrigger asChild>
+    //                                                 <button type="button">
+    //                                                     <Info className="mb-1 cursor-pointer" fontSize={22} />
+    //                                                 </button>
+    //                                             </TooltipTrigger>
+    //                                             <TooltipContent>
+    //                                                 To Add {nextLevel || "Asset Location"} to{" "}
+    //                                                 {breadCrumb?.at(-1) || "the selected asset location"}, click on{" "}
+    //                                                 {breadCrumb?.at(-1) || "the name"} and then click on the plus icon.
+    //                                             </TooltipContent>
+    //                                         </Tooltip>
+    //                                     </TooltipProvider>
+    //                                 )}
+    //                             </h4>
+    //                         </div>
+    //                         <div className="text-sm text-primary">
+    //                             <h6 className="breadCrumb">{breadCrumb.map(x => { return `${x} >` })}</h6>
+    //                         </div>
+    //                     </div>
+    //                 </div>
+    //                 <div className="space-y-6">
+    //                     <h5>{recordToEditId && selectedLevel !== 99 ? `Update ${assetLocData[0].heading}` : `${selectedLevel !== 99 ? "Enter" : ""} ${assetLocData[0].heading}`}</h5>
+    //                     <div className="px-1">
+    //                         <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4">
+    //                             {getFieldsByNames(['Name', 'Code']).map((field) => {
+    //                                 return <div className="flex items-center space-x-2">
+    //                                     {renderField(field)}
+    //                                 </div>;
+    //                             })}
+    //                         </div>
+    //                     </div>
+    //                 </div>
+    //             </div>
+    //         </div>
+
+    //         {/* <div className="flex-1 h-[75vh] shadow-xl">
+    //                       <div className="bg-card border-b rounded-lg shadow-lg lg:px-6 py-3 flex flex-row xxs:flex-col xs2:flex-row lg:flex-row lg:items-center justify-between gap-4">
+    //                         <div className="w-full p-1 space-y-6 h-[71vh]">
+    //                           <div className="flex flex-col gap-2">
+    //                             <div>
+    //                               <h4 className="master-heading mb-2 flex items-center gap-2">
+    //                                 {!recordToEditId
+    //                                   ? selectedLevel === 99
+    //                                     ? "Department"
+    //                                     : "Add Department"
+    //                                   : selectedLevel === 99
+    //                                     ? "Department"
+    //                                     : "Update Department"}
+    //                                 {selectedLevel !== lastLevel && (
+    //                                   <TooltipProvider>
+    //                                     <Tooltip>
+    //                                       <TooltipTrigger asChild>
+    //                                         <button type="button">
+    //                                           <Info className="mb-1 cursor-pointer" fontSize={22} />
+    //                                         </button>
+    //                                       </TooltipTrigger>
+    //                                       <TooltipContent>
+    //                                         To Add {nextLevel || "Department/Unit"} to{" "}
+    //                                         {breadCrumb?.at(-1) || "the selected department"}, click on{" "}
+    //                                         {breadCrumb?.at(-1) || "the name"} and then click on the plus icon.
+    //                                       </TooltipContent>
+    //                                     </Tooltip>
+    //                                   </TooltipProvider>
+    //                                 )}
+    //                               </h4>
+    //                             </div>
+    //                             <div className="text-sm text-primary">
+    //                               <h6 className="breadCrumb">{breadCrumb.map(x => { return `${x} >` })}</h6>
+    //                             </div>
+    //                           </div>
+
+    //                           <div className="space-y-6">
+    //                             <h5>{recordToEditId && selectedLevel !== 99 ? `Update ${departrmentData[0].heading}` : `${selectedLevel !== 99 ? "Enter" : ""} ${departrmentData[0].heading}`}</h5>
+    //                             <div className="px-1">
+    //                               <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4">
+    //                                 {getFieldsByNames(['Name', 'Code']).map((field) => {
+    //                                   return <div className="flex items-center space-x-2">
+    //                                     {renderField(field)}
+    //                                   </div>;
+    //                                 })}
+    //                               </div>
+    //                             </div>
+    //                           </div>
+
+    //                         </div>
+    //                       </div>
+    //                     </div> */}
+    //     </div>
+    //     </div >
+    // )
+
     return (
-        <div className="bg-hsl(214.3 31.8% 91.4%) overflow-y-auto">
-            <header className="bg-card flex flex-col sm:flex-row gap-4 shrink-0 justify-between border-b px-6 py-3 shadow-sm">
+        <div className="bg-hsl(214.3 31.8% 91.4%)">
+            <header className="bg-card flex justify-between border-b px-6 py-4">
                 <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <span>Masters</span>
@@ -651,7 +831,7 @@ const AssetLocation = () => {
                     <ReusableButton
                         htmlType="button"
                         variant="default"
-                        onClick={handleReset}
+                        onClick={() => handleReset()}
                         iconPosition="left"
                         size="middle"
                         className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
@@ -661,21 +841,21 @@ const AssetLocation = () => {
                     <ReusableButton
                         htmlType="button"
                         variant="default"
-                        onClick={handleSubmit(onSubmit)}
+                        onClick={submit}
                         iconPosition="left"
                         size="middle"
                         className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
                     >
-                        {selectedLevel <= 99 || recordToEditId === null ? "Save" : "Update"}
+                        Save
                     </ReusableButton>
                 </div>
             </header>
 
-            <div className="flex h-[calc(100vh-73px)]">
+            <div className="flex h-full p-2">
                 {/* Tree Structure Panel */}
-                <div className="w-[400px] border-r bg-card flex flex-col">
-                    <div className=" flex items-center justify-center pt-4 pb-4 ps-0 ms-0 border-b gap-3">
-                        <div className="relative">
+                <div className="w-[26vw] h-[75vh] rounded-lg shadow-lg border-r bg-card flex flex-col">
+                    <div className="px-2 flex items-center justify-center pt-4 pb-4 ps-0 ms-0 border-b gap-3">
+                        <div className="relative ps-2">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                             <Input
                                 placeholder="Search..."
@@ -684,113 +864,116 @@ const AssetLocation = () => {
                                 className="pl-9 "
                             />
                         </div>
-                        <div className="flex gap-3 flex items-center justify-center">
-                            <div>
-                                <TooltipProvider>
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                            <ReusableButton
-                                                size="small"
-                                                className="bg-primary h-[2rem] hover:bg-blue-700 text-white"
-                                                style={{
-                                                    cursor: selectedLevel >= 99 + level.length || disable ? "not-allowed" : "pointer",
-                                                }}
-                                                disabled={selectedLevel >= 99 + level.length || disable}
-                                                onClick={() => {
-                                                    if (!(selectedLevel >= 99 + level.length || disable)) {
-                                                        handleRoute();
-                                                        handleReset();
-                                                        setDisable(true);
-                                                    }
-                                                }}
-                                            >
-                                                <Plus className="h-4 w-4" />
-                                            </ReusableButton>
-                                        </TooltipTrigger>
-                                        {selectedLevel !== lastLevel && recordToEditId && (
-                                            <TooltipContent>
-                                                Add {nextLevel ? nextLevel : "Department/Unit"}
-                                            </TooltipContent>
-                                        )}
-                                    </Tooltip>
-                                </TooltipProvider>
-                            </div>
-                            <div>
-                                <ReusableButton
-                                    size="small"
-                                    className="bg-primary h-[2rem] hover:bg-blue-700 text-white"
-                                    style={{
-                                        cursor: disable || selectedLevel === 99 ? "not-allowed" : "pointer",
-                                    }}
-                                    onClick={() => {
-                                        if (!disable && selectedLevel !== 99) {
-                                            handleDelete();
-                                        }
-                                    }}
-                                >
-                                    <Trash2 className="h-4 w-4" />
-                                </ReusableButton>
-                            </div>
+                        <div className="flex gap-2 flex items-center justify-center">
+                            <ReusableButton
+                                size="small"
+                                className="bg-primary h-[2rem] hover:bg-blue-700 text-white"
+                                style={{
+                                    cursor: selectedLevel >= 99 + level.length || disable ? "not-allowed" : "pointer",
+                                }}
+                                disabled={selectedLevel >= 99 + level.length || disable}
+                                onClick={() => {
+                                    if (!(selectedLevel >= 99 + level.length || disable)) {
+                                        handleRoute();
+                                        setDisable(true);
+                                    }
+                                }}
+                            >
+                                <Plus className="h-4 w-4" />
+                            </ReusableButton>
+                            <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>
+                                <DialogContent className="sm:max-w-[425px]">
+                                    <DialogHeader>
+                                        <DialogTitle>Confirm the action</DialogTitle>
+                                        <DialogDescription>
+                                            Are you sure you want to delete Hierarchy level?
+                                        </DialogDescription>
+                                    </DialogHeader>
+                                    <DialogFooter>
+                                        <ReusableButton
+                                            variant="default"
+                                            onClick={() => setIsDelModalOpen(false)}
+                                        >
+                                            Cancel
+                                        </ReusableButton>
+                                        <ReusableButton
+                                            variant="primary"
+                                            danger={true}
+                                            onClick={() => { handleDelete(); setIsDelModalOpen(false); }}
+                                        // onClick={currentTab === "service-request-type" ? () => { deleteServiceRequestType(selectedRecord?.Id); setIsDelModalOpen(false) } : () => { deleteStatus(selectedStatusRec?.Id); setIsDelModalOpen(false) }}
+                                        >
+                                            Delete
+                                        </ReusableButton>
+                                    </DialogFooter>
+                                </DialogContent>
+                            </Dialog>
+                            <Button size="sm" variant="outline" className="h-8" onClick={() => setIsDelModalOpen(true)}>
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
                         </div>
                     </div>
-                    <div className="h-[370px] overflow-y-scroll p-2">
-                        {renderTreeNode(mockData)}
+                    <div className="min-h-20 h-[63vh] overflow-y-auto p-2">
+                        <TreeView treeData={mainTreeData} config={treeConfig} onSelect={onSelect} selectKeys={selectedKeys} onExpand={handleToggleNode}
+                            expandedKeys={Array.from(expandedKeys)} />
                     </div>
                 </div>
 
                 {/* Details Panel */}
-                <div className="flex-1 overflow-y-auto">
-                    <div className="p-6 space-y-6">
-                        <div className="flex flex-col gap-2">
-                            <div>
-                                <h4 className="master-heading mb-2 flex items-center gap-2">
-                                    {!recordToEditId
-                                        ? selectedLevel === 99
-                                            ? "Asset Location"
-                                            : "Add Location"
-                                        : selectedLevel === 99
-                                            ? "Asset Location"
-                                            : "Update Location"}
-                                    {selectedLevel !== lastLevel && (
-                                        <TooltipProvider>
-                                            <Tooltip>
-                                                <TooltipTrigger asChild>
-                                                    <button type="button">
-                                                        <Info className="mb-1 cursor-pointer" fontSize={22} />
-                                                    </button>
-                                                </TooltipTrigger>
-                                                <TooltipContent>
-                                                    To Add {nextLevel || "Asset Location"} to{" "}
-                                                    {breadCrumb?.at(-1) || "the selected asset location"}, click on{" "}
-                                                    {breadCrumb?.at(-1) || "the name"} and then click on the plus icon.
-                                                </TooltipContent>
-                                            </Tooltip>
-                                        </TooltipProvider>
-                                    )}
-                                </h4>
+                <div className="flex-1 h-[75vh]  ps-2 shadow-xl">
+                    <div className="bg-card border-b rounded-lg shadow-lg lg:ps-6 py-3 flex flex-row xxs:flex-col xs2:flex-row lg:flex-row lg:items-center justify-between gap-4">
+                        <div className="p-1 w-full space-y-6 h-[71vh] overflow-y-auto">
+                            <div className="flex flex-col gap-2">
+                                <div>
+                                    <h4 className="master-heading mb-2 flex items-center gap-2">
+                                        {!recordToEditId
+                                            ? selectedLevel === 99
+                                                ? "Asset Location"
+                                                : "Add Location"
+                                            : selectedLevel === 99
+                                                ? "Asset Location"
+                                                : "Update Location"}
+                                        {selectedLevel !== lastLevel && (
+                                            <TooltipProvider>
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <button type="button">
+                                                            <Info className="mb-1 cursor-pointer" fontSize={22} />
+                                                        </button>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                        To Add {nextLevel || "Department/Unit"} to{" "}
+                                                        {breadCrumb?.at(-1) || "the selected department"}, click on{" "}
+                                                        {breadCrumb?.at(-1) || "the name"} and then click on the plus icon.
+                                                    </TooltipContent>
+                                                </Tooltip>
+                                            </TooltipProvider>
+                                        )}
+                                    </h4>
+                                </div>
+                                <div className="text-sm text-primary">
+                                    <h6 className="breadCrumb">{breadCrumb.map(x => { return `${x} >` })}</h6>
+                                </div>
                             </div>
-                            <div className="text-sm text-primary">
-                                <h6 className="breadCrumb">{breadCrumb.map(x => { return `${x} >` })}</h6>
-                            </div>
-                        </div>
-                        <div className="space-y-6">
-                            {/* <h5 className="text-base font-semibold">Department Details</h5> */}
-                            <h5>{recordToEditId && selectedLevel !== 99 ? `Update ${assetLocData[0].heading}` : `${selectedLevel !== 99 ? "Enter" : ""} ${assetLocData[0].heading}`}</h5>
-                            <div className="px-1">
-                                <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4">
-                                    {getFieldsByNames(['Name', 'Code']).map((field) => {
-                                        return <div className="flex items-center space-x-2">
-                                            {renderField(field)}
-                                        </div>;
-                                    })}
+
+                            <div className="space-y-6">
+                                <h5>{recordToEditId && selectedLevel !== 99 ? `Update ${assetLocData[0].heading}` : `${selectedLevel !== 99 ? "Enter" : ""} ${assetLocData[0].heading}`}</h5>
+                                <div className="px-1">
+                                    <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4">
+                                        {getFieldsByNames(['Name', 'Code']).map((field) => {
+                                            return <div className="flex items-center space-x-2">
+                                                {renderField(field)}
+                                            </div>;
+                                        })}
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>
-    )
+    );
 }
 
 export default AssetLocation

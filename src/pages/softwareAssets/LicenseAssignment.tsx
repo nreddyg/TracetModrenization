@@ -23,7 +23,6 @@ import { useMessage } from '@/components/ui/reusable-message';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, } from '@/components/ui/dialog';
 import { formatDate } from '@/_Helper_Functions/HelperFunctions';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { FaAngleRight } from 'react-icons/fa';
 
 interface SoftwareData {
     LicenseAssignmentId: Number,
@@ -189,8 +188,8 @@ const LicenseAssignment = () => {
                         SoftwareName: '',
                         LicenseKeyId: data.LicenseKeyId,
                         LicenseKey: licenseKey || data.LicenseKey,
-                        AssignmentDate: data.AssignmentDate ? formatDate(data.AssignmentDate, 'DD/MM/YYYY') || '' : '',
-                        AssignmentExpiryDate: data.AssignmentExpiryDate ? formatDate(data.AssignmentExpiryDate, 'DD/MM/YYYY') || '' : '',
+                        AssignmentDate:editingRecord?.AssignmentDate ? editingRecord?.AssignmentDate :data.AssignmentDate ? formatDate(data.AssignmentDate, 'DD/MM/YYYY') || '' : '',
+                        AssignmentExpiryDate: editingRecord?.AssignmentExpiryDate? editingRecord?.AssignmentExpiryDate : data.AssignmentExpiryDate ? formatDate(data.AssignmentExpiryDate, 'DD/MM/YYYY') || '' : '',
                         Status: selectedLicenseData?.Status || '',
                         Notes: data.Notes || '',
                     },
@@ -199,8 +198,10 @@ const LicenseAssignment = () => {
             const res = await addOrUpdateLicenseAssignment(companyId, payload);
             if (res.success && res.data?.status) {
                 msg.success(res.data.message || 'License Assignment Successful');
+                setEditingRecord(null);
+                // setIsOpenLicenseCard(false);
                 fetchAllLicenseAssignments();
-                form.reset()
+                form.reset();
             } else {
                 msg.warning(res.data?.message || 'Something went wrong');
             }

@@ -23,6 +23,7 @@ import { setLoading } from '@/store/slices/projectsSlice';
 import { useMessage } from '@/components/ui/reusable-message';
 import { ReusableButton } from '@/components/ui/reusable-button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { FaAngleRight } from 'react-icons/fa';
 
 const SystemConfiguration = () => {
   const dispatch = useAppDispatch();
@@ -191,17 +192,23 @@ const SystemConfiguration = () => {
   return (
     <ScrollArea>
     <div className=" h-full transition-all duration-300 ease-in-out">
-      <header className="bg-white border-b px-6 py-4 shadow-sm">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <span>Settings</span>
-            <span>/</span>
-            <span className="text-gray-900 font-medium">SMTP Configuration</span>
-          </div>
-        </div>
-      </header>
+        <header className="px-6 py-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
 
-      <div className="p-6 space-y-6 animate-fade-in">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+              <h1 className="text-lg sm:text-2xl font-bold text-gray-900">
+                SMTP Configuration
+              </h1>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <span>Settings</span>
+              <FaAngleRight />
+              <span className="text-gray-900 font-medium">SMTP Configuration</span>
+            </div>
+          </div>
+        </header>
+
+      <div className="p-6 pt-0 space-y-6 animate-fade-in">
         {/* <h1 className="text-2xl font-bold text-gray-900">SMTP Configuration</h1> */}
 
         <Tabs defaultValue="smtp" className="space-y-6">

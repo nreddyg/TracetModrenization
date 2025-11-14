@@ -658,19 +658,19 @@ const AssetRegistry = () => {
 
     return (
         <ScrollArea>
-            <header className="bg-white rounded border-b px-6 py-2 shadow-sm flex flex-col sm:flex-row shrink-0 justify-between gap-4">
-                    <div className="flex items-center gap-2 text-sm text-gray-600 flex-wrap">
-                        <span>Software Assets</span>
-                        <span>/</span>
-                        <span className="text-gray-900 font-medium">Asset Registry</span>
-                    </div>
-                    <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
-                        <ReusableButton
+            <header className="px-6 py-4">
+                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+                          <h1 className="text-lg sm:text-2xl font-bold text-gray-900">
+                            Asset Registry
+                          </h1>
+                        </div>
+                        <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                    <ReusableButton
                             size="small"
-                            // variant="primary"
                             className=' flex-1 sm:flex-none bg-primary h-[2.38rem] text-white p-4'
                             onClick={() => setIsOpenLicenseCard((prev) => !prev)}>
-                            {/* <span className="" > + Add Software Asset</span> */}
                             {isOpenLicenseCard ? (
                                 <div className='flex items-center gap-2'>
                                     <ArrowLeft className="h-4 w-4 text-current stroke-[3]" /> Grid View
@@ -679,8 +679,9 @@ const AssetRegistry = () => {
                                 '+ Add Software Asset'
                             )}
                         </ReusableButton>
-                    </div>
-                </header>
+                </div>
+                      </div>
+                    </header>
             <div className="h-full">
                 {isOpenLicenseCard &&
                     <div className='p-2 rounded-lg'>
@@ -747,13 +748,13 @@ const AssetRegistry = () => {
                         </div>
                     </div>
                 }
-                <div className=" p-3 rounded-lg">
-                    <div className=" bg-white rounded-lg p-4 border">
+                <div className=" p-4 pt-0 rounded-lg">
+                    <div className=" bg-white rounded-lg p-6 border">
                             <ReusableTable
                                 data={getAllTableData} columns={columns}
                                 // permissions={""}
                                 permissions={tablePermissions}
-                                title="Software Assets Overview"
+                                title=" "
                                 onRefresh={handleRefresh}
                                 enableSearch={true}
                                 enableSelection={false}

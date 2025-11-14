@@ -273,19 +273,17 @@ const Store = () => {
         <div className="h-full overflow-y-auto bg-gray-50 flex flex-col ">
             <div className="flex flex-1 overflow-hidden">
                 <div className="flex-1 flex flex-col min-w-0 ">
-                    <div className="min-h-[53px] bg-white border-b shadow-sm px-4 lg:px-6 py-3 flex flex-row xxs:flex-col xs2:flex-row lg:flex-row lg:items-center justify-between gap-4 shrink-0">
-                        <div className="flex items-center gap-4 lg:gap-6 flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                                <div className="flex items-center gap-2 text-sm text-gray-600">
-                                    <span>Masters</span>
-                                    <FaAngleRight />
-                                    <span>Consumables</span>
-                                    <FaAngleRight />
-                                    <span className="text-gray-900 font-medium">Store</span>
-                                </div>
+                 <header className="px-6 py-4">
+                          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            
+                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                              <span>Masters</span>
+                              <FaAngleRight />
+                              <span>Consumables</span>
+                              <FaAngleRight />
+                              <span className="text-gray-900 font-medium">Store</span>
                             </div>
-                        </div>
-                        <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2">
                             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                                 <DialogTrigger asChild>
                                     {branch!=='All' && 
@@ -336,8 +334,9 @@ const Store = () => {
                                 </DialogContent>
                             </Dialog>
                         </div>
-                    </div>
-                    <div className="flex-1 p-3 overflow-hidden min-h-0  ">
+                          </div>
+                        </header>
+                    <div className="flex-1 p-3 pt-0 overflow-hidden min-h-0  ">
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-1 h-full">
                             <div className="lg:col-span-12 flex flex-col  min-h-0 ">
                                 <ScrollArea className="flex-1">

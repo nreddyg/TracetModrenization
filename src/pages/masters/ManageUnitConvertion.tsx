@@ -17,6 +17,7 @@ import { getUnitOfMeasure } from '@/services/itemCategoryServices';
 import { MANAGE_UNITS_OF_MEASURE_DB } from '@/Local_DB/Form_JSON_Data/UnitsOfMeasureDB';
 import { addNewConversion, deleteConversion, getConversionUOMData } from '@/services/unitsOfMeasureServices';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const ManageUnitConversion = () => {
     const [dataSource, setDatasource] = useState([]);
@@ -235,82 +236,84 @@ const ManageUnitConversion = () => {
         canManageColumns: false,
     };
     return (
-        <div className="bg-gray-50/30 h-full overflow-y-auto">
-            <div className="p-4 space-y-4 " >
-                <div className='flex w-full justify-between'>
-                    <h1 className='text-lg font-semibold text-gray-900'>Add Unit of Conversion</h1>
-                    <ReusableButton
-                        className=' flex-1 sm:flex-none bg-primary h-[2.38rem] text-white p-4'
-                        onClick={() => navigate("/masters/consumables/unitsofmeasure")}>Back</ReusableButton>
-                </div>
-                <div className="w-full p-4 bg-white rounded-md border">
-                    <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>
-                        <DialogContent className="sm:max-w-[425px]">
-                            <DialogHeader>
-                                <DialogTitle>Confirm the action</DialogTitle>
-                                <DialogDescription>
-                                    Are you sure you want to delete Unit Of Measure?
-                                </DialogDescription>
-                            </DialogHeader>
-                            <DialogFooter>
-                                <ReusableButton
-                                    variant="default"
-                                    onClick={() => setIsDelModalOpen(false)}
-                                >
-                                    Cancel
-                                </ReusableButton>
-                                <ReusableButton
-                                    variant="primary"
-                                    danger={true}
-                                    onClick={() => { deleteConversionData(recordToEditId, ""); setIsDelModalOpen(false) }}
-                                >
-                                    Delete
-                                </ReusableButton>
-                            </DialogFooter>
-                        </DialogContent>
-                    </Dialog>
-                    <div className="grid grid-cols-5 gap-6 items-end">
-                        {getFieldsByNames(['base', 'baseUOM', "equals", 'target', 'targetUOM']).map((field) => {
-                            return <div className="flex items-center space-x-2">
-                                {renderField(field)}
-                            </div>;
-                        })}
-                    </div>
-                    <div className="flex justify-end mt-6 gap-3">
+        <ScrollArea>
+            <div className="h-full overflow-y-auto">
+                <div className="p-4 space-y-3" >
+                    <div className='flex w-full justify-between'>
+                        <h1 className='text-lg font-semibold text-gray-900'>Add Unit of Conversion</h1>
                         <ReusableButton
-                            htmlType="submit"
-                            variant="primary"
-                            className="bg-orange-500 hover:bg-orange-600 border-orange-500"
-                            onClick={() => submit()}
-                        >Save</ReusableButton>
-                        <ReusableButton variant="default"
-                            onClick={() => handleReset()}
-                        >Clear</ReusableButton>
+                            className=' flex-1 sm:flex-none bg-primary text-white'
+                            onClick={() => navigate("/masters/consumables/unitsofmeasure")}>Back</ReusableButton>
                     </div>
+                    <div className="w-full p-4 bg-white rounded-md border">
+                        <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>
+                            <DialogContent className="sm:max-w-[425px]">
+                                <DialogHeader>
+                                    <DialogTitle>Confirm the action</DialogTitle>
+                                    <DialogDescription>
+                                        Are you sure you want to delete Unit Of Measure?
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <DialogFooter>
+                                    <ReusableButton
+                                        variant="default"
+                                        onClick={() => setIsDelModalOpen(false)}
+                                    >
+                                        Cancel
+                                    </ReusableButton>
+                                    <ReusableButton
+                                        variant="primary"
+                                        danger={true}
+                                        onClick={() => { deleteConversionData(recordToEditId, ""); setIsDelModalOpen(false) }}
+                                    >
+                                        Delete
+                                    </ReusableButton>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
+                        <div className="grid grid-cols-5 gap-6 items-end">
+                            {getFieldsByNames(['base', 'baseUOM', "equals", 'target', 'targetUOM']).map((field) => {
+                                return <div className="flex items-center space-x-2">
+                                    {renderField(field)}
+                                </div>;
+                            })}
+                        </div>
+                        <div className="flex justify-end mt-6 gap-3">
+                            <ReusableButton
+                                htmlType="submit"
+                                variant="primary"
+                                className="bg-orange-500 hover:bg-orange-600 border-orange-500"
+                                onClick={() => submit()}
+                            >Save</ReusableButton>
+                            <ReusableButton variant="default"
+                                onClick={() => handleReset()}
+                            >Clear</ReusableButton>
+                        </div>
+                    </div>
+                    <Card className="border-0 shadow-sm">
+                        <CardContent className="pt-2">
+                            <ReusableTable
+                                data={filteredData}
+                                columns={columns}
+                                permissions={tablePermissions}
+                                title="Unit of Measures Conversion list"
+                                enableSearch={false}
+                                enableSelection={false}
+                                enableExport={true}
+                                enableColumnVisibility={true}
+                                enablePagination={true}
+                                enableSorting={true}
+                                enableFiltering={true}
+                                pageSize={10}
+                                emptyMessage="No user groups found"
+                                rowHeight="normal"
+                                storageKey="usergroups-table"
+                            />
+                        </CardContent>
+                    </Card>
                 </div>
-                <Card className="border-0 shadow-sm">
-                    <CardContent className="pt-2">
-                        <ReusableTable
-                            data={filteredData}
-                            columns={columns}
-                            permissions={tablePermissions}
-                            title="Unit of Measures Conversion list"
-                            enableSearch={false}
-                            enableSelection={false}
-                            enableExport={true}
-                            enableColumnVisibility={true}
-                            enablePagination={true}
-                            enableSorting={true}
-                            enableFiltering={true}
-                            pageSize={10}
-                            emptyMessage="No user groups found"
-                            rowHeight="normal"
-                            storageKey="usergroups-table"
-                        />
-                    </CardContent>
-                </Card>
             </div>
-        </div>
+        </ScrollArea>
     );
 };
 export default ManageUnitConversion;

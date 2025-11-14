@@ -6,7 +6,7 @@ import { ReusableInput } from '@/components/ui/reusable-input';
 import { ReusableTable, TablePermissions } from '@/components/ui/reusable-table';
 import { ReusableDropdown } from '@/components/ui/reusable-dropdown';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Plus, Trash2 } from 'lucide-react';
+import { Edit, Plus, Trash2 } from 'lucide-react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ColumnDef } from '@tanstack/react-table';
@@ -93,22 +93,26 @@ const CustomerLocation = () => {
             accessorKey: 'actions',
             header: 'Actions',
             cell: ({ row }: any) => (
-                <div className="flex gap-2">
+                <div className="flex gap-2" title='Actions'>
                     <ReusableButton
                         variant="text"
                         size="small"
+                        title='Edit'
                         onClick={() => { setRecordToEditId(row.original.LocationId); handleEdit(true, row.original) }}
                     >
-                        Edit
+                        <Edit className="h-4 w-4 text-blue-600" />
+
                     </ReusableButton>
                     <ReusableButton
                         variant="text"
                         size="small"
                         danger
+                        title='Delete'
                         icon={<Trash2 className="h-4 w-4" />}
                         onClick={() => { setRecordToEditId(row.original.LocationId); setMainDelRec(row.original); setIsMainDelOpen(true) }}
                     >
-                        Delete
+                        <Trash2 className="h-4 w-4" />
+
                     </ReusableButton>
                 </div>
             ),
@@ -127,23 +131,27 @@ const CustomerLocation = () => {
             accessorKey: 'actions',
             header: 'Actions',
             cell: ({ row }: any) => (
-                <div className="flex gap-2">
+                <div className="flex gap-2" title='Actions'>
                     <ReusableButton
                         variant="text"
                         size="small"
+                        title='Edit'
                         //   icon={<Edit className="h-4 w-4" />}
                         onClick={() => { setSubRecID(row.original.LocationId); handleEdit(false, row.original) }}
                     >
-                        Edit
+                        <Edit className="h-4 w-4 text-blue-600" />
+
                     </ReusableButton>
                     <ReusableButton
                         variant="text"
                         size="small"
                         danger
+                        title='Delete'
                         icon={<Trash2 className="h-4 w-4" />}
                         onClick={() => { setSubRecID(row.original.LocationId); setMainDelRec(row.original); setIsMainDelOpen(true) }}
                     >
-                        Delete
+                        <Trash2 className="h-4 w-4" />
+
                     </ReusableButton>
                 </div>
             ),

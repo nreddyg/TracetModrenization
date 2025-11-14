@@ -4,7 +4,8 @@ export const UNITS_OF_MEASURE_DB:BaseField[]=[
         name:'Name',
         fieldType:'text',
         label:'Name',
-        // defaultChecked:false,
+        placeholder: 'Enter Name',
+        isRequired:true
     },
     //  {
     //     label: "Branch",
@@ -18,7 +19,7 @@ export const UNITS_OF_MEASURE_DB:BaseField[]=[
     {
         name: 'Description',
         label: 'Description',
-        fieldType: 'textarea',
+        fieldType: 'text',
         placeholder: 'EnterDescription',
         isRequired: false,
     },

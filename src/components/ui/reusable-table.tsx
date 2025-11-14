@@ -2230,7 +2230,7 @@ export function ReusableTable<T = any>({
                   {headerGroup.headers.map(header => (
                     <th
                       key={header.id}
-                      className="px-4 py-3 text-left border-b border-gray-200 whitespace-nowrap bg-white"
+                      className="px-4 py-3 text-left rounded-xl border-b border-gray-200 whitespace-nowrap bg-white"
                       style={{
                         width: header.getSize(),
                         minWidth: `${calculatedMinWidth}px`,

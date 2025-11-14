@@ -217,10 +217,10 @@ const Store = () => {
                     fetchStoreDataByBranchName(companyId, branch)
 
                 } else {
-                    msg.warning(res.data.message);
+                    msg.warning(res.data.ErrorDetails[0]["Error Message"]);
                 }
             } else {
-                msg.warning('Failed to delete status !!')
+                msg.warning('Failed to Add Store')
             }
         }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
     }
@@ -233,10 +233,11 @@ const Store = () => {
                     fetchStoreDataByBranchName(companyId, branch)
 
                 } else {
-                    msg.warning(res.data.message);
+                                        msg.warning(res.data.ErrorDetails[0]["Error Message"]);
+
                 }
             } else {
-                msg.warning('Failed to delete status !!')
+                msg.warning('Failed to Update Store')
             }
         }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
     }
@@ -252,12 +253,22 @@ const Store = () => {
             ]
         }
         if (recordToEditId == null && companyId) {
+            if(watch("StoreName")!=""){
             addNewStoreData(branch, Payload)
             setIsAddDialogOpen(false)
+            }
+            else{
+                msg.warning("Name should not be empty")
+            }
         }
         else if (recordToEditId !== null && companyId) {
+            if(watch("StoreName")!=""){
             updateStoreData(recordToEditId, Payload)
             setIsAddDialogOpen(false)
+            }
+            else{
+                msg.warning("Name should not be empty")
+            }
 
         }
     }
@@ -284,55 +295,55 @@ const Store = () => {
                                 <span className="text-gray-900 font-medium">Store</span>
                             </div>
                             <div className="flex items-center gap-2">
-                                <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-                                    <DialogTrigger asChild>
-                                        {branch !== 'All' &&
-                                            <ReusableButton
-                                                variant="primary"
-                                                size='small'
-                                                icon={<Plus className="h-4 w-4" />}
-                                                onClick={() => { setRecordToEditId(null); reset({ StoreName: "", Branch: "", StoreDescription: "" }) }}
-                                            >
-                                                Add
-                                            </ReusableButton>
-                                        }
-                                    </DialogTrigger>
-                                    <DialogContent className="max-w-2xl">
-                                        <DialogHeader>
-                                            <DialogTitle>{recordToEditId ? "Update Store" : "Add Store"}</DialogTitle>
-                                        </DialogHeader>
-                                        <div className='grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4'>
-                                            {getFieldsByNames(['StoreName', 'Branch']).map((field) => {
-                                                return <div className="flex items-center space-x-2">
-                                                    {renderField(field)}
-                                                </div>;
-                                            })}
-                                        </div>
-                                        <div className='w-100'>
-                                            {getFieldsByNames(['StoreDescription']).map((field) => {
-                                                return <div className=" space-x-2">
-                                                    {renderField(field)}
-                                                </div>;
-                                            })}
-                                        </div>
-                                        <div className="flex justify-end gap-2">
-                                            <ReusableButton
-                                                variant="default"
-                                                onClick={() => setIsAddDialogOpen(false)}
-                                            >
-                                                Cancel
-                                            </ReusableButton>
-                                            <ReusableButton
-                                                htmlType="submit"
-                                                variant="primary"
-                                                className="bg-orange-500 hover:bg-orange-600 border-orange-500"
-                                                onClick={() => submit()}
-                                            >
-                                                {recordToEditId ? "Update" : "Save"}
-                                            </ReusableButton>
-                                        </div>
-                                    </DialogContent>
-                                </Dialog>
+                            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                                <DialogTrigger asChild>
+                                    {branch!=='All' && 
+                                    <ReusableButton
+                                        variant="primary"
+                                        size='small'
+                                        icon={<Plus className="h-4 w-4" />}
+                                        onClick={() => { setRecordToEditId(null); reset({ StoreName: "", Branch: "", StoreDescription: "" }) }}
+                                    >
+                                        Add
+                                    </ReusableButton>
+                                    }
+                                </DialogTrigger>
+                                <DialogContent className="max-w-2xl">
+                                    <DialogHeader>
+                                        <DialogTitle>{recordToEditId ? "Update Store" : "Add Store"}</DialogTitle>
+                                    </DialogHeader>
+                                    <div className='grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4'>
+                                        {getFieldsByNames(['StoreName', 'StoreDescription']).map((field) => {
+                                            return <div className="flex items-center space-x-2">
+                                                {renderField(field)}
+                                            </div>;
+                                        })}
+                                    </div>
+                                    {/* <div className='w-100'>
+                                        {getFieldsByNames(['StoreDescription']).map((field) => {
+                                            return <div className=" space-x-2">
+                                                {renderField(field)}
+                                            </div>;
+                                        })}
+                                    </div> */}
+                                    <div className="flex justify-end gap-2">
+                                        <ReusableButton
+                                            variant="default"
+                                            onClick={() => setIsAddDialogOpen(false)}
+                                        >
+                                            Cancel
+                                        </ReusableButton>
+                                        <ReusableButton
+                                            htmlType="submit"
+                                            variant="primary"
+                                            className="bg-orange-500 hover:bg-orange-600 border-orange-500"
+                                            onClick={() => submit()}
+                                        >
+                                            {recordToEditId ? "Update" : "Save"}
+                                        </ReusableButton>
+                                    </div>
+                                </DialogContent>
+                            </Dialog>
                             </div>
                         </div>
                     </header>

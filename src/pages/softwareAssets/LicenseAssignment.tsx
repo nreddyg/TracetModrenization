@@ -55,7 +55,33 @@ const LicenseAssignment = () => {
         { id: 'AssignmentDate', accessorKey: "AssignmentDate", header: "Assignment Date" },
         { id: 'ExpiryDate', accessorKey: "LicenseExpiryDate", header: "License Expiry Date" },
         { id: 'AssignmentExpiryDate', accessorKey: "AssignmentExpiryDate", header: "Assignment Expiry Date" },
-        { id: 'Status', accessorKey: 'Status', header: 'Status' }
+        { id: 'Status', accessorKey: 'Status', header: 'Status' },
+        {
+                      id: 'actions',
+                      accessorKey: 'actions',
+                      header: 'Actions',
+                      cell: ({ row }: any) => (
+                        <div className="flex gap-2" title='Actions'>
+                          <ReusableButton
+                            variant="text"
+                            size="small"
+                            title='Edit'
+                            onClick={() => {handleEdit(row?.original)}}
+                          >
+                            <Edit className="h-4 w-4 text-blue-600" />
+                          </ReusableButton>
+                          <ReusableButton
+                            variant="text"
+                            size="small"
+                            title='Delete'
+                            danger
+                            onClick={() => {handleDelete(row?.original)}}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </ReusableButton>
+                        </div>
+                      ),
+                    },
     ]);
     const [fields, setFields] = useState<BaseField[]>(SOFTWARE_DB);
     const [isOpenLicenseCard, setIsOpenLicenseCard] = useState(false);
@@ -486,7 +512,7 @@ const LicenseAssignment = () => {
                                 emptyMessage="No Data found"
                                 rowHeight="normal"
                                 storageKey="service-request-type-list-table"
-                                actions={tableActions}
+                                // actions={tableActions}
                                 enableColumnPinning
                             />
                         </ScrollArea>

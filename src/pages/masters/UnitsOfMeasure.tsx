@@ -193,10 +193,10 @@ const UnitOfMeasure = () => {
                     msg.success(res.data.message);
                     fetchUOMGetData(companyId)
                 } else {
-                    msg.warning(res.data.message);
+                    msg.warning(res.data.ErrorDetails[0]["Error Message"]);
                 }
             } else {
-                msg.warning('Failed to delete status !!')
+                msg.warning('Failed to Add UOM')
             }
         }).catch(err => { }).finally(() => {
             dispatch(setLoading(false));
@@ -210,10 +210,11 @@ const UnitOfMeasure = () => {
                     msg.success(res.data.message);
                     fetchUOMGetData(companyId)
                 } else {
-                    msg.warning(res.data.message);
+                                        msg.warning(res.data.ErrorDetails[0]["Error Message"]);
+
                 }
             } else {
-                msg.warning('Failed to delete status !!')
+                msg.warning('Failed to update UOM !!')
             }
         }).catch(err => { }).finally(() => {
             dispatch(setLoading(false))
@@ -229,12 +230,23 @@ const UnitOfMeasure = () => {
             ]
         }
         if (recordToEditId == null && companyId) {
+            if(watch("Name")!=""){
             addNewUOMData(companyId, Payload)
             setIsAddDialogOpen(false)
+
+            }
+            else{
+                msg.warning("Name should not be empty")
+            }
         }
         else if (recordToEditId !== null && companyId) {
+            if(watch("Name")!=""){
             updateUOMData(recordToEditId, Payload)
             setIsAddDialogOpen(false)
+            }
+            else{
+                msg.warning("Name should not be empty")
+            }
         }
     }
     const handleEdit = (data) => {
@@ -271,19 +283,19 @@ const UnitOfMeasure = () => {
                                         <DialogTitle>{recordToEditId ? "Update Unit Of Measure" : "Add Unit Of Measure"}</DialogTitle>
                                     </DialogHeader>
                                     <div className='grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4'>
-                                        {getFieldsByNames(['Name', 'Branch']).map((field) => {
+                                        {getFieldsByNames(['Name', 'Description']).map((field) => {
                                             return <div className="flex items-center space-x-2">
                                                 {renderField(field)}
                                             </div>;
                                         })}
                                     </div>
-                                    <div className='w-100'>
+                                    {/* <div className='w-100'>
                                         {getFieldsByNames(['Description']).map((field) => {
                                             return <div className=" space-x-2">
                                                 {renderField(field)}
                                             </div>;
                                         })}
-                                    </div>
+                                    </div> */}
                                     <div className="flex justify-end gap-2">
                                         <ReusableButton
                                             variant="default"

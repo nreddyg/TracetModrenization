@@ -632,6 +632,7 @@ const Department = () => {
                 className="pl-9 "
               />
             </div>
+            
             <div className="flex gap-3 flex items-center justify-center">
               <div>
                 <TooltipProvider>
@@ -702,6 +703,7 @@ const Department = () => {
               </div>
             </div>
           </div>
+
           <div className="min-h-20 h-[63vh] overflow-y-auto p-2">
             <TreeView treeData={mainTreeData} config={treeConfig} onSelect={handleSelect} selectKeys={selectedKeys} onExpand={handleToggleNode}
               expandedKeys={Array.from(expandedKeys)} />
@@ -757,10 +759,9 @@ const Department = () => {
             </div>
           </div>
         </div> */}
-        <div className="flex-1 h-[75vh] ps-2 shadow-xl">
+        <div className="flex-1 h-[75vh] shadow-xl">
           <div className="bg-card border-b rounded-lg shadow-lg lg:px-6 py-3 flex flex-row xxs:flex-col xs2:flex-row lg:flex-row lg:items-center justify-between gap-4">
-            <div className="p-1 space-y-6 h-[71vh]">
-
+            <div className="w-full p-1 space-y-6 h-[71vh]">
               <div className="flex flex-col gap-2">
                 <div>
                   <h4 className="master-heading mb-2 flex items-center gap-2">

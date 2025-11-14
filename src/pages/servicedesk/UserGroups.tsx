@@ -42,10 +42,10 @@ const UserGroups = () => {
   const [isDelModalOpen, setIsDelModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [fields, setFields] = useState<BaseField[]>(USER_GROUP_DB);
-  const [deleteRecord,setDeleteRecord]=useState<UserGroup | null>(null);
+  const [deleteRecord, setDeleteRecord] = useState<UserGroup | null>(null);
   const dispatch = useAppDispatch();
   const companyId = useAppSelector(state => state.projects.companyId)
-  const branchName = useAppSelector(state=>state.projects.branch);
+  const branchName = useAppSelector(state => state.projects.branch);
 
   useEffect(() => {
     if (companyId && branchName) {
@@ -66,7 +66,7 @@ const UserGroups = () => {
       if (res.success && res.data) {
         if (res.data.UserGroupDetails?.length > 0) {
           setUserGroups(res.data.UserGroupDetails?.map((item) => ({ ...item, Status: item.Status ? 'Active' : 'In Active' })).reverse())
-        }else{
+        } else {
           setUserGroups([])
         }
       }
@@ -155,7 +155,7 @@ const UserGroups = () => {
     if (companyId && branchName) {
       SelectUsersLookup(companyId, branchName)
     }
-  }, [companyId,branchName])
+  }, [companyId, branchName])
 
 
 
@@ -307,6 +307,7 @@ const UserGroups = () => {
   };
 
   const handleEdit = (group: UserGroup): void => {
+    console.log(group,"311")
     setSelectedRecord(group);
     setIsEditMode(true);
     setIsFormVisible(true);
@@ -324,7 +325,7 @@ const UserGroups = () => {
     setIsEditMode(false);
     setSelectedRecord(null);
     setDeleteRecord(null);
-        reset({
+    reset({
       userGroupName: '',
       Users: [],
       description: '',
@@ -335,8 +336,8 @@ const UserGroups = () => {
   const handleAddUserGroup = (): void => {
     setIsEditMode(false);
     setSelectedRecord(null);
-    setDeleteRecord(null) ;  
-     reset();
+    setDeleteRecord(null);
+    reset();
     setIsFormVisible(true);
   };
 
@@ -387,6 +388,33 @@ const UserGroups = () => {
         <Badge className={`${getStatusColor(row.getValue('Status'))} border font-medium text-xs px-2 py-0.5`}>
           {row.getValue('Status')}
         </Badge>
+      ),
+    },
+
+    {
+      id: 'actions',
+      accessorKey: 'actions',
+      header: 'Actions',
+      cell: ({ row }: any) => (
+        <div className="flex gap-2" title='Actions'>
+          <ReusableButton
+            variant="text"
+            size="small"
+            title='Edit'
+            onClick={() => {handleEdit(row?.original)}}
+          >
+            <Edit className="h-4 w-4 text-blue-600" />
+          </ReusableButton>
+          <ReusableButton
+            variant="text"
+            size="small"
+            title='Delete'
+            danger
+            onClick={() => {handleDelete(row?.original)}}
+          >
+            <Trash2 className="h-4 w-4" />
+          </ReusableButton>
+        </div>
       ),
     },
   ];
@@ -505,7 +533,7 @@ const UserGroups = () => {
           )}
 
           {/* User Group List with ReusableTable */}
-          <Card className="border-0 shadow-sm">
+          {/* <Card className="border-0 shadow-sm">
             <CardHeader className="pb-2 pt-2">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
                 <CardTitle className="text-base font-semibold">
@@ -548,9 +576,54 @@ const UserGroups = () => {
                 storageKey="usergroups-table"
               />
             </CardContent>
-          </Card>
+          </Card> */}
         </div>
 
+        {/* User Group List with ReusableTable */}
+        <Card className="border-0 shadow-sm">
+          <CardHeader className="pb-2 pt-2">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
+              <CardTitle className="text-base font-semibold">
+                User Group List
+              </CardTitle>
+
+              <div className="w-full sm:w-64">
+                <ReusableInput
+                  placeholder="Search user groups..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  prefixIcon={<Search className="h-3 w-3 text-gray-400" />}
+                  allowClear={true}
+                  onClear={() => setSearchTerm('')}
+                  size="small"
+                  className="w-full pl-7"
+                />
+              </div>
+            </div>
+
+          </CardHeader>
+          <CardContent className="pt-0">
+            <ReusableTable
+              data={filteredData}
+              columns={columns}
+              // actions={tableActions}
+              permissions={tablePermissions}
+              title=""
+              // onRefresh={handleRefresh}
+              enableSearch={false}
+              enableSelection={false}
+              enableExport={true}
+              enableColumnVisibility={true}
+              enablePagination={true}
+              enableSorting={true}
+              enableFiltering={true}
+              pageSize={10}
+              emptyMessage="No user groups found"
+              rowHeight="normal"
+              storageKey="usergroups-table"
+            />
+          </CardContent>
+        </Card>
         {/* Delete Confirmation Modal */}
         <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>
           <DialogContent className="sm:max-w-[425px]">

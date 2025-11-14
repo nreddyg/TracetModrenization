@@ -40,9 +40,9 @@ const ProductMasters = () => {
     const [isDelModalOpen, setIsDelModalOpen] = useState(false);
     const companyId = useAppSelector(state => state.projects.companyId);
     // const [isEditMode,setIsEditMode]=useState(false);
-    const [editingRec,setEditingRec]=useState(null);
-    const [deleteRec,setDeleteRec]=useState(null);
-    const message=useMessage();
+    const [editingRec, setEditingRec] = useState(null);
+    const [deleteRec, setDeleteRec] = useState(null);
+    const message = useMessage();
     const dispatch = useDispatch();
 
     const form = useForm<GenericObject>({
@@ -61,17 +61,17 @@ const ProductMasters = () => {
         try {
             const payload = [
                 {
-                  ProductName:data?.ProductName
+                    ProductName: data?.ProductName
                 }
             ]
             const pay = { ProductMasterDetails: payload };
             let res;
 
-            if (editingRec===null) {
+            if (editingRec === null) {
                 res = await addProducts(companyId, pay)
             }
             else {
-                res=await updateProducts(editingRec?.ProductId,companyId,pay)
+                res = await updateProducts(editingRec?.ProductId, companyId, pay)
             }
             if (res?.success && res.data?.status) {
                 message.success(res.data.message);
@@ -97,16 +97,44 @@ const ProductMasters = () => {
             cell: ({ row }) => (
                 <span className="font-medium text-gray-900 text-sm">{row.getValue('ProductName')}</span>
             ),
-        }
+        },
+        {
+            id: 'actions',
+            accessorKey: 'actions',
+            header: 'Actions',
+            cell: ({ row }: any) => (
+                <div className="flex gap-2" title='Actions'>
+                    <ReusableButton
+                        variant="text"
+                        size="small"
+                        title='Edit'
+                        onClick={() => { handleEdit(row?.original) }}
+                    >
+                        <Edit className="h-4 w-4 text-blue-600" />
+                    </ReusableButton>
+                    <ReusableButton
+                        variant="text"
+                        size="small"
+                        title='Delete'
+                        danger
+                        onClick={() => { handleDelete(row?.original) }}
+                    >
+                        <Trash2 className="h-4 w-4" />
+                    </ReusableButton>
+                </div>
+            ),
+        },
     ];
 
-    const handleEdit=(record:Products)=>{
+    const handleEdit = (record: Products) => {
+        console.log(record, "rec")
         setEditingRec(record)
         // setIsEditMode(true);
         setIsMainDialogOpen(true);
     }
 
-    const handleDelete=(delRec:Products)=>{
+    const handleDelete = (delRec: Products) => {
+        console.log(delRec, "delrec")
         setDeleteRec(delRec)
         setIsDelModalOpen(true);
     }
@@ -116,7 +144,7 @@ const ProductMasters = () => {
         {
             label: 'Edit',
             icon: Edit,
-            onClick:handleEdit,
+            onClick: handleEdit,
             variant: 'default',
         },
         {
@@ -193,39 +221,39 @@ const ProductMasters = () => {
         }
     }, [companyId])
 
-    const getProductById=(id,compid)=>{
+    const getProductById = (id, compid) => {
         dispatch(setLoading(true))
-        editProducts(id,compid).then((res)=>{
-            if(res.data && res.success){
-                 const details = res.data[0];   
-        if (details) {
-          reset({
-            ProductName: details.ProductName,
-          }); 
+        editProducts(id, compid).then((res) => {
+            if (res.data && res.success) {
+                const details = res.data[0];
+                if (details) {
+                    reset({
+                        ProductName: details.ProductName,
+                    });
+                }
             }
-        }
-    }).catch(err => {
+        }).catch(err => {
         }).finally(() => {
             dispatch(setLoading(false))
         })
     }
 
-    useEffect(()=>{
-        if(editingRec!==null && companyId){
-            getProductById(editingRec?.ProductId,companyId)
+    useEffect(() => {
+        if (editingRec !== null && companyId) {
+            getProductById(editingRec?.ProductId, companyId)
         }
-    },[editingRec,companyId])
+    }, [editingRec, companyId])
 
-    const deleteMasterProducts=(id,compid)=>{
+    const deleteMasterProducts = (id, compid) => {
         dispatch(setLoading(true))
-        deleteProducts(id,compid).then((res)=>{
-            if(res.data && res.success){
-                if(res.data.status===true){
+        deleteProducts(id, compid).then((res) => {
+            if (res.data && res.success) {
+                if (res.data.status === true) {
                     setIsDelModalOpen(false);
                     message.success(res.data.message);
                     getProductMasterList(companyId)
                 }
-                else{
+                else {
                     message.warning(res.data.message);
                 }
 
@@ -270,7 +298,7 @@ const ProductMasters = () => {
                             <ReusableTable
                                 data={productList}
                                 columns={columns}
-                                actions={tableActions}
+                                // actions={tableActions}
                                 permissions={tablePermissions}
                                 title=""
                                 //    onRefresh={handleRefresh}
@@ -294,7 +322,7 @@ const ProductMasters = () => {
                 <Dialog open={isMainDialogOpen} onOpenChange={setIsMainDialogOpen}>
                     <DialogContent>
                         <DialogHeader>
-                            <DialogTitle>{editingRec===null?'Add':'Update'} New Product</DialogTitle>
+                            <DialogTitle>{editingRec === null ? 'Add' : 'Update'} New Product</DialogTitle>
                         </DialogHeader>
                         <Form {...form}>
                             <form onSubmit={form.handleSubmit(handleSubmitForm)} className="space-y-4">
@@ -313,12 +341,12 @@ const ProductMasters = () => {
                                         iconPosition="left"
                                         size="middle"
                                     >
-                                        {editingRec===null?'Save':'Update'}
+                                        {editingRec === null ? 'Save' : 'Update'}
                                     </ReusableButton>
                                     <ReusableButton
                                         htmlType="button"
                                         variant="default"
-                                        onClick={() => {setIsMainDialogOpen(false);form.reset() }}
+                                        onClick={() => { setIsMainDialogOpen(false); form.reset() }}
                                         // icon={<X className="h-3 w-3" />}
                                         iconPosition="left"
                                         size="middle"
@@ -351,7 +379,7 @@ const ProductMasters = () => {
                             <ReusableButton
                                 variant="primary"
                                 danger={true}
-                                onClick={() => {deleteMasterProducts(deleteRec?.ProductId,companyId)}}
+                                onClick={() => { deleteMasterProducts(deleteRec?.ProductId, companyId) }}
                             >
                                 Delete
                             </ReusableButton>

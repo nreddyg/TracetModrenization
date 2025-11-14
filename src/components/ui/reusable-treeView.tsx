@@ -190,7 +190,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({
     
     return (
       <Tooltip content={node.title}>
-        <span className="truncate">{titleContent}</span>
+        <span className="truncate text-sm">{titleContent}</span>
       </Tooltip>
     );
   };

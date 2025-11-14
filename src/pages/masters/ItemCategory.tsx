@@ -126,24 +126,28 @@ const ItemCategory = () => {
             accessorKey: 'actions',
             header: 'Actions',
             cell: ({ row }: any) => (
-                <div className="flex gap-2">
+                <div className="flex gap-2" title='Actions'>
                     <ReusableButton
                         variant="text"
                         size="small"
+                        title='Edit'
                         // onClick={() => { setRecordToEditId(row.original.AssetCategoryId); getAssetCategoryByID(row.original.AssetCategoryId, companyId, true) }}
                         onClick={() => { setRecordToEditId(row.original.CategoryId); handleEdit(row.original) }}
                     >
-                        Edit
+                        <Edit className="h-4 w-4 text-blue-600" />
+
                     </ReusableButton>
                     <ReusableButton
                         variant="text"
                         size="small"
+                        title='Delete'
                         danger
                         icon={<Trash2 className="h-4 w-4" />}
                         // onClick={() => { setRecordToEditId(row.original.AssetCategoryId); setMainDelRec(row.original); setIsMainDelOpen(true) }}
                         onClick={() => { setRecordToEditId(row.original.CategoryId); setMainDelRec(row.original); setIsMainDelOpen(true) }}
                     >
-                        Delete
+                        <Trash2 className="h-4 w-4" />
+
                     </ReusableButton>
                 </div>
             ),
@@ -170,24 +174,28 @@ const ItemCategory = () => {
             accessorKey: 'actions',
             header: 'Actions',
             cell: ({ row }: any) => (
-                <div className="flex gap-2">
+                <div className="flex gap-2" title='Actions'>
                     <ReusableButton
                         variant="text"
                         size="small"
+                        title='Edit'
                         // onClick={() => { setSubRecID(row.original.AssetCategoryId); setSubRecord(row.original); handleSubEdit(row.original); }}
                         onClick={() => { setSubRecID(row.original.CategoryId); setSubRecord(row.original); handleSubEdit(row.original); }}
                     >
-                        Edit
+                        <Edit className="h-4 w-4 text-blue-600" />
+
                     </ReusableButton>
                     <ReusableButton
                         variant="text"
                         size="small"
                         danger
+                        title='Delete'
                         icon={<Trash2 className="h-4 w-4" />}
                         // onClick={() => { setSubRecID(row.original.AssetCategoryId); setIsSubDelOpen(true) }}
                         onClick={() => { setSubRecID(row.original.CategoryId); setSubRecord(row.original); setIsSubDelOpen(true) }}
                     >
-                        Delete
+                        <Trash2 className="h-4 w-4" />
+
                     </ReusableButton>
                 </div>
             ),
@@ -236,7 +244,7 @@ const ItemCategory = () => {
             ...watch(),
             subname: '',
             subcode: '',
-            subunitofmeasure:'',
+            subunitofmeasure: '',
             subdescription: '',
         })
     }

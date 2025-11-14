@@ -17,6 +17,7 @@ import { UNITS_OF_MEASURE_DB } from '@/Local_DB/Form_JSON_Data/UnitsOfMeasureDB'
 import { useNavigate } from 'react-router-dom';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardContent } from '@/components/ui/card';
+import { FaAngleRight } from 'react-icons/fa';
 
 const UnitOfMeasure = () => {
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -124,17 +125,19 @@ const UnitOfMeasure = () => {
             accessorKey: 'actions',
             header: 'Actions',
             cell: ({ row }: any) => (
-                <div className="flex gap-2">
+                <div className="flex gap-2" title='Actions'>
                     <ReusableButton
                         variant="text"
                         size="small"
+                        title='Edit'
                         onClick={() => { setRecordToEditId(row.original.UOMId); fetchUOMById(companyId, row.original.UOMId) }}
                     >
-                        <Edit className="h-4 w-4" />
+                        <Edit className="h-4 w-4 text-blue-600" />
                     </ReusableButton>
                     <ReusableButton
                         variant="text"
                         size="small"
+                        title="Delete"
                         danger
                         onClick={() => { setIsDelModalOpen(true); setRecordToEditId(row.original.UOMId) }}
                     >
@@ -190,10 +193,10 @@ const UnitOfMeasure = () => {
                     msg.success(res.data.message);
                     fetchUOMGetData(companyId)
                 } else {
-                    msg.warning(res.data.message);
+                    msg.warning(res.data.ErrorDetails[0]["Error Message"]);
                 }
             } else {
-                msg.warning('Failed to delete status !!')
+                msg.warning('Failed to Add UOM')
             }
         }).catch(err => { }).finally(() => {
             dispatch(setLoading(false));
@@ -207,10 +210,11 @@ const UnitOfMeasure = () => {
                     msg.success(res.data.message);
                     fetchUOMGetData(companyId)
                 } else {
-                    msg.warning(res.data.message);
+                                        msg.warning(res.data.ErrorDetails[0]["Error Message"]);
+
                 }
             } else {
-                msg.warning('Failed to delete status !!')
+                msg.warning('Failed to update UOM !!')
             }
         }).catch(err => { }).finally(() => {
             dispatch(setLoading(false))
@@ -226,12 +230,23 @@ const UnitOfMeasure = () => {
             ]
         }
         if (recordToEditId == null && companyId) {
+            if(watch("Name")!=""){
             addNewUOMData(companyId, Payload)
             setIsAddDialogOpen(false)
+
+            }
+            else{
+                msg.warning("Name should not be empty")
+            }
         }
         else if (recordToEditId !== null && companyId) {
+            if(watch("Name")!=""){
             updateUOMData(recordToEditId, Payload)
             setIsAddDialogOpen(false)
+            }
+            else{
+                msg.warning("Name should not be empty")
+            }
         }
     }
     const handleEdit = (data) => {
@@ -242,19 +257,16 @@ const UnitOfMeasure = () => {
         <div className="h-full overflow-y-auto bg-gray-50 flex flex-col ">
             <div className="flex flex-1 overflow-hidden">
                 <div className="flex-1 flex flex-col min-w-0 ">
-                    <div className="min-h-[53px] bg-white border-b shadow-sm px-4 lg:px-6 py-3 flex flex-row xxs:flex-col xs2:flex-row lg:flex-row lg:items-center justify-between gap-4 shrink-0">
-                        <div className="flex items-center gap-4 lg:gap-6 flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
+                     <header className="px-6 py-4">
+                              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                                 <div className="flex items-center gap-2 text-sm text-gray-600">
-                                    <span>Masters</span>
-                                    <span>/</span>
-                                    <span>Consumables</span>
-                                    <span>/</span>
-                                    <span className="text-gray-900 font-medium">Units of Measure</span>
+                                  <span>Masters</span>
+                                  <FaAngleRight />
+                                  <span>Consumables</span>
+                                  <FaAngleRight />
+                                  <span className="text-gray-900 font-medium">Units of Measure</span>
                                 </div>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2">
                             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                                 <DialogTrigger asChild>
                                     <ReusableButton
@@ -271,19 +283,19 @@ const UnitOfMeasure = () => {
                                         <DialogTitle>{recordToEditId ? "Update Unit Of Measure" : "Add Unit Of Measure"}</DialogTitle>
                                     </DialogHeader>
                                     <div className='grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4'>
-                                        {getFieldsByNames(['Name', 'Branch']).map((field) => {
+                                        {getFieldsByNames(['Name', 'Description']).map((field) => {
                                             return <div className="flex items-center space-x-2">
                                                 {renderField(field)}
                                             </div>;
                                         })}
                                     </div>
-                                    <div className='w-100'>
+                                    {/* <div className='w-100'>
                                         {getFieldsByNames(['Description']).map((field) => {
                                             return <div className=" space-x-2">
                                                 {renderField(field)}
                                             </div>;
                                         })}
-                                    </div>
+                                    </div> */}
                                     <div className="flex justify-end gap-2">
                                         <ReusableButton
                                             variant="default"
@@ -311,8 +323,9 @@ const UnitOfMeasure = () => {
                                 Manage Unit Conversations
                             </ReusableButton>
                         </div>
-                    </div>
-                    <div className="flex-1 p-3 overflow-hidden min-h-0  ">
+                              </div>
+                            </header>
+                    <div className="flex-1 p-3 pt-0 overflow-hidden min-h-0  ">
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-1 h-full">
                             <div className="lg:col-span-12 flex flex-col  min-h-0 ">
                                 <ScrollArea className="flex-1">

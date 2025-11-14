@@ -125,7 +125,33 @@ const AssetRegistry = () => {
             }
         },
         // { id: 'Status', accessorKey: "Status", header: "Status" },
-        { id: 'AssignedLicenseTotalCost', accessorKey: "AssignedLicenseTotalCost", header: "Total Cost", }
+        { id: 'AssignedLicenseTotalCost', accessorKey: "AssignedLicenseTotalCost", header: "Total Cost", },
+        {
+              id: 'actions',
+              accessorKey: 'actions',
+              header: 'Actions',
+              cell: ({ row }: any) => (
+                <div className="flex gap-2" title='Actions'>
+                  <ReusableButton
+                    variant="text"
+                    size="small"
+                    title='Edit'
+                    onClick={() => {handleEdit(row?.original)}}
+                  >
+                    <Edit className="h-4 w-4 text-blue-600" />
+                  </ReusableButton>
+                  <ReusableButton
+                    variant="text"
+                    size="small"
+                    title='Delete'
+                    danger
+                    onClick={() => {handleDelete(row?.original)}}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </ReusableButton>
+                </div>
+              ),
+            },
 
     ]
     const [columns, setColumns] = useState<ColumnDef<SoftwareData>[]>(SoftwareDataColumns);
@@ -494,10 +520,12 @@ const AssetRegistry = () => {
         }
     };
     const handleDelete = (data: any): void => {
+        console.log(data,"delete")
         setIsDelModalOpen(true);
         setDeletingRecord(data)
     }
     const handleEdit = (data: any): void => {
+        console.log(data,"edit")
         dispatch(setLoading(true))
         setTimeout(() => {
 
@@ -658,19 +686,22 @@ const AssetRegistry = () => {
 
     return (
         <ScrollArea>
-            <header className="bg-white rounded border-b px-6 py-2 shadow-sm flex flex-col sm:flex-row shrink-0 justify-between gap-4">
-                    <div className="flex items-center gap-2 text-sm text-gray-600 flex-wrap">
-                        <span>Software Assets</span>
-                        <span>/</span>
-                        <span className="text-gray-900 font-medium">Asset Registry</span>
+            <div className="h-full">
+            <header className="px-6 py-4">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+                        <h1 className="text-lg sm:text-2xl font-bold text-gray-900">
+                            Asset Registry
+                        </h1>
                     </div>
                     <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
                         <ReusableButton
                             size="small"
-                            // variant="primary"
-                            className=' flex-1 sm:flex-none bg-primary h-[2.38rem] text-white p-4'
+                            // className=' flex-1 sm:flex-none bg-primary h-[2.38rem] text-white p-4'
+                                        className='btn-submit-style'
+
                             onClick={() => setIsOpenLicenseCard((prev) => !prev)}>
-                            {/* <span className="" > + Add Software Asset</span> */}
                             {isOpenLicenseCard ? (
                                 <div className='flex items-center gap-2'>
                                     <ArrowLeft className="h-4 w-4 text-current stroke-[3]" /> Grid View
@@ -680,8 +711,9 @@ const AssetRegistry = () => {
                             )}
                         </ReusableButton>
                     </div>
-                </header>
-            <div className="h-full">
+                </div>
+            </header>
+            <div>
                 {isOpenLicenseCard &&
                     <div className='p-2 rounded-lg'>
                         <div className=" bg-white rounded-lg p-4">
@@ -727,7 +759,10 @@ const AssetRegistry = () => {
                                             onClick={() => { handleSubmit(handleSave)() }}
                                             iconPosition="left"
                                             size="middle"
-                                            className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+                                            className='btn-submit-style'
+
+                                        // className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+
                                         >
                                             {editRecordId ? 'Update' : 'Save'}
                                         </ReusableButton>
@@ -737,6 +772,8 @@ const AssetRegistry = () => {
                                             onClick={() => handleReset()}
                                             iconPosition="left"
                                             size="middle"
+                                            className='btn-reset-clear-style'
+
                                         >
                                             {editRecordId ? 'Cancel' : 'Clear'}
                                         </ReusableButton>
@@ -747,13 +784,13 @@ const AssetRegistry = () => {
                         </div>
                     </div>
                 }
-                <div className=" p-3 rounded-lg">
-                    <div className=" bg-white rounded-lg p-4 border">
+                <div className=" p-4 pt-0 rounded-lg">
+                    <div className=" bg-white rounded-lg p-6 border">
                             <ReusableTable
                                 data={getAllTableData} columns={columns}
                                 // permissions={""}
                                 permissions={tablePermissions}
-                                title="Software Assets Overview"
+                                title=" "
                                 onRefresh={handleRefresh}
                                 enableSearch={true}
                                 enableSelection={false}
@@ -766,7 +803,7 @@ const AssetRegistry = () => {
                                 emptyMessage="No Data found"
                                 // rowHeight="normal"
                                 // storageKey="service-request-type-list-table"
-                                actions={tableActions}
+                                // actions={tableActions}
                                 enableColumnPinning
                             />
                     </div>
@@ -797,6 +834,7 @@ const AssetRegistry = () => {
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
+            </div>
             </div>
         </ScrollArea>
     );

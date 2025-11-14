@@ -19,6 +19,8 @@ import { BaseField, GenericObject } from '@/Local_DB/types/types';
 import { Controller, useForm } from 'react-hook-form';
 import { Form, } from '@/components/ui/form';
 import { useMessage } from '@/components/ui/reusable-message';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { FaAngleRight } from 'react-icons/fa';
 
 interface MainLocation {
     name: string;
@@ -154,7 +156,34 @@ const ServiceLocations = () => {
             cell: ({ row }) => (
                 <span className="font-medium text-gray-900 text-sm">{row.getValue('LocationName')}</span>
             ),
-        }
+        },
+
+        {
+              id: 'actions',
+              accessorKey: 'actions',
+              header: 'Actions',
+              cell: ({ row }: any) => (
+                <div className="flex gap-2" title='Actions'>
+                  <ReusableButton
+                    variant="text"
+                    size="small"
+                    title='Edit'
+                    onClick={() => {handleEdit(row?.original)}}
+                  >
+                    <Edit className="h-4 w-4 text-blue-600" />
+                  </ReusableButton>
+                  <ReusableButton
+                    variant="text"
+                    size="small"
+                    title='Delete'
+                    danger
+                    onClick={() => {handleDelete(row?.original)}}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </ReusableButton>
+                </div>
+              ),
+            },
     ]
 
     const subLocationColumns: ColumnDef<SubLocation>[] = [
@@ -164,15 +193,43 @@ const ServiceLocations = () => {
             cell: ({ row }) => (
                 <span className="font-medium text-gray-900 text-sm">{row.getValue('LocationName')}</span>
             ),
-        }
+        },
+        {
+              id: 'actions',
+              accessorKey: 'actions',
+              header: 'Actions',
+              cell: ({ row }: any) => (
+                <div className="flex gap-2" title='Actions'>
+                  <ReusableButton
+                    variant="text"
+                    size="small"
+                    title='Edit'
+                    onClick={() => {handleEdit(row?.original)}}
+                  >
+                    <Edit className="h-4 w-4 text-blue-600" />
+                  </ReusableButton>
+                  <ReusableButton
+                    variant="text"
+                    size="small"
+                    title='Delete'
+                    danger
+                    onClick={() => {handleDelete(row?.original)}}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </ReusableButton>
+                </div>
+              ),
+            },
     ];
 
     const handleEdit = (record: MainLocation) => {
+        console.log(record,"224")
         setIsMainDialogOpen(true);
         setEditRecord(record)
     }
 
     const handleDelete = (main: MainLocation): void => {
+        console.log(main,"224")
         setDeleteRecord(main);
         setIsDelModalOpen(true);
     };
@@ -358,23 +415,26 @@ const ServiceLocations = () => {
 
 
     return (
-        <div className="h-full overflow-y-auto bg-gray-50/30">
-            <header className="bg-card flex justify-between border-b px-6 py-4 shadow-sm">
-                <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <span>Masters</span>
-                        <span>/</span>
-                        <span>Service Maintenance</span>
-                        <span>/</span>
-                        <span className="text-foreground font-medium">Service Locations</span>
-                    </div>
-                </div>
-            </header>
-            <div className="p-4 space-y-4">
-                <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Service Maintenance Locations</h1>
-                </div>
-                <Card className="border-0 shadow-sm mt-2">
+        <ScrollArea>
+        <div className="h-full">
+           <header className="px-6 py-4">
+                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+                         <h1 className="text-lg sm:text-2xl font-bold text-gray-900">
+                            Service Locations
+                         </h1>
+                       </div>
+                       <div className="flex items-center gap-2 text-sm text-gray-600">
+                         <span>Masters</span>
+                         <FaAngleRight />
+                         <span>Service Maintenance</span>
+                         <FaAngleRight />
+                         <span className="text-gray-900 font-medium">Service Locations</span>
+                       </div>
+                     </div>
+                   </header>
+            <div className="p-4 pt-0">
+                <Card className="border-0 shadow-sm ">
                     <CardContent className="pb-2 pt-2">
                         <div className='mt-2 p-2'>
                             <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -395,7 +455,7 @@ const ServiceLocations = () => {
                                     <ReusableTable
                                         data={mainLocations}
                                         columns={mainLocationColumns}
-                                        actions={tableActions}
+                                        // actions={tableActions}
                                         permissions={tablePermissions}
                                         title=""
                                         //    onRefresh={handleRefresh}
@@ -426,7 +486,7 @@ const ServiceLocations = () => {
                                     <ReusableTable
                                         data={filteredSub}
                                         columns={subLocationColumns}
-                                        actions={tableActions}
+                                        // actions={tableActions}
                                         permissions={tablePermissions}
                                         title=""
                                         //    onRefresh={handleRefresh}
@@ -546,6 +606,7 @@ const ServiceLocations = () => {
                 </Dialog>
             </div>
         </div>
+        </ScrollArea>
     );
 };
 export default ServiceLocations;

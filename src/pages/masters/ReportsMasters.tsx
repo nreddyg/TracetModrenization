@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Eye, RefreshCw, Save, Search, Settings2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -29,6 +28,8 @@ import { getServiceLocationData } from '@/services/serviceLocationServices';
 import { getAssetCategoryReport, getAssetLocationReport, getColumns, getCompanyHierarchyReport, getCostCenterReport, getCustomerLocations, getCustomerLocationsReport, getCustomerReport, getDepartmentReport, getServiceLocationsReport, getUserLogReport, getUserReport, getVendorReport, postColumns } from '@/services/masterReportsServices';
 import { useMessage } from '@/components/ui/reusable-message';
 import { ColumnDef, FilterFn, VisibilityState } from '@tanstack/react-table';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { FaAngleRight } from 'react-icons/fa';
 interface MultiSelectConfig {
   isHierarchy?: boolean;
   labelClassName?: string;
@@ -596,21 +597,23 @@ const ReportsMasters = () => {
     }
   };
   return (
-    <div className="h-full overflow-y-auto bg-gray-50">
-      <header className="bg-white border-b px-6 py-2 shadow-sm flex flex-col sm:flex-row shrink-0 justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <div>
-            <h1 className="text-xl font-semibold text-gray-900">Master Reports</h1>
-            <p className="text-sm text-gray-600">Generate comprehensive reports with advanced filtering and customization options</p>
+    <ScrollArea>
+    <div>
+      <header className="px-6 py-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+            <h1 className="text-lg sm:text-2xl font-bold text-gray-900">
+              Master Reports
+            </h1>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <span>Masters</span>
+            <FaAngleRight />
+            <span className="text-gray-900 font-medium">Reports</span>
           </div>
         </div>
-        <div className="flex items-center gap-2 text-sm text-gray-600 flex-wrap">
-                <span>Masters</span>
-                <span>/</span>
-                <span className="text-gray-900 font-medium">Master Reports</span>
-              </div>
       </header>
-      <div className="px-3 pb-3 pt-3 space-y-3 ">
+      <div className="px-3 pb-3 pt-0 space-y-3 ">
         <div className="grid grid-cols-1 xl:grid-cols-4 gap-3 ">
           <div className="xl:col-span-1">
             <Card className="sticky top-6">
@@ -624,7 +627,8 @@ const ReportsMasters = () => {
                   <Input placeholder="Search reports..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10"/>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-1 max-h-80 overflow-y-auto">
+              <ScrollArea>
+              <CardContent className="space-y-1 max-h-80">
                 {filteredReportTabs.map((tab) => (
                   <button key={tab} onClick={() => { setActiveTab(tab); form.reset() }}
                     className={cn(
@@ -639,6 +643,7 @@ const ReportsMasters = () => {
                   </button>
                 ))}
               </CardContent>
+              </ScrollArea>
             </Card>
           </div>
           <div className="xl:col-span-3 space-y-6">
@@ -727,6 +732,7 @@ const ReportsMasters = () => {
         </div>
       </div>
     </div>
+    </ScrollArea>
   );
 };
 export default ReportsMasters;

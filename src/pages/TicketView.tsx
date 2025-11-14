@@ -1402,7 +1402,7 @@ const TicketView = () => {
     } catch (err) {
       console.error("Error while updating service request:", err);
     } finally {
-        // dispatch(setLoading(false))
+      // dispatch(setLoading(false))
       // Add any cleanup logic here if needed
     }
   };
@@ -1474,7 +1474,7 @@ const TicketView = () => {
         const errMsg =
           res.data.ErrorDetails?.[0]?.["Error Message"] || res.data.message;
         msg.warning(errMsg);
-         dispatch(setLoading(false));
+        dispatch(setLoading(false));
       }
     } catch (err: any) {
       msg.error(err.message || "Failed to update service request.");
@@ -1518,7 +1518,7 @@ const TicketView = () => {
     setUpdatedComments("")
     setHasChanges(false);
     setIsEditing(false);
-    fieldsCopy.forEach(element => {element.disabled=true});
+    fieldsCopy.forEach(element => { element.disabled = true });
     setFields(fieldsCopy)
   }
   // Handle cancel edit - only clear form values, preserve all field configs and options
@@ -1639,6 +1639,7 @@ const TicketView = () => {
       setAccordionOpen(undefined);
     }
   };
+  console.log("selected", selectedTicket)
   return (
     <div className="h-full overflow-y-auto  bg-gray-50 flex flex-col ">
       <div className="flex flex-1 overflow-hidden   ">
@@ -1729,7 +1730,9 @@ const TicketView = () => {
                 </div>
                 <span className="text-gray-600 text-sm">All Tickets</span>
                 <span className="text-gray-400">|</span>
-                {!isCreateMode && <h6 className="text-blue-600 font-medium truncate block max-w-xs" title={selectedTicket?.Title}>{originalTicket.ServiceRequestNo} {selectedTicket?.Title || ''}</h6>}
+                {!isCreateMode && <h6 className="text-blue-600 font-medium truncate block max-w-xs" title={selectedTicket?.Title}>{originalTicket.ServiceRequestNo} {selectedTicket?.Title && (<span title={selectedTicket.Title}>{selectedTicket.Title.length > 18 ? selectedTicket.Title.slice(0, 17) + "...": selectedTicket.Title}
+                  </span>
+                )}</h6>}
                 <Badge className={getPriorityColor(watch('Severity'))} title='Severity'>{watch('Severity')}</Badge>
                 {!isCreateMode && <Badge className={getStatusColor(selectedTicket?.Status)} title='Status'>{selectedTicket?.Status || ''}</Badge>}
               </div>

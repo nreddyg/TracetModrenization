@@ -1,6 +1,6 @@
 
 
-import {  useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Trash2, Plus, Edit, ChevronRight, ChevronLeft, Search, ArrowLeft, X, Save } from 'lucide-react';
 import { ReusableButton } from '@/components/ui/reusable-button';
@@ -23,6 +23,7 @@ import { deleteVendorByCompanyId, GetCountryList, getEditVendorListByCompanyId, 
 import { VENDOR_DETAILS } from '@/Local_DB/Form_JSON_Data/VendorDB';
 import { useMessage } from '@/components/ui/reusable-message';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, } from '@/components/ui/dialog';
+import { FaAngleRight } from 'react-icons/fa';
 interface VendorData {
   "VendorID": number | string,
   "VendorName": string,
@@ -52,8 +53,8 @@ const Vendor = () => {
   const [selectedVendorData, setSelectedVendorData] = useState<VendorData | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isInboxCollapsed, setIsInboxCollapsed] = useState(false);
-  const [isDelModalOpen,setIsDelModalOpen]=useState(false)
-  const [deletingVendorData,setDeletingVendorData]=useState(null)
+  const [isDelModalOpen, setIsDelModalOpen] = useState(false)
+  const [deletingVendorData, setDeletingVendorData] = useState(null)
   let msg = useMessage()
   const filteredOrgs = dataSource.filter(vend => {
     const matchesSearch = vend.VendorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -74,8 +75,8 @@ const Vendor = () => {
     fetchCountryList()
   }, [companyId]);
 
-  const handleSelect = (e,data: VendorData) => {
-    
+  const handleSelect = (e, data: VendorData) => {
+
     setSelectedVendorData(data);
     getVendorDataAPI(data.VendorID)
 
@@ -264,17 +265,17 @@ const Vendor = () => {
     });
     setFields(updatedFields);
   }
-  const handleDelete = (e,vend) => {
-     e.stopPropagation();
-     setDeletingVendorData(vend)
-   
-   setIsDelModalOpen(true)
+  const handleDelete = (e, vend) => {
+    e.stopPropagation();
+    setDeletingVendorData(vend)
+
+    setIsDelModalOpen(true)
 
   }
   const handleReset = () => {
     //       setSelectedVendorData(null);
     // setDataSource([{ OrganizationLogo: "", OrganizationLogoName: "", OrganizationLogoType: "", OrganizationLogoConversionType: "" }]);
-    form.reset({ "VendorName": "", "VendorType": "", "VendorCode": "", "PhoneNo": "", "Address": "", "City": "", "State": "",  "Country": "",  "ZipCode": "", "EmailId": "", "PAN": "",  "GSTIN": "", "Description": "", "ContactPerson": ""});
+    form.reset({ "VendorName": "", "VendorType": "", "VendorCode": "", "PhoneNo": "", "Address": "", "City": "", "State": "", "Country": "", "ZipCode": "", "EmailId": "", "PAN": "", "GSTIN": "", "Description": "", "ContactPerson": "" });
     setSelectedVendorData(null)
     setDeletingVendorData(null)
   };
@@ -301,12 +302,12 @@ const Vendor = () => {
         }
       ],
     };
-    if(selectedVendorData){
-UpdateVendorAPI(payload,selectedVendorData?.VendorID)
-    }else{
-     AddVendorAPI(payload)
+    if (selectedVendorData) {
+      UpdateVendorAPI(payload, selectedVendorData?.VendorID)
+    } else {
+      AddVendorAPI(payload)
     }
-    
+
   }
   //API Calls
   //fetch all vendors list
@@ -318,7 +319,7 @@ UpdateVendorAPI(payload,selectedVendorData?.VendorID)
       } else {
         setDataSource([]);
       }
-    }).catch(err => {}).finally(() => {
+    }).catch(err => { }).finally(() => {
       dispatch(setLoading(false));
     });
   }
@@ -335,7 +336,7 @@ UpdateVendorAPI(payload,selectedVendorData?.VendorID)
       } else {
         msg.warning("No Country Data Found !!");
       }
-    }).catch(err => {}).finally(() => {
+    }).catch(err => { }).finally(() => {
       dispatch(setLoading(false));
     });
   }
@@ -358,9 +359,9 @@ UpdateVendorAPI(payload,selectedVendorData?.VendorID)
   }
   //update Vendor
   //Add Vendor
-  const UpdateVendorAPI = async (payload,VendorId) => {
+  const UpdateVendorAPI = async (payload, VendorId) => {
     dispatch(setLoading(true))
-    await updateVendor(companyId, VendorId,payload).then(res => {
+    await updateVendor(companyId, VendorId, payload).then(res => {
       if (res.success) {
         if (res.data.status) {
           msg.success(res.data.message || "Vendor Updated Successfully !!");
@@ -385,12 +386,12 @@ UpdateVendorAPI(payload,selectedVendorData?.VendorID)
       } else {
         msg.warning("No Vendor Data Found !!");
       }
-    }).catch(err =>{}).finally(() => {
+    }).catch(err => { }).finally(() => {
       dispatch(setLoading(false));
     });
   }
-  const deleteVendorAPI= async (id) =>{
-      dispatch(setLoading(true))
+  const deleteVendorAPI = async (id) => {
+    dispatch(setLoading(true))
     await deleteVendorByCompanyId(companyId, id).then(res => {
       if (res.success) {
         if (res.data && res.data[0].status) {
@@ -410,15 +411,15 @@ UpdateVendorAPI(payload,selectedVendorData?.VendorID)
       <div className="flex flex-1 overflow-hidden   ">
         {/* Left Sidebar - Ticket Inbox */}
         {/* <div className={`${isInboxCollapsed ? 'w-6 p-1' : 'w-34 p-2 mb-2 rounded-b-[5px]'} bg-white border-r    border-0 shadow-lg flex pb-3 flex-col transition-all duration-300 shrink-0 hidden lg:flex`}> */}
-            <div
-  className={`
+        <div
+          className={`
     ${isInboxCollapsed ? 'w-6 p-1' : 'w-64 p-2 mb-2 rounded-b-[5px]'}
    bg-white border border-gray-200 border-t-0 border-t-transparent shadow-xl flex flex-col pb-3 transition-all duration-300 shrink-0
     md:relative
     ${isInboxCollapsed ? 'relative' : 'fixed md:relative'}
     ${isInboxCollapsed ? '' : 'top-15 left-0 h-full z-50 md:top-auto md:left-auto md:h-auto'}
   `}
->
+        >
           <div className="pt-1 shrink-0">
             <div className="flex items-center justify-between mb-2">
               <h3 className={`font-semibold text-gray-900 ${isInboxCollapsed ? 'hidden' : ''}`}>
@@ -455,7 +456,7 @@ UpdateVendorAPI(payload,selectedVendorData?.VendorID)
                       ? 'bg-blue-50 border-l-4 border-blue-500'
                       : 'border border-gray-200'
                       }`}
-                    onClick={(e) => handleSelect(e,vend)}
+                    onClick={(e) => handleSelect(e, vend)}
                   >
                     <div className="flex items-center justify-between mb-1.5">
                       <span className="text-xs font-medium text-blue-600 me-2 ms-1">{vend?.VendorName}</span>
@@ -495,7 +496,7 @@ UpdateVendorAPI(payload,selectedVendorData?.VendorID)
                           title={vend.VendorName}
                           className="block max-w-[90px] truncate text-[11px] text-gray-500"
                         >
-                          <Trash2 onClick={(e) => handleDelete(e,vend)} height={18} className='text-red-400'></Trash2>
+                          <Trash2 onClick={(e) => handleDelete(e, vend)} height={18} className='text-red-400'></Trash2>
                         </span>
                       </div>
 
@@ -511,14 +512,14 @@ UpdateVendorAPI(payload,selectedVendorData?.VendorID)
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col min-w-0 ">
           {/* Navigation and Action Bar */}
-          <div className="bg-white border-b shadow-sm px-4 lg:px-6 py-3 flex flex-row xxs:flex-col xs2:flex-row lg:flex-row lg:items-center justify-between gap-4 shrink-0">
+          <div className="px-4 lg:px-6 py-4 flex flex-row xxs:flex-col xs2:flex-row lg:flex-row lg:items-center justify-between gap-4 shrink-0">
             <div className="flex items-center gap-4 lg:gap-6 flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <div className="flex items-center gap-2 text-sm text-gray-600">
                   <span>Masters</span>
-                  <span>/</span>
+                  <FaAngleRight />
                   <span>Company</span>
-                  <span>/</span>
+                  <FaAngleRight />
                   <span className="text-gray-900 font-medium">Vendor</span>
                 </div>
               </div>
@@ -529,6 +530,8 @@ UpdateVendorAPI(payload,selectedVendorData?.VendorID)
                 size="small"
                 onClick={() => { handleReset() }}
                 icon={<X className="h-4 w-4" />}
+                className='btn-reset-clear-style'
+
               >
                 {selectedVendorData ? "Cancel" : "Clear"}
               </ReusableButton>
@@ -537,6 +540,8 @@ UpdateVendorAPI(payload,selectedVendorData?.VendorID)
                 variant="primary"
                 onClick={() => { handleSubmit(handleSave)() }}
                 icon={<Save className="h-4 w-4" />}
+                className='btn-submit-style'
+
               >
                 {selectedVendorData ? "Update" : "Save"}
               </ReusableButton>
@@ -544,7 +549,7 @@ UpdateVendorAPI(payload,selectedVendorData?.VendorID)
           </div>
 
           {/* Content Grid with Individual Scroll Areas */}
-          <div className="flex-1 p-3 overflow-hidden min-h-0  ">
+          <div className="flex-1 p-3 pt-0 overflow-hidden min-h-0  ">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-1 h-full">
               {/* Left Column - Main Content */}
               <div className="lg:col-span-12 flex flex-col  min-h-0 ">
@@ -579,32 +584,32 @@ UpdateVendorAPI(payload,selectedVendorData?.VendorID)
           </div>
         </div>
       </div>
-          <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>
-                      <DialogContent className="sm:max-w-[450px]">
-                          <DialogHeader>
-                              <DialogTitle>Confirm the action</DialogTitle>
-                              <DialogDescription>
-                                  Are you sure you want to delete vendor {deletingVendorData?.VendorName}?
-      
-                              </DialogDescription>
-                          </DialogHeader>
-                          <DialogFooter>
-                              <ReusableButton
-                                  variant="default"
-                                  onClick={() => setIsDelModalOpen(false)}
-                              >
-                                  Cancel
-                              </ReusableButton>
-                              <ReusableButton
-                                  variant="primary"
-                                  danger={true}
-                                  onClick={() => { deleteVendorAPI(deletingVendorData.VendorID); setIsDelModalOpen(false) }}
-                              >
-                                  Delete
-                              </ReusableButton>
-                          </DialogFooter>
-                      </DialogContent>
-                  </Dialog>
+      <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>
+        <DialogContent className="sm:max-w-[450px]">
+          <DialogHeader>
+            <DialogTitle>Confirm the action</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete vendor {deletingVendorData?.VendorName}?
+
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <ReusableButton
+              variant="default"
+              onClick={() => setIsDelModalOpen(false)}
+            >
+              Cancel
+            </ReusableButton>
+            <ReusableButton
+              variant="primary"
+              danger={true}
+              onClick={() => { deleteVendorAPI(deletingVendorData.VendorID); setIsDelModalOpen(false) }}
+            >
+              Delete
+            </ReusableButton>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

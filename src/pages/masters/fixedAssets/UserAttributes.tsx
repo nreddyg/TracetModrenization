@@ -20,6 +20,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { getUserAttributes } from '@/services/assetCategoryServices';
 import ReusableSingleCheckbox from '@/components/ui/reusable-single-checkbox';
 import { addNewUserAttribute, deleteUserAttribute, getEditUserAttributeData, updateUserAttribute } from '@/services/userAttributesServices';
+import { FaAngleRight } from 'react-icons/fa';
 interface CostBreakupData {
     GroupId: number,
     GroupName: string
@@ -347,18 +348,20 @@ setRec(null)
             accessorKey: 'actions',
             header: 'Actions',
             cell: ({ row }: any) => (
-                <div className="flex gap-2">
+                <div className="flex gap-2" title='Actions'>
                     <ReusableButton
                         variant="text"
                         size="small"
+                        title='Edit'
                         onClick={() => { handleEdit(row.original); setRec(row.original) }}
                     >
-                        <Edit className="h-4 w-4" />
+                        <Edit className="h-4 w-4 text-blue-600" />
                     </ReusableButton>
                     <ReusableButton
                         variant="text"
                         size="small"
                         danger
+                        title='Delete'
                         icon={<Trash2 className="h-4 w-4" />}
                         onClick={() => { setIsDelModalOpen(true);setTableDelete(true) ;setRec(row.original)}}
                     >
@@ -701,14 +704,14 @@ setRec(null)
                 {/* Main Content Area */}
                 <div className="flex-1 flex flex-col min-w-0 ">
                     {/* Navigation and Action Bar */}
-                    <div className="bg-white border-b shadow-sm px-4 lg:px-6 py-3 flex flex-row xxs:flex-col xs2:flex-row lg:flex-row lg:items-center justify-between gap-4 shrink-0">
+                    <div className="px-4 lg:px-6 py-3 flex flex-row xxs:flex-col xs2:flex-row lg:flex-row lg:items-center justify-between gap-4 shrink-0">
                         <div className="flex items-center gap-4 lg:gap-6 flex-1 min-w-0">
                             <div className="flex items-center gap-2">
                                 <div className="flex items-center gap-2 text-sm text-gray-600">
                                     <span>Masters</span>
-                                    <span>/</span>
+                                    <FaAngleRight />
                                     <span>Fixed Assets</span>
-                                    <span>/</span>
+                                    <FaAngleRight />
                                     <span className="text-gray-900 font-medium">User Attributes</span>
                                 </div>
                             </div>
@@ -735,7 +738,7 @@ setRec(null)
 
                     {/* Content Grid with Individual Scroll Areas */}
 
-                    <div className="flex-1 p-3 overflow-hidden min-h-0  ">
+                    <div className="flex-1 p-3 pt-0 overflow-hidden min-h-0  ">
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-1 h-full">
                             {/* Left Column - Main Content */}
                             <div className="lg:col-span-12 flex flex-col  min-h-0 ">

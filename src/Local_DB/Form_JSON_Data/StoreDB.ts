@@ -4,6 +4,9 @@ export const STORE_DB:BaseField[]=[
         name:'StoreName',
         fieldType:'text',
         label:'Store Name',
+        placeholder: 'Enter Store Name',
+        isRequired:true
+
         // defaultChecked:false,
     },
     //  {
@@ -18,7 +21,7 @@ export const STORE_DB:BaseField[]=[
     {
         name: 'StoreDescription',
         label: ' Store Description',
-        fieldType: 'textarea',
+        fieldType: 'text',
         placeholder: 'Enter Store Description',
         isRequired: false,
     },

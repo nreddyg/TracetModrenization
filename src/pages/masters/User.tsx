@@ -19,6 +19,7 @@ import { createUser, deleteUser, getCategoryList, getDepartmentList, getRoleName
 import { USER_DETAILS } from '@/Local_DB/Form_JSON_Data/UserDB';
 import { GetBranchListBasedonCompanyId } from '@/services/headerServices';
 import ReusableSingleCheckbox from '@/components/ui/reusable-single-checkbox';
+import { FaAngleRight } from 'react-icons/fa';
 
 interface User {
   UserId: number,
@@ -60,14 +61,14 @@ const User = () => {
     }, {} as GenericObject),
     mode: 'onChange'
   });
-  const { control, register, handleSubmit, trigger, watch, setValue,getValues, reset, formState: { errors } } = form;
+  const { control, register, handleSubmit, trigger, watch, setValue, getValues, reset, formState: { errors } } = form;
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [selectedUserData, setSelectedUserData] = useState<User | null>(null);
-  const [deletingUserData,setSelectedDeletingUserData]=useState<User | null>(null);
+  const [deletingUserData, setSelectedDeletingUserData] = useState<User | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isInboxCollapsed, setIsInboxCollapsed] = useState(false);
   const [isDelModalOpen, setIsDelModalOpen] = useState(false);
-  const [branchAndCategoriesList,setBranchAndCategoriesList]=useState({Branch:[],Categories:[]})
+  const [branchAndCategoriesList, setBranchAndCategoriesList] = useState({ Branch: [], Categories: [] })
   const filteredUsers = dataSource.filter(user => {
     const matchesSearch = user.FirstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.LastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -95,33 +96,33 @@ const User = () => {
         getCategoryList(companyId)
       ]);
       let allResponses = {
-        RoleName: { data: roleNames.status === 'fulfilled' && roleNames.value.success && roleNames.value.data && roleNames.value.data.Roles ? LoggedInUser?.RoleName==='Root Admin'? roleNames.value.data.Roles :roleNames.value.data.Roles.filter(ele=>ele.RoleName!=='Root Admin')  : [], label: 'RoleName', value: 'RoleName' },
+        RoleName: { data: roleNames.status === 'fulfilled' && roleNames.value.success && roleNames.value.data && roleNames.value.data.Roles ? LoggedInUser?.RoleName === 'Root Admin' ? roleNames.value.data.Roles : roleNames.value.data.Roles.filter(ele => ele.RoleName !== 'Root Admin') : [], label: 'RoleName', value: 'RoleName' },
         Branch: { data: branches.status === 'fulfilled' && branches.value.success && branches.value.data && branches.value.data ? branches.value.data.slice(1) : [], label: 'Name', value: 'Name' },
         Department: { data: departments.status === 'fulfilled' && departments.value.success && departments.value.data && departments.value.data.DepartmentsLookup ? departments.value.data.DepartmentsLookup : [], label: 'DepartmentName', value: 'DepartmentName' },
         Categories: { data: categories.status === 'fulfilled' && categories.value.success && categories.value.data && categories.value.data.CategoriesLookup ? categories.value.data.CategoriesLookup : [], label: 'CategoryName', value: 'CategoryName' },
       };
-      setBranchAndCategoriesList({Branch:allResponses.Branch.data,Categories:allResponses.Categories.data});
+      setBranchAndCategoriesList({ Branch: allResponses.Branch.data, Categories: allResponses.Categories.data });
       setLookupsDataInJson(allResponses);
-    } catch {} finally {
+    } catch { } finally {
       dispatch(setLoading(false));
     }
   }
-  useEffect(()=>{
+  useEffect(() => {
     if (LoggedInUser?.RoleName !== 'Root Admin' && selectedUserData) {
       let field = fields.find(obj => obj.name === 'Branch');
-      let field1=fields.find(obj=>obj.name==='Categories');
-      let branchData=branchAndCategoriesList.Branch.map(ele=>ele['Name']);
-      let catData=branchAndCategoriesList.Categories.map(ele=>ele['CategoryName'])
+      let field1 = fields.find(obj => obj.name === 'Categories');
+      let branchData = branchAndCategoriesList.Branch.map(ele => ele['Name']);
+      let catData = branchAndCategoriesList.Categories.map(ele => ele['CategoryName'])
       field.options = selectedUserData.Branch
         ? [...new Set([...branchData, ...selectedUserData.Branch.split(',')])]
           .map(ele => ({ label: ele, value: ele }))
-        : branchData.map(ele=>({ label: ele, value: ele }));
+        : branchData.map(ele => ({ label: ele, value: ele }));
       field1.options = selectedUserData.Categories
         ? [...new Set([...catData, ...selectedUserData.Categories.split(',')])]
           .map(ele => ({ label: ele, value: ele }))
         : catData.map(ele => ({ label: ele, value: ele }));
     }
-  },[selectedUserData,LoggedInUser])
+  }, [selectedUserData, LoggedInUser])
   //fetch all users list
   const fetchAllUsersList = async (UserId?: number) => {
     try {
@@ -211,7 +212,7 @@ const User = () => {
                 DeactiveDate: deactiveDateVal || "",
                 Department: "",
                 Branch: "",
-                Categories:""
+                Categories: ""
               }
               : {}),
           },
@@ -313,22 +314,22 @@ const User = () => {
       dispatch(setLoading(false));
     }
   };
-  const handleDelete=(e,data)=>{
+  const handleDelete = (e, data) => {
     e.stopPropagation();
     setIsDelModalOpen(true);
     setSelectedDeletingUserData(data)
   }
-  const handleDeleteCancel=()=>{
+  const handleDeleteCancel = () => {
     setIsDelModalOpen(false);
     setSelectedDeletingUserData(null);
   }
   const handleReset = () => {
-    if(selectedUserData){
-      let field=fields.find(f=>f.name==='Branch');
-      let field1=fields.find(f=>f.name==='Categories');
-      if(field && field1){
-        field.options=branchAndCategoriesList.Branch.map(ele=>({label:ele['Name'],value:ele['Name']}))
-        field1.options=branchAndCategoriesList.Categories.map(ele=>({label:ele['CategoryName'],value:ele['CategoryName']}))
+    if (selectedUserData) {
+      let field = fields.find(f => f.name === 'Branch');
+      let field1 = fields.find(f => f.name === 'Categories');
+      if (field && field1) {
+        field.options = branchAndCategoriesList.Branch.map(ele => ({ label: ele['Name'], value: ele['Name'] }))
+        field1.options = branchAndCategoriesList.Categories.map(ele => ({ label: ele['CategoryName'], value: ele['CategoryName'] }))
       }
     }
     setSelectedUser(null);
@@ -346,8 +347,8 @@ const User = () => {
   };
   const password = watch("Password");
   useEffect(() => {
-    if(password) trigger("ConfirmPassword");
-  }, [password]); 
+    if (password) trigger("ConfirmPassword");
+  }, [password]);
   const renderField = (field: BaseField) => {
     const { name, label, fieldType, isRequired, dependsOn, show = true } = field;
     const roleName = watch("RoleName");
@@ -568,7 +569,7 @@ const User = () => {
                               title={user.MobileNumber}
                               className="block max-w-[90px] truncate text-[11px] text-gray-500"
                             >
-                              <Trash2 height={18} className='text-red-400' onClick={(e) => handleDelete(e,user)}></Trash2>
+                              <Trash2 height={18} className='text-red-400' onClick={(e) => handleDelete(e, user)}></Trash2>
                             </span>
                           </div>
                         }
@@ -582,14 +583,14 @@ const User = () => {
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col min-w-0 ">
           {/* Navigation and Action Bar */}
-          <div className="bg-white border-b shadow-sm px-4 lg:px-6 py-3 flex flex-row xxs:flex-col xs2:flex-row lg:flex-row lg:items-center justify-between gap-4 shrink-0">
+          <div className="px-4 lg:px-6 py-4 flex flex-row xxs:flex-col xs2:flex-row lg:flex-row lg:items-center justify-between gap-4 shrink-0">
             <div className="flex items-center gap-4 lg:gap-6 flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <div className="flex items-center gap-2 text-sm text-gray-600">
                   <span>Masters</span>
-                  <span>/</span>
+                  <FaAngleRight />
                   <span>Company</span>
-                  <span>/</span>
+                  <FaAngleRight />
                   <span className="text-gray-900 font-medium">User</span>
                 </div>
               </div>
@@ -600,6 +601,8 @@ const User = () => {
                 size="small"
                 onClick={handleReset}
                 icon={<X className="h-4 w-4" />}
+                className='btn-reset-clear-style'
+
               >
                 {selectedUserData ? "Cancel" : "Reset"}
               </ReusableButton>
@@ -608,6 +611,8 @@ const User = () => {
                 variant="primary"
                 onClick={(data) => handleSubmit(handleSave)(data)}
                 icon={<Save className="h-4 w-4" />}
+                className='btn-submit-style'
+
               >
                 {selectedUserData ? "Update" : "Save"}
               </ReusableButton>
@@ -615,7 +620,7 @@ const User = () => {
           </div>
 
           {/* Content Grid with Individual Scroll Areas */}
-          <div className="flex-1 p-3 overflow-hidden min-h-0  ">
+          <div className="flex-1 p-3 pt-0 overflow-hidden min-h-0  ">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-1 h-full">
               {/* Left Column - Main Content */}
               <div className="lg:col-span-12 flex flex-col  min-h-0 ">

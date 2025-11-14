@@ -31,6 +31,7 @@ import { getSRBranchList } from '@/services/ticketServices';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { FaAngleRight } from 'react-icons/fa';
 interface OptType {
   data: { [key: string]: any }[];
   label: string;
@@ -97,10 +98,75 @@ const Configuration = () => {
     { id: 'Description', accessorKey: "Description", header: "Description" },
     { id: 'Branches', accessorKey: "Branches", header: "Branches" },
     { id: 'ServiceRequestTypeAdmin', accessorKey: "ServiceRequestTypeAdmin", header: "Service Request Type Admin", },
+    {
+      id: 'actions',
+      accessorKey: 'actions',
+      header: 'Actions',
+      cell: ({ row }: any) => (
+        <div className="flex gap-2" title='Actions'>
+          <ReusableButton
+            variant="text"
+            size="small"
+            title='Edit'
+            onClick={() => { handleEdit(row?.original) }}
+          >
+            <Edit className="h-4 w-4 text-blue-600" />
+          </ReusableButton>
+          <ReusableButton
+            variant="text"
+            size="small"
+            title='Delete'
+            danger
+            onClick={() => { handleDelete(row?.original) }}
+          >
+            <Trash2 className="h-4 w-4" />
+          </ReusableButton>
+        </div>
+      ),
+    },
   ]);
   const [statusColumns, setStatusColumns] = useState<ColumnDef<Status>[]>([
     { id: 'StatusType', accessorKey: "StatusType", header: "Status Type" },
     { id: 'Index', accessorKey: "Index", header: "Index" },
+    {
+      id: 'actions',
+      accessorKey: 'actions',
+      header: 'Actions',
+      cell: ({ row }: any) => {
+        if (row?.original.StatusType === 'Open' || row?.original.StatusType === 'Closed') {
+          return (
+            <span></span>
+          )
+
+        }
+        else {
+          return (
+            <div className="flex gap-2" title='Actions'>
+              <ReusableButton
+                variant="text"
+                size="small"
+                title='Edit'
+                onClick={() => { handleEditStatus(row?.original) }}
+              >
+                <Edit className="h-4 w-4 text-blue-600" />
+              </ReusableButton>
+              <ReusableButton
+                variant="text"
+                size="small"
+                title='Delete'
+                danger
+                onClick={() => { handleDeleteStatus(row?.original) }}
+              >
+                <Trash2 className="h-4 w-4" />
+              </ReusableButton>
+            </div>
+          )
+        }
+
+      }
+      ,
+    },
+
   ])
   const [statusTableData, setStatusTableData] = useState<Status[]>([]);
   const [serviceRequestTypeData, setServiceRequestTypeData] = useState<serviceRequestType[]>([]);
@@ -673,26 +739,21 @@ const Configuration = () => {
   return (
     <ScrollArea>
       <div className="h-full">
-        {/* <header className="bg-white border-b px-6 py-3 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-          <div className="flex items-center gap-3">
-            <Button 
-            size="sm" 
-            className="btn-submit-style" 
-            onClick={()=>navigate('/service-desk/create-ticket')}>
-              <span className="hidden sm:inline">New Service Request</span>
-              <span className="sm:hidden">New Request</span>
-            </Button>
-          </div>
-          <div className="flex items-center gap-2 text-sm text-gray-600">
+        <div className="p-4 space-y-4">
+          <header className="px-2 py-0">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+                <h1 className="text-lg sm:text-2xl font-bold text-gray-900">
+                  Service Desk Configuration
+                </h1>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-gray-600">
                 <span>Service Desk</span>
-                <span>/</span>
+                <FaAngleRight />
                 <span className="text-gray-900 font-medium">Configuration</span>
               </div>
-        </header> */}
-        <div className="p-4 space-y-4">
-          <div>
-            <h1 className="text-lg sm:text-2xl font-bold text-gray-900">Service Desk Configuration</h1>
-          </div>
+            </div>
+          </header>
           <Tabs value={currentTab} onValueChange={setCurrentTab} className="space-y-4">
             <div className="hidden sm:block tabs">
               {/* <TabsList className="grid w-full grid-cols-3 pb-[35px] pt-[20px] px-4 ">
@@ -817,7 +878,8 @@ const Configuration = () => {
                 <CardContent className="pt-3">
                   <ReusableTable
                     data={serviceRequestTypeData} columns={columns}
-                    actions={tableActions} permissions={tablePermissions}
+                    // actions={tableActions}
+                    permissions={tablePermissions}
                     title="Service Request Type List" onRefresh={() => handleRefresh('')}
                     enableSearch={true}
                     enableSelection={false}
@@ -881,7 +943,7 @@ const Configuration = () => {
                         rowHeight="normal" storageKey="service-request-type-list-table"
                         enableRowReordering
                         onRowReorder={(newData) => setStatusTableData(newData)}
-                        actions={statusTableActions}
+                      // actions={statusTableActions}
                       />
                     </div>
                     <div className="mt-4 flex justify-end">

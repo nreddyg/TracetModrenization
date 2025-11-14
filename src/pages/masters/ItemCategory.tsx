@@ -19,10 +19,11 @@ import { Controller, useForm } from 'react-hook-form';
 import { Asset_Main_Category_DB } from '@/Local_DB/Form_JSON_Data/AssetCategoryDB';
 import { BaseField, GenericObject } from '@/Local_DB/types/types';
 import ReusableMultiSelect from '@/components/ui/reusable-multi-select';
-import { FaSearch } from 'react-icons/fa';
+import { FaAngleRight, FaSearch } from 'react-icons/fa';
 import { ITEM_CATEGORY_DB } from '@/Local_DB/Form_JSON_Data/ItemCategoryDB';
 import { deleteItemCat, getItemCategoryData, getItemtCatByID, getUnitOfMeasure, postItemCatDetails, updateItemCat } from '@/services/itemCategoryServices';
 import { sub } from 'date-fns';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface MainCategory {
     CategoryName: string
@@ -125,24 +126,28 @@ const ItemCategory = () => {
             accessorKey: 'actions',
             header: 'Actions',
             cell: ({ row }: any) => (
-                <div className="flex gap-2">
+                <div className="flex gap-2" title='Actions'>
                     <ReusableButton
                         variant="text"
                         size="small"
+                        title='Edit'
                         // onClick={() => { setRecordToEditId(row.original.AssetCategoryId); getAssetCategoryByID(row.original.AssetCategoryId, companyId, true) }}
                         onClick={() => { setRecordToEditId(row.original.CategoryId); handleEdit(row.original) }}
                     >
-                        Edit
+                        <Edit className="h-4 w-4 text-blue-600" />
+
                     </ReusableButton>
                     <ReusableButton
                         variant="text"
                         size="small"
+                        title='Delete'
                         danger
                         icon={<Trash2 className="h-4 w-4" />}
                         // onClick={() => { setRecordToEditId(row.original.AssetCategoryId); setMainDelRec(row.original); setIsMainDelOpen(true) }}
                         onClick={() => { setRecordToEditId(row.original.CategoryId); setMainDelRec(row.original); setIsMainDelOpen(true) }}
                     >
-                        Delete
+                        <Trash2 className="h-4 w-4" />
+
                     </ReusableButton>
                 </div>
             ),
@@ -169,24 +174,28 @@ const ItemCategory = () => {
             accessorKey: 'actions',
             header: 'Actions',
             cell: ({ row }: any) => (
-                <div className="flex gap-2">
+                <div className="flex gap-2" title='Actions'>
                     <ReusableButton
                         variant="text"
                         size="small"
+                        title='Edit'
                         // onClick={() => { setSubRecID(row.original.AssetCategoryId); setSubRecord(row.original); handleSubEdit(row.original); }}
                         onClick={() => { setSubRecID(row.original.CategoryId); setSubRecord(row.original); handleSubEdit(row.original); }}
                     >
-                        Edit
+                        <Edit className="h-4 w-4 text-blue-600" />
+
                     </ReusableButton>
                     <ReusableButton
                         variant="text"
                         size="small"
                         danger
+                        title='Delete'
                         icon={<Trash2 className="h-4 w-4" />}
                         // onClick={() => { setSubRecID(row.original.AssetCategoryId); setIsSubDelOpen(true) }}
                         onClick={() => { setSubRecID(row.original.CategoryId); setSubRecord(row.original); setIsSubDelOpen(true) }}
                     >
-                        Delete
+                        <Trash2 className="h-4 w-4" />
+
                     </ReusableButton>
                 </div>
             ),
@@ -235,7 +244,7 @@ const ItemCategory = () => {
             ...watch(),
             subname: '',
             subcode: '',
-            subunitofmeasure:'',
+            subunitofmeasure: '',
             subdescription: '',
         })
     }
@@ -546,26 +555,29 @@ const ItemCategory = () => {
         setIsMainDialogOpen(true);
     }
     return (
-        <div className="h-full overflow-y-auto bg-gray-50/30">
-            <header className="bg-card flex justify-between border-b px-6 py-4 shadow-sm">
-                <div className="flex items-center gap-4">
-                    <SidebarTrigger />
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <span>Masters</span>
-                        <span>/</span>
-                        <span>Consumables</span>
-                        <span>/</span>
-                        <span className="text-foreground font-medium">Item Category</span>
-                    </div>
-                </div>
-            </header>
-            <div className="p-4 space-y-4">
-                <div className='ps-3'>
-                    <h1 className="text-3xl font-bold text-gray-900">Item Category</h1>
-                </div>
-                <Card className="border-0 shadow-sm mt-2">
+        <ScrollArea>
+        <div className="h-full">
+            <header className="px-6 py-4">
+                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+                          <h1 className="text-lg sm:text-2xl font-bold text-gray-900">
+                            Item Category
+                          </h1>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <span>Masters</span>
+                          <FaAngleRight />
+                          <span>Consumables</span>
+                          <FaAngleRight />
+                          <span className="text-gray-900 font-medium">Item Category</span>
+                        </div>
+                      </div>
+                    </header>
+            <div className="p-4 pt-0">
+                <Card className="border-0 shadow-sm">
                     <CardHeader className="pb-2 pt-2">
-                        <div className='mt-2 p-2'>
+                        <div className='mt-1 p-2'>
                             <Tabs value={activeTab} onValueChange={setActiveTab}>
                                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                                     <TabsList>
@@ -581,7 +593,7 @@ const ItemCategory = () => {
                                     </ReusableButton>
                                 </div>
 
-                                <TabsContent value="main" className="space-y-4">
+                                <TabsContent value="main" className="">
                                     <ReusableTable
                                         data={getMainCategoryData}
                                         columns={mainCategoryColumns}
@@ -751,6 +763,7 @@ const ItemCategory = () => {
                 </div>
             </div>
         </div>
+        </ScrollArea>
     );
 };
 

@@ -22,6 +22,7 @@ import { ORGANIZATION_DETAILS } from '@/Local_DB/Form_JSON_Data/OrganizationDB';
 import { useMessage } from '@/components/ui/reusable-message';
 import { convertOrgLogoFromApi, fileToByteArray } from '@/_Helper_Functions/HelperFunctions';
 import axios from 'axios';
+import { FaAngleRight } from 'react-icons/fa';
 interface OrganizationData {
   OrganizationId: number,
   OrganizationName: string,
@@ -580,15 +581,15 @@ const Organization = () => {
 
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col min-w-0 ">
-          <div className="bg-white border-b shadow-sm px-4 lg:px-6 py-3
+          <div className=" px-4 lg:px-6 py-4
   flex flex-col sm:flex-row justify-between gap-4 shrink-0"
           >
             <div className="flex items-start sm:items-center gap-4 lg:gap-6 flex-1 min-w-0">
               <div className="flex items-center gap-2 text-sm text-gray-600 flex-wrap">
                 <span>Masters</span>
-                <span>/</span>
+                <FaAngleRight />
                 <span>Company</span>
-                <span>/</span>
+                <FaAngleRight />
                 <span className="text-gray-900 font-medium">Organization</span>
               </div>
             </div>
@@ -599,6 +600,7 @@ const Organization = () => {
                 size="small"
                 onClick={handleReset}
                 icon={<X className="h-4 w-4" />}
+                className='btn-reset-clear-style'
               >
                 {selectedOrganizationData ? "Cancel" : "Reset"}
               </ReusableButton>
@@ -608,6 +610,7 @@ const Organization = () => {
                 variant="primary"
                 onClick={(data) => handleSubmit(handleSave)(data)}
                 icon={<Save className="h-4 w-4" />}
+                className='btn-submit-style'
               >
                 {selectedOrganizationData ? "Update" : "Save"}
               </ReusableButton>
@@ -616,7 +619,7 @@ const Organization = () => {
 
 
           {/* Content Grid with Individual Scroll Areas */}
-          <div className="flex-1 p-3 overflow-hidden min-h-0  ">
+          <div className="flex-1 p-3 pt-0 overflow-hidden min-h-0  ">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-1 h-full">
               {/* Left Column - Main Content */}
               <div className="lg:col-span-12 flex flex-col  min-h-0 ">

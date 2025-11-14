@@ -18,6 +18,7 @@ import { getItemCategoryData } from '@/services/itemCategoryServices';
 import { getUOMData } from '@/services/unitsOfMeasureServices';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardContent } from '@/components/ui/card';
+import { FaAngleRight } from 'react-icons/fa';
 
 interface Store {
   id: string;
@@ -263,19 +264,21 @@ const ItemMaster = () => {
       accessorKey: 'actions',
       header: 'Actions',
       cell: ({ row }: any) => (
-        <div className="flex gap-2">
+        <div className="flex gap-2" title='Actions'>
           <ReusableButton
             variant="text"
             size="small"
+            title='Edit'
             //   icon={<Edit className="h-4 w-4" />}
             onClick={() => { setSelectedStore(row.original); setRecordToEditId(row.original.ItemId); fetchItemMasterDataByItemMasterId(companyId, row.original.ItemId); }}
           >
-            <Edit className="h-4 w-4" />
+            <Edit className="h-4 w-4 text-blue-600" />
           </ReusableButton>
           <ReusableButton
             variant="text"
             size="small"
             danger
+            title='Delete'
             icon={<Trash2 className="h-4 w-4" />}
             onClick={() => { setIsDelModalOpen(true); setRecordToEditId(row.original.ItemId); }}
           >
@@ -338,7 +341,7 @@ const ItemMaster = () => {
         msg.warning('Failed to delete status !!')
       }
     }).catch(err => { }).finally(() => {
-        dispatch(setLoading(false))
+      dispatch(setLoading(false))
     })
   }
   const updateStoreData = async (id: any, data: any) => {
@@ -399,76 +402,67 @@ const ItemMaster = () => {
     <div className="h-full overflow-y-auto bg-gray-50 flex flex-col ">
       <div className="flex flex-1 overflow-hidden">
         <div className="flex-1 flex flex-col min-w-0 ">
-          <div className="min-h-[53px] bg-white border-b shadow-sm px-4 lg:px-6 py-3 flex flex-row xxs:flex-col xs2:flex-row lg:flex-row lg:items-center justify-between gap-4 shrink-0">
-            <div className="flex items-center gap-4 lg:gap-6 flex-1 min-w-0">
+          <header className="px-6 py-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <span>Masters</span>
+                <FaAngleRight />
+                <span>Consumables</span>
+                <FaAngleRight />
+                <span className="text-gray-900 font-medium">Item Master</span>
+              </div>
               <div className="flex items-center gap-2">
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <span>Masters</span>
-                  <span>/</span>
-                  <span>Consumables</span>
-                  <span>/</span>
-                  <span className="text-gray-900 font-medium">Item Master</span>
-                </div>
+                <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                  <DialogTrigger asChild>
+                    <ReusableButton
+                      variant="primary"
+                      icon={<Plus className="h-4 w-4" />}
+                      className="bg-orange-500 hover:bg-orange-600 border-orange-500"
+                      onClick={() => { setRecordToEditId(null); reset({ StoreName: "", Branch: "", StoreDescription: "" }) }}
+                    >
+                      Add
+                    </ReusableButton>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                      <DialogTitle>{recordToEditId ? "Update Item master" : "Add Item master"}</DialogTitle>
+                    </DialogHeader>
+                    <div className='grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4'>
+                      {getFieldsByNames(['ItemName', 'ItemCode', "MainCategory", "SubCategory", "UnitofMeasure", "UnitPrice", "ReorderLevel"]).map((field) => {
+                        return <div className="flex items-center space-x-2">
+                          {renderField(field)}
+                        </div>;
+                      })}
+                    </div>
+                    <div className='w-100'>
+                      {getFieldsByNames(['ItemDescription']).map((field) => {
+                        return <div className=" space-x-2">
+                          {renderField(field)}
+                        </div>;
+                      })}
+                    </div>
+                    <div className="flex justify-end gap-2">
+                      <ReusableButton
+                        variant="default"
+                        onClick={() => setIsAddDialogOpen(false)}
+                      >
+                        Cancel
+                      </ReusableButton>
+                      <ReusableButton
+                        htmlType="submit"
+                        variant="primary"
+                        className="bg-orange-500 hover:bg-orange-600 border-orange-500"
+                        onClick={() => handleSubmit(submit)()}
+                      >
+                        {recordToEditId ? "Update" : "Save"}
+                      </ReusableButton>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-                <DialogTrigger asChild>
-                  <ReusableButton
-                    variant="primary"
-                    icon={<Plus className="h-4 w-4" />}
-                    className="bg-orange-500 hover:bg-orange-600 border-orange-500"
-                    onClick={() => { setRecordToEditId(null); reset({ StoreName: "", Branch: "", StoreDescription: "" }) }}
-                  >
-                    Add
-                  </ReusableButton>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl">
-                  <DialogHeader>
-                    <DialogTitle>{recordToEditId ? "Update Item master" : "Add Item master"}</DialogTitle>
-                  </DialogHeader>
-                  <div className='grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4'>
-                    {getFieldsByNames(['ItemName', 'ItemCode', "MainCategory", "SubCategory", "UnitofMeasure", "UnitPrice", "ReorderLevel"]).map((field) => {
-                      return <div className="flex items-center space-x-2">
-                        {renderField(field)}
-                      </div>;
-                    })}
-                  </div>
-                  <div className='w-100'>
-                    {getFieldsByNames(['ItemDescription']).map((field) => {
-                      return <div className=" space-x-2">
-                        {renderField(field)}
-                      </div>;
-                    })}
-                  </div>
-                  <div className="flex justify-end gap-2">
-                    <ReusableButton
-                      variant="default"
-                      onClick={() => setIsAddDialogOpen(false)}
-                    >
-                      Cancel
-                    </ReusableButton>
-                    <ReusableButton
-                      htmlType="submit"
-                      variant="primary"
-                      className="bg-orange-500 hover:bg-orange-600 border-orange-500"
-                      onClick={() => handleSubmit(submit)()}
-                    >
-                      {recordToEditId ? "Update" : "Save"}
-                    </ReusableButton>
-                  </div>
-                </DialogContent>
-              </Dialog>
-              <ReusableButton
-                variant="primary"
-                icon={<Plus className="h-4 w-4" />}
-                className="bg-orange-500 hover:bg-orange-600 border-orange-500"
-              >
-                Import
-              </ReusableButton>
-            </div>
-          </div>
-          <div className="flex-1 p-3 overflow-hidden min-h-0  ">
+          </header>
+          <div className="flex-1 p-3 pt-0 overflow-hidden min-h-0  ">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-1 h-full">
               <div className="lg:col-span-12 flex flex-col  min-h-0 ">
                 <ScrollArea className="flex-1">

@@ -16,6 +16,7 @@ import { BaseField, GenericObject } from '@/Local_DB/types/types';
 import { STORE_DB } from '@/Local_DB/Form_JSON_Data/StoreDB';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardContent } from '@/components/ui/card';
+import { FaAngleRight } from 'react-icons/fa';
 interface Store {
     id: string;
     name: string;
@@ -138,7 +139,7 @@ const Store = () => {
             accessorKey: 'actions',
             header: 'Actions',
             cell: ({ row }: any) => (
-                <div className="flex gap-2">
+                <div className="flex gap-2" title='Actions'>
                     <ReusableButton
                         variant="text"
                         size="small"
@@ -216,10 +217,10 @@ const Store = () => {
                     fetchStoreDataByBranchName(companyId, branch)
 
                 } else {
-                    msg.warning(res.data.message);
+                    msg.warning(res.data.ErrorDetails[0]["Error Message"]);
                 }
             } else {
-                msg.warning('Failed to delete status !!')
+                msg.warning('Failed to Add Store')
             }
         }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
     }
@@ -232,10 +233,11 @@ const Store = () => {
                     fetchStoreDataByBranchName(companyId, branch)
 
                 } else {
-                    msg.warning(res.data.message);
+                                        msg.warning(res.data.ErrorDetails[0]["Error Message"]);
+
                 }
             } else {
-                msg.warning('Failed to delete status !!')
+                msg.warning('Failed to Update Store')
             }
         }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
     }
@@ -251,12 +253,22 @@ const Store = () => {
             ]
         }
         if (recordToEditId == null && companyId) {
+            if(watch("StoreName")!=""){
             addNewStoreData(branch, Payload)
             setIsAddDialogOpen(false)
+            }
+            else{
+                msg.warning("Name should not be empty")
+            }
         }
         else if (recordToEditId !== null && companyId) {
+            if(watch("StoreName")!=""){
             updateStoreData(recordToEditId, Payload)
             setIsAddDialogOpen(false)
+            }
+            else{
+                msg.warning("Name should not be empty")
+            }
 
         }
     }
@@ -272,19 +284,17 @@ const Store = () => {
         <div className="h-full overflow-y-auto bg-gray-50 flex flex-col ">
             <div className="flex flex-1 overflow-hidden">
                 <div className="flex-1 flex flex-col min-w-0 ">
-                    <div className="min-h-[53px] bg-white border-b shadow-sm px-4 lg:px-6 py-3 flex flex-row xxs:flex-col xs2:flex-row lg:flex-row lg:items-center justify-between gap-4 shrink-0">
-                        <div className="flex items-center gap-4 lg:gap-6 flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                                <div className="flex items-center gap-2 text-sm text-gray-600">
-                                    <span>Masters</span>
-                                    <span>/</span>
-                                    <span>Consumables</span>
-                                    <span>/</span>
-                                    <span className="text-gray-900 font-medium">Store</span>
-                                </div>
+                    <header className="px-6 py-4">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+
+                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                                <span>Masters</span>
+                                <FaAngleRight />
+                                <span>Consumables</span>
+                                <FaAngleRight />
+                                <span className="text-gray-900 font-medium">Store</span>
                             </div>
-                        </div>
-                        <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2">
                             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                                 <DialogTrigger asChild>
                                     {branch!=='All' && 
@@ -303,19 +313,19 @@ const Store = () => {
                                         <DialogTitle>{recordToEditId ? "Update Store" : "Add Store"}</DialogTitle>
                                     </DialogHeader>
                                     <div className='grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4'>
-                                        {getFieldsByNames(['StoreName', 'Branch']).map((field) => {
+                                        {getFieldsByNames(['StoreName', 'StoreDescription']).map((field) => {
                                             return <div className="flex items-center space-x-2">
                                                 {renderField(field)}
                                             </div>;
                                         })}
                                     </div>
-                                    <div className='w-100'>
+                                    {/* <div className='w-100'>
                                         {getFieldsByNames(['StoreDescription']).map((field) => {
                                             return <div className=" space-x-2">
                                                 {renderField(field)}
                                             </div>;
                                         })}
-                                    </div>
+                                    </div> */}
                                     <div className="flex justify-end gap-2">
                                         <ReusableButton
                                             variant="default"
@@ -334,9 +344,10 @@ const Store = () => {
                                     </div>
                                 </DialogContent>
                             </Dialog>
+                            </div>
                         </div>
-                    </div>
-                    <div className="flex-1 p-3 overflow-hidden min-h-0  ">
+                    </header>
+                    <div className="flex-1 p-3 pt-0 overflow-hidden min-h-0  ">
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-1 h-full">
                             <div className="lg:col-span-12 flex flex-col  min-h-0 ">
                                 <ScrollArea className="flex-1">

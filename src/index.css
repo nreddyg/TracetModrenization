@@ -174,10 +174,9 @@
   border-bottom: 5px solid #e5e7eb !important; /* subtle gray border under the tab row */
 }
 
-/* Default tab button style */
 .tabs .TabsList button {
   background: transparent;
-  color: #374151; /* gray text */
+  color: #374151; 
   padding-top: 0.75rem;
   padding-bottom: 0.75rem;
    padding-left: 1rem;
@@ -188,20 +187,15 @@
   transition: all 0.2s ease;
 }
 
-/* Hover effect */
 .tabs .TabsList button:hover {
-  color: #1d4ed8; /* blue text */
+  color: #1d4ed8;
 }
 
-/* Active tab button (Radix adds data-state="active") */
 .tabs .TabsList button[data-state="active"] {
-  color: #1d4ed8; /* active blue */
-  border-bottom-color: #1d4ed8; /* underline to match active color */
+  color: #1d4ed8; 
+  border-bottom-color: #1d4ed8; 
   font-weight: 600;
-  /* background-color: hsl(238 73% 97%) !important; */
 }
-
-
 }
 
 @keyframes fadeIn {

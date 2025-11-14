@@ -523,7 +523,7 @@ const UserGroups = () => {
                         iconPosition="left"
                         size="middle"
                       >
-                        {isEditMode ? 'Cancel' : 'Clear'}
+                        Cancel
                       </ReusableButton>
                     </div>
                   </form>

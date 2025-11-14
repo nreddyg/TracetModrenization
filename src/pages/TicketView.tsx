@@ -1639,6 +1639,7 @@ const TicketView = () => {
       setAccordionOpen(undefined);
     }
   };
+  console.log("selected",selectedTicket)
   return (
     <div className="h-full overflow-y-auto  bg-gray-50 flex flex-col ">
       <div className="flex flex-1 overflow-hidden   ">

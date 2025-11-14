@@ -581,7 +581,7 @@ const Organization = () => {
 
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col min-w-0 ">
-          <div className="bg-white border-b shadow-sm px-4 lg:px-6 py-3
+          <div className=" px-4 lg:px-6 py-4
   flex flex-col sm:flex-row justify-between gap-4 shrink-0"
           >
             <div className="flex items-start sm:items-center gap-4 lg:gap-6 flex-1 min-w-0">
@@ -619,7 +619,7 @@ const Organization = () => {
 
 
           {/* Content Grid with Individual Scroll Areas */}
-          <div className="flex-1 p-3 overflow-hidden min-h-0  ">
+          <div className="flex-1 p-3 pt-0 overflow-hidden min-h-0  ">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-1 h-full">
               {/* Left Column - Main Content */}
               <div className="lg:col-span-12 flex flex-col  min-h-0 ">

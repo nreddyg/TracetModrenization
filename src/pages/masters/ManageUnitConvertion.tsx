@@ -296,7 +296,7 @@ const ManageUnitConversion = () => {
                                 data={filteredData}
                                 columns={columns}
                                 permissions={tablePermissions}
-                                title="Unit of Measures Conversion list"
+                                title="Unit of Measures Conversion List"
                                 enableSearch={false}
                                 enableSelection={false}
                                 enableExport={true}

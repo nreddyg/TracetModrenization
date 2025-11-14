@@ -16,6 +16,7 @@ import { ColumnDef } from '@tanstack/react-table';
 import { Edit, Plus, Trash2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form';
+import { FaAngleRight } from 'react-icons/fa';
 import { useDispatch } from 'react-redux';
 
 interface Products {
@@ -266,128 +267,131 @@ const ProductMasters = () => {
 
     return (
         <ScrollArea>
-        <div className="h-full">
-            <header className="bg-card flex justify-between border-b px-6 py-4 shadow-sm">
-                <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <span>Masters</span>
-                        <span>/</span>
-                        <span>Service Maintenance</span>
-                        <span>/</span>
-                        <span className="text-foreground font-medium">Product Master</span>
+            <div className="h-full">
+                <header className="px-6 py-4">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+                            <h1 className="text-lg sm:text-2xl font-bold text-gray-900">
+                                Product Master
+                            </h1>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <span>Masters</span>
+                            <FaAngleRight />
+                            <span>Service Maintenance</span>
+                            <FaAngleRight />
+                            <span className="text-gray-900 font-medium">Product Master</span>
+                        </div>
                     </div>
+                </header>
+                <div className="p-4 pt-0">
+                    <Card className="border-0 shadow-sm">
+                        <CardContent className="pb-2">
+                            <div className="flex flex-col sm:flex-row justify-end items-start sm:items-center gap-4 mb-6 pt-2">
+
+                                <ReusableButton
+                                    variant="primary"
+                                    icon={<Plus className="h-4 w-4" />}
+                                    onClick={() => setIsMainDialogOpen(true)}
+                                >
+                                    Add
+                                </ReusableButton>
+                            </div>
+                            <div className='mt-2 p-2'>
+                                <ReusableTable
+                                    data={productList}
+                                    columns={columns}
+                                    // actions={tableActions}
+                                    permissions={tablePermissions}
+                                    title=""
+                                    //    onRefresh={handleRefresh}
+                                    enableSearch={false}
+                                    enableSelection={false}
+                                    enableExport={true}
+                                    enableColumnVisibility={true}
+                                    enablePagination={true}
+                                    enableSorting={true}
+                                    enableFiltering={true}
+                                    pageSize={10}
+                                    emptyMessage="No user groups found"
+                                    rowHeight="normal"
+                                    storageKey="usergroups-table"
+                                />
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Main Location Dialog */}
+                    <Dialog open={isMainDialogOpen} onOpenChange={setIsMainDialogOpen}>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>{editingRec === null ? 'Add' : 'Update'} New Product</DialogTitle>
+                            </DialogHeader>
+                            <Form {...form}>
+                                <form onSubmit={form.handleSubmit(handleSubmitForm)} className="space-y-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {getFieldsByNames(['ProductName']).map((field) => (
+                                            <div key={field.name}>
+                                                {renderField(field)}
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div className="flex gap-2 justify-end">
+                                        <ReusableButton
+                                            htmlType="submit"
+                                            variant="primary"
+                                            // icon={<Save className="h-3 w-3" />}
+                                            iconPosition="left"
+                                            size="middle"
+                                        >
+                                            {editingRec === null ? 'Save' : 'Update'}
+                                        </ReusableButton>
+                                        <ReusableButton
+                                            htmlType="button"
+                                            variant="default"
+                                            onClick={() => { setIsMainDialogOpen(false); form.reset() }}
+                                            // icon={<X className="h-3 w-3" />}
+                                            iconPosition="left"
+                                            size="middle"
+                                        >
+                                            Cancel
+                                        </ReusableButton>
+                                    </div>
+                                </form>
+                            </Form>
+
+                        </DialogContent>
+                    </Dialog>
+
+                    {/* Delete Confirmation Modal */}
+                    <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>
+                        <DialogContent className="sm:max-w-[425px]">
+                            <DialogHeader>
+                                <DialogTitle>Confirm the action</DialogTitle>
+                                <DialogDescription>
+                                    Are you sure you want to delete Service Locations
+                                </DialogDescription>
+                            </DialogHeader>
+                            <DialogFooter>
+                                <ReusableButton
+                                    variant="default"
+                                    onClick={() => setIsDelModalOpen(false)}
+                                >
+                                    Cancel
+                                </ReusableButton>
+                                <ReusableButton
+                                    variant="primary"
+                                    danger={true}
+                                    onClick={() => { deleteMasterProducts(deleteRec?.ProductId, companyId) }}
+                                >
+                                    Delete
+                                </ReusableButton>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
                 </div>
-            </header>
-            <div className="p-4 space-y-4">
-                <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Product Master</h1>
-                </div>
-                <Card className="border-0 shadow-sm mt-2">
-                    <CardContent className="pb-2 pt-2">
-                        <div className="flex flex-col sm:flex-row justify-end items-start sm:items-center gap-4 mb-6 pt-2">
-
-                            <ReusableButton
-                                variant="primary"
-                                icon={<Plus className="h-4 w-4" />}
-                                onClick={() => setIsMainDialogOpen(true)}
-                            >
-                                Add
-                            </ReusableButton>
-                        </div>
-                        <div className='mt-2 p-2'>
-                            <ReusableTable
-                                data={productList}
-                                columns={columns}
-                                // actions={tableActions}
-                                permissions={tablePermissions}
-                                title=""
-                                //    onRefresh={handleRefresh}
-                                enableSearch={false}
-                                enableSelection={false}
-                                enableExport={true}
-                                enableColumnVisibility={true}
-                                enablePagination={true}
-                                enableSorting={true}
-                                enableFiltering={true}
-                                pageSize={10}
-                                emptyMessage="No user groups found"
-                                rowHeight="normal"
-                                storageKey="usergroups-table"
-                            />
-                        </div>
-                    </CardContent>
-                </Card>
-
-                {/* Main Location Dialog */}
-                <Dialog open={isMainDialogOpen} onOpenChange={setIsMainDialogOpen}>
-                    <DialogContent>
-                        <DialogHeader>
-                            <DialogTitle>{editingRec === null ? 'Add' : 'Update'} New Product</DialogTitle>
-                        </DialogHeader>
-                        <Form {...form}>
-                            <form onSubmit={form.handleSubmit(handleSubmitForm)} className="space-y-4">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {getFieldsByNames(['ProductName']).map((field) => (
-                                        <div key={field.name}>
-                                            {renderField(field)}
-                                        </div>
-                                    ))}
-                                </div>
-                                <div className="flex gap-2 justify-end">
-                                    <ReusableButton
-                                        htmlType="submit"
-                                        variant="primary"
-                                        // icon={<Save className="h-3 w-3" />}
-                                        iconPosition="left"
-                                        size="middle"
-                                    >
-                                        {editingRec === null ? 'Save' : 'Update'}
-                                    </ReusableButton>
-                                    <ReusableButton
-                                        htmlType="button"
-                                        variant="default"
-                                        onClick={() => { setIsMainDialogOpen(false); form.reset() }}
-                                        // icon={<X className="h-3 w-3" />}
-                                        iconPosition="left"
-                                        size="middle"
-                                    >
-                                        Cancel
-                                    </ReusableButton>
-                                </div>
-                            </form>
-                        </Form>
-
-                    </DialogContent>
-                </Dialog>
-
-                {/* Delete Confirmation Modal */}
-                <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>
-                    <DialogContent className="sm:max-w-[425px]">
-                        <DialogHeader>
-                            <DialogTitle>Confirm the action</DialogTitle>
-                            <DialogDescription>
-                                Are you sure you want to delete Service Locations
-                            </DialogDescription>
-                        </DialogHeader>
-                        <DialogFooter>
-                            <ReusableButton
-                                variant="default"
-                                onClick={() => setIsDelModalOpen(false)}
-                            >
-                                Cancel
-                            </ReusableButton>
-                            <ReusableButton
-                                variant="primary"
-                                danger={true}
-                                onClick={() => { deleteMasterProducts(deleteRec?.ProductId, companyId) }}
-                            >
-                                Delete
-                            </ReusableButton>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
             </div>
-        </div>
         </ScrollArea>
     )
 }

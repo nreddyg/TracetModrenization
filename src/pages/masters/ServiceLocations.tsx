@@ -20,6 +20,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { Form, } from '@/components/ui/form';
 import { useMessage } from '@/components/ui/reusable-message';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { FaAngleRight } from 'react-icons/fa';
 
 interface MainLocation {
     name: string;
@@ -416,22 +417,24 @@ const ServiceLocations = () => {
     return (
         <ScrollArea>
         <div className="h-full">
-            <header className="bg-card flex justify-between border-b px-6 py-4 shadow-sm">
-                <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <span>Masters</span>
-                        <span>/</span>
-                        <span>Service Maintenance</span>
-                        <span>/</span>
-                        <span className="text-foreground font-medium">Service Locations</span>
-                    </div>
-                </div>
-            </header>
-            <div className="p-4 space-y-4">
-                <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Service Maintenance Locations</h1>
-                </div>
-                <Card className="border-0 shadow-sm mt-2">
+           <header className="px-6 py-4">
+                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+                         <h1 className="text-lg sm:text-2xl font-bold text-gray-900">
+                            Service Locations
+                         </h1>
+                       </div>
+                       <div className="flex items-center gap-2 text-sm text-gray-600">
+                         <span>Masters</span>
+                         <FaAngleRight />
+                         <span>Service Maintenance</span>
+                         <FaAngleRight />
+                         <span className="text-gray-900 font-medium">Service Locations</span>
+                       </div>
+                     </div>
+                   </header>
+            <div className="p-4 pt-0">
+                <Card className="border-0 shadow-sm ">
                     <CardContent className="pb-2 pt-2">
                         <div className='mt-2 p-2'>
                             <Tabs value={activeTab} onValueChange={setActiveTab}>

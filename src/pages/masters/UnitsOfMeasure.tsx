@@ -252,7 +252,7 @@ const UnitOfMeasure = () => {
                                   <FaAngleRight />
                                   <span>Consumables</span>
                                   <FaAngleRight />
-                                  <span className="text-gray-900 font-medium">Units Of Measure</span>
+                                  <span className="text-gray-900 font-medium">Units of Measure</span>
                                 </div>
                                 <div className="flex items-center gap-2">
                             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>

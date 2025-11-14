@@ -632,6 +632,7 @@ const Department = () => {
                 className="pl-9 "
               />
             </div>
+            
             <div className="flex gap-3 flex items-center justify-center">
               <div>
                 <TooltipProvider>
@@ -702,6 +703,7 @@ const Department = () => {
               </div>
             </div>
           </div>
+
           <div className="min-h-20 h-[63vh] overflow-y-auto p-2">
             <TreeView treeData={mainTreeData} config={treeConfig} onSelect={handleSelect} selectKeys={selectedKeys} onExpand={handleToggleNode}
               expandedKeys={Array.from(expandedKeys)} />

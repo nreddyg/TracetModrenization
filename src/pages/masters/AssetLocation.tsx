@@ -855,6 +855,7 @@ const AssetLocation = () => {
                 {/* Tree Structure Panel */}
                 <div className="w-[26vw] h-[75vh] rounded-lg shadow-lg border-r bg-card flex flex-col">
                     <div className="px-2 flex items-center justify-center pt-4 pb-4 ps-0 ms-0 border-b gap-3">
+
                         <div className="relative ps-2">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                             <Input
@@ -864,7 +865,7 @@ const AssetLocation = () => {
                                 className="pl-9 "
                             />
                         </div>
-                        <div className="flex gap-2 flex items-center justify-center">
+                        {/* <div className="flex gap-2 flex items-center justify-center">
                             <ReusableButton
                                 size="small"
                                 className="bg-primary h-[2rem] hover:bg-blue-700 text-white"
@@ -910,8 +911,78 @@ const AssetLocation = () => {
                             <Button size="sm" variant="outline" className="h-8" onClick={() => setIsDelModalOpen(true)}>
                                 <Trash2 className="h-4 w-4 text-destructive" />
                             </Button>
+                        </div> */}
+                        <div className="flex gap-3 flex items-center justify-center">
+                            <div>
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <ReusableButton
+                                                size="small"
+                                                className="bg-primary h-[2rem] hover:bg-blue-700 text-white"
+                                                style={{
+                                                    cursor: selectedLevel >= 99 + level.length || disable ? "not-allowed" : "pointer",
+                                                }}
+                                                disabled={selectedLevel >= 99 + level.length || disable}
+                                                onClick={() => {
+                                                    if (!(selectedLevel >= 99 + level.length || disable)) {
+                                                        handleRoute();
+                                                        handleReset();
+                                                        setDisable(true);
+                                                    }
+                                                }}
+                                            >
+                                                <Plus className="h-4 w-4" />
+                                            </ReusableButton>
+                                        </TooltipTrigger>
+                                        {selectedLevel !== lastLevel && recordToEditId && (
+                                            <TooltipContent>
+                                                Add {nextLevel ? nextLevel : "Department/Unit"}
+                                            </TooltipContent>
+                                        )}
+                                    </Tooltip>
+                                </TooltipProvider>
+                            </div>
+                            <div>
+                                <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>
+                                    <DialogContent className="sm:max-w-[425px]">
+                                        <DialogHeader>
+                                            <DialogTitle>Confirm the action</DialogTitle>
+                                            <DialogDescription>
+                                                Are you sure you want to delete Hierarchy level?
+                                            </DialogDescription>
+                                        </DialogHeader>
+                                        <DialogFooter>
+                                            <ReusableButton
+                                                variant="default"
+                                                onClick={() => setIsDelModalOpen(false)}
+                                            >
+                                                Cancel
+                                            </ReusableButton>
+                                            <ReusableButton
+                                                variant="primary"
+                                                danger={true}
+                                                onClick={() => { handleDelete(); setIsDelModalOpen(false); setRecordToEditId(null); handleReset() }}
+                                            >
+                                                Delete
+                                            </ReusableButton>
+                                        </DialogFooter>
+                                    </DialogContent>
+                                </Dialog>
+                                <ReusableButton
+                                    size="small"
+                                    className="bg-primary h-[2rem] hover:bg-blue-700 text-white"
+                                    style={{ cursor: disable || selectedLevel === 99 ? "not-allowed" : "pointer" }}
+                                    onClick={() => {
+                                        if (!disable && selectedLevel !== 99) { setIsDelModalOpen(true) }
+                                    }}
+                                >
+                                    <Trash2 className="h-4 w-4 text-destructive" />
+                                </ReusableButton>
+                            </div>
                         </div>
                     </div>
+
                     <div className="min-h-20 h-[63vh] overflow-y-auto p-2">
                         <TreeView treeData={mainTreeData} config={treeConfig} onSelect={onSelect} selectKeys={selectedKeys} onExpand={handleToggleNode}
                             expandedKeys={Array.from(expandedKeys)} />

@@ -1494,7 +1494,8 @@ const CompanyHierarchy = () => {
             onClick={() => handleReset()}
             iconPosition="left"
             size="middle"
-            className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+            // className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+            className='btn-reset-clear-style'
           >
             Reset
           </ReusableButton>
@@ -1504,7 +1505,8 @@ const CompanyHierarchy = () => {
             onClick={submit}
             iconPosition="left"
             size="middle"
-            className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+            // className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+            className='btn-submit-style'
           >
             Save
           </ReusableButton>
@@ -1547,10 +1549,6 @@ const CompanyHierarchy = () => {
                     <DialogTitle>Confirm the action</DialogTitle>
                     <DialogDescription>
                       Are you sure you want to delete Hierarchy level?
-                      {/* {currentTab === "service-request-type"
-                                                      ? `${selectedRecord?.ServiceRequestType || "this"} Service Request Type`
-                                                      : `${selectedStatusRec?.StatusType || "this"} Status`
-                                                    } */}
                     </DialogDescription>
                   </DialogHeader>
                   <DialogFooter>

@@ -599,6 +599,7 @@ const Organization = () => {
                 size="small"
                 onClick={handleReset}
                 icon={<X className="h-4 w-4" />}
+                className='btn-reset-clear-style'
               >
                 {selectedOrganizationData ? "Cancel" : "Reset"}
               </ReusableButton>
@@ -608,6 +609,7 @@ const Organization = () => {
                 variant="primary"
                 onClick={(data) => handleSubmit(handleSave)(data)}
                 icon={<Save className="h-4 w-4" />}
+                className='btn-submit-style'
               >
                 {selectedOrganizationData ? "Update" : "Save"}
               </ReusableButton>

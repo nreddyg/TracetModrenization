@@ -806,7 +806,7 @@ const CostCenter = () => {
             onClick={() => handleReset()}
             iconPosition="left"
             size="middle"
-            className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+            className='btn-reset-clear-style'
           >
             Reset
           </ReusableButton>
@@ -816,9 +816,9 @@ const CostCenter = () => {
             onClick={handleSubmit(onSubmit)}
             iconPosition="left"
             size="middle"
-            className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+            className='btn-submit-style'
           >
-            Save
+            {selectedLevel <= 99 || recordToEditId === null ? "Save" : "Update"}
           </ReusableButton>
         </div>
       </header>

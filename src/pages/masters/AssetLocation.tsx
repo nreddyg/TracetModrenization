@@ -815,6 +815,8 @@ const AssetLocation = () => {
     //     </div >
     // )
 
+    console.log("record", recordToEditId && selectedLevel !== 99);
+
     return (
         <div className="bg-hsl(214.3 31.8% 91.4%)">
             <header className="bg-card flex justify-between border-b px-6 py-4">
@@ -834,7 +836,8 @@ const AssetLocation = () => {
                         onClick={() => handleReset()}
                         iconPosition="left"
                         size="middle"
-                        className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+                        // className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+                        className='btn-reset-clear-style'
                     >
                         Reset
                     </ReusableButton>
@@ -844,9 +847,10 @@ const AssetLocation = () => {
                         onClick={submit}
                         iconPosition="left"
                         size="middle"
-                        className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+                        // className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+                        className='btn-submit-style'
                     >
-                        Save
+                        {selectedLevel <= 99 || recordToEditId === null ? "Save" : "Update"}
                     </ReusableButton>
                 </div>
             </header>
@@ -1040,7 +1044,6 @@ const AssetLocation = () => {
                             </div>
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>

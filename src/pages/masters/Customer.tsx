@@ -386,7 +386,7 @@ const Customer = () => {
       } else {
         setDataSource([]);
       }
-    }).catch(err =>{}).finally(() => {
+    }).catch(err => { }).finally(() => {
       dispatch(setLoading(false));
     });
   }
@@ -461,7 +461,7 @@ const Customer = () => {
       } else {
         msg.warning("No Customer Data Found !!");
       }
-    }).catch(err => {}).finally(() => {
+    }).catch(err => { }).finally(() => {
       dispatch(setLoading(false));
     });
   }
@@ -497,7 +497,7 @@ const Customer = () => {
       } else {
         msg.warning("No Customer Data Found !!");
       }
-    }).catch(err =>{}).finally(() => {
+    }).catch(err => { }).finally(() => {
       dispatch(setLoading(false));
     });
   }
@@ -505,7 +505,7 @@ const Customer = () => {
     dispatch(setLoading(true))
     await deleteCustomerByCompanyId(companyId, id).then(res => {
       if (res.success) {
-        if (res.data && Array.isArray(res.data) && res.data.length!==0 && res.data[0].status) {
+        if (res.data && Array.isArray(res.data) && res.data.length !== 0 && res.data[0].status) {
           msg.success(res.data[0].message || "Customer Deleted Successfully!!");
           fetchAllCustomerList();
           handleReset();
@@ -513,7 +513,7 @@ const Customer = () => {
           msg.warning(res.data.message || 'Failed to Delete Customer !!')
         }
       }
-    }).catch(err => {console.error(err) }).finally(() => { dispatch(setLoading(false)) })
+    }).catch(err => { console.error(err) }).finally(() => { dispatch(setLoading(false)) })
   }
   return (
     <div className="h-full overflow-y-auto    flex flex-col ">
@@ -574,8 +574,8 @@ const Customer = () => {
                   <div
                     key={cust.CustomerID}
                     className={`p-2.5 py-2 rounded-lg mb-2 cursor-pointer transition-all hover:bg-gray-50 ${selectedCustomerData?.CustomerID === cust.CustomerID
-                        ? 'bg-blue-50 border-l-4 border-blue-500'
-                        : 'border border-gray-200'
+                      ? 'bg-blue-50 border-l-4 border-blue-500'
+                      : 'border border-gray-200'
                       }`}
                     onClick={(e) => handleSelect(e, cust)}
                   >
@@ -631,6 +631,7 @@ const Customer = () => {
                 size="small"
                 onClick={() => { handleReset() }}
                 icon={<X className="h-4 w-4" />}
+                className='btn-reset-clear-style'
               >
                 {selectedCustomerData ? "Cancel" : "Clear"}
               </ReusableButton>
@@ -639,6 +640,7 @@ const Customer = () => {
                 variant="primary"
                 onClick={() => { handleSubmit(handleSave)() }}
                 icon={<Save className="h-4 w-4" />}
+                className='btn-submit-style'
               >
                 {selectedCustomerData ? "Update" : "Save"}
               </ReusableButton>

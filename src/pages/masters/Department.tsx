@@ -418,6 +418,7 @@ const Department = () => {
     setSelectedKeys(selectedKeys)
     setSelectedId(info.node.id)
     setDisable(false);
+    console.log(info)
     setRecordToEditId(info.node.id);
     setSelectedNode(info.node);
     setDepartmentData(fields[info.node.type])
@@ -581,7 +582,9 @@ const Department = () => {
       collectKeys(treeView);
       setExpandedKeys(new Set(allKeys));
     }
-  }, [treeView]);
+    }, [treeView]);
+
+    console.log("recordId", recordToEditId, "selectedLevel", selectedLevel);
 
   return (
     <div className="bg-hsl(214.3 31.8% 91.4%)">
@@ -602,7 +605,8 @@ const Department = () => {
             onClick={handleReset}
             iconPosition="left"
             size="middle"
-            className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+            // className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+            className='btn-reset-clear-style'
           >
             Reset
           </ReusableButton>
@@ -612,7 +616,9 @@ const Department = () => {
             onClick={handleSubmit(onSubmit)}
             iconPosition="left"
             size="middle"
-            className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+            // className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+                        className='btn-submit-style'
+
           >
             {selectedLevel <= 99 || recordToEditId === null ? "Save" : "Update"}
           </ReusableButton>

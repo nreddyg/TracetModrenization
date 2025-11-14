@@ -658,16 +658,17 @@ const AssetRegistry = () => {
 
     return (
         <ScrollArea>
+            <div className="h-full">
             <header className="px-6 py-4">
-                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-            
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-                          <h1 className="text-lg sm:text-2xl font-bold text-gray-900">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+                        <h1 className="text-lg sm:text-2xl font-bold text-gray-900">
                             Asset Registry
-                          </h1>
-                        </div>
-                        <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
-                    <ReusableButton
+                        </h1>
+                    </div>
+                    <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                        <ReusableButton
                             size="small"
                             className=' flex-1 sm:flex-none bg-primary h-[2.38rem] text-white p-4'
                             onClick={() => setIsOpenLicenseCard((prev) => !prev)}>
@@ -679,10 +680,10 @@ const AssetRegistry = () => {
                                 '+ Add Software Asset'
                             )}
                         </ReusableButton>
+                    </div>
                 </div>
-                      </div>
-                    </header>
-            <div className="h-full">
+            </header>
+            <div>
                 {isOpenLicenseCard &&
                     <div className='p-2 rounded-lg'>
                         <div className=" bg-white rounded-lg p-4">
@@ -798,6 +799,7 @@ const AssetRegistry = () => {
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
+            </div>
             </div>
         </ScrollArea>
     );

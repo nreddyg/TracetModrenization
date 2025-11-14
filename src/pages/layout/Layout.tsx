@@ -9,6 +9,7 @@ import UserGroups from '../servicedesk/UserGroups'
 import SubscriptionManagement from '../servicedesk/Subscription'
 import MyWorkbench from '../servicedesk/MyWorkbench'
 import Configuration from '../servicedesk/Configuration'
+import { RxDotFilled } from 'react-icons/rx'; 
 import {
   Home,
   Settings,
@@ -858,15 +859,15 @@ const Layout = () => {
       }
 
       if (hasNoChildren(module)) {
-        if (modulePath?.split("-")[0] === "settings") {
-          if (appRoutesObj[modulePath]) { settingsPaths.push(appRoutesObj[modulePath]) }
-        } else {
+        // if (modulePath?.split("-")[0] === "settings") {
+        //   if (appRoutesObj[modulePath]) { settingsPaths.push(appRoutesObj[modulePath]) }
+        // } else {
           if (appRoutesObj[modulePath])
             pathsArray.push(appRoutesObj[modulePath])
           if (appRoutesObj[modulePath]?.dependent) {
             pathsArray.push(...appRoutesObj[modulePath].dependent)
           }
-        }
+        // }
       }
       const menuItem:NavItem = {
         // id: module.ModuleId,
@@ -875,7 +876,7 @@ const Layout = () => {
         // key: `${hasNoChildren(module) ? routesObject[modulePath] : module.ModuleName}`,
         link: `${hasNoChildren(module) ? appRoutesObj[modulePath]?.path : module.ModuleName}`,
         label: module.ModuleName,
-        icon:parentModules.includes(modulePath) ? icons[modulePath] : null,
+        icon:parentModules.includes(modulePath) ? icons[modulePath] :(module.Children && module.Children?.length > 0)?null:RxDotFilled,
       };
       
       if (module.Children && module.Children?.length > 0) {

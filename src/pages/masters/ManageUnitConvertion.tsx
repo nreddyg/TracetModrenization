@@ -240,7 +240,7 @@ const ManageUnitConversion = () => {
                     <h1 className='text-lg font-semibold text-gray-900'>Add Unit of Conversion</h1>
                     <ReusableButton
                         className=' flex-1 sm:flex-none bg-primary h-[2.38rem] text-white p-4'
-                        onClick={() => navigate("/masters/consumables/unitsofmeasure")}>Back</ReusableButton>
+                        onClick={() => navigate("/layout/masters/consumables/unitsofmeasure")}>Back</ReusableButton>
                 </div>
                 <div className="w-full p-4 bg-white rounded-md border">
                     <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>

@@ -499,7 +499,7 @@ const CustomerLocation = () => {
                                     <div className='flex items-center gap-2'>
                                         <ReusableButton
                                             variant="text"
-                                            onClick={() => { navigate("/masters/company/customer") }}
+                                            onClick={() => { navigate("/layout/masters/company/customer") }}
                                             icon={""}
                                         >
                                             Back

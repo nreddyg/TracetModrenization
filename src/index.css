@@ -135,9 +135,73 @@
  
   div {
     font-size: 15px
-  }
- 
+  } 
 }
+
+  .btn-submit-style{
+  background-color: #f47e27;
+  color: hsl(210 40% 98%);
+  font-size: 0.875rem;
+  font-weight: 500; 
+  border-color: hsl(214.3 31.8% 91.4%);
+  padding-left: 0.75rem !important;
+  padding-right: 0.75rem !important;
+  transition: background-color 0.2s ease-in-out;
+  border: 0 !important;
+  }
+  .btn-submit-style:hover{
+    background-color: #f47e27 !important;
+    color: hsl(210 40% 98%) !important
+  }
+
+  .btn-reset-clear-style{
+    background-color: hsl(238 73% 97%) !important;
+    color: #000;
+    font-size: 0.875rem;
+    border-color: hsl(214.3 31.8% 91.4%);
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+    border: hsl(214.3 31.8% 91.4%) !important;
+  }
+  .btn-reset-clear-style:hover{
+    background-color: hsl(238 73% 97%) !important;
+    color: #000 !important;
+    border: hsl(214.3 31.8% 91.4%) !important;
+  }
+
+  /* Tabs container styling */
+.tabs .TabsList {
+  border-bottom: 5px solid #e5e7eb !important; /* subtle gray border under the tab row */
+}
+
+/* Default tab button style */
+.tabs .TabsList button {
+  background: transparent;
+  color: #374151; /* gray text */
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+   padding-left: 1rem;
+   padding-right: 1rem;
+  border: none;
+  border-bottom: 3px solid transparent;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+/* Hover effect */
+.tabs .TabsList button:hover {
+  color: #1d4ed8; /* blue text */
+}
+
+/* Active tab button (Radix adds data-state="active") */
+.tabs .TabsList button[data-state="active"] {
+  color: #1d4ed8; /* active blue */
+  border-bottom-color: #1d4ed8; /* underline to match active color */
+  font-weight: 600;
+  /* background-color: hsl(238 73% 97%) !important; */
+}
+
+
 }
 
 @keyframes fadeIn {

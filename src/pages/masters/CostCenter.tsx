@@ -260,37 +260,6 @@ const CostCenter = () => {
     }
   }
 
-  // const mainTreeData = useMemo(() => {
-  //   const loop = (data) =>
-  //     data.map((item) => {
-  //       const title = item.title.toLowerCase().includes(search.value.toLowerCase()) ? (
-  //         <span key={item.key}>
-  //           <span className={`${search.value === "" ? "" : "site-tree-search-value"}`}>{item.title}</span>
-  //         </span>
-  //       ) : (
-  //         <span key={item.key}>{item.title}</span>
-  //       )
-  //       if (item.children) {
-  //         return {
-  //           type: item.type,
-  //           id: item.id,
-  //           title,
-  //           name: item.Name,
-  //           key: item.key,
-  //           children: loop(item.children),
-  //         };
-  //       }
-  //       return {
-  //         type: item.type,
-  //         id: item.id,
-  //         title,
-  //         name: item.Name,
-  //         key: item.key,
-  //       };
-  //     });
-  //   return loop(treeView);
-  // }, [treeView]);
-
   const mainTreeData = useMemo(() => {
     const loop = (data) =>
       data.map((item) => {

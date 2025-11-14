@@ -247,10 +247,10 @@ const FixedHeader: React.FC = () => {
               <BreadcrumbList>
                 <BreadcrumbItem>
                   <BreadcrumbLink asChild>
-                    <Link to="/service-desk/all-requests" className="flex items-center gap-1 hover:text-blue-600 transition-colors">
+                    <div className="flex items-center gap-1 hover:text-blue-600 transition-colors">
                       <Home className="h-3 w-3 lg:h-4 lg:w-4" />
                       <span className="text-xs lg:text-sm">Dashboard</span>
-                    </Link>
+                    </div>
                   </BreadcrumbLink>
                 </BreadcrumbItem>
  
@@ -381,7 +381,7 @@ const FixedHeader: React.FC = () => {
           </div>
  
           {/* Desktop Dropdowns */}
-          <div className="hidden lg:flex items-center gap-3">
+          <div className="hidden lg:flex items-center justify-end gap-3">
             <ReusableDropdown
               options={companyList}
               value={selectedCompany}
@@ -390,7 +390,7 @@ const FixedHeader: React.FC = () => {
               size="small"
               disabled={!(LoggedInUser.RoleName === "Root Admin")}
               className="w-auto h-9"
-              containerClassName='max-w-[50%]'
+              containerClassName='max-w-[35%]'
             />
  
             <ReusableDropdown
@@ -400,7 +400,7 @@ const FixedHeader: React.FC = () => {
               placeholder="Select location"
               size="small"
               className="w-auto h-9"
-              containerClassName='max-w-[50%]'
+              containerClassName='max-w-[35%]'
             />
           </div>
  

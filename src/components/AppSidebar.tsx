@@ -1,55 +1,14 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
-  SidebarGroup,
-  SidebarGroupContent,
-  useSidebar,
+  Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem,
+  SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem, SidebarGroup, SidebarGroupContent, useSidebar,
 } from '@/components/ui/sidebar';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Input } from '@/components/ui/input';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import {
-  Home,
-  Settings,
-  Building2,
-  Package,
-  Wrench,
-  FileText,
-  HardHat,
-  ShoppingCart,
-  DollarSign,
-  Calculator,
-  Search,
-  Headphones,
-  Cog,
-  ChevronRight,
-  ChevronDown,
-  Star,
-  AlertCircle,
-  Users,
-  BarChart,
-  Calendar,
-  TrendingUp,
-  Shield,
-  UserRoundCheckIcon,
-  UserPlus,
-  User,
-  UserCheck,
-  UserCog,
-  MapPin
-} from 'lucide-react';
+import { Headphones, Settings, Building2, Package, ChevronRight, ChevronDown, Search, Eye, } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { RxDotFilled } from 'react-icons/rx';
 
 interface NavItem {
   label: string;
@@ -103,27 +62,27 @@ interface NavItem {
 //     children: [
 //       {
 //         label: 'New Service Request',
-//         // icon: AlertCircle,
+//         icon:RxDotFilled,
 //         link: '/service-desk/create-ticket',
 //       },
 //       {
 //         label: 'My Workbench',
-//         // icon: Users,
+//         icon:RxDotFilled,
 //         link: '/service-desk/my-workbench',
 //       },
 //       {
 //         label: 'My Requests',
-//         // icon: FileText,
+//         icon:RxDotFilled,
 //         link: '/service-desk/my-requests',
 //       },
 //       {
 //         label: 'All Service Requests',
-//         // icon: FileText,
+//         icon:RxDotFilled,
 //         link: '/service-desk/all-requests',
 //       },
 //       {
 //         label: 'Ticket Progress Dashboard',
-//         // icon: TrendingUp,
+//         icon:RxDotFilled,
 //         link: '/service-desk/ticket-progress-dashboard',
 //       },
 
@@ -139,22 +98,22 @@ interface NavItem {
 //       // },
 //       {
 //         label: 'User Groups',
-//         // icon: Users,
+//         icon: RxDotFilled,
 //         link: '/service-desk/user-groups',
 //       },
 //       {
 //         label: 'Configuration',
-//         // icon: Settings,
+//         icon: RxDotFilled,
 //         link: '/service-desk/configuration',
 //       },
 //       {
 //         label: 'Subscription',
-//         // icon: Star,
+//         icon: RxDotFilled,
 //         link: '/service-desk/subscription',
 //       },
 //       {
 //         label: 'Reports',
-//         // icon: BarChart,
+//         icon: RxDotFilled,
 //         link: '/service-desk/reports',
 //       },
 //       // {
@@ -340,33 +299,33 @@ interface NavItem {
 //   //     //     },
 //   //     //   ],
 //   //     // },
-//       {
-//         label: 'Depreciation',
-//         icon: DollarSign,
-//         link: '/depreciation',
-//         children: [
-//           {
-//             label: 'Process',
-//             icon: DollarSign,
-//             link: '/depreciation/process',
-//           },
-//           {
-//             label: 'Adjustments',
-//             icon: DollarSign,
-//             link: '/depreciation/adjustments',
-//           },
-//           {
-//             label: 'Analysis',
-//             icon: DollarSign,
-//             link: '/depreciation/analysis',
-//           },
-//           {
-//             label: 'Reports',
-//             icon: FileText,
-//             link: '/depreciation/reports',
-//           },
-//         ],
-//       },
+//   //     // {
+//   //     //   label: 'Depreciation',
+//   //     //   icon: DollarSign,
+//   //     //   link: '/depreciation',
+//   //     //   children: [
+//   //     //     {
+//   //     //       label: 'Process',
+//   //     //       icon: DollarSign,
+//   //     //       link: '/depreciation/process',
+//   //     //     },
+//   //     //     {
+//   //     //       label: 'Adjustments',
+//   //     //       icon: DollarSign,
+//   //     //       link: '/depreciation/adjustments',
+//   //     //     },
+//   //     //     {
+//   //     //       label: 'Analysis',
+//   //     //       icon: DollarSign,
+//   //     //       link: '/depreciation/analysis',
+//   //     //     },
+//   //     //     {
+//   //     //       label: 'Reports',
+//   //     //       icon: FileText,
+//   //     //       link: '/depreciation/reports',
+//   //     //     },
+//   //     //   ],
+//   //     // },
 //   //     // {
 //   //     //   label: 'Consumables',
 //   //     //   icon: Package,
@@ -467,42 +426,42 @@ interface NavItem {
 //         children: [
 //           {
 //             label: 'Organization',
-//             // icon: Building2,
+//             icon:RxDotFilled,
 //             link: '/masters/company/organization',
 //           },
 //           {
 //             label: 'Company Hierarchy',
-//             // icon: Building2,
+//             icon:RxDotFilled,
 //             link: '/masters/company/company-hierarchy',
 //           },
 //           {
 //             label: 'Asset Location',
-//             // icon: Building2,
+//             icon:RxDotFilled,
 //             link: '/masters/company/asset-location',
 //           },
 //           {
 //             label: 'Department',
-//             // icon: Building2,
+//             icon:RxDotFilled,
 //             link: '/masters/company/department',
 //           },
 //           {
 //             label: 'Cost Center',
-//             // icon: DollarSign,
+//             icon:RxDotFilled,
 //             link: '/masters/company/costcenter',
 //           },
 //           {
 //             label: 'User',
-//             // icon: User,
+//             icon:RxDotFilled,
 //             link: '/masters/company/user',
 //           },
 //           {
 //             label: 'Vendor',
-//             // icon: UserCheck,
+//             icon: RxDotFilled,
 //             link: '/masters/company/vendor',
 //           },
 //           {
 //             label: 'Customer',
-//             // icon: UserCog,
+//             icon: RxDotFilled,
 //             link: '/masters/company/customer',
 //           },
 //           // {
@@ -520,42 +479,42 @@ interface NavItem {
 //       {
 //         label: 'Fixed Assets',
 //         // icon: Building2,
-//         link: '/company',
+//         link: '/fixed-assets',
 //         children: [
 //           {
 //             label: 'Asset Category',
-//             // icon: Building2,
+//             icon: RxDotFilled,
 //             link: 'masters/fixed-assets/asset-category',
 //           },
 //           {
 //             label: 'Cost Breakup Attributes',
-//             // icon: DollarSign,
+//             icon: RxDotFilled,
 //             link: 'masters/fixed-assets/costbreakup',
 //           },
 //           {
 //             label: 'User Attributes',
-//             // icon: DollarSign,
+//             icon: RxDotFilled,
 //             link: 'masters/fixed-assets/userattributes',
 //           }
 //         ]
 //       },
-//       {
-//         label: 'Depreciation',
-//         // icon: Building2,
-//         link: '/depreciation',
-//         children: [
-//           {
-//             label: 'Books',
-//             // icon: BarChart,
-//             link: '/masters/depreciation/book',
-//           },
-//           {
-//             label: 'Asset Category Book Category Mapping',
-//             // icon: BarChart,
-//             link: '/masters/depreciation/assetcategorybookcategorymapping',
-//           },
-//         ],
-//       },
+//       // {
+//       //   label: 'Depreciation',
+//       //   // icon: Building2,
+//       //   link: '/depreciation',
+//       //   children: [
+//       //     {
+//       //       label: 'Books',
+//       //       icon: RxDotFilled,
+//       //       link: '/masters/depreciation/book',
+//       //     },
+//       //     {
+//       //       label: 'Asset Category Mapping With Book Category',
+//       //       icon: RxDotFilled,
+//       //       link: '/masters/depreciation/assetcategorybookcategorymapping',
+//       //     },
+//       //   ],
+//       // },
 //       {
 //         label: 'Consumables',
 //         // icon: Building2,
@@ -563,22 +522,22 @@ interface NavItem {
 //         children: [
 //           {
 //             label: 'Store',
-//             // icon: BarChart,
+//             icon: RxDotFilled,
 //             link: '/masters/consumables/store',
 //           },
 //           {
 //             label: 'Item Master',
-//             // icon: BarChart,
+//             icon: RxDotFilled,
 //             link: '/masters/consumables/item-master',
 //           },
 //           {
 //             label: "Units Of Measure",
-//             // icon: BarChart,
+//             icon: RxDotFilled,
 //             link: '/masters/consumables/unitsofmeasure',
 //           },
 //           {
 //             label: 'Item Category',
-//             // icon: BarChart,
+//             icon: RxDotFilled,
 //             link: '/masters/consumables/item-category',
 //           },
 //         ],
@@ -590,12 +549,12 @@ interface NavItem {
 //         children: [
 //           {
 //             label: 'Service Locations',
-//             // icon:MapPin,
+//             icon: RxDotFilled,
 //             link: '/masters/servicemaintenance/servicelocations',
 //           },
 //           {
 //             label: 'Product Masters',
-//             // icon: Package,
+//             icon: RxDotFilled,
 //             link: '/masters/servicemaintenance/productmaster',
 //           },
 //         ],
@@ -610,18 +569,18 @@ interface NavItem {
 //     ],
 //   },
 //   {
-//     label: 'Software assets',
+//     label: 'Software Assets',
 //     icon: Package,
 //     link: '/software-assets/asset-registry',
 //     children: [
 //       {
 //         label: 'Asset Registry',
-//         // icon: Package,
+//         icon: RxDotFilled,
 //         link: '/software-assets/asset-registry',
 //       },
 //       {
 //         label: 'License Assignment',
-//         // icon: Settings,
+//         icon: RxDotFilled,
 //         link: '/software-assets/license-assignment',
 //       },
 //       // {
@@ -649,12 +608,12 @@ interface NavItem {
 //   {
 //     label: 'Settings',
 //     icon: Settings,
-//     link: '/settings/system-configuration',
+//     link: '/settings/smtp-configuration',
 //     children: [
 //       {
-//         label: 'System Configuration',
-//         // icon: Settings,
-//         link: '/settings/system-configuration',
+//         label: 'SMTP Configuration',
+//         icon: RxDotFilled,
+//         link: '/settings/smtp-configuration',
 //       },
 //       // {
 //       //   label: 'User Management',
@@ -679,218 +638,378 @@ type MyComponentProps = {
 };
 const AppSidebar: React.FC<MyComponentProps> = ({navigation}) => {
   const location = useLocation();
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const { state, toggleSidebar } = useSidebar();
-  const collapsed = state === 'collapsed';
+  const collapsed = state === "collapsed";
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
-  const toggleMenu = (label: string) => {
-    setOpenMenus(prev => ({
-      ...prev,
-      [label]: !prev[label],
-    }));
+  const [hoveredLabel, setHoveredLabel] = useState<string | null>(null);
+
+  const isActive = (link: string) => location.pathname.includes(link);
+
+  const isItemOrDescendantActive = (item: NavItem): boolean => {
+    if (isActive(item.link)) return true;
+    if (!item.children) return false;
+    return item.children.some(child => isItemOrDescendantActive(child));
   };
+
+  const isChildOrHasActiveGrandchild = (child: NavItem) =>
+    isActive(child.link) || !!child.children?.some(gc => isActive(gc.link));
+
+  const isParentOrHasActiveDescendant = (item: NavItem) =>
+    isActive(item.link) || !!item.children?.some(c => isChildOrHasActiveGrandchild(c));
+
+  const toggleMenu = (label: string) =>
+    setOpenMenus(prev => ({ ...prev, [label]: !prev[label] }));
 
   useEffect(() => {
-    navigation.forEach(item => {
-      if (isSubMenuOpen(item))
-        setOpenMenus(prev => ({ ...prev, [item.label]: true }));
-    });
-  }, [location]);
-  const isActive = (link: string) => {
-    return location.pathname.includes(link);
-  };
-
-  const isSubMenuOpen = (item: NavItem) => {
-    if (!item.children) return false;
-    return item.children.some(child => {
-      if (child.children) {
-        return child.children.some(grandChild => isActive(grandChild.link));
+    const newOpen: Record<string, boolean> = {};
+    navigation.forEach(p => {
+      if (isParentOrHasActiveDescendant(p)) {
+        newOpen[p.label] = true;
+        p.children?.forEach(c => {
+          if (isChildOrHasActiveGrandchild(c)) newOpen[c.label] = true;
+        });
       }
-      return isActive(child.link);
     });
-  };
+    setOpenMenus(newOpen);
+  }, [location]);
 
-  const isNestedSubMenuOpen = (item: NavItem) => {
-    if (!item.children) return false;
-    return item.children.some(child => isActive(child.link));
-  };
-
-  // Filter navigation based on search term
   const filteredNavigation = React.useMemo(() => {
     if (!searchTerm) return navigation;
-
-    return navigation.filter(item => {
-      const itemMatches = item.label.toLowerCase().includes(searchTerm.toLowerCase());
-      const childMatches = item.children?.some(child =>
-        child.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        child.children?.some(grandChild =>
-          grandChild.label.toLowerCase().includes(searchTerm.toLowerCase())
+    const q = searchTerm.toLowerCase();
+    return navigation
+      .filter(item =>
+        item.label.toLowerCase().includes(q) ||
+        item.children?.some(
+          c =>
+            c.label.toLowerCase().includes(q) ||
+            c.children?.some(gc => gc.label.toLowerCase().includes(q))
         )
-      );
-      return itemMatches || childMatches;
-    }).map(item => {
-      if (item.children) {
-        return {
-          ...item,
-          children: item.children.filter(child => {
-            const childMatches = child.label.toLowerCase().includes(searchTerm.toLowerCase());
-            const grandChildMatches = child.children?.some(grandChild =>
-              grandChild.label.toLowerCase().includes(searchTerm.toLowerCase())
-            );
-            return childMatches || grandChildMatches;
-          }).map(child => {
-            if (child.children) {
-              return {
-                ...child,
-                children: child.children.filter(grandChild =>
-                  grandChild.label.toLowerCase().includes(searchTerm.toLowerCase())
-                )
-              };
-            }
-            return child;
-          })
-        };
-      }
-      return item;
-    });
+      )
+      .map(item => ({
+        ...item,
+        children: item.children
+          ?.filter(
+            c =>
+              c.label.toLowerCase().includes(q) ||
+              c.children?.some(gc => gc.label.toLowerCase().includes(q))
+          )
+          .map(c => ({
+            ...c,
+            children: c.children?.filter(gc => gc.label.toLowerCase().includes(q)),
+          })),
+      }));
   }, [searchTerm]);
 
-  const renderMenuItem = (item: NavItem, depth: number = 0) => {
+  const hasAnyOpenDescendant = (item: NavItem): boolean => {
+    if (!item.children) return false;
+    for (const c of item.children) {
+      if (openMenus[c.label]) return true;
+      if (c.children && hasAnyOpenDescendant(c)) return true;
+    }
+    return false;
+  };
+
+  const renderGrandChild = (grandChild: NavItem) => {
+    const isGrandchildActive = isActive(grandChild.link);
+    const highlight = isGrandchildActive || hoveredLabel === grandChild.label;
+
+    return (
+      <SidebarMenuSubItem
+        key={grandChild.label}
+        onMouseEnter={() => setHoveredLabel(grandChild.label)}
+        onMouseLeave={() => setHoveredLabel(null)}
+      >
+        <SidebarMenuSubButton asChild isActive={isGrandchildActive}>
+          {/* <Link
+            to={grandChild.link}
+            className={cn(
+              "flex items-center space-x-2 transition-colors duration-200 my-1",
+              highlight ? "text-white" : "text-[#a4bbdc]"
+            )}
+          >
+            {grandChild.icon ? (
+              // <grandChild.icon
+              //   className={cn(
+              //     "h-3 w-3 transition-colors duration-200",
+              //     highlight ? "text-white" : "text-[#a4bbdc]"
+              //   )}
+              // />
+              <Eye className='text-black' style={{color:'red'}}
+              // className={cn(
+                  // "h-3 w-3 transition-colors duration-200",
+                  // highlight ? "text-white" : "text-[#a4bbdc]"
+                // )}
+                />
+            ) : (
+              <pre />
+            )}
+            <span
+              className={cn(
+                "truncate transition-colors duration-200",
+                highlight ? "text-white [font-weight:350]" : "text-[#a4bbdc]"
+              )}
+              title={grandChild.label}
+            >
+              {grandChild.label}
+            </span>
+          </Link> */}
+          <Link
+            to={`/layout/${grandChild.link}`}
+            className={cn(
+              "flex items-center space-x-2 transition-colors duration-200 my-[2px]",
+              highlight ? "text-white" : "text-[#a4bbdc]"
+            )}
+          >
+            {grandChild.icon ? (
+              <RxDotFilled
+                className={cn(
+                  "h-3 w-3 transition-colors duration-200",
+                  highlight ? "text-white" : "!text-[#a4bbdc]"
+                )}
+              />
+            ) : (
+              <pre />
+            )}
+            <span
+              className={cn(
+                "truncate transition-colors duration-200",
+                highlight ? "text-white [font-weight:350]" : "text-[#a4bbdc]"
+              )}
+              title={grandChild.label}
+            >
+              {grandChild.label}
+            </span>
+          </Link>
+        </SidebarMenuSubButton>
+      </SidebarMenuSubItem>
+    );
+  };
+
+  const renderChild = (child: NavItem) => {
+    const isChildActive = isActive(child.link);
+    const hasActive = isChildOrHasActiveGrandchild(child);
+    const childOpen = openMenus[child.label] ?? false;
+    const highlight = isChildActive || hasActive || childOpen || hoveredLabel === child.label;
+
+    if (child.children && !collapsed) {
+      return (
+        <Collapsible
+          key={child.label}
+          className="w-full"
+          open={childOpen}
+          onOpenChange={() => toggleMenu(child.label)}
+        >
+          <SidebarMenuSubItem
+            onMouseEnter={() => setHoveredLabel(child.label)}
+            onMouseLeave={() => setHoveredLabel(null)}
+          >
+            <SidebarMenuSubButton asChild>
+              <CollapsibleTrigger className="flex items-center justify-between w-full transition-colors duration-200 rounded-md my-[2px]">
+                <div className="flex items-center space-x-2" title={child.label}>
+                  {child.icon ? (
+                    <RxDotFilled
+                      className={cn(
+                        "h-3 w-3 transition-colors duration-200",
+                        highlight ? "text-white" : "!text-[#a4bbdc]"
+                      )}
+                    />
+                  ) : (
+                    <pre />
+                  )}
+                  <span
+                    className={cn(
+                      "truncate transition-colors duration-200",
+                      highlight ? "text-white [font-weight:350]" : "text-[#a4bbdc]"
+                    )}
+                  >
+                    {child.label}
+                  </span>
+                </div>
+                {childOpen ? (
+                  <ChevronDown
+                    className={cn(
+                      "h-3 w-3 transition-transform transition-colors duration-200",
+                      highlight ? "text-white" : "text-[#a4bbdc]"
+                    )}
+                  />
+                ) : (
+                  <ChevronRight
+                    className={cn(
+                      "h-3 w-3 transition-transform transition-colors duration-200",
+                      highlight ? "text-white" : "text-[#a4bbdc]"
+                    )}
+                  />
+                )}
+              </CollapsibleTrigger>
+            </SidebarMenuSubButton>
+            <CollapsibleContent>
+              <SidebarMenuSub className="ml-0">
+                {child.children.map(gc => renderGrandChild(gc))}
+              </SidebarMenuSub>
+            </CollapsibleContent>
+          </SidebarMenuSubItem>
+        </Collapsible>
+      );
+    }
+
+    return (
+      <SidebarMenuSubItem
+        key={child.label}
+        onMouseEnter={() => setHoveredLabel(child.label)}
+        onMouseLeave={() => setHoveredLabel(null)}
+      >
+        <SidebarMenuSubButton asChild isActive={isChildActive}>
+          <Link
+            to={`/layout/${child.link}`}
+            className={cn(
+              "flex items-center space-x-0 transition-colors duration-200 my-[2px]",
+              highlight ? "text-white" : "text-[#a4bbdc]"
+            )}
+            title={child.label}
+          >
+            {child.icon ? (
+               <RxDotFilled
+                className={cn(
+                  "h-3 w-3 transition-colors duration-200",
+                  highlight ? "text-white" : "!text-[#a4bbdc]"
+                )}
+              />
+            ) : (
+              <pre />
+            )}
+            <span
+              className={cn(
+                "truncate transition-colors duration-200",
+                highlight ? "text-white [font-weight:350]" : "text-[#a4bbdc]"
+              )}
+            >
+              {child.label}
+            </span>
+          </Link>
+        </SidebarMenuSubButton>
+      </SidebarMenuSubItem>
+    );
+  };
+
+  const renderMenuItem = (item: NavItem) => {
+    const isParentActive = isParentOrHasActiveDescendant(item);
+    const isParentOpen = openMenus[item.label] ?? false;
+
+    const hasOpenDescendant = hasAnyOpenDescendant(item);
+
+    const shouldHighlight =
+      isParentActive || isParentOpen || hasOpenDescendant || hoveredLabel === item.label;
+
     if (item.children && !collapsed) {
       return (
-        <Collapsible key={item.label} className={cn("w-full")} open={openMenus[item.label] ?? false} onOpenChange={() => toggleMenu(item.label)}>
-          <SidebarMenuItem>
+        <Collapsible
+          key={item.label}
+          open={isParentOpen}
+          onOpenChange={() => toggleMenu(item.label)}
+          className="w-full"
+        >
+          <SidebarMenuItem
+            onMouseEnter={() => setHoveredLabel(item.label)}
+            onMouseLeave={() => setHoveredLabel(null)}
+          >
             <SidebarMenuButton asChild tooltip={item.label}>
-              <CollapsibleTrigger className="flex items-center justify-between w-full hover:bg-blue-50">
-                <div className="flex items-center space-x-3 gap-1">
-                  {item.icon && <item.icon className="h-4 w-4" />}
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span className="group-data-[collapsible=icon]:hidden truncate max-w-[180px]">{item.label}</span>
-                      </TooltipTrigger>
-                      {item.label.length > 25 && (
-                        <TooltipContent>
-                          <p>{item.label}</p>
-                        </TooltipContent>
+              <CollapsibleTrigger className={cn("flex items-center justify-between w-full transition-colors duration-200 rounded-md my-[2px]")}>
+                <div className="flex items-center space-x-3 gap-1" title={item.label}>
+                  {item.icon && (
+                    <item.icon
+                      className={cn(
+                        "h-4 w-4 transition-colors duration-200",
+                        shouldHighlight ? "text-white" : "text-[#a4bbdc]"
                       )}
-                    </Tooltip>
-                  </TooltipProvider>
-                </div>
-                <div className="group-data-[collapsible=icon]:hidden">
-                  {openMenus[item.label] ? (
-                    <ChevronDown className="h-4 w-4" />
-                  ) : (
-                    <ChevronRight className="h-4 w-4" />
+                    />
+                  )}
+                  {!collapsed && (
+                    <span
+                      className={cn(
+                        "truncate max-w-[180px] transition-colors duration-200",
+                        shouldHighlight ? "text-white [font-weight:350]" : "text-[#a4bbdc]"
+                      )}
+                    >
+                      {item.label}
+                    </span>
                   )}
                 </div>
+                {/* {isParentOpen ? (
+                  <ChevronDown
+                    className={cn(
+                      "h-4 w-4 transition-transform transition-colors duration-200",
+                      shouldHighlight ? "text-white" : "text-[#a4bbdc]"
+                    )}
+                  />
+                ) : (
+                  <ChevronRight
+                    className={cn(
+                      "h-4 w-4 transition-transform transition-colors duration-200",
+                      shouldHighlight ? "text-white" : "text-[#a4bbdc]"
+                    )}
+                  />
+                )} */}
               </CollapsibleTrigger>
             </SidebarMenuButton>
             <CollapsibleContent>
-              <SidebarMenuSub>
-                {item.children.map((child) => {
-                  if (child.children) {
-                    return (
-                      <Collapsible key={child.label} className="w-full" open={openMenus[child.label] ?? false} onOpenChange={() => toggleMenu(child.label)}>
-                        <SidebarMenuSubItem>
-                          <SidebarMenuSubButton asChild>
-                            <CollapsibleTrigger className="flex items-center justify-between w-full hover:bg-blue-50">
-                              <div className="flex items-center space-x-2">
-                                {child.icon ? <child.icon className="h-3 w-3" /> : <pre></pre>}
-                                <span className="truncate" title={child.label}>{child.label}</span>
-                              </div>
-                              {/* {isNestedSubMenuOpen(child) ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />} */}
-                              {openMenus[child.label] ? <ChevronDown /> : <ChevronRight />}
-                            </CollapsibleTrigger>
-                          </SidebarMenuSubButton>
-                          <CollapsibleContent>
-                            <SidebarMenuSub className="ml-0">
-                              {child.children.map((grandChild) => (
-                                <SidebarMenuSubItem key={grandChild.label}>
-                                  <SidebarMenuSubButton asChild isActive={isActive(grandChild.link)}>
-                                    <Link to={`/layout/${grandChild.link}`} className="flex items-center space-x-2">
-                                      {grandChild.icon ? <grandChild.icon className="h-3 w-3" /> : <pre></pre>}
-                                      <span
-                                        className="truncate"
-                                        title={String(grandChild.label)}
-                                      >{grandChild.label}</span>
-                                    </Link>
-                                  </SidebarMenuSubButton>
-                                </SidebarMenuSubItem>
-                              ))}
-                            </SidebarMenuSub>
-                          </CollapsibleContent>
-                        </SidebarMenuSubItem>
-                      </Collapsible>
-                    );
-                  }
-                  return (
-                    <SidebarMenuSubItem key={child.label}>
-                      <SidebarMenuSubButton asChild isActive={isActive(child.link)}>
-                        <div>
-                          <Link to={`/layout/${child.link}`} className="flex items-center space-x-2">
-                            {child?.icon ? <child.icon className="h-3 w-3" /> : <pre></pre>}
-                            <span
-                              className="truncate"
-                              title={String(child.label)}
-                            >{child.label}</span>
-                          </Link>
-                        </div>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                  );
-                })}
-              </SidebarMenuSub>
+              <SidebarMenuSub>{item.children.map(c => renderChild(c))}</SidebarMenuSub>
             </CollapsibleContent>
           </SidebarMenuItem>
         </Collapsible>
       );
     }
 
-    return (
+    const isItemActive = isActive(item.link);
+    const showHighlight = isItemActive || hoveredLabel === item.label;
 
-      <SidebarMenuItem key={item.label}>
-        <SidebarMenuButton asChild isActive={isActive(item.link)} tooltip={collapsed ? item.label : undefined}>
-          <Link to={`/layout/${item.link}`} className="flex items-center space-x-1 hover:bg-blue-50">
-            <item.icon className="h-4 w-4 shrink-0" onClick={toggleSidebar} />
+    return (
+      <SidebarMenuItem
+        key={item.label}
+        onMouseEnter={() => setHoveredLabel(item.label)}
+        onMouseLeave={() => setHoveredLabel(null)}
+      >
+        <SidebarMenuButton asChild isActive={isItemActive}>
+          <Link
+            to={`/layout/${item.link}`}
+            className={cn(
+              "flex items-center space-x-1 transition-colors duration-200 rounded-md my-1",
+              showHighlight ? "text-white" : "text-[#a4bbdc]"
+            )}
+          >
+            <item.icon
+              className={cn(
+                "h-4 w-4 transition-colors duration-200",
+                showHighlight ? "text-white" : "!text-[#a4bbdc]"
+              )}
+            />
             {!collapsed && (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span className="group-data-[collapsible=icon]:hidden truncate max-w-[180px]">{item.label}</span>
-                  </TooltipTrigger>
-                  {item.label.length > 25 && (
-                    <TooltipContent>
-                      <p>{item.label}</p>
-                    </TooltipContent>
-                  )}
-                </Tooltip>
-              </TooltipProvider>
+              <span
+                className={cn(
+                  "truncate max-w-[180px] transition-colors duration-200",
+                  showHighlight ? "text-white [font-weight:350]" : "text-[#a4bbdc]"
+                )}
+              >
+                {item.label}
+              </span>
             )}
           </Link>
         </SidebarMenuButton>
       </SidebarMenuItem>
-
     );
   };
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className='py-[18px] shadow-[0_2px_8px_0_rgba(0,0,0,0.05)]'>
-        <Link to="/" className="flex items-center space-x-2 px-2 py-1">
-          {!collapsed ? (
-            <div className="flex flex-col group-data-[collapsible=icon]:hidden">
-              <div className="text-xl font-bold text-gray-300">Tracet</div>
-            </div>
-          ) : <div>T</div>}
-        </Link>
+      <SidebarHeader className="py-[16px] shadow-[0_2px_8px_0_rgba(0,0,0,0.05)]">
+        <div className="flex items-center space-x-2 px-2 py-1">
+          {!collapsed ? <div className="text-xl font-bold text-gray-300">Tracet</div> : <div>T</div>}
+        </div>
       </SidebarHeader>
 
       <SidebarContent>
-        <SidebarMenu className={cn(
-          collapsed && "mt-2"
-        )}>
-          {filteredNavigation.map((item) => renderMenuItem(item))}
+        <SidebarMenu className={cn(collapsed && "mt-2")}>
+          {filteredNavigation.map(item => renderMenuItem(item))}
         </SidebarMenu>
       </SidebarContent>
 
@@ -898,12 +1017,12 @@ const AppSidebar: React.FC<MyComponentProps> = ({navigation}) => {
         <SidebarGroup>
           <SidebarGroupContent>
             {!collapsed && (
-              <div className="relative group-data-[collapsible=icon]:hidden">
+              <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-black h-4 w-4" />
                 <Input
                   placeholder="Search modules..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={e => setSearchTerm(e.target.value)}
                   className="pl-10 h-8 text-black"
                 />
               </div>
@@ -911,9 +1030,9 @@ const AppSidebar: React.FC<MyComponentProps> = ({navigation}) => {
           </SidebarGroupContent>
         </SidebarGroup>
         {!collapsed && (
-          <div className="text-xs text-white text-center border-t pt-2 group-data-[collapsible=icon]:hidden">
+          <div className="text-xs text-white text-center border-t pt-2">
             <div>&copy; {new Date().getFullYear()} Tracet Enterprise</div>
-            <div className="text-white font-medium">v2.0.1</div>
+            <div className="text-white [font-weight:350]">v2.0.1</div>
           </div>
         )}
       </SidebarFooter>

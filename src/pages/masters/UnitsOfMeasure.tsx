@@ -306,7 +306,7 @@ const UnitOfMeasure = () => {
                                 variant="primary"
                                 icon={<Plus className="h-4 w-4" />}
                                 className="bg-orange-500 hover:bg-orange-600 border-orange-500"
-                                onClick={() => { navigate('/masters/consumables/unitsofmeasure/manageunitconverstion'); }}
+                                onClick={() => { navigate('/layout/masters/consumables/unitsofmeasure/manageunitconverstion'); }}
                             >
                                 Manage Unit Conversations
                             </ReusableButton>

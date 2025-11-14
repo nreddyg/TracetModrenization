@@ -516,7 +516,7 @@ const Customer = () => {
     }).catch(err => {console.error(err) }).finally(() => { dispatch(setLoading(false)) })
   }
   return (
-    <div className="h-full overflow-y-auto   bg-gray-50 flex flex-col ">
+    <div className="h-full overflow-y-auto    flex flex-col ">
       <div className="flex flex-1 overflow-hidden   ">
         {/* Left Sidebar - Ticket Inbox */}
 
@@ -668,7 +668,7 @@ const Customer = () => {
 
                                       {renderField(obj)}
                                       <div className='text-xs text-cyan-500 font-bold flex justify-end'>
-                                        <NavLink to="/masters/company/customer/customerlocation" state={{ selectedCustomerData }} >Add Locations</NavLink>
+                                        <NavLink to="/layout/masters/company/customer/customer-location" state={{ selectedCustomerData }} >Add Locations</NavLink>
                                       </div>
                                     </div>
                                   )

@@ -1,39 +1,6 @@
-// import AssetLocation from "./pages/masters/AssetLocation";
-// import CompanyHierarchy from "./pages/masters/CompanyHierarchy";
-// import CostCenter from "./pages/masters/CostCenter";
-// import Customer from "./pages/masters/Customer";
-// import CustomerLocation from "./pages/masters/CustomerLocation";
-// import Department from "./pages/masters/Department";
-// import AddBook from "./pages/masters/depreciation/AddBook";
-// import AssetCategoryMappingBookCategory from "./pages/masters/depreciation/AssetCategoryMappingBookCategory";
-// import Books from "./pages/masters/depreciation/Books";
-// import AssetCategory from "./pages/masters/fixedAssets/AssetCategory";
-// import UserAttributes from "./pages/masters/fixedAssets/UserAttributes";
-// import ItemCategory from "./pages/masters/ItemCategory";
-// import ItemMaster from "./pages/masters/ItemMaster";
-// import Organization from "./pages/masters/Organization";
-// import ProductMasters from "./pages/masters/ProductMasters";
-// import ReportsMasters from "./pages/masters/ReportsMasters";
-// import ServiceLocations from "./pages/masters/ServiceLocations";
-// import Store from "./pages/masters/Store";
-// import UnitOfMeasure from "./pages/masters/UnitsOfMeasure";
-// import User from "./pages/masters/User";
-// import Vendor from "./pages/masters/Vendor";
-// import AllRequests from "./pages/servicedesk/AllRequests";
-// import AssetCodeTable from "./pages/servicedesk/AssetCodeTable";
-// import Configuration from "./pages/servicedesk/Configuration";
-// import MyWorkbench from "./pages/servicedesk/MyWorkbench";
-// import PaymentDetails from "./pages/servicedesk/PaymentDetails";
-// import ServiceDeskReports from "./pages/servicedesk/ServiceDeskReports";
-// import SubscriptionManagement from "./pages/servicedesk/Subscription";
-// import TicketProgressDashboard from "./pages/servicedesk/TicketProgressDashboard";
-// import UserGroups from "./pages/servicedesk/UserGroups";
-// import TicketCreate from "./pages/TicketCreate";
-// import TicketView from "./pages/TicketView";
 
 import WrapperLazyComponent from "./components/common/WrapperLazyComponent";
-
-
+import ManageUnitConversion from "./pages/masters/ManageUnitConvertion";
 
 // Lazy load all pages
 const Index = WrapperLazyComponent(() => import("./pages/Index"));
@@ -161,105 +128,121 @@ export const appRoutesObj={
     index: false,
   },
   "masters-company-organization": {
-    path: 'masters/addneworg',
+    path: 'masters/company/organization',
     component: <Organization />,
     index: true,
   },
   "masters-company-user": {
-    path: 'masters/usercreation',
+    path: 'masters/company/user',
     component: <User />,
     index: false,
   },
   "masters-company-vendor": {
-    path: 'masters/newVendor',
+    path: 'masters/company/vendor',
     component: <Vendor />,
     index: false,
   },
  'masters-company-companyhierarchy':  {
-    path: 'masters/companyhierarchy',
+    path: 'masters/company/company-hierarchy',
     component: <CompanyHierarchy />,
     index: false,
   },
  'masters-company-department/unit': {
-    path: 'masters/department',
+    path: 'masters/company/department',
     component: <Department />,
     index: false,
   },
   "masters-company-customer": {
-    path: 'masters/addnewcustomer',
+    path: 'masters/company/customer',
     component: <Customer />,
     index: false,
     dependent:[{
-      path: 'masters/customerlocation',
+      path: 'masters/company/customer/customer-location',
       component: <CustomerLocation/>,
       index:false
     }]
   },
   'masters-company-assetlocation': {
-    path: 'masters/assetlocation',
+    path: 'masters/company/asset-location',
     component: <AssetLocation />,
     index: false,
   },
  'masters-company-costcenter':  {
-    path: 'masters/costcenter',
+    path: 'masters/company/costcenter',
     component: <CostCenter />,
     index: false,
   },
  "masters-consumables-itemmaster":  {
-    path:"masters/itemmaster",
+    path:"masters/consumables/item-master",
     component:<ItemMaster/>,
     index:false,
   },
  "masters-consumables-unitsofmeasure":  {
-    path:"masters/unitsofmeasure",
+    path:"masters/consumables/unitsofmeasure",
     component:<UnitOfMeasure/>,
     index:false,
+      dependent:[{
+      path: 'masters/consumables/unitsofmeasure/manageunitconverstion',
+      component: <ManageUnitConversion/>,
+      index:false
+    }]
   },
   "masters-consumables-store": {
-    path:"masters/store",
+    path:"masters/consumables/store",
     component:<Store/>,
     index:false
   },
  "masters-consumables-itemcategories":  {
-    path: 'masters/itemcategory',
+    path: 'masters/consumables/item-category',
     component: <ItemCategory/>,
     index: false,
   },
 
   "masters-depreciation-book": {
-    path: 'masters/Book',
+    path: 'masters/depreciation/book',
     component: <Books/>,
     index: false,
     dependent:[ {
-      path: '/masters/depreciation/book/addbook',
+      path: 'masters/depreciation/book/addbook',
       component: <AddBook/>,
       index: false,
-    },]
+    },
+  {
+      path:"masters/depreciation/book/addbook/:id",
+      component:<AddBook key={`edit`} />,
+      index: false,
+    },
+    {
+      path:"masters/depreciation/book/additionaldepreciation",
+      component:<AdditionalDepreciation/>,
+      index: false,
+    },
+  ]
   },
   "masters-depreciation-assetcategorybookcategorymapping": {
-  path:'masters/AssetcategoryMappingWithBookCategory',
+  path:'masters/depreciation/assetcategorybookcategorymapping',
   component:<AssetCategoryMappingBookCategory/>,
   index:false
 },
 
  "masters-servicemaintenance-productmaster":  {
-    path:'masters/productMaster',
+    path:'masters/servicemaintenance/productmaster',
     component:<ProductMasters />,
     index:false
   },
  'masters-servicemaintenance-servicelocations':  {
-    path:'masters/servicelocations',
+    path:'masters/servicemaintenance/servicelocations',
     component:<ServiceLocations />,
     index:false
   },
   
   'masters-masterreports':{
-    path:'masters/MasterReports',
+    path:'masters/reports',
     component:<ReportsMasters/>,
     index:false
   },
   'masters-fixedassets-userattributes': {
-    path: 'masters/userattributes',
+    path: 'masters/fixed-assets/userattributes',
     component: <UserAttributes/>,
     index: false,
   },
@@ -623,24 +606,24 @@ export const appRoutesObj={
   index: false,
   dependent:[
     {
-      path:'servicedesk/newservicerequest/assettable',
+      path:'service-desk/new-request/assetcode-table',
       component: <AssetCodeTable />,
       index: false,
      },
   ]
 },
 "servicedesk-usergroups":{
- path:'servicedesk/usergroups',
+ path:'service-desk/user-groups',
  component: <UserGroups/>,
  index: false,
 },
 "servicedesk-subscription":{
- path:'servicedesk/subscription',
+ path:'service-desk/subscription',
  component: <SubscriptionManagement />,
  index: false,
  dependent:[
   {
-    path:'servicedesk/subscriptionpaymentdetails',
+    path:'service-desk/payment-details',
     component: <PaymentDetails />,
     index: false,
    },
@@ -664,7 +647,7 @@ export const appRoutesObj={
  },
 
  "servicedesk-myworkbench":{
- path:'servicedesk/myworkbench',
+ path:'service-desk/my-workbench',
  component: <MyWorkbench key={"myworkbench"} />,
  index: false,
  dependent:[ {
@@ -680,17 +663,17 @@ export const appRoutesObj={
  // },
 
  "servicedesk-allservicerequests":{
-   path:'servicedesk/allservicerequests',
+   path:'service-desk/all-requests',
    component: <AllRequests/>,
    index: false,
    dependent:[ {
-    path:'/service-desk/all-requests/tickets/:Did/:id',
+    path:'service-desk/all-requests/tickets/:Did/:id',
     component:<TicketView key={`edit`} />,
     index:false
   },]
  },
  "servicedesk-configuration":{
-   path:'servicedesk/configuration',
+   path:'service-desk/configuration',
    component: <Configuration/>,
    index: false,
  },
@@ -701,12 +684,12 @@ export const appRoutesObj={
  // },
 
 "servicedesk-reports": {
-  path:'servicedesk/reports',
+  path:'service-desk/reports',
   component:<ServiceDeskReports/>,
   index:false
 },
 "servicedesk-ticketprogressdashboard": {
-  path:'servicedesk/ticket-progress-dashboard',
+  path:'service-desk/ticket-progress-dashboard',
   component:<TicketProgressDashboard/>,
   index:false
 },
@@ -719,6 +702,11 @@ export const appRoutesObj={
 "softwareassets-licenseassignment": {
   path:'software-assets/license-assignment',
   component:<LicenseAssignment/>,
+  index:false
+},
+"settings-smtpconfiguration": {
+  path:'settings/smtp-configuration',
+  component:<SystemConfiguration/>,
   index:false
 }
 

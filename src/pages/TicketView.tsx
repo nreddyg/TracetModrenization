@@ -129,7 +129,7 @@ const TicketView = () => {
   const { Did, id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const [isCreateMode, setIsCreateMode] = useState(location.pathname === '/service-desk/create-ticket');
+  const [isCreateMode, setIsCreateMode] = useState(location.pathname === '/layout/service-desk/create-ticket');
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [selectedTicketId, setSelectedTicketId] = useState<string>();
   const [selectedTicket, setSelectedTicket] = useState<Ticket>({} as Ticket);
@@ -254,7 +254,7 @@ const TicketView = () => {
     if (watch('Customer') && companyId && branch) fetchSubscriptionByCustomer(watch('Customer'), companyId, branch);
   }, [watch('Customer'), companyId, branch])
   useEffect(() => {
-    if (isEditing && selectedTicket) {
+    if (isEditing && selectedTicket && watch('Status')) {
       let fieldsCopy = structuredClone(fields);
       let ind = fieldsCopy.findIndex(ele => ele?.name === 'Priority');
       if ((selectedTicket.Status === 'Open' && watch('Status') != 'Open') || selectedTicket.Status !== 'Open') {
@@ -873,7 +873,7 @@ const TicketView = () => {
 
   //function to navigate asset table
   function navigateToAssetTable() {
-    navigate("/service-desk/new-request/assetcode-table", { state: { data: form.getValues() } })
+    navigate("/layout/service-desk/new-request/assetcode-table", { state: { data: form.getValues() } })
   }
   //history table api call
   async function fetchSubscriptionHistoryByCustomer(
@@ -902,11 +902,12 @@ const TicketView = () => {
     dispatch(setLoading(true));
     let additionalCheckBoxNames = []
     let additionalDateNames = []
+    const baseFieldsOnly = fields.filter(f => !f.isAdditionalField);
     let updatedFields = []
     try {
       const res = await getSRAdditionalFieldsByServiceRequestType(name, compId);
       if (res.success && res.data && res.data.AdditionalFields) {
-        const baseFieldsOnly = fields.filter(f => !f.isAdditionalField);
+        // const baseFieldsOnly = fields.filter(f => !f.isAdditionalField);
         if (res.data.AdditionalFields.length === 0) {
           updatedFields = [...baseFieldsOnly]
           setShowAccordion(false);
@@ -999,7 +1000,8 @@ const TicketView = () => {
         setSelectedTicket({ ...fieldData, ...additionalFields, ...notifyValues });
         resetValue(updatedFields)
       } else {
-        setFields(updatedFields)
+        if (updatedFields.length > 0) setFields(updatedFields)
+        else setFields(baseFieldsOnly)
       }
       dispatch(setLoading(false));
     }
@@ -1746,6 +1748,7 @@ const TicketView = () => {
                   size="small"
                   onClick={() => handleEdit('edit')}
                   icon={<Edit className="h-4 w-4" />}
+                  className='btn-submit-style'
                 >
                   Edit
                 </ReusableButton>
@@ -1754,6 +1757,7 @@ const TicketView = () => {
                   <ReusableButton
                     variant="text"
                     size="small"
+                    className='btn-reset-clear-style'
                     onClick={() => handleEdit('cancel')}
                     icon={<X className="h-4 w-4" />}
                   >
@@ -1773,6 +1777,7 @@ const TicketView = () => {
                       }
                     }
                     icon={<Save className="h-4 w-4" />}
+                    className='btn-submit-style'
                   >
                     {isCreateMode ? "Save" : "Update"}
                   </ReusableButton>

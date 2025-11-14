@@ -22,6 +22,7 @@ import { getSMTPConfig, postSMTPconfiguration } from '@/services/smtpServices';
 import { setLoading } from '@/store/slices/projectsSlice';
 import { useMessage } from '@/components/ui/reusable-message';
 import { ReusableButton } from '@/components/ui/reusable-button';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const SystemConfiguration = () => {
   const dispatch = useAppDispatch();
@@ -188,19 +189,20 @@ const SystemConfiguration = () => {
   };
   const getFieldsByNames = (names: string[]) => smtpFields.filter(f => names.includes(f.name!));
   return (
-    <div className=" h-full overflow-y-auto bg-gray-50 transition-all duration-300 ease-in-out">
+    <ScrollArea>
+    <div className=" h-full transition-all duration-300 ease-in-out">
       <header className="bg-white border-b px-6 py-4 shadow-sm">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <span>Settings</span>
             <span>/</span>
-            <span className="text-gray-900 font-medium">System Configuration</span>
+            <span className="text-gray-900 font-medium">SMTP Configuration</span>
           </div>
         </div>
       </header>
 
       <div className="p-6 space-y-6 animate-fade-in">
-        <h1 className="text-2xl font-bold text-gray-900">System Configuration</h1>
+        {/* <h1 className="text-2xl font-bold text-gray-900">SMTP Configuration</h1> */}
 
         <Tabs defaultValue="smtp" className="space-y-6">
           <TabsList className="grid w-full grid-cols-4">
@@ -431,6 +433,7 @@ const SystemConfiguration = () => {
         </Tabs>
       </div>
     </div>
+    </ScrollArea>
   );
 };
 

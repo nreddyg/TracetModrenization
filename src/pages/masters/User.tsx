@@ -178,8 +178,8 @@ const User = () => {
       UserName: watch("UserName"),
       EmployeeId: watch("EmployeeId"),
       DeviceName: watch("DeviceName"),
-      Password: watch("Password"),
-      ConfirmPassword: watch("ConfirmPassword"),
+      Password: watch("Password") || selectedUserData?.Password || "",
+      ConfirmPassword: watch("ConfirmPassword") || selectedUserData?.Password || "",
       RoleName: watch("RoleName"),
       Categories: watch("Categories") ? watch("Categories").join() : "",
       IsServiceDesk: watch("IsServiceDesk")?.toString() || "false",
@@ -488,7 +488,7 @@ const User = () => {
     }
   };
   return (
-    <div className="h-full overflow-y-auto bg-gray-50 flex flex-col ">
+    <div className="h-full overflow-y-auto flex flex-col ">
       <div className="flex flex-1 overflow-hidden   ">
         {dataSource.length !== 0 &&
           <div

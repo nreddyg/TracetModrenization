@@ -478,13 +478,13 @@ const PaymentDetails = () => {
     <div className=" bg-gray-50/30 h-full overflow-y-scroll" >
       <header className="bg-white border-b px-6 py-4 shadow-sm">
         <div className="flex items-center gap-4">
-          <SidebarTrigger />
-          <nav className="flex items-center gap-2 text-sm text-gray-600">
-            <Link to="/" className="flex items-center gap-1 hover:text-blue-600 transition-colors">
+          {/* <SidebarTrigger /> */}
+          <nav className="flex items-center gap-2 text-sm text-gray-600 p-2">
+            {/* <Link to="/" className="flex items-center gap-1 hover:text-blue-600 transition-colors">
               <Home className="h-4 w-4" />
               <span>Dashboard</span>
             </Link>
-            <span>/</span>
+            <span>/</span> */}
             <Link to="/service-desk" className="hover:text-blue-600 transition-colors">Service Desk</Link>
             <span>/</span>
             <Link to="/service-desk/subscription" className="hover:text-blue-600 transition-colors">Subscription</Link>
@@ -517,8 +517,8 @@ const PaymentDetails = () => {
                   ))}
                 </div>
                 {/* Payment Section */}
-                <div className="bg-orange-50 p-4 rounded-lg">
-                  <h3 className="text-orange-600 font-semibold mb-4">Payment</h3>
+                <div className="rounded-lg">
+                  <h3 className="text-black-600 font-semibold mb-4">Payment</h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {getFieldsByNames(getPaymentFields()).map((field) => (
                       <div key={field.name}>
@@ -528,8 +528,8 @@ const PaymentDetails = () => {
                   </div>
                 </div>
                 {/* Subscription Details */}
-                <div className="bg-orange-50 p-4 rounded-lg">
-                  <h3 className="text-orange-600 font-semibold mb-4">Subscription Details</h3>
+                <div className=" rounded-lg">
+                  <h3 className="text-black-600 font-semibold mb-4">Subscription Details</h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {getFieldsByNames(['Type', 'AMCFromDate', 'AMCToDate', 'AMCPaidDate', 'AMCExpiryDate']).map((field) => (
                       <div key={field.name}>
@@ -539,8 +539,8 @@ const PaymentDetails = () => {
                   </div>
                 </div>
                 {/* API Details */}
-                <div className="bg-orange-50 p-4 rounded-lg">
-                  <h3 className="text-orange-600 font-semibold mb-4">API Details</h3>
+                <div className=" rounded-lg">
+                  <h3 className="text-black-600 font-semibold mb-4">API Details</h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {getFieldsByNames(['NoOfCountDetails', 'PerAdditionalCountCost', 'OverUsageCount', 'Remark']).map((field) => (
                       <div key={field.name}>

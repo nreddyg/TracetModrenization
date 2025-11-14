@@ -721,6 +721,7 @@ import ExcelJS from "exceljs";
 import { Badge } from '@/components/ui/badge';
 import { useAppSelector } from '@/store';
 import { setLoading } from '@/store/slices/projectsSlice';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 
 
@@ -924,6 +925,26 @@ const SubscriptionManagement = () => {
         </Badge>
       ),
     },
+
+    {
+      id: 'actions',
+      accessorKey: 'actions',
+      header: 'Actions',
+      cell: ({ row }: any) => {
+        return (
+          <div className="flex">
+            <ReusableButton
+              variant="text"
+              title='Edit'
+              onClick={() => { console.log(row?.original); navigate('/layout/service-desk/payment-details', { state: { subscriptionData: row?.original } }) }}
+            >
+              <Edit height={18} className="h-4 w-4 text-blue-600"
+              />
+            </ReusableButton>
+          </div>
+        )
+      },
+    },
   ];
 
   // Define table actions
@@ -932,7 +953,7 @@ const SubscriptionManagement = () => {
       label: 'Edit',
       icon: Edit,
       onClick: (record: subscriptionrecord) => {
-        navigate('/service-desk/payment-details', {
+        navigate('/layout/service-desk/payment-details', {
           state: { subscriptionData: record }
         });
       },
@@ -953,7 +974,7 @@ const SubscriptionManagement = () => {
   // Handle refresh
   const handleRefresh = () => {
     // message.info("Refreshing Subscriptions...");
-       getSubscriptionData(companyId, branchName);
+    getSubscriptionData(companyId, branchName);
     // Add refresh logic here
   };
 
@@ -1025,7 +1046,7 @@ const SubscriptionManagement = () => {
   const handleNavigation = () => {
     const { CustomerName, ProductName } = getValues();
     if (CustomerName !== '' && ProductName !== '') {
-      navigate('/service-desk/payment-details', {
+      navigate('/layout/service-desk/payment-details', {
         state: {
           parentData: {
             CustomerName,
@@ -1041,126 +1062,128 @@ const SubscriptionManagement = () => {
   }
 
   return (
-    <div className="bg-gray-50/30 h-full overflow-y-scroll">
-      <header className="bg-white border-b px-6 py-3 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-        <div className="flex items-center gap-3">
-          <SidebarTrigger />
-          <ReusableButton
-            size="small"
-            // variant="primary"
-            className='bg-primary h-[2.38rem] hover:bg-blue-700  text-white'
-            onClick={() => { navigate('/service-desk/create-ticket') }}
-          >
-            New Service Request
-          </ReusableButton>
-        </div>
-        <div className="flex items-center gap-2 text-sm text-gray-600">
-              <span>Service Desk</span>
-              <span>/</span>
-              <span className="text-gray-900 font-medium">Subscription</span>
+    <ScrollArea>
+      <div className="h-full">
+        {/* <header className="bg-white border-b px-6 py-3 shadow-sm flex flex-col sm:flex-row  items-start sm:items-center gap-3">
+          <div className="flex items-center gap-3">
+            <ReusableButton
+              size="small"
+              // variant="primary"
+              // className='bg-primary h-[2.38rem] hover:bg-blue-700  text-white'
+              className='btn-submit-style'
+              onClick={() => { navigate('/service-desk/create-ticket') }}
+            >
+              New Service Request
+            </ReusableButton>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-gray-600 p-2">
+            <span>Service Desk</span>
+            <span>/</span>
+            <span className="text-gray-900 font-medium">Subscription</span>
+          </div>
+        </header> */}
+
+        <div className="p-4 space-y-4 " >
+          {/* Header Section */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div >
+              <h1 className="text-lg sm:text-2xl font-bold text-gray-900">Subscription</h1>
+              {/* <p className="text-sm text-gray-600 mt-0.5 px-2">Subscription Management</p> */}
             </div>
-      </header>
-
-      <div className="p-4 space-y-4 " >
-        {/* Header Section */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-          <div >
-            <h1 className="text-lg font-semibold text-gray-900">Subscription</h1>
-            <p className="text-sm text-gray-600 mt-0.5">Subscription Management</p>
+            <div className='flex gap-2 justify-center'>
+              <ReusableButton
+                size="small"
+                variant="primary"
+                icon={<Plus className="h-3 w-3" />}
+                iconPosition="left"
+                onClick={handleNavigation}
+                className="whitespace-nowrap hover:bg-none"
+              >
+                Payment Details
+              </ReusableButton>
+              <ReusableButton
+                size="small"
+                // variant="primary"
+                icon={<></>}
+                // iconPosition="left"
+                onClick={() => downloadExcel(dataSource, columns)}
+                // className="bg-[rgb(122,132,148)] text-white hover:bg-[rgb(122,132,148)] hover:text-white hover:border-0 border-0"
+              className='btn-submit-style'
+  >
+                Export to Excel
+              </ReusableButton>
+            </div>
           </div>
-          <div className='flex gap-2 w-full sm:w-64 justify-center'>
-            <ReusableButton
-              size="small"
-              variant="primary"
-              icon={<Plus className="h-3 w-3" />}
-              iconPosition="left"
-              onClick={handleNavigation}
-              className="whitespace-nowrap"
 
-            >
-              Payment Details
-            </ReusableButton>
-            <ReusableButton
-              size="small"
-              variant="primary"
-              icon={<></>}
-              // iconPosition="left"
-              onClick={() => downloadExcel(dataSource, columns)}
-              className="whitespace-nowrap"
-            >
-              Export to Excel
-            </ReusableButton>
-          </div>
-        </div>
+          {/* Subscription Form */}
 
-        {/* Subscription Form */}
+          <Card className="border-0 shadow-sm">
+            <CardHeader className="pb-3 pt-4">
+              <CardTitle className="text-base font-semibold">
+                Add Subscription
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Form {...form}>
+                <form className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {getFieldsByNames(['CustomerName', 'ProductName']).map((field) => (
+                      <div key={field.name}>
+                        {renderField(field)}
+                      </div>
+                    ))}
+                  </div>
+                </form>
+              </Form>
+            </CardContent>
+          </Card>
 
-        <Card className="border-0 shadow-sm">
-          <CardHeader className="pb-3 pt-4">
-            <CardTitle className="text-base font-semibold">
-              Add Subscription
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Form {...form}>
-              <form className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {getFieldsByNames(['CustomerName', 'ProductName']).map((field) => (
-                    <div key={field.name}>
-                      {renderField(field)}
-                    </div>
-                  ))}
+
+          {/* User Group List with ReusableTable */}
+          <Card className="border-0 shadow-sm">
+            <CardHeader className="pb-3 pt-2">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
+                <CardTitle className="text-base font-semibold">Subscription List</CardTitle>
+                <div className="w-full sm:w-64">
+                  <ReusableInput
+                    placeholder="Search subscriptions..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    prefixIcon={<Search className="h-3 w-3 text-gray-400" />}
+                    allowClear={true}
+                    onClear={() => setSearchTerm('')}
+                    size="small"
+                    className="w-full pl-7"
+                  />
                 </div>
-              </form>
-            </Form>
-          </CardContent>
-        </Card>
-
-
-        {/* User Group List with ReusableTable */}
-        <Card className="border-0 shadow-sm">
-          <CardHeader className="pb-3 pt-2">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-              <CardTitle className="text-base font-semibold">Subscription List</CardTitle>
-              <div className="w-full sm:w-64">
-                <ReusableInput
-                  placeholder="Search subscriptions..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  prefixIcon={<Search className="h-3 w-3 text-gray-400" />}
-                  allowClear={true}
-                  onClear={() => setSearchTerm('')}
-                  size="small"
-                  className="w-full pl-7"
-                />
               </div>
-            </div>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <ReusableTable
-              data={filteredData}
-              columns={columns}
-              actions={tableActions}
-              permissions={tablePermissions}
-              // loading={loading}
-              title=""
-              onRefresh={handleRefresh}
-              enableSearch={false}
-              enableSelection={false}
-              enableExport={true}
-              enableColumnVisibility={true}
-              enablePagination={true}
-              enableSorting={true}
-              enableFiltering={true}
-              pageSize={10}
-              emptyMessage="No user groups found"
-              rowHeight="normal"
-              storageKey="usergroups-table"
-            />
-          </CardContent>
-        </Card>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <ReusableTable
+                data={filteredData}
+                columns={columns}
+                // actions={tableActions}
+                permissions={tablePermissions}
+                // loading={loading}
+                title=""
+                // onRefresh={handleRefresh}
+                enableSearch={false}
+                enableSelection={false}
+                enableExport={true}
+                enableColumnVisibility={true}
+                enablePagination={true}
+                enableSorting={true}
+                enableFiltering={true}
+                pageSize={10}
+                emptyMessage="No user groups found"
+                rowHeight="normal"
+                storageKey="usergroups-table"
+              />
+            </CardContent>
+          </Card>
+        </div>
       </div>
-    </div>
+    </ScrollArea>
   );
 };
 

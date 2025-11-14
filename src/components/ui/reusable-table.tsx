@@ -1428,7 +1428,7 @@ const Pagination = ({ table }: { table: TanstackTable<any> }) => {
   };
 
   return (
-    <div className="flex items-center justify-between flex-wrap sm:flex-nowrap px-4 py-3 border-t border-gray-200 bg-white text-sm rounded-b-lg gap-3">
+    <div className="flex items-center justify-between flex-wrap sm:flex-nowrap px-4 py-3 border-t border-gray-200 bg-white text-sm rounded-b-xl gap-3">
       {/* Left info */}
       <div className="text-gray-600">
         Showing {start} to {end} of {totalRows} entries

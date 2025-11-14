@@ -733,7 +733,6 @@ const Layout = () => {
  )
       const [menuList, setMenuList] = useState([])
 
-      console.log("clg",LoggedInUser)
   useLayoutEffect(() => {
     if (companyId && userId) {
       if (roleModuleUsedParams.companyId !== companyId || roleModuleUsedParams.userId !==String(userId)) {
@@ -842,7 +841,6 @@ const Layout = () => {
     data?.forEach((module, ind) => {
       const moduleName = module.ModuleName.split('-')[0];
       const modulePath = currentPath ? `${currentPath}-${moduleName.toLowerCase().replace(/\s+/g, '')}` : moduleName.toLowerCase().replace(/\s+/g, '');
-          console.log("data",data,module)
       if (module.ModuleName.toLowerCase() === "reports") {
         
         const reportsPathArr = storingReportsMenu(module, parent, modulePath)
@@ -906,7 +904,6 @@ const Layout = () => {
 
   const storingReportsMenu = (module, parent, prevPath) => {
     if (parent === "servicedesk") {
-        console.log("reports",module)
       dispatch(setReportsMenu({serviceDeskReportsMenu:module.Children ? module.Children : []}))
     }
      else if (parent === "fixedassets") {

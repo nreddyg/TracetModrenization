@@ -520,12 +520,10 @@ const AssetRegistry = () => {
         }
     };
     const handleDelete = (data: any): void => {
-        console.log(data,"delete")
         setIsDelModalOpen(true);
         setDeletingRecord(data)
     }
     const handleEdit = (data: any): void => {
-        console.log(data,"edit")
         dispatch(setLoading(true))
         setTimeout(() => {
 

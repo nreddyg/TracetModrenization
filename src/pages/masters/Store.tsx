@@ -387,6 +387,7 @@ const Store = () => {
                                                             title='Store'
                                                             data={dataSource}
                                                             columns={columns}
+                                                            enableExport={false}
                                                         />
                                                     </div>
                                                 </div>

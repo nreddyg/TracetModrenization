@@ -420,7 +420,6 @@ const Department = () => {
     setSelectedKeys(selectedKeys)
     setSelectedId(info.node.id)
     setDisable(false);
-    console.log(info)
     setRecordToEditId(info.node.id);
     setSelectedNode(info.node);
     setDepartmentData(fields[info.node.type])

@@ -936,7 +936,7 @@ const SubscriptionManagement = () => {
             <ReusableButton
               variant="text"
               title='Edit'
-              onClick={() => { console.log(row?.original); navigate('/layout/service-desk/payment-details', { state: { subscriptionData: row?.original } }) }}
+              onClick={() => {  navigate('/layout/service-desk/payment-details', { state: { subscriptionData: row?.original } }) }}
             >
               <Edit height={18} className="h-4 w-4 text-blue-600"
               />

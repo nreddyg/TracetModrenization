@@ -294,11 +294,11 @@ const MyWorkbench = () => {
                 <span className="hidden sm:inline">Refresh</span>
                 <span className="sm:hidden">Refresh</span>
               </Button>
-              <Button size="sm" onClick={() => navigate('/layout/service-desk/create-ticket')} className="flex-1 btn-submit-style sm:flex-none">
+              {/* <Button size="sm" onClick={() => navigate('/layout/service-desk/create-ticket')} className="flex-1 btn-submit-style sm:flex-none">
                 <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
                 <span className="hidden sm:inline">New Service Request</span>
                 <span className="sm:hidden">New</span>
-              </Button>
+              </Button> */}
             </div>
           </div>
           <div>

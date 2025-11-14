@@ -127,8 +127,8 @@ export const modulesOverride = {
           } 
      },
       "depreciation": {
-      "action": (module,isParent) => {
-        if(isParent)return(module)
+      "action": (module) => {
+      
         return;
           } 
      },

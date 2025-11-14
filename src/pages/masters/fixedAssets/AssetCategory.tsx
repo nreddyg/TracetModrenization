@@ -235,8 +235,6 @@ const AssetCategory = () => {
                             f.name === "attributegroup" ? { ...f, options } : f
                         )
                     );
-                } else {
-                    msg.warning('no data found')
                 }
             })
             .catch(err => { })
@@ -260,8 +258,6 @@ const AssetCategory = () => {
                             f.name === "costbreakgroup" ? { ...f, options } : f
                         )
                     );
-                } else {
-                    msg.warning('no data found')
                 }
             })
             .catch(err => { })

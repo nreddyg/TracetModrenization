@@ -9,7 +9,6 @@ function Home() {
   const location=useLocation()
 
   useEffect(()=>{
-      console.log("home",location.pathname)
     navigate('/layout')
   },[dispatch])
   

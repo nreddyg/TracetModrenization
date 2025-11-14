@@ -223,13 +223,11 @@ const ServiceLocations = () => {
     ];
 
     const handleEdit = (record: MainLocation) => {
-        console.log(record,"224")
         setIsMainDialogOpen(true);
         setEditRecord(record)
     }
 
     const handleDelete = (main: MainLocation): void => {
-        console.log(main,"224")
         setDeleteRecord(main);
         setIsDelModalOpen(true);
     };

@@ -188,7 +188,7 @@ const FixedHeader: React.FC = () => {
       localStorage.removeItem("Branch");
       localStorage.removeItem("BranchId");
       localStorage.removeItem("BranchCode");
-      navigate('/layout/service-desk/all-requests');
+      navigate('/layout');
     } else if (name === "Branch") {
       setSelectedBranch(value);
       dispatch(setBranch(value || 'All'));

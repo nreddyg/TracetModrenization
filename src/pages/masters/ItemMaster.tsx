@@ -475,6 +475,7 @@ const ItemMaster = () => {
                               title='Item Master'
                               data={dataSource}
                               columns={columns}
+                              enableExport={false}
                             />
                           </div>
                         </div>

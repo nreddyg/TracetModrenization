@@ -338,6 +338,7 @@ const UnitOfMeasure = () => {
                                                             title='Units of Measure'
                                                             data={dataSource}
                                                             columns={columns}
+                                                            enableExport={false}
                                                         />
                                                     </div>
                                                 </div>

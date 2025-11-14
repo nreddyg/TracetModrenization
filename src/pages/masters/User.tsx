@@ -128,7 +128,7 @@ const User = () => {
     try {
       dispatch(setLoading(true));
       const res = await GetUsersList(companyId, UserId);
-      if (res.success && res.data) {
+      if (res.success && res.data && res.data.status===undefined) {
         if (UserId) {
           form.reset({
             ...res.data[0],
@@ -146,6 +146,7 @@ const User = () => {
           form.reset();
           setSelectedUserData(null);
         } else {
+          msg.warning(res?.data?.message || "No Users Found !!")
           setDataSource([]);
         }
       }

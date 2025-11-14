@@ -520,7 +520,7 @@ const Customer = () => {
     <div className="h-full overflow-y-auto    flex flex-col ">
       <div className="flex flex-1 overflow-hidden   ">
         {/* Left Sidebar - Ticket Inbox */}
-
+{dataSource?.length>0 &&
         <div
           className={`
     ${isInboxCollapsed ? 'w-6 p-1' : 'w-64 p-2 mb-2 rounded-b-[5px]'}
@@ -610,6 +610,7 @@ const Customer = () => {
             </ScrollArea>
           )}
         </div>
+        }
 
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col min-w-0 ">

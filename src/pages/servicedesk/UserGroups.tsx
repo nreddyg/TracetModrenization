@@ -307,7 +307,6 @@ const UserGroups = () => {
   };
 
   const handleEdit = (group: UserGroup): void => {
-    console.log(group,"311")
     setSelectedRecord(group);
     setIsEditMode(true);
     setIsFormVisible(true);

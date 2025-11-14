@@ -120,7 +120,6 @@ const ServiceDeskReports = () => {
   );
   const [columnDropdownOpen, setColumnDropdownOpen] = useState(false);
         const reportsData = useAppSelector(state => state.projects.reportsMenu);
-        console.log("reportdata",reportsData)
   const dispatch = useAppDispatch();
   const [reportTabs] = useState([
     'Service Request Details',

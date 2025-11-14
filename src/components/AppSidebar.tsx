@@ -643,7 +643,6 @@ const AppSidebar: React.FC<MyComponentProps> = ({navigation}) => {
   const collapsed = state === "collapsed";
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
   const [hoveredLabel, setHoveredLabel] = useState<string | null>(null);
-  console.log('navigation',navigation)
   const isActive = (link: string) => location.pathname.includes(link);
 
   const isItemOrDescendantActive = (item: NavItem): boolean => {

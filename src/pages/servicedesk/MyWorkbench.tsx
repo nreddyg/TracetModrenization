@@ -8,7 +8,6 @@ import { RefreshCw, Plus, Search } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import ReusableRangePicker from '@/components/ui/reusable-range-picker';
-import { ScrollArea } from '@radix-ui/react-scroll-area';
 import { getAllSRDetailsList } from '@/services/ticketServices';
 import { useAppDispatch } from '@/store/reduxStore';
 import { setLoading } from '@/store/slices/projectsSlice';
@@ -21,7 +20,7 @@ import { MyRequest_Filter_DB, workbench_Filter_DB } from '@/Local_DB/Form_JSON_D
 import { getRequestTypeById } from '@/_Helper_Functions/HelperFunctions';
 import { useAppSelector } from '@/store';
 import { useMessage } from '@/components/ui/reusable-message';
-import { FaMagnifyingGlass } from "react-icons/fa6";
+import { ScrollArea } from '@/components/ui/scroll-area';
 interface Filters {
   TicketCategory: string;
   CreatedDate: any[]; // Assuming these are ISO date strings
@@ -280,64 +279,64 @@ const MyWorkbench = () => {
   };
 
   return (
-    <div className="h-full overflow-y-scroll bg-gray-50/30">
-      <div className="p-4 sm:p-4 space-y-4 sm:space-y-4">
-        {/* Header Section */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <ScrollArea>
+      <div className="h-full">
+        <div className="p-4 sm:p-4 space-y-4 sm:space-y-4">
+          {/* Header Section */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-lg sm:text-2xl font-bold text-gray-900">{isMyRequest ? "My Requests" : "My Workbench"}</h1>
+              {/* <p className="text-gray-600 mt-1 text-sm sm:text-base">View and manage all your service requests in one place</p> */}
+            </div>
+            <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+              <Button variant="outline" size="sm" onClick={handleRefresh} className="flex-1 sm:flex-none hover:bg-background hover:text-black">
+                <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
+                <span className="hidden sm:inline">Refresh</span>
+                <span className="sm:hidden">Refresh</span>
+              </Button>
+              <Button size="sm" onClick={() => navigate('/service-desk/create-ticket')} className="flex-1 btn-submit-style sm:flex-none">
+                <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
+                <span className="hidden sm:inline">New Service Request</span>
+                <span className="sm:hidden">New</span>
+              </Button>
+            </div>
+          </div>
           <div>
-            <h1 className="text-lg sm:text-2xl font-bold text-gray-900">{isMyRequest ? "My Requests" : "My Workbench"}</h1>
-            {/* <p className="text-gray-600 mt-1 text-sm sm:text-base">View and manage all your service requests in one place</p> */}
-          </div>
-          <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
-            <Button variant="outline" size="sm" onClick={handleRefresh} className="flex-1 sm:flex-none hover:bg-background hover:text-black">
-              <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
-              <span className="hidden sm:inline">Refresh</span>
-              <span className="sm:hidden">Refresh</span>
-            </Button>
-            <Button size="sm" onClick={() => navigate('/service-desk/create-ticket')} className="flex-1 btn-submit-style sm:flex-none">
-              <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
-              <span className="hidden sm:inline">New Service Request</span>
-              <span className="sm:hidden">New</span>
-            </Button>
-          </div>
-        </div>
-        <div>
-          <Card>
-            <CardTitle className="text-lg flex px-6 py-1 pt-2 items-center gap-2">
-              {"Filters"}
-            </CardTitle>
-            <CardContent>
-              <form onSubmit={form.handleSubmit(onSubmit)}>
-                <div className=" grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {
-                    fields.map((field) => (
-                      <div key={field.name}>
-                        {renderField(field)}
-                      </div>))
-                  }
-                  <div className="flex items-center xxs:mt-1 xs2:mt-2 sm:mt-6 md:mt-6" >
-                    <ReusableButton size={"small"} htmlType='submit' className='h-9 mt-1 bg-background hover:border-[rgb(209 213 219)] hover:bg-background'>
-                      {/* <Search size={18} color='#000'/> */}
-                      <Search
-                        size={18}
-                        className="text-black hover:text-blue-500 transition-colors duration-200 cursor-pointer"
-                      />
+            <Card>
+              <CardTitle className="text-lg flex px-6 py-1 pt-2 items-center gap-2">
+                {"Filters"}
+              </CardTitle>
+              <CardContent>
+                <form onSubmit={form.handleSubmit(onSubmit)}>
+                  <div className=" grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {
+                      fields.map((field) => (
+                        <div key={field.name}>
+                          {renderField(field)}
+                        </div>))
+                    }
+                    <div className="flex items-center xxs:mt-1 xs2:mt-2 sm:mt-6 md:mt-6" >
+                      <ReusableButton size={"small"} htmlType='submit' className='h-9 mt-1 bg-background hover:border-[rgb(209 213 219)] hover:bg-background'>
+                        {/* <Search size={18} color='#000'/> */}
+                        <Search
+                          size={18}
+                          className="text-black hover:text-blue-500 transition-colors duration-200 cursor-pointer"
+                        />
 
 
-                    </ReusableButton>
+                      </ReusableButton>
+                    </div>
                   </div>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-        </div>
-        <div className="bg-white p-6 rounded-lg">
-          <ScrollArea className=" w-full ">
-            <ReusableTable data={dataSourceToShow} columns={columns} enableExport={false} />
-          </ScrollArea>
+                </form>
+              </CardContent>
+            </Card>
+          </div>
+          <div className="bg-white p-6 rounded-lg">
+              <ReusableTable data={dataSourceToShow} columns={columns} enableExport={false} />
+          </div>
         </div>
       </div>
-    </div>
+    </ScrollArea>
   );
 };
 

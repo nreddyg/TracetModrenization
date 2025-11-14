@@ -1058,7 +1058,7 @@ const ServiceDeskReports = () => {
   };
 
   return (
-    <ScrollArea className="h-full  bg-gray-50">
+    <ScrollArea className="h-full">
       {/* Compact Header */}
       <header className="bg-white border-b px-6 py-3 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3"
       >

@@ -348,7 +348,7 @@ const TicketProgressDashboard = () => {
   // Helper function to get fields by names (similar to TicketView)
   const getFieldsByNames = (names: string[]) => fields.filter(f => names.includes(f.name!));
   return (
-    <ScrollArea scrollStyle={'flex-[0.8] bg-[#aab4ca]'}>
+    <ScrollArea>
       <div className="h-full">
         <header className="px-6 py-4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">

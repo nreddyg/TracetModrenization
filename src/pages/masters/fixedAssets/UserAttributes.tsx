@@ -719,17 +719,19 @@ setRec(null)
                         <div className="flex items-center gap-2">
                             <ReusableButton
                                 variant="text"
-                                size="small"
+                                // size="small"
                                 onClick={handleReset}
                                 icon={<X className="h-4 w-4" />}
+                                
                             >
                                 Reset
                             </ReusableButton>
                             <ReusableButton
-                                size="small"
+                                // size="small"
                                 variant="primary"
                                 onClick={() => { handleSave() }}
                                 icon={<Save className="h-4 w-4" />}
+                                 className='btn-submit-style'
                             >
                                 {recordData ? 'Update' : 'Save'}
                             </ReusableButton>

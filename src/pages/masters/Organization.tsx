@@ -597,7 +597,7 @@ const Organization = () => {
             <div className="flex items-center gap-2 self-start sm:self-auto">
               <ReusableButton
                 variant="text"
-                size="small"
+                // size="small"
                 onClick={handleReset}
                 icon={<X className="h-4 w-4" />}
                 className='btn-reset-clear-style'
@@ -606,7 +606,7 @@ const Organization = () => {
               </ReusableButton>
 
               <ReusableButton
-                size="small"
+                // size="small"
                 variant="primary"
                 onClick={(data) => handleSubmit(handleSave)(data)}
                 icon={<Save className="h-4 w-4" />}

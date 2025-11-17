@@ -183,7 +183,7 @@ const AllRequests = () => {
   return (
     <ScrollArea>
       <div className="h-full">
-        <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+        <div className="p-3 sm:p-5 space-y-3 sm:space-y-4 pt-4">
           {/* Header Section */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>

@@ -13,7 +13,6 @@ import { ReusableDropdown } from '@/components/ui/reusable-dropdown';
 import { ArrowLeft, Edit, Save, X, Tag, Link, Search, ChevronLeft, ChevronRight, } from 'lucide-react';
 import { ReusableTextarea } from '@/components/ui/reusable-textarea';
 import { Controller, useForm } from 'react-hook-form';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@radix-ui/react-accordion';
 import { ReusableInput } from '@/components/ui/reusable-input';
 import { ReusableDatePicker } from '@/components/ui/reusable-datepicker';
 import ReusableTable from '@/components/ui/reusable-table';
@@ -34,6 +33,7 @@ import { ReusableCheckbox } from '@/components/ui/reusable-checkbox';
 import { BsFileEarmarkPdf, BsFiletypeHtml, BsFiletypePptx } from 'react-icons/bs';
 import { PiMicrosoftExcelLogoFill, PiMicrosoftWordLogo, PiImage, } from "react-icons/pi";
 import { RxCross2 } from "react-icons/rx";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 interface HistoryRecord {
   id: string;

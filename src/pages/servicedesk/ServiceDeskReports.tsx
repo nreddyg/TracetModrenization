@@ -121,13 +121,12 @@ const ServiceDeskReports = () => {
   const [columnDropdownOpen, setColumnDropdownOpen] = useState(false);
         const reportsData = useAppSelector(state => state.projects.reportsMenu);
   const dispatch = useAppDispatch();
-  const [reportTabs] = useState([
+  const [reportTabs,setReportsTabs] = useState([
     'Service Request Details',
     'Service Request SLA Met/SLA Violated',
     'Service Request Detail History',
   ]);
 
-  const [activeTab, setActiveTab] = useState('Service Request Details');
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
 
   const [showReport, setShowReport] = useState(false);
@@ -146,6 +145,35 @@ const ServiceDeskReports = () => {
   const [dataSource, setDataSourse] = useState([])
   const [cols, setCols] = useState([])
   let additionalFields = useRef([]);
+    const reportsMenu = useAppSelector(state => state.projects.reportsMenu);
+  const [activeTab, setActiveTab] = useState('Service Request Details');
+
+  useEffect(() => {
+    if(reportsMenu){
+
+
+       let tempReportsList = []
+    if (reportsMenu.serviceDeskReportsMenu.length !== 0) {
+      reportsMenu.serviceDeskReportsMenu.map((item) => {
+        if (item.ModuleName === "Service Request Details") {
+          tempReportsList.push("Service Request Details")
+        }
+        if (item.ModuleName === "Service Request Sla Met/Sla Violated") {
+          tempReportsList.push("Service Request SLA Met/SLA Violated")
+        }
+        if (item.ModuleName === "Service Request Detail History") {
+          tempReportsList.push("Service Request Detail History")
+        }
+      })
+    }
+    setReportsTabs(tempReportsList)
+      if(tempReportsList.length>0){
+          setActiveTab(tempReportsList[0])
+    }
+    }
+   
+  }, [reportsMenu])
+ 
 
   const form = useForm<GenericObject>({
     defaultValues: fields.reduce((acc, f) => {
@@ -1256,7 +1284,7 @@ const ServiceDeskReports = () => {
                       canManageColumns: true,  // optional
                     }}
 
-                    enableColumnPinning
+                    // enableColumnPinning
                     storageKey={activeTab === "Service Request Details" ? "SRdetails-Report" : activeTab === "Service Request SLA Met/SLA Violated" ? "SLA-Report" : "History-Report"}
                     pageSize={10}
                     enableSelection={false}

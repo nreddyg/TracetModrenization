@@ -417,7 +417,7 @@ const ItemMaster = () => {
                     <ReusableButton
                       variant="primary"
                       icon={<Plus className="h-4 w-4" />}
-                      className="bg-orange-500 hover:bg-orange-600 border-orange-500"
+                      className="btn-submit-style"
                       onClick={() => { setRecordToEditId(null); reset({ StoreName: "", Branch: "", StoreDescription: "" }) }}
                     >
                       Add
@@ -451,7 +451,7 @@ const ItemMaster = () => {
                       <ReusableButton
                         htmlType="submit"
                         variant="primary"
-                        className="bg-orange-500 hover:bg-orange-600 border-orange-500"
+                        className="btn-submit-style"
                         onClick={() => handleSubmit(submit)()}
                       >
                         {recordToEditId ? "Update" : "Save"}

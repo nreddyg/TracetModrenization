@@ -302,7 +302,7 @@ const SystemConfiguration = () => {
                     onClick={handleSubmit((data) => { handleSave(data, "SMTPSettings") })}
                     iconPosition="left"
                     size="middle"
-                    className="w-full bg-orange-500 border-orange-500 text-white hover:bg-orange-600 hover:border-orange-600 hover:text-white"
+                    className="w-full btn-submit-style"
                   >
                     Save SMTP Settings
                   </ReusableButton>

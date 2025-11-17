@@ -1428,15 +1428,15 @@ const Pagination = ({ table }: { table: TanstackTable<any> }) => {
   };
 
   return (
-    <div className="flex items-center justify-between flex-wrap sm:flex-nowrap px-4 py-3 border-t border-gray-200 bg-white text-sm rounded-b-xl gap-3">
-      {/* Left info */}
-      <div className="text-gray-600">
+    <div className="flex items-center justify-between flex-wrap sm:flex-nowrap px-2 py-3 border-t border-gray-200 bg-white text-sm rounded-b-xl gap-1">
+
+      <div className="basis-1/4 shrink-0 grow-0 whitespace-normal break-words text-gray-600">
         Showing {start} to {end} of {totalRows} entries
       </div>
 
-      {/* Right side controls */}
       <ScrollArea scrollStyle={'flex-[0.8] bg-[#aab4ca]'}>
-        <div className="flex items-center gap-2 flex-nowrap">
+        <div className="flex items-center gap-1 flex-nowrap">
+
           <Select
             value={pageSize.toString()}
             onValueChange={(value) => table.setPageSize(Number(value))}
@@ -1453,11 +1453,6 @@ const Pagination = ({ table }: { table: TanstackTable<any> }) => {
             </SelectContent>
           </Select>
 
-
-
-
-
-          {/* Left shift */}
           <Button
             variant="outline"
             size="sm"
@@ -1466,7 +1461,7 @@ const Pagination = ({ table }: { table: TanstackTable<any> }) => {
           >
             <ChevronLeft />
           </Button>
-          {/* Previous */}
+
           <Button
             variant="outline"
             size="sm"
@@ -1476,7 +1471,6 @@ const Pagination = ({ table }: { table: TanstackTable<any> }) => {
             Prev
           </Button>
 
-          {/* 3-page buttons */}
           <div className="flex items-center gap-2 min-w-[150px] justify-center">
             {visiblePages.map((page, idx) =>
               page ? (
@@ -1495,10 +1489,6 @@ const Pagination = ({ table }: { table: TanstackTable<any> }) => {
               )
             )}
           </div>
-
-
-
-          {/* Next */}
           <Button
             variant="outline"
             size="sm"
@@ -1507,7 +1497,6 @@ const Pagination = ({ table }: { table: TanstackTable<any> }) => {
           >
             Next
           </Button>
-          {/* Right shift */}
           <Button
             variant="outline"
             size="sm"
@@ -1519,6 +1508,7 @@ const Pagination = ({ table }: { table: TanstackTable<any> }) => {
         </div>
       </ScrollArea>
     </div>
+
   );
 };
 

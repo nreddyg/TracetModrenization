@@ -21,6 +21,7 @@ import { getRequestTypeById } from '@/_Helper_Functions/HelperFunctions';
 import { useAppSelector } from '@/store';
 import { useMessage } from '@/components/ui/reusable-message';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { FaAngleRight } from 'react-icons/fa';
 interface Filters {
   TicketCategory: string;
   CreatedDate: any[]; // Assuming these are ISO date strings
@@ -286,19 +287,13 @@ const MyWorkbench = () => {
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
               <h1 className="text-lg sm:text-2xl font-bold text-gray-900">{isMyRequest ? "My Requests" : "My Workbench"}</h1>
-              {/* <p className="text-gray-600 mt-1 text-sm sm:text-base">View and manage all your service requests in one place</p> */}
             </div>
             <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
-              <Button variant="outline" size="sm" onClick={handleRefresh} className="flex-1 sm:flex-none hover:bg-background hover:text-black">
-                <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
-                <span className="hidden sm:inline">Refresh</span>
-                <span className="sm:hidden">Refresh</span>
-              </Button>
-              {/* <Button size="sm" onClick={() => navigate('/layout/service-desk/create-ticket')} className="flex-1 btn-submit-style sm:flex-none">
-                <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
-                <span className="hidden sm:inline">New Service Request</span>
-                <span className="sm:hidden">New</span>
-              </Button> */}
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <span>Service Desk</span>
+                <FaAngleRight />
+                <span className="text-gray-900 font-medium">{isMyRequest ? "My Requests" : "My Workbench"}</span>
+              </div>
             </div>
           </div>
           <div>
@@ -332,7 +327,7 @@ const MyWorkbench = () => {
             </Card>
           </div>
           <div className="bg-white p-6 rounded-lg">
-              <ReusableTable data={dataSourceToShow} columns={columns} enableExport={false} />
+              <ReusableTable title={' '} onRefresh={handleRefresh} data={dataSourceToShow} columns={columns} enableExport={false} />
           </div>
         </div>
       </div>

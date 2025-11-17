@@ -97,7 +97,7 @@ const AssetCodeTable = () => {
     // Memoized navigation function
     const navigateBacktoMain = useCallback(() => {
         if(selectedRecords?.length>0){
- navigate("/service-desk/create-ticket", { state: { data: selectedRecords,formData:location.state.data } })
+ navigate("/layout/service-desk/create-ticket", { state: { data: selectedRecords,formData:location.state.data } })
         }else{
                     msg.warning('Please Select Atleast One Asset')
         }

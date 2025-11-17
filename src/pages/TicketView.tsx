@@ -1,5 +1,3 @@
-
-
 import { useState, useEffect, useCallback, useRef, ReactNode } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
@@ -15,15 +13,13 @@ import { ReusableDropdown } from '@/components/ui/reusable-dropdown';
 import { ArrowLeft, Edit, Save, X, Tag, Link, Search, ChevronLeft, ChevronRight, } from 'lucide-react';
 import { ReusableTextarea } from '@/components/ui/reusable-textarea';
 import { Controller, useForm } from 'react-hook-form';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@radix-ui/react-accordion';
 import { ReusableInput } from '@/components/ui/reusable-input';
 import { ReusableDatePicker } from '@/components/ui/reusable-datepicker';
 import ReusableTable from '@/components/ui/reusable-table';
 import { BaseField, GenericObject, UploadedFileOutput, UploadFileInput } from '@/Local_DB/types/types';
 import { CREATE_TICKET_DB, modules } from '@/Local_DB/Form_JSON_Data/CreateTicketDB';
-import { cn } from '@/lib/utils';
 import { deleteSRUpload, getAllSRDetailsList, getCommentHistoryList, getCommentsAPI, getLinkedServiceRequests, getManageAssetsList, GetServiceRequestAssignToLookups, getServiceRequestDetailsById, getSRAdditionalFieldsByServiceRequestType, getSRAssetsList, getSRBranchList, getSRCCListLookupsList, getSRConfigList, getSRCustomerLookupsList, getSRLinkToLookupsList, getSRRequestByLookupsList, getStatusLookups, getSubscriptionByCustomer, getSubscriptionHistoryByCustomer, getUploadedFilesByServiceRequestId, postCommentAPI, postServiceRequest, saveFileUpload, ServiceRequestTypeLookups, updateServiceRequest } from '@/services/ticketServices';
-import { fileToByteArray, formatDate, byteArrayToFile, formatDateToDDMMYYYY, getActivityStatusColor, getPriorityColor, getStatusColor, getRequestTypeById } from '@/_Helper_Functions/HelperFunctions';
+import { fileToByteArray, formatDate, byteArrayToFile, formatDateToDDMMYYYY, getPriorityColor, getStatusColor, getRequestTypeById } from '@/_Helper_Functions/HelperFunctions';
 import axios from 'axios';
 import { useAppDispatch, useAppSelector } from '@/store/reduxStore';
 import { setLoading } from '@/store/slices/projectsSlice';
@@ -35,8 +31,9 @@ import { FaSearch } from 'react-icons/fa';
 import { ReusableRadio } from '@/components/ui/reusable-radio';
 import { ReusableCheckbox } from '@/components/ui/reusable-checkbox';
 import { BsFileEarmarkPdf, BsFiletypeHtml, BsFiletypePptx } from 'react-icons/bs';
-import {PiMicrosoftExcelLogoFill,PiMicrosoftWordLogo,PiImage,} from "react-icons/pi";
+import { PiMicrosoftExcelLogoFill, PiMicrosoftWordLogo, PiImage, } from "react-icons/pi";
 import { RxCross2 } from "react-icons/rx";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 interface HistoryRecord {
   id: string;
@@ -74,12 +71,12 @@ export interface Ticket {
   AssigneeSelectedUserGroups?: string,
   CCListSelectedUsers?: string,
   CCListSelectedUserGroups?: string,
-  ChildServiceRequestId?:number,
-   ChildServiceRequestNo?:string,
+  ChildServiceRequestId?: number,
+  ChildServiceRequestNo?: string,
   RequestType?: string,
-  AssignedTo?:string,
+  AssignedTo?: string,
   TicketStatus?: string,
-  RequestedById?:number
+  RequestedById?: number
 }
 interface ActivityLog {
   id: string;
@@ -126,24 +123,24 @@ interface additionalFieldData {
   SelectedValues: any
 }
 const enableInClose = ["CCListSelectedUsers", "Status", "FileUploadURLs", "Title", "Description"]
-const workBenchEnables=["100","101","102","103"]
-const myRequestEnables=["104","105"]
+const workBenchEnables = ["100", "101", "102", "103"]
+const myRequestEnables = ["104", "105"]
 const TicketView = () => {
   const { Did, id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const [isCreateMode, setIsCreateMode] = useState(location.pathname === '/service-desk/create-ticket');
+  const [isCreateMode, setIsCreateMode] = useState(location.pathname === '/layout/service-desk/create-ticket');
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [selectedTicketId, setSelectedTicketId] = useState<string>();
   const [selectedTicket, setSelectedTicket] = useState<Ticket>({} as Ticket);
   const [originalTicket, setOriginalTicket] = useState<Ticket>(selectedTicket);
-  const [requestTypeId,setRequestTypeId]=useState(Did)
+  const [requestTypeId, setRequestTypeId] = useState(Did)
   const [hasChanges, setHasChanges] = useState(false);
   const [activityLogs] = useState<ActivityLog[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isInboxCollapsed, setIsInboxCollapsed] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [statusOptions,setStatusOptions]=useState([
+  const [statusOptions, setStatusOptions] = useState([
     { value: 'All Status', label: 'All Status' },
     { value: 'Open', label: 'Open' },
     { value: 'In Progress', label: 'In Progress' },
@@ -152,7 +149,7 @@ const TicketView = () => {
   ]);
   const [statusFilter, setStatusFilter] = useState('All Status');
   const [cols, setCols] = useState([])
-  const [assetCols,setAssetCols]=useState([])
+  const [assetCols, setAssetCols] = useState([])
   const [dataSource, setDataSource] = useState([]);
   const [accordionOpen, setAccordionOpen] = useState<string | undefined>(undefined);
   const [showAccordion, setShowAccordion] = useState<boolean>(false);
@@ -167,20 +164,19 @@ const TicketView = () => {
   const [comments, setComments] = useState<Comment[]>();
   const [commentHistory, setCommentHistory] = useState<any>([])
   const [childListData, setChildListData] = useState<any>([])
-  const [updatedComments,setUpdatedComments]=useState("")
-  const [notifyValues,setNotifyValues]=useState({"Notify":[]})
+  const [updatedComments, setUpdatedComments] = useState("")
+  const [notifyValues, setNotifyValues] = useState({ "Notify": [] })
   const selectedAssetCodesData: GenericObject[] = location.state ? location.state?.data : [];
-  const [triggerAccordionValidations,setTriggerAccordionValidations]=useState(false);
+  const [triggerAccordionValidations, setTriggerAccordionValidations] = useState(false);
   const msg = useMessage()
   const dispatch = useAppDispatch();
-  const storeData = useAppSelector(state => state);
-  const [srtLookupData,setSrtLookupData]=useState<any[]>([]);
-  const [assetsData,setAssetData]=useState([])
-  let LoggedInUserData=JSON.parse(localStorage.getItem('LoggedInUser'));
-  const companyId=useAppSelector(state=>state.projects.companyId);
-  const branch=useAppSelector(state=>state.projects.branch) || '';
-  const branchId=useAppSelector(state=>state.projects.branchId) || localStorage.getItem('BranchId');
-
+  const lastLevelsData = useAppSelector(state => state.projects.lastLevelsData);
+  const [srtLookupData, setSrtLookupData] = useState<any[]>([]);
+  const [assetsData, setAssetData] = useState([])
+  let LoggedInUserData = JSON.parse(localStorage.getItem('LoggedInUser')) || {};
+  const companyId = useAppSelector(state => state.projects.companyId);
+  const branch = useAppSelector(state => state.projects.branch) || '';
+  const branchId = useAppSelector(state => state.projects.branchId) || localStorage.getItem('BranchId');
   // Add ref to track previous ServiceRequestType to prevent infinite loops
   const prevServiceRequestTypeRef = useRef<string>('');
   const filteredTickets = tickets?.filter(ticket => {
@@ -190,12 +186,13 @@ const TicketView = () => {
     return matchesSearch && matchesStatus;
   });
   const [fields, setFields] = useState<BaseField[]>(CREATE_TICKET_DB);
-
   const form = useForm<GenericObject>({
     defaultValues: fields.reduce((acc, f) => {
       acc[f.name!] = f.defaultValue ?? '';
-      if(f.name==="RequestedById"){
-        acc[f.name!]=LoggedInUserData?.UserId || ''
+      if (f.name === "RequestedById") {
+        acc[f.name!] = LoggedInUserData?.UserId || ''
+      } else if (f.name === 'Branch') {
+        acc[f.name!] = branch || ''
       }
       return acc;
     }, {} as GenericObject),
@@ -207,18 +204,21 @@ const TicketView = () => {
     }
   });
   const { control, register, handleSubmit, trigger, watch, setValue, reset, formState: { errors } } = form;
-
-
   //api calls to be made in edit mode
   useEffect(() => {
-    if (!isCreateMode) {
-      if(requestTypeId){
-       fetchAllTickets(getRequestTypeById(requestTypeId));
+    if (!isCreateMode && companyId && branch) {
+      if (requestTypeId) {
+        fetchAllTickets(getRequestTypeById(requestTypeId));
       }
-     
-    }
-  }, [isCreateMode,requestTypeId])
 
+    }
+  }, [isCreateMode, requestTypeId, companyId, branch])
+
+  useEffect(() => {
+    if (isCreateMode && branch) {
+      form.setValue('Branch', branch)
+    }
+  }, [isCreateMode, branch])
   // Function to clear all form values but preserve all field configurations and options
   const clearAllFormValues = useCallback(() => {
     const currentFields = fields;
@@ -236,15 +236,15 @@ const TicketView = () => {
   useEffect(() => {
     if (selectedAssetCodesData && companyId && branch)
       fetchAllLookUps();
-    if(location?.state?.formData){
-     form.reset(location?.state?.formData)
+    if (location?.state?.formData) {
+      form.reset(location?.state?.formData)
     }
-  
-  }, [companyId,branch]);
+
+  }, [companyId, branch]);
 
 
   useEffect(() => {
-    if (branch && localStorage.getItem("editBranchFromParent")) {
+    if (branch && localStorage.getItem("editBranchFromParent") && !isCreateMode) {
       if (branch !== localStorage.getItem("editBranchFromParent")) {
         navigate(-1)
       }
@@ -252,7 +252,23 @@ const TicketView = () => {
   }, [branch])
   useEffect(() => {
     if (watch('Customer') && companyId && branch) fetchSubscriptionByCustomer(watch('Customer'), companyId, branch);
-  }, [watch('Customer'),companyId,branch])
+  }, [watch('Customer'), companyId, branch])
+  useEffect(() => {
+    if (isEditing && selectedTicket && watch('Status')) {
+      let fieldsCopy = structuredClone(fields);
+      let ind = fieldsCopy.findIndex(ele => ele?.name === 'Priority');
+      if ((selectedTicket.Status === 'Open' && watch('Status') != 'Open') || selectedTicket.Status !== 'Open') {
+        if (ind !== -1) {
+          fieldsCopy[ind].disabled = true
+        }
+      } else {
+        if (ind !== -1) {
+          fieldsCopy[ind].disabled = false
+        }
+      }
+      setFields(fieldsCopy)
+    }
+  }, [watch('Status'), isEditing, selectedTicket])
   useEffect(() => {
     if (isCreateMode) {
       const currentServiceRequestType = watch('ServiceRequestType');
@@ -263,7 +279,7 @@ const TicketView = () => {
           additionalFields.forEach(field => {
             setValue(field.name!, '');
           });
-          fetchAdditionalFieldsData(currentServiceRequestType, companyId,false,'setDefaultAssigneeBasedOnServiceRequestType');
+          fetchAdditionalFieldsData(currentServiceRequestType, companyId, false, 'setDefaultAssigneeBasedOnServiceRequestType');
         } else {
           const additionalFields = fields.filter(f => f.isAdditionalField);
           additionalFields.forEach(field => {
@@ -285,8 +301,8 @@ const TicketView = () => {
   }, [form.watch("FileUploadURLs")]);
   useEffect(() => {
     if (Object.keys(originalTicket).length > 0) {
-      let requestedById=parseId(originalTicket.RequestedById)
-      form.reset({ ...originalTicket,...notifyValues,RequestedById: requestedById})
+      let requestedById = parseId(originalTicket.RequestedById)
+      form.reset({ ...originalTicket, ...notifyValues, RequestedById: requestedById })
     }
   }, [originalTicket])
 
@@ -298,25 +314,19 @@ const TicketView = () => {
   }
 
   //assets lisat get for edit
-   const assetListAPICall=async(id:string,compId:string)=>{
-   await getSRAssetsList(id,compId).then(res => {
-
-        if (res.success && res.data && res.data !== undefined) {
-          setAssetData(res.data.AssetsList)
-          let cols=generateColumnsFromData(res.data.AssetsList,false)
-          setAssetCols(cols)
-        } else {
-          setAssetData([])
-        }
+  const assetListAPICall = async (id: string, compId: string) => {
+    try {
+      dispatch(setLoading(true))
+      const res = await getSRAssetsList(id, compId);
+      if (res.success && res.data && res.data !== undefined) {
+        setAssetData(res.data.AssetsList)
+        let cols = generateColumnsFromData(res.data.AssetsList, false)
+        setAssetCols(cols)
+      } else {
+        setAssetData([])
       }
-      )
-      .catch((err) => {
-   
-      })
-      .finally(() => {
-        dispatch(setLoading(false));
-      });
-    }
+    } catch { } finally { dispatch(setLoading(false)) }
+  }
 
   //fetch single ticket related apis
   async function fetchSingleTicketRelatedAPIs(serviceRequestId: number) {
@@ -330,16 +340,15 @@ const TicketView = () => {
         setSelectedTicket(ticketData);
         try {
           await fetchAdditionalFieldsData(ticketData.ServiceRequestType, companyId, ticketData);
-            if(ticketData.AssetId){
-             await assetListAPICall(serviceRequestId.toString(),companyId)
+          if (ticketData.AssetId) {
+            await assetListAPICall(serviceRequestId.toString(), companyId)
           }
-        } catch (err) {}
+        } catch (err) { }
       }
       if (childTickets.status === 'fulfilled' && childTickets.value.data) {
-        if (childTickets.value.data.status == undefined)
-        {
-           setChildListData(childTickets.value.data)
-        }else{
+        if (childTickets.value.data.status == undefined) {
+          setChildListData(childTickets.value.data)
+        } else {
           setChildListData([])
         }
       } else {
@@ -351,11 +360,11 @@ const TicketView = () => {
         setUploadData([]);
       }
       if (getComments.status === 'fulfilled' && getComments.value.data) {
-        if (getComments.value.data?.status===undefined ) {
-          if(getComments.value.data.length>0){
-         const commentsArray = getComments.value.data[0]?.Comments || [];
-          setComments(commentsArray);
-          }else{
+        if (getComments.value.data?.status === undefined) {
+          if (getComments.value.data.length > 0) {
+            const commentsArray = getComments.value.data[0]?.Comments || [];
+            setComments(commentsArray);
+          } else {
             setComments([]);
           }
         } else {
@@ -363,12 +372,12 @@ const TicketView = () => {
         }
       }
       if (getCommentsHistory.status === 'fulfilled' && getCommentsHistory.value.data) {
-        if (getCommentsHistory.value.data?.status===undefined) {
-         if(getCommentsHistory.value.data.length>0){
-          setCommentHistory(getCommentsHistory.value.data[0].Comments)
-         }else{
-          setCommentHistory([]);
-         }
+        if (getCommentsHistory.value.data?.status === undefined) {
+          if (getCommentsHistory.value.data.length > 0) {
+            setCommentHistory(getCommentsHistory.value.data[0].Comments)
+          } else {
+            setCommentHistory([]);
+          }
         } else {
           setCommentHistory([]);
         }
@@ -380,34 +389,34 @@ const TicketView = () => {
     }
   }
   //fetch all tickets list
-  async function fetchAllTickets(requestType:string) {
-    dispatch(setLoading(true))
-    await getAllSRDetailsList(branch, companyId, requestType).then(res => {
+  async function fetchAllTickets(requestType: string) {
+    try {
+      dispatch(setLoading(true))
+      const res = await getAllSRDetailsList(branch, companyId, requestType);
       if (res.success && res.data.status === undefined) {
         if (Array.isArray(res.data)) {
           setTickets([...res.data].reverse())
         } else {
           setTickets([])
         }
-
-      } else {
-
-      }
-    }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
+      } else { }
+    } catch { } finally { dispatch(setLoading(false)) }
   }
   //fetch uploaded files data based on the service request id 
   async function fetchUploadedFilesByServiceRequestId(serviceRequestId: number) {
-    dispatch(setLoading(true))
-    await getUploadedFilesByServiceRequestId(serviceRequestId, companyId).then(res => {
+    dispatch(setLoading(true));
+    try {
+      const res = await getUploadedFilesByServiceRequestId(serviceRequestId, companyId);
       if (res.success && res.data) {
-        setUploadData(res.data?.FileUploadDetails)
+        setUploadData(res.data?.FileUploadDetails);
       } else {
         setUploadData([]);
       }
-    }).catch(err => {
-    }).finally(()=>{
+    } catch (err) {
+      // handle error if needed
+    } finally {
       dispatch(setLoading(false));
-    })
+    }
   }
   //store lookups data in json
   const setLookupsDataInJson = (lookupsData: allResponsesType, config: GenericObject): void => {
@@ -467,11 +476,11 @@ const TicketView = () => {
       }
       if ((obj.name === 'AssetId' || obj.name === 'LinkTo') && !isCreateMode) {
         obj.show = false;
-      } if(obj.name==="RequesterCheckbox"|| obj.name==="CCListCheckbox" || obj.name==="AssignToCheckbox" || obj.name==="Notify"){
-          if(config.IsDefaultNotifyUsers){
-              form.setValue("Notify",config.NotifyUserTypes?.split(","))
-              setNotifyValues({"Notify":config.NotifyUserTypes?.split(",")})
-          }
+      } if (obj.name === "RequesterCheckbox" || obj.name === "CCListCheckbox" || obj.name === "AssignToCheckbox" || obj.name === "Notify") {
+        if (config.IsDefaultNotifyUsers) {
+          form.setValue("Notify", config.NotifyUserTypes?.split(","))
+          setNotifyValues({ "Notify": config.NotifyUserTypes?.split(",") })
+        }
       }
     });
     setFields(data);
@@ -485,21 +494,29 @@ const TicketView = () => {
           "Comment": commentForm.watch("comment"),
         }
       ]
-    }
-   
-    dispatch(setLoading(true))
-    await postCommentAPI(companyId, branch, payload).then(res => {
-        let commentList=`${updatedComments} Comment:${payload["ServiceRequestComments"][0].Comment}`
+    };
+
+    dispatch(setLoading(true));
+    try {
+      const res = await postCommentAPI(companyId, branch, payload);
+      const commentList = `${updatedComments} Comment:${payload["ServiceRequestComments"][0].Comment}`;
+
       if (res.data.status) {
-        msg.success(res.data.message)
-        setUpdatedComments(commentList)
-        commentForm.setValue("comment","")
+        msg.success(res.data.message);
+        setUpdatedComments(commentList);
+        commentForm.setValue("comment", "");
         getCommentApi(originalTicket.ServiceRequestId.toString(), companyId);
       } else {
-        msg.warning(res?.data?.ErrorDetails[0]['Error Message'] || 'Please Fill All The Required Fields')
+        msg.warning(res?.data?.ErrorDetails?.[0]?.['Error Message'] || 'Please fill all the required fields');
       }
-    }).catch(err => { }).finally(() => dispatch(setLoading(false)))
-  }
+    } catch (err) {
+      // You can log or handle error if needed
+      console.error(err);
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
+
   // Handle history button click
   const handleHistoryClick = (row: any) => {
     setSelectedRowForHistory(row);
@@ -514,9 +531,9 @@ const TicketView = () => {
   ): ColumnDef<T>[] {
     if (!data || data.length === 0) return [];
     const sample = data[0];
-    let keys=Object.keys(sample)
-    const columns: ColumnDef<T>[] = keys.filter((obj)=>obj!=="ProductId").map((key) => {
-    const value = sample[key];
+    let keys = Object.keys(sample)
+    const columns: ColumnDef<T>[] = keys.filter((obj) => obj !== "ProductId").map((key) => {
+      const value = sample[key];
 
       let editType: 'text' | 'number' | 'date' | 'select' = 'text';
       if (typeof value === 'number') {
@@ -533,8 +550,8 @@ const TicketView = () => {
           editType,
         },
       } as ColumnDef<T>;
-  
-  
+
+
     });
 
     if (includeActions) {
@@ -565,123 +582,341 @@ const TicketView = () => {
         const commentsArray = res.data[0]?.Comments || [];
         setComments(commentsArray);
       }
-    } catch (err) {}finally{dispatch(setLoading(false))}
+    } catch (err) { } finally { dispatch(setLoading(false)) }
   }
   //subscription table api call
   async function fetchSubscriptionByCustomer(CustomerName: string, compId: string, BranchName: string) {
-    dispatch(setLoading(true))
-    await getSubscriptionByCustomer(CustomerName, compId, BranchName).then(res => {
+    dispatch(setLoading(true));
+    try {
+      const res = await getSubscriptionByCustomer(CustomerName, compId, BranchName);
       if (res.success && res.data.status === undefined) {
         setDataSource(res.data);
-        const newCols = generateColumnsFromData(res.data)
-        setCols(newCols)
+        const newCols = generateColumnsFromData(res.data);
+        setCols(newCols);
       } else {
         setDataSource([]);
       }
-    })
-      .catch(err => {
-      }).finally(()=>{
-        dispatch(setLoading(false));
-      })
+    } catch (err) {
+      // You can log or handle error if needed
+      console.error(err);
+    } finally {
+      dispatch(setLoading(false));
+    }
   }
+
   //fetching all lookups data
   async function fetchAllLookUps() {
     dispatch(setLoading(true));
     try {
-      const [SRTLookUp, SRTAssignToLookup, SRTRequestedByLookup, SRTLinkToLookup, SRTCCListLookup, SRTBranchListLookup, ConfigData, StatusLookup] = await Promise.allSettled([
-        ServiceRequestTypeLookups(companyId,branchId), GetServiceRequestAssignToLookups(companyId, branch),
-        getSRRequestByLookupsList(companyId, branch), getSRLinkToLookupsList(companyId, branch),
-        getSRCCListLookupsList(companyId, branch), getSRBranchList(companyId), getSRConfigList(companyId,branch),
-        getStatusLookups(companyId)
+      const [
+        SRTLookUp,
+        SRTAssignToLookup,
+        SRTRequestedByLookup,
+        SRTLinkToLookup,
+        SRTCCListLookup,
+        SRTBranchListLookup,
+        ConfigData,
+        StatusLookup
+      ] = await Promise.allSettled([
+        ServiceRequestTypeLookups(companyId, branchId),
+        GetServiceRequestAssignToLookups(companyId, branch),
+        getSRRequestByLookupsList(companyId, branch),
+        getSRLinkToLookupsList(companyId, branch),
+        getSRCCListLookupsList(companyId, branch),
+        getSRBranchList(companyId),
+        getSRConfigList(companyId, branch),
+        getStatusLookups(companyId),
       ]);
-      let configuration = ConfigData.status === 'fulfilled' && ConfigData.value.data && ConfigData.value.data.ServiceRequestConfiguration ? ConfigData.value.data.ServiceRequestConfiguration : { CustomerFieldinMyRequest: true, AssetFieldinCreateEditServiceRequest: true }
-      let fetchCustomerAndAssetCodesLookup = { Customer: configuration.CustomerFieldinMyRequest, AssetId: configuration.AssetFieldinCreateEditServiceRequest,...configuration };
-      let SRTCustomerLookup: [] = [], Assets: [] = [];
-      if (fetchCustomerAndAssetCodesLookup.Customer) {
-        await getSRCustomerLookupsList(companyId, branch).then(res => {
-          SRTCustomerLookup = res.success ? res.data.ServiceRequestCustomerLookup ? res.data.ServiceRequestCustomerLookup : [] : []
-        }).catch(err => { }).finally(() => { })
-      }
-      if (fetchCustomerAndAssetCodesLookup.AssetId) {
-        await getManageAssetsList(branch, companyId).then(res => {
-          Assets = res.success ? res.data.AssetsListDetails ? res.data.AssetsListDetails : [] : []
-        }).catch(err => { }).finally(() => { })
-      }
-      let AssetsData: GenericObject[] = [...selectedAssetCodesData, ...Assets.filter((item: any) => item.EmpId == 'AIPL1693')]
-      const allResponses = {
-        ServiceRequestType: { data: SRTLookUp.status === 'fulfilled' && SRTLookUp.value.success && SRTLookUp.value.data.ServiceRequestTypesLookup ? SRTLookUp.value.data.ServiceRequestTypesLookup : [], label: 'ServiceRequestTypeName', value: 'ServiceRequestTypeName' },
-        AssigneeSelectedUsers: {
-          data: [], label: 'UserName', value: 'UserName', isGrouping: true, groupData: [{ label: "UserGroupName", value: "UserGroupName", data: SRTAssignToLookup.status === 'fulfilled' && SRTAssignToLookup.value.success && SRTAssignToLookup.value.data.ServiceRequestAssignToUserGroupLookup ? SRTAssignToLookup.value.data.ServiceRequestAssignToUserGroupLookup : [], groupLabel: "User Group" },
-          { label: "UserName", value: "UserName", data: SRTAssignToLookup.status === 'fulfilled' && SRTAssignToLookup.value.success && SRTAssignToLookup.value.data.ServiceRequestAssignToUsersLookup ? SRTAssignToLookup.value.data.ServiceRequestAssignToUsersLookup : [], groupLabel: "Users" },]
-        }
-        , RequestedById: { data: SRTRequestedByLookup.status === 'fulfilled' && SRTRequestedByLookup.value.success && SRTRequestedByLookup.value.data.ServiceRequestRequestedByLookup ? SRTRequestedByLookup.value.data.ServiceRequestRequestedByLookup : [], label: 'UserName', value: 'UserId' }
-        , Customer: fetchCustomerAndAssetCodesLookup.Customer ? { data: SRTCustomerLookup, label: 'CustomerName', value: 'CustomerName' } : { data: [], label: '', value: '' }
-        , LinkTo: { data: SRTLinkToLookup.status === 'fulfilled' && SRTLinkToLookup.value.success && SRTLinkToLookup.value.data.ServiceRequestLinkToLookup ? SRTLinkToLookup.value.data.ServiceRequestLinkToLookup : [], label: 'ServiceRequestName', value: 'ServiceRequestName' }
-        , CCListSelectedUsers: {
-          data: [], label: 'UserName', value: 'UserName', isGrouping: true, groupData: [
-            { label: "UserGroupName", value: "UserGroupName", data: SRTCCListLookup.status === 'fulfilled' && SRTCCListLookup.value.success && SRTCCListLookup.value.data.ServiceRequestCCListUserGroupsLookup ? SRTCCListLookup.value.data.ServiceRequestCCListUserGroupsLookup : [], groupLabel: "User Group" },
-            { label: "UserName", value: "UserName", data: SRTCCListLookup.status === 'fulfilled' && SRTCCListLookup.value.success && SRTCCListLookup.value.data.ServiceRequestCCListUsersLookup ? SRTCCListLookup.value.data.ServiceRequestCCListUsersLookup : [], groupLabel: "Users" },]
-        }
-        , Branch: { data: SRTBranchListLookup.status === 'fulfilled' && SRTBranchListLookup.value.success && SRTBranchListLookup.value.data ? SRTBranchListLookup.value.data.filter((ele: any) => ele.id !== 0 && ele.parent !== '#' && ele.type !== '99') : [], label: 'Name', value: 'Name' }
-        , AssetId: fetchCustomerAndAssetCodesLookup.AssetId ? { data: AssetsData, label: 'AssetCode', value: 'AssetID', defaultValues: selectedAssetCodesData.map(asset => asset['AssetID']) } : { data: [], label: '', value: '' }
-        , Status: { data: StatusLookup.status === 'fulfilled' && StatusLookup.value.success && StatusLookup.value.data.ServiceRequestStatusLookup ? StatusLookup.value.data.ServiceRequestStatusLookup : [], label: 'ServiceRequestStatusName', value: 'ServiceRequestStatusName' }
+
+      // Configuration handling
+      const configuration =
+        ConfigData.status === "fulfilled" &&
+          ConfigData.value.data &&
+          ConfigData.value.data.ServiceRequestConfiguration
+          ? ConfigData.value.data.ServiceRequestConfiguration
+          : {
+            CustomerFieldinMyRequest: true,
+            AssetFieldinCreateEditServiceRequest: true,
+          };
+
+      const fetchCustomerAndAssetCodesLookup = {
+        Customer: configuration.CustomerFieldinMyRequest,
+        AssetId: configuration.AssetFieldinCreateEditServiceRequest,
+        ...configuration,
       };
-      if(StatusLookup.status === 'fulfilled' && StatusLookup.value.success && StatusLookup.value.data.ServiceRequestStatusLookup){
-        let statusArr=StatusLookup.value.data.ServiceRequestStatusLookup.map((status: any) => ({ value: status?.ServiceRequestStatusName, label: status?.ServiceRequestStatusName }));
-        setStatusOptions([{ value: 'All Status', label: 'All Status' },...statusArr]);
-      }else{
-        setStatusOptions([])
+
+      let SRTCustomerLookup: any[] = [];
+      let Assets: any[] = [];
+
+      // Fetch Customer Lookup if enabled
+      if (fetchCustomerAndAssetCodesLookup.Customer) {
+        try {
+          const res = await getSRCustomerLookupsList(companyId, branch);
+          SRTCustomerLookup =
+            res.success && res.data?.ServiceRequestCustomerLookup
+              ? res.data.ServiceRequestCustomerLookup
+              : [];
+        } catch (err) {
+          console.error("Error fetching customer lookup:", err);
+        }
       }
-      if(SRTLookUp.status === 'fulfilled' && SRTLookUp.value.success && SRTLookUp.value.data.ServiceRequestTypesLookup){
+
+      // Fetch Asset Lookup if enabled
+      if (fetchCustomerAndAssetCodesLookup.AssetId) {
+        try {
+          const res = await getManageAssetsList(branch, companyId);
+          Assets =
+            res.success && res.data?.AssetsListDetails
+              ? res.data.AssetsListDetails
+              : [];
+        } catch (err) {
+          console.error("Error fetching assets list:", err);
+        }
+      }
+
+      // Filter and merge asset data
+      const AssetsData: GenericObject[] = Array.from(
+        new Map(
+          [
+            ...selectedAssetCodesData,
+            ...Assets.filter(
+              (i: any) => i.EmpId === LoggedInUserData?.EmployeeId
+            ),
+          ].map((item) => [item.AssetCode, item])
+        ).values()
+      );
+
+      // Build all lookup responses
+      const allResponses = {
+        ServiceRequestType: {
+          data:
+            SRTLookUp.status === "fulfilled" &&
+              SRTLookUp.value.success &&
+              SRTLookUp.value.data?.ServiceRequestTypesLookup
+              ? SRTLookUp.value.data.ServiceRequestTypesLookup
+              : [],
+          label: "ServiceRequestTypeName",
+          value: "ServiceRequestTypeName",
+        },
+
+        AssigneeSelectedUsers: {
+          data: [],
+          label: "UserName",
+          value: "UserName",
+          isGrouping: true,
+          groupData: [
+            {
+              label: "UserGroupName",
+              value: "UserGroupName",
+              data:
+                SRTAssignToLookup.status === "fulfilled" &&
+                  SRTAssignToLookup.value.success &&
+                  SRTAssignToLookup.value.data
+                    ?.ServiceRequestAssignToUserGroupLookup
+                  ? SRTAssignToLookup.value.data
+                    .ServiceRequestAssignToUserGroupLookup
+                  : [],
+              groupLabel: "User Group",
+            },
+            {
+              label: "UserName",
+              value: "UserName",
+              data:
+                SRTAssignToLookup.status === "fulfilled" &&
+                  SRTAssignToLookup.value.success &&
+                  SRTAssignToLookup.value.data?.ServiceRequestAssignToUsersLookup
+                  ? SRTAssignToLookup.value.data.ServiceRequestAssignToUsersLookup
+                  : [],
+              groupLabel: "Users",
+            },
+          ],
+        },
+
+        RequestedById: {
+          data:
+            SRTRequestedByLookup.status === "fulfilled" &&
+              SRTRequestedByLookup.value.success &&
+              SRTRequestedByLookup.value.data?.ServiceRequestRequestedByLookup
+              ? SRTRequestedByLookup.value.data.ServiceRequestRequestedByLookup
+              : [],
+          label: "UserName",
+          value: "UserId",
+        },
+
+        Customer: fetchCustomerAndAssetCodesLookup.Customer
+          ? {
+            data: SRTCustomerLookup,
+            label: "CustomerName",
+            value: "CustomerName",
+          }
+          : { data: [], label: "", value: "" },
+
+        LinkTo: {
+          data:
+            SRTLinkToLookup.status === "fulfilled" &&
+              SRTLinkToLookup.value.success &&
+              SRTLinkToLookup.value.data?.ServiceRequestLinkToLookup
+              ? SRTLinkToLookup.value.data.ServiceRequestLinkToLookup
+              : [],
+          label: "ServiceRequestName",
+          value: "ServiceRequestName",
+        },
+
+        CCListSelectedUsers: {
+          data: [],
+          label: "UserName",
+          value: "UserName",
+          isGrouping: true,
+          groupData: [
+            {
+              label: "UserGroupName",
+              value: "UserGroupName",
+              data:
+                SRTCCListLookup.status === "fulfilled" &&
+                  SRTCCListLookup.value.success &&
+                  SRTCCListLookup.value.data
+                    ?.ServiceRequestCCListUserGroupsLookup
+                  ? SRTCCListLookup.value.data
+                    .ServiceRequestCCListUserGroupsLookup
+                  : [],
+              groupLabel: "User Group",
+            },
+            {
+              label: "UserName",
+              value: "UserName",
+              data:
+                SRTCCListLookup.status === "fulfilled" &&
+                  SRTCCListLookup.value.success &&
+                  SRTCCListLookup.value.data?.ServiceRequestCCListUsersLookup
+                  ? SRTCCListLookup.value.data.ServiceRequestCCListUsersLookup
+                  : [],
+              groupLabel: "Users",
+            },
+          ],
+        },
+
+        Branch: {
+          data:
+            SRTBranchListLookup.status === "fulfilled" &&
+              SRTBranchListLookup.value.success &&
+              SRTBranchListLookup.value.data
+              ? SRTBranchListLookup.value.data.filter(
+                (ele: any) =>
+                  ele.id !== 0 && ele.parent !== "#" && ele.type !== "99"
+              )
+              : [],
+          label: "Name",
+          value: "Name",
+        },
+
+        AssetId: fetchCustomerAndAssetCodesLookup.AssetId
+          ? {
+            data: AssetsData,
+            label: "AssetCode",
+            value: "AssetID",
+            defaultValues: selectedAssetCodesData.map(
+              (asset) => asset["AssetID"]
+            ),
+          }
+          : { data: [], label: "", value: "" },
+
+        Status: {
+          data:
+            StatusLookup.status === "fulfilled" &&
+              StatusLookup.value.success &&
+              StatusLookup.value.data?.ServiceRequestStatusLookup
+              ? StatusLookup.value.data.ServiceRequestStatusLookup
+              : [],
+          label: "ServiceRequestStatusName",
+          value: "ServiceRequestStatusName",
+        },
+      };
+
+      // Status dropdown setup
+      if (
+        StatusLookup.status === "fulfilled" &&
+        StatusLookup.value.success &&
+        StatusLookup.value.data?.ServiceRequestStatusLookup
+      ) {
+        const statusArr = StatusLookup.value.data.ServiceRequestStatusLookup.map(
+          (status: any) => ({
+            value: status?.ServiceRequestStatusName,
+            label: status?.ServiceRequestStatusName,
+          })
+        );
+        setStatusOptions([{ value: "All Status", label: "All Status" }, ...statusArr]);
+      } else {
+        setStatusOptions([]);
+      }
+
+      // Service Request Type lookup setup
+      if (
+        SRTLookUp.status === "fulfilled" &&
+        SRTLookUp.value.success &&
+        SRTLookUp.value.data?.ServiceRequestTypesLookup
+      ) {
         setSrtLookupData(SRTLookUp.value.data.ServiceRequestTypesLookup);
-      }else{
+      } else {
         setSrtLookupData([]);
       }
+
+      // Save lookup data to state
       setLookupsDataInJson(allResponses, fetchCustomerAndAssetCodesLookup);
+
     } catch (error) {
-      msg.warning(`Error fetching lookups: ${error}`)
+      msg.warning(`Error fetching lookups: ${error}`);
     } finally {
-      setSelectedTicketId(id)
+      setSelectedTicketId(id);
       dispatch(setLoading(false));
     }
   }
+
   //function to navigate asset table
   function navigateToAssetTable() {
-    navigate("/service-desk/new-request/assetcode-table", { state: { data: form.getValues() } })
+    navigate("/layout/service-desk/new-request/assetcode-table", { state: { data: form.getValues() } })
   }
   //history table api call
-  async function fetchSubscriptionHistoryByCustomer(CustomerName: string, compId: string, BranchName: string, ProductId: number) {
+  async function fetchSubscriptionHistoryByCustomer(
+    CustomerName: string,
+    compId: string,
+    BranchName: string,
+    ProductId: number
+  ) {
     dispatch(setLoading(true));
-    await getSubscriptionHistoryByCustomer(CustomerName, compId, BranchName, ProductId).then(res => {
+    try {
+      const res = await getSubscriptionHistoryByCustomer(CustomerName, compId, BranchName, ProductId);
       if (res.success && res.data) {
         setHistoryData(res.data);
-        const newCols1 = generateColumnsFromData(res.data, false)
-        setHistoryColumns(newCols1)
+        const newCols1 = generateColumnsFromData(res.data, false);
+        setHistoryColumns(newCols1);
       }
-    }).catch(err => {
-      }).finally(()=>{
-        dispatch(setLoading(false));
-      })
+    } catch (err) {
+      console.error("Error fetching subscription history:", err);
+    } finally {
+      dispatch(setLoading(false));
+    }
   }
+
   // Fetch additional fields - only clear values, preserve all field configs and options
-  async function fetchAdditionalFieldsData(name: string, compId: string, fieldData?: any,setDefaultAssignee?:string) {
+  async function fetchAdditionalFieldsData(name: string, compId: string, fieldData?: any, setDefaultAssignee?: string) {
     dispatch(setLoading(true));
     let additionalCheckBoxNames = []
-    let additionalDateNames=[]
-    let updatedFields=[]
+    let additionalDateNames = []
+    const baseFieldsOnly = fields.filter(f => !f.isAdditionalField);
+    let updatedFields = []
     try {
       const res = await getSRAdditionalFieldsByServiceRequestType(name, compId);
       if (res.success && res.data && res.data.AdditionalFields) {
-        const baseFieldsOnly = fields.filter(f => !f.isAdditionalField);
+        // const baseFieldsOnly = fields.filter(f => !f.isAdditionalField);
         if (res.data.AdditionalFields.length === 0) {
-          updatedFields=[...baseFieldsOnly]
+          updatedFields = [...baseFieldsOnly]
           setShowAccordion(false);
           setAccordionOpen(undefined);
         } else {
           const newAdditionalFields = res.data.AdditionalFields.map((field: any) => {
             if (field.FieldType.toLowerCase() === "checkbox") {
               additionalCheckBoxNames.push(field.FieldName)
-            }else if(field.FieldType.toLowerCase() === "date"){
+            } else if (field.FieldType.toLowerCase() === "date") {
               additionalDateNames.push(field.FieldName)
             }
 
@@ -708,10 +943,10 @@ const TicketView = () => {
           }
 
           );
-          if(setDefaultAssignee && srtLookupData.length!==0 && watch('ServiceRequestType')){
+          if (setDefaultAssignee && srtLookupData.length !== 0 && watch('ServiceRequestType')) {
             const selectedServiceRequestType = watch('ServiceRequestType');
             const matchingSrt = srtLookupData.find(item => item.ServiceRequestTypeName === selectedServiceRequestType);
-            if(matchingSrt){
+            if (matchingSrt) {
               setValue('AssigneeSelectedUsers', matchingSrt.UserGroup ? matchingSrt.UserGroup.split(",") : []);
             }
           }
@@ -752,20 +987,21 @@ const TicketView = () => {
             if (additionalCheckBoxNames.includes(field.FieldName))
               additionalFields[field.FieldName] = field.FieldValue.split(",");
 
-              if (additionalDateNames.includes(field.FieldName))
-                    additionalFields[field.FieldName] = formatDateToDDMMYYYY(field.FieldValue);
+            if (additionalDateNames.includes(field.FieldName))
+              additionalFields[field.FieldName] = formatDateToDDMMYYYY(field.FieldValue);
           });
         }
-       fieldData["AssigneeSelectedUsers"] = {  "Users":fieldData["AssigneeSelectedUsers"]?fieldData["AssigneeSelectedUsers"].split(","):[],"User Group":fieldData["AssigneeSelectedUserGroups"]? fieldData["AssigneeSelectedUserGroups"].split(","):[]};
-        fieldData["CCListSelectedUsers"] = {  "Users":fieldData["CCListSelectedUsers"]?fieldData["CCListSelectedUsers"].split(","):[],"User Group":fieldData["CCListSelectedUserGroups"]? fieldData["CCListSelectedUserGroups"].split(","):[]};
+        fieldData["AssigneeSelectedUsers"] = { "Users": fieldData["AssigneeSelectedUsers"] ? fieldData["AssigneeSelectedUsers"].split(",") : [], "User Group": fieldData["AssigneeSelectedUserGroups"] ? fieldData["AssigneeSelectedUserGroups"].split(",") : [] };
+        fieldData["CCListSelectedUsers"] = { "Users": fieldData["CCListSelectedUsers"] ? fieldData["CCListSelectedUsers"].split(",") : [], "User Group": fieldData["CCListSelectedUserGroups"] ? fieldData["CCListSelectedUserGroups"].split(",") : [] };
         // fieldData['RequestedBy'] = fieldData['RequestedBy']?.replace(/\s*\(/g, " (");
         fieldData['RequestedDate'] = formatDateToDDMMYYYY(fieldData['RequestedDate']);
-        form.reset({ ...fieldData, ...additionalFields,...notifyValues });
-        setOriginalTicket({ ...fieldData, ...additionalFields,...notifyValues });
-        setSelectedTicket({ ...fieldData, ...additionalFields,...notifyValues });
+        form.reset({ ...fieldData, ...additionalFields, ...notifyValues });
+        setOriginalTicket({ ...fieldData, ...additionalFields, ...notifyValues });
+        setSelectedTicket({ ...fieldData, ...additionalFields, ...notifyValues });
         resetValue(updatedFields)
-      }else{
-        setFields(updatedFields)
+      } else {
+        if (updatedFields.length > 0) setFields(updatedFields)
+        else setFields(baseFieldsOnly)
       }
       dispatch(setLoading(false));
     }
@@ -801,72 +1037,77 @@ const TicketView = () => {
   // };
 
   //upload Functionality and API Integration
-const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> => {
-  // Ensure filelist is an array
-  const fileArray = Array.isArray(filelist) ? filelist : [];
-  
-  if (fileArray.length === 0) {
-    return;
-  }
+  const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> => {
+    // Ensure filelist is an array
+    const fileArray = Array.isArray(filelist) ? filelist : [];
 
-  const files: (UploadedFileOutput | null)[] = await Promise.all(
-    fileArray.map(async (file, index) => {
-      try {
-        if (!file.url) throw new Error(`Missing file URL for file at index ${index}`);
-        
-        const response = await axios.get<Blob>(file.url, { responseType: "blob" });
-        const byteArray = await fileToByteArray(response.data);
-        const byteArrayAsArray = Array.from(byteArray);
-        const jsonArrayString = JSON.stringify(byteArrayAsArray);
-        const fileType = file.name.split(".").pop() || "";
-        
-        return {
-          FileName: file.name,
-          ServiceDocumentFile: jsonArrayString,
-          FileType: fileType,
-          FileConversionType: file.type,
-        };
-      } catch (error) {
-        console.error(`Failed to process file ${file.name}:`, error);
-        return null;
-      }
-    })
-  );
+    if (fileArray.length === 0) {
+      return;
+    }
 
-  const validFiles = files.filter(
-    (file): file is UploadedFileOutput => file !== null
-  );
+    const files: (UploadedFileOutput | null)[] = await Promise.all(
+      fileArray.map(async (file, index) => {
+        try {
+          if (!file.url) throw new Error(`Missing file URL for file at index ${index}`);
 
-  setAttachments(validFiles);
-};
+          const response = await axios.get<Blob>(file.url, { responseType: "blob" });
+          const byteArray = await fileToByteArray(response.data);
+          const byteArrayAsArray = Array.from(byteArray);
+          const jsonArrayString = JSON.stringify(byteArrayAsArray);
+          const fileType = file.name.split(".").pop() || "";
+
+          return {
+            FileName: file.name,
+            ServiceDocumentFile: jsonArrayString,
+            FileType: fileType,
+            FileConversionType: file.type,
+          };
+        } catch (error) {
+          console.error(`Failed to process file ${file.name}:`, error);
+          return null;
+        }
+      })
+    );
+
+    const validFiles = files.filter(
+      (file): file is UploadedFileOutput => file !== null
+    );
+
+    setAttachments(validFiles);
+  };
   //handling uploaded files
-  const handleSubmitUploadedFiles = async (id: string,updatedData?:any) => {
+  const handleSubmitUploadedFiles = async (id: string, updatedData?: any) => {
     dispatch(setLoading(true));
-    const uploadPayload = { ServiceReqFileUploadDetails: attachments }
-    await saveFileUpload(companyId, id, uploadPayload).then(res => {
+    const uploadPayload = { ServiceReqFileUploadDetails: attachments };
+
+    try {
+      const res = await saveFileUpload(companyId, id, uploadPayload);
       if (res.data.status) {
-        msg.success(res.data.message)
+        msg.success(res.data.message);
         setAttachments([]);
       }
-    }).catch(err => { }).finally(() => {
+    } catch (err) {
+      console.error("Error while uploading files:", err);
+    } finally {
       if (!isCreateMode) {
-     
-        if(updatedData.status=="Closed"){
-            navigate(-1)
+        if (updatedData?.status === "Closed") {
+          navigate(-1);
         }
-        fetchSingleTicketRelatedAPIs(Number(selectedTicketId))
-      }else{
+        fetchSingleTicketRelatedAPIs(Number(selectedTicketId));
+      } else {
         form.reset();
         setAttachments([]);
       }
       dispatch(setLoading(false));
-    })
-  }
+    }
+  };
+
   //to render re usable components based on the json data from db
   const renderField = (field: BaseField) => {
-    let fieldsToShowInEdit:string[]=['Status','Notify']
+    let fieldsToShowInEdit: string[] = ['Status', 'Notify']
     const { name, label, fieldType, isRequired, show = true } = field;
     const overrideShow = !show && fieldsToShowInEdit.includes(name) && !isCreateMode;
+    const branchLabel = lastLevelsData?.Branch
     if (!name || (!overrideShow && (!show || (fieldsToShowInEdit.includes(name) && !isCreateMode)))) {
       return null;
     }
@@ -939,7 +1180,8 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
                 value={ctrl.value}
                 onChange={ctrl.onChange}
                 error={errors[name]?.message as string}
-                  dropdownClassName={true ? 'z-[10001]' : ''}
+                dropdownClassName={true ? 'z-[10001]' : ''}
+                {...(name === 'Branch' ? { label: branchLabel || label, placeholder: `Select ${branchLabel || label}` } : {})}
               />
             )}
           />
@@ -977,6 +1219,7 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
                   onChange={ctrl.onChange}
                   error={errors[name]?.message as string}
                   {...(name === 'AssetId' ? { suffixIcon: <FaSearch onClick={() => navigateToAssetTable()} style={{ fontSize: "16px", color: "#617ce7", cursor: 'pointer' }} color="white" /> } : {})}
+                  {...(!isCreateMode ? { maxTagTextLength: 10 } : {})}
                 />
               )}
             />
@@ -1073,22 +1316,38 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
   }
   //handle submit for creating tickets
   const handleSave = async () => {
-    const isValidationFailed = fields.filter(f => f.isAdditionalField && f.isRequired).every(f=>form.getValues()[f.name] !== undefined && form.getValues()[f.name] !== null && form.getValues()[f.name] !== '');
+    const isValidationFailed = fields
+      .filter(f => f.isAdditionalField && f.isRequired)
+      .every(f =>
+        form.getValues()[f.name] !== undefined &&
+        form.getValues()[f.name] !== null &&
+        form.getValues()[f.name] !== ''
+      );
+
     if (!isValidationFailed) {
       return;
     }
+
     const payload = {
       "ServiceRequestDetails": [
         {
           "Title": watch('Title'),
           "ServiceRequestType": watch('ServiceRequestType'),
-          "AssigneeSelectedUserGroups": watch('AssigneeSelectedUsers')["User Group"] ? watch('AssigneeSelectedUsers')["User Group"].join(',') : "",
-          "CCListSelectedUserGroups": watch('CCListSelectedUsers')["User Group"] ? watch('CCListSelectedUsers')["User Group"].join(',') : "",
-          "AssigneeSelectedUsers": watch('AssigneeSelectedUsers')["Users"] ? watch('AssigneeSelectedUsers')["Users"].join(',') : "",
-          "CCListSelectedUsers": watch('CCListSelectedUsers')["Users"] ? watch('CCListSelectedUsers')["Users"].join(',') : "",
+          "AssigneeSelectedUserGroups": watch('AssigneeSelectedUsers')["User Group"]
+            ? watch('AssigneeSelectedUsers')["User Group"].join(',')
+            : "",
+          "CCListSelectedUserGroups": watch('CCListSelectedUsers')["User Group"]
+            ? watch('CCListSelectedUsers')["User Group"].join(',')
+            : "",
+          "AssigneeSelectedUsers": watch('AssigneeSelectedUsers')["Users"]
+            ? watch('AssigneeSelectedUsers')["Users"].join(',')
+            : "",
+          "CCListSelectedUsers": watch('CCListSelectedUsers')["Users"]
+            ? watch('CCListSelectedUsers')["Users"].join(',')
+            : "",
           "Severity": watch('Severity'),
-          "Priority":watch('Priority'),
-          "AssetIds": watch('AssetId')?watch('AssetId')?.join(','):'',
+          "Priority": watch('Priority'),
+          "AssetIds": watch('AssetId') ? watch('AssetId')?.join(',') : '',
           "IsDraft": false,
           "RequestedDate": formatDate(watch('RequestedDate'), 'DD-MM-YYYY'),
           "RequestedBy": watch('RequestedById'),
@@ -1100,128 +1359,187 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
           "AdditionalFields": getAdditionalFieldsData()
         }
       ]
-    }
+    };
+
     dispatch(setLoading(true));
-    await postServiceRequest(companyId, branch, payload).then(res => {
+
+    try {
+      const res = await postServiceRequest(companyId, branch, payload);
+
       if (res.data.status) {
         handleSubmitUploadedFiles(res.data.ServiceRequestId);
-        msg.success(res.data.message)
+        msg.success(res.data.message);
         setHasChanges(false);
       } else {
-        let errMsg=(res.data.ErrorDetails && res.data.ErrorDetails[0]['Error Message'])?res.data.ErrorDetails[0]['Error Message']:res.data.message
+        const errMsg =
+          res.data?.ErrorDetails?.[0]?.['Error Message'] || res.data.message;
         msg.warning(errMsg);
       }
-    }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
+    } catch (err) {
+      console.error("Error while saving service request:", err);
+    } finally {
+      dispatch(setLoading(false));
+    }
   };
+
   //handle Edit Save
   const handleUpdate = async () => {
-    const isValidationFailed = fields.filter(f => f.isAdditionalField && f.isRequired).every(f=>form.getValues()[f.name] !== undefined && form.getValues()[f.name] !== null && form.getValues()[f.name] !== '');
+    const isValidationFailed = fields
+      .filter(f => f.isAdditionalField && f.isRequired)
+      .every(f =>
+        form.getValues()[f.name] !== undefined &&
+        form.getValues()[f.name] !== null &&
+        form.getValues()[f.name] !== ''
+      );
+
     if (!isValidationFailed) {
       return;
     }
-    updateServiceRequestDetails()
-  }
+
+    try {
+      // dispatch(setLoading(true))
+      await updateServiceRequestDetails();
+    } catch (err) {
+      console.error("Error while updating service request:", err);
+    } finally {
+      // dispatch(setLoading(false))
+      // Add any cleanup logic here if needed
+    }
+  };
+
   async function updateServiceRequestDetails() {
-    let commentlist=commentForm.watch("comment")  && commentForm.watch("comment")!= "<p><br></p>"?`${updatedComments} Comment:${commentForm.watch("comment")}`:updatedComments
+    const comment = commentForm.watch("comment");
+    const hasValidComment = comment && comment !== "<p><br></p>";
+
+    const commentList = hasValidComment
+      ? `${updatedComments} Comment:${comment}`
+      : updatedComments;
+
     const updatedData = {
-      "ServiceRequestNo": originalTicket.ServiceRequestNo,
-      "NotifyRequester": watch('Notify').includes("100") ? true : false,
-      "NotifyAssignee": watch('Notify').includes("102") ? true : false,
-      "NotifyCCList": watch('Notify').includes("101") ? true : false,
-      "Status": watch('Status'),
-      "Severity": watch('Severity'),
-      "Priority": watch('Priority') ? watch('Priority') : "",
-      "SaveAndSend": true,
-       "Comment":commentForm.watch("comment") && commentForm.watch("comment")!= "<p><br></p>"?commentForm.watch("comment"):"",
-      "CommentList":commentlist,
-      "AsignedUserGroups":watch('AssigneeSelectedUsers')["User Group"] ? watch('AssigneeSelectedUsers')["User Group"].join(',') : "",
-      "AsignedUsers":watch('AssigneeSelectedUsers')["Users"] ? watch('AssigneeSelectedUsers')["Users"].join(',') : "",
-      "Customer": watch('Customer'),
-      "CCListUsers": watch('CCListSelectedUsers')["Users"] ? watch('CCListSelectedUsers')["Users"].join(',') : "",
-      "CCListUserGroups": watch('CCListSelectedUsers')["User Group"] ? watch('CCListSelectedUsers')["User Group"].join(',') : "",
-      "FileUploadURLs": "",
-      "Title": watch('Title'),
-      "Description": watch('Description'),
-      "AdditionalFields": selectedTicket.Status === "Closed" ? [] : getAdditionalFieldsData()
- ,
- 
-          
-    }
+      ServiceRequestNo: originalTicket.ServiceRequestNo,
+      NotifyRequester: watch("Notify").includes("100"),
+      NotifyAssignee: watch("Notify").includes("102"),
+      NotifyCCList: watch("Notify").includes("101"),
+      Status: watch("Status"),
+      Severity: watch("Severity"),
+      Priority: watch("Priority") || "",
+      SaveAndSend: true,
+      Comment: hasValidComment ? comment : "",
+      CommentList: commentList,
+      AsignedUserGroups: watch("AssigneeSelectedUsers")["User Group"]
+        ? watch("AssigneeSelectedUsers")["User Group"].join(",")
+        : "",
+      AsignedUsers: watch("AssigneeSelectedUsers")["Users"]
+        ? watch("AssigneeSelectedUsers")["Users"].join(",")
+        : "",
+      Customer: watch("Customer"),
+      CCListUsers: watch("CCListSelectedUsers")["Users"]
+        ? watch("CCListSelectedUsers")["Users"].join(",")
+        : "",
+      CCListUserGroups: watch("CCListSelectedUsers")["User Group"]
+        ? watch("CCListSelectedUsers")["User Group"].join(",")
+        : "",
+      FileUploadURLs: "",
+      Title: watch("Title"),
+      Description: watch("Description"),
+      AdditionalFields:
+        selectedTicket.Status === "Closed" ? [] : getAdditionalFieldsData(),
+    };
 
-    let payload = {
-      "ServiceRequestDetails": [updatedData]
-    }
+    const payload = {
+      ServiceRequestDetails: [updatedData],
+    };
+
     dispatch(setLoading(true));
-    await updateServiceRequest(companyId, branch, payload).then(res => {
+
+    try {
+      const res = await updateServiceRequest(companyId, branch, payload);
+
       if (res.data.status) {
+        // ✅ Success
         if (attachments?.length > 0) {
-          handleSubmitUploadedFiles(originalTicket.ServiceRequestId.toString(),updatedData)
-        }else{
-          if(updatedData.Status=="Closed" && requestTypeId!=="106"){
-             navigate(-1)
+          await handleSubmitUploadedFiles(
+            originalTicket.ServiceRequestId.toString(),
+            updatedData
+          );
+        } else {
+          if (updatedData.Status === "Closed" && requestTypeId !== "106") {
+            navigate(-1);
           }
-        fetchSingleTicketRelatedAPIs(Number(selectedTicketId))
-        // resetValue()
+          fetchSingleTicketRelatedAPIs(Number(selectedTicketId));
         }
+
         msg.success(res.data.message);
-
-
+      } else {
+        const errMsg =
+          res.data.ErrorDetails?.[0]?.["Error Message"] || res.data.message;
+        msg.warning(errMsg);
+        dispatch(setLoading(false));
       }
-    }).catch(err => {
-      msg.error(err.message);
-    }).finally(() => {
-
+    } catch (err: any) {
+      msg.error(err.message || "Failed to update service request.");
+      console.error("Update failed:", err);
       dispatch(setLoading(false));
-    });
+    } finally {
+      // dispatch(setLoading(false));
+    }
   }
+
   //handle Attachment delete
   const handleAttachmentDelete = async (fileId: number) => {
-    dispatch(setLoading(true))
-    await deleteSRUpload(fileId, companyId).then((res) => {
+    dispatch(setLoading(true));
+
+    try {
+      const res = await deleteSRUpload(fileId, companyId);
+
       if (res.data.status !== undefined) {
         if (res.data.status === true) {
-          msg.success(res.data.message)
-          fetchUploadedFilesByServiceRequestId(selectedTicket.ServiceRequestId)
+          msg.success(res.data.message);
+          fetchUploadedFilesByServiceRequestId(selectedTicket.ServiceRequestId);
         } else {
-          msg.success(res.data.message)
+          msg.warning(res.data.message);
         }
       } else {
-        msg.success(res.data?.ErrorDetails[0]["Error Message"])
+        const errMsg = res.data?.ErrorDetails?.[0]?.["Error Message"] || "Unknown error occurred.";
+        msg.warning(errMsg);
       }
-    }).catch(() => { }).finally(() => {
-      dispatch(setLoading(false))
-    })
+    } catch (err: any) {
+      msg.error(err.message || "Failed to delete the attachment.");
+      console.error("Attachment delete error:", err);
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
 
-  }
   //reset values
-  const resetValue=(fieldsCopy)=>{
-    commentForm.reset({comment:""})
-      setAttachments([])
-      setUpdatedComments("")
-      setHasChanges(false);
-      setIsEditing(false);
-      fieldsCopy.forEach(field => { field.disabled = true; });
-      setFields(fieldsCopy);
+  const resetValue = (fieldsCopy) => {
+    commentForm.reset({ comment: "" })
+    setAttachments([])
+    setUpdatedComments("")
+    setHasChanges(false);
+    setIsEditing(false);
+    fieldsCopy.forEach(element => { element.disabled = true });
+    setFields(fieldsCopy)
   }
   // Handle cancel edit - only clear form values, preserve all field configs and options
   const handleEdit = (type: string) => {
-  let fieldsCopy = structuredClone(fields);
+    let fieldsCopy = structuredClone(fields);
     if (type === 'cancel') {
       msg.warning('All unsaved changes have been discarded.');
-      if(isCreateMode){
+      if (isCreateMode) {
         form.reset();
         setAttachments([]);
         setUpdatedComments("")
         setHasChanges(false);
         setIsEditing(false);
-      }else{
-        form.reset({ ...originalTicket,...notifyValues });
+      } else {
+        form.reset({ ...originalTicket, ...notifyValues });
         setSelectedTicket(originalTicket);
         resetValue(fieldsCopy);
       }
-     
+
     } else if (type === 'clear' || type === 'save') {
-      form.reset({...notifyValues});
+      form.reset({ ...notifyValues });
       setHasChanges(false);
       setIsEditing(false);
       clearAllFormValues();
@@ -1229,16 +1547,16 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
       setDataSource([]);
       setCols([]);
     } else if (type === 'edit') {
-    
+
       setIsEditing(true);
       setHasChanges(true);
       let isNotClosed = selectedTicket.Status !== "Closed"
       fieldsCopy.forEach(field => {
-      if (isNotClosed) {
-          if (!field.isAlwaysOnDisabled && (field.name !== 'Branch' && field.name !== 'ServiceRequestType'&& field.name !== 'RequestedById')) {
-            if((workBenchEnables.includes(requestTypeId)) && (field.name !== 'Severity') && (field.name !== 'Customer')&& ( field.name !== 'Title' && field.name !== 'Description') ){
-             field.disabled = false;
-            }else if(myRequestEnables.includes(requestTypeId) && (field.name !== 'Priority')  ){
+        if (isNotClosed) {
+          if (!field.isAlwaysOnDisabled && (field.name !== 'Branch' && field.name !== 'ServiceRequestType' && field.name !== 'RequestedById')) {
+            if ((workBenchEnables.includes(requestTypeId)) && (field.name !== 'Severity') && (field.name !== 'Customer') && (field.name !== 'Title' && field.name !== 'Description')) {
+              field.disabled = false;
+            } else if (myRequestEnables.includes(requestTypeId) && (field.name !== 'Priority')) {
               if (field.name == 'Title' || field.name == 'Description') {
                 if (selectedTicket.Status == "Open" || selectedTicket.Status == "Re-Open") {
                   field.disabled = false;
@@ -1246,7 +1564,7 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
               } else {
                 field.disabled = false;
               }
-            }else if(requestTypeId==="106"){
+            } else if (requestTypeId === "106") {
               if (field.name == 'Title' || field.name == 'Description') {
                 if (((selectedTicket.Status == "Open" || selectedTicket.Status == "Re-Open") && selectedTicket["RequestedById"] == LoggedInUserData.UserId)) {
                   field.disabled = false;
@@ -1255,63 +1573,63 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
                 field.disabled = false;
               }
             }
-           
-           
+
+
           }
-        }else {
+        } else {
           field.disabled = !enableInClose.includes(field.name)
         }
       });
       setFields(fieldsCopy);
     }
   };
-  const handleTicketSelect = (ticket: Ticket,isLink:boolean) => {
+  const handleTicketSelect = (ticket: Ticket, isLink: boolean) => {
     if (hasChanges) {
       const confirmDiscard = window.confirm('You have unsaved changes. Do you want to discard them?');
       if (!confirmDiscard) return;
     }
-   if(!isLink &&(selectedTicketId!==ticket.ServiceRequestId.toString())){
-    form.reset({...notifyValues})
-    }else if(isLink && (selectedTicketId!==ticket.ChildServiceRequestId.toString())){
-     form.reset({...notifyValues})
+    if (!isLink && (selectedTicketId !== ticket.ServiceRequestId.toString())) {
+      form.reset({ ...notifyValues })
+    } else if (isLink && (selectedTicketId !== ticket.ChildServiceRequestId.toString())) {
+      form.reset({ ...notifyValues })
     }
-    if(!isLink){
-    setSelectedTicketId(ticket.ServiceRequestId.toString())
-    if (isEditing) {
-      handleEdit("cancel")
-    }
-    commentForm.reset({comment:""})
-    // window.history.replaceState(null, '', `/tickets/${ticket.ServiceRequestId}`);
-    const parts = window.location.pathname.split('/');
-    parts[parts.length - 1] = ticket.ServiceRequestId.toString();
-    window.history.replaceState(null, '', parts.join('/'));
+    if (!isLink) {
+      setSelectedTicketId(ticket.ServiceRequestId.toString())
+      if (isEditing) {
+        handleEdit("cancel")
+      }
+      commentForm.reset({ comment: "" })
+      // window.history.replaceState(null, '', `/tickets/${ticket.ServiceRequestId}`);
+      const parts = window.location.pathname.split('/');
+      parts[parts.length - 1] = ticket.ServiceRequestId.toString();
+      window.history.replaceState(null, '', parts.join('/'));
 
-    }else{
-      
-     setSelectedTicketId(ticket.ChildServiceRequestId.toString())
-    if (isEditing) {
-      handleEdit("cancel")
-    }
-    commentForm.reset({comment:""})
-        const parts = window.location.pathname.split('/');
-    parts[parts.length - 1] = ticket.ChildServiceRequestId.toString();
-    window.history.replaceState(null, '', parts.join('/'));
-    // window.history.replaceState(null, '', `/tickets/${ticket.ChildServiceRequestId}`);
+    } else {
+
+      setSelectedTicketId(ticket.ChildServiceRequestId.toString())
+      if (isEditing) {
+        handleEdit("cancel")
+      }
+      commentForm.reset({ comment: "" })
+      const parts = window.location.pathname.split('/');
+      parts[parts.length - 1] = ticket.ChildServiceRequestId.toString();
+      window.history.replaceState(null, '', parts.join('/'));
+      // window.history.replaceState(null, '', `/tickets/${ticket.ChildServiceRequestId}`);
     }
 
   };
-  const triggerAccordionItemsValidations=async()=>{
+  const triggerAccordionItemsValidations = async () => {
     await trigger(fields.filter(f => f.isAdditionalField && f.isRequired).map(f => f.name));
     setTriggerAccordionValidations(false);
   }
-  useEffect(()=>{
-    if(triggerAccordionValidations){
+  useEffect(() => {
+    if (triggerAccordionValidations) {
       triggerAccordionItemsValidations();
     }
-  },[triggerAccordionValidations])
-  const handleTriggerAccordionItemsValidations = ():void => {
-    if(fields.filter(f => f.isAdditionalField && f.isRequired).length > 0 && showAccordion){
-      const valid = fields.filter(f => f.isAdditionalField && f.isRequired).every(f=>form.getValues()[f.name] !== undefined && form.getValues()[f.name] !== null && form.getValues()[f.name] !== '');
+  }, [triggerAccordionValidations])
+  const handleTriggerAccordionItemsValidations = (): void => {
+    if (fields.filter(f => f.isAdditionalField && f.isRequired).length > 0 && showAccordion) {
+      const valid = fields.filter(f => f.isAdditionalField && f.isRequired).every(f => form.getValues()[f.name] !== undefined && form.getValues()[f.name] !== null && form.getValues()[f.name] !== '');
       if (!valid) {
         setAccordionOpen('additional-fields');
         setTriggerAccordionValidations(true);
@@ -1322,7 +1640,7 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
     }
   };
   return (
-    <div className="h-full   bg-gray-50 flex flex-col ">
+    <div className="h-full overflow-y-auto  bg-gray-50 flex flex-col ">
       <div className="flex flex-1 overflow-hidden   ">
         {/* Left Sidebar - Ticket Inbox */}
         {!isCreateMode &&
@@ -1345,7 +1663,7 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
                     onChange={(value) => setStatusFilter(value as string)}
                     placeholder="Filter by status..."
                     className=" min-h-[10px] rounded-md"
-                    containerClassName="w-full h-8 rounded-md"
+                    containerClassName="w-full h-8 rounded-md mb-4"
 
                     showSearch={false}
                   />
@@ -1370,7 +1688,7 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
                     <div
                       key={ticket.ServiceRequestId}
                       className={`p-3 py-2 rounded-lg mb-2 cursor-pointer transition-all hover:bg-gray-50 ${selectedTicket?.ServiceRequestNo === ticket.ServiceRequestNo ? 'bg-blue-50 border-l-4 border-blue-500' : 'border border-gray-200'}`}
-                      onClick={() => handleTicketSelect(ticket,false)}
+                      onClick={() => handleTicketSelect(ticket, false)}
                     >
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-sm font-medium text-blue-600">{ticket.ServiceRequestNo}</span>
@@ -1399,7 +1717,7 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
               </ScrollArea>
             )}
           </div>}
-        
+
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col min-w-0 ">
           {/* Navigation and Action Bar */}
@@ -1411,8 +1729,10 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
                 </div>
                 <span className="text-gray-600 text-sm">All Tickets</span>
                 <span className="text-gray-400">|</span>
-                {!isCreateMode && <h6 className="text-blue-600 font-medium truncate block max-w-xs" title={selectedTicket?.Title}>{originalTicket.ServiceRequestNo} {selectedTicket?.Title || ''}</h6>}
-                <Badge className={getPriorityColor(watch('Severity')) } title='Severity'>{watch('Severity')}</Badge>
+                {!isCreateMode && <h6 className="text-blue-600 font-medium truncate block max-w-xs" title={selectedTicket?.Title}>{originalTicket.ServiceRequestNo} {selectedTicket?.Title && (<span title={selectedTicket.Title}>{selectedTicket.Title.length > 18 ? selectedTicket.Title.slice(0, 17) + "...": selectedTicket.Title}
+                  </span>
+                )}</h6>}
+                <Badge className={getPriorityColor(watch('Severity'))} title='Severity'>{watch('Severity')}</Badge>
                 {!isCreateMode && <Badge className={getStatusColor(selectedTicket?.Status)} title='Status'>{selectedTicket?.Status || ''}</Badge>}
               </div>
 
@@ -1430,6 +1750,7 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
                   size="small"
                   onClick={() => handleEdit('edit')}
                   icon={<Edit className="h-4 w-4" />}
+                  className='btn-submit-style'
                 >
                   Edit
                 </ReusableButton>
@@ -1437,14 +1758,15 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
                 <>
                   <ReusableButton
                     variant="text"
-                    size="small"
+                    // size="small"
+                    className='btn-reset-clear-style'
                     onClick={() => handleEdit('cancel')}
                     icon={<X className="h-4 w-4" />}
                   >
-                   {isCreateMode? "Clear":"Cancel"}
+                    {isCreateMode ? "Clear" : "Cancel"}
                   </ReusableButton>
                   <ReusableButton
-                    size="small"
+                    // size="small"
                     variant="primary"
                     onClick={isCreateMode
                       ? () => {
@@ -1452,19 +1774,20 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
                         handleTriggerAccordionItemsValidations();
                       }
                       : () => {
-                          handleSubmit(handleUpdate)();
-                          handleTriggerAccordionItemsValidations();
+                        handleSubmit(handleUpdate)();
+                        handleTriggerAccordionItemsValidations();
                       }
                     }
                     icon={<Save className="h-4 w-4" />}
+                    className='btn-submit-style'
                   >
-                   {isCreateMode?"Save":"Update"}
+                    {isCreateMode ? "Save" : "Update"}
                   </ReusableButton>
                 </>
               )}
             </div>
           </div>
-          
+
           {/* Content Grid with Individual Scroll Areas */}
           <div className="flex-1 p-3 overflow-hidden min-h-0  ">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-1 h-full">
@@ -1534,7 +1857,7 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
                                         </div>
 
                                         {/* Delete Icon */}
-                                        {isEditing && (x["FileCreatedBy"]==LoggedInUserData.UserId) &&
+                                        {isEditing && (x["FileCreatedBy"] == LoggedInUserData.UserId) &&
                                           <button
                                             onClick={() => {
                                               handleAttachmentDelete(x.FileUploadId)
@@ -1563,8 +1886,8 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
 
                             />
                           </div>}
-                           {!isCreateMode && selectedTicket.AssetId!==null  && <div>
-                             <div className='text-sm font-medium mb-1'>Asset List:</div>
+                          {!isCreateMode && selectedTicket.AssetId !== null && <div>
+                            <div className='text-sm font-medium mb-1'>Asset List:</div>
                             <ReusableTable
                               data={assetsData}
                               columns={assetCols}
@@ -1627,11 +1950,13 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
                                         showToolbar={true}
                                         minHeight={120}
                                         maxHeight={300}
+                                        disabled={false}
                                       />
                                     )}
                                   />
                                   <div className="flex justify-end my-4">
                                     <ReusableButton
+                                      disabled={!isEditing}
                                       size="small"
                                       onClick={commentForm.handleSubmit(postComment)}
                                     >
@@ -1718,19 +2043,19 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
                       <CardContent className="p-0">
                         <Tabs defaultValue="details" className="w-full">
                           <TabsList className="grid w-full grid-cols-3 rounded-t-lg">
-                            <TabsTrigger value="details" className="text-xs data-[state=active]:shadow-lg data-[state=active]:shadow-gray-300">Details</TabsTrigger>
+                            <TabsTrigger value="details" className="text-sm data-[state=active]:shadow-lg data-[state=active]:shadow-gray-200">Details</TabsTrigger>
                             {!isCreateMode && <TabsTrigger value="linkedissues" className="text-xs data-[state=active]:shadow-lg data-[state=active]:shadow-gray-300">Links</TabsTrigger>}
                           </TabsList>
 
                           <TabsContent value="details" className="p-6 space-y-4">
-                            {getFieldsByNames(['Status', 'AssigneeSelectedUsers', 'Severity', 'Priority', 'AssetId', 'RequestedDate', 'RequestedById', 'Branch', 'CCListSelectedUsers', 'LinkTo','Notify']).map(renderField)}
-                          
+                            {getFieldsByNames(['Status', 'AssigneeSelectedUsers', 'Severity', 'Priority', 'AssetId', 'RequestedDate', 'RequestedById', 'Branch', 'CCListSelectedUsers', 'LinkTo', 'Notify']).map(renderField)}
+
                           </TabsContent>
                           <TabsContent value="linkedissues" className="p-6 space-y-3">
                             {(childListData.length !== 0) ?
                               <>
                                 {childListData?.map((obj) => (
-                                  <div  onClick={()=>{handleTicketSelect(obj,true)}} key={obj.ChildServiceRequestNo} className="flex items-center gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 cursor-pointer transition-colors">
+                                  <div onClick={() => { handleTicketSelect(obj, true) }} key={obj.ChildServiceRequestNo} className="flex items-center gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 cursor-pointer transition-colors">
                                     <Link className="h-4 w-4 text-blue-600" />
                                     <div className="flex-1">
                                       <span className="text-blue-600 font-medium text-sm">{obj.ChildServiceRequestNo}</span>
@@ -1753,7 +2078,7 @@ const multipleFileUpload = async (filelist: UploadFileInput[]): Promise<void> =>
           </div>
         </div>
       </div>
-      
+
       {/* History Popup Dialog */}
       <Dialog open={isHistoryPopupOpen} onOpenChange={setIsHistoryPopupOpen}>
         <DialogContent className="max-w-6xl max-h-[80vh] overflow-hidden">

@@ -1,4 +1,4 @@
-import { URL_GET_USER_DETAILS, URL_ORGANZIATION_DETAILS } from "@/config/apiUrls";
+import { URL_GET_HIERARCHY_LEVELS_DATA, URL_GET_USER_DETAILS, URL_ORGANZIATION_DETAILS } from "@/config/apiUrls";
 import api from "./api";
 
 interface APIResponse<T> {
@@ -27,3 +27,12 @@ export const getUserDetailsByUserName = async (userName: string): Promise<APIRes
     }
 }
 
+//get last levels data
+export const getHierarchyLevelsData= async (CompId:string,hdnleveltype:number): Promise<APIResponse<any>> => {
+    try {
+        const response = await api.get(URL_GET_HIERARCHY_LEVELS_DATA, { params: {CompId,hdnleveltype} })
+        return { success: true, data: response.data }
+    } catch (err: any) {
+        return { success: false, message: err.response?.data?.message || err.message, status: err.response?.status };
+    }
+}

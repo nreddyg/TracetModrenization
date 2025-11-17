@@ -32,6 +32,8 @@ import { GetServiceRequestAssignToLookups, getSRBranchList, getSRCustomerLookups
 import ReusableTable from '@/components/ui/reusable-table';
 import dayjs from 'dayjs';
 import { ReusableButton } from '@/components/ui/reusable-button';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { FaAngleRight } from 'react-icons/fa';
 interface MultiSelectConfig {
   isHierarchy?: boolean;
   labelClassName?: string;
@@ -117,32 +119,62 @@ const ServiceDeskReports = () => {
     availableColumns.map(col => col.key) // Default to all columns selected
   );
   const [columnDropdownOpen, setColumnDropdownOpen] = useState(false);
+        const reportsData = useAppSelector(state => state.projects.reportsMenu);
   const dispatch = useAppDispatch();
-  const [reportTabs] = useState([
+  const [reportTabs,setReportsTabs] = useState([
     'Service Request Details',
     'Service Request SLA Met/SLA Violated',
     'Service Request Detail History',
   ]);
 
-  const [activeTab, setActiveTab] = useState('Service Request Details');
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
 
   const [showReport, setShowReport] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [fields, setFields] = useState<BaseField[]>(SERVICE_DESK_DB);
+  const [fieldsCopy, setFieldsCopy] = useState<BaseField[]>(fields);
   const [slaDB, setSLADB] = useState<BaseField[]>()
   const [serviceHistoryDetail, setServiceHistoryDetail] = useState<BaseField[]>()
   const [columnVisibility, setColumnVisibility] = useState({});
-  const companyId=useAppSelector(state=>state.projects.companyId);
-  const branch = useAppSelector(state=>state.projects.branch);
-  const branchId = useAppSelector(state=>state.projects.branchId);
+  const companyId = useAppSelector(state => state.projects.companyId);
+  const companyName = useAppSelector(state => state.projects.companyName);
+  const branch = useAppSelector(state => state.projects.branch);
+  const branchId = useAppSelector(state => state.projects.branchId);
   // const dispatch =useDispatch();
   const msg = useMessage()
   const [dataSource, setDataSourse] = useState([])
   const [cols, setCols] = useState([])
   let additionalFields = useRef([]);
+    const reportsMenu = useAppSelector(state => state.projects.reportsMenu);
+  const [activeTab, setActiveTab] = useState('Service Request Details');
 
-  // let data = activeTab === "Service Request SLA Met/SLA Violated" ? slaDB : activeTab === "Service Request Detail History" ? serviceHistoryDetail : fields;
+  useEffect(() => {
+    if(reportsMenu){
+
+
+       let tempReportsList = []
+    if (reportsMenu.serviceDeskReportsMenu.length !== 0) {
+      reportsMenu.serviceDeskReportsMenu.map((item) => {
+        if (item.ModuleName === "Service Request Details") {
+          tempReportsList.push("Service Request Details")
+        }
+        if (item.ModuleName === "Service Request Sla Met/Sla Violated") {
+          tempReportsList.push("Service Request SLA Met/SLA Violated")
+        }
+        if (item.ModuleName === "Service Request Detail History") {
+          tempReportsList.push("Service Request Detail History")
+        }
+      })
+    }
+    setReportsTabs(tempReportsList)
+      if(tempReportsList.length>0){
+          setActiveTab(tempReportsList[0])
+    }
+    }
+   
+  }, [reportsMenu])
+ 
+
   const form = useForm<GenericObject>({
     defaultValues: fields.reduce((acc, f) => {
       acc[f.name!] = f.defaultValue ?? '';
@@ -164,69 +196,77 @@ const ServiceDeskReports = () => {
   }, [activeTab]);
 
   useEffect(() => {
+    let jsonCopy = [];
+    if (activeTab) {
+      if (activeTab === "Service Request Details") {
+        jsonCopy = fieldsCopy.filter(f => f.jsontype === "servicerequestDetails");
+      } else if (activeTab === "Service Request SLA Met/SLA Violated") {
+        jsonCopy = fieldsCopy.filter(f => f.jsontype === "slaViolated");
+      } else if (activeTab === "Service Request Detail History") {
+        jsonCopy = fieldsCopy.filter(f => f.jsontype === "serviceReqHistoryDetail");
+      }
+      setFields(jsonCopy);
+    }
+  }, [activeTab])
+
+  const datesInSRDetail = watch('dateRange');
+
+  useEffect(() => {
   }, [columnVisibility])
   useEffect(() => {
-    if (companyId) {
-      fetchAdditionalFieldConfigurationDetails(companyId)
-      fetchAllLookUps();
-    }
-  }, [companyId,branch])
+    if (companyId) fetchAdditionalFieldConfigurationDetails(companyId)
+    if (companyId && branch && branchId) fetchAllLookUps();
+  }, [companyId, branch, branchId])
+
   const multiSelectFilter: FilterFn<any> = (row, columnId, filterValue) => {
-
     const selected = Array.isArray(filterValue) ? filterValue : [];
-
     if (selected.length === 0) return true;
-
     const cell = row.getValue(columnId);
-
     if (cell == null) return false;
-
     if (Array.isArray(cell)) return cell.some(v => selected.includes(String(v)));
-
     return selected.includes(String(cell));
-
   };
-function buildColumnsFromApi<T extends Record<string, any>>(
-  apiResponse: ColumnApiResponse,
-  editableColumns: string[] = [],
-  typeMapper: Record<string, "text" | "number" | "date" | "select"> = {}
-): { columns: ColumnDef<T>[]; initialVisibility: VisibilityState } {
-  const [_, columnsMeta] = Object.entries(apiResponse)[0];
 
-  const columns: ColumnDef<T>[] = Object.entries(columnsMeta).map(
-    ([colName], index) => {
-      // Ensure we have a valid column name
-      if (!colName || !colName.trim()) {
-        console.warn(`Column at index ${index} has empty name, skipping`);
-        return null;
+  function buildColumnsFromApi<T extends Record<string, any>>(
+    apiResponse: ColumnApiResponse,
+    editableColumns: string[] = [],
+    typeMapper: Record<string, "text" | "number" | "date" | "select"> = {}
+  ): { columns: ColumnDef<T>[]; initialVisibility: VisibilityState } {
+    const [_, columnsMeta] = Object.entries(apiResponse)[0];
+
+    const columns: ColumnDef<T>[] = Object.entries(columnsMeta).map(
+      ([colName], index) => {
+        // Ensure we have a valid column name
+        if (!colName || !colName.trim()) {
+          console.warn(`Column at index ${index} has empty name, skipping`);
+          return null;
+        }
+        return {
+          accessorKey: colName,
+          id: colName,
+          header: colName,
+          cell: (info) => info.getValue() ?? "",
+          enableHiding: true,
+          enableColumnFilter: true,
+          filterFn: multiSelectFilter,
+          meta: {
+            editable: editableColumns.includes(colName),
+            editType: typeMapper[colName] || "text",
+          },
+        } as ColumnDef<T>;
       }
-      
-      return {
-        accessorKey: colName,
-        id: colName,
-        header: colName,
-        cell: (info) => info.getValue() ?? "",
-        enableHiding: true,
-        enableColumnFilter: true,
-        filterFn: multiSelectFilter,
-        meta: {
-          editable: editableColumns.includes(colName),
-          editType: typeMapper[colName] || "text",
-        },
-      } as ColumnDef<T>;
-    }
-  ).filter(Boolean) as ColumnDef<T>[]; // Remove null entries
+    ).filter(Boolean) as ColumnDef<T>[]; // Remove null entries
 
-  // build VisibilityState (true/false per column)
-  const initialVisibility: VisibilityState = {};
-  Object.entries(columnsMeta).forEach(([colName, visible]) => {
-    if (colName && colName.trim()) {
-      initialVisibility[colName] = visible === "true";
-    }
-  });
+    // build VisibilityState (true/false per column)
+    const initialVisibility: VisibilityState = {};
+    Object.entries(columnsMeta).forEach(([colName, visible]) => {
+      if (colName && colName.trim()) {
+        initialVisibility[colName] = visible === "true";
+      }
+    });
 
-  return { columns, initialVisibility };
-}
+    return { columns, initialVisibility };
+  }
 
   const selectedMainCategory = watch("MainCategory");
   const selectedMainCategoryforSLA = watch("maincategoryinSLA");
@@ -245,8 +285,6 @@ function buildColumnsFromApi<T extends Record<string, any>>(
       getSubCategoryDetails(companyId, null)
     }
   }, [selectedMainCategoryforSLA, companyId])
-
-
 
   //method for generating columns based on data
   function generateColumnsFromData<T extends Record<string, any>>(
@@ -274,26 +312,6 @@ function buildColumnsFromApi<T extends Record<string, any>>(
         },
       } as ColumnDef<T>;
     });
-
-    // if (includeActions) {
-    //   columns.push({
-    //     id: 'actions',
-    //     header: 'Actions',
-    //     cell: ({ row }) => (
-    //       <Button
-    //         size="sm"
-    //         onClick={() => handleHistoryClick(row.original)}
-    //         className="flex items-center gap-1"
-    //         style={{ backgroundColor: "#fb8420" }}
-    //       >
-    //         History
-    //       </Button>
-    //     ),
-    //     enableSorting: false,
-    //     enableHiding: false,
-    //   });
-    // }
-
     return columns;
   }
 
@@ -312,12 +330,18 @@ function buildColumnsFromApi<T extends Record<string, any>>(
 
 
   async function fetchServiceRequestDetailsReport(compId: string, BranchID: string, srType: string, srNo: string, srStatus: string, requestedBy: string, fromDate: string, toDate: string, customer: string, AssigneeUsers: string, AssigneeGroups: string, severity: string, priority: string, SLAStatus: string, dept: string, mainCategory: string, subCategory: string, assetCode: string) {
-    // dispatch(setLoading(true))
+    dispatch(setLoading(true))
     await getServiceRequestDetailsReport(compId, BranchID, srType, srNo, srStatus, requestedBy, fromDate, toDate, customer, AssigneeUsers, AssigneeGroups, severity, priority, SLAStatus, dept, mainCategory, subCategory, assetCode).then(res => {
       if (res.success && res.data.status === undefined) {
         const tabData = res.data.ServiceRequestDetailsReport
+        if(tabData.length > 0){
         setDataSourse(tabData)
+        }else{
+        msg.warning("no records available");
+        }
       } else {
+        setDataSourse([]);
+        msg.warning(`${res.data.message}`)
 
       }
     }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
@@ -327,10 +351,11 @@ function buildColumnsFromApi<T extends Record<string, any>>(
     dispatch(setLoading(true))
     await getServiceRequestSLAMetViolatedReport(compId, BranchID, srType, srNo, srStatus, requestedBy, fromDate, toDate, customer, AssigneeUsers, AssigneeGroups, severity, priority, SLAStatus, dept, mainCategory, subCategory, assetCode).then(res => {
       if (res.success && res.data.status === undefined) {
-        const tabData = res.data.ServiceRequestDetails.ServiceRequestDetailsReport
+        const tabData = res.data.ServiceRequestDetailsReport
         setDataSourse(tabData)
-
       } else {
+        setDataSourse([]);
+        msg.warning(`${res.data.message}`)
 
       }
     }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
@@ -357,14 +382,12 @@ function buildColumnsFromApi<T extends Record<string, any>>(
     await getAdditionaliFieldsConfigurationDetails(compId).then(res => {
       if (res.success && res.data.status === undefined) {
         additionalFields.current = res.data.AdditionalFieldConfigurationDetails.filter(x => x.TransactionTypeId === 105 || x.TransactionType === "Service request");
-
-
       } else {
         additionalFields.current = [];
-
       }
     }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
   }
+
   async function fetchServiceRequestDetailsColumns(compId: string) {
     dispatch(setLoading(true))
     await getServiceRequestDetailsColumns(compId).then(res => {
@@ -372,14 +395,12 @@ function buildColumnsFromApi<T extends Record<string, any>>(
         const tempCols = buildColumnsFromApi(res.data)
         setColumnVisibility(tempCols.initialVisibility)
         setCols(tempCols.columns)
-
       } else {
         msg.warning(`${res.data.message}`)
-
       }
     }).catch(err => { }).finally(() => {
       //  dispatch(setLoading(false)) 
-      fetchServiceRequestDetailsReport(companyId, formatToString(watch("LevelFiveCompany")), formatToString(watch("ServiceRequestType")), formatToString(watch("ServiceRequest")), formatToString(watch("Status")), formatToString(watch("RequestedBy")), "", "", formatToString(watch("Customer")), formatToString(watch("AssignTo")["Users"]), formatToString(watch("AssignTo")["User Group"]), formatToString(watch("Severity")), formatToString(watch("Priority")), formatToString(watch("slastatus")), formatToString(watch("LevelFiveDepartment")), formatToString(watch("MainCategory")), formatToString(watch("SubCategory")), formatToString(watch("AssetCode")))
+      fetchServiceRequestDetailsReport(companyId, formatToString(watch("LevelFiveCompany")), formatToString(watch("ServiceRequestType")), formatToString(watch("ServiceRequest")), formatToString(watch("Status")), formatToString(watch("RequestedBy")), formatToString(datesInSRDetail.from), formatToString(datesInSRDetail.to), formatToString(watch("Customer")), formatToString(watch("AssignTo")["Users"]), formatToString(watch("AssignTo")["User Group"]), formatToString(watch("Severity")), formatToString(watch("Priority")), formatToString(watch("slastatus")), formatToString(watch("LevelFiveDepartment")), formatToString(watch("MainCategory")), formatToString(watch("SubCategory")), formatToString(watch("AssetCode")))
     })
   }
   async function fetchServiceRequestSLAViolatedColumns(compId: string) {
@@ -391,7 +412,7 @@ function buildColumnsFromApi<T extends Record<string, any>>(
         setCols(tempCols.columns)
 
       } else {
-
+        setCols([])
       }
     }).catch(err => { }).finally(() => {
       // dispatch(setLoading(false)) 
@@ -435,6 +456,8 @@ function buildColumnsFromApi<T extends Record<string, any>>(
       return String(input);
     }
   }
+
+
 
 
   const handleViewReport = async () => {
@@ -650,8 +673,7 @@ function buildColumnsFromApi<T extends Record<string, any>>(
       }
       opts[obj] = ret
     })
-    let jsonCopy = activeTab === "Service Request SLA Met/SLA Violated" ? slaDB : activeTab === "Service Request Detail History" ? serviceHistoryDetail : SERVICE_DESK_DB
-    const data = structuredClone(jsonCopy);
+    const data = structuredClone(SERVICE_DESK_DB);
     data.forEach((obj) => {
       if (arr.includes(obj.name)) {
         if (groupNames.includes(obj.name)) {
@@ -664,6 +686,7 @@ function buildColumnsFromApi<T extends Record<string, any>>(
       }
     });
     setFields(data);
+    setFieldsCopy(data);
   }
 
   // fetch all lookUps
@@ -1065,19 +1088,24 @@ function buildColumnsFromApi<T extends Record<string, any>>(
   };
 
   return (
-    <div className="h-full overflow-y-scroll  bg-gray-50">
+    <ScrollArea className="h-full">
       {/* Compact Header */}
-      <header className="bg-white border-b px-6 py-3 shadow-sm">
-        <div className="flex items-center gap-4">
-          <SidebarTrigger />
-          <div>
-            <h1 className="text-xl font-semibold text-gray-900">Service Desk Reports</h1>
-            <p className="text-sm text-gray-600">Generate comprehensive reports with advanced filtering and customization options</p>
+      <header className="px-6 py-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+            <h1 className="text-lg sm:text-2xl font-bold text-gray-900">
+              Service Desk Reports
+            </h1>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <span>Service Desk</span>
+            <FaAngleRight />
+            <span className="text-gray-900 font-medium">Reports</span>
           </div>
         </div>
       </header>
 
-      <div className="px-6 pb-6 pt-6 space-y-6 ">
+      <div className="px-6 pb-6 pt-0 space-y-6 ">
         <div className="grid grid-cols-1 xl:grid-cols-4 gap-6 ">
           {/* Enhanced Left Sidebar - Report Types */}
           <div className="xl:col-span-1">
@@ -1130,7 +1158,7 @@ function buildColumnsFromApi<T extends Record<string, any>>(
                   <Button
                     onClick={handleViewReport}
                     disabled={isGeneratingReport}
-                    className="bg-blue-600 hover:bg-blue-700"
+                    className="btn-submit-style"
                   >
                     {isGeneratingReport ? (
                       <>
@@ -1147,25 +1175,28 @@ function buildColumnsFromApi<T extends Record<string, any>>(
                   <Button
                     onClick={handleClearFilters}
                     variant="outline"
+                    className='btn-reset-clear-style'
                   >
                     Clear All
                   </Button>
                 </div>
               }
             >
-              <div className="space-y-2 h-full overflow-y-hidden">
-                {/* Primary Filters */}
-                <div className='px-1'>
-                  <h4 className="text-sm font-semibold text-gray-900 mb-3">Primary Filters</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {activeTab === "Service Request SLA Met/SLA Violated"
-                      ? getFieldsByNames(["slastatus", "assignedto", "serviceReqTypeSLA"]).map(renderField)
-                      : activeTab === "Service Request Detail History"
-                        ? getFieldsByNames(["ServiceRequestDetailHistory"]).map(renderField)
-                        : getFieldsByNames(["ServiceRequestType", "ServiceRequest", "Status"]).map(renderField)
-                    }
+              <div className="space-y-2 h-full">
+                <ScrollArea>
+                  {/* Primary Filters */}
+                  <div className='px-1'>
+                    <h4 className="text-sm font-semibold text-gray-900 mb-3">Primary Filters</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {activeTab === "Service Request SLA Met/SLA Violated"
+                        ? getFieldsByNames(["slastatus", "assignedto", "serviceReqTypeSLA"]).map(renderField)
+                        : activeTab === "Service Request Detail History"
+                          ? getFieldsByNames(["ServiceRequestDetailHistory"]).map(renderField)
+                          : getFieldsByNames(["ServiceRequestType", "ServiceRequest", "Status"]).map(renderField)
+                      }
+                    </div>
                   </div>
-                </div>
+                </ScrollArea>
                 {activeTab !== "Service Request Detail History" ?
                   <Accordion type="single" collapsible className="w-full">
                     <AccordionItem value="additional-filters">
@@ -1218,7 +1249,7 @@ function buildColumnsFromApi<T extends Record<string, any>>(
                       onClick={handlePostColumns}
                       icon={<Save
                         className="h-4 w-4" />}
-                      className="bg-primary text-white hover:bg-primary/90 hover:text-white"
+                      className="bg-blue-600 hover:bg-blue-700 text-white  hover:text-white"
                       variant="default"
                     >
                       Apply As Default Grid Columns
@@ -1235,11 +1266,16 @@ function buildColumnsFromApi<T extends Record<string, any>>(
                     enableSorting={true}
                     enablePagination={true}
                     title={`${activeTab} Report`}
+                    exportMeta={{
+                      companyName: `${companyName || ""}`,
+                      name: `${activeTab} Report`,
+                    }}
                     // enableRowReordering
                     // onRowReorder={(newData) => setDataSourse(newData)}
                     enableColumnVisibility
                     columnVisibility={columnVisibility} // 👈 pass down
                     onColumnVisibilityChange={setColumnVisibility}
+                    exportOptions={["csv", "excel"]}
                     permissions={{
                       canEdit: false,          // required
                       canDelete: false,        // required
@@ -1247,7 +1283,8 @@ function buildColumnsFromApi<T extends Record<string, any>>(
                       canExport: true,         // required
                       canManageColumns: true,  // optional
                     }}
-                    enableColumnPinning
+
+                    // enableColumnPinning
                     storageKey={activeTab === "Service Request Details" ? "SRdetails-Report" : activeTab === "Service Request SLA Met/SLA Violated" ? "SLA-Report" : "History-Report"}
                     pageSize={10}
                     enableSelection={false}
@@ -1259,7 +1296,7 @@ function buildColumnsFromApi<T extends Record<string, any>>(
           </div>
         </div>
       </div>
-    </div>
+    </ScrollArea>
   );
 
 

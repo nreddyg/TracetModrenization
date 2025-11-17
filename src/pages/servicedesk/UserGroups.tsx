@@ -1,6 +1,5 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Search, Edit, Trash2, Plus, Save, X } from 'lucide-react';
@@ -12,7 +11,7 @@ import { ReusableButton } from '../../components/ui/reusable-button';
 import { ReusableInput } from '../../components/ui/reusable-input';
 import { ReusableDropdown } from '../../components/ui/reusable-dropdown';
 import { ReusableTable, TableAction, TablePermissions } from '../../components/ui//reusable-table';
-import { MessageProvider, useMessage } from '../../components/ui/reusable-message';
+import { useMessage } from '../../components/ui/reusable-message';
 import { ReusableMultiSelect } from '@/components/ui/reusable-multi-select';
 import { ReusableTextarea } from '@/components/ui/reusable-textarea';
 import { BaseField, GenericObject } from '@/Local_DB/types/types';
@@ -22,7 +21,7 @@ import { GetServiceRequestAssignToLookups } from '@/services/ticketServices';
 import { useAppDispatch } from '@/store/reduxStore';
 import { setLoading } from '@/store/slices/projectsSlice';
 import { useAppSelector } from '@/store';
-import { Item } from '@radix-ui/react-dropdown-menu';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 
 interface UserGroup {
@@ -43,10 +42,10 @@ const UserGroups = () => {
   const [isDelModalOpen, setIsDelModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [fields, setFields] = useState<BaseField[]>(USER_GROUP_DB);
-  const [deleteRecord,setDeleteRecord]=useState<UserGroup | null>(null);
+  const [deleteRecord, setDeleteRecord] = useState<UserGroup | null>(null);
   const dispatch = useAppDispatch();
   const companyId = useAppSelector(state => state.projects.companyId)
-  const branchName = useAppSelector(state=>state.projects.branch);
+  const branchName = useAppSelector(state => state.projects.branch);
 
   useEffect(() => {
     if (companyId && branchName) {
@@ -67,7 +66,7 @@ const UserGroups = () => {
       if (res.success && res.data) {
         if (res.data.UserGroupDetails?.length > 0) {
           setUserGroups(res.data.UserGroupDetails?.map((item) => ({ ...item, Status: item.Status ? 'Active' : 'In Active' })).reverse())
-        }else{
+        } else {
           setUserGroups([])
         }
       }
@@ -156,7 +155,7 @@ const UserGroups = () => {
     if (companyId && branchName) {
       SelectUsersLookup(companyId, branchName)
     }
-  }, [companyId,branchName])
+  }, [companyId, branchName])
 
 
 
@@ -325,7 +324,7 @@ const UserGroups = () => {
     setIsEditMode(false);
     setSelectedRecord(null);
     setDeleteRecord(null);
-        reset({
+    reset({
       userGroupName: '',
       Users: [],
       description: '',
@@ -336,8 +335,8 @@ const UserGroups = () => {
   const handleAddUserGroup = (): void => {
     setIsEditMode(false);
     setSelectedRecord(null);
-    setDeleteRecord(null) ;  
-     reset();
+    setDeleteRecord(null);
+    reset();
     setIsFormVisible(true);
   };
 
@@ -390,6 +389,33 @@ const UserGroups = () => {
         </Badge>
       ),
     },
+
+    {
+      id: 'actions',
+      accessorKey: 'actions',
+      header: 'Actions',
+      cell: ({ row }: any) => (
+        <div className="flex gap-2" title='Actions'>
+          <ReusableButton
+            variant="text"
+            size="small"
+            title='Edit'
+            onClick={() => {handleEdit(row?.original)}}
+          >
+            <Edit className="h-4 w-4 text-blue-600" />
+          </ReusableButton>
+          <ReusableButton
+            variant="text"
+            size="small"
+            title='Delete'
+            danger
+            onClick={() => {handleDelete(row?.original)}}
+          >
+            <Trash2 className="h-4 w-4" />
+          </ReusableButton>
+        </div>
+      ),
+    },
   ];
 
   // Define table actions
@@ -426,88 +452,136 @@ const UserGroups = () => {
   };
 
   return (
-    <div className="h-full overflow-y-scroll bg-gray-50/30">
-      <div className="p-4 space-y-4">
-        {/* Header Section */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-lg font-semibold text-gray-900">User Groups</h1>
-            <p className="text-sm text-gray-600 mt-0.5">Manage user groups and permissions</p>
+    <ScrollArea>
+      <div className="h-full">
+        <div className="p-4 space-y-4">
+          {/* Header Section */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-lg sm:text-2xl font-bold text-gray-900">User Groups</h1>
+              {/* <p className="text-sm text-gray-600 mt-0.5">Manage user groups and permissions</p> */}
+            </div>
+            {!selectedRecord && <ReusableButton
+              // size="small"
+              variant="primary"
+              icon={<Plus className="h-3 w-3" />}
+              iconPosition="left"
+              onClick={handleAddUserGroup}
+              className="whitespace-nowrap btn-submit-style"
+            >Add User Group
+            </ReusableButton>
+            }
           </div>
-          {!selectedRecord && <ReusableButton
-            size="small"
-            variant="primary"
-            icon={<Plus className="h-3 w-3" />}
-            iconPosition="left"
-            onClick={handleAddUserGroup}
-            className="whitespace-nowrap"
-          >Add User Group
-          </ReusableButton>
-          }
-        </div>
 
-        {/* User Group Form */}
-        {isFormVisible && (
-          <Card className="border-0 shadow-sm">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base font-semibold">
-                {isEditMode ? 'Edit User Group' : 'User Group'}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(handleSubmitForm)} className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {getFieldsByNames(['userGroupName', 'Users']).map((field) => (
+          {/* User Group Form */}
+          {isFormVisible && (
+            <Card className="border-0 shadow-sm">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base font-semibold">
+                  {isEditMode ? 'Edit User Group' : 'User Group'}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(handleSubmitForm)} className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {getFieldsByNames(['userGroupName', 'Users']).map((field) => (
+                        <div key={field.name}>
+                          {renderField(field)}
+                        </div>
+                      ))}
+                    </div>
+
+                    {getFieldsByNames(['description']).map((field) => (
                       <div key={field.name}>
                         {renderField(field)}
                       </div>
                     ))}
-                  </div>
 
-                  {getFieldsByNames(['description']).map((field) => (
-                    <div key={field.name}>
-                      {renderField(field)}
+                    {isEditMode && getFieldsByNames(['status']).map((field) => (
+                      <div key={field.name}>
+                        {renderField(field)}
+                      </div>
+                    ))}
+
+                    <div className="flex gap-2">
+                      <ReusableButton
+                        htmlType="submit"
+                        variant="primary"
+                        // icon={<Save className="h-3 w-3" />}
+                        iconPosition="left"
+                        size="middle"
+                      >
+                        {isEditMode ? 'Update' : 'Save'}
+                      </ReusableButton>
+                      <ReusableButton
+                        htmlType="button"
+                        variant="default"
+                        onClick={handleCancel}
+                        // icon={<X className="h-3 w-3" />}
+                        iconPosition="left"
+                        size="middle"
+                      >
+                        Cancel
+                      </ReusableButton>
                     </div>
-                  ))}
+                  </form>
+                </Form>
+              </CardContent>
+            </Card>
+          )}
 
-                  {isEditMode && getFieldsByNames(['status']).map((field) => (
-                    <div key={field.name}>
-                      {renderField(field)}
-                    </div>
-                  ))}
+          {/* User Group List with ReusableTable */}
+          {/* <Card className="border-0 shadow-sm">
+            <CardHeader className="pb-2 pt-2">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
+                <CardTitle className="text-base font-semibold">
+                  User Group List
+                </CardTitle>
 
-                  <div className="flex gap-2">
-                    <ReusableButton
-                      htmlType="submit"
-                      variant="primary"
-                      // icon={<Save className="h-3 w-3" />}
-                      iconPosition="left"
-                      size="middle"
-                    >
-                      {isEditMode ? 'Update' : 'Save'}
-                    </ReusableButton>
-                    <ReusableButton
-                      htmlType="button"
-                      variant="default"
-                      onClick={handleCancel}
-                      // icon={<X className="h-3 w-3" />}
-                      iconPosition="left"
-                      size="middle"
-                    >
-                      {isEditMode ? 'Cancel' : 'Clear'}
-                    </ReusableButton>
-                  </div>
-                </form>
-              </Form>
+                <div className="w-full sm:w-64">
+                  <ReusableInput
+                    placeholder="Search user groups..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    prefixIcon={<Search className="h-3 w-3 text-gray-400" />}
+                    allowClear={true}
+                    onClear={() => setSearchTerm('')}
+                    size="small"
+                    className="w-full pl-7"
+                  />
+                </div>
+              </div>
+
+            </CardHeader>
+            <CardContent className="pt-0">
+              <ReusableTable
+                data={filteredData}
+                columns={columns}
+                actions={tableActions}
+                permissions={tablePermissions}
+                title=""
+                // onRefresh={handleRefresh}
+                enableSearch={false}
+                enableSelection={false}
+                enableExport={true}
+                enableColumnVisibility={true}
+                enablePagination={true}
+                enableSorting={true}
+                enableFiltering={true}
+                pageSize={10}
+                emptyMessage="No user groups found"
+                rowHeight="normal"
+                storageKey="usergroups-table"
+              />
             </CardContent>
-          </Card>
-        )}
+          </Card> */}
+        </div>
 
         {/* User Group List with ReusableTable */}
         <Card className="border-0 shadow-sm">
           <CardHeader className="pb-2 pt-2">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
               <CardTitle className="text-base font-semibold">
                 User Group List
               </CardTitle>
@@ -531,10 +605,10 @@ const UserGroups = () => {
             <ReusableTable
               data={filteredData}
               columns={columns}
-              actions={tableActions}
+              // actions={tableActions}
               permissions={tablePermissions}
               title=""
-              onRefresh={handleRefresh}
+              // onRefresh={handleRefresh}
               enableSearch={false}
               enableSelection={false}
               enableExport={true}
@@ -549,35 +623,34 @@ const UserGroups = () => {
             />
           </CardContent>
         </Card>
+        {/* Delete Confirmation Modal */}
+        <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Confirm the action</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete {deleteRecord?.UserGroup || "this"} User Group?
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <ReusableButton
+                variant="default"
+                onClick={() => setIsDelModalOpen(false)}
+              >
+                Cancel
+              </ReusableButton>
+              <ReusableButton
+                variant="primary"
+                danger={true}
+                onClick={() => { deleteUserGroupData(companyId, deleteRecord?.UserGroupId); setIsDelModalOpen(false) }}
+              >
+                Delete
+              </ReusableButton>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
-
-      {/* Delete Confirmation Modal */}
-      <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Confirm the action</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete {deleteRecord?.UserGroup || "this"} User Group?
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <ReusableButton
-              variant="default"
-              onClick={() => setIsDelModalOpen(false)}
-            >
-              Cancel
-            </ReusableButton>
-            <ReusableButton
-              variant="primary"
-              danger={true}
-              onClick={() => { deleteUserGroupData(companyId, deleteRecord?.UserGroupId); setIsDelModalOpen(false) }}
-            >
-              Delete
-            </ReusableButton>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
+    </ScrollArea>
   );
 };
 

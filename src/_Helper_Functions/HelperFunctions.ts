@@ -1,10 +1,20 @@
 
 import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+dayjs.extend(customParseFormat);
 
 //you can format the dates into various formats like dd/mm/yyyy || dd-mm-yyyy || dd-mm-yy || mm-dd-yyyy || yyyy-mm-dd etc other formats
-export const formatDate = (date: Date | string | number, format: string = 'YYYY-MM-DD'): string => {
-  return date ? dayjs(date).format(format):'';
+export const formatDate = (
+  date: Date | string | number,
+  format: string = "YYYY-MM-DD"
+): string => {
+  if (!date) return "";
+  if (typeof date === "string" && date.includes("-")) {
+    return dayjs(date, "DD-MM-YYYY").format(format);
+  }
+  return dayjs(date).format(format);
 };
+
 // "04/03/2025 09:58:52" to DD-MM-YYYY
 export function formatDateToDDMMYYYY(dateTimeStr: string) {
   if (!dateTimeStr?.trim()) return "";
@@ -13,21 +23,14 @@ export function formatDateToDDMMYYYY(dateTimeStr: string) {
   );
 }
 
-import customParseFormat from 'dayjs/plugin/customParseFormat';
-
-dayjs.extend(customParseFormat);
 //you can format the dates into various formats like dd/mm/yyyy || dd-mm-yyyy || dd-mm-yy || mm-dd-yyyy || yyyy-mm-dd etc other formats and also accepts String in in given format
-
 export const formatDates = (date: Date | string | number, format: string = 'YYYY-MM-DD'): string => {
   if (!date) return '';
-  // If the input is a string, parse it using a specific format
   if (typeof date === 'string') {
-    return dayjs(date, format, true).format(format);  // true => strict parsing
+    return dayjs(date, format, true).format(format);
   }
-  // For Date objects or timestamps
   return dayjs(date).format(format);
 };
-
 
 //upload helper function 
  export const fileToByteArray = (blob: Blob): Promise<Uint8Array> => {
@@ -52,6 +55,7 @@ export const formatDates = (date: Date | string | number, format: string = 'YYYY
       default: return 'bg-gray-100 text-gray-800';
     }
 };
+
 //get a color based on the status
 export const getStatusColor = (status: string) => {
     switch (status) {
@@ -62,6 +66,7 @@ export const getStatusColor = (status: string) => {
       default: return 'bg-gray-100 text-gray-800';
     }
 };
+
 //get a color based on the activity status
 export const getActivityStatusColor = (status: string) => {
     switch (status) {
@@ -132,3 +137,26 @@ const statusColors: Record<string, string> = {
   Closed: GRAY,
 };
 export const getColorForStatus = (status: string): string => statusColors[status] || GRAY;
+
+export const convertOrgLogoFromApi = async (apiData: {
+  OrganizationLogo: string;
+  OrganizationLogoName: string;
+  OrganizationLogoType: string;
+  OrganizationLogoConversionType: string;
+}) => {
+  try {
+    const byteArray = new Uint8Array(JSON.parse(apiData.OrganizationLogo));
+    const blob = new Blob([byteArray], { type: apiData.OrganizationLogoConversionType });
+    const blobUrl = URL.createObjectURL(blob);
+    return {
+      uid: crypto.randomUUID(),
+      name: apiData.OrganizationLogoName,
+      type: apiData.OrganizationLogoConversionType,
+      status: "done",
+      url: blobUrl,
+    };
+  } catch (error) {
+    console.error("Failed to reconstruct uploaded file:", error);
+    return null;
+  }
+};

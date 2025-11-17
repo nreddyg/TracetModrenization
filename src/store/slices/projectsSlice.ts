@@ -19,9 +19,16 @@ interface ProjectsState {
   loading: boolean;
   error: string | null;
   companyId:string | null;
+  companyName?:string | null;
   userId?:number | null;
   branch?:string;
   branchId?:string;
+  allLevelsData?:any[];
+  lastLevelsData?:any;
+  branchCode?:string;
+  branchList?:any[];
+reportsMenu:any
+  
 }
 
 const initialState: ProjectsState = {
@@ -29,9 +36,25 @@ const initialState: ProjectsState = {
   loading: false,
   error: null,
   companyId:'',
+  companyName:'',
   userId:null,
   branch:'',
-  branchId:""
+  branchId:"",
+  allLevelsData:[],
+  lastLevelsData:{
+    Branch: "",BranchId:"",AssetLocation: "",AssetLocationId:"",
+    CostCenter: "",CostCenterId:"",Department: "",DepartmentId:""
+  },
+  branchCode:'',
+  branchList:[],
+  reportsMenu:{
+  
+    fixedAssetsReportsMenu:[],
+    serviceDeskReportsMenu:[],
+    depreciationReportsMenu:[],
+    physicalVerificationMenu:[]
+  }
+  
 };
 
 const projectsSlice = createSlice({
@@ -59,21 +82,40 @@ const projectsSlice = createSlice({
     setCompanyId:(state,action:PayloadAction<string | null>)=>{
       state.companyId=action.payload
     },
+    setCompanyName:(state,action:PayloadAction<string | null>)=>{
+      state.companyName=action.payload
+    },
     setBranch:(state,action:PayloadAction<string>)=>{
       state.branch=action.payload
     },
     setBranchId:(state,action:PayloadAction<string>)=>{
       state.branchId=action.payload
     },
+    setBranchCode:(state,action:PayloadAction<string>)=>{
+      state.branchCode=action.payload
+    },
     setUserId:(state,action:PayloadAction<number | null>)=>{
       state.userId=action.payload
+    },
+    setLastLevelsData:(state,action:PayloadAction<any>)=>{
+      state.lastLevelsData=action.payload
+    },
+    setAllLevelsData:(state,action:PayloadAction<any>)=>{
+      state.allLevelsData=action.payload
+    },
+    setBranchesList:(state, action: PayloadAction<any>) => {
+      state.branchList = action.payload;
     },
     setError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload;
     },
+    setReportsMenu: (state, action: PayloadAction<any | null>) => {
+      state.reportsMenu = {...state.reportsMenu,...action.payload};
+    },
+   
   },
 });
 
 export const { setProjects, addProject, updateProject, deleteProject, setLoading,
-  setCompanyId,setBranch,setBranchId,setUserId,setError } = projectsSlice.actions;
+  setCompanyId,setCompanyName,setBranch,setBranchId,setUserId,setLastLevelsData,setAllLevelsData,setBranchCode,setError,setBranchesList,setReportsMenu } = projectsSlice.actions;
 export default projectsSlice.reducer;

@@ -1,81 +1,14 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef, RefObject } from 'react';
 import {
-  useReactTable,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  getGroupedRowModel,
-  getExpandedRowModel,
-  flexRender,
-  createColumnHelper,
-  Row,
-  Column,
-  Table as TanstackTable,
-  ColumnDef,
-  SortingState,
-  ColumnFiltersState,
-  VisibilityState,
-  RowSelectionState,
-  GroupingState,
-  ExpandedState,
-  PaginationState,
-  OnChangeFn,
-  ColumnOrderState,
-  ColumnSizingState,
-  ColumnPinningState,
-  FilterFn,
-  getFacetedRowModel,
-  getFacetedUniqueValues,
+  useReactTable, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, getGroupedRowModel, getExpandedRowModel, flexRender, createColumnHelper, Row, Column,
+  Table as TanstackTable, ColumnDef, SortingState, ColumnFiltersState, VisibilityState, RowSelectionState, GroupingState, ExpandedState, PaginationState, OnChangeFn, ColumnOrderState, ColumnSizingState, ColumnPinningState, FilterFn, getFacetedRowModel, getFacetedUniqueValues,
 } from '@tanstack/react-table';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import {
-  ChevronDown,
-  ChevronRight,
-  Search,
-  Filter,
-  Download,
-  Edit,
-  Trash2,
-  Eye,
-  Settings,
-  MoreHorizontal,
-  ArrowUpDown,
-  ArrowUp,
-  ArrowDown,
-  Plus,
-  X,
-  Check,
-  AlertCircle,
-  Loader2,
-  Moon,
-  Sun,
-  Columns,
-  RefreshCw,
-  PrinterIcon,
-  FileSpreadsheet,
-  FileImage,
-  Keyboard,
-  Volume2,
-  Calendar,
-  Users,
-  Shield,
-  History,
-  Globe,
-  Save,
-  Undo,
-  Redo,
-  Maximize2,
-  Minimize2,
-  Pin,
-  PinOff,
-  FileText,
-  Group,
-  CheckSquare,
-  Square,
-  MoreVertical
+  ChevronDown, ChevronRight, Search, Filter, Download, Edit, Trash2, Eye, Settings, MoreHorizontal, ArrowUpDown, ArrowUp, ArrowDown, Plus, X, Check, AlertCircle, Loader2, Moon, Sun, Columns, RefreshCw, PrinterIcon, FileSpreadsheet, FileImage, Keyboard, Volume2, Calendar, Users, Shield, History, Globe, Save, Undo, Redo, Maximize2, Minimize2, Pin, PinOff, FileText, Group, CheckSquare, Square, MoreVertical,
+  ChevronLeft
 } from 'lucide-react';
 import { Button } from './button';
 import { Input } from './input';
@@ -85,23 +18,12 @@ import { Badge } from './badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './dropdown-menu';
 import { Popover, PopoverContent, PopoverTrigger } from './popover';
 import { cn } from '@/lib/utils';
-import {
-  DndContext,
-  closestCenter,
-  MouseSensor,
-  TouchSensor,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
-import {
-  arrayMove,
-  SortableContext,
-  useSortable,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
+import { DndContext, closestCenter, MouseSensor, TouchSensor, useSensor, useSensors, } from "@dnd-kit/core";
+import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy, } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { ReusableMultiSelect } from './reusable-multi-select';
-
+import { useMessage } from './reusable-message';
+import { ScrollArea } from './scroll-area';
 // Enhanced types for enterprise features
 export interface TablePermissions {
   canEdit: boolean;
@@ -162,7 +84,6 @@ export interface TablePreferences {
   filters: AdvancedFilter[];
   pageSize: number;
 }
-
 // NEW: Enhanced Selection interfaces
 export interface SelectionInfo<T = any> {
   selectedRows: T[];
@@ -171,7 +92,6 @@ export interface SelectionInfo<T = any> {
   isAllSelected: boolean;
   isPartiallySelected: boolean;
 }
-
 export interface SelectionActions<T = any> {
   selectRow: (rowId: string) => void;
   deselectRow: (rowId: string) => void;
@@ -182,7 +102,6 @@ export interface SelectionActions<T = any> {
   deselectMultiple: (rowIds: string[]) => void;
   invertSelection: () => void;
 }
-
 export interface ReusableTableProps<T = any> {
   data: T[];
   columns: ColumnDef<T>[];
@@ -191,6 +110,12 @@ export interface ReusableTableProps<T = any> {
   title?: string;
   permissions?: TablePermissions;
   actions?: TableAction<T>[];
+  exportMeta?: {
+    companyName?: string;
+    name?: string;
+  };
+  exportOptions?: ("csv" | "excel" | "json" | "pdf")[]; // formats allowed
+  onExport?: (type: "csv" | "excel" | "json" | "pdf", rows: T[], table: TanstackTable<T>) => void;
   onAdd?: () => void;
   onRefresh?: () => void;
   onBulkDelete?: (selectedRows: T[]) => void;
@@ -210,33 +135,10 @@ export interface ReusableTableProps<T = any> {
   enableSelectAll?: boolean; // Enable/disable select all functionality
   maxSelectable?: number; // Maximum number of rows that can be selected
   selectableRowFilter?: (row: T) => boolean; // Filter which rows can be selected
-
-  enableSelection?: boolean;
-  enableSearch?: boolean;
-  enableColumnVisibility?: boolean;
-  enableExport?: boolean;
-  enablePagination?: boolean;
-  enableSorting?: boolean;
-  enableFiltering?: boolean;
-  enableGrouping?: boolean;
-  enableInlineEdit?: boolean;
-  enableKeyboardNav?: boolean;
-  enableVirtualScrolling?: boolean;
-  enableAdvancedFilters?: boolean;
-  enableAuditTrail?: boolean;
-  enablePrintMode?: boolean;
-  enableColumnPinning?: boolean;
-  enableTreeData?: boolean;
-  pageSize?: number;
-  virtualItemHeight?: number;
-  className?: string;
-  storageKey?: string;
-  customActions?: React.ReactNode;
-  emptyMessage?: string;
-  theme?: TableTheme;
-  locale?: string;
-  timezone?: string;
-  rowHeight?: 'compact' | 'normal' | 'comfortable';
+  headerContentClassName?: string
+  enableSelection?: boolean; enableSearch?: boolean; enableColumnVisibility?: boolean; enableExport?: boolean; enablePagination?: boolean; enableSorting?: boolean; enableFiltering?: boolean; enableGrouping?: boolean; enableInlineEdit?: boolean; enableKeyboardNav?: boolean;
+  enableVirtualScrolling?: boolean; enableAdvancedFilters?: boolean; enableAuditTrail?: boolean; enablePrintMode?: boolean; enableColumnPinning?: boolean; enableTreeData?: boolean; pageSize?: number;
+  virtualItemHeight?: number; className?: string; storageKey?: string; customActions?: React.ReactNode; emptyMessage?: string; theme?: TableTheme; locale?: string; timezone?: string; rowHeight?: 'compact' | 'normal' | 'comfortable';
   aggregationFunctions?: Record<string, (values: any[]) => any>;
   getSubRows?: (originalRow: T, index: number) => T[] | undefined;
 }
@@ -479,7 +381,7 @@ const ActionMenu = <T,>({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+        <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Actions">
           <MoreHorizontal className="w-4 h-4" />
         </Button>
       </DropdownMenuTrigger>
@@ -490,6 +392,7 @@ const ActionMenu = <T,>({
             <DropdownMenuItem
               key={index}
               onClick={() => action.onClick(row)}
+
               className={cn(
                 action.variant === 'destructive' && 'text-destructive focus:text-destructive'
               )}
@@ -559,48 +462,52 @@ const ColumnVisibilityManager = ({ table }: { table: TanstackTable<any> }) => {
         </Button>
       </PopoverTrigger>
 
-      <PopoverContent className="w-56 p-2">
-        <div className="space-y-2 overflow-y-auto" style={{ maxHeight: "40vh" }}>
-          {/* Select All */}
-          <div className="flex items-center space-x-2 border-b pb-2 mb-2">
-            <Checkbox
-              id="select-all-columns"
-              checked={allVisible ? true : someVisible ? "indeterminate" : false}
-              onCheckedChange={(checked) => handleToggleAll(checked === true)}
-            />
-            <label htmlFor="select-all-columns" className="text-sm font-medium">
-              Select All
-            </label>
+      <PopoverContent className="w-56 p-2 border border-gray-200 shadow-md rounded-lg">
+        <ScrollArea >
+          <div className="space-y-2" style={{ maxHeight: "40vh" }}>
+            {/* Select All */}
+            <div className="flex items-center space-x-2 border-b border-gray-200 pb-2 mb-2">
+              <Checkbox
+                id="select-all-columns"
+                checked={allVisible ? true : someVisible ? "indeterminate" : false}
+                title='Select'
+                onCheckedChange={(checked) => handleToggleAll(checked === true)}
+              />
+              <label htmlFor="select-all-columns" className="text-sm font-medium">
+                Select All
+              </label>
+            </div>
+
+            {/* Individual columns */}
+            {allColumns.map((column) => {
+              const canHide = column.getCanHide(); // false for locked columns
+              const label =
+                (column.columnDef.header as any)?.toString?.() ||
+                column.id.replace(/([A-Z])/g, " $1").trim();
+
+              return (
+                <div key={column.id} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={column.id}
+                    checked={column.getIsVisible()}
+                    title='Select'
+                    disabled={!canHide}
+                    onCheckedChange={(checked) => {
+                      if (canHide) handleToggleColumn(column, checked === true);
+                    }}
+                  />
+                  <label
+                    htmlFor={column.id}
+                    className={`text-sm font-medium capitalize ${!canHide ? "opacity-50 cursor-not-allowed" : ""
+                      }`}
+                  >
+                    {label}
+                  </label>
+                </div>
+              );
+            })}
           </div>
-
-          {/* Individual columns */}
-          {allColumns.map((column) => {
-            const canHide = column.getCanHide(); // false for locked columns
-            const label =
-              (column.columnDef.header as any)?.toString?.() ||
-              column.id.replace(/([A-Z])/g, " $1").trim();
-
-            return (
-              <div key={column.id} className="flex items-center space-x-2">
-                <Checkbox
-                  id={column.id}
-                  checked={column.getIsVisible()}
-                  disabled={!canHide}
-                  onCheckedChange={(checked) => {
-                    if (canHide) handleToggleColumn(column, checked === true);
-                  }}
-                />
-                <label
-                  htmlFor={column.id}
-                  className={`text-sm font-medium capitalize ${!canHide ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
-                >
-                  {label}
-                </label>
-              </div>
-            );
-          })}
-        </div>
+        </ScrollArea>
       </PopoverContent>
     </Popover>
   );
@@ -623,33 +530,35 @@ const ColumnPinningManager = ({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-48 p-2">
-        <div className="space-y-2 overflow-y-auto" style={{ maxHeight: "40vh" }}>
-          {table.getAllLeafColumns().map((column) => (
-            <div key={column.id} className="flex items-center justify-between space-x-2">
-              <label className="text-sm font-medium capitalize flex-1">
-                {column.id.replace(/([A-Z])/g, ' $1').trim()}
-              </label>
-              <div className="flex gap-1">
-                <Button
-                  size="sm"
-                  variant={column.getIsPinned() === 'left' ? 'default' : 'outline'}
-                  onClick={() => column.pin(column.getIsPinned() === 'left' ? false : 'left')}
-                  className="h-6 w-6 p-0"
-                >
-                  ←
-                </Button>
-                <Button
-                  size="sm"
-                  variant={column.getIsPinned() === 'right' ? 'default' : 'outline'}
-                  onClick={() => column.pin(column.getIsPinned() === 'right' ? false : 'right')}
-                  className="h-6 w-6 p-0"
-                >
-                  →
-                </Button>
+        <ScrollArea>
+          <div className="space-y-2" style={{ maxHeight: "40vh" }}>
+            {table.getAllLeafColumns().map((column) => (
+              <div key={column.id} className="flex items-center justify-between space-x-2">
+                <label className="text-sm font-medium capitalize flex-1">
+                  {column.id.replace(/([A-Z])/g, ' $1').trim()}
+                </label>
+                <div className="flex gap-1">
+                  <Button
+                    size="sm"
+                    variant={column.getIsPinned() === 'left' ? 'default' : 'outline'}
+                    onClick={() => column.pin(column.getIsPinned() === 'left' ? false : 'left')}
+                    className="h-6 w-6 p-0"
+                  >
+                    ←
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={column.getIsPinned() === 'right' ? 'default' : 'outline'}
+                    onClick={() => column.pin(column.getIsPinned() === 'right' ? false : 'right')}
+                    className="h-6 w-6 p-0"
+                  >
+                    →
+                  </Button>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        </ScrollArea>
       </PopoverContent>
     </Popover>
   );
@@ -678,6 +587,7 @@ const ColumnGroupingManager = ({
               <div key={column.id} className="flex items-center space-x-2">
                 <Checkbox
                   checked={column.getIsGrouped()}
+                  title='Select'
                   onCheckedChange={() => column.toggleGrouping()}
                   id={`group-${column.id}`}
                 />
@@ -746,7 +656,7 @@ const AdvancedFilterBuilder = ({
           Advanced Filters {filters.length > 0 && `(${filters.length})`}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-96 p-4">
+      <PopoverContent className="w-96 p-4 border border-gray-200 shadow-md rounded-lg">
         <div className="space-y-4">
           <div className="flex justify-between items-center">
             <h4 className="font-medium">Advanced Filters</h4>
@@ -846,11 +756,18 @@ const SelectionControls = <T,>({
   if (selectionInfo.totalSelected === 0) return null;
 
   return (
-    <div className="flex items-center gap-2 px-3 py-2 bg-primary/10 rounded-md">
-      <Badge variant="secondary">
+    <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 border border-blue-100 rounded-lg">
+      <span
+        className="inline-flex items-center px-3 py-1.5 rounded-xl bg-blue-200 text-blue-600 text-xs font-semibold shadow-sm"
+      >
         {selectionInfo.totalSelected} selected
-        {maxSelectable && ` of ${maxSelectable} max`}
-      </Badge>
+        {maxSelectable && (
+          <span className="ml-1 text-blue-100 font-normal">
+            of {maxSelectable} max
+          </span>
+        )}
+      </span>
+
 
       {selectionMode === 'multiple' && (
         <>
@@ -926,11 +843,23 @@ function getVisibleData(table: TanstackTable<any>, exportData: any[]) {
     col => (col.columnDef.header as string) || col.id
   );
 
-  const body = exportData.map(row =>
-    visibleCols.map(col => {
+  const body = exportData.map((row) =>
+    visibleCols.map((col) => {
       try {
-        const tableRow = table.getRowModel().rows.find(r => r.original === row);
-        return String(tableRow?.getValue(col.id) ?? "");
+        const def = col.columnDef as any;
+
+        // Prefer accessorFn if present
+        if (typeof def.accessorFn === "function") {
+          return String(def.accessorFn(row, 0) ?? "");
+        }
+
+        // accessorKey fallback
+        if (def.accessorKey) {
+          return String(row[def.accessorKey] ?? "");
+        }
+
+        // id fallback (if your data uses ids matching column ids)
+        return String(row[col.id] ?? "");
       } catch {
         return "";
       }
@@ -941,6 +870,7 @@ function getVisibleData(table: TanstackTable<any>, exportData: any[]) {
 }
 
 
+
 // Enhanced Export Menu with multiple formats
 const ExportMenu = ({
   data,
@@ -948,20 +878,44 @@ const ExportMenu = ({
   permissions,
   filename = 'export',
   table,
+  exportOptions = ["csv", "excel", "json", "pdf"],
+  exportMeta,
 }: {
   data: any[];
   selectedRows: any[];
   permissions?: TablePermissions;
   filename?: string;
-  columns?: ColumnDef<any>[];
   table: TanstackTable<any>;
+  exportOptions?: ("csv" | "excel" | "json" | "pdf")[];
+  exportMeta?: { companyName?: string; name?: string };
 }) => {
+  const getExportMetadata = (data: any[], meta?: { companyName?: string; name?: string }) => {
+    const totalCount = data.length;
+    const downloadDate = new Date().toLocaleString();
+    return {
+      companyName: meta?.companyName || "",
+      name: meta?.name || "",
+      totalCount,
+      downloadDate,
+    };
+  };
+
   const exportToCSV = (exportData: any[], table: TanstackTable<any>) => {
     if (exportData.length === 0) return;
 
     const { headers, body } = getVisibleData(table, exportData);
+    const meta = getExportMetadata(exportData, exportMeta);
+
+    const metaSection = [
+      `"${meta.companyName}"`,
+      `"Exported by: ${meta.name}"`,
+      `"Download Date: ${meta.downloadDate}"`,
+      `"Total Records: ${meta.totalCount}"`,
+      "", // spacer line
+    ];
 
     const csvContent = [
+      ...metaSection,
       headers.join(","),
       ...body.map(row =>
         row.map(val => `"${val.replace(/"/g, '""')}"`).join(",")
@@ -978,39 +932,55 @@ const ExportMenu = ({
   };
 
 
+
+
   const exportToExcel = (exportData: any[], table: TanstackTable<any>) => {
     if (exportData.length === 0) return;
 
     const { headers, body } = getVisibleData(table, exportData);
+    const meta = getExportMetadata(exportData, exportMeta);
 
-    const worksheet = XLSX.utils.aoa_to_sheet([headers, ...body]);
+    const metaSheet = [
+      ["Company Name:", meta.companyName],
+      ["Name:", meta.name],
+      ["Total Records:", meta.totalCount],
+      ["Download Date:", meta.downloadDate],
+      [],
+    ];
+
+    const worksheet = XLSX.utils.aoa_to_sheet([...metaSheet, headers, ...body]);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Data");
 
     worksheet["!cols"] = headers.map(() => ({ wch: 20 }));
-
     XLSX.writeFile(workbook, `${filename}-${new Date().toISOString().split("T")[0]}.xlsx`);
   };
+
 
 
   const exportToPDF = (exportData: any[], table: TanstackTable<any>) => {
     if (exportData.length === 0) return;
 
-    const doc = new jsPDF();
     const { headers, body } = getVisibleData(table, exportData);
+    const meta = getExportMetadata(exportData, exportMeta);
 
+    const doc = new jsPDF();
     doc.setFontSize(14);
-    doc.text(filename, 14, 20);
+    doc.text(filename, 14, 15);
+    doc.setFontSize(10);
+    doc.text(`Company Name: ${meta.companyName}`, 14, 25);
+    doc.text(`Name: ${meta.name}`, 14, 30);
+    doc.text(`Total Records: ${meta.totalCount}`, 14, 35);
+    doc.text(`Download Date: ${meta.downloadDate}`, 14, 40);
 
     autoTable(doc, {
       head: [headers],
       body,
-      startY: 30,
+      startY: 45,
       styles: { fontSize: 8, cellPadding: 2 },
       headStyles: { fillColor: [66, 135, 245] },
       alternateRowStyles: { fillColor: [240, 240, 240] },
       theme: "grid",
-      margin: { top: 30 },
     });
 
     doc.save(`${filename}-${new Date().toISOString().split("T")[0]}.pdf`);
@@ -1018,14 +988,29 @@ const ExportMenu = ({
 
 
 
+
   const exportToJSON = (exportData: any[], table: TanstackTable<any>) => {
     if (exportData.length === 0) return;
 
     const { headers, body } = getVisibleData(table, exportData);
+    const meta = getExportMetadata(exportData, exportMeta);
 
-    const jsonData = body.map(row =>
-      Object.fromEntries(headers.map((h, i) => [h, row[i]]))
-    );
+    const jsonData = {
+      metadata: meta,
+      records: body.map(row =>
+        Object.fromEntries(headers.map((h, i) => [h, row[i]]))
+      ),
+    };
+    const msg = useMessage()
+
+    const validateVisibleColumns = (table: TanstackTable<any>) => {
+      const visibleColumns = table.getAllLeafColumns().filter(col => col.getIsVisible());
+      if (visibleColumns.length < 3) {
+        msg.warning("Please select at least 3 columns before exporting.");
+        return false;
+      }
+      return true;
+    };
 
     const blob = new Blob([JSON.stringify(jsonData, null, 2)], {
       type: "application/json",
@@ -1036,6 +1021,17 @@ const ExportMenu = ({
     a.download = `${filename}-${new Date().toISOString().split("T")[0]}.json`;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const msg = useMessage()
+
+  const validateVisibleColumns = (table: TanstackTable<any>) => {
+    const visibleColumns = table.getAllLeafColumns().filter(col => col.getIsVisible());
+    if (visibleColumns.length < 3) {
+      msg.warning("Please select at least 3 columns before exporting.");
+      return false;
+    }
+    return true;
   };
 
 
@@ -1107,39 +1103,71 @@ const ExportMenu = ({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuItem onClick={() => exportToCSV(data, table)}>
-          Export All to CSV
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => exportToExcel(data, table)}>
-          Export All to Excel
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => exportToJSON(data, table)}>
-          Export All to JSON
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => exportToPDF(data, table)}>
-          Export All to PDF
-        </DropdownMenuItem>
+        {exportOptions.includes("csv") && (
+          <DropdownMenuItem onClick={() => {
+            const allRows = table.getFilteredRowModel().rows.map(r => r.original);
+            if (!validateVisibleColumns(table)) return; // all pages, honors filters/sort
+            exportToCSV(allRows, table);
+          }}>
+            Export All to CSV
+          </DropdownMenuItem>
+        )}
+        {exportOptions.includes("excel") && (
+          <DropdownMenuItem onClick={() => {
+            const allRows = table.getFilteredRowModel().rows.map(r => r.original);
+            if (!validateVisibleColumns(table)) return;
+            exportToExcel(allRows, table);
+          }}>
+            Export All to Excel
+          </DropdownMenuItem>
+        )}
+        {exportOptions.includes("json") && (
+          <DropdownMenuItem onClick={() => {
+            const allRows = table.getFilteredRowModel().rows.map(r => r.original);
+            if (!validateVisibleColumns(table)) return;
+            exportToJSON(allRows, table);
+          }}>
+            Export All to JSON
+          </DropdownMenuItem>
+        )}
+        {exportOptions.includes("pdf") && (
+          <DropdownMenuItem onClick={() => {
+            const allRows = table.getFilteredRowModel().rows.map(r => r.original);
+            if (!validateVisibleColumns(table)) return;
+            exportToPDF(allRows, table);
+          }}>
+            Export All to PDF
+          </DropdownMenuItem>
+        )}
 
         {selectedRows.length > 0 && (
           <>
-            <DropdownMenuItem onClick={() => exportToCSV(selectedRows, table)}>
-              Export Selected to CSV ({selectedRows.length})
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => exportToExcel(selectedRows, table)}>
-              Export Selected to Excel ({selectedRows.length})
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => exportToJSON(selectedRows, table)}>
-              Export Selected to JSON ({selectedRows.length})
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => exportToPDF(selectedRows, table)}>
-              Export Selected to PDF ({selectedRows.length})
-            </DropdownMenuItem>
+            {exportOptions.includes("csv") && (
+              <DropdownMenuItem onClick={() => exportToCSV(selectedRows, table)}>
+                Export Selected to CSV ({selectedRows.length})
+              </DropdownMenuItem>
+            )}
+            {exportOptions.includes("excel") && (
+              <DropdownMenuItem onClick={() => exportToExcel(selectedRows, table)}>
+                Export Selected to Excel ({selectedRows.length})
+              </DropdownMenuItem>
+            )}
+            {exportOptions.includes("json") && (
+              <DropdownMenuItem onClick={() => exportToJSON(selectedRows, table)}>
+                Export Selected to JSON ({selectedRows.length})
+              </DropdownMenuItem>
+            )}
+            {exportOptions.includes("pdf") && (
+              <DropdownMenuItem onClick={() => exportToPDF(selectedRows, table)}>
+                Export Selected to PDF ({selectedRows.length})
+              </DropdownMenuItem>
+            )}
           </>
         )}
-
       </DropdownMenuContent>
     </DropdownMenu>
   );
+
 };
 
 // Inline Edit Cell Component
@@ -1365,56 +1393,125 @@ const useKeyboardNavigation = (
   }, [enabled, tableRef]);
 };
 
-const Pagination = ({ table }: { table: TanstackTable<any> }) => (
-  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-4 py-3 border-t gap-2">
-    <div className="text-sm text-muted-foreground">
-      Showing{' '}
-      {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} to{' '}
-      {Math.min((table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize, table.getFilteredRowModel().rows.length)} of{' '}
-      {table.getFilteredRowModel().rows.length} results
+
+const Pagination = ({ table }: { table: TanstackTable<any> }) => {
+  const pageCount = table.getPageCount();
+  const currentPage = table.getState().pagination.pageIndex + 1;
+  const totalRows = table.getFilteredRowModel().rows.length;
+  const pageSize = table.getState().pagination.pageSize;
+  const start = (currentPage - 1) * pageSize + 1;
+  const end = Math.min(currentPage * pageSize, totalRows);
+
+  // 3-page window logic
+  const [pageWindow, setPageWindow] = React.useState(0);
+  const pagesPerWindow = 3;
+  const totalWindows = Math.ceil(pageCount / pagesPerWindow);
+  const currentWindow = Math.floor((currentPage - 1) / pagesPerWindow);
+
+  React.useEffect(() => {
+    setPageWindow(currentWindow);
+  }, [currentWindow]);
+
+  const startPage = pageWindow * pagesPerWindow + 1;
+  const endPage = Math.min(startPage + pagesPerWindow - 1, pageCount);
+  const visiblePages = Array.from({ length: pagesPerWindow }, (_, i) => {
+    const page = startPage + i;
+    return page <= pageCount ? page : null;
+  });
+
+  const shiftWindowLeft = () => {
+    if (pageWindow > 0) setPageWindow(pageWindow - 1);
+  };
+
+  const shiftWindowRight = () => {
+    if (pageWindow < totalWindows - 1) setPageWindow(pageWindow + 1);
+  };
+
+  return (
+    <div className="flex items-center justify-between flex-wrap sm:flex-nowrap px-2 py-3 border-t border-gray-200 bg-white text-sm rounded-b-xl gap-1">
+
+      <div className="basis-1/4 shrink-0 grow-0 whitespace-normal break-words text-gray-600">
+        Showing {start} to {end} of {totalRows} entries
+      </div>
+
+      <ScrollArea scrollStyle={'flex-[0.8] bg-[#aab4ca]'}>
+        <div className="flex items-center gap-1 flex-nowrap">
+
+          <Select
+            value={pageSize.toString()}
+            onValueChange={(value) => table.setPageSize(Number(value))}
+          >
+            <SelectTrigger className="w-28 h-8 text-sm">
+              <SelectValue placeholder="Rows per page" />
+            </SelectTrigger>
+            <SelectContent>
+              {[10, 20, 50, 100].map((size) => (
+                <SelectItem key={size} value={size.toString()}>
+                  {size} per page
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={shiftWindowLeft}
+            disabled={pageWindow === 0}
+          >
+            <ChevronLeft />
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+          >
+            Prev
+          </Button>
+
+          <div className="flex items-center gap-2 min-w-[150px] justify-center">
+            {visiblePages.map((page, idx) =>
+              page ? (
+                <button
+                  key={page}
+                  onClick={() => table.setPageIndex(page - 1)}
+                  className={`w-8 h-8 text-sm font-medium rounded-md border transition-all duration-150 ${page === currentPage
+                      ? "bg-blue-600 text-white border-blue-600 shadow-sm"
+                      : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
+                    }`}
+                >
+                  {page}
+                </button>
+              ) : (
+                <div key={`empty-${idx}`} className="w-10 h-9" />
+              )
+            )}
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+          >
+            Next
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={shiftWindowRight}
+            disabled={pageWindow >= totalWindows - 1}
+          >
+            <ChevronRight />
+          </Button>
+        </div>
+      </ScrollArea>
     </div>
 
-    <div className="flex flex-wrap items-center gap-2">
-      <Select
-        value={table.getState().pagination.pageSize.toString()}
-        onValueChange={(value) => table.setPageSize(Number(value))}
-      >
-        <SelectTrigger className="w-32">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {[10, 20, 50, 100].map(size => (
-            <SelectItem key={size} value={size.toString()}>
-              {size} per page
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+  );
+};
 
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => table.previousPage()}
-        disabled={!table.getCanPreviousPage()}
-      >
-        Previous
-      </Button>
-
-      <span className="text-sm font-medium">
-        Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
-      </span>
-
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => table.nextPage()}
-        disabled={!table.getCanNextPage()}
-      >
-        Next
-      </Button>
-    </div>
-  </div>
-);
 function DraggableRow({ row, children }: { row: any; children: React.ReactNode }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: row.id,
@@ -1433,7 +1530,9 @@ function DraggableRow({ row, children }: { row: any; children: React.ReactNode }
       style={style}
       {...attributes}
       {...listeners}
-      className={row.getIsSelected() ? "bg-primary/5 hover:bg-muted/50" : "hover:bg-muted/50"}
+      className={row.getIsSelected()
+        ? "bg-primary/5 hover:bg-gray-50 transition-colors duration-150 border-b border-gray-100"
+        : "hover:bg-gray-50 transition-colors duration-150 border-b border-gray-100"}
     >
       {children}
     </tr>
@@ -1459,14 +1558,16 @@ export function ReusableTable<T = any>({
     canInlineEdit: false,
     canManageColumns: true
   },
+  exportOptions,
+  exportMeta,
   actions = [],
   onAdd,
+  onExport,
   onRefresh,
   onBulkDelete,
   onBulkEdit,
   onRowEdit,
   onAuditLog,
-
   // NEW: Enhanced Selection Props
   selectedRowIds: controlledSelectedRowIds,
   onSelectionChange,
@@ -1507,9 +1608,10 @@ export function ReusableTable<T = any>({
   getSubRows,
   enableRowReordering = false,
   onRowReorder,
+  headerContentClassName
 }: ReusableTableProps<T>) {
   // State management
-  const [sorting, setSorting] = useLocalStorage<SortingState>(`${storageKey}-sorting`, []);
+  const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   // const [columnVisibility, setColumnVisibility] = useLocalStorage<VisibilityState>(`${storageKey}-visibility`, {});
   const [uncontrolledColumnVisibility, setUncontrolledColumnVisibility] = useState<VisibilityState>({});
@@ -1609,6 +1711,7 @@ export function ReusableTable<T = any>({
           return (
             <Checkbox
               checked={selectionInfo.isAllSelected}
+              title='Select'
               ref={(el) => {
                 if (el && 'indeterminate' in el) {
                   (el as HTMLInputElement).indeterminate = selectionInfo.isPartiallySelected;
@@ -1637,6 +1740,7 @@ export function ReusableTable<T = any>({
           return (
             <Checkbox
               checked={isSelected}
+              title='Select'
               onCheckedChange={() => selectionActions.toggleRowSelection(rowId)}
               aria-label="Select row"
               disabled={!isSelectable || (maxSelectable && !isSelected && selectionInfo.totalSelected >= maxSelectable)}
@@ -1645,7 +1749,8 @@ export function ReusableTable<T = any>({
         },
         enableSorting: false,
         enableHiding: false,
-        size: 50,
+        size: 28, minSize: 24,
+        maxSize: 36,
       });
     }
 
@@ -1683,17 +1788,17 @@ export function ReusableTable<T = any>({
     isOpen: boolean
     onOpenChange: (open: boolean) => void
   }
-const headerRef = React.useRef<HTMLDivElement>(null);
-const [calculatedMinWidth, setCalculatedMinWidth] = React.useState<number>(150);
-function getMinWidthFromChars(charCount: number, font: string = '12px Arial'): number {
-  const canvas = document.createElement('canvas');
-  const context = canvas.getContext('2d');
-  if (!context) return 48; // fallback minimum width
+  const headerRef = React.useRef<HTMLDivElement>(null);
+  const [calculatedMinWidth, setCalculatedMinWidth] = React.useState<number>(150);
+  function getMinWidthFromChars(charCount: number, font: string = '12px Arial'): number {
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    if (!context) return 48; // fallback minimum width
 
-  context.font = font;
-  const avgCharWidth = context.measureText('M').width; // Use 'M' as average char width
-  return Math.ceil(avgCharWidth * charCount + 32); // +32 for padding
-}
+    context.font = font;
+    const avgCharWidth = context.measureText('M').width; // Use 'M' as average char width
+    return Math.ceil(avgCharWidth * charCount + 32); // +32 for padding
+  }
   function DataTableColumnHeader<TData, TValue>({
     column,
     table,
@@ -1701,16 +1806,17 @@ function getMinWidthFromChars(charCount: number, font: string = '12px Arial'): n
     enableSorting,
     enableFiltering,
   }: DataTableColumnHeaderProps<TData, TValue>) {
-useEffect(() => {
-  if (headerRef.current) {
-    const actualWidth = headerRef.current.offsetWidth + 16;
+    useEffect(() => {
+      if (headerRef.current) {
+        const actualWidth = headerRef.current.offsetWidth + 16;
 
-    const minCharsWidth = getMinWidthFromChars(10);  // Minimum width based on 4 chars
-    const calculated = Math.max(actualWidth, minCharsWidth);
+        const headerText = title?.toString() ?? '';
+        const minCharsWidth = getMinWidthFromChars(headerText.length);
+        const calculated = Math.max(actualWidth, minCharsWidth);
 
-    setCalculatedMinWidth(calculated);
-  }
-}, [title]);
+        setCalculatedMinWidth(calculated);
+      }
+    }, [title]);
     const [tempFilter, setTempFilter] = React.useState<string[]>(
       Array.isArray(column.getFilterValue()) ? (column.getFilterValue() as string[]) : []
     );
@@ -1743,6 +1849,7 @@ useEffect(() => {
     if (column.id === "select") {
       return (
         <Checkbox
+          title='Select'
           checked={
             table.getIsAllPageRowsSelected()
               ? true
@@ -1770,9 +1877,11 @@ useEffect(() => {
           setOpenColumnId(open ? column.id : null);
         }}>
           <PopoverTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+
+            {(enableFiltering || enableSorting) && <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
               <MoreVertical className="h-4 w-4 text-muted-foreground" />
             </Button>
+            }
           </PopoverTrigger>
           <PopoverContent
             className="w-60 p-4 space-y-4"
@@ -1786,33 +1895,50 @@ useEffect(() => {
           >
             {/* Sorting */}
             {enableSorting && column.getCanSort() && (
-              <div className="space-y-2">
-                <p className="text-sm font-medium">Sort</p>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => column.toggleSorting(false)}
-                    className="flex-1"
-                  >
-                    Asc
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => column.toggleSorting(true)}
-                    className="flex-1"
-                  >
-                    Desc
-                  </Button>
-                </div>
+              <div className=" flex gap-2">
+                <p className="text-sm pt-1 font-medium">Sort</p>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className={cn(
+                    "flex items-center justify-center gap-1 px-3 py-1.5 rounded-md border border-gray-200 bg-white hover:bg-gray-50 transition",
+                    // column.getIsSorted() ? "bg-gray-50" : ""
+                  )}
+                  onClick={() => {
+                    const isSorted = column.getIsSorted();
+                    if (!isSorted) {
+                      column.toggleSorting(false); // ASC first
+                    } else if (isSorted === "asc") {
+                      column.toggleSorting(true); // DESC next
+                    } else {
+                      column.clearSorting(); // then reset
+                    }
+                  }}
+                >
+                  <ArrowUp
+                    className={cn(
+                      "w-4 h-4",
+                      column.getIsSorted() === "asc"
+                        ? "text-blue-600"
+                        : "text-gray-400"
+                    )}
+                  />
+                  <ArrowDown
+                    className={cn(
+                      "w-4 h-4 -mt-0.5",
+                      column.getIsSorted() === "desc"
+                        ? "text-blue-600"
+                        : "text-gray-400"
+                    )}
+                  />
+                </Button>
               </div>
             )}
-
             {/* Filtering */}
             {enableFiltering && column.getCanFilter() && (
               <div className="space-y-2">
-                <label className="text-xs font-medium text-muted-foreground">Filter</label>
+                <label className="text-sm pt-1 font-medium">Filter</label>
 
                 <ReusableMultiSelect
                   options={options}
@@ -1942,7 +2068,6 @@ useEffect(() => {
     if (selectedRows.length === 0 || !onBulkEdit) return;
     onBulkEdit(selectedRows);
   };
-
   if (loading) {
     return (
       <div className="p-8 text-center">
@@ -1965,7 +2090,7 @@ useEffect(() => {
           <div className="flex items-center gap-2">
             {customActions}
             {onRefresh && (
-              <Button variant="outline" size="sm" onClick={onRefresh}>
+              <Button variant="outline" size="sm" onClick={onRefresh} className="flex-1 sm:flex-none hover:bg-background hover:text-black">
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Refresh
               </Button>
@@ -2001,16 +2126,41 @@ useEffect(() => {
         {enableGrouping && (
           <ColumnGroupingManager table={table} />
         )}
-        {enableExport && (
-          <ExportMenu
-            data={table?.getCoreRowModel().rows.map(r => r.original)}
-            selectedRows={selectedRows}
-            permissions={permissions}
-            filename={title || 'export'}
-            columns={enhancedColumns}
-            table={table}
-          />
+        {enableExport && permissions.canExport && (
+          onExport ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Download className="w-4 h-4 mr-2" />
+                  Export
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                {(exportOptions || ["csv", "excel", "json", "pdf"]).map((type) => (
+                  <DropdownMenuItem
+                    key={type}
+                    onClick={() => onExport(type, selectedRows.length ? selectedRows : data, table)}
+                  >
+                    Export to {type.toUpperCase()}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            // fallback to internal ExportMenu if no external handler provided
+            <ExportMenu
+              data={table?.getPrePaginationRowModel().rows.map(r => r.original)} // ✅ include ALL rows
+              selectedRows={selectedRows}
+              permissions={permissions}
+              filename={title || "export"}
+              table={table}
+              exportOptions={exportOptions}
+              exportMeta={exportMeta}
+            />
+
+          )
         )}
+
 
         {/* Accessibility and keyboard shortcuts info */}
         {enableKeyboardNav && (
@@ -2061,17 +2211,16 @@ useEffect(() => {
       )}
 
       {/* Table */}
-      <div className="border rounded-lg overflow-hidden">
-        <div className="overflow-x-auto">
-          <div className="max-h-[500px] overflow-y-auto">
-          <table ref={tableRef} className="w-full  table-fixed">
-            <thead className="sticky top-0 bg-muted/50 z-10">
+      <div className="bg-white shadow-sm rounded-xl border border-gray-200">
+          <ScrollArea horizontal>
+          <table ref={tableRef} className="w-full min-w-max border-collapse text-sm text-gray-800">
+            <thead className="bg-white text-gray-700 uppercase text-sm font-semibold tracking-wide">
               {table.getHeaderGroups().map(headerGroup => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map(header => (
                     <th
                       key={header.id}
-                      className="ps-4 px-2 py-1 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider border-b relative bg-background z-10"
+                      className="px-4 py-3 text-left rounded-xl border-b border-gray-200 whitespace-nowrap bg-white"
                       style={{
                         width: header.getSize(),
                         minWidth: `${calculatedMinWidth}px`,
@@ -2085,26 +2234,7 @@ useEffect(() => {
                     >
                       {header.isPlaceholder ? null : (
                         <div className="flex flex-col gap-2">
-                          <div className="flex items-center gap-2">
-                            {/* {enableSorting && header.column.getCanSort() ? (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-auto p-0 font-medium"
-                                onClick={header.column.getToggleSortingHandler()}
-                              >
-                                {flexRender(header.column.columnDef.header, header.getContext())}
-                                {header.column.getIsSorted() === 'asc' ? (
-                                  <ArrowUp className="w-4 h-4 ml-1" />
-                                ) : header.column.getIsSorted() === 'desc' ? (
-                                  <ArrowDown className="w-4 h-4 ml-1" />
-                                ) : (
-                                  <ArrowUpDown className="w-4 h-4 ml-1" />
-                                )}
-                              </Button>
-                            ) : (
-                              flexRender(header.column.columnDef.header, header.getContext())
-                            )} */}
+                          <div className={cn("flex items-center  py-1  gap-2", headerContentClassName)}>
                             <DataTableColumnHeader
                               column={header.column}
                               table={table}
@@ -2126,9 +2256,17 @@ useEffect(() => {
                         <div
                           onMouseDown={header.getResizeHandler()}
                           onTouchStart={header.getResizeHandler()}
-                          className="absolute right-0 top-0 h-full w-1 bg-border cursor-col-resize opacity-0 hover:opacity-100"
-                        />
+                          className="absolute right-0 top-0 h-full w-1.5 cursor-col-resize group z-30"
+                          style={{
+                            transform: "translateX(50%)", // ensures correct alignment
+                            backgroundColor: "transparent",
+                          }}
+                        >
+                          {/* visible hover indicator */}
+                          <div className="h-full w-1 bg-transparent group-hover:bg-gray-300 transition-colors" />
+                        </div>
                       )}
+
                     </th>
                   ))}
                 </tr>
@@ -2171,7 +2309,7 @@ useEffect(() => {
                               <td
                                 key={cell.id}
                                 className={cn(
-                                  "px-4 py-3 text-sm bg-background",
+                                  "px-4 py-3 text-gray-600 border-b border-gray-200 last:border-0 transition-colors duration-150",
                                   rowHeightClasses[rowHeight]
                                 )}
                                 style={{
@@ -2234,9 +2372,8 @@ useEffect(() => {
                     <tr
                       key={row.id}
                       className={cn(
-                        "hover:bg-muted/50",
-                        isSelected && "bg-primary/5",
-                        !isSelectable && "opacity-50"
+                        row.getIsSelected() ? "bg-white border-b border-gray-200 transition-all duration-150" : "text-gray-700 border-b border-gray-200 last:border-0 transition-all duration-150 hover:bg-indigo-50 cursor-pointer",
+                        "bg-white hover:bg-gray-100 cursor-pointer"
                       )}
                     >
                       {row.getVisibleCells().map(cell => {
@@ -2249,7 +2386,7 @@ useEffect(() => {
                           <td
                             key={cell.id}
                             className={cn(
-                              "px-4 py-3 text-sm bg-background",
+                              "px-4 py-3 text-gray-600 border-b border-gray-200 last:border-0",
                               rowHeightClasses[rowHeight]
                             )}
                             style={{
@@ -2277,14 +2414,7 @@ useEffect(() => {
                                 type={columnMeta.editType || "text"}
                                 options={columnMeta.options || []}
                               />
-                            ) : <div
-                              className="overflow-hidden"
-                              style={{
-                                display: '-webkit-box',
-                                WebkitLineClamp: 2,
-                                WebkitBoxOrient: 'vertical',
-                                textOverflow: 'ellipsis',
-                              }}
+                            ) : <div className="overflow-hidden" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', textOverflow: 'ellipsis', }}
                               title={String(cell.getValue())}
                             >
                               {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -2300,8 +2430,7 @@ useEffect(() => {
             )}
 
           </table>
-          </div>
-        </div>
+          </ScrollArea>
 
         {/* Pagination */}
         {enablePagination && <Pagination table={table} />}
@@ -2309,7 +2438,6 @@ useEffect(() => {
     </div>
   );
 }
-
 // NEW: Export additional types and hooks for external use
 // export { useTableSelection, type SelectionInfo, type SelectionActions };
 export default ReusableTable;

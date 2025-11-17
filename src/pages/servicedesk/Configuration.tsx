@@ -1,8 +1,6 @@
 
 import { useCallback, useEffect, useState } from 'react';
-import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { ReusableDropdown } from '@/components/ui/reusable-dropdown';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Controller, useForm } from 'react-hook-form';
@@ -31,6 +29,9 @@ import { ReusableButton } from '@/components/ui/reusable-button';
 import { useAppSelector } from '@/store';
 import { getSRBranchList } from '@/services/ticketServices';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { FaAngleRight } from 'react-icons/fa';
 interface OptType {
   data: { [key: string]: any }[];
   label: string;
@@ -70,8 +71,10 @@ const tablePermissions: TablePermissions = {
 };
 
 const Configuration = () => {
+  const navigate = useNavigate()
   const companyId = useAppSelector(state => state.projects.companyId);
-  const branch=useAppSelector(state => state.projects.branch) || '';
+  const branch = useAppSelector(state => state.projects.branch) || '';
+  const branchId = useAppSelector(state => state.projects.branchId) || localStorage.getItem('BranchId');
   const [fields, setFields] = useState<BaseField[]>(CONFIGURATION_DB);
   const dispatch = useDispatch()
   const msg = useMessage()
@@ -95,16 +98,83 @@ const Configuration = () => {
     { id: 'Description', accessorKey: "Description", header: "Description" },
     { id: 'Branches', accessorKey: "Branches", header: "Branches" },
     { id: 'ServiceRequestTypeAdmin', accessorKey: "ServiceRequestTypeAdmin", header: "Service Request Type Admin", },
+    {
+      id: 'actions',
+      accessorKey: 'actions',
+      header: 'Actions',
+      cell: ({ row }: any) => (
+        <div className="flex gap-2" title='Actions'>
+          <ReusableButton
+            variant="text"
+            size="small"
+            title='Edit'
+            onClick={() => { handleEdit(row?.original) }}
+          >
+            <Edit className="h-4 w-4 text-blue-600" />
+          </ReusableButton>
+          <ReusableButton
+            variant="text"
+            size="small"
+            title='Delete'
+            danger
+            onClick={() => { handleDelete(row?.original) }}
+          >
+            <Trash2 className="h-4 w-4" />
+          </ReusableButton>
+        </div>
+      ),
+    },
   ]);
   const [statusColumns, setStatusColumns] = useState<ColumnDef<Status>[]>([
     { id: 'StatusType', accessorKey: "StatusType", header: "Status Type" },
     { id: 'Index', accessorKey: "Index", header: "Index" },
+    {
+      id: 'actions',
+      accessorKey: 'actions',
+      header: 'Actions',
+      cell: ({ row }: any) => {
+        if (row?.original.StatusType === 'Open' || row?.original.StatusType === 'Closed') {
+          return (
+            <span></span>
+          )
+
+        }
+        else {
+          return (
+            <div className="flex gap-2" title='Actions'>
+              <ReusableButton
+                variant="text"
+                size="small"
+                title='Edit'
+                onClick={() => { handleEditStatus(row?.original) }}
+              >
+                <Edit className="h-4 w-4 text-blue-600" />
+              </ReusableButton>
+              <ReusableButton
+                variant="text"
+                size="small"
+                title='Delete'
+                danger
+                onClick={() => { handleDeleteStatus(row?.original) }}
+              >
+                <Trash2 className="h-4 w-4" />
+              </ReusableButton>
+            </div>
+          )
+        }
+
+      }
+      ,
+    },
+
   ])
   const [statusTableData, setStatusTableData] = useState<Status[]>([]);
   const [serviceRequestTypeData, setServiceRequestTypeData] = useState<serviceRequestType[]>([]);
   const [isDelModalOpen, setIsDelModalOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<serviceRequestType | null>(null);
+  const [deletingRecord, setDeletingRecord] = useState<serviceRequestType | null>(null);
   const [selectedStatusRec, setSelectedStatusRec] = useState<Status | null>(null);
+  const [deletingStatusRec, setDeletingStatusRec] = useState<Status | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isEditStatusMode, setIsEditStatusMode] = useState(false);
   const { toast } = useToast();
@@ -116,11 +186,11 @@ const Configuration = () => {
   };
   const handleDelete = (data: serviceRequestType): void => {
     setIsDelModalOpen(true);
-    setSelectedRecord(data);
+    setDeletingRecord(data);
   };
   const handleDeleteStatus = (data: Status): void => {
     setIsDelModalOpen(true);
-    setSelectedStatusRec(data);
+    setDeletingStatusRec(data);
   }
   const handleEditStatus = (data: Status): void => {
     dispatch(setLoading(true));
@@ -169,7 +239,7 @@ const Configuration = () => {
         console.error('Error fetching lookups:', err);
       } finally {
         if (companyId) {
-          getSRConfiguration(companyId,branch);
+          getSRConfiguration(companyId, branch);
           fetchAllServiceRequests();
           fetchAllStatusList();
         }
@@ -181,9 +251,14 @@ const Configuration = () => {
   }, [companyId, branch])
   const fetchAllServiceRequests = async () => {
     dispatch(setLoading(true));
-    await getServiceRequestTypes(companyId,branch).then(res => {
+    await getServiceRequestTypes(companyId, branchId).then(res => {
       if (res.success && res.data) {
-        setServiceRequestTypeData(res.data)
+        if (Array.isArray(res.data)) {
+          setServiceRequestTypeData(res.data)
+        } else {
+          setServiceRequestTypeData([])
+        }
+
       } else {
         setServiceRequestTypeData([])
       }
@@ -262,7 +337,7 @@ const Configuration = () => {
         }).catch(err => { { } }).finally(() => { dispatch(setLoading(false)) })
       } else {
         dispatch(setLoading(true));
-        await postServiceRequestType(companyId,branch, payload).then(res => {
+        await postServiceRequestType(companyId, branch, payload).then(res => {
           if (res.success && res.data.status) {
             msg.success(res.data.message);
             fetchAllServiceRequests();
@@ -429,7 +504,7 @@ const Configuration = () => {
     if (type) {
       form.reset({ ...form.getValues(), Status: '' });
       setIsEditStatusMode(false);
-      setSelectedStatusRec(null)
+      setSelectedStatusRec(null);
     } else {
       form.reset({ ...form.getValues(), ServiceRequestType: '', UserGroups: [], Vendors: [], SLAHoursMinutes: '', ReminderForSLAHoursMinutes: '', EscalationTo: [], StatusToCalculate: '', ServiceRequestTypeAdmin: [], Branches: [], Description: '' });
       setIsEditMode(false);
@@ -519,6 +594,8 @@ const Configuration = () => {
                   value={ctrl.value}
                   onChange={ctrl.onChange}
                   error={errors[name]?.message as string}
+                  maxTagCount={2}
+                  maxTagTextLength={15}
                 />
               )}
             />
@@ -562,15 +639,15 @@ const Configuration = () => {
     }
   };
   // handle refresh
-    const handleRefresh = useCallback((type?: string) => {
-     if (type) {
-      toast({title: "Data Refreshed",description: "All status data has been updated",});
+  const handleRefresh = useCallback((type?: string) => {
+    if (type) {
+      toast({ title: "Data Refreshed", description: "All status data has been updated", });
       fetchAllStatusList()
     } else {
-      toast({title: "Data Refreshed",description: "All service request types data has been updated",});
+      toast({ title: "Data Refreshed", description: "All service request types data has been updated", });
       fetchAllServiceRequests();
     }
-    },[toast]);
+  }, [toast]);
   const formatSLAHoursMinutes = (val?: string) => {
     if (!val) return "";
     const [hours, minutes] = val.split("/");
@@ -623,6 +700,7 @@ const Configuration = () => {
   }
   //delete status
   const deleteStatus = async (id: number) => {
+    dispatch(setLoading(true));
     await postDeleteServiceRequestStatus(companyId, id).then(res => {
       if (res.success) {
         if (res.data.status) {
@@ -637,9 +715,7 @@ const Configuration = () => {
       } else {
         msg.warning('Failed to delete status !!')
       }
-    }).catch(err => { }).finally(() => {
-
-    })
+    }).catch(err => { }).finally(() => { dispatch(setLoading(false)) })
   }
   //update service request status sequence
   const handleUpdateStatusSequence = async () => {
@@ -661,232 +737,265 @@ const Configuration = () => {
     })
   }
   return (
-    <div className="h-full bg-gray-50 overflow-y-scroll">
-      <header className="bg-white border-b px-4 py-3 shadow-sm">
-        <div className="flex items-center gap-3">
-          <SidebarTrigger />
-          <Button size="sm" className="bg-primary h-[2.38rem] hover:bg-blue-700  text-white">
-            <span className="hidden sm:inline">New Service Request</span>
-            <span className="sm:hidden">New Request</span>
-          </Button>
-        </div>
-      </header>
-      <div className="p-4 space-y-4">
-        <div>
-          <h1 className="text-base sm:text-lg font-semibold text-gray-900">Service Desk Configuration</h1>
-        </div>
-        <Tabs value={currentTab} onValueChange={setCurrentTab} className="space-y-4">
-          <div className="hidden sm:block">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="service-request-config" className="text-sm">Service Request Configuration</TabsTrigger>
-              <TabsTrigger value="service-request-type" className="text-sm">Service Request Type</TabsTrigger>
-              <TabsTrigger value="service-request-status" className="text-sm">Service Request Status</TabsTrigger>
-            </TabsList>
-          </div>
-          <div className="sm:hidden">
-            <TabsList className="flex flex-col gap-1 h-auto p-1">
-              <TabsTrigger value="service-request-config" className="text-xs w-full">Configuration</TabsTrigger>
-              <TabsTrigger value="service-request-type" className="text-xs w-full">Request Type</TabsTrigger>
-              <TabsTrigger value="service-request-status" className="text-xs w-full">Request Status</TabsTrigger>
-            </TabsList>
-          </div>
-          <TabsContent value="service-request-config" className="space-y-4">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="grid xxs:grid-cols-1 xs2:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-6">  
-                <div className="space-y-4 ">
-                  {getFieldsByNames(['CustomerFieldinMyRequest', 'AssetFieldinCreateEditServiceRequest', 'IsDefaultNotifyUsers', 'NotifyUserTypes']).map((field) => {
-                    return <div className="flex-1 items-center space-x-2">
-                      {renderField(field)}
-                    </div>;
-                  })}
-                </div>
-                  <div className="space-y-4">
-                    {getFieldsByNames(['AllowWorkOrderCreation', 'PauseSLAcalculation', 'DefaultSLAStatusDataList']).map((field) => {
-                      return <div className={`flex-1 items-center space-x-2 ${field.name === 'PauseSLAcalculation' ? ' sm:!mb-4 lg:!mb-8' : ''}`}>
-                        {renderField(field)}
-                      </div>;
-                    })}
-                  </div>
-                </div>
-                <div className="mt-6">
-                  <ReusableButton
-                    htmlType="button"
-                    variant="default"
-                    onClick={handleSubmit((data) => { handleSave(data, "configuration") })}
-                    iconPosition="left"
-                    size="middle"
-                    className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
-                  >
-                    Save
-                  </ReusableButton>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          <TabsContent value="service-request-type" className="space-y-4">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="grid xxs:grid-cols-1 xs2:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-6">
-                <div className="space-y-4">
-                  <div className="space-y-2 ">
-                    {getFieldsByNames(['ServiceRequestType', 'UserGroups', 'Vendors', 'SLAHoursMinutes', 'ReminderForSLAHoursMinutes', "Branches"]).map((field) => {
-                      return <div className="flex-1 items-center space-x-2">
-                        {renderField(field)}
-                      </div>;
-                    })}
-                  </div>
-                </div>
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      {getFieldsByNames(['EscalationTo', 'StatusToCalculate', 'ServiceRequestTypeAdmin', 'Description']).map((field) => {
+    <ScrollArea>
+      <div className="h-full">
+        <div className="p-4 space-y-4">
+          <header className="px-2 py-0">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+                <h1 className="text-lg sm:text-2xl font-bold text-gray-900">
+                  Service Desk Configuration
+                </h1>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <span>Service Desk</span>
+                <FaAngleRight />
+                <span className="text-gray-900 font-medium">Configuration</span>
+              </div>
+            </div>
+          </header>
+          <Tabs value={currentTab} onValueChange={setCurrentTab} className="space-y-4">
+            <div className="hidden sm:block tabs">
+              {/* <TabsList className="grid w-full grid-cols-3 pb-[35px] pt-[20px] px-4 ">
+                <TabsTrigger value="service-request-config" className="text-sm text-sm border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:text-blue-600 hover:text-blue-500 transition font-medium">Service Request Configuration</TabsTrigger>
+                <TabsTrigger value="service-request-type" className="text-sm text-sm border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:text-blue-600 hover:text-blue-500 transition font-medium">Service Request Type</TabsTrigger>
+                <TabsTrigger value="service-request-status" className="text-sm text-sm border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:text-blue-600 hover:text-blue-500 transition font-medium">Service Request Status</TabsTrigger>
+              </TabsList> */}
+              <TabsList className="grid w-full grid-cols-3 h-10 bg-hsl(0deg 0% 100%) border-b border-gray-300 pb-[2.375rem] rounded-none">
+                <TabsTrigger value="service-request-config" className="text-sm leading-[1.5rem] text-gray-700 border-b-2 border-transparent data-[state=active]:border-[hsl(229.09deg_44%_44.12%)] data-[state=active]:bg-[#00000000] data-[state=active]:text-[hsl(239.29deg_34.69%_48.04%)] data-[state=active]:rounded-none  font-medium transition-colors"
+                >
+                  Service Request Configuration
+                </TabsTrigger>
+
+                <TabsTrigger
+                  value="service-request-type"
+                  className="text-sm leading-[1.5rem] text-gray-700 border-b-2 border-transparent data-[state=active]:border-[hsl(229.09deg_44%_44.12%)] data-[state=active]:bg-[#00000000] data-[state=active]:text-[hsl(239.29deg_34.69%_48.04%)] data-[state=active]:rounded-none font-medium transition-colors"
+                >
+                  Service Request Type
+                </TabsTrigger>
+
+                <TabsTrigger
+                  value="service-request-status"
+                  className="text-sm leading-[1.5rem] text-gray-700 border-b-2 border-transparent data-[state=active]:border-[hsl(229.09deg_44%_44.12%)] data-[state=active]:bg-[#00000000] data-[state=active]:text-[hsl(239.29deg_34.69%_48.04%)] data-[state=active]:rounded-none font-medium transition-colors"
+                >
+                  Service Request Status
+                </TabsTrigger>
+              </TabsList>
+
+
+            </div>
+            <div className="sm:hidden">
+              <TabsList className="flex flex-col gap-1 h-auto p-1">
+                <TabsTrigger value="service-request-config" className="text-xs w-full">Configuration</TabsTrigger>
+                <TabsTrigger value="service-request-type" className="text-xs w-full">Request Type</TabsTrigger>
+                <TabsTrigger value="service-request-status" className="text-xs w-full">Request Status</TabsTrigger>
+              </TabsList>
+            </div>
+            <TabsContent value="service-request-config" className="space-y-4">
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="grid xxs:grid-cols-1 xs2:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-6">
+                    <div className="space-y-4 ">
+                      {getFieldsByNames(['CustomerFieldinMyRequest', 'AssetFieldinCreateEditServiceRequest', 'IsDefaultNotifyUsers', 'NotifyUserTypes']).map((field) => {
                         return <div className="flex-1 items-center space-x-2">
                           {renderField(field)}
                         </div>;
                       })}
                     </div>
+                    <div className="space-y-4">
+                      {getFieldsByNames(['AllowWorkOrderCreation', 'PauseSLAcalculation', 'DefaultSLAStatusDataList']).map((field) => {
+                        return <div className={`flex-1 items-center space-x-2 ${field.name === 'PauseSLAcalculation' ? ' sm:!mb-4 lg:!mb-8' : ''}`}>
+                          {renderField(field)}
+                        </div>;
+                      })}
+                    </div>
                   </div>
-                </div>
-                <div className="flex gap-2 mb-6">
-                  <ReusableButton
-                    htmlType="button"
-                    variant="default"
-                    onClick={handleSubmit((data) => { handleSave(data, "ServiceRequestType") })}
-                    iconPosition="left"
-                    size="middle"
-                    className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
-                  >
-                    {isEditMode && currentTab === 'service-request-type' ? 'Update' : 'Save'}
-                  </ReusableButton>
-                  <ReusableButton
-                    htmlType="button"
-                    variant="default"
-                    onClick={() => handleReset('')}
-                    iconPosition="left"
-                    size="middle"
-                  >
-                    Cancel
-                  </ReusableButton>
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="border-0 shadow-sm">
-              <CardContent className="pt-3">
-                <ReusableTable
-                  data={serviceRequestTypeData} columns={columns}
-                  actions={tableActions} permissions={tablePermissions}
-                  title="Service Request Type List" onRefresh={() => handleRefresh('')}
-                  enableSearch={true}
-                  enableSelection={false}
-                  enableExport={true}
-                  enableColumnVisibility={true}
-                  enablePagination={true}
-                  enableSorting={true}
-                  enableFiltering={true}
-                  pageSize={10}
-                  emptyMessage="No Data found"
-                  storageKey="service-request-type-list-table"
-                  enableColumnPinning
-                />
-              </CardContent>
-            </Card>
-          </TabsContent>
-          <TabsContent value="service-request-status" className="space-y-4">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="mb-6">
-                  {getFieldsByNames(['Status']).map((field) => {
-                    return <div className="flex-1 items-center space-x-2">
-                      {renderField(field)}
-                    </div>;
-                  })}
-                </div>
-                <div className="flex gap-2 mb-8">
-                  <ReusableButton
-                    htmlType="button"
-                    variant="default"
-                    onClick={handleSubmit((data) => { handleSave(data, "AddNewStatus") })}
-                    iconPosition="left"
-                    size="middle"
-                    className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
-                  >
-                    {currentTab === 'service-request-status' && isEditStatusMode ? 'Update' : 'Save'}
-                  </ReusableButton>
-                  <ReusableButton
-                    htmlType="button"
-                    variant="default"
-                    onClick={() => handleReset('AddNewStatus')}
-                    iconPosition="left"
-                    size="middle"
-                  >
-                    Cancel
-                  </ReusableButton>
-                </div>
-                <div>
-                  <div className="border border-gray-200 rounded-lg overflow-hidden p-3">
-                    <ReusableTable
-                      data={statusTableData} columns={statusColumns}
-                      permissions={tablePermissions}
-                      title="Service Request Status List"
-                      onRefresh={() => handleRefresh('Status')} enableSearch={true}
-                      enableSelection={false} enableExport={true}
-                      enableColumnVisibility={true} enablePagination={true}
-                      enableSorting={true} enableFiltering={true}
-                      pageSize={10} emptyMessage="No Data found"
-                      rowHeight="normal" storageKey="service-request-type-list-table"
-                      enableRowReordering
-                      onRowReorder={(newData) => setStatusTableData(newData)}
-                      actions={statusTableActions}
-                    />
-                  </div>
-                  <div className="mt-4 flex justify-end">
+                  <div className="mt-6">
                     <ReusableButton
                       htmlType="button"
                       variant="default"
-                      onClick={handleUpdateStatusSequence}
+                      onClick={handleSubmit((data) => { handleSave(data, "configuration") })}
                       iconPosition="left"
                       size="middle"
-                      className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+                      // className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+                      className="btn-submit-style"
                     >
-                      Update Index Sequence
+                      Save
                     </ReusableButton>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-        <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Confirm the action</DialogTitle>
-              <DialogDescription>
-                Are you sure you want to delete{" "}
-                {currentTab === "service-request-type"
-                  ? `${selectedRecord?.ServiceRequestType || "this"} Service Request Type`
-                  : `${selectedStatusRec?.StatusType || "this"} Status`
-                }
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
-              <ReusableButton
-                variant="default"
-                onClick={() => setIsDelModalOpen(false)}
-              >
-                Cancel
-              </ReusableButton>
-              <ReusableButton
-                variant="primary"
-                danger={true}
-                onClick={currentTab === "service-request-type" ? () => { deleteServiceRequestType(selectedRecord?.Id); setIsDelModalOpen(false) } : () => { deleteStatus(selectedStatusRec?.Id); setIsDelModalOpen(false) }}
-              >
-                Delete
-              </ReusableButton>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            <TabsContent value="service-request-type" className="space-y-4">
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="grid xxs:grid-cols-1 xs2:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-6">
+                    <div className="space-y-4">
+                      <div className="space-y-2 ">
+                        {getFieldsByNames(['ServiceRequestType', 'UserGroups', 'Vendors', 'SLAHoursMinutes', 'ReminderForSLAHoursMinutes', "Branches"]).map((field) => {
+                          return <div className="flex-1 items-center space-x-2">
+                            {renderField(field)}
+                          </div>;
+                        })}
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        {getFieldsByNames(['EscalationTo', 'StatusToCalculate', 'ServiceRequestTypeAdmin', 'Description']).map((field) => {
+                          return <div className="flex-1 items-center space-x-2">
+                            {renderField(field)}
+                          </div>;
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 mb-6">
+                    <ReusableButton
+                      htmlType="button"
+                      variant="default"
+                      onClick={handleSubmit((data) => { handleSave(data, "ServiceRequestType") })}
+                      iconPosition="left"
+                      size="middle"
+                      // className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+                      className='btn-submit-style'
+                    >
+                      {isEditMode && currentTab === 'service-request-type' ? 'Update' : 'Save'}
+                    </ReusableButton>
+                    <ReusableButton
+                      htmlType="button"
+                      variant="default"
+                      onClick={() => handleReset('')}
+                      iconPosition="left"
+                      size="middle"
+                      className='btn-reset-clear-style'
+                    >
+                      Cancel
+                    </ReusableButton>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="border-0 shadow-sm">
+                <CardContent className="pt-3">
+                  <ReusableTable
+                    data={serviceRequestTypeData} columns={columns}
+                    // actions={tableActions}
+                    permissions={tablePermissions}
+                    title="Service Request Type List" onRefresh={() => handleRefresh('')}
+                    enableSearch={true}
+                    enableSelection={false}
+                    enableExport={true}
+                    enableColumnVisibility={true}
+                    enablePagination={true}
+                    enableSorting={true}
+                    enableFiltering={true}
+                    pageSize={10}
+                    emptyMessage="No Data found"
+                    storageKey="service-request-type-list-table"
+                  // enableColumnPinning
+                  />
+                </CardContent>
+              </Card>
+            </TabsContent>
+            <TabsContent value="service-request-status" className="space-y-4">
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="mb-6">
+                    {getFieldsByNames(['Status']).map((field) => {
+                      return <div className="flex-1 items-center space-x-2">
+                        {renderField(field)}
+                      </div>;
+                    })}
+                  </div>
+                  <div className="flex gap-2 mb-8">
+                    <ReusableButton
+                      htmlType="button"
+                      variant="default"
+                      onClick={handleSubmit((data) => { handleSave(data, "AddNewStatus") })}
+                      iconPosition="left"
+                      size="middle"
+                      // className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+                      className='btn-submit-style'
+                    >
+                      {currentTab === 'service-request-status' && isEditStatusMode ? 'Update' : 'Save'}
+                    </ReusableButton>
+                    <ReusableButton
+                      htmlType="button"
+                      variant="default"
+                      onClick={() => handleReset('AddNewStatus')}
+                      iconPosition="left"
+                      size="middle"
+                      className='btn-reset-clear-style'
+                    >
+                      Cancel
+                    </ReusableButton>
+                  </div>
+                  <div>
+                    <div className="border border-gray-200 rounded-lg overflow-hidden p-3">
+                      <ReusableTable
+                        data={statusTableData} columns={statusColumns}
+                        permissions={tablePermissions}
+                        title="Service Request Status List"
+                        onRefresh={() => handleRefresh('Status')} enableSearch={true}
+                        enableSelection={false} enableExport={true}
+                        enableColumnVisibility={true} enablePagination={true}
+                        enableSorting={true} enableFiltering={true}
+                        pageSize={10} emptyMessage="No Data found"
+                        rowHeight="normal" storageKey="service-request-type-list-table"
+                        enableRowReordering
+                        onRowReorder={(newData) => setStatusTableData(newData)}
+                      // actions={statusTableActions}
+                      />
+                    </div>
+                    <div className="mt-4 flex justify-end">
+                      <ReusableButton
+                        htmlType="button"
+                        variant="default"
+                        onClick={handleUpdateStatusSequence}
+                        iconPosition="left"
+                        size="middle"
+                        // className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+                        className='btn-submit-style'
+                      >
+                        Update Index Sequence
+                      </ReusableButton>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+          <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Confirm the action</DialogTitle>
+                <DialogDescription>
+                  Are you sure you want to delete{" "}
+                  {currentTab === "service-request-type"
+                    ? `${deletingRecord?.ServiceRequestType || "this"} Service Request Type`
+                    : `${deletingStatusRec?.StatusType || "this"} Status`
+                  }
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <ReusableButton
+                  variant="default"
+                  onClick={() => setIsDelModalOpen(false)}
+                >
+                  Cancel
+                </ReusableButton>
+                <ReusableButton
+                  variant="primary"
+                  danger={true}
+                  onClick={currentTab === "service-request-type" ? () => { deleteServiceRequestType(deletingRecord?.Id); setIsDelModalOpen(false) } : () => { deleteStatus(deletingStatusRec?.Id); setIsDelModalOpen(false) }}
+                >
+                  Delete
+                </ReusableButton>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
-    </div>
+    </ScrollArea>
   );
 };
 export default Configuration;

@@ -21,6 +21,7 @@ import { ReusableDatePicker } from '@/components/ui/reusable-datepicker';
 import { USAGE_TRACKING_DB } from '@/Local_DB/Form_JSON_Data/UsageTrackingDB';
 import ReusableRangePicker from '@/components/ui/reusable-range-picker';
 import { Badge } from '@/components/ui/badge';
+import { BsExclamationTriangle } from 'react-icons/bs';
 
 interface SoftwareData {
   SoftwareID: Number,
@@ -184,79 +185,88 @@ const UsageTracking = () => {
     // fetchAllCustomerList();
   }, [toast]);
   return (
-    <div className="h-full overflow-y-scroll bg-gray-50/30">
-      <div className="p-4 sm:p-4 space-y-4 sm:space-y-4">
-        {/* Header Section */}
+    // <div className="h-full overflow-y-auto bg-gray-50/30">
+    //   <div className="p-4 sm:p-4 space-y-4 sm:space-y-4">
+    //     {/* Header Section */}
 
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
-          {cardNamesArray.map((card, i) => {
-            return (
-              <Card className="border-0 shadow-sm bg-gradient-to-br">
-                <CardContent className="p-3 sm:p-4 lg:p-5">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs md:text-sm font-medium  mb-1 text-[#64748b]">{card.label}</p>
-                      <p className="text-lg sm:text-xl lg:text-2xl font-bold ">{card.value}</p>
-                    </div>
-                    <div className="p-2 sm:p-0">
-                      {card.label === "Compliance Rate" ? (
-                        <Badge className='text-[#166534] bg-[#dcfce7]'>Good</Badge>
-                      ) : (
-                        icons[i]
-                      )}
-                    </div>
+    //     <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+    //       {cardNamesArray.map((card, i) => {
+    //         return (
+    //           <Card className="border-0 shadow-sm bg-gradient-to-br">
+    //             <CardContent className="p-3 sm:p-4 lg:p-5">
+    //               <div className="flex items-center justify-between">
+    //                 <div>
+    //                   <p className="text-xs md:text-sm font-medium  mb-1 text-[#64748b]">{card.label}</p>
+    //                   <p className="text-lg sm:text-xl lg:text-2xl font-bold ">{card.value}</p>
+    //                 </div>
+    //                 <div className="p-2 sm:p-0">
+    //                   {card.label === "Compliance Rate" ? (
+    //                     <Badge className='text-[#166534] bg-[#dcfce7]'>Good</Badge>
+    //                   ) : (
+    //                     icons[i]
+    //                   )}
+    //                 </div>
 
-                  </div>
-                </CardContent>
-              </Card>
+    //               </div>
+    //             </CardContent>
+    //           </Card>
 
-            )
-          })}
+    //         )
+    //       })}
 
+    //     </div>
+    //     <Card>
+    //       <CardContent className="pt-6">
+    //         <div className="">
+    //           <div className="space-y-4">
+    //             <span className='text-2xl font-bold'>Filters</span>
+    //             <div className={`grid xxs:grid-cols-1 xs2:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6`}>
+    //               {getFieldsByNames(['Software', 'Employee', 'Compliance', 'DateRange']).map((field) => {
+    //                 return <div className="flex-1 items-center space-x-2">
+    //                   {renderField(field)}
+    //                 </div>;
+    //               })}
+    //             </div>
+    //           </div>
+    //         </div>
+    //       </CardContent>
+    //     </Card>
+    //     <div className="bg-white p-6 rounded-lg">
+    //       <ScrollArea className=" w-full ">
+    //         <ReusableTable
+    //           data={[]}
+    //           columns={columns}
+    //           // permissions={""}
+    //           permissions={tablePermissions}
+    //           title="Usage Records"
+    //           onRefresh={handleRefresh}
+    //           enableSearch={true}
+    //           enableSelection={false}
+    //           enableExport={true}
+    //           enableColumnVisibility={true}
+    //           enablePagination={true}
+    //           enableSorting={true}
+    //           enableFiltering={true}
+    //           pageSize={10}
+    //           emptyMessage="No Data found"
+    //           rowHeight="normal"
+    //           storageKey="service-request-type-list-table"
+    //           actions={tableActions}
+
+    //         />
+    //       </ScrollArea>
+    //     </div>
+    //   </div>
+    // </div>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+          <div className="text-center flex flex-col justify-center items-center">
+            <h1 className="text-4xl font-bold mb-4 text-center"><BsExclamationTriangle /></h1>
+            <p className="text-xl text-gray-600 mb-4"> Work in Progress</p>
+            <a href="/" className="text-blue-500 hover:text-blue-700 underline">
+              Return to Home
+            </a>
+          </div>
         </div>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="">
-              <div className="space-y-4">
-                <span className='text-2xl font-bold'>Filters</span>
-                <div className={`grid xxs:grid-cols-1 xs2:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6`}>
-                  {getFieldsByNames(['Software', 'Employee', 'Compliance', 'DateRange']).map((field) => {
-                    return <div className="flex-1 items-center space-x-2">
-                      {renderField(field)}
-                    </div>;
-                  })}
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <div className="bg-white p-6 rounded-lg">
-          <ScrollArea className=" w-full ">
-            <ReusableTable
-              data={[]}
-              columns={columns}
-              // permissions={""}
-              permissions={tablePermissions}
-              title="Usage Records"
-              onRefresh={handleRefresh}
-              enableSearch={true}
-              enableSelection={false}
-              enableExport={true}
-              enableColumnVisibility={true}
-              enablePagination={true}
-              enableSorting={true}
-              enableFiltering={true}
-              pageSize={10}
-              emptyMessage="No Data found"
-              rowHeight="normal"
-              storageKey="service-request-type-list-table"
-              actions={tableActions}
-
-            />
-          </ScrollArea>
-        </div>
-      </div>
-    </div>
   );
 }
 export default UsageTracking;

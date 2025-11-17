@@ -1,17 +1,27 @@
-
-import { useCallback, useEffect, useState } from 'react';
-import { SidebarTrigger } from '@/components/ui/sidebar';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { ReusableTable, TableAction, TablePermissions } from '@/components/ui/reusable-table';
-import { Trash2, Plus, Edit } from 'lucide-react';
-import { ColumnDef } from '@tanstack/react-table';
-import { useToast } from '@/hooks/use-toast';
+import { useEffect, useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { ChevronRight, ChevronLeft, Search, X, Save, Trash2 } from 'lucide-react';
 import { ReusableButton } from '@/components/ui/reusable-button';
-import { GetUsersList } from '@/services/userServices';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { setLoading } from '@/store/slices/projectsSlice';
-interface UserData {
+import { ReusableDropdown } from '@/components/ui/reusable-dropdown';
+import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Badge } from '@/components/ui/badge';
+import { Controller, useForm } from 'react-hook-form';
+import { BaseField, GenericObject } from '@/Local_DB/types/types';
+import { ReusableInput } from '@/components/ui/reusable-input';
+import { ReusableDatePicker } from '@/components/ui/reusable-datepicker';
+import ReusableMultiSelect from '@/components/ui/reusable-multi-select';
+import { useMessage } from '@/components/ui/reusable-message';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, } from '@/components/ui/dialog';
+import { createUser, deleteUser, getCategoryList, getDepartmentList, getRoleNamesList, GetUsersList, updateUser } from '@/services/userServices';
+import { USER_DETAILS } from '@/Local_DB/Form_JSON_Data/UserDB';
+import { GetBranchListBasedonCompanyId } from '@/services/headerServices';
+import ReusableSingleCheckbox from '@/components/ui/reusable-single-checkbox';
+import { FaAngleRight } from 'react-icons/fa';
+
+interface User {
   UserId: number,
   FirstName: string,
   LastName: string,
@@ -36,125 +46,799 @@ interface UserData {
   Password: string,
   ConfirmPassword: string
 }
-const Positive='border font-medium text-xs px-2 py-0.5 bg-green-50 text-green-700 border-green-200 hover:bg-green-600 hover:text-white transition-colors';
-const Negative='border font-medium text-xs px-2 py-0.5 bg-red-50 text-red-700 border-red-200 hover:bg-red-600 hover:text-white transition-colors'
+
 const User = () => {
-  const { toast } = useToast();
   const dispatch = useAppDispatch();
+  const msg = useMessage();
+  let LoggedInUser = JSON.parse(localStorage.getItem('LoggedInUser')) || {};
   const companyId = useAppSelector(state => state.projects.companyId)
-  const [dataSource, setDataSource] = useState<UserData[]>([]);
-  const [columns, setColumns] = useState<ColumnDef<UserData>[]>([
-    { id: 'FirstName', accessorKey: "FirstName", header: "First Name" },
-    { id: 'LastName', accessorKey: "LastName", header: "Last Name" },
-    { id: 'UserName', accessorKey: "UserName", header: "User Name" },
-    { id: 'RoleName', accessorKey: "RoleName", header: "Role Name" },
-    { id: 'EmployeeId', accessorKey: "EmployeeId", header: "Employee ID" },
-    { id: 'Email', accessorKey: "Email", header: "Email ID" },
-    { id: 'PhoneNumber', accessorKey: "PhoneNumber", header: "Mobile Number" },
-    { id: 'Status', accessorKey: "Status", header: "Status", cell: ({ row }) => (
-      row.original.Deactive ? <Badge title='Status' className={Negative}>Deactive</Badge> : <Badge title='Status' className={Positive}>Active</Badge>
-    ) },
-    { id: 'IsServiceDesk', accessorKey: "IsServiceDesk", header: "Is Service Desk User",
-      cell: ({ row }) => (
-        row.original.IsServiceDesk ? <Badge title='Is Service Desk User' className={Positive}>Yes</Badge> : <Badge title='Is Service Desk User' variant="destructive" className={Negative}>No</Badge>
-      )
-     },
-  ])
+  const [dataSource, setDataSource] = useState<User[]>([]);
+  const [fields, setFields] = useState<BaseField[]>(USER_DETAILS);
+  const form = useForm<GenericObject>({
+    defaultValues: fields.reduce((acc, f) => {
+      acc[f.name!] = f.defaultValue ?? '';
+      return acc;
+    }, {} as GenericObject),
+    mode: 'onChange'
+  });
+  const { control, register, handleSubmit, trigger, watch, setValue, getValues, reset, formState: { errors } } = form;
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedUserData, setSelectedUserData] = useState<User | null>(null);
+  const [deletingUserData, setSelectedDeletingUserData] = useState<User | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isInboxCollapsed, setIsInboxCollapsed] = useState(false);
+  const [isDelModalOpen, setIsDelModalOpen] = useState(false);
+  const [branchAndCategoriesList, setBranchAndCategoriesList] = useState({ Branch: [], Categories: [] })
+  const filteredUsers = dataSource.filter(user => {
+    const matchesSearch = user.FirstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.LastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.Email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.EmployeeId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.MobileNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.PhoneNumber.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesSearch;
+  });
 
   useEffect(() => {
-    if (companyId) fetchAllUsersList();
-  }, [companyId]);
-  //fetch all users list
-  const fetchAllUsersList = async () => {
-    dispatch(setLoading(true));
-    await GetUsersList(companyId).then(res => {
-      if (res.success && res.data && Array.isArray(res.data)) {
-        setDataSource(res.data);
-      }else{
-        setDataSource([]);
-      }
-    }).catch(err => console.log(err)).finally(() => {
-      dispatch(setLoading(false));
-    });
-  }
-  const handleDelete = (data: UserData): void => {
-  }
-  const handleEdit = (data: UserData): void => {
-  }
-  const tableActions: TableAction<UserData>[] = [
-    {
-      label: 'Edit',
-      icon: Edit,
-      onClick: handleEdit,
-      variant: 'default',
-    },
-    {
-      label: 'Delete',
-      icon: Trash2,
-      onClick: handleDelete,
-      variant: 'destructive',
-    },
-  ];
-  // handle refresh
-  const handleRefresh = useCallback(() => {
-      toast({ title: "Data Refreshed", description: "All users data has been updated", });
+    if (companyId) {
       fetchAllUsersList();
-  }, [toast]);
-  // Define table permissions
-  const tablePermissions: TablePermissions = {
-    canEdit: true,
-    canDelete: true,
-    canView: true,
-    canExport: false,
-    canAdd: true,
-    canManageColumns: true,
+      fetchAllLookupsData();
+    }
+  }, [companyId]);
+  //fetch all lookups data
+  const fetchAllLookupsData = async () => {
+    try {
+      dispatch(setLoading(true));
+      const [roleNames, branches, departments, categories] = await Promise.allSettled([
+        getRoleNamesList(companyId),
+        GetBranchListBasedonCompanyId(companyId),
+        getDepartmentList(companyId),
+        getCategoryList(companyId)
+      ]);
+      let allResponses = {
+        RoleName: { data: roleNames.status === 'fulfilled' && roleNames.value.success && roleNames.value.data && roleNames.value.data.Roles ? LoggedInUser?.RoleName === 'Root Admin' ? roleNames.value.data.Roles : roleNames.value.data.Roles.filter(ele => ele.RoleName !== 'Root Admin') : [], label: 'RoleName', value: 'RoleName' },
+        Branch: { data: branches.status === 'fulfilled' && branches.value.success && branches.value.data && branches.value.data ? branches.value.data.slice(1) : [], label: 'Name', value: 'Name' },
+        Department: { data: departments.status === 'fulfilled' && departments.value.success && departments.value.data && departments.value.data.DepartmentsLookup ? departments.value.data.DepartmentsLookup : [], label: 'DepartmentName', value: 'DepartmentName' },
+        Categories: { data: categories.status === 'fulfilled' && categories.value.success && categories.value.data && categories.value.data.CategoriesLookup ? categories.value.data.CategoriesLookup : [], label: 'CategoryName', value: 'CategoryName' },
+      };
+      setBranchAndCategoriesList({ Branch: allResponses.Branch.data, Categories: allResponses.Categories.data });
+      setLookupsDataInJson(allResponses);
+    } catch { } finally {
+      dispatch(setLoading(false));
+    }
+  }
+  useEffect(() => {
+    if (LoggedInUser?.RoleName !== 'Root Admin' && selectedUserData) {
+      let field = fields.find(obj => obj.name === 'Branch');
+      let field1 = fields.find(obj => obj.name === 'Categories');
+      let branchData = branchAndCategoriesList.Branch.map(ele => ele['Name']);
+      let catData = branchAndCategoriesList.Categories.map(ele => ele['CategoryName'])
+      field.options = selectedUserData.Branch
+        ? [...new Set([...branchData, ...selectedUserData.Branch.split(',')])]
+          .map(ele => ({ label: ele, value: ele }))
+        : branchData.map(ele => ({ label: ele, value: ele }));
+      field1.options = selectedUserData.Categories
+        ? [...new Set([...catData, ...selectedUserData.Categories.split(',')])]
+          .map(ele => ({ label: ele, value: ele }))
+        : catData.map(ele => ({ label: ele, value: ele }));
+    }
+  }, [selectedUserData, LoggedInUser])
+  //fetch all users list
+  const fetchAllUsersList = async (UserId?: number) => {
+    try {
+      dispatch(setLoading(true));
+      const res = await GetUsersList(companyId, UserId);
+      if (res.success && res.data && res.data.status===undefined) {
+        if (UserId) {
+          form.reset({
+            ...res.data[0],
+            Branch: res.data[0]?.Branch ? res.data[0].Branch.split(',') : [],
+            Department: res.data[0]?.Department ? res.data[0].Department.split(',') : [],
+            Categories: res.data[0]?.Categories ? res.data[0].Categories.split(',') : [],
+            JoinDate: res.data[0].JoinDate ? res.data[0].JoinDate.split(' ')[0] : ''
+          });
+          setSelectedUserData(res.data[0]);
+        } else {
+          setDataSource(res.data);
+        }
+      } else {
+        if (UserId) {
+          form.reset();
+          setSelectedUserData(null);
+        } else {
+          msg.warning(res?.data?.message || "No Users Found !!")
+          setDataSource([]);
+        }
+      }
+    } catch { } finally { dispatch(setLoading(false)) }
+  }
+  function setLookupsDataInJson(data: any) {
+    let keys = Object.keys(data);
+    const updatedFields = fields.map(field => {
+      if (keys.includes(field.name)) {
+        let options = data[field.name].data.map((item: any) => ({ label: item[data[field.name].label], value: item[data[field.name].value] }));
+        return { ...field, options };
+      }
+      return field;
+    });
+    setFields(updatedFields);
+  }
+  const handleSelect = (data: User) => {
+    // handleReset();
+    setSelectedUser(data);
+    fetchAllUsersList(data.UserId);
+  }
+  const handleSave = async (formData: GenericObject) => {
+    const isValid = await trigger();
+    if (!isValid) return msg.error("Please fix the validation errors before submitting.");
+    const baseUser = {
+      FirstName: watch("FirstName"),
+      LastName: watch("LastName"),
+      Email: watch("Email"),
+      MobileNumber: "",
+      PhoneNumber: watch("PhoneNumber"),
+      UserName: watch("UserName"),
+      EmployeeId: watch("EmployeeId"),
+      DeviceName: watch("DeviceName"),
+      Password: watch("Password") || selectedUserData?.Password || "",
+      ConfirmPassword: watch("ConfirmPassword") || selectedUserData?.Password || "",
+      RoleName: watch("RoleName"),
+      Categories: watch("Categories") ? watch("Categories").join() : "",
+      IsServiceDesk: watch("IsServiceDesk")?.toString() || "false",
+      Department: watch("Department") ? watch("Department").join() : "",
+      Branch: watch("Branch") ? watch("Branch").join() : "",
+      JoinDate: watch("JoinDate") || "",
+    };
+    const roleName = watch("RoleName");
+    const isRootAdmin = roleName === "Root Admin";
+    const isUpdate = !!selectedUserData;
+    const isDeactive = watch("Deactive");
+    const deactiveDateVal = watch("DeactiveDate");
+
+    const validateDeactivation = () => {
+      if (isDeactive && !(deactiveDateVal)) {
+        msg.warning("Deactive Date Cannot Be Blank!!!");
+        return false;
+      }
+      return true;
+    };
+    if (isRootAdmin) {
+      const userPayload = {
+        UserDetails: [
+          {
+            ...baseUser,
+            ...(isUpdate
+              ? {
+                IsDeactive: isDeactive?.toString() || "false",
+                DeactiveDate: deactiveDateVal || "",
+                Department: "",
+                Branch: "",
+                Categories: ""
+              }
+              : {}),
+          },
+        ],
+      };
+
+      if (isUpdate) {
+        if (validateDeactivation()) updateUserDetails(userPayload);
+      } else {
+        addUser(userPayload);
+      }
+      return;
+    }
+    const normalUserPayload = {
+      UserDetails: [
+        {
+          ...baseUser,
+          Department: baseUser.Department,
+          Branch: baseUser.Branch,
+        },
+      ],
+    };
+    if (isUpdate && companyId) {
+      const updatePayload = {
+        UserDetails: normalUserPayload.UserDetails.map((user) => ({
+          ...user,
+          IsDeactive: isDeactive?.toString() || "false",
+          DeactiveDate: deactiveDateVal || "",
+        })),
+      };
+      if (validateDeactivation()) updateUserDetails(updatePayload);
+    } else {
+      addUser(normalUserPayload);
+    }
+  };
+  const addUser = async (payload: any) => {
+    try {
+      dispatch(setLoading(true))
+      const res = await createUser(companyId, payload);
+      if (res.success && res.data) {
+        if (res.data.status) {
+          handleReset()
+          msg.success(res.data.message);
+          fetchAllUsersList();
+        } else {
+          msg.warning(res.data.ErrorDetails[0]["Error Message"]);
+        }
+      }
+    } catch (error) {
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
+  const updateUserDetails = async (payload: any) => {
+    try {
+      dispatch(setLoading(true));
+      const res = await updateUser(companyId, selectedUserData?.UserId, payload);
+      if (res.data && res.data.status !== undefined) {
+        if (res.data.status) {
+          msg.success(res.data.message);
+          fetchAllUsersList();
+          if (LoggedInUser.UserId && (selectedUserData.UserId === LoggedInUser.UserId) && payload && payload?.UserDetails[0]?.RoleName === 'Asset User') {
+            logoutFunction();
+          }
+          handleReset();
+        } else {
+          msg.warning(res.data.message);
+        }
+      } else {
+        msg.warning(res.data.ErrorDetails[0]["Error Message"]);
+      }
+    } catch (error) {
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
+  const delUser = async () => {
+    try {
+      dispatch(setLoading(true));
+      const res = await deleteUser(companyId, deletingUserData.UserId);
+      if (res.data[0].status !== undefined) {
+        if (res.data[0].status === true) {
+          if (LoggedInUser.UserId && (deletingUserData.UserId === LoggedInUser.UserId)) {
+            logoutFunction();
+          }
+          msg.success(res.data[0].message);
+          handleReset();
+          fetchAllUsersList();
+        } else {
+          msg.warning(res.data[0].message);
+        }
+      } else {
+        msg.warning("Failed to delete user.");
+      }
+    } catch (err) {
+      msg.warning("Failed to Delete User");
+    } finally {
+      setIsDelModalOpen(false);
+      dispatch(setLoading(false));
+    }
+  };
+  const handleDelete = (e, data) => {
+    e.stopPropagation();
+    setIsDelModalOpen(true);
+    setSelectedDeletingUserData(data)
+  }
+  const handleDeleteCancel = () => {
+    setIsDelModalOpen(false);
+    setSelectedDeletingUserData(null);
+  }
+  const handleReset = () => {
+    if (selectedUserData) {
+      let field = fields.find(f => f.name === 'Branch');
+      let field1 = fields.find(f => f.name === 'Categories');
+      if (field && field1) {
+        field.options = branchAndCategoriesList.Branch.map(ele => ({ label: ele['Name'], value: ele['Name'] }))
+        field1.options = branchAndCategoriesList.Categories.map(ele => ({ label: ele['CategoryName'], value: ele['CategoryName'] }))
+      }
+    }
+    setSelectedUser(null);
+    setSelectedUserData(null);
+    setSelectedDeletingUserData(null);
+    form.reset({
+      FirstName: '', LastName: '', Email: '', OrganizationDomain: '', PanNumber: '',
+      AddressLine1: '', AddressLine2: '', City: '', State: '', CountryName: '',
+      ZipCode: '', OrganizationEmail: '', OrganizationPhone: '', Website: ''
+    });
+  };
+  const logoutFunction = () => {
+    localStorage.clear();
+    window.location.href = "/login";
+  };
+  const password = watch("Password");
+  useEffect(() => {
+    if (password) trigger("ConfirmPassword");
+  }, [password]);
+  const renderField = (field: BaseField) => {
+    const { name, label, fieldType, isRequired, dependsOn, show = true } = field;
+    const roleName = watch("RoleName");
+    const isEditMode = !!selectedUserData;
+    const isAssetUser = roleName === "Asset User";
+    const isRootAdmin = roleName === "Root Admin";
+    const isDeactive = watch("Deactive");
+    const password = watch("Password");
+    let isVisible = true;
+    if (!show || (dependsOn && !watch(dependsOn))) isVisible = false;
+    if (!isEditMode) {
+      if (name === "Deactive") isVisible = false;
+      if (isAssetUser && ["Password", "ConfirmPassword", "IsServiceDesk"].includes(name))
+        isVisible = false;
+      if (isRootAdmin && ["Department", "Categories", "Branch"].includes(name))
+        isVisible = false;
+    }
+    if (isEditMode) {
+      if (["Password", "ConfirmPassword"].includes(name)) {
+        const prevRoleName = selectedUserData?.RoleName;
+        const hasRoleChangedFromAssetUser =
+          prevRoleName === "Asset User" && roleName !== "Asset User";
+        if (!hasRoleChangedFromAssetUser) isVisible = false;
+      }
+      if (isRootAdmin && ["Department", "Categories", "Branch"].includes(name))
+        isVisible = false;
+      if (isAssetUser && name === "IsServiceDesk")
+        isVisible = false;
+    }
+    if (!isDeactive && name === "DeactiveDate")
+      isVisible = false;
+    useEffect(() => {
+      if (!isVisible && getValues(name)) {
+        setValue(name, "");
+      }
+    }, [isVisible]);
+    if (!isVisible) return null;
+    const validationRules = {
+      required: isRequired ? `${label} is required` : false,
+      ...(name === "ConfirmPassword" && {
+        validate: (value: string) =>
+          value === password || "Passwords do not match",
+      }),
+    };
+    switch (fieldType) {
+      case "text":
+      case "password":
+      case "email":
+        return (
+          <Controller
+            key={name}
+            name={name}
+            control={control}
+            rules={validationRules}
+            render={({ field: ctrl }) => (
+              <ReusableInput
+                {...field}
+                value={ctrl.value}
+                onChange={ctrl.onChange}
+                error={errors[name]?.message as string}
+                autoComplete="new-password"
+              />
+            )}
+          />
+        );
+      case "dropdown":
+        return (
+          <Controller
+            key={name}
+            name={name}
+            control={control}
+            rules={validationRules}
+            render={({ field: ctrl }) => (
+              <ReusableDropdown
+                {...field}
+                value={ctrl.value}
+                onChange={ctrl.onChange}
+                error={errors[name]?.message as string}
+                allowClear
+                dropdownClassName="z-[10001]"
+              />
+            )}
+          />
+        );
+      case "date":
+        return (
+          <Controller
+            key={name}
+            name={name}
+            control={control}
+            rules={validationRules}
+            render={({ field: ctrl }) => (
+              <ReusableDatePicker
+                {...field}
+                value={ctrl.value}
+                onChange={ctrl.onChange}
+                error={errors[name]?.message as string}
+              />
+            )}
+          />
+        );
+      case "multiselect":
+        return (
+          <Controller
+            key={name}
+            name={name}
+            control={control}
+            rules={validationRules}
+            render={({ field: ctrl }) => (
+              <ReusableMultiSelect
+                {...field}
+                label={label!}
+                value={ctrl.value}
+                onChange={ctrl.onChange}
+                error={errors[name]?.message as string}
+              />
+            )}
+          />
+        );
+      case "checkbox":
+        return (
+          <Controller
+            key={name}
+            name={name}
+            control={control}
+            rules={validationRules}
+            render={({ field: ctrl }) => (
+              <ReusableSingleCheckbox
+                {...field}
+                value={ctrl.value}
+                onChange={ctrl.onChange}
+              />
+            )}
+          />
+        );
+      default:
+        return null;
+    }
   };
   return (
-    <div className="h-full overflow-y-scroll bg-gray-50 transition-all duration-300 ease-in-out">
-      <header className="bg-white border-b px-6 py-4 shadow-sm">
-        <div className="flex items-center gap-4">
-          <SidebarTrigger />
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <span>Masters</span><span>/</span><span>Company</span><span>/</span><span className="text-gray-900 font-medium">User</span>
+    <div className="h-full overflow-y-auto flex flex-col ">
+      <div className="flex flex-1 overflow-hidden   ">
+        {dataSource.length !== 0 &&
+          <div
+            className={`
+    ${isInboxCollapsed ? 'w-6 p-1' : 'w-64 p-2 mb-2 rounded-b-[5px]'}
+   bg-white border border-gray-200 border-t-0 border-t-transparent shadow-xl flex flex-col pb-3 transition-all duration-300 shrink-0
+    md:relative
+    ${isInboxCollapsed ? 'relative' : 'fixed md:relative'}
+    ${isInboxCollapsed ? '' : 'top-15 left-0 h-full z-50 md:top-auto md:left-auto md:h-auto'}
+  `}
+          >
+            <div className="pt-1 shrink-0">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className={`font-semibold text-gray-900 ${isInboxCollapsed ? 'hidden' : ''}`}>
+                  Users ({dataSource.length})
+                </h3>
+                <div onClick={() => setIsInboxCollapsed(!isInboxCollapsed)} className={`cursor-pointer transition-colors hover:bg-accent hover:text-accent-foreground  ${isInboxCollapsed ? 'me-2  py-1 ' : 'p-1'}`}>
+                  {isInboxCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+                </div>
+              </div>
+              {!isInboxCollapsed && (
+                <div className="space-y-2 pb-1">
+                  {/* Search */}
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Input
+                      placeholder="Search Organizations..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+            {!isInboxCollapsed && (
+              <ScrollArea hideScrollbar={true} className="flex-1 min-h-0 mb-2 truncate max-w-[250px] block">
+                <div className="py-2">
+                  {filteredUsers.map((user) => (
+                    <div
+                      key={user.UserId}
+                      className={`p-2.5 py-2 rounded-lg mb-2 cursor-pointer transition-all hover:bg-gray-50 ${selectedUser?.UserId === user.UserId
+                        ? 'bg-blue-50 border-l-4 border-blue-500'
+                        : 'border border-gray-200'
+                        }`}
+                      onClick={LoggedInUser?.RoleName !== 'Root Admin' && (user.RoleName === 'Root Admin' || LoggedInUser?.UserId === user.UserId) ? undefined : () => handleSelect(user)}
+                    >
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-xs font-medium text-blue-600 me-2">{user.UserName}</span>
+                        <Badge
+                          title={`User Known As : ${user.RoleName}`}
+                          variant="secondary"
+                          className="bg-purple-100 text-purple-800 text-center truncate inline-block w-[90px] text-[11px] px-2 py-0.5"
+                        >
+                          {user.RoleName}
+                        </Badge>
+                      </div>
+
+                      <h3
+                        className="text-xs font-medium text-gray-900 mb-1 truncate"
+                        title={user?.Email}
+                      >
+                        {user?.Email}
+                      </h3>
+                      <div className="flex items-center justify-between gap-1.5 text-[11px] text-gray-500">
+                        <Badge
+                          title="Organization Type"
+                          variant="outline"
+                          className="bg-green-100 text-green-800 text-[11px] px-2 py-0.5"
+                        >
+                          {user?.EmployeeId}
+                        </Badge>
+                        {
+                          (user?.RoleName !== 'Root Admin' && LoggedInUser?.UserId !== user.UserId) &&
+                          <div>
+                            <span
+                              title={user.MobileNumber}
+                              className="block max-w-[90px] truncate text-[11px] text-gray-500"
+                            >
+                              <Trash2 height={18} className='text-red-400' onClick={(e) => handleDelete(e, user)}></Trash2>
+                            </span>
+                          </div>
+                        }
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            )}
+          </div>}
+        {/* Main Content Area */}
+        <div className="flex-1 flex flex-col min-w-0 ">
+          {/* Navigation and Action Bar */}
+          <div className="px-4 lg:px-6 py-3 flex flex-row xxs:flex-col xs2:flex-row lg:flex-row lg:items-center justify-between gap-4 shrink-0">
+            <div className="flex items-center gap-4 lg:gap-6 flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <span>Masters</span>
+                  <FaAngleRight />
+                  <span>Company</span>
+                  <FaAngleRight />
+                  <span className="text-gray-900 font-medium">User</span>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <ReusableButton
+                variant="text"
+                // size="small"
+                onClick={handleReset}
+                icon={<X className="h-4 w-4" />}
+                className='btn-reset-clear-style'
+
+              >
+                {selectedUserData ? "Cancel" : "Reset"}
+              </ReusableButton>
+              <ReusableButton
+                // size="small"
+                variant="primary"
+                onClick={(data) => handleSubmit(handleSave)(data)}
+                icon={<Save className="h-4 w-4" />}
+                className='btn-submit-style'
+
+              >
+                {selectedUserData ? "Update" : "Save"}
+              </ReusableButton>
+            </div>
+          </div>
+
+          {/* Content Grid with Individual Scroll Areas */}
+          <div className="flex-1 p-3 pt-0 overflow-hidden min-h-0  ">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-1 h-full">
+              {/* Left Column - Main Content */}
+              <div className="lg:col-span-12 flex flex-col  min-h-0 ">
+                <ScrollArea className="flex-1  ">
+                  <div className="space-y-6 pr-1">
+                    <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+                      <CardContent className="pt-6">
+                        <div className="space-y-6">
+                          <div className='grid md:grid-cols-2 sm:grid-cols-1 gap-x-3 gap-y-3 '>
+                            {
+                              fields.map(obj => {
+                                if (obj.fieldType === "heading") {
+                                  return <h3 key={obj.text} className='text-lg font-semibold text-gray-900 border-b col-span-full pb-2'>{obj.text}</h3>
+                                }
+                                return (<>{renderField(obj)}</>
+                                )
+                              })
+                            }
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </ScrollArea>
+              </div>
+            </div>
           </div>
         </div>
-      </header>
-      <div className="p-6 space-y-6 animate-fade-in">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-900">Users</h1>
-          <ReusableButton
-            htmlType="button"
-            variant="default"
-            onClick={null}
-            iconPosition="left"
-            size="middle"
-            className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
-          >
-            <div className='flex items-center'><Plus className="h-4 w-4 mr-2" />Add User</div>
-          </ReusableButton>
-        </div>
-        <Card className="shadow-sm">
-          <CardHeader className="pb-4">
-          </CardHeader>
-          <CardContent>
-            <ReusableTable
-              data={dataSource} columns={columns}
-              permissions={tablePermissions}
-              title="Users List"
-              onRefresh={handleRefresh} enableSearch={true}
-              enableSelection={false} enableExport={true}
-              enableColumnVisibility={true} enablePagination={true}
-              enableSorting={true} enableFiltering={true}
-              pageSize={10} emptyMessage="No Data found"
-              rowHeight="normal" storageKey="user-master-list-table"
-              actions={tableActions}
-              enableColumnPinning
-            />
-          </CardContent>
-        </Card>
       </div>
+      <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Confirm the action</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete {deletingUserData?.UserName} ?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <ReusableButton
+              variant="default"
+              onClick={handleDeleteCancel}
+            >
+              Cancel
+            </ReusableButton>
+            <ReusableButton
+              variant="primary"
+              danger={true}
+              onClick={delUser}
+            >
+              Delete
+            </ReusableButton>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
 
 export default User;
+
+
+
+
+
+
+
+
+
+
+
+// interface UserData {
+//   UserId: number,
+//   FirstName: string,
+//   LastName: string,
+//   Email: string,
+//   EmployeeId: string,
+//   MobileNumber: string,
+//   PhoneNumber: string,
+//   UserName: string,
+//   DeviceName: string,
+//   RoleTypeId: number,
+//   RoleName: string,
+//   DepartmentIds: string,
+//   Department: string,
+//   AssetCategoryIds: string,
+//   Categories: string,
+//   BranchIds: string,
+//   Branch: string,
+//   Deactive: boolean,
+//   DeactiveDate: string,
+//   IsServiceDesk: boolean,
+//   JoinDate: string,
+//   Password: string,
+//   ConfirmPassword: string
+// }
+// const Positive = 'border font-medium text-xs px-2 py-0.5 bg-green-50 text-green-700 border-green-200 hover:bg-green-600 hover:text-white transition-colors';
+// const Negative = 'border font-medium text-xs px-2 py-0.5 bg-red-50 text-red-700 border-red-200 hover:bg-red-600 hover:text-white transition-colors'
+// export const User1 = () => {
+//   const { toast } = useToast();
+//   const dispatch = useAppDispatch();
+//   const companyId = useAppSelector(state => state.projects.companyId)
+//   const [dataSource, setDataSource] = useState<UserData[]>([]);
+//   const [columns, setColumns] = useState<ColumnDef<UserData>[]>([
+//     { id: 'FirstName', accessorKey: "FirstName", header: "First Name" },
+//     { id: 'LastName', accessorKey: "LastName", header: "Last Name" },
+//     { id: 'UserName', accessorKey: "UserName", header: "User Name" },
+//     { id: 'RoleName', accessorKey: "RoleName", header: "Role Name" },
+//     { id: 'EmployeeId', accessorKey: "EmployeeId", header: "Employee ID" },
+//     { id: 'Email', accessorKey: "Email", header: "Email ID" },
+//     { id: 'PhoneNumber', accessorKey: "PhoneNumber", header: "Mobile Number" },
+//     {
+//       id: 'Status', accessorKey: "Status", header: "Status", cell: ({ row }) => (
+//         row.original.Deactive ? <Badge title='Status' className={Negative}>Deactive</Badge> : <Badge title='Status' className={Positive}>Active</Badge>
+//       )
+//     },
+//     {
+//       id: 'IsServiceDesk', accessorKey: "IsServiceDesk", header: "Is Service Desk User",
+//       cell: ({ row }) => (
+//         row.original.IsServiceDesk ? <Badge title='Is Service Desk User' className={Positive}>Yes</Badge> : <Badge title='Is Service Desk User' variant="destructive" className={Negative}>No</Badge>
+//       )
+//     },
+//   ])
+
+//   useEffect(() => {
+//     if (companyId) fetchAllUsersList();
+//   }, [companyId]);
+//   //fetch all users list
+//   const fetchAllUsersList = async () => {
+//     dispatch(setLoading(true));
+//     await GetUsersList(companyId).then(res => {
+//       if (res.success && res.data && Array.isArray(res.data)) {
+//         setDataSource(res.data);
+//       } else {
+//         setDataSource([]);
+//       }
+//     }).catch(err => {}).finally(() => {
+//       dispatch(setLoading(false));
+//     });
+//   }
+//   const handleDelete = (data: UserData): void => {
+//   }
+//   const handleEdit = (data: UserData): void => {
+//   }
+//   const tableActions: TableAction<UserData>[] = [
+//     {
+//       label: 'Edit',
+//       icon: Edit,
+//       onClick: handleEdit,
+//       variant: 'default',
+//     },
+//     {
+//       label: 'Delete',
+//       icon: Trash2,
+//       onClick: handleDelete,
+//       variant: 'destructive',
+//     },
+//   ];
+//   // handle refresh
+//   const handleRefresh = useCallback(() => {
+//     toast({ title: "Data Refreshed", description: "All users data has been updated", });
+//     fetchAllUsersList();
+//   }, [toast]);
+//   // Define table permissions
+//   const tablePermissions: TablePermissions = {
+//     canEdit: true,
+//     canDelete: true,
+//     canView: true,
+//     canExport: false,
+//     canAdd: true,
+//     canManageColumns: true,
+//   };
+//   return (
+//     <div className="h-full overflow-y-scroll bg-gray-50 transition-all duration-300 ease-in-out">
+//       <header className="bg-white border-b px-6 py-4 shadow-sm">
+//         <div className="flex items-center gap-4">
+//           <SidebarTrigger />
+//           <div className="flex items-center gap-2 text-sm text-gray-600">
+//             <span>Masters</span><span>/</span><span>Company</span><span>/</span><span className="text-gray-900 font-medium">User</span>
+//           </div>
+//         </div>
+//       </header>
+//       <div className="p-6 space-y-6 animate-fade-in">
+//         <div className="flex items-center justify-between">
+//           <h1 className="text-2xl font-bold text-gray-900">Users</h1>
+//           <ReusableButton
+//             htmlType="button"
+//             variant="default"
+//             onClick={null}
+//             iconPosition="left"
+//             size="middle"
+//             className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+//           >
+//             <div className='flex items-center'><Plus className="h-4 w-4 mr-2" />Add User</div>
+//           </ReusableButton>
+//         </div>
+//         <Card className="shadow-sm">
+//           <CardHeader className="pb-4">
+//           </CardHeader>
+//           <CardContent>
+//             <ReusableTable
+//               data={dataSource} columns={columns}
+//               permissions={tablePermissions}
+//               title="Users List"
+//               onRefresh={handleRefresh} enableSearch={true}
+//               enableSelection={false} enableExport={true}
+//               enableColumnVisibility={true} enablePagination={true}
+//               enableSorting={true} enableFiltering={true}
+//               pageSize={10} emptyMessage="No Data found"
+//               rowHeight="normal" storageKey="user-master-list-table"
+//               actions={tableActions}
+//               enableColumnPinning
+//             />
+//           </CardContent>
+//         </Card>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default User;

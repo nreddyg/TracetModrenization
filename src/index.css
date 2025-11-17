@@ -1,5 +1,5 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -95,7 +95,7 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', 'ui-sans-serif', 'system-ui', sans-serif;
+    font-family: "Poppins", sans-serif;
   }
 }
 
@@ -135,8 +135,66 @@
  
   div {
     font-size: 15px
+  } 
+}
+
+  .btn-submit-style{
+  background-color: #f47e27;
+  color: hsl(210 40% 98%);
+  font-size: 0.875rem;
+  font-weight: 500; 
+  border-color: hsl(214.3 31.8% 91.4%);
+  padding-left: 0.75rem !important;
+  padding-right: 0.75rem !important;
+  transition: background-color 0.2s ease-in-out;
+  border: 0 !important;
   }
- 
+  .btn-submit-style:hover{
+    background-color: #f47e27 !important;
+    color: hsl(210 40% 98%) !important
+  }
+
+  .btn-reset-clear-style{
+    background-color: hsl(238 73% 97%) !important;
+    color: #000;
+    font-size: 0.875rem;
+    border-color: hsl(214.3 31.8% 91.4%);
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+    border: hsl(214.3 31.8% 91.4%) !important;
+  }
+  .btn-reset-clear-style:hover{
+    background-color: hsl(238 73% 97%) !important;
+    color: #000 !important;
+    border: hsl(214.3 31.8% 91.4%) !important;
+  }
+
+  /* Tabs container styling */
+.tabs .TabsList {
+  border-bottom: 5px solid #e5e7eb !important; /* subtle gray border under the tab row */
+}
+
+.tabs .TabsList button {
+  background: transparent;
+  color: #374151; 
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+   padding-left: 1rem;
+   padding-right: 1rem;
+  border: none;
+  border-bottom: 3px solid transparent;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.tabs .TabsList button:hover {
+  color: #1d4ed8;
+}
+
+.tabs .TabsList button[data-state="active"] {
+  color: #1d4ed8; 
+  border-bottom-color: #1d4ed8; 
+  font-weight: 600;
 }
 }
 

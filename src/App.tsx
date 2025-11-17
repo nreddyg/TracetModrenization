@@ -14,12 +14,25 @@ import { MessageProvider } from "./components/ui/reusable-message";
 import WrapperLazyComponent from "./components/common/WrapperLazyComponent";
 import AssetCodeTable from "./pages/servicedesk/AssetCodeTable";
 import ServiceRequestReport from "./pages/servicedesk/ServiceRequestDetailsHistory";
-import { getOrganizationDetailsByToken, getUserDetailsByUserName } from "./services/appService";
-import { useAppDispatch } from "./store";
-import { setCompanyId, setLoading, setUserId } from "./store/slices/projectsSlice";
 import ComplianceAndAudit from "./pages/softwareAssets/ComplianceAndAudit";
 import SoftwareAssetsReports from "./pages/softwareAssets/SoftwareAssetsReports";
 import ChangePassword from "./pages/changePassword/ChangePassword";
+import AssetLocation from "./pages/masters/AssetLocation";
+import Store from "./pages/masters/Store";
+import AssetCategory from "./pages/masters/fixedAssets/AssetCategory"
+import ItemMaster from "./pages/masters/ItemMaster";
+import UnitOfMeasure from "./pages/masters/UnitsOfMeasure";
+import ItemCategory from "./pages/masters/ItemCategory";
+import AssetCategoryMappingBookCategory from "./pages/masters/depreciation/AssetCategoryMappingBookCategory";
+import ManageUnitConversion from "./pages/masters/ManageUnitConvertion";
+import UserAttributes from "./pages/masters/fixedAssets/UserAttributes";
+import PrivateRoute from "./components/common/PrivateRoute";
+import Layout from "./pages/layout/Layout";
+import Home from "./pages/dashboard/Home";
+
+
+
+
 
 // Lazy load all pages
 const Index = WrapperLazyComponent(() => import("./pages/Index"));
@@ -42,11 +55,19 @@ const Organization = WrapperLazyComponent(() => import("./pages/masters/Organiza
 const User = WrapperLazyComponent(() => import("./pages/masters/User"));
 const Vendor = WrapperLazyComponent(() => import("./pages/masters/Vendor"));
 const Customer = WrapperLazyComponent(() => import("./pages/masters/Customer"));
+const CustomerLocation = WrapperLazyComponent(() => import("./pages/masters/CustomerLocation"));
 const CompanyHierarchy = WrapperLazyComponent(() => import("./pages/masters/CompanyHierarchy"));
 const Department = WrapperLazyComponent(() => import("./pages/masters/Department"));
+const CostCenter=WrapperLazyComponent(() => import("./pages/masters/CostCenter"));
 const AssetsMasters = WrapperLazyComponent(() => import("./pages/masters/AssetsMasters"));
 const MaintenanceMasters = WrapperLazyComponent(() => import("./pages/masters/MaintenanceMasters"));
 const ReportsMasters = WrapperLazyComponent(() => import("./pages/masters/ReportsMasters"));
+const ServiceLocations=WrapperLazyComponent(() => import("./pages/masters/ServiceLocations"));
+const ProductMasters=WrapperLazyComponent(() => import("./pages/masters/ProductMasters"));
+const CostBreakupAttributes=WrapperLazyComponent(() => import("./pages/masters/fixedAssets/CostBreakupAttributes"));
+const Books=WrapperLazyComponent(()=>import("./pages/masters/depreciation/Books"));
+const AdditionalDepreciation=WrapperLazyComponent(()=>import("./pages/masters/depreciation/AdditionalDepreciation"));
+const AddBook=WrapperLazyComponent(()=>import("./pages/masters/depreciation/AddBook"))
 
 // CWIP
 const ProjectManagement = WrapperLazyComponent(() => import("./pages/cwip/ProjectManagement"));
@@ -67,11 +88,15 @@ const AssetOps = WrapperLazyComponent(() => import("./pages/fixedassets/AssetOps
 const AssetMaintenance = WrapperLazyComponent(() => import("./pages/fixedassets/AssetMaintenance"));
 const FixedAssetsReports = WrapperLazyComponent(() => import("./pages/fixedassets/FixedAssetsReports"));
 
-// Depreciation
-const DepreciationProcess = WrapperLazyComponent(() => import("./pages/depreciation/DepreciationProcess"));
-const Adjustments = WrapperLazyComponent(() => import("./pages/depreciation/Adjustments"));
-const Analysis = WrapperLazyComponent(() => import("./pages/depreciation/Analysis"));
-const DepreciationReports = WrapperLazyComponent(() => import("./pages/depreciation/DepreciationReports"));
+// // Depreciation
+// const DepreciationProcess = WrapperLazyComponent(() => import("./pages/depreciation/DepreciationProcess"));
+// const Adjustments = WrapperLazyComponent(() => import("./pages/depreciation/Adjustments"));
+// const Analysis = WrapperLazyComponent(() => import("./pages/depreciation/Analysis"));
+// const DepreciationReports = WrapperLazyComponent(() => import("./pages/depreciation/DepreciationReports"));
+
+const ForexAdjustment= WrapperLazyComponent(() => import("./pages/Deprecation/ForexAdjustment"));
+const ImportAssetWise= WrapperLazyComponent(() => import("./pages/Deprecation/ImportAssetWise"));
+
 
 // Consumables
 const Receiving = WrapperLazyComponent(() => import("./pages/consumables/Receiving"));
@@ -165,12 +190,13 @@ const AnimatedRoutes = () => {
   }
   return (
     <MessageProvider duration={3} maxCount={5} offset={24}>
+  
       <SidebarProvider>
         <div className="h-screen flex w-full bg-app-background overflow-hidden">
-          <AppSidebar />
-          <SidebarInset className="flex flex-col overflow-hidden">
+          <AppSidebar navigation={[]}/>
+          <SidebarInset className="flex flex-col overflow-hidden bg-[#f9fafb]">
             <FixedHeader />
-            <div className="w-full h-full pt-20 transition-all duration-300 ease-in-out">
+            {/* <div className="w-full h-full pt-1 transition-all duration-200 ease-in-out"> */}
               <Suspense fallback={<ReusableLoader spinning={true} size="lg" position="center" />}>
                 <Routes location={location}>
                   <Route path="/" element={<Navigate to="/login" replace />} />
@@ -194,15 +220,37 @@ const AnimatedRoutes = () => {
                   <Route path="/tickets/dashboard" element={<TicketsDashboard />} />
 
                   {/* Masters */}
-                  <Route path="/masters/organization" element={<Organization />} />
-                  <Route path="/masters/customer" element={<Customer />} />
-                  <Route path="/masters/vendor" element={<Vendor />} />
-                  <Route path="/masters/user" element={<User />} />
-                  <Route path="/masters/company-hierarchy" element={<CompanyHierarchy />} />
-                  <Route path="/masters/department" element={<Department />} />
-                  <Route path="/masters/assets-inventory" element={<AssetsMasters />} />
-                  <Route path="/masters/maintenance" element={<MaintenanceMasters />} />
+                  <Route path="/masters/company/customer" element={<Customer />} />
+                  <Route path="/masters/company/customer/customerlocation" element={<CustomerLocation/>}/>
+                  <Route path="/masters/company/vendor" element={<Vendor />} />
+                  <Route path="/masters/company/user" element={<User />} />
+                  <Route path="/masters/company/organization" element={<Organization />} />
+                  <Route path="/masters/company/company-hierarchy" element={<CompanyHierarchy />} />
+                  <Route path="/masters/company/department" element={<Department />} />
+                  <Route path='/masters/company/costcenter' element={<CostCenter/>}/>
+                  <Route path="/masters/company/assets-inventory" element={<AssetsMasters />} />
+                  <Route path="/masters/company/maintenance" element={<MaintenanceMasters />} />
                   <Route path="/masters/reports" element={<ReportsMasters />} />
+                  <Route path="/masters/company/asset-location" element={<AssetLocation />} />
+                  <Route path="/masters/servicemaintenance/servicelocations" element={<ServiceLocations />} />
+                  <Route path='/masters/servicemaintenance/productmaster' element={<ProductMasters/>}/>
+                  <Route path="/masters/store" element={<Store/>} />
+                  <Route path="/masters/fixed-assets/asset-category" element={<AssetCategory/>} />
+                  <Route path="masters/fixed-assets/costbreakup" element={<CostBreakupAttributes/>}/>
+                  <Route path="masters/fixed-assets/userattributes" element={<UserAttributes/>}/>
+                  
+
+                  <Route path="/masters/consumables/store" element={<Store/>} />
+                  <Route path="/masters/consumables/item-master" element={<ItemMaster/>} />
+                  <Route path="/masters/consumables/unitsofmeasure" element={<UnitOfMeasure/>} />
+                  <Route path="/masters/consumables/unitsofmeasure/manageunitconverstion" element={<ManageUnitConversion/>} />
+                  <Route path="/masters/consumables/item-category" element={<ItemCategory/>} />
+                  <Route path="/masters/depreciation/book" element={<Books/>} />
+                  <Route path="/masters/depreciation/book/additionaldepreciation" element={<AdditionalDepreciation/> }/>
+                  <Route path="/masters/depreciation/assetcategorybookcategorymapping" element={<AssetCategoryMappingBookCategory/> }/>
+
+                  <Route path="/masters/depreciation/book/addbook" element={<AddBook/>}/>
+                  <Route path="/masters/depreciation/book/addbook/:id" element={<AddBook key={`edit`} />} />
 
                   {/* CWIP */}
                   <Route path="/cwip/project-management" element={<ProjectManagement />} />
@@ -224,10 +272,13 @@ const AnimatedRoutes = () => {
                   <Route path="/fixed-assets/reports" element={<FixedAssetsReports />} />
 
                   {/* Depreciation */}
-                  <Route path="/depreciation/process" element={<DepreciationProcess />} />
+                  {/* <Route path="/depreciation/process" element={<DepreciationProcess />} />
                   <Route path="/depreciation/adjustments" element={<Adjustments />} />
                   <Route path="/depreciation/analysis" element={<Analysis />} />
-                  <Route path="/depreciation/reports" element={<DepreciationReports />} />
+                  <Route path="/depreciation/reports" element={<DepreciationReports />} /> */}
+
+                  <Route path="depreciation/forexadjustment" element={<ForexAdjustment/>}/>
+                  <Route path="depreciation/importassetwise" element={<ImportAssetWise/>}/>
 
                   {/* Consumables */}
                   <Route path="/consumables/receiving" element={<Receiving />} />
@@ -262,7 +313,7 @@ const AnimatedRoutes = () => {
                   <Route path="/service-desk/work-management" element={<WorkManagement />} />
                   <Route path="/service-desk/administration" element={<Administration />} />
                   <Route path="/service-desk/reports" element={<ServiceDeskReports />} />
-                  <Route path="/service-desk/ticket-progress" element={<TicketProgressDashboard />} />
+                  <Route path="/service-desk/ticket-progress-dashboard" element={<TicketProgressDashboard />} />
 
                   {/* Utilities */}
                   <Route path="/utilities/printing-codes" element={<PrintingCodes />} />
@@ -272,7 +323,7 @@ const AnimatedRoutes = () => {
 
                   {/* Settings */}
                   <Route path="/settings" element={<Settings />} />
-                  <Route path="/settings/system-configuration" element={<SystemConfiguration />} />
+                  <Route path="/settings/smtp-configuration" element={<SystemConfiguration />} />
                   <Route path="/settings/user-management" element={<UserManagement />} />
                   <Route path="/settings/process-configuration" element={<ProcessConfiguration />} />
                   <Route path="/settings/advanced-setup" element={<AdvancedSetup />} />
@@ -286,7 +337,7 @@ const AnimatedRoutes = () => {
                   <Route path="/software-assets/reports" element={<SoftwareAssetsReports />} />
                 </Routes>
               </Suspense>
-            </div>
+            {/* </div> */}
           </SidebarInset>
         </div>
       </SidebarProvider>
@@ -302,7 +353,33 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <AnimatedRoutes />
+         <MessageProvider duration={5} maxCount={5} offset={24}>
+           <Routes>
+      <Route  path='/login' element={<Login />}/>
+      {/* <Route  path='/forgot' element={<ForgotPage/>}/> */}
+      {/* <Route path='/authentication' element={<Authentication/>}/>
+       */}
+      <Route element= {<PrivateRoute/>}>
+      <Route  path='/layout/*' element={<Layout/>}/>
+      <Route  path='/' element = {<Home/>}/>
+       {/* <Route  path='/' element = {<Layout/>}/> */}
+      <Route  path='/changepassword' element={<ChangePassword/>}/>
+      <Route  path='"/service-desk/srdetailshistoryview"' element={<ServiceRequestReport />}/>
+      {/* <Route path='/assetTransReportPreview' element={<AssetTransferReport/>}/>
+      <Route  path='/assetTransReportView' element={<AssetTransView/>}/>
+      <Route  path='/assetsaleinvoiceView' element={<AssetInvoiceView/>}/>
+      <Route  path='/assetcountView' element={<AssetCountView/>}/>
+      <Route path='/viewAssetCard' element={<ViewAsset/>}/>
+      <Route path='/groupAssetCard' element={<GroupAsset/>}/>
+      <Route path='/retireViewSaleMemo' element={<SaleMemoView/>}/>
+      <Route path='/retireViewInvoiceMemo' element={<SaleInvoiceView/>}/>
+      <Route path='/profile' element={<TracetProfileDetail/>}/>
+      <Route path="/userAssetVerification" element={<UserAssetVerification/>}/> */}
+    </Route>
+      <Route path="*"  element={<NotFound />}/>
+    </Routes>
+         </MessageProvider>
+     
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>

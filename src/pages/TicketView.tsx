@@ -1758,7 +1758,7 @@ const TicketView = () => {
                 <>
                   <ReusableButton
                     variant="text"
-                    size="small"
+                    // size="small"
                     className='btn-reset-clear-style'
                     onClick={() => handleEdit('cancel')}
                     icon={<X className="h-4 w-4" />}
@@ -1766,7 +1766,7 @@ const TicketView = () => {
                     {isCreateMode ? "Clear" : "Cancel"}
                   </ReusableButton>
                   <ReusableButton
-                    size="small"
+                    // size="small"
                     variant="primary"
                     onClick={isCreateMode
                       ? () => {

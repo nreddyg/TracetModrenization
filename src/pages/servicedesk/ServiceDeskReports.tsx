@@ -1221,7 +1221,7 @@ const ServiceDeskReports = () => {
                       onClick={handlePostColumns}
                       icon={<Save
                         className="h-4 w-4" />}
-                      className="bg-primary text-white hover:bg-primary/90 hover:text-white"
+                      className="bg-blue-600 hover:bg-blue-700 text-white  hover:text-white"
                       variant="default"
                     >
                       Apply As Default Grid Columns

@@ -282,7 +282,7 @@ const ManageUnitConversion = () => {
                             <ReusableButton
                                 htmlType="submit"
                                 variant="primary"
-                                className="bg-orange-500 hover:bg-orange-600 border-orange-500"
+                                className="btn-submit-style"
                                 onClick={() => submit()}
                             >Save</ReusableButton>
                             <ReusableButton variant="default"

@@ -713,6 +713,7 @@ const AssetCategory = () => {
                                         variant="primary"
                                         icon={<Plus className="h-4 w-4" />}
                                         onClick={() => activeTab === 'main' ? handleModalOpen(true) : handleModalOpen(false)}
+                                         className='btn-submit-style'
                                     >
                                         Add
                                     </ReusableButton>

@@ -13,7 +13,6 @@ import { ReusableDropdown } from '@/components/ui/reusable-dropdown';
 import { ArrowLeft, Edit, Save, X, Tag, Link, Search, ChevronLeft, ChevronRight, } from 'lucide-react';
 import { ReusableTextarea } from '@/components/ui/reusable-textarea';
 import { Controller, useForm } from 'react-hook-form';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@radix-ui/react-accordion';
 import { ReusableInput } from '@/components/ui/reusable-input';
 import { ReusableDatePicker } from '@/components/ui/reusable-datepicker';
 import ReusableTable from '@/components/ui/reusable-table';
@@ -34,6 +33,7 @@ import { ReusableCheckbox } from '@/components/ui/reusable-checkbox';
 import { BsFileEarmarkPdf, BsFiletypeHtml, BsFiletypePptx } from 'react-icons/bs';
 import { PiMicrosoftExcelLogoFill, PiMicrosoftWordLogo, PiImage, } from "react-icons/pi";
 import { RxCross2 } from "react-icons/rx";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 interface HistoryRecord {
   id: string;
@@ -1758,7 +1758,7 @@ const TicketView = () => {
                 <>
                   <ReusableButton
                     variant="text"
-                    size="small"
+                    // size="small"
                     className='btn-reset-clear-style'
                     onClick={() => handleEdit('cancel')}
                     icon={<X className="h-4 w-4" />}
@@ -1766,7 +1766,7 @@ const TicketView = () => {
                     {isCreateMode ? "Clear" : "Cancel"}
                   </ReusableButton>
                   <ReusableButton
-                    size="small"
+                    // size="small"
                     variant="primary"
                     onClick={isCreateMode
                       ? () => {

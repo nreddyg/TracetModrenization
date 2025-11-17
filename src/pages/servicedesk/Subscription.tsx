@@ -1092,7 +1092,7 @@ const SubscriptionManagement = () => {
             </div>
             <div className='flex gap-2 justify-center'>
               <ReusableButton
-                size="small"
+                // size="small"
                 variant="primary"
                 icon={<Plus className="h-3 w-3" />}
                 iconPosition="left"
@@ -1102,7 +1102,7 @@ const SubscriptionManagement = () => {
                 Payment Details
               </ReusableButton>
               <ReusableButton
-                size="small"
+                // size="small"
                 // variant="primary"
                 icon={<></>}
                 // iconPosition="left"

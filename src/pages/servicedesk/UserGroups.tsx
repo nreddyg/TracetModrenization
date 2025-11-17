@@ -462,7 +462,7 @@ const UserGroups = () => {
               {/* <p className="text-sm text-gray-600 mt-0.5">Manage user groups and permissions</p> */}
             </div>
             {!selectedRecord && <ReusableButton
-              size="small"
+              // size="small"
               variant="primary"
               icon={<Plus className="h-3 w-3" />}
               iconPosition="left"

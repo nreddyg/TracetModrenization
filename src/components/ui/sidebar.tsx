@@ -400,7 +400,7 @@ const SidebarContent = React.forwardRef<
   React.ComponentProps<"div">
 >(({ className, ...props }, ref) => {
   return (
-     <ScrollArea className="flex-1" scrollStyle={'flex-[0.8] bg-[#cdcdce96]'}>
+     <ScrollArea className="flex-1" scrollStyle={'flex-[0.7] bg-[#cdcdce96]'}>
     <div
       ref={ref}
       data-sidebar="content"

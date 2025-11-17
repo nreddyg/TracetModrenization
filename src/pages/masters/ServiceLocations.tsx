@@ -445,6 +445,7 @@ const ServiceLocations = () => {
                                         variant="primary"
                                         icon={<Plus className="h-4 w-4" />}
                                         onClick={() => setIsMainDialogOpen(true)}
+                                         className='btn-submit-style'
                                     >
                                         Add
                                     </ReusableButton>

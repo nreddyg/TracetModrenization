@@ -825,7 +825,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Plus, Trash2, ChevronRight, ChevronDown, Folder, Info, File } from 'lucide-react';
+import { Search, Plus, Trash2, ChevronRight, ChevronDown, Folder, Info, File, X, Save } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ReusableButton } from '@/components/ui/reusable-button';
 import { BaseField, GenericObject } from '@/Local_DB/types/types';
@@ -1488,24 +1488,24 @@ const CompanyHierarchy = () => {
             <FaAngleRight />
             <span className="text-foreground font-medium">Company Hierarchy</span>
           </div>
-          <div className='flex gap-2'>
+          <div className="flex items-center gap-2 self-start sm:self-auto">
             <ReusableButton
               htmlType="button"
-              variant="default"
+              variant="text"
               onClick={() => handleReset()}
-              iconPosition="left"
-              size="middle"
-              // className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+              icon={<X className="h-4 w-4" />}
               className='btn-reset-clear-style'
+            // className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+
             >
               Reset
             </ReusableButton>
             <ReusableButton
               htmlType="button"
-              variant="default"
+              variant="primary"
               onClick={submit}
-              iconPosition="left"
-              size="middle"
+              icon={<Save className="h-4 w-4" />}
+
               // className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
               className='btn-submit-style'
             >

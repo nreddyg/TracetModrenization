@@ -616,7 +616,7 @@ const ReportsMasters = () => {
       <div className="px-3 pb-3 pt-0 space-y-3 ">
         <div className="grid grid-cols-1 xl:grid-cols-4 gap-3 ">
           <div className="xl:col-span-1">
-            <Card className="sticky top-6">
+            <Card className="sticky top-6 pb-3">
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Settings2 className="h-5 w-5 text-blue-600" />
@@ -628,7 +628,7 @@ const ReportsMasters = () => {
                 </div>
               </CardHeader>
               <ScrollArea>
-              <CardContent className="space-y-1 max-h-80">
+              <CardContent className="space-y-2 max-h-80">
                 {filteredReportTabs.map((tab) => (
                   <button key={tab} onClick={() => { setActiveTab(tab); form.reset() }}
                     className={cn(
@@ -650,7 +650,7 @@ const ReportsMasters = () => {
             <FilterCard
               actions={
                 <div className='flex items-center gap-3 xxs:flex-col xxs:justify-center xs2:flex-row md:flex-row lg:flex-row '>
-                  <Button onClick={handleViewReport} disabled={isGeneratingReport} className="bg-blue-600 hover:bg-blue-700">
+                  <Button onClick={handleViewReport} disabled={isGeneratingReport} className="btn-submit-style">
                     {isGeneratingReport ? (
                       <>
                         <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
@@ -663,7 +663,7 @@ const ReportsMasters = () => {
                       </>
                     )}
                   </Button>
-                  <Button onClick={reset} variant="outline"> Clear All </Button>
+                  <Button onClick={reset} className='btn-reset-clear-style' variant="outline"> Clear All </Button>
                 </div>
               }
             >
@@ -693,7 +693,7 @@ const ReportsMasters = () => {
                   <CardTitle className="text-lg">Report Results - {activeTab}</CardTitle>
                   <div>
                     <ReusableButton onClick={handleSaveColumns} icon={<Save className="h-4 w-4" />}
-                      className="bg-primary text-white hover:bg-primary/90 hover:text-white"
+                      className="bg-blue-600 hover:bg-blue-700 text-white  hover:text-white"
                       variant="default"
                     >
                       Apply As Default Grid Columns

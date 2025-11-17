@@ -409,7 +409,7 @@ const TicketProgressDashboard = () => {
                         <ReusableButton
                           htmlType="submit"
                           variant="default"
-                          className="bg-orange-500 border-orange-500 text-white hover:bg-orange-600 hover:border-orange-600 hover:text-white"
+                          className="btn-submit-style"
                           iconPosition="left"
                           onClick={() => handleSearch("FetchAll")}
                         >

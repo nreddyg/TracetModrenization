@@ -581,7 +581,7 @@ const Organization = () => {
 
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col min-w-0 ">
-          <div className=" px-4 lg:px-6 py-4
+          <div className=" px-4 lg:px-6 py-3
   flex flex-col sm:flex-row justify-between gap-4 shrink-0"
           >
             <div className="flex items-start sm:items-center gap-4 lg:gap-6 flex-1 min-w-0">
@@ -597,7 +597,7 @@ const Organization = () => {
             <div className="flex items-center gap-2 self-start sm:self-auto">
               <ReusableButton
                 variant="text"
-                size="small"
+                // size="small"
                 onClick={handleReset}
                 icon={<X className="h-4 w-4" />}
                 className='btn-reset-clear-style'
@@ -606,7 +606,7 @@ const Organization = () => {
               </ReusableButton>
 
               <ReusableButton
-                size="small"
+                // size="small"
                 variant="primary"
                 onClick={(data) => handleSubmit(handleSave)(data)}
                 icon={<Save className="h-4 w-4" />}

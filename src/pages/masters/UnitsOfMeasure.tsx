@@ -257,7 +257,7 @@ const UnitOfMeasure = () => {
         <div className="h-full overflow-y-auto bg-gray-50 flex flex-col ">
             <div className="flex flex-1 overflow-hidden">
                 <div className="flex-1 flex flex-col min-w-0 ">
-                     <header className="px-6 py-4">
+                     <header className="px-6 py-3">
                               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                                 <div className="flex items-center gap-2 text-sm text-gray-600">
                                   <span>Masters</span>
@@ -270,9 +270,9 @@ const UnitOfMeasure = () => {
                             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                                 <DialogTrigger asChild>
                                     <ReusableButton
-                                        variant="primary"
+                                        
                                         icon={<Plus className="h-4 w-4" />}
-                                        className="bg-orange-500 hover:bg-orange-600 border-orange-500"
+                                        className="btn-submit-style"
                                         onClick={() => { setRecordToEditId(null); reset({ Name: "", Description: "" }) }}
                                     >
                                         Add Unit
@@ -306,7 +306,7 @@ const UnitOfMeasure = () => {
                                         <ReusableButton
                                             htmlType="submit"
                                             variant="primary"
-                                            className="bg-orange-500 hover:bg-orange-600 border-orange-500"
+                                            className="btn-submit-style"
                                             onClick={() => submit()}
                                         >
                                             {recordToEditId ? "Update" : "Save"}
@@ -317,7 +317,7 @@ const UnitOfMeasure = () => {
                             <ReusableButton
                                 variant="primary"
                                 icon={<Plus className="h-4 w-4" />}
-                                className="bg-orange-500 hover:bg-orange-600 border-orange-500"
+                                className="btn-submit-style"
                                 onClick={() => { navigate('/layout/masters/consumables/unitsofmeasure/manageunitconverstion'); }}
                             >
                                 Manage Unit Conversations

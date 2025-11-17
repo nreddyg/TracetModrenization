@@ -581,7 +581,7 @@ const Organization = () => {
 
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col min-w-0 ">
-          <div className=" px-4 lg:px-6 py-4
+          <div className=" px-4 lg:px-6 py-3
   flex flex-col sm:flex-row justify-between gap-4 shrink-0"
           >
             <div className="flex items-start sm:items-center gap-4 lg:gap-6 flex-1 min-w-0">

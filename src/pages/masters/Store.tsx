@@ -284,7 +284,7 @@ const Store = () => {
         <div className="h-full overflow-y-auto bg-gray-50 flex flex-col ">
             <div className="flex flex-1 overflow-hidden">
                 <div className="flex-1 flex flex-col min-w-0 ">
-                    <header className="px-6 py-4">
+                    <header className="px-6 py-3">
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
 
                             <div className="flex items-center gap-2 text-sm text-gray-600">

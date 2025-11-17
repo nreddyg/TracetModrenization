@@ -584,7 +584,7 @@ const User = () => {
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col min-w-0 ">
           {/* Navigation and Action Bar */}
-          <div className="px-4 lg:px-6 py-4 flex flex-row xxs:flex-col xs2:flex-row lg:flex-row lg:items-center justify-between gap-4 shrink-0">
+          <div className="px-4 lg:px-6 py-3 flex flex-row xxs:flex-col xs2:flex-row lg:flex-row lg:items-center justify-between gap-4 shrink-0">
             <div className="flex items-center gap-4 lg:gap-6 flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <div className="flex items-center gap-2 text-sm text-gray-600">

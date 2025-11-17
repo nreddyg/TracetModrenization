@@ -599,7 +599,7 @@ const User = () => {
             <div className="flex items-center gap-2">
               <ReusableButton
                 variant="text"
-                size="small"
+                // size="small"
                 onClick={handleReset}
                 icon={<X className="h-4 w-4" />}
                 className='btn-reset-clear-style'
@@ -608,7 +608,7 @@ const User = () => {
                 {selectedUserData ? "Cancel" : "Reset"}
               </ReusableButton>
               <ReusableButton
-                size="small"
+                // size="small"
                 variant="primary"
                 onClick={(data) => handleSubmit(handleSave)(data)}
                 icon={<Save className="h-4 w-4" />}

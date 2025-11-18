@@ -301,3 +301,7 @@ export const URL_GET_VIEW_ASSET_CARD_DETAILS='/api/FixedAssetAPI/GetViewAssetCar
 export const URL_GET_GROUP_ASSET_CARD_DETAILS='/api/FixedAssetAPI/GetGroupAssetViewCardDetails';
 export const URL_GET_COST_BREAKUP_DATA_BY_ASSET_ID='/api/FixedAssetAPI/GetCostBreakup';
 export const URL_GET_RETIRE_DETAILS_BY_ASSET_ID='/api/FixedAssetAPI/GetRetireById';
+export const URL_POST_UPDATE_ASSET_DETAILS_WITH_ATTRIBUTES='/api/FixedAssetAPI/UpdateAssetDetailsWithAttribute';
+export const URL_POST_UPDATE_ASSET_DETAILS='/api/FixedAssetAPI/UpdateAssetDetails';
+export const URL_POST_ADD_ASSET_DETAILS='/api/FixedAssetAPI/AddAssetDetails';
+export const URL_ADD_ASSET_DETAILS_WITH_ATTRIBUTES='/api/FixedAssetAPI/AddAssetDetailsWithAttribute';

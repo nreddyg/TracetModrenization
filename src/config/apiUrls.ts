@@ -13,7 +13,6 @@ export const URL_GET_BRANCH_LIST = "/api/Masters/GetHeirarchyDetailsLastLevelByC
 //service desk urls
 // create ticket screen
 export const URL_GET_SRCONFIG_LIST = "/api/ServiceDeskAPI/GetServiceRequestConfiguration";
-// export const URL_GET_SR_TYPE_LOOKUPS = "/api/ServiceDeskAPI/GetServiceRequestTypeLookups";
 export const URL_GET_SR_TYPE_LOOKUPS = "/api/ServiceDeskAPI/GetServiceRequestTypeLookupsByBranchId";
 export const URL_CREATE_SERVICE_REQUEST = "/api/ServiceDeskAPI/CreateServiceRequestwithAdditionalFields";
 export const URL_SAVE_FILE_UPLOAD = "/api/ServiceDeskAPI/SaveFileUploadByServiceRequestId";
@@ -52,16 +51,16 @@ export const URL_GET_REPORT_FOR_SR_DETAILS_COLUMNS = "/api/ServiceDeskAPI/GetDef
 export const URL_GET_REPORT_FOR_SR_DETAILS_HISTORY = "/api/ServiceDeskAPI/GetServiceRequestHistoyReport";
 export const URL_GET_SR_SLA_MET_SEL_VIOLATED = "/api/ServiceDeskAPI/GetServiceRequestSLAReport";
 export const URL_GET_SR_SLA_MET_SEL_VIOLATED_COLUMNS = "/api/ServiceDeskAPI/GetDefaultColumnsSLAMetViolated";
-export const URL_GET_SR_SEVERITY = "api/ServiceDeskAPI/GetServiceRequestSeverityLookups";
-export const URL_GET_SR_PRIORITY = 'api/ServiceDeskAPI/GetServiceRequestPriorityLookups';
+export const URL_GET_SR_SEVERITY = "/api/ServiceDeskAPI/GetServiceRequestSeverityLookups";
+export const URL_GET_SR_PRIORITY = '/api/ServiceDeskAPI/GetServiceRequestPriorityLookups';
 export const URL_GET_MAIN_CATEGORY_DETAILS = "/api/Masters/GetCategoryLookups";
 export const URL_GET_SUB_CATEGORY_DETAILS = "/api/Masters/GetSubCategoryLookups";
 export const URL_GET_DEPARTMENT_DETAILS = "/api/Masters/GetDepartmentDetailsByCompanyId";
-export const URL_GET_SLA_STATUS = "api/ServiceDeskAPI/GetServiceRequestSLAStatusLookups";
-export const URL_GET_LEVEL_FIVE_COMPANY = "api/Masters/GetHeirarchyDetailsByCompanyId";
-export const URL_POST_COLUMNS_FOR_SR_DETAILS = "api/ServiceDeskAPI/SaveDefaultServiceRequestDetailsColumns";
-export const URL_POST_COLUMNS_FOR_SR_MET_VIOLATED = "api/ServiceDeskAPI/SaveDefaultServiceRequestSLADetailsColumns";
-export const URL_ADDITIONAL_FIELD_CONFIG_DETAILS = "api/Settings/GetAllAdditionalFieldConfigurationDetails"
+export const URL_GET_SLA_STATUS = "/api/ServiceDeskAPI/GetServiceRequestSLAStatusLookups";
+export const URL_GET_LEVEL_FIVE_COMPANY = "/api/Masters/GetHeirarchyDetailsByCompanyId";
+export const URL_POST_COLUMNS_FOR_SR_DETAILS = "/api/ServiceDeskAPI/SaveDefaultServiceRequestDetailsColumns";
+export const URL_POST_COLUMNS_FOR_SR_MET_VIOLATED = "/api/ServiceDeskAPI/SaveDefaultServiceRequestSLADetailsColumns";
+export const URL_ADDITIONAL_FIELD_CONFIG_DETAILS = "/api/Settings/GetAllAdditionalFieldConfigurationDetails"
 
 //configuration
 export const URL_GET_SERVICE_REQUEST_TYPES = '/api/ServiceDeskAPI/GetServiceRequestTypes'
@@ -102,7 +101,6 @@ export const URL_GET_CUSTOMER_LIST = '/api/Masters/GetCustomerDetailsByCompanyId
 export const URL_POST_ADD_NEW_CUSTOMER = "/api/Masters/AddCustomerDetails"
 export const URL_POST_DELETE_CUSTOMER = "/api/Masters/DeleteCustomerById"
 export const URL_GET_BRANCH_LOOKUP = "/api/Masters/GetBranchLookups"
-export const URL_GET_CUSTOMER_DETAILS = "/api/Masters/GetCustomerDetailsByCompanyId"
 export const URL_POST_UPDATE_CUSTOMER = "/api/Masters/UpdateCustomerDetails"
 export const URL_GET_CUSTOMER_LOCATION_DATA = "/api/Masters/GetCustomerLocationDetailsByCompanyId"
 export const URL_POST_ADD_CUSTOMER_LOCATION = "/api/Masters/AddCustomerLocationDetails"
@@ -112,9 +110,7 @@ export const URL_POST_DELETE_CUSTOMER_LOCATION = "/api/Masters/DeleteCustomerLoc
 
 
 //Vendor Master
-export const URL_GET_VENDOR_LIST = '/api/Masters/GetVendorDetailsByCompanyId';
 export const URL_POST_VENDOR_DETAILS = "/api/Masters/AddVendorDetails";
-export const URL_GET_VENDOR_DETAILS = "/api/Masters/GetVendorDetailsByCompanyId";
 export const URL_POST_UPDATE_VENDOR_DETAILS = "/api/Masters/UpdateVendorDetails";
 export const URL_POST_DELETE_VENDOR = "/api/Masters/DeleteVendorById"
 
@@ -126,7 +122,7 @@ export const URL_POST_ADD_OR_UPDATE_SMTP_CONFIG = "/api/Settings/AddOrUpdateSMTP
 export const URL_GET_ORGANIZATION_LIST = '/api/Masters/GetOrganizations';
 export const URL_GET_COUNTRY_LIST = '/api/Masters/GetCountry';
 export const URL_ADD_ORGANIZATION = '/api/Masters/AddOrganizationDetails';
-export const URL_UPDATE_ORGANIZATION = 'api/Masters/UpdateOrganizationDetails';
+export const URL_UPDATE_ORGANIZATION = '/api/Masters/UpdateOrganizationDetails';
 export const URL_GET_CURRENCY_LIST = '/api/Masters/GetCurrency';
 
 //Ticket Progress Dashboard
@@ -160,33 +156,24 @@ export const URL_POST_DEPARTMENT_DATA = `/api/Masters/SubmitdepartmentLevels`;
 export const URL_DELETE_DEPARTMENT_DATA = `/api/Masters/DeleteDepartmentDetailsById`;
 
 // Master's Company Hierarchy Screen
-export const URL_GET_COMPANY_HIERARCHY_DATA = `/api/Masters/GetHeirarchyDetailsByCompanyId`;
 export const URL_GET_STATE_LOOKUP_DATA = `/api/Masters/StateLookup`;
 export const URL_POST_COMPANY_HIERARCHY_DATA = `/api/Masters/SubmitBrachLevels`;
 export const URL_DELETE_COMPANY_HIERARCHY_DATA = `/api/Masters/DeleteHeirachyDetailsById`;
-export const URL_GET_COMPANY_HIERARCHY_DATA_BY_BRANCHID = `/api/Masters/GetHeirarchyDetailsByCompanyId`;
 
 // Store Screen`
-
 export const URL_GET_STORE_DATA = `/api/Masters/GetStoreDetails`;
 export const URL_DELETE_STORE = `/api/Masters/DeleteStoreDetailsById`;
 export const URL_POST_NEW_STORE = `/api/Masters/AddStoreDetails`;
 export const URL_POST_UPDATE_STORE = `/api/Masters/UpdateStoreDetails`;
-// export const URL_GET_EDIT_STORE_DATA = `/api/Masters/GetStoreDetails`;
-// export const URL_GET_COMPANY_HIERARCHY_DATA = `/api/Masters/GetHeirarchyDetailsByCompanyId`
-// export const URL_POST_COMPANY_HIERARCHY_DATA=`/api/Masters/GetHeirarchyDetailsByCompanyId`;
-
 
 // Master's AssetLocation API's
 export const URL_ASSET_LOCATION_DETAILS = `/api/Masters/GetAssetLocationDetailsByCompanyId`
-export const URL_ASSET_LOCATION_BY_LOC_ID = `/api/Masters/GetAssetLocationDetailsByCompanyId`
 export const URL_POST_ASSET_LOC_DATA = `/api/Masters/SubmitLocationLevels`;
 export const URL_DELETE_LOC = `/api/Masters/DeleteAssetLocationDetailsById`;
 //Masters Cost center Screen
 
 export const URL_GET_COSTCENTER_DATA = `/api/Masters/GetCostCenterDetailsByCompanyId`;
 export const URL_POST_COSTCENTER = `/api/Masters/SubmitCostCenterLevels`;
-export const URL_GET_COSTCENTER_BY_ID = `/api/Masters/GetCostCenterDetailsByCompanyId`;
 export const URL_DELETE_COSTCENTER = `/api/Masters/DeleteCostCenterDetailsById`;
 
 //Masters Service locations
@@ -199,7 +186,6 @@ export const URL_DELETE_COSTCENTER = `/api/Masters/DeleteCostCenterDetailsById`;
 export const URL_GET_COSTBREAKUP_LIST=`/api/Masters/GetCostBreakupAttributesByCompanyId`;
 export const URL_POST_COSTBREAKUP=`/api/Masters/AddCostBreakupAttributesDetails`;
 export const URL_UPDATE_COSTBREAKUP=`/api/Masters/UpdateCostBreakupAttributesDetails`;
-export const URL_EDIT_COSTBREAKUP=`/api/Masters/GetCostBreakupAttributesByCompanyId`;
 export const URL_DELETE_COSTBREAKUP=`/api/Masters/DeleteCostBreakupAttributes`;
 // Master's fixed Assets Asset Category
 export const URL_GET_ASSET_CATEGORY_DATA = `/api/Masters/GetAssetCategoriesByCompanyId`;
@@ -207,7 +193,6 @@ export const URL_POST_ASSET_CATEGORY_DATA = `/api/Masters/AddAssetCategoryDetail
 export const URL_UPDATE_ASSET_CATEGORY_DATA = `/api/Masters/UpdateAssetCategoryDetails`;
 export const URL_DELETE_ASSET_CATEGORY_REC = `/api/Masters/DeleteAssetCategoryById`;
 export const URL_USER_ATTRIBUTES = `/api/Masters/GetUserAttributesByCompanyId`;
-export const URL_COST_BREAKUP_ATTRIBUTES = `/api/Masters/GetCostBreakupAttributesByCompanyId`;
 
 // Masters Item Master 
 export const URL_GET_ITEM_MASTER_DATA = `/api/Masters/GetItemMasterDetailsByCompanyId`;
@@ -218,20 +203,16 @@ export const URL_POST_UPDATE_ITEM_MASTER = `/api/Masters/UpdateItemMasterDetails
 
 export const URL_GET_UNITS_OF_MEASURE_DATA = `/api/Masters/GetUOMDetailsByCompanyId`;
 export const URL_GET_MANAGE_UNITS_OF_MEASURE_DATA = `/api/Masters/GetUOMConversionDetails`;
-export const URL_GET_UNITS_OF_MEASURE_DATA_BY_ID = `/api/Masters/GetUOMDetailsByCompanyId`;
 export const URL_DELETE_UNITS_OF_MEASURE = `/api/Masters/DeleteUnitofMeasureById`;
 export const URL_DELETE_CONVERSION = `/api/Masters/DeleteUOMConversionById`;
 export const URL_POST_NEW_UNITS_OF_MEASURE = `/api/Masters/AddUnitOfMeasuresDetails`;
 export const URL_POST_NEW_CONVERSION = `/api/Masters/AddUOMConversionDetails`;
 export const URL_POST_UPDATE_UNITS_OF_MEASURE = `/api/Masters/UpdateUnitOfMeasuresDetails`;
 //Masters Product masters
-export const URL_PRODUCT_MASTERS=`/api/Masters/GetProductMasterDetailsByCompanyId`;
 export const URL_POST_PRODUCTS=`/api/Masters/AddProductDetails`;
-export const URL_EDIT_PRODUCTS=`/api/Masters/GetProductMasterDetailsByCompanyId`;
 export const URL_UPDATE_PRODUCTS=`/api/Masters/UpdateProductDetails`;
 export const URL_DELETE_PRODUCTS=`/api/Masters/DeleteProductMasterById`;
 // Masters User Attributes 
-export const URL_GET_USER_ATTRIBUTES = `/api/Masters/GetUserAttributesByCompanyId`;
 export const URL_GET_USER_ATTRIBUTES_DATA_BY_ID = `/api/Masters/GetUserAttributes`;
 export const URL_POST_NEW_USER_ATTRIBUTES=`/api/Masters/AddUserAttributesDetails`;
 export const URL_DELETE_GROUP=`/api/Masters/DeleteUserAttributes`;
@@ -239,7 +220,6 @@ export const URL_UPDATE_GROUP=`/api/Masters/UpdateUserAttributesDetails`;
 
 // Item Cateory
 export const URL_GET_ITEM_CATEGORY = `/api/Masters/GetItemCategoryDetailsByCompanyId`;
-export const URL_UNIT_OF_MEASURE = `/api/Masters/GetUOMDetailsByCompanyId`;
 export const URL_ADD_ITEM_CATEGORY = `/api/Masters/AddItemCategoryDetails`;
 export const URL_UPDATE_ITEM_CATEGORY = `/api/Masters/UpdateItemCategoryDetails`;
 export const URL_DELETE_ITEM_CATEGORY = `/api/Masters/DeleteItemCategoriesById`;
@@ -254,7 +234,6 @@ export const URL_ASSET_CATEGORIES_PREV_NEXT_DATES = `/api/Masters/GetAssetCatego
 export const URL_GET_DATE_LIST = `/api/Masters/GetAssetCatBookCatMapEffFromDatesListLookupsByBookId`;
 export const URL_DOWNLOAD_EXCEL_DATA = `/api/Masters/DownLoadAssetCategoryBookCategoryMapping`;
 export const URL_POST_UPLOAD_EXCEL_DATA = `/api/Masters/ImportAssetCategoryBookCategoryMappingData`;
-export const URL_GET_CUSTOMER_LOCATIONS_DATA='/api/Masters/GetCustomerLocationDetailsByCompanyId';
 export const URL_GET_COMPANY_HIERARCHY_MASTER_REPORT='api/Masters/GetCompanyHierarchyMasterReport';
 export const URL_GET_DEPARTMENT_MASTER_REPORT='/api/Masters/GetDepartmentMasterReport';
 export const URL_GET_COST_CENTER_MASTER_REPORT='/api/Masters/GetCostCenterMasterReport';
@@ -276,7 +255,6 @@ export const URL_POST_UPDATE_ADDITIONAL_DEPRECIATION="/api/Masters/UpdateAdditio
 export const URL_DELETE_ADDITIONAL_DEPRECIATION="/api/Masters/DeleteAdditionalDepreciation"
 export const URL_GET_GROUP_BY_BOOK_ID="/api/Masters/GetGroupByBookIdDetails"
 export const URL_GET_DEPRECIATION_BOOK_DETAILS_BY_ID="/api/Masters/GetDepreciationBookDetailsByBookId"
-export const URL_GET_DEPRECIATION_BOOK_DETAILS="/api/Masters/GetDepreciationBookDetails"
 export const URL_GET_BOOK_CATEGORY_LIST="/api/Masters/GetDepreciationBookCategoryDetailsByBookId"
 export const URL_GET_EFFECTIVE_FROM_DATE="/api/Masters/GetEffectiveFromDatesListLookupsByBookId"
 export const URL_GET_CHECK_DEP_RAN_FY="/api/DepreciationAPI/CheckForDepreciationRanForFY"
@@ -302,3 +280,9 @@ export const URL_ASSET_TRANSFER_LIST="/api/FixedAssetAPI/GetAssetsTransferList";
 export const URL_BASIC_SEARCH = `/api/FixedAssetAPI/GetAssetTransferDetailsListByBasicSearch`;
 export const URL_FILTER_SEARCH = `/api/FixedAssetAPI/GetManageAssetTransferListByFilter`;
 export const URL_GRID_COLS = `/api/FixedAssetAPI/GetAllGridColumnsList`;
+
+//Fixed Assets Module
+//Lookups
+export const URL_GET_SELLER_LOOKUP_DATA='api/Masters/GetSellerLookups';
+// export const UR
+//Add Asset

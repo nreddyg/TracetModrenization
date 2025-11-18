@@ -1,4 +1,4 @@
-import { URL_ADD_ITEM_CATEGORY, URL_DELETE_ITEM_CATEGORY, URL_GET_ITEM_CATEGORY, URL_ITEM_CATEGORY_BY_ID, URL_UNIT_OF_MEASURE, URL_UPDATE_ITEM_CATEGORY } from '@/config/apiUrls';
+import { URL_ADD_ITEM_CATEGORY, URL_DELETE_ITEM_CATEGORY, URL_GET_ITEM_CATEGORY, URL_GET_UNITS_OF_MEASURE_DATA, URL_ITEM_CATEGORY_BY_ID, URL_UPDATE_ITEM_CATEGORY } from '@/config/apiUrls';
 import api from './api';
 
 interface APIResponse<T> {
@@ -20,7 +20,7 @@ export const getItemCategoryData = async (CompId: string): Promise<APIResponse<a
 
 export const getUnitOfMeasure = async (CompId: string): Promise<APIResponse<any>> => {
     try {
-        const response = await api.get(URL_UNIT_OF_MEASURE, { params: { CompId: CompId } })
+        const response = await api.get(URL_GET_UNITS_OF_MEASURE_DATA, { params: { CompId: CompId } })
         return { success: true, data: response.data, }
     } catch (err: any) {
         return { success: false, message: err.response?.data?.message || err.message, status: err.response?.status };

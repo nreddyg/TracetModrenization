@@ -1,4 +1,4 @@
-import { URL_GET_BRANCH_LOOKUP, URL_GET_COUNTRY_LIST, URL_GET_CUSTOMER_DETAILS, URL_GET_CUSTOMER_LIST, URL_GET_CUSTOMER_LOCATION_DATA, URL_POST_ADD_CUSTOMER_LOCATION, URL_POST_ADD_NEW_CUSTOMER, URL_POST_DELETE_CUSTOMER, URL_POST_DELETE_CUSTOMER_LOCATION, URL_POST_UPDATE_CUSTOMER, URL_POST_UPDATE_CUSTOMER_LOCATION, } from "@/config/apiUrls";
+import { URL_GET_BRANCH_LOOKUP, URL_GET_COUNTRY_LIST, URL_GET_CUSTOMER_LIST, URL_GET_CUSTOMER_LOCATION_DATA, URL_POST_ADD_CUSTOMER_LOCATION, URL_POST_ADD_NEW_CUSTOMER, URL_POST_DELETE_CUSTOMER, URL_POST_DELETE_CUSTOMER_LOCATION, URL_POST_UPDATE_CUSTOMER, URL_POST_UPDATE_CUSTOMER_LOCATION, } from "@/config/apiUrls";
 import api from "./api";
 
 interface APIResponse<T> {
@@ -38,7 +38,7 @@ export const postNewCustomer= async (CompId: string,Data:string): Promise<APIRes
 };
 export const getEditCustomerListByCompanyId= async (compId:string,CustomerId:string,branchName:string): Promise<APIResponse<any>> => {
     try {
-        const response = await api.get(URL_GET_CUSTOMER_DETAILS, { params: { CompId: compId,CustomerId:CustomerId,BranchName:branchName} })
+        const response = await api.get(URL_GET_CUSTOMER_LIST, { params: { CompId: compId,CustomerId:CustomerId,BranchName:branchName} })
         return {success: true,data: response.data,}
     } catch (err: any) {
         return { success: false,message: err.response?.data?.message || err.message,status: err.response?.status};

@@ -83,11 +83,7 @@ export const modulesOverride = {
          return;
        }
      },
-    //  "software assets": {
-    //    "action": (module) => {  // Hide this module
-    //      return;
-    //    }
-    //  },
+    
      "mis reports": {
        "action": (module) => {  // Hide this module
          return;
@@ -108,9 +104,9 @@ export const modulesOverride = {
          return;
        }
      },
-     "fixed assets": {
+     "software assets": {
         "action": (module,isParent) => {
-        if(isParent)return(module)
+        if(!isParent)return(module)
         return;
           }
      },

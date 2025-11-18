@@ -940,11 +940,13 @@ const ExportMenu = ({
     const { headers, body } = getVisibleData(table, exportData);
     const meta = getExportMetadata(exportData, exportMeta);
 
+    const downloadDate = meta.downloadDate.substring(0,10);
+
     const metaSheet = [
-      ["Company Name:", meta.companyName],
-      ["Name:", meta.name],
+      [meta.companyName],
+      [meta.name],
       ["Total Records:", meta.totalCount],
-      ["Download Date:", meta.downloadDate],
+      ["Download Date:", downloadDate],
       [],
     ];
 

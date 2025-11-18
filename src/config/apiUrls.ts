@@ -292,7 +292,12 @@ export const URL_GET_MANUFACTURER_LOOKUP_DATA='/api/Masters/GetManufacturerLooku
 export const URL_GET_ASSET_TAGGABLE_LOOKUP_DATA='/api/Masters/GetIsAssetTaggableLookups';
 export const URL_GET_ASSIGNED_TO_LOOKUP_DATA='/api/Masters/GetAssignedUserLookups';
 export const URL_GET_ASSET_OWNER_LOOKUP_DATA='/api/Masters/GetAssetOwnerLookups';
+export const URL_GET_MAINTENANCE_TYPE_LOOKUP_DATA='/api/Masters/GetMaintenanceTypeLookups'
 //Add Asset or Edit Asset Details
 export const URL_GET_USER_ATTRIBUTES_BY_SUB_CAT='/api/FixedAssetAPI/GetUserAttributesByCategoryId';
 export const URL_GET_COST_BREAKUP_DATA_SUB_CAT='/api/FixedAssetAPI/GetCostBreakupByCatId';
-export const URL_GET_ASSET_DETAILS='/api/FixedAssetAPI/GetManageAssetsListWithAttributesById'
+export const URL_GET_ASSET_DETAILS='/api/FixedAssetAPI/GetManageAssetsListWithAttributesById';
+export const URL_GET_VIEW_ASSET_CARD_DETAILS='/api/FixedAssetAPI/GetViewAssetCardDetails';
+export const URL_GET_GROUP_ASSET_CARD_DETAILS='/api/FixedAssetAPI/GetGroupAssetViewCardDetails';
+export const URL_GET_COST_BREAKUP_DATA_BY_ASSET_ID='/api/FixedAssetAPI/GetCostBreakup';
+export const URL_GET_RETIRE_DETAILS_BY_ASSET_ID='/api/FixedAssetAPI/GetRetireById';

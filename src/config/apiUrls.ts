@@ -283,6 +283,25 @@ export const URL_GRID_COLS = `/api/FixedAssetAPI/GetAllGridColumnsList`;
 
 //Fixed Assets Module
 //Lookups
-export const URL_GET_SELLER_LOOKUP_DATA='api/Masters/GetSellerLookups';
-// export const UR
-//Add Asset
+export const URL_GET_SELLER_LOOKUP_DATA='/api/Masters/GetSellerLookups';
+export const URL_GET_ACQUISITION_TYPE_LIST='/api/Masters/GetAcquisitionTypeLookups';
+export const URL_GET_DEPENDENCY_TYPE_LIST='/api/Masters/GetDependencyTypeLookups';
+export const URL_GET_WORKING_CONDITION_LOOKUP_LIST='/api/Masters/GetWorkingConditionLookups';
+export const URL_GET_DEPARTMENT_LOOKUP_DATA_BY_USER='/api/Masters/GetDepartmentDetailsByUser';
+export const URL_GET_MANUFACTURER_LOOKUP_DATA='/api/Masters/GetManufacturerLookups';
+export const URL_GET_ASSET_TAGGABLE_LOOKUP_DATA='/api/Masters/GetIsAssetTaggableLookups';
+export const URL_GET_ASSIGNED_TO_LOOKUP_DATA='/api/Masters/GetAssignedUserLookups';
+export const URL_GET_ASSET_OWNER_LOOKUP_DATA='/api/Masters/GetAssetOwnerLookups';
+export const URL_GET_MAINTENANCE_TYPE_LOOKUP_DATA='/api/Masters/GetMaintenanceTypeLookups'
+//Add Asset or Edit Asset Details
+export const URL_GET_USER_ATTRIBUTES_BY_SUB_CAT='/api/FixedAssetAPI/GetUserAttributesByCategoryId';
+export const URL_GET_COST_BREAKUP_DATA_SUB_CAT='/api/FixedAssetAPI/GetCostBreakupByCatId';
+export const URL_GET_ASSET_DETAILS='/api/FixedAssetAPI/GetManageAssetsListWithAttributesById';
+export const URL_GET_VIEW_ASSET_CARD_DETAILS='/api/FixedAssetAPI/GetViewAssetCardDetails';
+export const URL_GET_GROUP_ASSET_CARD_DETAILS='/api/FixedAssetAPI/GetGroupAssetViewCardDetails';
+export const URL_GET_COST_BREAKUP_DATA_BY_ASSET_ID='/api/FixedAssetAPI/GetCostBreakup';
+export const URL_GET_RETIRE_DETAILS_BY_ASSET_ID='/api/FixedAssetAPI/GetRetireById';
+export const URL_POST_UPDATE_ASSET_DETAILS_WITH_ATTRIBUTES='/api/FixedAssetAPI/UpdateAssetDetailsWithAttribute';
+export const URL_POST_UPDATE_ASSET_DETAILS='/api/FixedAssetAPI/UpdateAssetDetails';
+export const URL_POST_ADD_ASSET_DETAILS='/api/FixedAssetAPI/AddAssetDetails';
+export const URL_POST_ADD_ASSET_DETAILS_WITH_ATTRIBUTES='/api/FixedAssetAPI/AddAssetDetailsWithAttribute';

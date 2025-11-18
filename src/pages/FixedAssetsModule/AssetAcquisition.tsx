@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ADD_ASSET_DB } from '@/Local_DB/Form_JSON_Data/AddAssetDB'
 import { BaseField, GenericObject } from '@/Local_DB/types/types'
 import { useAppDispatch } from '@/store/reduxStore'
+import { setLoading } from '@/store/slices/projectsSlice'
 import { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { FaAngleRight } from 'react-icons/fa'
@@ -28,6 +29,15 @@ function AssetAcquisition() {
         mode: 'onChange'
     });
     const { control, register, handleSubmit, trigger, watch, setValue, getValues, reset, formState: { errors } } = form;
+
+    //Fetch All Lookups Data
+    const fetchAllLookupsData=async()=>{
+        dispatch(setLoading(true));
+        try{
+            const res = Promise.allSettled([])
+
+        }catch{}finally{dispatch(setLoading(false))}
+    }
     const renderField = (field: BaseField) => {
         const { name, label, fieldType, isRequired, dependsOn, show = true } = field;
         const validationRules = { required: isRequired ? `${label} is required` : false }

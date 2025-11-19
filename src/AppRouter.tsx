@@ -1,6 +1,7 @@
 
 import WrapperLazyComponent from "./components/common/WrapperLazyComponent";
 import AssetSplit from "./pages/FixedAssetsModule/AssetSplit";
+import IntraTransfer from "./pages/FixedAssetsModule/AssetTransfer/IntraTransfer";
 import ManageAssets from "./pages/FixedAssetsModule/ManageAssets";
 import ManageUnitConversion from "./pages/masters/ManageUnitConvertion";
 
@@ -346,7 +347,7 @@ export const appRoutesObj={
   },
   "fixedassets-assettransfer-intratransfer":{
     path:'fixedassets/intratransfer',
-    // component:<IntraTransfer/>,
+    component:<IntraTransfer/>,
     index:false,
     dependent:[  {
       path:'fixedassets/intratransfer/assettransferto',

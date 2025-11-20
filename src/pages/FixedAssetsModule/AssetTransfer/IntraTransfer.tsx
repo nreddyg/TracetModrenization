@@ -12,6 +12,7 @@ import ReusableTable, { TablePermissions } from '@/components/ui/reusable-table'
 import { getAssetTansferColumns, getAssetTransferAssets } from '@/services/assetTransferAssetServices';
 import { setLoading } from '@/store/slices/projectsSlice';
 import { ColumnDef, FilterFn, VisibilityState } from '@tanstack/react-table';
+import { useNavigate } from 'react-router-dom';
 
 interface ColumnApiResponse {
     [section: string]: {
@@ -26,7 +27,10 @@ const IntraTransfer = () => {
     const [dataSource, setDataSource] = useState([]);
     const [columns, setColumns] = useState([]);
     const [selectedAssetIds, setSelectedAssetIds] = useState([]);
-    console.log(selectedAssetIds,"29")
+    const [selectedRecord, setSelectedRecord] = useState(null)
+    console.log(selectedRecord,"31")
+    const navigate = useNavigate();
+    console.log(selectedAssetIds, "29")
     const msg = useMessage()
     const dispatch = useAppDispatch();
     // Define table permissions
@@ -72,63 +76,63 @@ const IntraTransfer = () => {
         return selected.includes(String(cell));
     };
 
-    const getAccessorKey=(x:string)=>{
-        let accessorKey:string;
-         if (x === "Purchased Price (₹)")
-                accessorKey = "PurchasedPrice";
-            else if (x === "Manufacturer")
-                accessorKey = "Manufacturer"
-            else if (x === "Year Of Manufacturer")
-                accessorKey = "YearOfManufacturer"
-            else if (x === "Salvage Value (₹)")
-                accessorKey = "SalvageValue"
-            else if (x === "Description")
-                accessorKey = "Description"
-            else if(x==="Is Asset Tagable")
-                accessorKey="IsAssetTaggable"
-            else if(x==="Depreciation Applicable")
-                accessorKey="DepricationApplicable"
-            // else if (x === allLastLevelsDetailsFromStore["Branch"])
-            //     accessorKey = "Branch"
-            // else if (hierarchyLevels[1] && hierarchyLevels[1].LevelName && x === hierarchyLevels[1].LevelName[0]?.LevelName)
-            //     accessorKey = "LocName_100"
-            // else if (hierarchyLevels[1] && hierarchyLevels[1].LevelName && x === hierarchyLevels[1].LevelName[1]?.LevelName)
-            //     accessorKey = "LocName_101"
-            // else if (hierarchyLevels[1] && hierarchyLevels[1].LevelName && x === hierarchyLevels[1].LevelName[2]?.LevelName)
-            //     accessorKey = "LocName_102"
-            // else if (hierarchyLevels[1] && hierarchyLevels[1].LevelName && x === hierarchyLevels[1].LevelName[3]?.LevelName)
-            //     accessorKey = "LocName_103"
-            // else if (hierarchyLevels[1] && hierarchyLevels[1].LevelName && x === hierarchyLevels[1].LevelName[4]?.LevelName)
-            //     accessorKey = "LocName_104"
-            // else if (hierarchyLevels[3] && hierarchyLevels[3].LevelName && x === hierarchyLevels[3].LevelName[0]?.LevelName)
-            //     accessorKey = "DepName_100"
-            // else if (hierarchyLevels[3] && hierarchyLevels[3].LevelName && x === hierarchyLevels[3].LevelName[1]?.LevelName)
-            //     accessorKey = "DepName_101"
-            // else if (hierarchyLevels[3] && hierarchyLevels[3].LevelName && x === hierarchyLevels[3].LevelName[2]?.LevelName)
-            //     accessorKey = "DepName_102"
-            // else if (hierarchyLevels[3] && hierarchyLevels[3].LevelName && x === hierarchyLevels[3].LevelName[3]?.LevelName)
-            //     accessorKey = "DepName_103"
-            // else if (hierarchyLevels[3] && hierarchyLevels[3].LevelName && x === hierarchyLevels[3].LevelName[4]?.LevelName)
-            //     accessorKey = "DepName_104"
-            // else if (hierarchyLevels[2] && hierarchyLevels[2].LevelName && x === hierarchyLevels[2].LevelName[0]?.LevelName)
-            //     accessorKey = "CostName_100"
-            // else if (hierarchyLevels[2] && hierarchyLevels[2].LevelName && x === hierarchyLevels[2].LevelName[1]?.LevelName)
-            //     accessorKey = "CostName_101"
-            // else if (hierarchyLevels[2] && hierarchyLevels[2].LevelName && x === hierarchyLevels[2].LevelName[2]?.LevelName)
-            //     accessorKey = "CostName_102"
-            // else if (hierarchyLevels[2] && hierarchyLevels[2].LevelName && x === hierarchyLevels[2].LevelName[3]?.LevelName)
-            //     accessorKey = "CostName_103"
-            // else if (hierarchyLevels[2] && hierarchyLevels[2].LevelName && x === hierarchyLevels[2].LevelName[4]?.LevelName)
-            //     accessorKey = "CostName_104"
-            else {
-                accessorKey = x.split(" ").map((word, index) => {
-                    return index === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1);
-                }).join('');
-            }
+    const getAccessorKey = (x: string) => {
+        let accessorKey: string;
+        if (x === "Purchased Price (₹)")
+            accessorKey = "PurchasedPrice";
+        else if (x === "Manufacturer")
+            accessorKey = "Manufacturer"
+        else if (x === "Year Of Manufacturer")
+            accessorKey = "YearOfManufacturer"
+        else if (x === "Salvage Value (₹)")
+            accessorKey = "SalvageValue"
+        else if (x === "Description")
+            accessorKey = "Description"
+        else if (x === "Is Asset Tagable")
+            accessorKey = "IsAssetTaggable"
+        else if (x === "Depreciation Applicable")
+            accessorKey = "DepricationApplicable"
+        // else if (x === allLastLevelsDetailsFromStore["Branch"])
+        //     accessorKey = "Branch"
+        // else if (hierarchyLevels[1] && hierarchyLevels[1].LevelName && x === hierarchyLevels[1].LevelName[0]?.LevelName)
+        //     accessorKey = "LocName_100"
+        // else if (hierarchyLevels[1] && hierarchyLevels[1].LevelName && x === hierarchyLevels[1].LevelName[1]?.LevelName)
+        //     accessorKey = "LocName_101"
+        // else if (hierarchyLevels[1] && hierarchyLevels[1].LevelName && x === hierarchyLevels[1].LevelName[2]?.LevelName)
+        //     accessorKey = "LocName_102"
+        // else if (hierarchyLevels[1] && hierarchyLevels[1].LevelName && x === hierarchyLevels[1].LevelName[3]?.LevelName)
+        //     accessorKey = "LocName_103"
+        // else if (hierarchyLevels[1] && hierarchyLevels[1].LevelName && x === hierarchyLevels[1].LevelName[4]?.LevelName)
+        //     accessorKey = "LocName_104"
+        // else if (hierarchyLevels[3] && hierarchyLevels[3].LevelName && x === hierarchyLevels[3].LevelName[0]?.LevelName)
+        //     accessorKey = "DepName_100"
+        // else if (hierarchyLevels[3] && hierarchyLevels[3].LevelName && x === hierarchyLevels[3].LevelName[1]?.LevelName)
+        //     accessorKey = "DepName_101"
+        // else if (hierarchyLevels[3] && hierarchyLevels[3].LevelName && x === hierarchyLevels[3].LevelName[2]?.LevelName)
+        //     accessorKey = "DepName_102"
+        // else if (hierarchyLevels[3] && hierarchyLevels[3].LevelName && x === hierarchyLevels[3].LevelName[3]?.LevelName)
+        //     accessorKey = "DepName_103"
+        // else if (hierarchyLevels[3] && hierarchyLevels[3].LevelName && x === hierarchyLevels[3].LevelName[4]?.LevelName)
+        //     accessorKey = "DepName_104"
+        // else if (hierarchyLevels[2] && hierarchyLevels[2].LevelName && x === hierarchyLevels[2].LevelName[0]?.LevelName)
+        //     accessorKey = "CostName_100"
+        // else if (hierarchyLevels[2] && hierarchyLevels[2].LevelName && x === hierarchyLevels[2].LevelName[1]?.LevelName)
+        //     accessorKey = "CostName_101"
+        // else if (hierarchyLevels[2] && hierarchyLevels[2].LevelName && x === hierarchyLevels[2].LevelName[2]?.LevelName)
+        //     accessorKey = "CostName_102"
+        // else if (hierarchyLevels[2] && hierarchyLevels[2].LevelName && x === hierarchyLevels[2].LevelName[3]?.LevelName)
+        //     accessorKey = "CostName_103"
+        // else if (hierarchyLevels[2] && hierarchyLevels[2].LevelName && x === hierarchyLevels[2].LevelName[4]?.LevelName)
+        //     accessorKey = "CostName_104"
+        else {
+            accessorKey = x.split(" ").map((word, index) => {
+                return index === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1);
+            }).join('');
+        }
 
 
 
-            return accessorKey
+        return accessorKey
 
     }
 
@@ -148,7 +152,7 @@ const IntraTransfer = () => {
                 }
                 return {
                     accessorKey: getAccessorKey(colName),
-                    id:  getAccessorKey(colName),
+                    id: getAccessorKey(colName),
                     header: colName,
                     cell: (info) => info.getValue() ?? "",
                     enableHiding: true,
@@ -190,21 +194,32 @@ const IntraTransfer = () => {
     }
 
     const handleSelectionChange = useCallback((selectionInfo: any) => {
-        console.log(selectionInfo.selectedRows,"137")
-        const selectedIds=selectionInfo?.selectedRows.map((row)=>row.AssetID)
+        setSelectedRecord(selectionInfo.selectedRows)
+        const selectedIds = selectionInfo?.selectedRows.map((row) => row.AssetID)
         setSelectedAssetIds(selectedIds)
-    
+
     }, []);
 
-       const getRowId = useCallback((row: any, index: number) => {
-            // Try different ID fields that might exist in your data
-            if (row.id) return row.id.toString();
-            if (row.assetId) return row.assetId.toString();
-            if (row.AssetId) return row.AssetId.toString();
-            if (row.ID) return row.ID.toString();
-            // Fallback to index
-            return index.toString();
-        }, []);
+    const getRowId = useCallback((row: any, index: number) => {
+        // Try different ID fields that might exist in your data
+        if (row.id) return row.id.toString();
+        if (row.assetId) return row.assetId.toString();
+        if (row.AssetId) return row.AssetId.toString();
+        if (row.ID) return row.ID.toString();
+        // Fallback to index
+        return index.toString();
+    }, []);
+
+    const handleTransferClick = () => {
+        if (branch !== "All" && selectedRecord) {
+            navigate('/layout/fixedassets/intratransfer/assettransferto', { state: { selectedRecord: selectedRecord, BranchName: branch } });
+        } else if (branch === "All") {
+            msg.warning("Please select branch in switch branch")
+        } else if (selectedRecord === null) {
+            msg.warning("Please Select atleast one asset Record")
+
+        }
+    }
     return (
         <ScrollArea className='h-full'>
             <div className="p-4 sm:p-4 space-y-4 sm:space-y-4">
@@ -233,7 +248,7 @@ const IntraTransfer = () => {
                                         <ReusableButton
                                             variant="primary"
                                             // icon={<Plus className="h-4 w-4" />}
-                                            onClick={null}
+                                            onClick={handleTransferClick}
                                             className='btn-submit-style'
                                         >
                                             Transfer

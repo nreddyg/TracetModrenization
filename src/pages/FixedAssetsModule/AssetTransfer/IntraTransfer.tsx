@@ -68,7 +68,7 @@ const IntraTransfer = () => {
                                             // actions={tableActions}
                                             // permissions={tablePermissions}
                                             title=""
-                                            //    onRefresh={handleRefresh}
+                                            // onRefresh={handleRefresh}
                                             enableSearch={false}
                                             enableSelection={false}
                                             // enableExport={true}
@@ -113,7 +113,6 @@ const IntraTransfer = () => {
                     </Card>
                 </div>
             </div>
-
         </ScrollArea>
     )
 }

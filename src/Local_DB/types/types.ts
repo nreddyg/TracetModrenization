@@ -52,6 +52,7 @@ export interface field {
   format?: string;
   filelist?: File[] | any[];
   maxCount?: number;
+  showMaxText?:boolean;
   check?: string[];
   accept?: string;
   listeners?: string[];

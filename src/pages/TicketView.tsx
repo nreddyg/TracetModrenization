@@ -1238,6 +1238,7 @@ const TicketView = () => {
                 {...field}
                 value={ctrl.value}
                 onChange={ctrl.onChange}
+                // dragAndDrop={false}
                 error={errors[name]?.message as string}
               />
             )}

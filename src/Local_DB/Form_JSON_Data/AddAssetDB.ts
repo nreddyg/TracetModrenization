@@ -111,6 +111,7 @@ export const ADD_ASSET_DB: BaseField[] = [
         name: "BarcodeOption",
         defaultValue: "Other",
         jsontype:'assetdetails',
+        listeners:['CustomerAssetNo','BarcodeNo'],
         options: [
             {
                 label: "Asset code",

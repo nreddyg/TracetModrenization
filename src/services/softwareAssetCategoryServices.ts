@@ -19,7 +19,7 @@ export const addOrUpdateSoftwareCategory = async (CompId: string,data: any): Pro
 };
 
 //get All Software Categories
-export const getCategoriesList= async (CompId:string,CategoryId?:string): Promise<APIResponse<any>> => {
+export const getCategoriesList= async (CompId:string,CategoryId?:number): Promise<APIResponse<any>> => {
     try {
         const response = await api.get(URL_GET_ALL_CATEGORIES, { params: { CompId,...(CategoryId?{CategoryId}:{}) } })
         return {success: true,data: response.data,}
@@ -28,7 +28,7 @@ export const getCategoriesList= async (CompId:string,CategoryId?:string): Promis
     }
 }
 //Delete Software Category by ID
-export const deleteCategoryById = async (CompId: string,CategoryId:string): Promise<APIResponse<any>> => {
+export const deleteCategoryById = async (CompId: string,CategoryId:number): Promise<APIResponse<any>> => {
     try {
         const response = await api.post(URL_DELETE_CATEGORY_BY_ID,'', { params: { CompId,CategoryId } });
         return {success: true,data: response.data};

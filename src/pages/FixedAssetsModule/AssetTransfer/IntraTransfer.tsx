@@ -252,6 +252,7 @@ const IntraTransfer = () => {
 
                                             permissions={tablePermissions}
                                             title=""
+                                            // onRefresh={handleRefresh}
                                             enableSearch={false}
                                             enableColumnVisibility={true}
                                             enablePagination={true}
@@ -294,7 +295,6 @@ const IntraTransfer = () => {
                     </Card>
                 </div>
             </div>
-
         </ScrollArea>
     )
 }

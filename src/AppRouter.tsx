@@ -47,7 +47,8 @@ const ProductMasters=WrapperLazyComponent(() => import("./pages/masters/ProductM
 const CostBreakupAttributes=WrapperLazyComponent(() => import("./pages/masters/fixedAssets/CostBreakupAttributes"));
 const Books=WrapperLazyComponent(()=>import("./pages/masters/depreciation/Books"));
 const AdditionalDepreciation=WrapperLazyComponent(()=>import("./pages/masters/depreciation/AdditionalDepreciation"));
-const AddBook=WrapperLazyComponent(()=>import("./pages/masters/depreciation/AddBook"))
+const AddBook=WrapperLazyComponent(()=>import("./pages/masters/depreciation/AddBook"));
+const SoftwareCategory=WrapperLazyComponent(()=>import('./pages/masters/softwareAssets/SoftwareCategory'));
 
 // CWIP
 const ProjectManagement = WrapperLazyComponent(() => import("./pages/cwip/ProjectManagement"));
@@ -239,6 +240,11 @@ export const appRoutesObj={
  'masters-servicemaintenance-servicelocations':  {
     path:'masters/servicemaintenance/servicelocations',
     component:<ServiceLocations />,
+    index:false
+  },
+   "masters-softwareassets-softwarecategory":  {
+    path:'masters/softwareassets/softwarecategory',
+    component:<SoftwareCategory />,
     index:false
   },
   

@@ -13,6 +13,8 @@ import { getAssetTansferColumns, getAssetTransferAssets } from '@/services/asset
 import { setLoading } from '@/store/slices/projectsSlice';
 import { ColumnDef, FilterFn, VisibilityState } from '@tanstack/react-table';
 import { useNavigate } from 'react-router-dom';
+import { getAssetTransferHistList } from '@/services/assetTransferHistory';
+import { Download, Edit, View } from 'lucide-react';
 
 interface ColumnApiResponse {
     [section: string]: {
@@ -20,14 +22,41 @@ interface ColumnApiResponse {
     };
 }
 
+interface HistoryColumn {
+    "AssetTransferId": number,
+    "TransferInvoiceDeliveryChallanNo": string,
+    "TransferInvoiceValue": string,
+    "TransferDate": string,
+    "LocName_100": string,
+    "LocName_101": string,
+    "LocName_102": string,
+    "LocName_103": string,
+    "LocName_104": string,
+    "DepName_100": string,
+    "DepName_101": string,
+    "DepName_102": string,
+    "DepName_103": string,
+    "DepName_104": string,
+    "CostName_100": string,
+    "CostName_101": string,
+    "CostName_102": string,
+    "CostName_103": string,
+    "CostName_104": string,
+    "CreatedOn": string,
+    "CreatedBy": string
+}
+
 const IntraTransfer = () => {
     const [activeTab, setActiveTab] = useState('assets');
     const companyId = useAppSelector(state => state.projects.companyId);
+    console.log("compny", companyId);
     const branch = useAppSelector(state => state.projects.branch) || '';
     const [dataSource, setDataSource] = useState([]);
+    const [histDataSource, setHistDataSource] = useState([]);
     const [columns, setColumns] = useState([]);
+    // const [historyColumns, setHistoryColumns] = useState<ColumnDef<HistoryColumn>[]>(histColumns);
     const [selectedAssetIds, setSelectedAssetIds] = useState([]);
-    const [selectedRecord, setSelectedRecord] = useState(null)
+    const [selectedRecord, setSelectedRecord] = useState([])
     console.log(selectedRecord,"31")
     const navigate = useNavigate();
     console.log(selectedAssetIds, "29")
@@ -43,6 +72,64 @@ const IntraTransfer = () => {
         canAdd: true,
         canManageColumns: true,
     };
+
+    const histColumns = [
+        { id: 'TransferInvoiceDeliveryChallanNo', accessorKey: "TransferInvoiceDeliveryChallanNo", header: "Transfer Invoice DeliveryChallanNo", },
+        { id: 'TransferInvoiceValue', accessorKey: "TransferInvoiceValue", header: "Transfer Invoice Value", },
+        { id: 'TransferDate', accessorKey: "TransferDate", header: "TransferDatee", },
+        { id: 'LocName_100', accessorKey: "LocName_100", header: "level one location", },
+        { id: 'LocName_101', accessorKey: "LocName_101", header: "level two location", },
+        { id: 'LocName_102', accessorKey: "LocName_102", header: "level three location", },
+        { id: 'LocName_103', accessorKey: "LocName_103", header: "level four location", },
+        { id: 'LocName_104', accessorKey: "LocName_104", header: "level five location", },
+        { id: 'DepName_100', accessorKey: "DepName_100", header: "level one department	", },
+        { id: 'DepName_101', accessorKey: "DepName_101", header: "level two department	", },
+        { id: 'DepName_102', accessorKey: "DepName_102", header: "level three department	", },
+        { id: 'DepName_103', accessorKey: "DepName_103", header: "level four department	", },
+        { id: 'DepName_104', accessorKey: "DepName_104", header: "level five department	", },
+        { id: 'CostName_100', accessorKey: "CostName_100", header: "level one cost center", },
+        { id: 'CostName_101', accessorKey: "CostName_101", header: "level two cost center", },
+        { id: 'CostName_102', accessorKey: "CostName_102", header: "level three cost center", },
+        { id: 'CostName_103', accessorKey: "CostName_103", header: "level four cost center", },
+        { id: 'CostName_104', accessorKey: "CostName_104", header: "level five cost center", },
+        { id: 'CreatedOn', accessorKey: "CreatedOn", header: "Created On", },
+        { id: 'CreatedBy', accessorKey: "CreatedBy", header: "Created By", },
+        {
+            id: 'actions',
+            accessorKey: 'actions',
+            header: 'Actions',
+            cell: ({ row }: any) => (
+                <div className="flex" title='Actions'>
+                    <ReusableButton
+                        variant="text"
+                        size="small"
+                        title='download'
+                        onClick={null}
+                    >
+                        <Download className="h-4 w-4 text-blue-600" />
+                    </ReusableButton>
+                     <ReusableButton
+                        variant="text"
+                        size="small"
+                        title='Edit'
+                        onClick={null}
+                    >
+                        <Edit className="h-4 w-4 text-blue-600" />
+                    </ReusableButton>
+                    <ReusableButton
+                        variant="text"
+                        size="small"
+                        title='view'
+                        onClick={null}
+                    >
+                        <View className="h-4 w-4 text-blue-600" />
+                    </ReusableButton>
+
+                </div>
+            ),
+        },
+
+    ]
 
     const getIntraTransferList = async (branchname: string, compid: string) => {
         dispatch(setLoading(true));
@@ -64,6 +151,7 @@ const IntraTransfer = () => {
         if (companyId && branch) {
             getIntraTransferList(branch, companyId);
             fetchAssetTransferColumns(branch, companyId)
+            getHistoryList(branch, companyId);
         }
     }, [companyId, branch])
 
@@ -136,6 +224,28 @@ const IntraTransfer = () => {
 
     }
 
+    const getHistoryList = async (branchname: string, companyId: any) => {
+        dispatch(setLoading(true));
+        await getAssetTransferHistList(branchname, companyId).then((res) => {
+            if (res.data !== undefined) {
+                if (res.data.message === undefined && res.data.AssetTransferHistoryListDetails !== undefined) {
+                    console.log("AssetTransferHistoryListDetails", res.data);
+                    const transId = res.data?.AssetTransferHistoryListDetails[0]["AssetTransferId"]
+                    setHistDataSource(res.data?.AssetTransferHistoryListDetails);
+                    //   getAssetTransHistDownload(transId, compId)
+                } else {
+                    if (res.data.Message !== undefined) {
+                        setDataSource([]);
+                        // TracetMessage(res.data.Message);
+                    }
+                }
+            }
+            else {
+                setDataSource([])
+            }
+        }).catch(() => { }).finally(() => { dispatch(setLoading(false)) })
+    }
+
     function buildColumnsFromApi<T extends Record<string, any>>(
         apiResponse: ColumnApiResponse,
         editableColumns: string[] = [],
@@ -195,6 +305,7 @@ const IntraTransfer = () => {
 
     const handleSelectionChange = useCallback((selectionInfo: any) => {
         setSelectedRecord(selectionInfo.selectedRows)
+        console.log(selectionInfo.selectedRows, "137")
         const selectedIds = selectionInfo?.selectedRows.map((row) => row.AssetID)
         setSelectedAssetIds(selectedIds)
 
@@ -211,11 +322,11 @@ const IntraTransfer = () => {
     }, []);
 
     const handleTransferClick = () => {
-        if (branch !== "All" && selectedRecord) {
+        if (branch !== "All" && selectedRecord.length>0) {
             navigate('/layout/fixedassets/intratransfer/assettransferto', { state: { selectedRecord: selectedRecord, BranchName: branch } });
         } else if (branch === "All") {
             msg.warning("Please select branch in switch branch")
-        } else if (selectedRecord === null) {
+        } else if (selectedRecord?.length===0) {
             msg.warning("Please Select atleast one asset Record")
 
         }
@@ -245,14 +356,15 @@ const IntraTransfer = () => {
                                             <TabsTrigger value="assets">Assets</TabsTrigger>
                                             <TabsTrigger value="history">History</TabsTrigger>
                                         </TabsList>
-                                        <ReusableButton
-                                            variant="primary"
-                                            // icon={<Plus className="h-4 w-4" />}
-                                            onClick={handleTransferClick}
-                                            className='btn-submit-style'
-                                        >
-                                            Transfer
-                                        </ReusableButton>
+                                        {activeTab === "assets" &&
+                                            <ReusableButton
+                                                variant="primary"
+                                                // icon={<Plus className="h-4 w-4" />}
+                                                onClick={handleTransferClick}
+                                                className='btn-submit-style'
+                                            >
+                                                Transfer
+                                            </ReusableButton>}
                                     </div>
 
                                     <TabsContent value="assets" className="">
@@ -282,15 +394,15 @@ const IntraTransfer = () => {
 
                                     <TabsContent value="history" className="">
                                         <ReusableTable
-                                            data={[]}
-                                            columns={[]}
+                                            data={histDataSource}
+                                            columns={histColumns}
                                             // actions={tableActions2}
                                             // permissions={tablePermissions}
                                             title=""
                                             //    onRefresh={handleRefresh}
                                             enableSearch={false}
                                             enableSelection={false}
-                                            // enableExport={false}
+                                            enableExport={false}
                                             enableColumnVisibility={true}
                                             enablePagination={true}
                                             enableSorting={true}

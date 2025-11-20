@@ -77,12 +77,10 @@ const ProductMasters = () => {
             if (res?.success && res.data?.status) {
                 message.success(res.data.message);
                 getProductMasterList(companyId)
-                setIsMainDialogOpen(false);
-                setEditingRec(null);
-                form.reset();
+                handleCancel();
 
             } else {
-                message.error(res.data.ErrorDetails[0]["Error Message"]);
+                message.error(res.data.message);
             }
         } catch (error) {
             // message.error("Failed to save user group");
@@ -138,6 +136,16 @@ const ProductMasters = () => {
         console.log(delRec, "delrec")
         setDeleteRec(delRec)
         setIsDelModalOpen(true);
+    }
+
+
+    const handleCancel = () => {
+        setIsMainDialogOpen(false);
+        setEditingRec(null);
+        form.reset({
+            ...form.getValues(),
+            ProductName: ''
+        });
     }
 
     // Define table actions
@@ -294,7 +302,7 @@ const ProductMasters = () => {
                                     variant="primary"
                                     icon={<Plus className="h-4 w-4" />}
                                     onClick={() => setIsMainDialogOpen(true)}
-                                     className='btn-submit-style  mt-2 me-2'
+                                    className='btn-submit-style  mt-2 me-2'
                                 >
                                     Add
                                 </ReusableButton>
@@ -324,7 +332,12 @@ const ProductMasters = () => {
                     </Card>
 
                     {/* Main Location Dialog */}
-                    <Dialog open={isMainDialogOpen} onOpenChange={setIsMainDialogOpen}>
+                    <Dialog open={isMainDialogOpen} onOpenChange={(open) => {
+                        if (!open) {
+                            handleCancel();
+                        }
+                        setIsDelModalOpen(open);
+                    }}>
                         <DialogContent>
                             <DialogHeader>
                                 <DialogTitle>{editingRec === null ? 'Add' : 'Update'} New Product</DialogTitle>
@@ -351,7 +364,7 @@ const ProductMasters = () => {
                                         <ReusableButton
                                             htmlType="button"
                                             variant="default"
-                                            onClick={() => { setIsMainDialogOpen(false); form.reset() }}
+                                            onClick={() => { setIsMainDialogOpen(false); handleCancel() }}
                                             // icon={<X className="h-3 w-3" />}
                                             iconPosition="left"
                                             size="middle"

@@ -340,7 +340,7 @@ const ProductMasters = () => {
                     }}>
                         <DialogContent>
                             <DialogHeader>
-                                <DialogTitle>{editingRec === null ? 'Add' : 'Update'} New Product</DialogTitle>
+                                <DialogTitle>{editingRec ? 'Update' : 'Add New'} Product</DialogTitle>
                             </DialogHeader>
                             <Form {...form}>
                                 <form onSubmit={form.handleSubmit(handleSubmitForm)} className="space-y-4">
@@ -359,7 +359,7 @@ const ProductMasters = () => {
                                             iconPosition="left"
                                             size="middle"
                                         >
-                                            {editingRec === null ? 'Save' : 'Update'}
+                                            {editingRec? 'Update' : 'Save'}
                                         </ReusableButton>
                                         <ReusableButton
                                             htmlType="button"
@@ -384,7 +384,7 @@ const ProductMasters = () => {
                             <DialogHeader>
                                 <DialogTitle>Confirm the action</DialogTitle>
                                 <DialogDescription>
-                                    Are you sure you want to delete Service Locations
+                                    Are you sure you want to delete {deleteRec?.ProductName} ?
                                 </DialogDescription>
                             </DialogHeader>
                             <DialogFooter>

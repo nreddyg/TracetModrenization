@@ -146,8 +146,10 @@ function AssetAcquisition() {
                                 {...field}
                                 value={ctrl.value}
                                 onChange={ctrl.onChange}
+                                min={1}
                                 error={errors[name]?.message as string}
                                 autoComplete="new-password"
+                                {...(name==='Quantity' && {min:1})}
                             />
                         )}
                     />

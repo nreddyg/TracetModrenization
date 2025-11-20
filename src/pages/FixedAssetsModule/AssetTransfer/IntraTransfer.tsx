@@ -12,6 +12,7 @@ import ReusableTable, { TablePermissions } from '@/components/ui/reusable-table'
 import { getAssetTansferColumns, getAssetTransferAssets } from '@/services/assetTransferAssetServices';
 import { setLoading } from '@/store/slices/projectsSlice';
 import { ColumnDef, FilterFn, VisibilityState } from '@tanstack/react-table';
+import { useNavigate } from 'react-router-dom';
 import { getAssetTransferHistList } from '@/services/assetTransferHistory';
 import { Download, Edit, View } from 'lucide-react';
 
@@ -55,6 +56,10 @@ const IntraTransfer = () => {
     const [columns, setColumns] = useState([]);
     // const [historyColumns, setHistoryColumns] = useState<ColumnDef<HistoryColumn>[]>(histColumns);
     const [selectedAssetIds, setSelectedAssetIds] = useState([]);
+    const [selectedRecord, setSelectedRecord] = useState([])
+    console.log(selectedRecord,"31")
+    const navigate = useNavigate();
+    console.log(selectedAssetIds, "29")
     const msg = useMessage()
     const dispatch = useAppDispatch();
     // Define table permissions
@@ -299,6 +304,7 @@ const IntraTransfer = () => {
     }
 
     const handleSelectionChange = useCallback((selectionInfo: any) => {
+        setSelectedRecord(selectionInfo.selectedRows)
         console.log(selectionInfo.selectedRows, "137")
         const selectedIds = selectionInfo?.selectedRows.map((row) => row.AssetID)
         setSelectedAssetIds(selectedIds)
@@ -314,6 +320,17 @@ const IntraTransfer = () => {
         // Fallback to index
         return index.toString();
     }, []);
+
+    const handleTransferClick = () => {
+        if (branch !== "All" && selectedRecord.length>0) {
+            navigate('/layout/fixedassets/intratransfer/assettransferto', { state: { selectedRecord: selectedRecord, BranchName: branch } });
+        } else if (branch === "All") {
+            msg.warning("Please select branch in switch branch")
+        } else if (selectedRecord?.length===0) {
+            msg.warning("Please Select atleast one asset Record")
+
+        }
+    }
     return (
         <ScrollArea className='h-full'>
             <div className="p-4 sm:p-4 space-y-4 sm:space-y-4">
@@ -343,7 +360,7 @@ const IntraTransfer = () => {
                                             <ReusableButton
                                                 variant="primary"
                                                 // icon={<Plus className="h-4 w-4" />}
-                                                onClick={null}
+                                                onClick={handleTransferClick}
                                                 className='btn-submit-style'
                                             >
                                                 Transfer

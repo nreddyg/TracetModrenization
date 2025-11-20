@@ -1,7 +1,6 @@
 
 import WrapperLazyComponent from "./components/common/WrapperLazyComponent";
 import AssetSplit from "./pages/FixedAssetsModule/AssetSplit";
-import IntraTransfer from "./pages/FixedAssetsModule/AssetTransfer/IntraTransfer";
 import ManageAssets from "./pages/FixedAssetsModule/ManageAssets";
 import ManageUnitConversion from "./pages/masters/ManageUnitConvertion";
 
@@ -48,7 +47,8 @@ const ProductMasters=WrapperLazyComponent(() => import("./pages/masters/ProductM
 const CostBreakupAttributes=WrapperLazyComponent(() => import("./pages/masters/fixedAssets/CostBreakupAttributes"));
 const Books=WrapperLazyComponent(()=>import("./pages/masters/depreciation/Books"));
 const AdditionalDepreciation=WrapperLazyComponent(()=>import("./pages/masters/depreciation/AdditionalDepreciation"));
-const AddBook=WrapperLazyComponent(()=>import("./pages/masters/depreciation/AddBook"))
+const AddBook=WrapperLazyComponent(()=>import("./pages/masters/depreciation/AddBook"));
+const SoftwareCategory=WrapperLazyComponent(()=>import('./pages/masters/softwareAssets/SoftwareCategory'));
 
 // CWIP
 const ProjectManagement = WrapperLazyComponent(() => import("./pages/cwip/ProjectManagement"));
@@ -69,6 +69,9 @@ const AssetManagement = WrapperLazyComponent(() => import("./pages/fixedassets/A
 const AssetOps = WrapperLazyComponent(() => import("./pages/fixedassets/AssetOps"));
 const AssetMaintenance = WrapperLazyComponent(() => import("./pages/fixedassets/AssetMaintenance"));
 const FixedAssetsReports = WrapperLazyComponent(() => import("./pages/fixedassets/FixedAssetsReports"));
+const AssetTransferTo= WrapperLazyComponent(() => import("./pages/FixedAssetsModule/AssetTransfer/AssetTransferTo"));
+const IntraTransfer=WrapperLazyComponent(() => import("./pages/FixedAssetsModule/AssetTransfer/IntraTransfer"));
+
 
 // Depreciation
 const DepreciationProcess = WrapperLazyComponent(() => import("./pages/depreciation/DepreciationProcess"));
@@ -239,6 +242,11 @@ export const appRoutesObj={
     component:<ServiceLocations />,
     index:false
   },
+   "masters-softwareassets-softwarecategory":  {
+    path:'masters/softwareassets/softwarecategory',
+    component:<SoftwareCategory />,
+    index:false
+  },
   
   'masters-masterreports':{
     path:'masters/reports',
@@ -351,7 +359,7 @@ export const appRoutesObj={
     index:false,
     dependent:[  {
       path:'fixedassets/intratransfer/assettransferto',
-      // component:<AssetTransferTo/>,
+      component:<AssetTransferTo/>,
       index:false
     },]
   },

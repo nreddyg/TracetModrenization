@@ -938,7 +938,7 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
       }
 
       const maxAllowedHeight = listHeight + headerHeight + padding;
-      const minHeight = 80;
+      const minHeight = 150;
 
       const spaceBelow = window.innerHeight - inputRect.bottom - margin;
       const spaceAbove = inputRect.top - margin;

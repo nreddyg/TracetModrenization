@@ -364,35 +364,38 @@ export const ADD_ASSET_DB: BaseField[] = [
     },
       {
         label: 'Asset Location',
-        fieldType: 'multiselect',
+        fieldType: 'treeselect',
         name: 'AssetLocation',
         options: [],
         disabled: false,
         isRequired: true,
-        jsontype:'allocation'
+        jsontype:'allocation',
+        placeholder:'Select Location'
     },
     {
         label: 'Department',
-        fieldType: 'multiselect',
+        fieldType: 'treeselect',
         name: 'Department',
-        options: [],
+        treeData: [],
         isRequired: true,
-        jsontype:'allocation'
+        jsontype:'allocation',
+        placeholder:'Select Department'
     },
     {
         label: 'Cost Center',
-        fieldType: 'multiselect',
+        fieldType: 'treeselect',
         name: 'CostCenter',
-        options: [],
+        treeData: [],
         isRequired: false,
-        jsontype:'allocation'
+        jsontype:'allocation',
+        placeholder:'Select Cost Center'
     },
     {
         label: 'Assign To',
         fieldType: 'dropdown',
         name: 'EmpId',
         placeholder: 'Select User',
-        options: [],
+        treeData: [],
         isRequired: false,
         jsontype:'allocation'
     },

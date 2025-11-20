@@ -1,7 +1,6 @@
 
 import WrapperLazyComponent from "./components/common/WrapperLazyComponent";
 import AssetSplit from "./pages/FixedAssetsModule/AssetSplit";
-import IntraTransfer from "./pages/FixedAssetsModule/AssetTransfer/IntraTransfer";
 import ManageAssets from "./pages/FixedAssetsModule/ManageAssets";
 import ManageUnitConversion from "./pages/masters/ManageUnitConvertion";
 
@@ -70,6 +69,9 @@ const AssetManagement = WrapperLazyComponent(() => import("./pages/fixedassets/A
 const AssetOps = WrapperLazyComponent(() => import("./pages/fixedassets/AssetOps"));
 const AssetMaintenance = WrapperLazyComponent(() => import("./pages/fixedassets/AssetMaintenance"));
 const FixedAssetsReports = WrapperLazyComponent(() => import("./pages/fixedassets/FixedAssetsReports"));
+const AssetTransferTo= WrapperLazyComponent(() => import("./pages/FixedAssetsModule/AssetTransfer/AssetTransferTo"));
+const IntraTransfer=WrapperLazyComponent(() => import("./pages/FixedAssetsModule/AssetTransfer/IntraTransfer"));
+
 
 // Depreciation
 const DepreciationProcess = WrapperLazyComponent(() => import("./pages/depreciation/DepreciationProcess"));
@@ -357,7 +359,7 @@ export const appRoutesObj={
     index:false,
     dependent:[  {
       path:'fixedassets/intratransfer/assettransferto',
-      // component:<AssetTransferTo/>,
+      component:<AssetTransferTo/>,
       index:false
     },]
   },

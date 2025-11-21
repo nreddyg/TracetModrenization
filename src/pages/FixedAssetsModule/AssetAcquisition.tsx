@@ -132,6 +132,7 @@ function AssetAcquisition() {
     const renderField = (field: BaseField) => {
         const { name, label, fieldType, isRequired, dependsOn, show = true } = field;
         const validationRules = { required: isRequired ? `${label} is required` : false }
+        if(!show) return null;
         switch (fieldType) {
             case "text":
             case 'number':

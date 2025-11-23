@@ -455,12 +455,13 @@ const UserGroups = () => {
     <ScrollArea>
       <div className="h-full">
         <div className="p-4 space-y-4">
+
           {/* Header Section */}
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-lg sm:text-2xl font-bold text-gray-900">User Groups</h1>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            
+              <h1 className="text-2xl font-bold">User Groups</h1>
               {/* <p className="text-sm text-gray-600 mt-0.5">Manage user groups and permissions</p> */}
-            </div>
+            
             {!selectedRecord && <ReusableButton
               // size="small"
               variant="primary"
@@ -475,13 +476,12 @@ const UserGroups = () => {
 
           {/* User Group Form */}
           {isFormVisible && (
-            <Card className="border-0 shadow-sm">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base font-semibold">
+            <Card className="border-0 bg-card rounded-lg border border-border p-5 mb-6">
+              
+       
+                  <h2 className="text-lg font-semibold mb-4 ">
                   {isEditMode ? 'Edit User Group' : 'User Group'}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
+                </h2>
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit(handleSubmitForm)} className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -507,19 +507,20 @@ const UserGroups = () => {
                     <div className="flex gap-2">
                       <ReusableButton
                         htmlType="submit"
-                        variant="primary"
+                        variant="text"
+                        className='btn-submit-style btn-style-adj '
                         // icon={<Save className="h-3 w-3" />}
-                        iconPosition="left"
+                        
                         size="middle"
                       >
                         {isEditMode ? 'Update' : 'Save'}
                       </ReusableButton>
                       <ReusableButton
                         htmlType="button"
-                        variant="default"
+                        variant='text'
                         onClick={handleCancel}
                         // icon={<X className="h-3 w-3" />}
-                        iconPosition="left"
+                        className='btn-reset-clear-style'
                         size="middle"
                       >
                         Cancel
@@ -527,59 +528,15 @@ const UserGroups = () => {
                     </div>
                   </form>
                 </Form>
-              </CardContent>
+              
             </Card>
           )}
 
-          {/* User Group List with ReusableTable */}
-          {/* <Card className="border-0 shadow-sm">
-            <CardHeader className="pb-2 pt-2">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
-                <CardTitle className="text-base font-semibold">
-                  User Group List
-                </CardTitle>
-
-                <div className="w-full sm:w-64">
-                  <ReusableInput
-                    placeholder="Search user groups..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    prefixIcon={<Search className="h-3 w-3 text-gray-400" />}
-                    allowClear={true}
-                    onClear={() => setSearchTerm('')}
-                    size="small"
-                    className="w-full pl-7"
-                  />
-                </div>
-              </div>
-
-            </CardHeader>
-            <CardContent className="pt-0">
-              <ReusableTable
-                data={filteredData}
-                columns={columns}
-                actions={tableActions}
-                permissions={tablePermissions}
-                title=""
-                // onRefresh={handleRefresh}
-                enableSearch={false}
-                enableSelection={false}
-                enableExport={true}
-                enableColumnVisibility={true}
-                enablePagination={true}
-                enableSorting={true}
-                enableFiltering={true}
-                pageSize={10}
-                emptyMessage="No user groups found"
-                rowHeight="normal"
-                storageKey="usergroups-table"
-              />
-            </CardContent>
-          </Card> */}
-        </div>
+         
+        
 
         {/* User Group List with ReusableTable */}
-        <Card className="border-0 shadow-sm">
+        {/* <Card className="border-0 shadow-sm">
           <CardHeader className="pb-2 pt-2">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
               <CardTitle className="text-base font-semibold">
@@ -601,7 +558,7 @@ const UserGroups = () => {
             </div>
 
           </CardHeader>
-          <CardContent className="pt-0">
+          <CardContent className="p-0">
             <ReusableTable
               data={filteredData}
               columns={columns}
@@ -622,7 +579,39 @@ const UserGroups = () => {
               storageKey="usergroups-table"
             />
           </CardContent>
-        </Card>
+        </Card> */}
+         
+            <div className=" border bg-white rounded-lg pb-5 pt-2">
+                       <ReusableTable
+              data={filteredData}
+              columns={columns}
+              // actions={tableActions}
+              permissions={tablePermissions}
+              title="User Group List"
+              // onRefresh={handleRefresh}
+              enableSearch={true}
+              enableSelection={false}
+              enableExport={true}
+              enableColumnVisibility={true}
+              enablePagination={true}
+              enableSorting={true}
+              enableFiltering={true}
+              pageSize={10}
+              emptyMessage="No user groups found"
+              rowHeight="normal"
+              storageKey="usergroups-table"
+            />
+           </div>
+              </div>
+
+
+
+
+
+
+
+
+
         {/* Delete Confirmation Modal */}
         <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>
           <DialogContent className="sm:max-w-[425px]">

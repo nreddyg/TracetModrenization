@@ -743,7 +743,7 @@ const Configuration = () => {
           <header className="px-2 py-0">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-                <h1 className="text-lg sm:text-2xl font-bold text-gray-900">
+                <h1 className="text-2xl font-bold ">
                   Service Desk Configuration
                 </h1>
               </div>
@@ -818,7 +818,7 @@ const Configuration = () => {
                       iconPosition="left"
                       size="middle"
                       // className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
-                      className="btn-submit-style"
+                      className="btn-submit-style btn-style-adj"
                     >
                       Save
                     </ReusableButton>
@@ -857,7 +857,7 @@ const Configuration = () => {
                       iconPosition="left"
                       size="middle"
                       // className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
-                      className='btn-submit-style'
+                      className='btn-submit-style btn-style-adj'
                     >
                       {isEditMode && currentTab === 'service-request-type' ? 'Update' : 'Save'}
                     </ReusableButton>
@@ -874,8 +874,8 @@ const Configuration = () => {
                   </div>
                 </CardContent>
               </Card>
-              <Card className="border-0 shadow-sm">
-                <CardContent className="pt-3">
+             
+                <div className="border bg-white rounded-lg pb-5 pt-3 ">
                   <ReusableTable
                     data={serviceRequestTypeData} columns={columns}
                     // actions={tableActions}
@@ -893,20 +893,20 @@ const Configuration = () => {
                     storageKey="service-request-type-list-table"
                   // enableColumnPinning
                   />
-                </CardContent>
-              </Card>
+                </div>
+              
             </TabsContent>
             <TabsContent value="service-request-status" className="space-y-4">
               <Card>
-                <CardContent className="pt-6">
-                  <div className="mb-6">
+                <CardContent className="p-3">
+                  <div className="mb-3">
                     {getFieldsByNames(['Status']).map((field) => {
                       return <div className="flex-1 items-center space-x-2">
                         {renderField(field)}
                       </div>;
                     })}
                   </div>
-                  <div className="flex gap-2 mb-8">
+                  <div className="flex gap-2 ">
                     <ReusableButton
                       htmlType="button"
                       variant="default"
@@ -929,8 +929,10 @@ const Configuration = () => {
                       Cancel
                     </ReusableButton>
                   </div>
-                  <div>
-                    <div className="border border-gray-200 rounded-lg overflow-hidden p-3">
+                </CardContent>
+              </Card>
+                 <div className="border bg-white rounded-lg pb-5 pt-3 ">
+                 
                       <ReusableTable
                         data={statusTableData} columns={statusColumns}
                         permissions={tablePermissions}
@@ -945,8 +947,8 @@ const Configuration = () => {
                         onRowReorder={(newData) => setStatusTableData(newData)}
                       // actions={statusTableActions}
                       />
-                    </div>
-                    <div className="mt-4 flex justify-end">
+                   
+                    <div className="mt-4 flex justify-end mx-3">
                       <ReusableButton
                         htmlType="button"
                         variant="default"
@@ -959,9 +961,7 @@ const Configuration = () => {
                         Update Index Sequence
                       </ReusableButton>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+                 </div>
             </TabsContent>
           </Tabs>
           <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>

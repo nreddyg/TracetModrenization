@@ -415,26 +415,27 @@ const ServiceLocations = () => {
     return (
         <ScrollArea>
         <div className="h-full">
-           <header className="px-6 py-4">
-                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-                         <h1 className="text-lg sm:text-2xl font-bold text-gray-900">
-                            Service Locations
-                         </h1>
-                       </div>
-                       <div className="flex items-center gap-2 text-sm text-gray-600">
-                         <span>Masters</span>
+                        <div className="p-4 sm:p-4 space-y-4 sm:space-y-4">
+
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                                    
+                                        <h1 className="text-2xl font-bold "> Service Locations</h1>
+                                        
+                                        <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                                         <span>Masters</span>
                          <FaAngleRight />
                          <span>Service Maintenance</span>
                          <FaAngleRight />
                          <span className="text-gray-900 font-medium">Service Locations</span>
-                       </div>
-                     </div>
-                   </header>
-            <div className="p-4 pt-0">
-                <Card className="border-0 shadow-sm ">
-                    <CardContent className="pb-2 pt-2">
-                        <div className='mt-2 p-2'>
+                                    </div>
+                                        </div>
+                                    </div>
+          
+          
+                <Card className="bg-card rounded-lg border border-border p-5 mb-6 ">
+                    <CardContent className="p-0">
+                        <div className='p-1'>
                             <Tabs value={activeTab} onValueChange={setActiveTab}>
                                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                                     <TabsList>
@@ -451,6 +452,7 @@ const ServiceLocations = () => {
                                     </ReusableButton>
                                 </div>
                                 <TabsContent value="main" className="space-y-4">
+                                     <div className='border bg-white rounded-lg pb-6 '>
                                     <ReusableTable
                                         data={mainLocations}
                                         columns={mainLocationColumns}
@@ -470,18 +472,20 @@ const ServiceLocations = () => {
                                         rowHeight="normal"
                                         storageKey="usergroups-table"
                                     />
+                                    </div>
                                 </TabsContent>
 
                                 <TabsContent value="sub" className="space-y-4">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
                                         {getFieldsByNames(['SelectMainLocation']).map((field) => (
                                             <div key={field.name} className='flex items-center'>
-                                                <Label className={"text-sm font-medium text-slate-700 mt-1 w-[300px]"}>Select Main locations</Label>
+                                                <Label className={"text-sm font-medium text-slate-700 mt-1 w-[300px] text-md font-semibold"}>Select Main locations</Label>
                                                 {renderField(field)}
                                             </div>
                                         ))}
 
                                     </div>
+                                    <div className='border bg-white rounded-lg pb-6 '>
                                     <ReusableTable
                                         data={filteredSub}
                                         columns={subLocationColumns}
@@ -501,6 +505,7 @@ const ServiceLocations = () => {
                                         rowHeight="normal"
                                         storageKey="usergroups-table"
                                     />
+                                    </div>
                                 </TabsContent>
                             </Tabs>
                         </div>
@@ -528,24 +533,27 @@ const ServiceLocations = () => {
                                     ))}
                                 </div>
                                 <div className="flex gap-2 justify-end">
-                                    <ReusableButton
-                                        htmlType="submit"
-                                        variant="primary"
-                                        // icon={<Save className="h-3 w-3" />}
-                                        iconPosition="left"
-                                        size="middle"
-                                    >
-                                        {editRecord === null ? 'Save' : 'Update'}
-                                    </ReusableButton>
+                                  
                                     <ReusableButton
                                         htmlType="button"
-                                        variant="default"
+                                        variant="text"
+                                        className='btn-reset-clear-style'
                                         onClick={handleCancel}
                                         // icon={<X className="h-3 w-3" />}
                                         iconPosition="left"
                                         size="middle"
                                     >
                                         Cancel
+                                    </ReusableButton>
+                                      <ReusableButton
+                                        htmlType="submit"
+                                        variant="text"
+                                        className='btn-submit-style'
+                                        // icon={<Save className="h-3 w-3" />}
+                                        iconPosition="left"
+                                        size="middle"
+                                    >
+                                        {editRecord === null ? 'Save' : 'Update'}
                                     </ReusableButton>
                                 </div>
                             </form>
@@ -588,8 +596,10 @@ const ServiceLocations = () => {
                         </DialogHeader>
                         <DialogFooter>
                             <ReusableButton
-                                variant="default"
-                                onClick={() => setIsDelModalOpen(false)}
+                                variant="text"
+                                className='btn-reset-clear-style'
+
+                                    onClick={() => setIsDelModalOpen(false)}
                             >
                                 Cancel
                             </ReusableButton>
@@ -603,7 +613,8 @@ const ServiceLocations = () => {
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
-            </div>
+           
+        </div>
         </div>
         </ScrollArea>
     );

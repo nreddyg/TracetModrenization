@@ -1093,7 +1093,7 @@ const ServiceDeskReports = () => {
       <header className="px-6 py-4">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-            <h1 className="text-lg sm:text-2xl font-bold text-gray-900">
+            <h1 className="text-2xl font-bold">
               Service Desk Reports
             </h1>
           </div>
@@ -1109,9 +1109,9 @@ const ServiceDeskReports = () => {
         <div className="grid grid-cols-1 xl:grid-cols-4 gap-6 ">
           {/* Enhanced Left Sidebar - Report Types */}
           <div className="xl:col-span-1">
-            <Card className="sticky top-6">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center gap-2">
+            <Card className="sticky top-6 p-5">
+              <CardHeader className="p-0 pb-3 ">
+                <CardTitle className="text-lg mb-1 flex items-center gap-2">
                   <Settings2 className="h-5 w-5 text-blue-600" />
                   Report Types
                 </CardTitle>
@@ -1125,23 +1125,25 @@ const ServiceDeskReports = () => {
                   />
                 </div>
               </CardHeader>
-              <CardContent className="space-y-1 max-h-96 overflow-y-auto">
+              <CardContent className="space-y-1 max-h-96 overflow-y-auto p-0">
                 {filteredReportTabs.map((tab) => (
                   <button
                     key={tab}
                     onClick={() => { setActiveTab(tab); form.reset() }}
                     className={cn(
-                      "w-full text-left px-3 py-3 rounded-lg text-sm transition-all duration-200 flex items-center gap-2",
+                      "w-full text-left px-2 mb-1 py-3 rounded-lg text-sm   flex items-center gap-2",
                       activeTab === tab
                         ? "bg-orange-100 text-orange-700 font-medium border border-orange-200 shadow-sm"
                         : "hover:bg-gray-100 text-gray-700 hover:text-gray-900"
                     )}
                   >
+                    <div>
                     <div className={cn(
                       "w-2 h-2 rounded-full",
                       activeTab === tab ? "bg-orange-500" : "bg-gray-300"
                     )} />
-                    <span className="leading-tight">{tab}</span>
+                    </div>
+                    <div className="leading-tight">{tab}</div>
                   </button>
                 ))}
               </CardContent>
@@ -1186,7 +1188,10 @@ const ServiceDeskReports = () => {
                 <ScrollArea>
                   {/* Primary Filters */}
                   <div className='px-1'>
-                    <h4 className="text-sm font-semibold text-gray-900 mb-3">Primary Filters</h4>
+                          <h2 className="text-lg font-semibold mb-2">
+                {"Primary Filters"}
+              </h2>
+                    {/* <h4 className="text-sm font-semibold text-gray-900 mb-3"></h4> */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       {activeTab === "Service Request SLA Met/SLA Violated"
                         ? getFieldsByNames(["slastatus", "assignedto", "serviceReqTypeSLA"]).map(renderField)
@@ -1200,7 +1205,7 @@ const ServiceDeskReports = () => {
                 {activeTab !== "Service Request Detail History" ?
                   <Accordion type="single" collapsible className="w-full">
                     <AccordionItem value="additional-filters">
-                      <AccordionTrigger className="text-sm font-semibold text-gray-900 px-1">
+                      <AccordionTrigger className="text-lg font-semibold text-gray-900 px-1">
                         Additional Filters
                       </AccordionTrigger>
                       <AccordionContent>
@@ -1241,7 +1246,7 @@ const ServiceDeskReports = () => {
 
             {/* Report Results Table */}
             {showReport && !isGeneratingReport && (activeTab !== "Service Request Detail History") && (
-              <Card>
+              <Card className='p-0'>
                 <CardHeader>
                   <CardTitle className="text-lg">Report Results - {activeTab}</CardTitle>
                   <div>
@@ -1256,7 +1261,7 @@ const ServiceDeskReports = () => {
                     </ReusableButton>
                   </div>
                 </CardHeader>
-                <CardContent>
+                <CardContent className='p-0'>
                   <ReusableTable
                     // key={activeTab}
                     data={dataSource}

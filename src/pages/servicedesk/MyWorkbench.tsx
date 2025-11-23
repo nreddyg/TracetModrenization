@@ -49,7 +49,7 @@ const MyWorkbench = () => {
         <span onClick={() => { localStorage.setItem("editBranchFromParent", branch) }}>
           <Link
             to={(isMyRequest) ? `/layout/service-desk/my-requests/tickets/${filters.TicketCategory}/${row.original.ServiceRequestId}` : `/layout/service-desk/my-workbench/tickets/${filters.TicketCategory}/${row.original.ServiceRequestId}`}
-            className="text-blue-500"
+            className="text-button-save font-medium"
 
           >
             {row.getValue('ServiceRequestNo')}
@@ -57,7 +57,7 @@ const MyWorkbench = () => {
         </span>
       )
     },
-    { accessorKey: "Title", header: "Title" },
+    { accessorKey: "Title", header: "Title", size:160 },
     {
       accessorKey: "CreatedDate", header: "Created Date",
       cell: ({ row }) => (
@@ -285,9 +285,9 @@ const MyWorkbench = () => {
         <div className="p-4 sm:p-4 space-y-4 sm:space-y-4">
           {/* Header Section */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div>
-              <h1 className="text-lg sm:text-2xl font-bold text-gray-900">{isMyRequest ? "My Requests" : "My Workbench"}</h1>
-            </div>
+           
+              <h1 className="text-2xl font-bold ">{isMyRequest ? "My Requests" : "My Workbench"}</h1>
+            
             <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <span>Service Desk</span>
@@ -297,13 +297,14 @@ const MyWorkbench = () => {
             </div>
           </div>
           <div>
-            <Card>
-              <CardTitle className="text-lg flex px-6 py-1 pt-2 items-center gap-2">
+            <Card className='bg-card rounded-lg border border-border p-5 mb-6'>
+             
+              {/* <CardContent> */}
+                 <h2 className="text-lg font-semibold mb-4">
                 {"Filters"}
-              </CardTitle>
-              <CardContent>
+              </h2>
                 <form onSubmit={form.handleSubmit(onSubmit)}>
-                  <div className=" grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  <div className=" grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {
                       fields.map((field) => (
                         <div key={field.name}>
@@ -311,11 +312,11 @@ const MyWorkbench = () => {
                         </div>))
                     }
                     <div className="flex items-center xxs:mt-1 xs2:mt-2 sm:mt-6 md:mt-6" >
-                      <ReusableButton size={"small"} htmlType='submit' className='h-9 mt-1 bg-background hover:border-[rgb(209 213 219)] hover:bg-background'>
+                      <ReusableButton size={"small"} htmlType='submit' className='h-9 mt-1 bg-button-save hover:bg-button-save hover:border-bg-button-save   group' >
                         {/* <Search size={18} color='#000'/> */}
                         <Search
                           size={18}
-                          className="text-black hover:text-blue-500 transition-colors duration-200 cursor-pointer"
+                          className="text-white transition-colors duration-200 cursor-pointer group-hover:text-blue-500"
                         />
 
 
@@ -323,11 +324,11 @@ const MyWorkbench = () => {
                     </div>
                   </div>
                 </form>
-              </CardContent>
+              {/* </CardContent> */}
             </Card>
           </div>
-          <div className="bg-white p-6 rounded-lg">
-              <ReusableTable title={' '} onRefresh={handleRefresh} data={dataSourceToShow} columns={columns} enableExport={false} />
+          <div className=" border bg-white rounded-lg pb-5 pt-2">
+              <ReusableTable  onRefresh={handleRefresh} data={dataSourceToShow} columns={columns} enableExport={false} />
           </div>
         </div>
       </div>

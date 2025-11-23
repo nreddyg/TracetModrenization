@@ -240,9 +240,9 @@ const ManageUnitConversion = () => {
             <div className="h-full overflow-y-auto">
                 <div className="p-4 space-y-3" >
                     <div className='flex w-full justify-between'>
-                        <h1 className='text-lg font-semibold text-gray-900'>Add Unit of Conversion</h1>
+                        <h1 className='text-2xl font-bold'>Add Unit of Conversion</h1>
                         <ReusableButton
-                            className=' flex-1 sm:flex-none bg-primary text-white'
+                            className=' flex-1 sm:flex-none bg-[#3F50A0] text-white hover:bg-[#3F50A0] hover:text-white'
                             onClick={() => navigate("/layout/masters/consumables/unitsofmeasure")}>Back</ReusableButton>
                     </div>
                     <div className="w-full p-4 bg-white rounded-md border">
@@ -256,7 +256,8 @@ const ManageUnitConversion = () => {
                                 </DialogHeader>
                                 <DialogFooter>
                                     <ReusableButton
-                                        variant="default"
+                                      variant="text"
+                                            className='btn-reset-clear-style'
                                         onClick={() => setIsDelModalOpen(false)}
                                     >
                                         Cancel
@@ -271,7 +272,7 @@ const ManageUnitConversion = () => {
                                 </DialogFooter>
                             </DialogContent>
                         </Dialog>
-                        <div className="grid grid-cols-5 gap-6 items-end">
+                        <div className=" p-2 grid grid-cols-5 gap-6 items-end">
                             {getFieldsByNames(['base', 'baseUOM', "equals", 'target', 'targetUOM']).map((field) => {
                                 return <div className="flex items-center space-x-2">
                                     {renderField(field)}
@@ -290,8 +291,7 @@ const ManageUnitConversion = () => {
                             >Clear</ReusableButton>
                         </div>
                     </div>
-                    <Card className="border-0 shadow-sm">
-                        <CardContent className="pt-2">
+                  <div className=" border bg-white rounded-lg pb-5 pt-3">
                             <ReusableTable
                                 data={filteredData}
                                 columns={columns}
@@ -309,8 +309,7 @@ const ManageUnitConversion = () => {
                                 rowHeight="normal"
                                 storageKey="usergroups-table"
                             />
-                        </CardContent>
-                    </Card>
+                       </div>
                 </div>
             </div>
         </ScrollArea>

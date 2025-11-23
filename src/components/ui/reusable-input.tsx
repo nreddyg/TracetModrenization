@@ -538,7 +538,7 @@ export const ReusableInput = forwardRef<ReusableInputRef, ReusableInputProps>(
                 ellipsisPlaceholder && "overflow-hidden  text-ellipsis whitespace-nowrap",
                 prefixIcon && "pl-10",
                 (suffixIcon || showPasswordToggle || visibilityToggle || allowClear || loading) && "pr-10",
-                focused && "ring-2 ring-opacity-50",
+                focused && "ring-2 ring-ring ring-offset-2 ring-opacity-50",
                 hasAddon && "border-0",
                 addonBefore && "rounded-l-none border-l-0",
               

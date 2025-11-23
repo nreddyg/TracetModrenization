@@ -685,15 +685,13 @@ const AssetRegistry = () => {
     return (
         <ScrollArea>
             <div className="h-full">
-            <header className="px-6 py-4">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-                        <h1 className="text-lg sm:text-2xl font-bold text-gray-900">
-                            Asset Registry
-                        </h1>
-                    </div>
-                    <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                <div className="p-4 space-y-4">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                                                    
+                                                      <h1 className="text-2xl font-bold"> Asset Registry</h1>
+                                                      {/* <p className="text-sm text-gray-600 mt-0.5">Manage user groups and permissions</p> */}
+                                                    
+                                                 <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
                         <ReusableButton
                             // size="small"
                             // className=' flex-1 sm:flex-none bg-primary h-[2.38rem] text-white p-4'
@@ -709,28 +707,29 @@ const AssetRegistry = () => {
                             )}
                         </ReusableButton>
                     </div>
-                </div>
-            </header>
-            <div>
+                                                  </div>
+        
+           
                 {isOpenLicenseCard &&
-                    <div className='p-2 rounded-lg'>
-                        <div className=" bg-white rounded-lg p-4">
-                            <Card className=''>
-                                <CardContent className="pt-6">
-                                    <div className="">
+                    
+                     
+                            <Card className='border-0 bg-card rounded-lg border border-border p-5 mb-6'>
+                                  <h2 className="text-lg font-semibold mb-4 ">
+                  Add New Software Asset
+                </h2>
                                         <div className="space-y-4">
-                                            <span className='text-2xl'>Add New Software Asset</span>
+                                           
                                             <div className={`grid xxs:grid-cols-1 xs2:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-6`}>
                                                 {getFieldsByNames(['SoftwareName', 'Version', 'VendorId', 'CategoryId', 'LicenseType', 'NumberOfLicenses']).map((field) => {
                                                     return <> <div className="flex-1 items-center space-x-2">
                                                         {renderField(field)}
-                                                        {(field.name === 'NumberOfLicenses') && <div className='mt-2 float-right'><ReusableButton
+                                                        {(field.name === 'NumberOfLicenses') && <div className='mt-3 float-right'><ReusableButton
                                                             htmlType="button"
                                                             variant="default"
                                                             onClick={() => { handleEnterLicenseDetails() }}
                                                             iconPosition="left"
                                                             size="middle"
-                                                            className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+                                                            className="bg-[#3F50A0]  text-white hover:bg-[#3F50A0] hover:text-white"
                                                         > {'Click To Enter License Details'}
                                                         </ReusableButton></div>}
                                                     </div>
@@ -738,18 +737,19 @@ const AssetRegistry = () => {
                                                 })}
 
                                             </div>
-                                            <div className={`grid xxs:grid-cols-1 xs2:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-1 gap-6 mb-6`}>
-                                                {dataSource.length !== 0 && <ReusableTable data={dataSource} columns={tableColumnsData} enableSearch={false}
+                                           
+                                                {dataSource.length !== 0 && <div className={` border bg-white rounded-lg pb-6`}> <ReusableTable data={dataSource} columns={tableColumnsData} enableSearch={false}
                                                     enableColumnVisibility={false}
                                                     enableExport={false}
                                                     enableSorting={false}
                                                     enableFiltering={false}
                                                     headerContentClassName={"justify-center "}
-                                                />}
+                                                />
+                                                 </div>}
 
-                                            </div>
+                                           
                                         </div>
-                                    </div>
+                                   
                                     <div className="flex gap-2 mt-6">
                                         <ReusableButton
                                             htmlType="button"
@@ -776,14 +776,14 @@ const AssetRegistry = () => {
                                             {editRecordId ? 'Cancel' : 'Clear'}
                                         </ReusableButton>
                                     </div>
-                                </CardContent>
+                              
                             </Card>
 
-                        </div>
-                    </div>
+                   
                 }
-                <div className=" p-4 pt-0 rounded-lg">
-                    <div className=" bg-white rounded-lg p-6 border">
+               
+                 
+          <div className=" border bg-white rounded-lg pb-5 pt-2">
                             <ReusableTable
                                 data={getAllTableData} columns={columns}
                                 // permissions={""}
@@ -805,7 +805,7 @@ const AssetRegistry = () => {
                                 enableColumnPinning
                             />
                     </div>
-                </div>
+               
                 <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>
                     <DialogContent className="sm:max-w-[450px]">
                         <DialogHeader>
@@ -833,7 +833,8 @@ const AssetRegistry = () => {
                     </DialogContent>
                 </Dialog>
             </div>
-            </div>
+            </div> 
+            
         </ScrollArea>
     );
 }

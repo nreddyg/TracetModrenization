@@ -2972,16 +2972,16 @@ const isDateDisabled = (date: Date): boolean => {
         <div className="relative">
           <div
             className={cn(
-              "flex items-center rounded-md border transition-colors relative overflow-hidden w-full ",
+              "flex items-center rounded-md border border-input transition-colors relative overflow-hidden w-full ",
               sizeClasses[size],
               disabled ? "opacity-50 bg-gray-100 cursor-not-allowed" : "bg-background",
-              actualOpen && !disabled && "ring-2 border-blue-500 bg-background",
+              actualOpen && !disabled && "ring-2  ring-2 ring-ring ring-offset-2 ring-opacity-50 border-blue-500 bg-background",
               getStatusClasses(),"bg-background",
               className
             )}
             style={{ 
-              backgroundColor: disabled ? '#f3f4f6' :(backgroundColor)?backgroundColor: 'hsl(240deg 73.33% 97.06%)', 
-              borderColor: disabled ? undefined : 'hsl(214.29deg 31.82% 91.37%)' 
+              backgroundColor: disabled ? '#f3f4f6' :(backgroundColor)?backgroundColor: 'hsl(var(--background)', 
+              borderColor: disabled ? undefined : '' 
             }}
             onClick={handleWrapperClick}
           >

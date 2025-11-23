@@ -15,14 +15,14 @@ const FilterCard: React.FC<FilterCardProps> = ({
   actions 
 }) => {
   return (
-    <Card>
+    <Card className='p-0'>
       {/* <CardHeader> */}
         {/* <CardTitle className="text-lg flex items-center gap-2">
           <Filter className="h-5 w-5" />
           {title}
         </CardTitle> */}
       {/* </CardHeader> */}
-      <CardContent className='mt-5'>
+      <CardContent className='p-5'>
         {children}
         {actions && (
           <div className="flex xxs:justify-center xs2:justify-end md:justify-end lg:justify-end  gap-3 mt-6">

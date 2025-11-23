@@ -581,8 +581,7 @@ const Organization = () => {
 
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col min-w-0 ">
-          <div className=" px-4 lg:px-6 py-3
-  flex flex-col sm:flex-row justify-between gap-4 shrink-0"
+          <div className=" px-4 lg:px-6 py-3 flex flex-col sm:flex-row justify-between gap-4 shrink-0"
           >
             <div className="flex items-start sm:items-center gap-4 lg:gap-6 flex-1 min-w-0">
               <div className="flex items-center gap-2 text-sm text-gray-600 flex-wrap">
@@ -610,7 +609,7 @@ const Organization = () => {
                 variant="primary"
                 onClick={(data) => handleSubmit(handleSave)(data)}
                 icon={<Save className="h-4 w-4" />}
-                className='btn-submit-style'
+                className='btn-submit-style sm:btn-style-adj md:btn-style-adj'
               >
                 {selectedOrganizationData ? "Update" : "Save"}
               </ReusableButton>
@@ -619,14 +618,14 @@ const Organization = () => {
 
 
           {/* Content Grid with Individual Scroll Areas */}
-          <div className="flex-1 p-3 pt-0 overflow-hidden min-h-0  ">
+           <div className="flex-1 p-3 pt-0 overflow-hidden min-h-0  ">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-1 h-full">
               {/* Left Column - Main Content */}
-              <div className="lg:col-span-12 flex flex-col  min-h-0 ">
-                <ScrollArea className="flex-1  ">
+              <div className="lg:col-span-12 flex flex-col  min-h-0 text-card-foreground bg-card rounded-lg border border-border overflow-hidden  pt-2 ">
+                <ScrollArea scrollStyle={'flex-[0.8] '}  className="flex-1  ">
                   <div className="space-y-6 pr-1">
-                    <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-                      <CardContent className="pt-6">
+                    <Card className=" border-0 pt-1">
+                      <CardContent className=" p-4 pt-1 pe-3 ">
                         <div className="space-y-6">
                           <div className='grid md:grid-cols-2 sm:grid-cols-1 gap-x-3 gap-y-3 '>
                             {
@@ -649,7 +648,8 @@ const Organization = () => {
                 </ScrollArea>
               </div>
             </div>
-          </div>
+          </div> 
+          
         </div>
       </div>
     </div>

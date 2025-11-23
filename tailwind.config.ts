@@ -67,6 +67,10 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
+				button:{
+					DEFAULT: '#4051a1',
+					save:'hsl(var(--button-orange))'
+				},
 				// Custom app colors
 				'app-background': '#EEF2FF',
 				'app-sidebar': '#4051a1',

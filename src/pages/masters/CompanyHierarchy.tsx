@@ -1517,7 +1517,7 @@ const CompanyHierarchy = () => {
 
       <div className="flex h-full pt-1 px-2 gap-3">
         {/* Tree Structure Panel */}
-        <div className="w-[26vw] h-[75vh] rounded-lg shadow-lg border-r bg-card flex flex-col">
+        <div className="w-[26vw] h-[75vh] rounded-lg shadow-lg border   bg-card flex flex-col">
           <div className="px-2 flex items-center justify-center pt-4 pb-4 ps-0 ms-0 border-b gap-3">
             <div className="relative ps-2">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -1579,19 +1579,21 @@ const CompanyHierarchy = () => {
               </ReusableButton>
             </div>
           </div>
-          <ScrollArea className="min-h-20 h-[63vh] p-2" horizontal>
+          <ScrollArea scrollStyle={'flex-[0.8] '}  className="min-h-20 h-[63vh] p-2" horizontal>
             <TreeView treeData={mainTreeData} config={treeConfig} onSelect={handleSelect} selectKeys={selectedKeys} onExpand={handleToggleNode}
               expandedKeys={Array.from(expandedKeys)} />
           </ScrollArea>
         </div>
 
+
         {/* Details Panel */}
-        <div className="flex-1 h-[75vh]  ps-2 shadow-xl bg-card border-b rounded-lg shadow-lg lg:ps-6 py-3 flex flex-row xxs:flex-col xs2:flex-row lg:flex-row lg:items-center justify-between gap-4">
+         <ScrollArea scrollStyle={'flex-[0.8] '}  className="border  ps-1  flex-1 h-[75vh] bg-card border-b rounded-lg   py-3 flex flex-row xxs:flex-col xs2:flex-row lg:flex-row lg:items-center justify-between gap-4">
+        <div className="p-5 pt-0">
           {/* <div className="bg-card border-b rounded-lg shadow-lg lg:ps-6 py-3 flex flex-row xxs:flex-col xs2:flex-row lg:flex-row lg:items-center justify-between gap-4"> */}
-            <div className="p-1 w-full space-y-6 h-[71vh] overflow-y-auto">
+            <div className="p-1 pt-2 w-full space-y-6 ">
               <div className="flex flex-col gap-2">
                 <div>
-                  <h4 className="master-heading mb-2 flex items-center gap-2">
+                  <h4 className="master-heading mb-2 flex  text-xl font-bold items-center gap-2">
                     {!recordToEditId
                       ? selectedLevel === 99
                         ? "Company Hierarchy"
@@ -1604,7 +1606,7 @@ const CompanyHierarchy = () => {
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <button type="button">
-                              <Info className="mb-1 cursor-pointer" fontSize={22} />
+                              <Info className="cursor-pointer text-sm h-3 w-3"  />
                             </button>
                           </TooltipTrigger>
                           <TooltipContent>
@@ -1622,7 +1624,7 @@ const CompanyHierarchy = () => {
                 </div>
               </div>
               <div className="space-y-6">
-                <h5>{recordToEditId && selectedLevel !== 99 ? `Update ${fields[0].heading}` : `${selectedLevel !== 99 ? "Enter" : ""} ${fields[0].heading}`}</h5>
+                <h5 className='text-md font-semibold'>{recordToEditId && selectedLevel !== 99 ? `Update ${fields[0].heading}` : `${selectedLevel !== 99 ? "Enter" : ""} ${fields[0].heading}`}</h5>
                 <div className="px-1">
                   <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4">
                     {getFieldsByNames((selectedLevel != lastLevel) ? ['Name', 'Code'] : ['Name', 'Code', "PAN", "GSTIN", "Address", "State", "City", "ZipCode", "EmailId", "MobileNo"]).map((field) => {
@@ -1636,6 +1638,7 @@ const CompanyHierarchy = () => {
             </div>
           {/* </div> */}
         </div>
+        </ScrollArea>
       </div>
     </div>
   );

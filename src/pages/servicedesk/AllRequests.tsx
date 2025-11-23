@@ -18,6 +18,7 @@ import { useMessage } from '@/components/ui/reusable-message';
 import { getColorForStatus } from '@/_Helper_Functions/HelperFunctions';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { FaAngleRight } from 'react-icons/fa';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 const AllRequests = () => {
   const navigate = useNavigate();
@@ -33,7 +34,7 @@ const AllRequests = () => {
     {
       accessorKey: "ServiceRequestNo", header: "Service Request No",
       cell: ({ row }) => (
-        <span onClick={() => { localStorage.setItem("editBranchFromParent", branch) }}> <Link to={`/layout/service-desk/all-requests/tickets/106/${row.original.ServiceRequestId}`} className='text-blue-500 '>
+        <span onClick={() => { localStorage.setItem("editBranchFromParent", branch) }}> <Link to={`/layout/service-desk/all-requests/tickets/106/${row.original.ServiceRequestId}`} className='text-button-save font-medium'>
           {row.getValue('ServiceRequestNo')}
         </Link></span>
       )
@@ -186,10 +187,10 @@ const AllRequests = () => {
         <div className="p-3 sm:p-5 space-y-3 sm:space-y-4 pt-4">
           {/* Header Section */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div>
-              <h1 className="text-lg sm:text-2xl font-bold text-gray-900">All Service Requests</h1>
+           
+              <h1 className="text-2xl font-bold">All Service Requests</h1>
               {/* <p className="text-gray-600 mt-1 text-sm sm:text-base">View and manage all your service requests in one place</p> */}
-            </div>
+          
             <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <span>Service Desk</span>
@@ -271,10 +272,27 @@ const AllRequests = () => {
           </div>
 
           <div>
-            <Card>
-              <CardTitle className="text-lg flex px-6 py-1 pt-2 items-center gap-2">{"Filters"}</CardTitle>
-              <CardContent>
-                <div className=" grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+
+ <Accordion
+            type="single"
+            collapsible
+            className="w-full  rounded-lg bg-white mb-3"
+          >
+            <AccordionItem value="Dashboard Filters" className="rounded-lg border border-gray-200 ">
+              <AccordionTrigger
+                className="text-lg font-semibold text-gray-900 px-3 py-3 flex items-center justify-between rounded-lg hover:no-underline"
+              >
+
+                {"Filters"}
+              
+              </AccordionTrigger>
+
+              <AccordionContent
+                className="bg-white px-3   rounded-lg"
+              >
+                
+                
+                 <div className=" grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                   <ReusableRangePicker
                     label='Date Range'
                     tooltip='Select a date range'
@@ -286,15 +304,29 @@ const AllRequests = () => {
                     format='DD/MM/YYYY'
                   />
                   <div className="flex items-end mt-4  ">
-                    <ReusableButton size={"small"} htmlType='submit' onClick={handleSearch} className='h-10 mt-1 bg-background hover:border-[rgb(209 213 219)] hover:bg-background'>
-                      <Search size={18} color='#000' />
-                    </ReusableButton>
+                
+                               <ReusableButton size={"small"} htmlType='submit' onClick={handleSearch}  className='h-9 mt-1 bg-button-save hover:bg-button-save hover:border-bg-button-save   group' >
+                        {/* <Search size={18} color='#000'/> */}
+                        <Search
+                          size={18}
+                          className="text-white transition-colors duration-200 cursor-pointer group-hover:text-blue-500"
+                        />
+
+
+                      </ReusableButton>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+             
+               
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+
+
+            
+            
           </div>
-          <div className="bg-white p-6 rounded-lg">
+          <div className="border bg-white rounded-lg pb-5">
             <ReusableTable title={' '} onRefresh={handleRefresh} data={filteredRequests} columns={columns} enableExport={false} />
           </div>
         </div>

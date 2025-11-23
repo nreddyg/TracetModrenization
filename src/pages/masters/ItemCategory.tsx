@@ -557,27 +557,25 @@ const ItemCategory = () => {
     return (
         <ScrollArea>
         <div className="h-full">
-            <header className="px-6 py-4">
-                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-            
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-                          <h1 className="text-lg sm:text-2xl font-bold text-gray-900">
-                            Item Category
-                          </h1>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <span>Masters</span>
-                          <FaAngleRight />
-                          <span>Consumables</span>
-                          <FaAngleRight />
-                          <span className="text-gray-900 font-medium">Item Category</span>
-                        </div>
-                      </div>
-                    </header>
-            <div className="p-4 pt-0">
-                <Card className="border-0 shadow-sm">
-                    <CardHeader className="pb-2 pt-2">
-                        <div className='mt-1 p-2'>
+  <div className="p-4 sm:p-4 space-y-4 sm:space-y-4">
+                         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                                            
+                                                <h1 className="text-2xl font-bold "> Item Category</h1>
+                                                
+                                                <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                                                <div className="flex items-center gap-2 text-sm text-gray-600">
+                                                <span>Masters</span>
+                                                <FaAngleRight />
+                                                <span>Fixed Assets</span>
+                                                <FaAngleRight />
+                                                <span className="text-gray-900 font-medium">Item Category</span>
+                                            </div>
+                                                </div>
+                                            </div>
+        
+                <Card className="bg-card rounded-lg border border-border p-5 mb-6">
+                    <CardHeader className="p-0">
+                        <div className='p-1'>
                             <Tabs value={activeTab} onValueChange={setActiveTab}>
                                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                                     <TabsList>
@@ -595,6 +593,7 @@ const ItemCategory = () => {
                                 </div>
 
                                 <TabsContent value="main" className="">
+                                      <div className=' border bg-white rounded-lg pb-6'>
                                     <ReusableTable
                                         data={getMainCategoryData}
                                         columns={mainCategoryColumns}
@@ -614,14 +613,15 @@ const ItemCategory = () => {
                                         rowHeight="normal"
                                         storageKey="usergroups-table"
                                     />
+                                    </div>
                                 </TabsContent>
 
                                 <TabsContent value="sub" className="space-y-4">
                                     <div className='flex items-center gap-6 mb-3'>
                                         <div>
-                                            <h2 className='text-lg mb-2'>Select Main Category</h2>
+                                            <h2 className='text-md font-semibold '>Select Main Category</h2>
                                         </div>
-                                        <div className="mb-4">
+                                        <div className="">
                                             {getFieldsByNames(['mainCatdropdown']).map((field) => {
                                                 return <div className=" space-x-2">
                                                     {renderField(field)}
@@ -629,6 +629,7 @@ const ItemCategory = () => {
                                             })}
                                         </div>
                                     </div>
+                                    <div className='border bg-white rounded-lg pb-6 '>
                                     <ReusableTable
                                         data={subDataToShow}
                                         columns={subItemCategoryColumns}
@@ -648,6 +649,7 @@ const ItemCategory = () => {
                                         rowHeight="normal"
                                         storageKey="usergroups-table"
                                     />
+                                    </div>
                                 </TabsContent>
                             </Tabs>
                         </div>
@@ -684,15 +686,16 @@ const ItemCategory = () => {
                                 </div>
                                 <div className="flex justify-end gap-2">
                                     <ReusableButton
-                                        variant="default"
+                                         variant="text"
+                                            className='btn-reset-clear-style'   
                                         onClick={() => { setIsMainDialogOpen(false); setSubRecID(null); handleCancel() }}
                                     >
                                         Cancel
                                     </ReusableButton>
                                     <ReusableButton
                                         htmlType="submit"
-                                        variant="primary"
-                                        className="bg-orange-500 hover:bg-orange-600 border-orange-500"
+                                         variant="text"
+                                            className=" btn-submit-style "
                                         onClick={(e) => { handleSubmit(() => submit(e, true))(e) }}
                                     >
                                         {recordToEditId !== null ? "Update" : "Save"}
@@ -710,10 +713,10 @@ const ItemCategory = () => {
                             <div className="space-y-4">
                                 <h4>{`Are you sure want to delete ${mainDelRec?.CategoryName} MainCategory`}</h4>
                                 <div className="flex justify-end gap-2">
-                                    <ReusableButton onClick={() => setIsMainDelOpen(false)}>
+                                    <ReusableButton  variant='text' className='btn-reset-clear-style'  onClick={() => setIsMainDelOpen(false)}>
                                         Cancel
                                     </ReusableButton>
-                                    <ReusableButton variant="primary" onClick={() => handleMainDelete(recordToEditId, companyId, '')}>
+                                    <ReusableButton   danger={true}  variant="primary" onClick={() => handleMainDelete(recordToEditId, companyId, '')}>
                                         Delete
                                     </ReusableButton>
                                 </div>
@@ -731,10 +734,12 @@ const ItemCategory = () => {
                                 {getFieldsByNames(['subunitofmeasure', 'subname', 'subcode', 'subdescription']).map(renderField)}
                             </div>
                             <div className="flex justify-end gap-2">
-                                <ReusableButton onClick={() => setIsSubDialogOpen(false)}>
+                                <ReusableButton    variant="text"
+                                            className='btn-reset-clear-style' onClick={() => setIsSubDialogOpen(false)}>
                                     Cancel
                                 </ReusableButton>
-                                <ReusableButton variant="primary" onClick={(e) => { handleSubmit(() => submit(e, false))(e) }}>
+                                <ReusableButton    variant="text"
+                                            className=" btn-submit-style " onClick={(e) => { handleSubmit(() => submit(e, false))(e) }}>
                                     {subRecID ? "Update" : "Save"}
                                 </ReusableButton>
                             </div>
@@ -751,7 +756,8 @@ const ItemCategory = () => {
                             <div className="space-y-4">
                                 <h4>{`Are you sure want to delete ${subRecord?.CategoryName} SubCategory`}</h4>
                                 <div className="flex justify-end gap-2">
-                                    <ReusableButton onClick={() => setIsSubDelOpen(false)}>
+                                    <ReusableButton     variant="text"
+                                            className='btn-reset-clear-style' onClick={() => setIsSubDelOpen(false)}>
                                         Cancel
                                     </ReusableButton>
                                     <ReusableButton variant="primary" onClick={() => handleMainDelete(subRecID, companyId, '')}>

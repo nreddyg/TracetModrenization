@@ -998,12 +998,12 @@ const AssetLocation = () => {
                     </ScrollArea>
                 </div>
                 {/* Details Panel */}
-                <div className="flex-1 h-[75vh]  ps-2 shadow-xl bg-card border-b rounded-lg shadow-lg lg:ps-6 py-3 flex flex-row xxs:flex-col xs2:flex-row lg:flex-row lg:items-center justify-between gap-4">
+                <div className="flex-1 h-[75vh]  ps-2  bg-card border rounded-lg  lg:ps-6 py-3 flex flex-row xxs:flex-col xs2:flex-row lg:flex-row lg:items-center justify-between gap-4">
                     {/* <div className="bg-card border-b rounded-lg shadow-lg lg:ps-6 py-3 flex flex-row xxs:flex-col xs2:flex-row lg:flex-row lg:items-center justify-between gap-4"> */}
-                        <div className="p-1 w-full space-y-6 h-[71vh] overflow-y-auto">
+                        <div className="p-1 pt-2 w-full space-y-6 h-[71vh] overflow-y-auto">
                             <div className="flex flex-col gap-2">
                                 <div>
-                                    <h4 className="master-heading mb-2 flex items-center gap-2">
+                                    <h4 className="master-heading mb-2 flex items-center text-xl font-bold  gap-2">
                                         {!recordToEditId
                                             ? selectedLevel === 99
                                                 ? "Asset Location"
@@ -1016,7 +1016,7 @@ const AssetLocation = () => {
                                                 <Tooltip>
                                                     <TooltipTrigger asChild>
                                                         <button type="button">
-                                                            <Info className="mb-1 cursor-pointer" fontSize={22} />
+                                                            <Info className="mb-1 cursor-pointer h-3 w-3" fontSize={22} />
                                                         </button>
                                                     </TooltipTrigger>
                                                     <TooltipContent>
@@ -1035,7 +1035,7 @@ const AssetLocation = () => {
                             </div>
 
                             <div className="space-y-6">
-                                <h5>{recordToEditId && selectedLevel !== 99 ? `Update ${assetLocData[0].heading}` : `${selectedLevel !== 99 ? "Enter" : ""} ${assetLocData[0].heading}`}</h5>
+                                <h5 className='text-md font-semibold'>{recordToEditId && selectedLevel !== 99 ? `Update ${assetLocData[0].heading}` : `${selectedLevel !== 99 ? "Enter" : ""} ${assetLocData[0].heading}`}</h5>
                                 <div className="px-1">
                                     <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4">
                                         {getFieldsByNames(['Name', 'Code']).map((field) => {

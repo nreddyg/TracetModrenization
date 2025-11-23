@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { ReusableDropdown } from '@/components/ui/reusable-dropdown';
-import { Home, User, Settings, LogOut, Bell, Menu } from 'lucide-react';
+import { Home, User, Settings, LogOut, Bell, Menu, Building, Building2, MapPin } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
@@ -224,8 +224,8 @@ const FixedHeader: React.FC = () => {
   };
   const getInitial = (name?: string) => name && name.length > 0 ? name.charAt(0).toUpperCase() : '';
   return (
-    <header className="sticky top-0 right-0  bg-white border-b border-gray-200 shadow-[0_2px_8px_0_rgba(0,0,0,0.05)]">
-      <div className="flex items-center justify-between gap-2 px-4 lg:px-6 py-4">
+    <header className="sticky top-0 right-0  bg-white border-b border-gray-200 ">
+      <div className="flex  h-16 items-center justify-between gap-2 px-4 lg:px-6 py-4">
         {/* Left Section - Sidebar Trigger + Company Logo + Breadcrumbs */}
         <div className="flex items-center gap-2 lg:gap-4 flex-1 min-w-0">
           <SidebarTrigger />
@@ -384,33 +384,46 @@ const FixedHeader: React.FC = () => {
           <div className="hidden lg:flex items-center justify-end gap-3">
             <ReusableDropdown
               options={companyList}
+                hoverColor='#FF7A33'  
+               focusClass="focus-within:outline-none"
+              addonBefore={<Building2 size={16}  className='text-sm !text-black'/>}
               value={selectedCompany}
               onChange={(value, ...args) => handleChange('CompanyId', value)}
               placeholder="Select company"
+              arrowClass="!text-black font-medium"
               size="small"
               disabled={!(LoggedInUser.RoleName === "Root Admin")}
-              className="w-auto h-9"
-              containerClassName='max-w-[35%]'
+              className="w-auto h-10 font-medium group-hover:bg-grey-900"
+              containerClassName='max-w-[40%]  group !hover:bg-grey-900'
             />
  
             <ReusableDropdown
+              hoverColor='#FF7A33'  
               options={branchList}
               value={selectedBranch}
+                focusClass="focus-within:outline-none"
+                addonBefore={<MapPin size={16} className='text-sm !text-black'/>}
               onChange={(value) => handleChange('Branch', value)}
               placeholder="Select location"
+                arrowClass="!text-black !font-medium"
               size="small"
-              className="w-auto h-9"
-              containerClassName='max-w-[35%]'
+              className="w-auto h-10  font-medium  "
+              containerClassName='max-w-[40%]  '
             />
           </div>
  
           {/* Notifications */}
-          <Button variant="outline" size="sm" className="relative h-8 w-8 lg:h-9 lg:w-9 p-0">
-            <Bell className="h-3 w-3 lg:h-4 lg:w-4" />
-            <Badge variant="destructive" className="absolute -top-1 -right-1 h-4 w-4 lg:h-5 lg:w-5 text-xs p-0 flex items-center justify-center">
+          <Button size="sm" className="relative bg-transparent h-8 w-8 lg:h-9 lg:w-9 p-0 hover:bg-button-save group">
+            <Bell className="h-5 w-5 text-[#22222a] group-hover:text-white" />
+            </Button>
+            <Button size="sm" className="relative bg-transparent h-8 w-8 lg:h-9 lg:w-9 p-0  hover:bg-button-save group">
+             <Settings className="h-5 w-5 text-[#22222a] group-hover:text-white"/>
+            </Button>
+          
+            {/* <Badge variant="destructive" className="absolute -top-1 -right-1 h-4 w-4 lg:h-5 lg:w-5 text-xs p-0 flex items-center justify-center">
               3
             </Badge>
-          </Button>
+          
  
           {/* Profile Dropdown */}
           <DropdownMenu>

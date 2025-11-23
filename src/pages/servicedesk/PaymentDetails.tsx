@@ -19,6 +19,7 @@ import { ReusableButton } from '@/components/ui/reusable-button';
 import { useMessage } from '@/components/ui/reusable-message';
 import { useAppSelector } from '@/store';
 import { formatDate, formatDates } from '@/_Helper_Functions/HelperFunctions';
+import { FaAngleRight } from 'react-icons/fa';
 
 
 const PaymentDetails = () => {
@@ -476,36 +477,28 @@ const PaymentDetails = () => {
 
   return (
     <div className=" bg-gray-50/30 h-full overflow-y-scroll" >
-      <header className="bg-white border-b px-6 py-4 shadow-sm">
-        <div className="flex items-center gap-4">
-          {/* <SidebarTrigger /> */}
-          <nav className="flex items-center gap-2 text-sm text-gray-600 p-2">
-            {/* <Link to="/" className="flex items-center gap-1 hover:text-blue-600 transition-colors">
-              <Home className="h-4 w-4" />
-              <span>Dashboard</span>
-            </Link>
-            <span>/</span> */}
-            <Link to="/service-desk" className="hover:text-blue-600 transition-colors">Service Desk</Link>
-            <span>/</span>
-            <Link to="/layout/service-desk/subscription" className="hover:text-blue-600 transition-colors">Subscription</Link>
-            <span>/</span>
-            <span className="text-gray-900 font-medium">Payment Details</span>
-          </nav>
-        </div>
-      </header>
+    
 
-      <div className="p-6 space-y-6">
+      <div className="p-4 sm:p-4 space-y-4 sm:space-y-4">
         {/* Header Section */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Payment Details</h1>
-            <p className="text-gray-600 mt-1">Manage subscription payment information</p>
-         {subData &&   <p className=" font-bold text-gray-900">Subscription Status:<span className={subData.SubscriptionStatus==='Expired'?'text-red-500':'text-green-500'}>{subData.SubscriptionStatus}</span></p>}
-          </div>
-        </div>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  
+                     <h1 className="text-2xl font-bold ">Payment Details</h1>
+                   
+                   <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                     <div className="flex items-center gap-2 text-sm text-gray-600">
+                       <span>Service Desk</span>
+                       <FaAngleRight />
+                                 <Link to="/layout/service-desk/subscription" className="hover:text-blue-600 transition-colors">Subscription</Link>
+                                  <FaAngleRight />
+                         <span className="text-gray-900 font-medium">Payment Details</span>
+                     </div>
+                   </div>
+                 </div>
+                 <div></div>
         {/* Payment Form */}
-        <Card className="border-0 shadow-sm">
-          <CardContent className="p-6">
+        <Card className="border-0 shadow-sm p-6">
+          <CardContent className="p-0">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(handleSubmitForm)} className="space-y-6">
                 {/* Customer Information */}
@@ -554,7 +547,7 @@ const PaymentDetails = () => {
                   <ReusableButton
                     htmlType="submit"
                     variant="default"
-                    className="bg-blue-500 border-blue-500 text-white hover:bg-blue-600 hover:border-blue-600"
+                    className="btn-submit-style"
                     // icon={<Save className="h-4 w-4" />}
                     // iconPosition="left"
                   >
@@ -567,6 +560,7 @@ const PaymentDetails = () => {
                     // className="border-orange-500 text-orange-500 hover:bg-orange-50"
                     // icon={<RotateCcw className="h-4 w-4" />}
                     // iconPosition="left"
+                    className='btn-reset-clear-style'
                   >
                     Cancel
                   </ReusableButton>

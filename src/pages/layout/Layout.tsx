@@ -38,7 +38,14 @@ import {
   User,
   UserCheck,
   UserCog,
-  MapPin
+  MapPin,
+  TrendingDown,
+  PlusCircle,
+  Briefcase,
+  ListChecks,
+  ClipboardList,
+  BarChart3,
+  CreditCard
 } from 'lucide-react';
 import { useAppSelector } from '@/store'
 import { setLoading, setReportsMenu } from '@/store/slices/projectsSlice'
@@ -56,7 +63,8 @@ interface NavItem {
 }
 const icons={
 
-"masters":Building2, "servicedesk":Headphones, "fixedassets":Building2, "depreciation":DollarSign, "utilities":Building2, "cwip":Building2, "procurement":Building2, "consumables":Building2, "physicalverification":Building2,"settings":Settings,"softwareassets":Building2
+"masters":Building2,"company":Building2, "servicedesk":Headphones, "fixedassets":Package, "depreciation":TrendingDown, "utilities":Building2, "cwip":Building2, "procurement":Building2, "consumables":ShoppingCart, "physicalverification":Building2,"settings":Settings,"softwareassets":Building2, "servicemaintenance":Wrench,"masterreports":FileText,"createservicerequest":PlusCircle,"myworkbench":Briefcase,"myrequests":ListChecks,"allservicerequests":ClipboardList,"ticketprogressdashboard":BarChart3,"usergroups":Users,
+"configuration":Settings,"subscription":CreditCard,"reports":FileText
 
 }
 
@@ -475,7 +483,7 @@ const icons={
 //           },
 //           {
 //             label: 'Company Hierarchy',
-//             // icon: Building2,
+//             // icon,
 //             link: '/masters/company/company-hierarchy',
 //           },
 //           {
@@ -880,6 +888,7 @@ const Layout = () => {
           }
         }
       }
+      console.log("icon", module.ModuleName.toLowerCase().replace(/\s+/g, ''),icons[module.ModuleName.toLowerCase().replace(/\s+/g, '')])
       const menuItem:NavItem = {
         // id: module.ModuleId,
         // title: module.ModuleName,
@@ -887,7 +896,7 @@ const Layout = () => {
         // key: `${hasNoChildren(module) ? routesObject[modulePath] : module.ModuleName}`,
         link: `${hasNoChildren(module) ? appRoutesObj[modulePath]?.path : module.ModuleName}`,
         label: module.ModuleName,
-        icon:parentModules.includes(modulePath) ? icons[modulePath] :(module.Children && module.Children?.length > 0)?null:RxDotFilled,
+        icon:icons[module.ModuleName.toLowerCase().replace(/\s+/g, '')]?icons[module.ModuleName.toLowerCase().replace(/\s+/g, '')]:false
       };
       
       if (module.Children && module.Children?.length > 0) {
@@ -953,7 +962,7 @@ const Layout = () => {
     <SidebarProvider>
         <div className="h-screen flex w-full bg-app-background overflow-hidden">
           {menuList.length!=0 &&<AppSidebar  navigation={menuList}/>}
-          <SidebarInset className="flex flex-col overflow-hidden bg-[#f9fafb]">
+          <SidebarInset className="flex flex-col overflow-hidden bg-[#fafafa]">
             <FixedHeader />
             {/* <div className="w-full h-full pt-1 transition-all duration-200 ease-in-out"> */}
                {menuList.length!=0 && <Suspense fallback={<ReusableLoader spinning={true} size="lg" position="center" />}>

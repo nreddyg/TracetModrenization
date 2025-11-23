@@ -1097,7 +1097,7 @@ const SubscriptionManagement = () => {
                 icon={<Plus className="h-3 w-3" />}
                 iconPosition="left"
                 onClick={handleNavigation}
-                className="whitespace-nowrap hover:bg-none"
+                className="bg-[#3F50A0] text-white hover:bg-[#3F50A0] hover:text-white whitespace-nowrap hover:bg-none"
               >
                 Payment Details
               </ReusableButton>
@@ -1117,13 +1117,11 @@ const SubscriptionManagement = () => {
 
           {/* Subscription Form */}
 
-          <Card className="border-0 shadow-sm">
-            <CardHeader className="pb-3 pt-4">
-              <CardTitle className="text-base font-semibold">
-                Add Subscription
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+          <Card className="bg-card rounded-lg border border-border p-5 mb-6">
+           
+                <h2 className="text-lg font-semibold mb-4">
+                {"Add Subscription"}
+              </h2>
               <Form {...form}>
                 <form className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1135,12 +1133,12 @@ const SubscriptionManagement = () => {
                   </div>
                 </form>
               </Form>
-            </CardContent>
+          
           </Card>
 
 
           {/* User Group List with ReusableTable */}
-          <Card className="border-0 shadow-sm">
+          {/* <Card className="border-0 shadow-sm">
             <CardHeader className="pb-3 pt-2">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
                 <CardTitle className="text-base font-semibold">Subscription List</CardTitle>
@@ -1159,15 +1157,19 @@ const SubscriptionManagement = () => {
               </div>
             </CardHeader>
             <CardContent className="pt-0">
-              <ReusableTable
+            
+            </CardContent>
+          </Card> */}
+              <div className=" border bg-white rounded-lg pb-5 pt-2">
+      <ReusableTable
                 data={filteredData}
                 columns={columns}
                 // actions={tableActions}
                 permissions={tablePermissions}
                 // loading={loading}
-                title=""
+                title="Subscription List"
                 // onRefresh={handleRefresh}
-                enableSearch={false}
+                enableSearch={true}
                 enableSelection={false}
                 enableExport={true}
                 enableColumnVisibility={true}
@@ -1179,8 +1181,7 @@ const SubscriptionManagement = () => {
                 rowHeight="normal"
                 storageKey="usergroups-table"
               />
-            </CardContent>
-          </Card>
+        </div>
         </div>
       </div>
     </ScrollArea>

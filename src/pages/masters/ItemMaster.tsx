@@ -399,70 +399,39 @@ const ItemMaster = () => {
     })
   };
   return (
-    <div className="h-full overflow-y-auto bg-gray-50 flex flex-col ">
-      <div className="flex flex-1 overflow-hidden">
-        <div className="flex-1 flex flex-col min-w-0 ">
-          <header className="px-6 py-3">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+       <>
+       <ScrollArea>
+    <div className="h-full  ">
+      <div className="p-4 sm:p-4 space-y-4 sm:space-y-4">
+      
+
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+           
+            
+            <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
               <div className="flex items-center gap-2 text-sm text-gray-600">
-                <span>Masters</span>
+             <span>Masters</span>
                 <FaAngleRight />
                 <span>Consumables</span>
                 <FaAngleRight />
                 <span className="text-gray-900 font-medium">Item Master</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-                  <DialogTrigger asChild>
+            </div>
+            
+                                   
                     <ReusableButton
                       variant="primary"
                       icon={<Plus className="h-4 w-4" />}
                       className="btn-submit-style"
-                      onClick={() => { setRecordToEditId(null); reset({ StoreName: "", Branch: "", StoreDescription: "" }) }}
+                      onClick={() => {  setIsAddDialogOpen(true); setRecordToEditId(null); reset({ StoreName: "", Branch: "", StoreDescription: "" }) }}
                     >
                       Add
                     </ReusableButton>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-2xl">
-                    <DialogHeader>
-                      <DialogTitle>{recordToEditId ? "Update Item master" : "Add Item master"}</DialogTitle>
-                    </DialogHeader>
-                    <div className='grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4'>
-                      {getFieldsByNames(['ItemName', 'ItemCode', "MainCategory", "SubCategory", "UnitofMeasure", "UnitPrice", "ReorderLevel"]).map((field) => {
-                        return <div className="flex items-center space-x-2">
-                          {renderField(field)}
-                        </div>;
-                      })}
-                    </div>
-                    <div className='w-100'>
-                      {getFieldsByNames(['ItemDescription']).map((field) => {
-                        return <div className=" space-x-2">
-                          {renderField(field)}
-                        </div>;
-                      })}
-                    </div>
-                    <div className="flex justify-end gap-2">
-                      <ReusableButton
-                        variant="default"
-                        onClick={() => setIsAddDialogOpen(false)}
-                      >
-                        Cancel
-                      </ReusableButton>
-                      <ReusableButton
-                        htmlType="submit"
-                        variant="primary"
-                        className="btn-submit-style"
-                        onClick={() => handleSubmit(submit)()}
-                      >
-                        {recordToEditId ? "Update" : "Save"}
-                      </ReusableButton>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              </div>
-            </div>
-          </header>
-          <div className="flex-1 p-3 pt-0 overflow-hidden min-h-0  ">
+              
+                             
+          </div>
+      
+          {/* <div className="flex-1 p-3 pt-0 overflow-hidden min-h-0  ">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-1 h-full">
               <div className="lg:col-span-12 flex flex-col  min-h-0 ">
                 <ScrollArea className="flex-1">
@@ -485,9 +454,60 @@ const ItemMaster = () => {
                 </ScrollArea>
               </div>
             </div>
-          </div>
+          </div> */}
+
+           <div className=" border bg-white rounded-lg pb-5 pt-2">
+
+             <ReusableTable
+                              title='Item Master'
+                              data={dataSource}
+                              columns={columns}
+                              enableExport={false}
+                            />
+        </div>
         </div>
       </div>
+
+      </ScrollArea>
+       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+               
+                  <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                      <DialogTitle>{recordToEditId ? "Update Item master" : "Add Item master"}</DialogTitle>
+                    </DialogHeader>
+                    <div className='grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4'>
+                      {getFieldsByNames(['ItemName', 'ItemCode', "MainCategory", "SubCategory", "UnitofMeasure", "UnitPrice", "ReorderLevel"]).map((field) => {
+                        return <div className="flex items-center space-x-2">
+                          {renderField(field)}
+                        </div>;
+                      })}
+                    </div>
+                    <div className='w-100'>
+                      {getFieldsByNames(['ItemDescription']).map((field) => {
+                        return <div className=" space-x-2">
+                          {renderField(field)}
+                        </div>;
+                      })}
+                    </div>
+                    <div className="flex justify-end gap-2">
+                      <ReusableButton
+                        variant="text"
+                        className='btn-reset-clear-style'
+                        onClick={() => setIsAddDialogOpen(false)}
+                      >
+                        Cancel
+                      </ReusableButton>
+                      <ReusableButton
+                        htmlType="submit"
+                        variant="text"
+                        className="btn-submit-style"
+                        onClick={() => handleSubmit(submit)()}
+                      >
+                        {recordToEditId ? "Update" : "Save"}
+                      </ReusableButton>
+                    </div>
+                  </DialogContent>
+                </Dialog>
       <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -498,7 +518,8 @@ const ItemMaster = () => {
           </DialogHeader>
           <DialogFooter>
             <ReusableButton
-              variant="default"
+              variant="text"
+              className='btn-reset-clear-style'
               onClick={() => setIsDelModalOpen(false)}
             >
               Cancel
@@ -513,7 +534,8 @@ const ItemMaster = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    
+    </>
   );
 };
 export default ItemMaster;

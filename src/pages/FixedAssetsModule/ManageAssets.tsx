@@ -15,6 +15,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface Asset {
   id: string;
@@ -37,9 +38,10 @@ const mockAssets: Asset[] = [
 const ManageAssets = () => {
   const navigate = useNavigate();
   const [assets, setAssets] = useState<Asset[]>(mockAssets);
+  const [activeTab, setActiveTab] = useState('main');
   const [selectedAssets, setSelectedAssets] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  
+
   // Modal states
   const [showInsuranceModal, setShowInsuranceModal] = useState(false);
   const [showMaintenanceModal, setShowMaintenanceModal] = useState(false);
@@ -47,7 +49,7 @@ const ManageAssets = () => {
   const [showDocumentModal, setShowDocumentModal] = useState(false);
   const [showAssignmentModal, setShowAssignmentModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  
+
   // Form states
   const [insuranceStartDate, setInsuranceStartDate] = useState<Date>();
   const [insuranceEndDate, setInsuranceEndDate] = useState<Date>();
@@ -103,8 +105,10 @@ const ManageAssets = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background transition-all duration-300 ease-in-out">
-      <header className="bg-card border-b px-6 py-4 shadow-sm">
+    // <div className="min-h-screen bg-background transition-all duration-300 ease-in-out">
+    <ScrollArea className="h-full">
+
+      <div className="bg-card border-b px-6 py-4 shadow-sm">
         <div className="flex items-center gap-4">
           <SidebarTrigger />
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -113,7 +117,7 @@ const ManageAssets = () => {
             <span className="text-foreground font-medium">Manage Assets</span>
           </div>
         </div>
-      </header>
+      </div>
 
       <div className="p-6 space-y-6">
         <div className="flex items-center justify-between">
@@ -223,7 +227,7 @@ const ManageAssets = () => {
                       onCheckedChange={(checked) => handleSelectAsset(asset.id, checked as boolean)}
                     />
                   </TableCell>
-                  <TableCell 
+                  <TableCell
                     className="text-primary font-medium cursor-pointer hover:underline"
                     onClick={() => handleAssetClick(asset.assetCode)}
                   >
@@ -267,7 +271,7 @@ const ManageAssets = () => {
       </div>
 
       {/* Insurance Modal */}
-      <Dialog open={showInsuranceModal} onOpenChange={setShowInsuranceModal}>
+      {/* <Dialog open={showInsuranceModal} onOpenChange={setShowInsuranceModal}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Asset Insurance</DialogTitle>
@@ -327,10 +331,10 @@ const ManageAssets = () => {
             <Button onClick={handleInsuranceSubmit}>Submit</Button>
           </DialogFooter>
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
 
       {/* Maintenance Modal */}
-      <Dialog open={showMaintenanceModal} onOpenChange={setShowMaintenanceModal}>
+      {/* <Dialog open={showMaintenanceModal} onOpenChange={setShowMaintenanceModal}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Asset Maintenance</DialogTitle>
@@ -406,10 +410,10 @@ const ManageAssets = () => {
             <Button onClick={handleMaintenanceSubmit}>Submit</Button>
           </DialogFooter>
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
 
       {/* Assignment Modal */}
-      <Dialog open={showAssignmentModal} onOpenChange={setShowAssignmentModal}>
+      {/* <Dialog open={showAssignmentModal} onOpenChange={setShowAssignmentModal}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Asset Assignment</DialogTitle>
@@ -447,10 +451,10 @@ const ManageAssets = () => {
             <Button onClick={handleAssignmentSubmit}>Submit</Button>
           </DialogFooter>
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
 
       {/* Document Modal */}
-      <Dialog open={showDocumentModal} onOpenChange={setShowDocumentModal}>
+      {/* <Dialog open={showDocumentModal} onOpenChange={setShowDocumentModal}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add New Document</DialogTitle>
@@ -477,10 +481,10 @@ const ManageAssets = () => {
             <Button onClick={handleDocumentSubmit}>Submit</Button>
           </DialogFooter>
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
 
       {/* Parameters Modal */}
-      <Dialog open={showParametersModal} onOpenChange={setShowParametersModal}>
+      {/* <Dialog open={showParametersModal} onOpenChange={setShowParametersModal}>
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Select Parameters</DialogTitle>
@@ -615,10 +619,10 @@ const ManageAssets = () => {
             <Button onClick={() => setShowParametersModal(false)}>Apply Filters</Button>
           </DialogFooter>
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
 
       {/* Delete Confirmation Modal */}
-      <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
+      {/* <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="text-center">
@@ -630,8 +634,8 @@ const ManageAssets = () => {
             <Button variant="destructive" onClick={handleDeleteAssets}>Delete</Button>
           </DialogFooter>
         </DialogContent>
-      </Dialog>
-    </div>
+      </Dialog> */}
+    </ScrollArea>
   );
 };
 

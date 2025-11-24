@@ -160,3 +160,24 @@ export const convertOrgLogoFromApi = async (apiData: {
     return null;
   }
 };
+
+export const treefunWithParent = (data, id, idName, assetLocationUnique) => {
+  const treeData = [];
+  const uniqueId = idName ? idName : "id";
+  data.forEach((item) => {
+    if (item["parent"] || item["Parent"]) {
+      let p = item["parent"] ? "parent" : "Parent";
+      if (item[p] == id) {
+        item.title = `${item.text || item.Name || item.LocationName}`;
+        item.key = item[uniqueId];
+        item.value = item[assetLocationUnique] || item[uniqueId] || item[item.Name] || item.Name || item.text || item.LocationName;
+        const children = treefunWithParent(data, item[uniqueId], idName, assetLocationUnique);
+        if (children.length > 0) {
+          item.children = children;
+        }
+        treeData.push(item);
+      }
+    }
+  });
+  return treeData;
+};

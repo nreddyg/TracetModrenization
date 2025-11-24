@@ -7,7 +7,7 @@ export const ADD_ASSET_DB: BaseField[] = [
         fieldType: 'text',
         name: 'AssetName',
         isRequired: true,
-        jsontype:'assetdetails'
+        jsontype:'assetdetails',
     },
     {
         label: 'Acquisition Type',
@@ -62,9 +62,10 @@ export const ADD_ASSET_DB: BaseField[] = [
         name: 'ParentAssetCode',
         defaultValue: "",
         isRequired: false,
-        jsontype:'assetdetails'
+        jsontype:'assetdetails',
+        show:false
     },
-    {
+     {
         label: 'Is Asset Taggable',
         fieldType: "dropdown",
         name: "IsAssetTagable",
@@ -111,6 +112,7 @@ export const ADD_ASSET_DB: BaseField[] = [
         name: "BarcodeOption",
         defaultValue: "Other",
         jsontype:'assetdetails',
+        listeners:['CustomerAssetNo','BarcodeNo'],
         options: [
             {
                 label: "Asset code",
@@ -142,7 +144,8 @@ export const ADD_ASSET_DB: BaseField[] = [
         name: 'BarcodeNo',
         value: "",
         isRequired: true,
-        jsontype:'assetdetails'
+        jsontype:'assetdetails',
+        show:true
     },
     {
         label: "Description",
@@ -311,7 +314,8 @@ export const ADD_ASSET_DB: BaseField[] = [
         name: 'LeasedVendorName',
         placeholder: 'Enter Leased Vendor Name',
         isRequired: false,
-        jsontype:'purchase'
+        jsontype:'purchase',
+        show:false
     },
     {
         label: 'Lease Expiry Date',
@@ -320,7 +324,8 @@ export const ADD_ASSET_DB: BaseField[] = [
         placeholder: 'DD/MM/YYYY',
         format: 'DD/MM/YYYY',
         isRequired: false,
-        jsontype:'purchase'
+        jsontype:'purchase',
+        show:false
     },
     {
         label: 'Party Name',
@@ -328,7 +333,8 @@ export const ADD_ASSET_DB: BaseField[] = [
         name: 'PartyName',
         placeholder: 'Enter Party Name',
         isRequired: false,
-        jsontype:'purchase'
+        jsontype:'purchase',
+        show:false
     },
     {
         label: 'Proposal Number',
@@ -336,7 +342,8 @@ export const ADD_ASSET_DB: BaseField[] = [
         name: 'ProposalNumber',
         placeholder: 'Enter Proposal Number',
         isRequired: false,
-        jsontype:'purchase'
+        jsontype:'purchase',
+        show:false
     },
     {
         label: 'Asset Acquistition Account',
@@ -344,7 +351,8 @@ export const ADD_ASSET_DB: BaseField[] = [
         name: 'AssetAcquisitionAccount',
         disabled: true,
         isRequired: false,
-        jsontype:'purchase'
+        jsontype:'purchase',
+        show:false
     },
     {
         label: 'Asset Depreciation Account',
@@ -352,7 +360,8 @@ export const ADD_ASSET_DB: BaseField[] = [
         name: 'AssetDepreciationAccount',
         disabled: true,
         isRequired: false,
-        jsontype:'purchase'
+        jsontype:'purchase',
+        show:false
     },
     {
         label: 'Depreciation Account',
@@ -360,39 +369,43 @@ export const ADD_ASSET_DB: BaseField[] = [
         name: 'DepreciationAccount',
         disabled: true,
         isRequired: false,
-        jsontype:'purchase'
+        jsontype:'purchase',
+        show:false
     },
       {
         label: 'Asset Location',
-        fieldType: 'multiselect',
+        fieldType: 'treeselect',
         name: 'AssetLocation',
         options: [],
         disabled: false,
         isRequired: true,
-        jsontype:'allocation'
+        jsontype:'allocation',
+        placeholder:'Select Location',
     },
     {
         label: 'Department',
-        fieldType: 'multiselect',
+        fieldType: 'treeselect',
         name: 'Department',
-        options: [],
+        treeData: [],
         isRequired: true,
-        jsontype:'allocation'
+        jsontype:'allocation',
+        placeholder:'Select Department'
     },
     {
         label: 'Cost Center',
-        fieldType: 'multiselect',
+        fieldType: 'treeselect',
         name: 'CostCenter',
-        options: [],
+        treeData: [],
         isRequired: false,
-        jsontype:'allocation'
+        jsontype:'allocation',
+        placeholder:'Select Cost Center'
     },
     {
         label: 'Assign To',
         fieldType: 'dropdown',
         name: 'EmpId',
         placeholder: 'Select User',
-        options: [],
+        treeData: [],
         isRequired: false,
         jsontype:'allocation'
     },
@@ -435,6 +448,7 @@ export const ADD_ASSET_DB: BaseField[] = [
         name: 'AssetUsefulLife',
         defaultValue: 1,
         isRequired: true,
+        jsontype:'depreciation'
     },
     {
         label: 'Expected Life End Date',
@@ -451,6 +465,7 @@ export const ADD_ASSET_DB: BaseField[] = [
         name: 'AssetCode',
         placeholder: 'Asset Code',
         isRequired: false,
+        jsontype:'parentAsset'
     },
     {
         label: '',
@@ -458,6 +473,7 @@ export const ADD_ASSET_DB: BaseField[] = [
         name: 'BarcodeNo',
         placeholder: 'Barcode No',
         isRequired: false,
+        jsontype:'parentAsset'
     },
     {
         label: '',
@@ -465,6 +481,7 @@ export const ADD_ASSET_DB: BaseField[] = [
         name: 'CustomerAssetNo',
         placeholder: 'Customer Asset No',
         isRequired: false,
+        jsontype:'parentAsset'
     },
     {
         label: '',
@@ -473,6 +490,7 @@ export const ADD_ASSET_DB: BaseField[] = [
         placeholder: 'Asset Location',
         defaultValue: [],
         isRequired: false,
+        jsontype:'parentAsset'
     },
     {
         label: '',
@@ -481,6 +499,7 @@ export const ADD_ASSET_DB: BaseField[] = [
         placeholder: "Department",
         defaultValue: [],
         isRequired: false,
+        jsontype:'parentAsset'
     },
     {
         label: '',
@@ -489,6 +508,7 @@ export const ADD_ASSET_DB: BaseField[] = [
         placeholder: 'Cost Center',
         defaultValue: [],
         isRequired: false,
+        jsontype:'parentAsset'
     },
     {
         label: '',
@@ -497,6 +517,7 @@ export const ADD_ASSET_DB: BaseField[] = [
         options: [],
         placeholder: "Main Category",
         isRequired: false,
+        jsontype:'parentAsset'
     },
     {
         label: '',
@@ -505,6 +526,7 @@ export const ADD_ASSET_DB: BaseField[] = [
         options: [],
         placeholder: "Sub Category",
         isRequired: false,
+        jsontype:'parentAsset'
     },
 ]
 

@@ -311,3 +311,5 @@ export const URL_GET_CHANGE_ASSET_CATEGORY='/api/FixedAssetAPI/GetChangeInAssetC
 export const URL_GET_COLUMNS_FOR_CHANGE_ASSET_CATEGORY='/api/FixedAssetAPI/GetChangeInAssetCategoryGridColumnsList';
 
 
+// Asset Transfer
+export const URL_GET_ASSET_TRANSFER_HIST_LIST = `/api/FixedAssetAPI/GetAssetsTransferHistoryList`

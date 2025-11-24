@@ -27,9 +27,9 @@ import { MultiSelectConfig } from '../masters/ReportsMasters'
 function AssetAcquisition() {
     const dispatch = useAppDispatch();
     const msg = useMessage();
-    const companyId=useAppSelector(state=>state.projects.companyId);
-    const branchName=useAppSelector(state=>state.projects.branch);
-    const loggedInUserId=JSON.parse(localStorage.getItem('LoggedInUser'))['UserId'];
+    const companyId = useAppSelector(state => state.projects.companyId);
+    const branchName = useAppSelector(state => state.projects.branch);
+    const loggedInUserId = JSON.parse(localStorage.getItem('LoggedInUser'))['UserId'];
     const [fields, setFields] = useState<BaseField[]>(ADD_ASSET_DB);
     const form = useForm<GenericObject>({
         defaultValues: fields.reduce((acc, f) => {
@@ -39,11 +39,33 @@ function AssetAcquisition() {
         mode: 'onChange'
     });
     const { control, register, handleSubmit, trigger, watch, setValue, getValues, reset, formState: { errors } } = form;
+    useEffect(() => {
+        if (companyId && branchName && loggedInUserId) fetchAllLookupsData();
+    }, [companyId, branchName, loggedInUserId])
 
-    useEffect(()=>{
-        if(companyId && branchName && loggedInUserId) fetchAllLookupsData();
-    },[companyId,branchName,loggedInUserId])
-
+    //Functionality
+    const watchAll = watch();
+    useEffect(() => {
+        let updatedFields = [...fields];
+        Object.keys(fieldRules).forEach((fieldName) => {
+            if (watchAll[fieldName] !== undefined) {
+                updatedFields = fieldRules[fieldName](watchAll[fieldName], updatedFields);
+            }
+        });
+        setFields(updatedFields);
+    }, [watchAll]);
+     const fieldRules = {
+        BarcodeOption: (value, fields) => {
+            const newFields = [...fields];
+            const barcodeNo = newFields.find(f => f.name === "BarcodeNo");
+            if (barcodeNo) {
+                barcodeNo.show = value === "Other";
+                barcodeNo.isRequired = value === "Other";
+            }
+            return newFields;
+        },
+    };
+    
     const setLookupsDataInJson = async (dataset: any) => {
         let keys = Object.keys(dataset);
         const updatedFields = fields.map(field => {
@@ -53,15 +75,15 @@ function AssetAcquisition() {
                     let treeData = treefunWithParent(data, id, idName, assetLocationUnique);
                     return { ...field, treeData };
                 } else {
-                    let isUser=field.name==='EmpId';
-                    let isAssetOwner=field.name==='AssetOwner';
+                    let isUser = field.name === 'EmpId';
+                    let isAssetOwner = field.name === 'AssetOwner';
                     let options = Array.from(
                         new Map(
                             dataset[field.name].data.map((item: any) => [
                                 item[dataset[field.name].value],
                                 {
-                                    label:isUser || isAssetOwner? `${item.Text} ( ${item.EmpId} )`:item[dataset[field.name].label],
-                                    value:isUser? item.EmpId:isAssetOwner?`${item.Text} ( ${item.EmpId} )`:item[dataset[field.name].value],
+                                    label: isUser || isAssetOwner ? `${item.Text} ( ${item.EmpId} )` : item[dataset[field.name].label],
+                                    value: isUser ? item.EmpId : isAssetOwner ? `${item.Text} ( ${item.EmpId} )` : item[dataset[field.name].value],
                                 },
                             ])
                         ).values()
@@ -74,36 +96,64 @@ function AssetAcquisition() {
         setFields(updatedFields);
     }
     // Fetch All Lookups Data
-    const fetchAllLookupsData=async()=>{
-        dispatch(setLoading(true));
-        try{
-            const [acqList,wcList,depList,atList,mcList,sellerList,manufacturerList,usersList,aoList,alList,deptList,ccList] = await Promise.allSettled(
-                [
-                    getAssetAcquistionTypeLookupData(companyId),getWorkingConditionLookupData(companyId),
-                    getDependencyLookupData(companyId),getAssetTaggableLookupData(companyId),
-                    getCategoryList(companyId),getSellerLookupData(companyId),
-                    getManufacturerLookupData(companyId),getAssignedToUserLookupData(companyId),
-                    getAssetOwnerLookupData(companyId),getAssetLocationDetals(companyId, branchName),
-                    getDepartmentLookupByUser(companyId,loggedInUserId),getCostCenterData(companyId)
-                ]
-            )
-            const allResponses={
-                AcquisitionType:{data:acqList.status==='fulfilled' && acqList.value.data && acqList.value.data.AcqusitionTypeLookup && acqList.value.data.AcqusitionTypeLookup.length>0 ? acqList.value.data.AcqusitionTypeLookup : [],label:'Name',value:'Name',isTree:false},
-                WorkingStatus:{data:wcList.status==='fulfilled' && wcList.value.data && wcList.value.data.WorkingConditionLookup && wcList.value.data.WorkingConditionLookup.length>0 ? wcList.value.data.WorkingConditionLookup : [],label:'Name',value:'Name',isTree:false},
-                DependencyType:{data:depList.status==='fulfilled' && depList.value.data && depList.value.data.DepandencyTypeLookup && depList.value.data.DepandencyTypeLookup.length>0 ? depList.value.data.DepandencyTypeLookup : [],label:'Name',value:'Name',isTree:false},
-                IsAssetTagable:{data:atList.status==='fulfilled' && atList.value.data && atList.value.data.IsAssetTaggableLookup && atList.value.data.IsAssetTaggableLookup.length>0 ? atList.value.data.IsAssetTaggableLookup : [],label:'Name',value:'Name',isTree:false},
-                MainCategory:{data:mcList.status==='fulfilled' && mcList.value.data && mcList.value.data.CategoriesLookup && mcList.value.data.CategoriesLookup.length>0 ? mcList.value.data.CategoriesLookup : [],label:'CategoryName',value:'CategoryId',isTree:false},
-                Seller:{data:sellerList.status==='fulfilled' && sellerList.value.data && sellerList.value.data.SellerDetails && sellerList.value.data.SellerDetails.length>0 ? sellerList.value.data.SellerDetails : [],label:'Seller',value:'Seller',isTree:false},
-                Manufacture:{data:manufacturerList.status==='fulfilled' && manufacturerList.value.data && manufacturerList.value.data.ManufacturerDetails && manufacturerList.value.data.ManufacturerDetails.length>0 ? manufacturerList.value.data.ManufacturerDetails : [],label:'Manufacturer',value:'Manufacturer',isTree:false},
-                EmpId:{data:usersList.status==='fulfilled' && usersList.value.data && usersList.value.data.AssignedUserDetails && usersList.value.data.AssignedUserDetails.length>0 ? usersList.value.data.AssignedUserDetails : [],label:`Text`,value:'EmpId',isTree:false},
-                AssetOwner:{data:aoList.status==='fulfilled' && aoList.value.data && aoList.value.data.AssetOwnerDetails && aoList.value.data.AssetOwnerDetails.length>0 ? aoList.value.data.AssetOwnerDetails : [],label:'Text',value:'EmpId',isTree:false},
-                AssetLocation:{data:alList.status==='fulfilled' && alList.value.data && alList.value.data.length>0 && alList.value.data.status===undefined ? alList.value.data : [],isTree:true,id:"#",idName:'',assetLocationUnique:'orginalId'},
-                Department:{data:deptList.status==='fulfilled' && deptList.value.data && deptList.value.data.length>0 && deptList.value.data.status===undefined ? deptList.value.data : [],isTree:true,id:'#'},
-                CostCenter:{data:ccList.status==='fulfilled' && ccList.value.data && ccList.value.data.length>0 && ccList.value.data.status===undefined ? ccList.value.data : [],id:'#',isTree:true},
-            }
-            setLookupsDataInJson(allResponses);
-        }catch{}finally{dispatch(setLoading(false))}
+    type LookupResult<T = any> = | { status: "fulfilled"; value: { data: T } } | { status: "rejected"; reason: any };
+    const getSafe = <T = any>(res: LookupResult, path: string, fallback: T = [] as unknown as T): T => {
+        if (res.status !== "fulfilled") return fallback;
+        const parts = path.split(".");
+        let current: any = res.value?.data;
+        for (const p of parts) {
+            if (!current?.[p]) return fallback;
+            current = current[p];
+        }
+        return current || fallback;
+    };
+    interface LookupConfig {
+        res: LookupResult;
+        path?: string;
+        label?: string;
+        value?: string;
+        isTree?: boolean;
+        id?: string;
+        assetLocationUnique?: string;
     }
+    const fetchAllLookupsData = async () => {
+        dispatch(setLoading(true));
+        try {
+            const promises = [getAssetAcquistionTypeLookupData(companyId),getWorkingConditionLookupData(companyId),
+                getDependencyLookupData(companyId),getAssetTaggableLookupData(companyId),
+                getCategoryList(companyId),getSellerLookupData(companyId),
+                getManufacturerLookupData(companyId),getAssignedToUserLookupData(companyId),
+                getAssetOwnerLookupData(companyId),getAssetLocationDetals(companyId, branchName),
+                getDepartmentLookupByUser(companyId, loggedInUserId),getCostCenterData(companyId)
+            ];
+            const results = await Promise.allSettled(promises) as LookupResult[];
+            const [acqList, wcList, depList, atList, mcList,sellerList, manufacturerList, usersList,aoList, alList, deptList, ccList] = results;
+            const config: Record<string, LookupConfig> = {
+                AcquisitionType: { res: acqList, path: "AcqusitionTypeLookup", label: "Name", value: "Name" },
+                WorkingStatus: { res: wcList, path: "WorkingConditionLookup", label: "Name", value: "Name" },
+                DependencyType: { res: depList, path: "DepandencyTypeLookup", label: "Name", value: "Name" },
+                IsAssetTagable: { res: atList, path: "IsAssetTaggableLookup", label: "Name", value: "Name" },
+                MainCategory: { res: mcList, path: "CategoriesLookup", label: "CategoryName", value: "CategoryId" },
+                Seller: { res: sellerList, path: "SellerDetails", label: "Seller", value: "Seller" },
+                Manufacture: { res: manufacturerList, path: "ManufacturerDetails", label: "Manufacturer", value: "Manufacturer" },
+                EmpId: { res: usersList, path: "AssignedUserDetails", label: "Text", value: "EmpId" },
+                AssetOwner: { res: aoList, path: "AssetOwnerDetails", label: "Text", value: "EmpId" },
+                AssetLocation: { res: alList, isTree: true, id: "#", assetLocationUnique: "orginalId" },
+                Department: { res: deptList, isTree: true, id: "#" },
+                CostCenter: { res: ccList, isTree: true, id: "#" }
+            };
+            const allResponses = Object.fromEntries(
+                Object.entries(config).map(([key, cfg]) => {
+                    const data =cfg.path ? getSafe(cfg.res, cfg.path) : cfg.res.status === "fulfilled" && Array.isArray(cfg.res.value?.data) &&
+                                cfg.res.value.data[0]?.status === undefined ? cfg.res.value.data : [];
+                    return [ key,{data,label: cfg.label,value: cfg.value,isTree: cfg.isTree || false,id: cfg.id,assetLocationUnique: cfg.assetLocationUnique}];
+                })
+            );
+            setLookupsDataInJson(allResponses);
+        } finally {
+            dispatch(setLoading(false));
+        }
+    };
     const multiSelectConfig: MultiSelectConfig = {
         isHierarchy: true,
         treeCheckable: false,
@@ -129,10 +179,11 @@ function AssetAcquisition() {
             const selectedTitles = getSelectedTitles(treeData, selectedKeys);
         }
     };
+    const getFieldsByNames = (names: string[], type: string) => fields.filter(f => names.includes(f.name!) && f.jsontype === type);
     const renderField = (field: BaseField) => {
-        const { name, label, fieldType, isRequired, dependsOn, show = true } = field;
+        const { name, label, fieldType, isRequired, show = true } = field;
         const validationRules = { required: isRequired ? `${label} is required` : false }
-        if(!show) return null;
+        if (!show) return null;
         switch (fieldType) {
             case "text":
             case 'number':
@@ -150,7 +201,7 @@ function AssetAcquisition() {
                                 min={1}
                                 error={errors[name]?.message as string}
                                 autoComplete="new-password"
-                                {...(name==='Quantity' && {min:1})}
+                                {...(name === 'Quantity' && { min: 1 })}
                             />
                         )}
                     />
@@ -307,30 +358,42 @@ function AssetAcquisition() {
                                                 <div className="p-3">
                                                     <div className="">
                                                         <Tabs defaultValue="assetdetails">
-                                                            <TabsList>
+                                                            <TabsList className='w-full overflow-auto'>
                                                                 <TabsTrigger value="assetdetails">Asset Details</TabsTrigger>
                                                                 <TabsTrigger value="purchase">Purchase Details</TabsTrigger>
                                                                 <TabsTrigger value="allocation">Allocation Details</TabsTrigger>
                                                                 <TabsTrigger value="depreciation">Depreciation Details</TabsTrigger>
-
                                                             </TabsList>
                                                             <TabsContent value="assetdetails" className="mt-6">
-                                                                <div className="grid grid-cols-3 gap-6">
-                                                                    {fields.filter(f => f.jsontype === 'assetdetails').map(renderField)}
+                                                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                                                                    {getFieldsByNames(['AssetName', 'AcquisitionType', 'WorkingStatus'], 'assetdetails').map(renderField)}
+                                                                    {getFieldsByNames(['Quantity'], 'assetdetails').map(field => {
+                                                                        const splitField = fields.find(f => f.name === 'SplitQuantity');
+                                                                        return (
+                                                                            <div key="qty-group" className="col-span-1 relative">
+                                                                                <div className="absolute right-0 top-0 z-20 flex items-center gap-2 text-sm font-medium text-[#485585]">
+                                                                                    {renderField(splitField)}
+                                                                                </div>
+                                                                                {renderField(field)}
+                                                                            </div>
+                                                                        );
+                                                                    })}
+                                                                    {getFieldsByNames(['DependencyType', 'ParentAssetCode', 'MainCategory', 'SubCategory', 'IsAssetTagable', 'BarcodeOption', 'CustomerAssetNo', 'BarcodeNo',], 'assetdetails').map(renderField)}
                                                                 </div>
+                                                                <div className='grid grid-cols-1 mt-6'>{getFieldsByNames(['AssetDescription'], 'assetdetails').map(renderField)}</div>
                                                             </TabsContent>
                                                             <TabsContent value="purchase" className="mt-6">
-                                                                <div className="grid grid-cols-3 gap-6">
+                                                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                                                                     {fields.filter(f => f.jsontype === 'purchase').map(renderField)}
                                                                 </div>
                                                             </TabsContent>
                                                             <TabsContent value="allocation" className="mt-6">
-                                                                <div className="grid grid-cols-3 gap-6">
+                                                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                                                                     {fields.filter(f => f.jsontype === 'allocation').map(renderField)}
                                                                 </div>
                                                             </TabsContent>
                                                             <TabsContent value="depreciation" className="mt-6">
-                                                                <div className="grid grid-cols-3 gap-6">
+                                                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                                                                     {fields.filter(f => f.jsontype === 'depreciation').map(renderField)}
                                                                 </div>
                                                             </TabsContent>

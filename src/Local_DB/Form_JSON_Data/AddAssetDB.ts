@@ -448,6 +448,7 @@ export const ADD_ASSET_DB: BaseField[] = [
         name: 'AssetUsefulLife',
         defaultValue: 1,
         isRequired: true,
+        jsontype:'depreciation'
     },
     {
         label: 'Expected Life End Date',

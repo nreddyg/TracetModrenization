@@ -23,6 +23,8 @@ import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { FaAngleRight } from 'react-icons/fa'
 import { MultiSelectConfig } from '../masters/ReportsMasters'
+import { getSubCategoryLookUp } from '@/services/servicedeskReportsServices'
+import { getAssetCatByID } from '@/services/assetCategoryServices'
 
 function AssetAcquisition() {
     const dispatch = useAppDispatch();
@@ -43,29 +45,127 @@ function AssetAcquisition() {
         if (companyId && branchName && loggedInUserId) fetchAllLookupsData();
     }, [companyId, branchName, loggedInUserId])
 
-    //Functionality
-    const watchAll = watch();
-    useEffect(() => {
-        let updatedFields = [...fields];
-        Object.keys(fieldRules).forEach((fieldName) => {
-            if (watchAll[fieldName] !== undefined) {
-                updatedFields = fieldRules[fieldName](watchAll[fieldName], updatedFields);
+    const isEmptyValue = (v: any) => v === '' || v === null || v === undefined || (Array.isArray(v) && v.length === 0);
+    const runRuleAndApply = async (name: string, newValue: any) => {
+        const ruleFn = (fieldRules as any)[name];
+        if (!ruleFn) return;
+        try {
+            let resultOrPromise: any;
+            let snapshot: BaseField[] = [];
+            setFields(prev => {
+                snapshot = prev;
+                return prev;
+            });
+            resultOrPromise = ruleFn(newValue, snapshot);
+            const updatedFields = resultOrPromise && typeof resultOrPromise.then === 'function' ? await resultOrPromise : resultOrPromise;
+            if (!updatedFields) return;
+            if (Array.isArray(updatedFields)) {
+                setFields(prev => {
+                    return updatedFields;
+                });
+                return;
             }
+            const { updates = [], options = [], setValues = [] } = updatedFields as any;
+            if (updates.length > 0 || options.length > 0) {
+                setFields(prev => {
+                    const next = prev.map(f => ({ ...f }));
+                    updates.forEach((u: any) => {
+                        const idx = next.findIndex(x => x.name === u.name);
+                        if (idx >= 0) next[idx] = { ...next[idx], ...(u.props || {}) };
+                    });
+                    options.forEach((o: any) => {
+                        const idx = next.findIndex(x => x.name === o.name);
+                        if (idx >= 0) next[idx] = { ...next[idx], options: o.options ?? [] };
+                    });
+                    return next;
+                });
+            }
+            if (setValues.length > 0) {
+                setValues.forEach((s: any) => {
+                    setValue(s.name, s.value, { shouldValidate: false, shouldDirty: true });
+                });
+            }
+        } catch (err) {
+            console.error('rule execution error for', name, err);
+        }
+    };
+    useEffect(() => {
+        const subscription = watch((allValues, { name }) => {
+            if (!name) return;
+            const newValue = allValues[name];
+            void runRuleAndApply(name, newValue);
         });
-        setFields(updatedFields);
-    }, [watchAll]);
-     const fieldRules = {
-        BarcodeOption: (value, fields) => {
-            const newFields = [...fields];
-            const barcodeNo = newFields.find(f => f.name === "BarcodeNo");
+        return () => subscription.unsubscribe();
+    }, [watch]);
+    // Reusable helpers
+    const cloneFields = (fields: BaseField[]) => fields.map(f => ({ ...f }));
+    const bulkUpdateProps = (names: string[], props: any) => names.map(name => ({ name, props }));
+    const bulkSetValues = (names: string[], valueMap: Record<string, any>) => names.map(name => ({ name, value: valueMap[name] ?? '' }));
+    const accountFields = ['AssetAcquisitionAccount','AssetDepreciationAccount','DepreciationAccount'];
+    const fieldRules: Record<string, any> = {
+        BarcodeOption: (value, fieldsSnapshot) => {
+            const newFields = cloneFields(fieldsSnapshot);
+            const barcodeNo = newFields.find(f => f.name === 'BarcodeNo');
+            const custAsset = newFields.find(f => f.name === 'CustomerAssetNo');
+            const isOther = value === 'Other';
             if (barcodeNo) {
-                barcodeNo.show = value === "Other";
-                barcodeNo.isRequired = value === "Other";
+                barcodeNo.show = isOther;
+                barcodeNo.isRequired = isOther;
+                if (!isOther) setValue('BarcodeNo', '');
+            }
+            if (custAsset) {
+                custAsset.isRequired = value === 'Customer Asset No';
             }
             return newFields;
         },
+        MainCategory: async (value, fieldsSnapshot) => {
+            if (isEmptyValue(value)) {
+                return {
+                    updates: [{ name: 'SubCategory', props: { disabled: true } },...bulkUpdateProps(accountFields, { show: false })],
+                    options: [{ name: 'SubCategory', options: [] }],
+                    setValues: bulkSetValues(['SubCategory', ...accountFields],{})
+                };
+            }
+            dispatch(setLoading(true));
+            try {
+                const subCatRes = await getSubCategoryLookUp(companyId, value);
+                const subOptions = Array.isArray(subCatRes?.data?.SubCategoriesLookup) ? subCatRes.data.SubCategoriesLookup.map(ele => ({label: ele.CategoryName,value: ele.CategoryId})) : [];
+                const mainCatRes = await getAssetCatByID(value, companyId);
+                const mainCat = Array.isArray(mainCatRes.data) && mainCatRes.data.length ? mainCatRes.data[0] : {};
+                const showAccounts =!!(mainCat.AssetAcquisitionAccount || mainCat.AssetDepreciationAccount || mainCat.DepreciationAccount);
+                return {
+                    updates: [{ name: 'SubCategory', props: { disabled: false } },...bulkUpdateProps(accountFields, { show: showAccounts })],
+                    options: [{ name: 'SubCategory', options: subOptions }],
+                    setValues: bulkSetValues(
+                        [...accountFields, 'SubCategory'],
+                        { AssetAcquisitionAccount: mainCat.AssetAcquisitionAccount,AssetDepreciationAccount: mainCat.AssetDepreciationAccount,
+                            DepreciationAccount: mainCat.DepreciationAccount,SubCategory: ''
+                        }
+                    )
+                };
+            } finally {
+                dispatch(setLoading(false));
+            }
+        },
+        DepreciationApplicable: (value, fieldsSnapshot) => {
+            const newFields = cloneFields(fieldsSnapshot);
+            const assetLife = newFields.find(f => f.name === 'AssetUsefulLife');
+            const expLife = newFields.find(f => f.name === 'ExpectedLifeEndDate');
+            if (assetLife) assetLife.isRequired = value;
+            if (expLife) expLife.isRequired = value;
+            return newFields;
+        },
+        PurchasedDate: (value, fieldsSnapshot) => {
+            const newFields = cloneFields(fieldsSnapshot);
+            setValue('CapitalizationDate', value);
+            setValue('PlacedInServiceDate', value);
+            return newFields;
+        }
     };
-    
+    const handleSave=(data)=>{
+        console.log('data',data)
+
+    }
     const setLookupsDataInJson = async (dataset: any) => {
         let keys = Object.keys(dataset);
         const updatedFields = fields.map(field => {
@@ -333,14 +433,14 @@ function AssetAcquisition() {
                             <div className='flex items-center gap-2'>
                                 <ReusableButton
                                     variant="text"
-                                    onClick={null}
+                                    onClick={reset}
                                     className='btn-reset-clear-style'
                                 >
                                     Reset
                                 </ReusableButton>
                                 <ReusableButton
                                     variant="primary"
-                                    onClick={null}
+                                    onClick={handleSubmit((data) => { handleSave(data) })}
                                     className='btn-submit-style'
                                 >
                                     Save

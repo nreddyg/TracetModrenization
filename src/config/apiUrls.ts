@@ -305,3 +305,9 @@ export const URL_POST_UPDATE_ASSET_DETAILS_WITH_ATTRIBUTES='/api/FixedAssetAPI/U
 export const URL_POST_UPDATE_ASSET_DETAILS='/api/FixedAssetAPI/UpdateAssetDetails';
 export const URL_POST_ADD_ASSET_DETAILS='/api/FixedAssetAPI/AddAssetDetails';
 export const URL_POST_ADD_ASSET_DETAILS_WITH_ATTRIBUTES='/api/FixedAssetAPI/AddAssetDetailsWithAttribute';
+
+// Change Asset Category
+export const URL_GET_CHANGE_ASSET_CATEGORY='/api/FixedAssetAPI/GetChangeInAssetCategoryList';
+export const URL_GET_COLUMNS_FOR_CHANGE_ASSET_CATEGORY='/api/FixedAssetAPI/GetChangeInAssetCategoryGridColumnsList';
+
+

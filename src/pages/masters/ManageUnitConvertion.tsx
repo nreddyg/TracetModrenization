@@ -142,11 +142,12 @@ const ManageUnitConversion = () => {
         dispatch(setLoading(true))
         await addNewConversion(companyId, data).then(res => {
             if (res.success) {
-                if (res.data.status) {
+                if (res.data.status==true) {
                     msg.success(res.data.message);
                     fetchUOMGetData(companyId)
                 } else {
-                    msg.warning(res.data.ErrorDetails[0]["Error Message"]);
+                    // msg.warning(res.data.ErrorDetails[0]["Error Message"]) 
+                    msg.warning(res.data.message);
                 }
             } else {
                 msg.warning('Failed to Add Conversion !!')
@@ -181,6 +182,24 @@ const ManageUnitConversion = () => {
         );
     }, [dataSource, searchTerm]);
     const submit = () => {
+        let baseUOM=watch("baseUOM")
+        let targetUOMValue=watch("target")
+        let targetUOM=watch("targetUOM")
+    
+         if (baseUOM === "") {
+        msg.warning(`Base Unit of measure is required`);
+        return
+         }
+         if (targetUOMValue === "") {
+        msg.warning(`Target Unit of measure value is required`);
+        return
+
+         }
+          if (targetUOM === "") {
+        msg.warning(`Target Unit of measure is required`);
+        return
+
+         }
         const payload = {
             UOMConversionDetails: [
                 {

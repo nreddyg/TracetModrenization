@@ -312,4 +312,6 @@ export const URL_GET_COLUMNS_FOR_CHANGE_ASSET_CATEGORY='/api/FixedAssetAPI/GetCh
 
 
 // Asset Transfer
-export const URL_GET_ASSET_TRANSFER_HIST_LIST = `/api/FixedAssetAPI/GetAssetsTransferHistoryList`
+export const URL_GET_ASSET_TRANSFER_HIST_LIST = `/api/FixedAssetAPI/GetAssetsTransferHistoryList`;
+export const URL_GET_LIST_BY_IDS = `/api/FixedAssetAPI/GetAssetDetailsListForAssetTransferByAssetIds`;
+export const URL_GET_PLACE_OF_SUPPLY = `/api/FixedAssetAPI/GetPlaceOfSupplyList`;

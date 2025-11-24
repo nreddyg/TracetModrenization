@@ -307,4 +307,6 @@ export const URL_POST_ADD_ASSET_DETAILS='/api/FixedAssetAPI/AddAssetDetails';
 export const URL_POST_ADD_ASSET_DETAILS_WITH_ATTRIBUTES='/api/FixedAssetAPI/AddAssetDetailsWithAttribute';
 
 // Asset Transfer
-export const URL_GET_ASSET_TRANSFER_HIST_LIST = `/api/FixedAssetAPI/GetAssetsTransferHistoryList`
+export const URL_GET_ASSET_TRANSFER_HIST_LIST = `/api/FixedAssetAPI/GetAssetsTransferHistoryList`;
+export const URL_GET_LIST_BY_IDS = `/api/FixedAssetAPI/GetAssetDetailsListForAssetTransferByAssetIds`;
+export const URL_GET_PLACE_OF_SUPPLY = `/api/FixedAssetAPI/GetPlaceOfSupplyList`;

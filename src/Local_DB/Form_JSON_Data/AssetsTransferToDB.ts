@@ -9,9 +9,8 @@ export const ASSET_TRANSFER_TO_DB: BaseField[] = [
         isRequired: true,
         options: [],
         allowClear: true,
-        disabled: false,
     },
-     {
+    {
         fieldType: 'treeselect',
         name: 'levelfivedepartment',
         label: 'Level Five Department',
@@ -19,10 +18,8 @@ export const ASSET_TRANSFER_TO_DB: BaseField[] = [
         treeData: [],
         isRequired: false,
         allowClear: true,
-        disabled: false,
-        errormsg: false,
     },
-     {
+    {
         fieldType: 'treeselect',
         name: 'levelfivecostcenter',
         label: 'Level Five Cost Center',
@@ -30,10 +27,8 @@ export const ASSET_TRANSFER_TO_DB: BaseField[] = [
         treeData: [],
         isRequired: false,
         allowClear: true,
-        disabled: false,
-        errormsg: false,
     },
-     {
+    {
         fieldType: 'treeselect',
         name: 'levelfivelocation',
         label: 'Level Five Location',
@@ -41,17 +36,29 @@ export const ASSET_TRANSFER_TO_DB: BaseField[] = [
         treeData: [],
         isRequired: false,
         allowClear: true,
-        disabled: false,
-        errormsg: false,
+        // disabled: false,
+        // errormsg: false,
     },
-       {
+    {
         label: "Transfer Date",
         fieldType: "date",
         name: "transferdate",
         placeholder: "Select Date",
         isRequired: false,
         format: "DD-MM-YYYY",
-        disabled: true,
-        jsontype: 'servicerequestDetails'
+    },
+    {
+        label: "Place Of Supply",
+        fieldType: "dropdown",
+        name: "placeofsupply",
+        placeholder: "",
+        isRequired: false,
+    },
+    {
+        label: "Remarks",
+        fieldType: "text",
+        name: "remarks",
+        placeholder: "",
+        isRequired: false,
     }
 ]

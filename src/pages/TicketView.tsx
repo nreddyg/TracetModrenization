@@ -1722,36 +1722,84 @@ const TicketView = () => {
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col min-w-0 ">
           {/* Navigation and Action Bar */}
-          <div className="bg-white border-b shadow-sm px-4 lg:px-6 py-3 flex flex-row xxs:flex-col xs2:flex-row lg:flex-row lg:items-center justify-between gap-4 shrink-0">
-            <div className="flex items-center gap-4 lg:gap-6 flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <div className=' text-gray-400 hover:text-blue-900 p-1 cursor-pointer' onClick={() => navigate(-1)}>
+          <div
+            className="
+    bg-white border-b shadow-sm px-4 lg:px-6 
+    h-16 flex items-center justify-between gap-4 
+    overflow-hidden
+  "
+          >
+            {/* LEFT SECTION */}
+            <div className="flex items-center gap-3 flex-1 min-w-0 overflow-hidden">
+
+              {/* Back + All Tickets */}
+              <div className="flex items-center gap-2 shrink-0">
+                <div
+                  className="text-gray-400 hover:text-blue-900 p-1 cursor-pointer"
+                  onClick={() => navigate(-1)}
+                >
                   <ArrowLeft className="h-4 w-4 text-current stroke-[3]" />
                 </div>
-                <span className="text-gray-600 text-sm">All Tickets</span>
-                <span className="text-gray-400">|</span>
-                {!isCreateMode && <h6 className="text-blue-600 font-medium truncate block max-w-xs" title={selectedTicket?.Title}>{originalTicket.ServiceRequestNo} {selectedTicket?.Title && (<span title={selectedTicket.Title}>{selectedTicket.Title.length > 18 ? selectedTicket.Title.slice(0, 17) + "...": selectedTicket.Title}
-                  </span>
-                )}</h6>}
-                <Badge className={getPriorityColor(watch('Severity'))} title='Severity'>{watch('Severity')}</Badge>
-                {!isCreateMode && <Badge className={getStatusColor(selectedTicket?.Status)} title='Status'>{selectedTicket?.Status || ''}</Badge>}
+                <span className="text-gray-600 text-sm shrink-0">All Tickets</span>
+                <span className="text-gray-400 shrink-0">|</span>
               </div>
 
+              {/* DYNAMIC TITLE AREA – will shrink and truncate */}
+              {!isCreateMode && (
+                <div className="flex items-center gap-2 min-w-0 overflow-hidden flex-1">
+
+                  {/* ID */}
+                  <span className="text-blue-600 font-medium shrink-0">
+                    {originalTicket.ServiceRequestNo}
+                  </span>
+
+                  {/* TITLE (Flexible shrinking, auto adjusts on zoom) */}
+                  <div className="min-w-0 flex-1 overflow-hidden">
+                    <span
+                      className="text-blue-600 font-medium truncate block"
+                      title={selectedTicket?.Title}
+                    >
+                      {selectedTicket?.Title}
+                    </span>
+                  </div>
+
+                  {/* Severity */}
+                  <Badge
+                    className={`${getPriorityColor(watch("Severity"))} shrink-0`}
+                    title="Severity"
+                  >
+                    {watch("Severity")}
+                  </Badge>
+
+                  {/* Status */}
+                  <Badge
+                    className={`${getStatusColor(selectedTicket?.Status)} shrink-0`}
+                    title="Status"
+                  >
+                    {selectedTicket?.Status || ""}
+                  </Badge>
+                </div>
+              )}
+
+              {/* Create Mode Title */}
               {isCreateMode && (
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-lg font-bold text-gray-900 truncate">{watch('Title')}</h3>
+                <div className="flex-1 min-w-0 overflow-hidden">
+                  <h3 className="text-lg font-bold text-gray-900 truncate">
+                    {watch("Title")}
+                  </h3>
                 </div>
               )}
             </div>
 
-            <div className="xxs:flex items-center gap-3 justify-end">
+            {/* BUTTONS (never shrink) */}
+            <div className="flex items-center gap-3 shrink-0">
               {!isEditing && !isCreateMode ? (
                 <ReusableButton
                   variant="primary"
                   size="small"
-                  onClick={() => handleEdit('edit')}
+                  onClick={() => handleEdit("edit")}
                   icon={<Edit className="h-4 w-4" />}
-                  className='btn-submit-style'
+                  className="btn-submit-style"
                 >
                   Edit
                 </ReusableButton>
@@ -1759,28 +1807,28 @@ const TicketView = () => {
                 <>
                   <ReusableButton
                     variant="text"
-                    // size="small"
-                    className='btn-reset-clear-style'
-                    onClick={() => handleEdit('cancel')}
+                    className="btn-reset-clear-style"
+                    onClick={() => handleEdit("cancel")}
                     icon={<X className="h-4 w-4" />}
                   >
                     {isCreateMode ? "Clear" : "Cancel"}
                   </ReusableButton>
+
                   <ReusableButton
-                    // size="small"
                     variant="primary"
-                    onClick={isCreateMode
-                      ? () => {
-                        handleSubmit(handleSave)();
-                        handleTriggerAccordionItemsValidations();
-                      }
-                      : () => {
-                        handleSubmit(handleUpdate)();
-                        handleTriggerAccordionItemsValidations();
-                      }
+                    onClick={
+                      isCreateMode
+                        ? () => {
+                          handleSubmit(handleSave)();
+                          handleTriggerAccordionItemsValidations();
+                        }
+                        : () => {
+                          handleSubmit(handleUpdate)();
+                          handleTriggerAccordionItemsValidations();
+                        }
                     }
                     icon={<Save className="h-4 w-4" />}
-                    className='btn-submit-style'
+                    className="btn-submit-style"
                   >
                     {isCreateMode ? "Save" : "Update"}
                   </ReusableButton>
@@ -1788,7 +1836,6 @@ const TicketView = () => {
               )}
             </div>
           </div>
-
           {/* Content Grid with Individual Scroll Areas */}
           <div className="flex-1 p-3 overflow-hidden min-h-0  ">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-1 h-full">

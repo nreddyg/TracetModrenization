@@ -1,6 +1,7 @@
 
 import WrapperLazyComponent from "./components/common/WrapperLazyComponent";
 import AssetSplit from "./pages/FixedAssetsModule/AssetSplit";
+import ChangeAssetCategory from "./pages/FixedAssetsModule/ChangeAssetCategory";
 import ManageAssets from "./pages/FixedAssetsModule/ManageAssets";
 import ManageUnitConversion from "./pages/masters/ManageUnitConvertion";
 
@@ -365,7 +366,7 @@ export const appRoutesObj={
   },
   "fixedassets-changeinassetcategory":{
     path:'fixedassets/changeassetcategory',
-    // component:<ChangeAssetCategory/>,
+    component:<ChangeAssetCategory/>,
     index:false
   },
   "fixedassets-unretireassets":{

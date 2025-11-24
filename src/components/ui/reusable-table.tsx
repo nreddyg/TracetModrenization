@@ -1424,26 +1424,36 @@ const Pagination = ({ table }: { table: TanstackTable<any> }) => {
   const shiftWindowLeft = () => {
     if (pageWindow > 0) setPageWindow(pageWindow - 1);
   };
-
   const shiftWindowRight = () => {
     if (pageWindow < totalWindows - 1) setPageWindow(pageWindow + 1);
   };
 
-  return (
-    <div className="flex items-center justify-between flex-wrap sm:flex-nowrap px-2 py-3 border-t border-gray-200 bg-white text-sm rounded-b-xl gap-1">
 
-      <div className="basis-1/4 shrink-0 grow-0 whitespace-normal break-words text-gray-600">
+  return (
+    <div
+      className="
+    flex items-center justify-between
+    flex-wrap sm:flex-nowrap
+    px-2 py-3 border-t border-gray-200 bg-white text-sm rounded-b-xl
+    gap-x-2 gap-y-3
+  "
+    >
+
+      {/* Left section: Showing entries */}
+      <div className="basis-full sm:basis-1/4 shrink-0 whitespace-normal break-words text-gray-600">
         Showing {start} to {end} of {totalRows} entries
       </div>
 
-      <ScrollArea scrollStyle={'flex-[0.8] bg-[#aab4ca]'}>
-        <div className="flex items-center gap-1 flex-nowrap">
+      {/* Pagination section with scroll on small screens */}
+      <ScrollArea className="w-full sm:w-auto overflow-x-auto" horizontal hideScrollbar>
+        <div className="flex items-center gap-1 flex-nowrap w-max">
 
+          {/* Page size selector */}
           <Select
             value={pageSize.toString()}
             onValueChange={(value) => table.setPageSize(Number(value))}
           >
-            <SelectTrigger className="w-28 h-8 text-sm">
+            <SelectTrigger className="w-29 h-8 text-sm shrink-0">
               <SelectValue placeholder="Rows per page" />
             </SelectTrigger>
             <SelectContent>
@@ -1455,25 +1465,33 @@ const Pagination = ({ table }: { table: TanstackTable<any> }) => {
             </SelectContent>
           </Select>
 
+          {/* Shift window left */}
           <Button
             variant="outline"
             size="sm"
             onClick={shiftWindowLeft}
             disabled={pageWindow === 0}
+            className="shrink-0"
           >
             <ChevronLeft />
           </Button>
 
+          {/* Previous */}
           <Button
             variant="outline"
             size="sm"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
+            className="shrink-0"
           >
             Prev
           </Button>
 
-          <div className="flex items-center gap-2 min-w-[150px] justify-center">
+          {/* Page numbers */}
+          <div
+            className={`flex items-center gap-2 justify-center shrink-0 ${visiblePages.length<=3 && visiblePages.includes(null) ? "min-w-0 w-auto":"min-w-[140px]"
+              }`}
+          >
             {visiblePages.map((page, idx) =>
               page ? (
                 <button
@@ -1487,29 +1505,38 @@ const Pagination = ({ table }: { table: TanstackTable<any> }) => {
                   {page}
                 </button>
               ) : (
-                <div key={`empty-${idx}`} className="w-10 h-9" />
+                <div key={`empty-${idx}`} className="max-w-10 h-9 shrink-0" />
               )
             )}
           </div>
+
+          {/* Next */}
           <Button
             variant="outline"
             size="sm"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
+            className="shrink-0"
           >
             Next
           </Button>
+
+          {/* Shift window right */}
           <Button
             variant="outline"
             size="sm"
             onClick={shiftWindowRight}
             disabled={pageWindow >= totalWindows - 1}
+            className="shrink-0"
           >
             <ChevronRight />
           </Button>
+
         </div>
       </ScrollArea>
     </div>
+
+
 
   );
 };

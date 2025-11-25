@@ -459,9 +459,9 @@ import ExcelJS from 'exceljs';
     return (
       <Popover>
         <PopoverTrigger asChild>
-          <Button variant="outline" size="sm" className='text-slate-700'>
+          <Button variant="outline" size="sm" className=''>
             {/* <Columns className="w-4 h-4 mr-2" /> */}
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            <svg className="w-4 h-4 stroke-current stroke-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
             Columns
           </Button>
         </PopoverTrigger>

@@ -225,22 +225,25 @@ const SoftwareCategory = () => {
                                         />
                                     </div>
                                     <div className="flex gap-2 justify-end">
-                                        <ReusableButton
-                                            htmlType="submit"
-                                            variant="primary"
-                                            iconPosition="left"
-                                            size="middle"
-                                        >
-                                            {editingRec ? 'Update' : 'Save'}
-                                        </ReusableButton>
+                                    
                                         <ReusableButton
                                             htmlType="button"
-                                            variant="default"
+                                            variant="text"
+                                            className='btn-reset-clear-style'
                                             onClick={() => { setIsMainDialogOpen(false); reset(); setEditingRec(null) }}
                                             iconPosition="left"
                                             size="middle"
                                         >
                                             Cancel
+                                        </ReusableButton>
+                                            <ReusableButton
+                                            htmlType="submit"
+                                            variant="primary"
+                                            className='btn-submit-style'
+                                            iconPosition="left"
+                                            size="middle"
+                                        >
+                                            {editingRec ? 'Update' : 'Save'}
                                         </ReusableButton>
                                     </div>
                                 </form>
@@ -259,7 +262,8 @@ const SoftwareCategory = () => {
                             </DialogHeader>
                             <DialogFooter>
                                 <ReusableButton
-                                    variant="default"
+                                    variant="text"
+                                    className='btn-reset-clear-style'
                                     onClick={() => setIsDelModalOpen(false)}
                                 >
                                     Cancel

@@ -6,7 +6,7 @@ import {
 } from '@/components/ui/sidebar';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Input } from '@/components/ui/input';
-import { Headphones, Settings, Building2, Package, ChevronRight, ChevronDown, Search, Eye, } from 'lucide-react';
+import { Headphones, Settings, Building2, Package, ChevronRight, ChevronDown, Search, Eye, Home, } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { RxDotFilled } from 'react-icons/rx';
 
@@ -21,7 +21,7 @@ interface NavItem {
 type MyComponentProps = {
   navigation: NavItem[];
 };
-const alwaysOpendata=["Masters"]
+const alwaysOpendata=["Masters","Dashboard"]
 
 const AppSidebar: React.FC<MyComponentProps> = ({navigation}) => {
   const location = useLocation();
@@ -191,7 +191,7 @@ const AppSidebar: React.FC<MyComponentProps> = ({navigation}) => {
             onMouseLeave={() => setHoveredLabel(null)}
           >
             <SidebarMenuSubButton asChild>
-              <CollapsibleTrigger className="flex items-center justify-between w-full transition-colors duration-200 rounded-md my-[2px]">
+              <CollapsibleTrigger className="flex items-center justify-between w-full ps-2  transition-colors duration-200 rounded-md my-[2px]">
                 <div className="flex items-center space-x-2" title={child.label}>
                   {child.icon? (
                   
@@ -300,9 +300,9 @@ const AppSidebar: React.FC<MyComponentProps> = ({navigation}) => {
             onMouseEnter={() => setHoveredLabel(item.label)}
             onMouseLeave={() => setHoveredLabel(null)}
           >
-            <SidebarMenuButton asChild tooltip={item.label} className={cn(alwaysOpendata.includes(item.label)&&'hover:bg-transparent hover:text-current')}>
+            <SidebarMenuButton asChild tooltip={item.label} className={cn(alwaysOpendata.includes(item.label)&&'hover:bg-transparent hover:text-current ',)}>
               <CollapsibleTrigger className={cn("flex items-center justify-between w-full transition-colors duration-200 rounded-md my-[2px]")}>
-                <div className="flex items-center space-x-3 gap-1" title={item.label}>
+                <div className="flex items-center space-x-2 " title={item.label}>
                   {!alwaysOpendata.includes(item.label) && (
                     <item.icon
                       className={cn(
@@ -314,7 +314,7 @@ const AppSidebar: React.FC<MyComponentProps> = ({navigation}) => {
                   {!collapsed && (
                     <span
                       className={cn(
-                      "truncate max-w-[180px] transition-colors font-sans duration-200 uppercase text-xs font-semibold text-sidebar-foreground/60 ",alwaysOpendata.includes(item.label)?"":"px-3",
+                      "truncate max-w-[180px] transition-colors font-sans duration-200 uppercase text-xs font-semibold text-sidebar-foreground/60 ",alwaysOpendata.includes(item.label)?"":"",
                         shouldHighlight ? "text-white " : "text-[#a4bbdc]"
                       )}
                     >
@@ -358,7 +358,9 @@ const AppSidebar: React.FC<MyComponentProps> = ({navigation}) => {
         onMouseLeave={() => setHoveredLabel(null)}
       >
         <SidebarMenuButton asChild isActive={isItemActive}>
-          <Link
+         {
+
+             item.label !== "Dashboard"? <Link
             to={`/layout/${item.link}`}
             className={cn(
               "flex items-center space-x-1 transition-colors duration-200 rounded-md my-1",
@@ -381,7 +383,30 @@ const AppSidebar: React.FC<MyComponentProps> = ({navigation}) => {
                 {item.label}
               </span>
             )}
-          </Link>
+          </Link>:<div 
+           className={cn(
+              "flex items-center space-x-1 transition-colors duration-200 rounded-md my-1",
+              showHighlight ? "text-white" : "text-[#a4bbdc]"
+            )}>
+           <item.icon
+              className={cn(
+                "h-4 w-4 transition-colors duration-200",
+                showHighlight ? "text-white" : "!text-[#a4bbdc]"
+              )}
+            />
+            {!collapsed && (
+              <span
+                className={cn(
+                  "truncate max-w-[180px] transition-colors duration-200",
+                  showHighlight ? "text-white" : "text-[#a4bbdc]"
+                )}
+              >
+                {item.label}
+              </span>
+            )}
+          </div>
+ 
+         }
         </SidebarMenuButton>
       </SidebarMenuItem>
     );
@@ -396,7 +421,7 @@ const AppSidebar: React.FC<MyComponentProps> = ({navigation}) => {
       </SidebarHeader>
 
       <SidebarContent>
-        <SidebarMenu className={cn(collapsed && "mt-2")}>
+        <SidebarMenu className={cn(collapsed && "mt-2")}>      
           {filteredNavigation.map(item => renderMenuItem(item))}
         </SidebarMenu>
       </SidebarContent>

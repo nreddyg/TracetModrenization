@@ -826,7 +826,7 @@ setRec(null)
                             <ReusableButton
                                    variant="text"
                                 className='btn-reset-clear-style'
-                                onClick={() => { }}
+                                onClick={() => setIsDelModalOpen(false)}
                             >
                                 Cancel
                             </ReusableButton>

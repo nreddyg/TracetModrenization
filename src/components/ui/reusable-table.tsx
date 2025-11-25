@@ -24,6 +24,8 @@
   import { ReusableMultiSelect } from './reusable-multi-select';
   import { useMessage } from './reusable-message';
   import { ScrollArea } from './scroll-area';
+import ExcelJS from 'exceljs';
+
   // Enhanced types for enterprise features
   export interface TablePermissions {
     canEdit: boolean;
@@ -481,7 +483,7 @@
               </div>
 
               {/* Individual columns */}
-              {allColumns.map((column) => {
+              {toggleableColumns.map((column) => {
                 const canHide = column.getCanHide(); // false for locked columns
                 const label =
                   (column.columnDef.header as any)?.toString?.() ||
@@ -874,157 +876,216 @@
 
 
   // Enhanced Export Menu with multiple formats
-  const ExportMenu = ({
-    data,
-    selectedRows,
-    permissions,
-    filename = 'export',
-    table,
-    exportOptions = ["csv", "excel", "json", "pdf"],
-    exportMeta,
-  }: {
-    data: any[];
-    selectedRows: any[];
-    permissions?: TablePermissions;
-    filename?: string;
-    table: TanstackTable<any>;
-    exportOptions?: ("csv" | "excel" | "json" | "pdf")[];
-    exportMeta?: { companyName?: string; name?: string };
-  }) => {
-    const getExportMetadata = (data: any[], meta?: { companyName?: string; name?: string }) => {
-      const totalCount = data.length;
-      const downloadDate = new Date().toLocaleString();
-      return {
-        companyName: meta?.companyName || "",
-        name: meta?.name || "",
-        totalCount,
-        downloadDate,
+ const ExportMenu = ({
+  data,
+  selectedRows,
+  permissions,
+  filename = 'export',
+  table,
+  exportOptions = ["csv", "excel", "json", "pdf"],
+  exportMeta,
+}: {
+  data: any[];
+  selectedRows: any[];
+  permissions?: TablePermissions;
+  filename?: string;
+  table: TanstackTable<any>;
+  exportOptions?: ("csv" | "excel" | "json" | "pdf")[];
+  exportMeta?: { companyName?: string; name?: string };
+}) => {
+  const getExportMetadata = (data: any[], meta?: { companyName?: string; name?: string }) => {
+    const totalCount = data.length;
+    const downloadDate = new Date().toLocaleString();
+    return {
+      companyName: meta?.companyName || "",
+      name: meta?.name || "",
+      totalCount,
+      downloadDate,
+    };
+  };
+
+  const exportToCSV = (exportData: any[], table: TanstackTable<any>) => {
+    if (exportData.length === 0) return;
+
+    const { headers, body } = getVisibleData(table, exportData);
+    const meta = getExportMetadata(exportData, exportMeta);
+
+    const metaSection = [
+      `"${meta.companyName}"`,
+      `"Exported by: ${meta.name}"`,
+      `"Download Date: ${meta.downloadDate}"`,
+      `"Total Records: ${meta.totalCount}"`,
+      "", // spacer line
+    ];
+
+    const csvContent = [
+      ...metaSection,
+      headers.join(","),
+      ...body.map(row =>
+        row.map(val => `"${val.replace(/"/g, '""')}"`).join(",")
+      ),
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${filename}-${new Date().toISOString().split("T")[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+
+
+
+const exportToExcel = async (exportData: any[], table: TanstackTable<any>) => {
+  if (!exportData || exportData.length === 0) return;
+
+  const { headers, body } = getVisibleData(table, exportData);
+  const meta = getExportMetadata(exportData, exportMeta);
+
+  // Create workbook and worksheet with gridlines off
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet("Data", {
+    views: [{ showGridLines: false }],
+  });
+
+  // 1) Metadata lines (plain, no borders)
+  const metaRows = [
+    [ meta.companyName || ""],
+    [ meta.name || ""],
+    ["Date:", String(meta.downloadDate.split(",")[0] || "")],
+
+    ["Total Count:", String(meta.totalCount || "")],
+  ];
+  metaRows.forEach((rowArr) => {
+    const r = worksheet.addRow(rowArr);
+    r.eachCell((cell) => {
+      cell.font = { bold: true };
+      // explicit no border / plain fill
+      cell.border = {};
+      cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFFFFFFF" } };
+      cell.alignment = { vertical: "middle", horizontal: "left" };
+    });
+  });
+
+  // 2) Blank spacer row
+  worksheet.addRow([]);
+
+  // 3) Header row (exactly once)
+  const headerRow = worksheet.addRow(headers);
+  headerRow.eachCell((cell) => {
+    cell.font = { bold: true };
+    cell.alignment = { vertical: "middle", horizontal: "left" };
+    cell.fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FFECEFF6" },
+    };
+    // give header cells borders
+    cell.border = {
+      top: { style: "thin" },
+      left: { style: "thin" },
+      bottom: { style: "thin" },
+      right: { style: "thin" },
+    };
+  });
+
+  // 4) Body rows
+  body.forEach((rowArr) => {
+    const dataRow = worksheet.addRow(rowArr);
+    dataRow.eachCell((cell) => {
+      cell.alignment = { vertical: "middle", horizontal: "left" };
+      cell.border = {
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" },
       };
+    });
+  });
+
+  // 5) Set column widths WITHOUT rewriting headers (do NOT set `header:` here)
+  //    Use getColumn(i).width so ExcelJS won't insert header row at row 1.
+  for (let i = 0; i < headers.length; i++) {
+    const col = worksheet.getColumn(i + 1);
+    // compute an appropriate width; you can tweak this
+    const suggestedWidth = Math.max(15, String(headers[i]).length + 5);
+    col.width = suggestedWidth;
+  }
+
+  // 6) Ensure metadata rows remain borderless (safety)
+  // metadata rows are rows 1..metaRows.length
+  for (let r = 1; r <= metaRows.length; r++) {
+    const row = worksheet.getRow(r);
+    row.eachCell((cell) => {
+      cell.border = {}; // ensure plain
+      // keep cell.fill white (or remove fill if you prefer)
+      cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFFFFFFF" } };
+    });
+  }
+
+  // 7) Download workbook
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${filename}-${new Date().toISOString().split("T")[0]}.xlsx`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+};
+
+
+
+
+  const exportToPDF = (exportData: any[], table: TanstackTable<any>) => {
+    if (exportData.length === 0) return;
+
+    const { headers, body } = getVisibleData(table, exportData);
+    const meta = getExportMetadata(exportData, exportMeta);
+
+    const doc = new jsPDF();
+    doc.setFontSize(14);
+    doc.text(filename, 14, 15);
+    doc.setFontSize(10);
+    doc.text(`Company Name: ${meta.companyName}`, 14, 25);
+    doc.text(`Name: ${meta.name}`, 14, 30);
+    doc.text(`Total Records: ${meta.totalCount}`, 14, 35);
+    doc.text(`Download Date: ${meta.downloadDate}`, 14, 40);
+
+    autoTable(doc, {
+      head: [headers],
+      body,
+      startY: 45,
+      styles: { fontSize: 8, cellPadding: 2 },
+      headStyles: { fillColor: [66, 135, 245] },
+      alternateRowStyles: { fillColor: [240, 240, 240] },
+      theme: "grid",
+    });
+
+    doc.save(`${filename}-${new Date().toISOString().split("T")[0]}.pdf`);
+  };
+
+
+
+
+  const exportToJSON = (exportData: any[], table: TanstackTable<any>) => {
+    if (exportData.length === 0) return;
+
+    const { headers, body } = getVisibleData(table, exportData);
+    const meta = getExportMetadata(exportData, exportMeta);
+
+    const jsonData = {
+      metadata: meta,
+      records: body.map(row =>
+        Object.fromEntries(headers.map((h, i) => [h, row[i]]))
+      ),
     };
-
-    const exportToCSV = (exportData: any[], table: TanstackTable<any>) => {
-      if (exportData.length === 0) return;
-
-      const { headers, body } = getVisibleData(table, exportData);
-      const meta = getExportMetadata(exportData, exportMeta);
-
-      const metaSection = [
-        `"${meta.companyName}"`,
-        `"Exported by: ${meta.name}"`,
-        `"Download Date: ${meta.downloadDate}"`,
-        `"Total Records: ${meta.totalCount}"`,
-        "", // spacer line
-      ];
-
-      const csvContent = [
-        ...metaSection,
-        headers.join(","),
-        ...body.map(row =>
-          row.map(val => `"${val.replace(/"/g, '""')}"`).join(",")
-        ),
-      ].join("\n");
-
-      const blob = new Blob([csvContent], { type: "text/csv" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${filename}-${new Date().toISOString().split("T")[0]}.csv`;
-      a.click();
-      URL.revokeObjectURL(url);
-    };
-
-
-
-
-    const exportToExcel = (exportData: any[], table: TanstackTable<any>) => {
-      if (exportData.length === 0) return;
-
-      const { headers, body } = getVisibleData(table, exportData);
-      const meta = getExportMetadata(exportData, exportMeta);
-
-      const metaSheet = [
-        ["Company Name:", meta.companyName],
-        ["Name:", meta.name],
-        ["Total Records:", meta.totalCount],
-        ["Download Date:", meta.downloadDate],
-        [],
-      ];
-
-      const worksheet = XLSX.utils.aoa_to_sheet([...metaSheet, headers, ...body]);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Data");
-
-      worksheet["!cols"] = headers.map(() => ({ wch: 20 }));
-      XLSX.writeFile(workbook, `${filename}-${new Date().toISOString().split("T")[0]}.xlsx`);
-    };
-
-
-
-    const exportToPDF = (exportData: any[], table: TanstackTable<any>) => {
-      if (exportData.length === 0) return;
-
-      const { headers, body } = getVisibleData(table, exportData);
-      const meta = getExportMetadata(exportData, exportMeta);
-
-      const doc = new jsPDF();
-      doc.setFontSize(14);
-      doc.text(filename, 14, 15);
-      doc.setFontSize(10);
-      doc.text(`Company Name: ${meta.companyName}`, 14, 25);
-      doc.text(`Name: ${meta.name}`, 14, 30);
-      doc.text(`Total Records: ${meta.totalCount}`, 14, 35);
-      doc.text(`Download Date: ${meta.downloadDate}`, 14, 40);
-
-      autoTable(doc, {
-        head: [headers],
-        body,
-        startY: 45,
-        styles: { fontSize: 8, cellPadding: 2 },
-        headStyles: { fillColor: [66, 135, 245] },
-        alternateRowStyles: { fillColor: [240, 240, 240] },
-        theme: "grid",
-      });
-
-      doc.save(`${filename}-${new Date().toISOString().split("T")[0]}.pdf`);
-    };
-
-
-
-
-    const exportToJSON = (exportData: any[], table: TanstackTable<any>) => {
-      if (exportData.length === 0) return;
-
-      const { headers, body } = getVisibleData(table, exportData);
-      const meta = getExportMetadata(exportData, exportMeta);
-
-      const jsonData = {
-        metadata: meta,
-        records: body.map(row =>
-          Object.fromEntries(headers.map((h, i) => [h, row[i]]))
-        ),
-      };
-      const msg = useMessage()
-
-      const validateVisibleColumns = (table: TanstackTable<any>) => {
-        const visibleColumns = table.getAllLeafColumns().filter(col => col.getIsVisible());
-        if (visibleColumns.length < 3) {
-          msg.warning("Please select at least 3 columns before exporting.");
-          return false;
-        }
-        return true;
-      };
-
-      const blob = new Blob([JSON.stringify(jsonData, null, 2)], {
-        type: "application/json",
-      });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${filename}-${new Date().toISOString().split("T")[0]}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-    };
-
     const msg = useMessage()
 
     const validateVisibleColumns = (table: TanstackTable<any>) => {
@@ -1036,141 +1097,163 @@
       return true;
     };
 
-
-    const printTable = () => {
-      const printWindow = window.open('', '', 'height=600,width=800');
-      if (!printWindow) return;
-
-      const tableData = selectedRows.length > 0 ? selectedRows : data;
-      const headers = Object.keys(tableData[0] || {});
-
-      printWindow.document.write(`
-        <html>
-          <head>
-            <title>Print Table - ${filename}</title>
-            <style>
-              body { font-family: Arial, sans-serif; margin: 20px; }
-              table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-              th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-              th { background-color: #f2f2f2; font-weight: bold; }
-              tr:nth-child(even) { background-color: #f9f9f9; }
-              h1 { color: #333; margin-bottom: 10px; }
-              .meta { color: #666; font-size: 12px; margin-bottom: 20px; }
-              @media print {
-                body { margin: 0; }
-                .no-print { display: none; }
-              }
-            </style>
-          </head>
-          <body>
-            <h1>${filename}</h1>
-            <div class="meta">
-              Generated on ${new Date().toLocaleString()}
-              ${selectedRows.length > 0 ? `(${selectedRows.length} selected rows)` : `(${data.length} total rows)`}
-            </div>
-            <table>
-              <thead>
-                <tr>
-                  ${headers.map(header => `<th>${header.replace(/([A-Z])/g, ' $1').trim()}</th>`).join('')}
-                </tr>
-              </thead>
-              <tbody>
-                ${tableData.map(row =>
-        `<tr>${headers.map(header => `<td>${String(row[header] || '')}</td>`).join('')}</tr>`
-      ).join('')}
-              </tbody>
-            </table>
-            <script>
-              window.onload = function() {
-                window.print();
-                window.onafterprint = function() {
-                  window.close();
-                };
-              };
-            </script>
-          </body>
-        </html>
-      `);
-      printWindow.document.close();
-    };
-
-    if (!permissions?.canExport) return null;
-
-    return (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm">
-            <Download className="w-4 h-4 mr-2" />
-            Export
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          {exportOptions.includes("csv") && (
-            <DropdownMenuItem onClick={() => {
-              const allRows = table.getFilteredRowModel().rows.map(r => r.original);
-              if (!validateVisibleColumns(table)) return; // all pages, honors filters/sort
-              exportToCSV(allRows, table);
-            }}>
-              Export All to CSV
-            </DropdownMenuItem>
-          )}
-          {exportOptions.includes("excel") && (
-            <DropdownMenuItem onClick={() => {
-              const allRows = table.getFilteredRowModel().rows.map(r => r.original);
-              if (!validateVisibleColumns(table)) return;
-              exportToExcel(allRows, table);
-            }}>
-              Export All to Excel
-            </DropdownMenuItem>
-          )}
-          {exportOptions.includes("json") && (
-            <DropdownMenuItem onClick={() => {
-              const allRows = table.getFilteredRowModel().rows.map(r => r.original);
-              if (!validateVisibleColumns(table)) return;
-              exportToJSON(allRows, table);
-            }}>
-              Export All to JSON
-            </DropdownMenuItem>
-          )}
-          {exportOptions.includes("pdf") && (
-            <DropdownMenuItem onClick={() => {
-              const allRows = table.getFilteredRowModel().rows.map(r => r.original);
-              if (!validateVisibleColumns(table)) return;
-              exportToPDF(allRows, table);
-            }}>
-              Export All to PDF
-            </DropdownMenuItem>
-          )}
-
-          {selectedRows.length > 0 && (
-            <>
-              {exportOptions.includes("csv") && (
-                <DropdownMenuItem onClick={() => exportToCSV(selectedRows, table)}>
-                  Export Selected to CSV ({selectedRows.length})
-                </DropdownMenuItem>
-              )}
-              {exportOptions.includes("excel") && (
-                <DropdownMenuItem onClick={() => exportToExcel(selectedRows, table)}>
-                  Export Selected to Excel ({selectedRows.length})
-                </DropdownMenuItem>
-              )}
-              {exportOptions.includes("json") && (
-                <DropdownMenuItem onClick={() => exportToJSON(selectedRows, table)}>
-                  Export Selected to JSON ({selectedRows.length})
-                </DropdownMenuItem>
-              )}
-              {exportOptions.includes("pdf") && (
-                <DropdownMenuItem onClick={() => exportToPDF(selectedRows, table)}>
-                  Export Selected to PDF ({selectedRows.length})
-                </DropdownMenuItem>
-              )}
-            </>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
-    );
-
+    const blob = new Blob([JSON.stringify(jsonData, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${filename}-${new Date().toISOString().split("T")[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
+
+  const msg = useMessage()
+
+  const validateVisibleColumns = (table: TanstackTable<any>) => {
+    const visibleColumns = table.getAllLeafColumns().filter(col => col.getIsVisible());
+    if (visibleColumns.length < 3) {
+      msg.warning("Please select at least 3 columns before exporting.");
+      return false;
+    }
+    return true;
+  };
+
+
+  const printTable = () => {
+    const printWindow = window.open('', '', 'height=600,width=800');
+    if (!printWindow) return;
+
+    const tableData = selectedRows.length > 0 ? selectedRows : data;
+    const headers = Object.keys(tableData[0] || {});
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Print Table - ${filename}</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background-color: #f2f2f2; font-weight: bold; }
+            tr:nth-child(even) { background-color: #f9f9f9; }
+            h1 { color: #333; margin-bottom: 10px; }
+            .meta { color: #666; font-size: 12px; margin-bottom: 20px; }
+            @media print {
+              body { margin: 0; }
+              .no-print { display: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <h1>${filename}</h1>
+          <div class="meta">
+            Generated on ${new Date().toLocaleString()}
+            ${selectedRows.length > 0 ? `(${selectedRows.length} selected rows)` : `(${data.length} total rows)`}
+          </div>
+          <table>
+            <thead>
+              <tr>
+                ${headers.map(header => `<th>${header.replace(/([A-Z])/g, ' $1').trim()}</th>`).join('')}
+              </tr>
+            </thead>
+            <tbody>
+              ${tableData.map(row =>
+      `<tr>${headers.map(header => `<td>${String(row[header] || '')}</td>`).join('')}</tr>`
+    ).join('')}
+            </tbody>
+          </table>
+          <script>
+            window.onload = function() {
+              window.print();
+              window.onafterprint = function() {
+                window.close();
+              };
+            };
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
+  if (!permissions?.canExport) return null;
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" size="sm">
+          <Download className="w-4 h-4 mr-2" />
+          Export
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        {exportOptions.includes("csv") && (
+          <DropdownMenuItem onClick={() => {
+            const allRows = table.getFilteredRowModel().rows.map(r => r.original);
+            if (!validateVisibleColumns(table)) return; // all pages, honors filters/sort
+            exportToCSV(allRows, table);
+          }}>
+            Export All to CSV
+          </DropdownMenuItem>
+        )}
+        {exportOptions.includes("excel") && (
+          <DropdownMenuItem onClick={() => {
+            const allRows = table.getFilteredRowModel().rows.map(r => r.original);
+            if (!validateVisibleColumns(table)) return;
+            exportToExcel(allRows, table);
+          }}>
+            Export All to Excel
+          </DropdownMenuItem>
+        )}
+        {exportOptions.includes("json") && (
+          <DropdownMenuItem onClick={() => {
+            const allRows = table.getFilteredRowModel().rows.map(r => r.original);
+            if (!validateVisibleColumns(table)) return;
+            exportToJSON(allRows, table);
+          }}>
+            Export All to JSON
+          </DropdownMenuItem>
+        )}
+        {exportOptions.includes("pdf") && (
+          <DropdownMenuItem onClick={() => {
+            const allRows = table.getFilteredRowModel().rows.map(r => r.original);
+            if (!validateVisibleColumns(table)) return;
+            exportToPDF(allRows, table);
+          }}>
+            Export All to PDF
+          </DropdownMenuItem>
+        )}
+
+        {selectedRows.length > 0 && (
+          <>
+            {exportOptions.includes("csv") && (
+              <DropdownMenuItem onClick={() => exportToCSV(selectedRows, table)}>
+                Export Selected to CSV ({selectedRows.length})
+              </DropdownMenuItem>
+            )}
+            {exportOptions.includes("excel") && (
+              <DropdownMenuItem onClick={() => exportToExcel(selectedRows, table)}>
+                Export Selected to Excel ({selectedRows.length})
+              </DropdownMenuItem>
+            )}
+            {exportOptions.includes("json") && (
+              <DropdownMenuItem onClick={() => exportToJSON(selectedRows, table)}>
+                Export Selected to JSON ({selectedRows.length})
+              </DropdownMenuItem>
+            )}
+            {exportOptions.includes("pdf") && (
+              <DropdownMenuItem onClick={() => exportToPDF(selectedRows, table)}>
+                Export Selected to PDF ({selectedRows.length})
+              </DropdownMenuItem>
+            )}
+          </>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
+};
 
   // Inline Edit Cell Component
   const InlineEditCell = ({
@@ -1752,8 +1835,9 @@
           },
           enableSorting: false,
           enableHiding: false,
-          size: 28, minSize: 24,
-          maxSize: 36,
+          size: 20,
+    minSize: 16,
+    maxSize: 28,
         });
       }
 
@@ -2226,9 +2310,9 @@
                         key={header.id}
                         className="px-4 py-3 text-left rounded-xl border-gray-200 whitespace-nowrap bg-[#f9f9fa]"
                         style={{
-                          width: header.getSize(),
-                          minWidth: `${calculatedMinWidth}px`,
-                          maxWidth: header.column.columnDef.maxSize ?? 1000,
+                            width: header.id === "select" ? 40 : header.getSize(),
+  minWidth: header.id === "select" ? 40 : `${calculatedMinWidth}px`,
+  maxWidth: header.id === "select" ? 60 : header.column.columnDef.maxSize ?? 1000,
                           position: header.column.getIsPinned() ? "sticky" : "relative",
                           whiteSpace: 'nowrap',
                           left: header.column.getIsPinned() === "left" ? header.column.getStart("left") : undefined,
@@ -2395,8 +2479,8 @@
                                 rowHeightClasses[rowHeight]
                               )}
                               style={{
-                                width: cell.column.getSize(),
-                                maxWidth: cell.column.getSize()*2,
+                                width: cell.column.id === "select" ? 24 : cell.column.getSize(),
+  maxWidth: cell.column.id === "select" ? 30 : cell.column.getSize() * 2,
                                 position: cell.column.getIsPinned() ? "sticky" : "relative",
                                 left:
                                   cell.column.getIsPinned() === "left"

@@ -598,7 +598,8 @@ const CostBreakupAttributes = () => {
                             <ReusableButton
                                 variant="text"
                                 className='btn-reset-clear-style'
-                                onClick={() => { }}
+                                 onClick={()=>{handleReset();setIsDelModalOpen(false)}}
+ 
                             >
                                 Cancel
                             </ReusableButton>

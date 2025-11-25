@@ -167,6 +167,7 @@ const AssetRegistry = () => {
                         value={row.original.LicenseKey}
                         onChange={(e) => handleChange(e.target.value, row.id, "LicenseKey")}
                         name='LicenseKey'
+                        focusClass="ring-1 ring-ring  ring-opacity-50"
                         // placeholder='Enter License key'
                         isRequired={true}
                         className='m-2 mt-0 me-0 bg-white border-2'
@@ -189,7 +190,7 @@ const AssetRegistry = () => {
                         isRequired={true}
                         className='m-2 me-0  mt-0 bg-white border-2'
                         size='small'
-
+  focusClass="ring-1 ring-ring  ring-opacity-50"
                         //   placeholder='Enter Cost'
                         type="number"
                     ></ReusableInput><span className='text-red-500 ms-0 ps-0'>*</span>
@@ -210,6 +211,7 @@ const AssetRegistry = () => {
                             placeholder=' '
                             disabled={form.watch("LicenseType") !== "Perpetual" ? false : true}
                             size="sm"
+                            focusClass="ring-1 ring-ring  ring-opacity-50"
                             isRequired={true}
                             className='m-2 bg-white border-2'
                             wrapperClassName='m-2 ms-0  me-2'
@@ -232,6 +234,7 @@ const AssetRegistry = () => {
                         containerClassName=" p-2"
                         className='h-8 border-2 '
                         placeholder=" "
+                          focusClass="ring-1 ring-ring  ring-opacity-50"
                         options={[
                             { label: "Active", value: "Active" }, { label: "Expired", value: "Expired" }, { label: "Suspended", value: "Suspended" },
                         ]}

@@ -439,18 +439,7 @@ const TicketProgressDashboard = () => {
 
           {/* Main Content with Tabs */}
           <Card>
-            <CardHeader>
-              <Tabs value={activeView} onValueChange={setActiveView} className="w-full">
-                <TabsList className="grid w-full grid-cols-2 h-auto">
-
-                  <TabsTrigger value="graphs" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4 py-2">
-                    <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4" />
-                    <span className="hidden sm:inline">Analytics Dashboard</span>
-                    <span className="sm:hidden">Analytics</span>
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </CardHeader>
+           
             <CardContent>
               <Tabs value={activeView} className="w-full">
                 <TabsContent value="graphs">

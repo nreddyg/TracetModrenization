@@ -103,7 +103,7 @@ export interface ReusableMultiSelectProps {
   popupClassName?: string;
   placement?: 'bottomLeft' | 'bottomRight' | 'topLeft' | 'topRight';
   usePortal?: boolean;
-
+focusClass?:string
   // Virtual scrolling
   virtual?: boolean;
 
@@ -143,6 +143,7 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
     placeholder = "Select options",
     disabled = false,
     loading = false,
+    focusClass,
 
     // Display props
     allowClear = true,
@@ -1082,7 +1083,7 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
           <div
             className={cn(
               "flex items-center rounded-md w-full min-w-0 h-10 border transition-colors relative border border-input",
-              "focus-within:outline-none focus-within:ring-2 focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
+             focusClass?focusClass: "focus-within:outline-none focus-within:ring-2 focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
               disabled ? "bg-gray-100 cursor-not-allowed" : "bg-white ",
               getStatusClasses(),
               className

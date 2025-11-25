@@ -1804,7 +1804,7 @@ const TicketView = () => {
               <div className="flex items-center gap-2 shrink-0">
                 <div
                   className="text-gray-400 hover:text-blue-900 p-1 cursor-pointer"
-                  onClick={() => navigate(-1)}
+                  onClick={() => navigate("/layout/service-desk/all-requests")}
                 >
                   <ArrowLeft className="h-4 w-4 text-current stroke-[3]" />
                 </div>

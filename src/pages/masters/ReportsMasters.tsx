@@ -30,7 +30,7 @@ import { useMessage } from '@/components/ui/reusable-message';
 import { ColumnDef, FilterFn, VisibilityState } from '@tanstack/react-table';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { FaAngleRight } from 'react-icons/fa';
-interface MultiSelectConfig {
+export interface MultiSelectConfig {
   isHierarchy?: boolean;
   labelClassName?: string;
   className?: string;

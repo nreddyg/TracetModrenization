@@ -41,54 +41,7 @@ const ItemMaster = () => {
       fetchItemMasterData(companyId)
     }
   }, [companyId])
-  const setLookupsDataInJson = (lookupsData): void => {
-    const arr = Object.keys(lookupsData)
-    const groupNames: string[] = []
-    const opts: { [key: string]: any } = {}
-    arr.forEach((obj) => {
-      let ret = []
-      if (lookupsData[obj].isGrouping) {
-        groupNames.push(obj)
-        let groupOpts = []
-        ret = lookupsData[obj].groupData.map((element) => {
-          groupOpts = element.data.map((ele) => {
-            let opt = {}
-            opt["label"] = ele[element.label]
-            opt["value"] = ele[element.value]
-            return opt
-          });
-          return {
-            "label": element.groupLabel,
-            "options": groupOpts
-          }
-        })
-
-      } else if (lookupsData[obj].treedata) {
-        ret = lookupsData[obj].data
-      } else {
-        ret = lookupsData[obj].data.map((element) => {
-          let opt = {}
-          opt["label"] = element[lookupsData[obj].label]
-          opt["value"] = element[lookupsData[obj].value]
-          return opt
-        });
-      }
-      opts[obj] = ret
-    })
-    const data = structuredClone(fields);
-    data.forEach((obj) => {
-      if (arr.includes(obj.name)) {
-        if (groupNames.includes(obj.name)) {
-          obj.groupedOptions = opts[obj.name]
-        }
-        obj.options = opts[obj.name]
-        if (obj.fieldType === 'treeselect') {
-          obj['treeData'] = opts[obj.name]
-        }
-      }
-    });
-    setFields(data);
-  }
+ 
   const form = useForm<GenericObject>({
     defaultValues: fields.reduce((acc, f) => {
       acc[f.name!] = f.defaultChecked ?? '';

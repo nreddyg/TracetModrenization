@@ -142,7 +142,7 @@ const ManageUnitConversion = () => {
         dispatch(setLoading(true))
         await addNewConversion(companyId, data).then(res => {
             if (res.success) {
-                if (res.data.status) {
+                if (res.data.status==true) {
                     msg.success(res.data.message);
                     fetchUOMGetData(companyId)
                 } else {

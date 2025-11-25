@@ -29,6 +29,7 @@ import UserAttributes from "./pages/masters/fixedAssets/UserAttributes";
 import PrivateRoute from "./components/common/PrivateRoute";
 import Layout from "./pages/layout/Layout";
 import Home from "./pages/dashboard/Home";
+import AssetTransferReport from "./pages/FixedAssetsModule/AssetTransfer/AssetTransferReport";
 
 
 
@@ -365,6 +366,8 @@ const App = () => (
        {/* <Route  path='/' element = {<Layout/>}/> */}
       <Route  path='/changepassword' element={<ChangePassword/>}/>
       <Route  path='/service-desk/srdetailshistoryview' element={<ServiceRequestReport />}/>
+      <Route  path='"/service-desk/srdetailshistoryview"' element={<ServiceRequestReport />}/>
+      <Route path='/assetTransReportPreview' element={<AssetTransferReport/>}/>
       {/* <Route path='/assetTransReportPreview' element={<AssetTransferReport/>}/>
       <Route  path='/assetTransReportView' element={<AssetTransView/>}/>
       <Route  path='/assetsaleinvoiceView' element={<AssetInvoiceView/>}/>

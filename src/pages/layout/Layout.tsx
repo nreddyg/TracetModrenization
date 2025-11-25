@@ -2,7 +2,7 @@ import AppSidebar from '@/components/AppSidebar'
 import FixedHeader from '@/components/layout/FixedHeader'
 import { ReusableLoader } from '@/components/ui/reusable-loader'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
-import React, { Suspense, useLayoutEffect, useState } from 'react'
+import React, { Children, Suspense, useLayoutEffect, useState } from 'react'
 import { NavLink, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import TicketView from '../TicketView'
 import UserGroups from '../servicedesk/UserGroups'
@@ -38,10 +38,19 @@ import {
   User,
   UserCheck,
   UserCog,
-  MapPin
+  MapPin,
+  TrendingDown,
+  PlusCircle,
+  Briefcase,
+  ListChecks,
+  ClipboardList,
+  BarChart3,
+  CreditCard,
+  Activity,
+  Mail
 } from 'lucide-react';
 import { useAppSelector } from '@/store'
-import { setLoading, setReportsMenu } from '@/store/slices/projectsSlice'
+import { setLoading, setReportsMenu, setSettingsMenu } from '@/store/slices/projectsSlice'
 import { useDispatch } from 'react-redux'
 import { getUserWiseModuleList } from '@/services/userRoleServices'
 import NotFound from '../NotFound'
@@ -56,7 +65,8 @@ interface NavItem {
 }
 const icons={
 
-"masters":Building2, "servicedesk":Headphones, "fixedassets":Building2, "depreciation":DollarSign, "utilities":Building2, "cwip":Building2, "procurement":Building2, "consumables":Building2, "physicalverification":Building2,"settings":Settings,"softwareassets":Building2
+"masters":Building2,"company":Building2, "servicedesk":Headphones, "fixedassets":Package, "depreciation":TrendingDown, "utilities":Building2, "cwip":Building2, "procurement":Building2, "consumables":ShoppingCart, "physicalverification":Building2,"settings":Settings,"softwareassets":Building2, "servicemaintenance":Wrench,"masterreports":FileText,"createservicerequest":PlusCircle,"myworkbench":Briefcase,"myrequests":ListChecks,"allservicerequests":ClipboardList,"ticketprogressdashboard":BarChart3,"usergroups":Users,
+"configuration":Settings,"subscription":CreditCard,"reports":FileText,"assetregistry":Package ,"licenseassignment":Shield,"usagetracking":Activity,"smtpconfiguration":Mail
 
 }
 
@@ -475,7 +485,7 @@ const icons={
 //           },
 //           {
 //             label: 'Company Hierarchy',
-//             // icon: Building2,
+//             // icon,
 //             link: '/masters/company/company-hierarchy',
 //           },
 //           {
@@ -802,21 +812,7 @@ const Layout = () => {
     let settingsList = []
 
     // result.children.forEach((item) => {
-    //   if (item.title !== "Settings" && item.children?.length > 0) {
-
-    //     let activeitem = (item?.children[0]?.children !== undefined && item?.children[0]?.children.length !== 0) ? item?.children[0]?.children[0].key : item?.children[0].key;
-
-    //     if (moduleList[item.title]) {
-    //       moduleList[item.title].displaymenu = {
-    //         items: item.children,
-    //         heading: item.title,
-    //         activeMenuItem: activeitem,
-    //         defaultOpenKey: item.children[0].key
-    //       }
-    //       moduleList[item.title].defaultPath = activeitem
-    //       list.push(moduleList[item.title])
-    //     }
-    //   } else if (item.title === "Settings") {
+    //  (item.title === "Settings") {
     //     settingsList = item.children ? item.children : []
     //   }
     // })
@@ -832,7 +828,31 @@ const Layout = () => {
     // settingsPath && setSettingsIndexPath(settingsPath)
     // dispatch(updateSettingsMenueList(settingsList))
     result.children.push(result.children.shift());
-    setMenuList(result.children.filter(f=>f))
+
+    result.children.filter(f=>f)
+
+    result.children.forEach((obj)=>
+      {
+        if(obj.label=="Masters"){
+          if(obj.children){  
+          obj?.children?.forEach(ob=>{
+            if(ob.children){
+           ob.link=ob?.children.length>0 ? ob.children[0].link:ob.link
+            }
+          })
+          }
+        }
+         if(obj.label=="Settings") {
+        settingsList = obj.children ? obj.children : []
+      }
+        obj.link=obj?.children.length>0 ? obj.children[0].link:obj.link
+    })
+    result.children.unshift({label:"Dashboard",icon:Home})
+    console.log("settingsListlist",settingsList)
+
+   dispatch(setSettingsMenu(settingsList))
+    setMenuList( result.children)
+
   }
   const formattingMenuAPIData = (data, parent = '', currentPath = '', pathsArray = [], settingsPaths = []) => {
     parent = parent.toLowerCase().replace(/\s+/g, '')
@@ -880,6 +900,7 @@ const Layout = () => {
           }
         }
       }
+      console.log("icon", module.ModuleName.toLowerCase().replace(/\s+/g, ''),icons[module.ModuleName.toLowerCase().replace(/\s+/g, '')])
       const menuItem:NavItem = {
         // id: module.ModuleId,
         // title: module.ModuleName,
@@ -887,7 +908,7 @@ const Layout = () => {
         // key: `${hasNoChildren(module) ? routesObject[modulePath] : module.ModuleName}`,
         link: `${hasNoChildren(module) ? appRoutesObj[modulePath]?.path : module.ModuleName}`,
         label: module.ModuleName,
-        icon:parentModules.includes(modulePath) ? icons[modulePath] :(module.Children && module.Children?.length > 0)?null:RxDotFilled,
+        icon:icons[module.ModuleName.toLowerCase().replace(/\s+/g, '')]?icons[module.ModuleName.toLowerCase().replace(/\s+/g, '')]:false
       };
       
       if (module.Children && module.Children?.length > 0) {
@@ -953,8 +974,8 @@ const Layout = () => {
     <SidebarProvider>
         <div className="h-screen flex w-full bg-app-background overflow-hidden">
           {menuList.length!=0 &&<AppSidebar  navigation={menuList}/>}
-          <SidebarInset className="flex flex-col overflow-hidden bg-[#f9fafb]">
-            <FixedHeader />
+          <SidebarInset className="flex flex-col overflow-hidden bg-[#fafafa]">
+            <FixedHeader showCreateBtn={showCreateBtn} />
             {/* <div className="w-full h-full pt-1 transition-all duration-200 ease-in-out"> */}
                {menuList.length!=0 && <Suspense fallback={<ReusableLoader spinning={true} size="lg" position="center" />}>
              {appRoutesState.length > 1 ? 

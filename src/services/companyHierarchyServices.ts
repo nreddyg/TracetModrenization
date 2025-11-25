@@ -1,6 +1,6 @@
-import { URL_GET_COMPANY_HIERARCHY_DATA_BY_BRANCHID, URL_GET_HIERARCHY_LEVELS_DATA, URL_GET_STATE_LOOKUP_DATA } from './../config/apiUrls';
+import {URL_GET_HIERARCHY_LEVELS_DATA, URL_GET_LEVEL_FIVE_COMPANY, URL_GET_STATE_LOOKUP_DATA } from './../config/apiUrls';
 // services/customerService.ts
-import { URL_DELETE_COMPANY_HIERARCHY_DATA, URL_GET_COMPANY_HIERARCHY_DATA, URL_POST_COMPANY_HIERARCHY_DATA, URL_POST_DEPARTMENT_DATA} from '@/config/apiUrls';
+import { URL_DELETE_COMPANY_HIERARCHY_DATA, URL_POST_COMPANY_HIERARCHY_DATA, URL_POST_DEPARTMENT_DATA} from '@/config/apiUrls';
 import api from './api';
 
 interface APIResponse<T> {
@@ -33,7 +33,7 @@ export const addOrUpdateHierarchyLevel = async (compId: string, id: any , data: 
 //getCompany Hierarchy Data
 export const getCompanyData = async (CompId: string): Promise<APIResponse<any>> => {
     try {
-        const response = await api.get(URL_GET_COMPANY_HIERARCHY_DATA, { params: { CompId: CompId } })
+        const response = await api.get(URL_GET_LEVEL_FIVE_COMPANY, { params: { CompId: CompId } })
         return {success: true,data: response.data,}
     } catch (err: any) {
         return {success: false,message: err.response?.data?.message || err.message,status: err.response?.status};
@@ -52,7 +52,7 @@ export const getStateData = async (CompId: string): Promise<APIResponse<any>> =>
 //getCompany Hierarchy Data by branch ID
 export const getCompanyDataBybranchId = async (CompId: string,id:any): Promise<APIResponse<any>> => {
     try {
-        const response = await api.get(URL_GET_COMPANY_HIERARCHY_DATA_BY_BRANCHID, { params: { CompId: CompId,BranchId:id } })
+        const response = await api.get(URL_GET_LEVEL_FIVE_COMPANY , { params: { CompId: CompId,BranchId:id } })
         return {success: true,data: response.data,}
     } catch (err: any) {
         return {success: false,message: err.response?.data?.message || err.message,status: err.response?.status};

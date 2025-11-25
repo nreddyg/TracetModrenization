@@ -985,7 +985,7 @@ const TicketView = () => {
           fieldData.AdditionalFields.forEach((field: any) => {
             additionalFields[field.FieldName] = field.FieldValue || '';
             if (additionalCheckBoxNames.includes(field.FieldName))
-              additionalFields[field.FieldName] = field.FieldValue.split(",");
+              additionalFields[field.FieldName] = field.FieldValue? field.FieldValue.split(","):'';
 
             if (additionalDateNames.includes(field.FieldName))
               additionalFields[field.FieldName] = formatDateToDDMMYYYY(field.FieldValue);
@@ -1721,7 +1721,7 @@ const TicketView = () => {
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col min-w-0 ">
           {/* Navigation and Action Bar */}
-          <div className="bg-white border-b shadow-sm px-4 lg:px-6 py-3 flex flex-row xxs:flex-col xs2:flex-row lg:flex-row lg:items-center justify-between gap-4 shrink-0">
+          {/* <div className=" px-4 lg:px-6 py-3 flex flex-row xxs:flex-col xs2:flex-row lg:flex-row lg:items-center justify-between gap-4 shrink-0">
             <div className="flex items-center gap-4 lg:gap-6 flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <div className=' text-gray-400 hover:text-blue-900 p-1 cursor-pointer' onClick={() => navigate(-1)}>
@@ -1729,16 +1729,16 @@ const TicketView = () => {
                 </div>
                 <span className="text-gray-600 text-sm">All Tickets</span>
                 <span className="text-gray-400">|</span>
-                {!isCreateMode && <h6 className="text-blue-600 font-medium truncate block max-w-xs" title={selectedTicket?.Title}>{originalTicket.ServiceRequestNo} {selectedTicket?.Title && (<span title={selectedTicket.Title}>{selectedTicket.Title.length > 18 ? selectedTicket.Title.slice(0, 17) + "...": selectedTicket.Title}
-                  </span>
-                )}</h6>}
+                {!isCreateMode && <h6 className="text-blue-600 font-medium truncate block  lg:max-w-xs" title={selectedTicket?.Title}>{originalTicket.ServiceRequestNo} { selectedTicket.Title} 
+                
+                </h6>}
                 <Badge className={getPriorityColor(watch('Severity'))} title='Severity'>{watch('Severity')}</Badge>
                 {!isCreateMode && <Badge className={getStatusColor(selectedTicket?.Status)} title='Status'>{selectedTicket?.Status || ''}</Badge>}
               </div>
 
               {isCreateMode && (
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-lg font-bold text-gray-900 truncate">{watch('Title')}</h3>
+                  <h3 className="text-lg font-medium text-gray-900 truncate">{watch('Title')}</h3>
                 </div>
               )}
             </div>
@@ -1759,7 +1759,7 @@ const TicketView = () => {
                   <ReusableButton
                     variant="text"
                     // size="small"
-                    className='btn-reset-clear-style'
+                    className='btn-reset-clear-style btn-style-adj '
                     onClick={() => handleEdit('cancel')}
                     icon={<X className="h-4 w-4" />}
                   >
@@ -1779,7 +1779,124 @@ const TicketView = () => {
                       }
                     }
                     icon={<Save className="h-4 w-4" />}
-                    className='btn-submit-style'
+                    className='btn-submit-style btn-style-adj '
+                  >
+                   
+                    {isCreateMode ? "Save" : "Update"}
+                    
+                  </ReusableButton>
+                </>
+              )}
+            </div>
+          </div> */}
+
+<div
+            className="
+    px-4 lg:px-6
+    h-12 flex items-center justify-between gap-4
+    overflow-hidden
+  "
+          >
+            {/* LEFT SECTION */}
+            <div className="flex items-center gap-3 flex-1 min-w-0 overflow-hidden">
+ 
+              {/* Back + All Tickets */}
+              <div className="flex items-center gap-2 shrink-0">
+                <div
+                  className="text-gray-400 hover:text-blue-900 p-1 cursor-pointer"
+                  onClick={() => navigate("/layout/service-desk/all-requests")}
+                >
+                  <ArrowLeft className="h-4 w-4 text-current stroke-[3]" />
+                </div>
+                <span className="text-gray-600 text-sm shrink-0">All Tickets</span>
+                <span className="text-gray-400 shrink-0">|</span>
+              </div>
+ 
+              {/* DYNAMIC TITLE AREA – will shrink and truncate */}
+              {!isCreateMode && (
+                <div className="flex items-center gap-2 min-w-0 overflow-hidden flex-1">
+ 
+                  {/* ID */}
+                  <span className="text-blue-600 font-medium shrink-0">
+                    {originalTicket.ServiceRequestNo}
+                  </span>
+ 
+                  {/* TITLE (Flexible shrinking, auto adjusts on zoom) */}
+                  <div className="min-w-0 flex-1 overflow-hidden">
+                    <span
+                      className="text-blue-600 font-medium truncate block"
+                      title={selectedTicket?.Title}
+                    >
+                      {selectedTicket?.Title}
+                    </span>
+                  </div>
+ 
+                  {/* Severity */}
+                  <Badge
+                    className={`${getPriorityColor(watch("Severity"))} shrink-0`}
+                    title="Severity"
+                  >
+                    {watch("Severity")}
+                  </Badge>
+ 
+                  {/* Status */}
+                  <Badge
+                    className={`${getStatusColor(selectedTicket?.Status)} shrink-0`}
+                    title="Status"
+                  >
+                    {selectedTicket?.Status || ""}
+                  </Badge>
+                </div>
+              )}
+ 
+              {/* Create Mode Title */}
+              {isCreateMode && (
+                <div className="flex-1 min-w-0 overflow-hidden">
+                  <h3 className="text-lg font-bold text-gray-900 truncate">
+                    {watch("Title")}
+                  </h3>
+                </div>
+              )}
+            </div>
+ 
+            {/* BUTTONS (never shrink) */}
+            <div className="flex items-center gap-3 shrink-0">
+              {!isEditing && !isCreateMode ? (
+                <ReusableButton
+                  variant="primary"
+                  size="small"
+                  onClick={() => handleEdit("edit")}
+                  icon={<Edit className="h-4 w-4" />}
+                  className="btn-submit-style"
+                >
+                  Edit
+                </ReusableButton>
+              ) : (
+                <>
+                  <ReusableButton
+                    variant="text"
+                    className="btn-reset-clear-style"
+                    onClick={() => handleEdit("cancel")}
+                    icon={<X className="h-4 w-4" />}
+                  >
+                    {isCreateMode ? "Clear" : "Cancel"}
+                  </ReusableButton>
+ 
+                  <ReusableButton
+                    variant="primary"
+                    onClick={
+                      isCreateMode
+                        ? () => {
+                          handleSubmit(handleSave)();
+                          handleTriggerAccordionItemsValidations();
+                        }
+                        : () => {
+                          handleSubmit(handleUpdate)();
+                          handleTriggerAccordionItemsValidations();
+                        }
+                    }
+                    icon={<Save className="h-4 w-4" />}
+                    className="btn-submit-style"
                   >
                     {isCreateMode ? "Save" : "Update"}
                   </ReusableButton>
@@ -1787,17 +1904,16 @@ const TicketView = () => {
               )}
             </div>
           </div>
-
           {/* Content Grid with Individual Scroll Areas */}
-          <div className="flex-1 p-3 overflow-hidden min-h-0  ">
+          <div className="flex-1 p-3  pt-1 overflow-hidden min-h-0  ">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-1 h-full">
               {/* Left Column - Main Content */}
-              <div className="lg:col-span-8 flex flex-col  min-h-0 ">
-                <ScrollArea className="flex-1  ">
+              <div className="lg:col-span-8 flex flex-col  min-h-0  ">
+                <ScrollArea scrollStyle={'flex-[0.8] '} className="flex-1  ">
                   <div className="space-y-6 pr-1">
-                    <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-                      <CardContent className="pt-6">
-                        <div className="space-y-6">
+                    <Card className="border-0  p-0 text-card-foreground bg-card rounded-lg border border-border">
+                      <CardContent className=" p-0">
+                        <div className="space-y-6 p-4">
                           <div className='grid md:grid-cols-[2.2fr_1.8fr] sm:grid-cols-1 gap-x-3 gap-y-3 '>
                             {getFieldsByNames(['Title', 'ServiceRequestType']).map((field) => (
                               <div key={field.name}>
@@ -1877,10 +1993,11 @@ const TicketView = () => {
                             }
                             {getFieldsByNames(['Customer']).map(renderField)}
                           </div>
-                          {watch('Customer') && <div>
-                            <div className='text-sm font-medium mb-1'>Subscription Details List:</div>
+                          {watch('Customer') && <div className='border pt-2 overflow-hidden rounded-lg'>
+                            <div className='text-sm font-medium mb-1 px-3 '>Subscription Details List:</div>
                             <ReusableTable
                               data={dataSource}
+                              containerClassName={"border-b-0"}
                               columns={cols}
                               enableExport={false}
 
@@ -1898,17 +2015,17 @@ const TicketView = () => {
                       </CardContent>
                     </Card>
                     {(showAccordion && ticketStatus !== 'Closed') &&
-                      <Card className='shadow-lg'>
-                        <CardContent className="p-0">
+                      <Card className=''>
+                        {/* <CardContent className="p-0"> */}
                           <Accordion type="single" collapsible value={accordionOpen} onValueChange={setAccordionOpen}>
                             <AccordionItem value="additional-fields" className="border-none">
-                              <AccordionTrigger className="px-6 w-full py-4 hover:no-underline">
+                              <AccordionTrigger className="w-full p-2 hover:no-underline">
                                 <div className="flex items-center gap-2 w-full">
                                   <Tag className="h-5 w-5" />
                                   <span className="font-semibold">Additional Fields</span>
                                 </div>
                               </AccordionTrigger>
-                              <AccordionContent className="px-6 pb-6">
+                              <AccordionContent className="p-4">
                                 <div className="space-y-4">
                                   <div className="grid grid-cols-1 md:grid-cols-2 capitalize gap-4">
                                     {getAdditionalFields().map(renderField)}
@@ -1917,24 +2034,24 @@ const TicketView = () => {
                               </AccordionContent>
                             </AccordionItem>
                           </Accordion>
-                        </CardContent>
+                        {/* </CardContent> */}
                       </Card>
                     }
                     {/* Activity & Comments */}
                     {!isCreateMode && (
-                      <Card className=" bg-white border-b  shadow-sm   mb-2  shadow-lg">
-                        <CardHeader>
-                          <CardTitle>Activity</CardTitle>
+                      <Card className=" bg-white border-b  shadow-sm  p-2 mb-2  ">
+                        <CardHeader className='p-3 '>
+                          <h3 className='text-lg font-medium'>Activity</h3>
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className='p-3'>
                           <Tabs defaultValue="comments" className="space-y-4">
                             <TabsList className="grid w-full grid-cols-3 h-auto">
-                              <TabsTrigger value="comments" className="text-xs sm:text-sm px-2 sm:px-4 py-2">Comments</TabsTrigger>
-                              <TabsTrigger value="history" className="text-xs sm:text-sm px-2 sm:px-4 py-2">History</TabsTrigger>
+                              <TabsTrigger value="comments" className="text-xs sm:text-sm px-2 sm:px-4 ">Comments</TabsTrigger>
+                              <TabsTrigger value="history" className="text-xs sm:text-sm px-2 sm:px-4 ">History</TabsTrigger>
                               {/* <TabsTrigger value="worklog" className="text-xs sm:text-sm px-2 sm:px-4 py-2">Work Log</TabsTrigger> */}
                             </TabsList>
 
-                            <TabsContent value="comments" className="space-y-4">
+                            <TabsContent value="comments" className="space-y-4 ">
                               <div className="space-y-4">
                                 <form>
                                   <Controller
@@ -2036,18 +2153,18 @@ const TicketView = () => {
               </div>
 
               {/* Right Column - Details Panel */}
-              <div className="lg:col-span-4 flex flex-col min-h-0">
-                <ScrollArea className="flex-1 h-full">
+              <div className="lg:col-span-4 flex flex-col min-h-0 text-card-foreground bg-card rounded-lg border border-border overflow-">
+                <ScrollArea scrollStyle={'flex-[0.8] '}  className="flex-1 h-full">
                   <div className="pr-1">
-                    <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+                    <Card className="border-0 p-4 pt-3">
                       <CardContent className="p-0">
                         <Tabs defaultValue="details" className="w-full">
-                          <TabsList className="grid w-full grid-cols-3 rounded-t-lg">
-                            <TabsTrigger value="details" className="text-sm data-[state=active]:shadow-lg data-[state=active]:shadow-gray-200">Details</TabsTrigger>
-                            {!isCreateMode && <TabsTrigger value="linkedissues" className="text-xs data-[state=active]:shadow-lg data-[state=active]:shadow-gray-300">Links</TabsTrigger>}
-                          </TabsList>
-
-                          <TabsContent value="details" className="p-6 space-y-4">
+                             {!isCreateMode? <TabsList className="grid w-full grid-cols-3 rounded-t-lg">
+                            <TabsTrigger value="details" className="text-xs data-[state=active]:shadow-lg data-[state=active]:shadow-gray-200">Details</TabsTrigger>
+                            {!isCreateMode && <TabsTrigger value="linkedissues" className="text-xs data-[state=active]:shadow-lg data-[state=active]:shadow-gray-200">Links</TabsTrigger>}
+                          </TabsList>:<h2 className="text-lg font-semibold  ">Details</h2>
+                           }
+                          <TabsContent value="details" className=" space-y-4">
                             {getFieldsByNames(['Status', 'AssigneeSelectedUsers', 'Severity', 'Priority', 'AssetId', 'RequestedDate', 'RequestedById', 'Branch', 'CCListSelectedUsers', 'LinkTo', 'Notify']).map(renderField)}
 
                           </TabsContent>
@@ -2069,6 +2186,7 @@ const TicketView = () => {
                             }
                           </TabsContent>
                         </Tabs>
+                       
                       </CardContent>
                     </Card>
                   </div>
@@ -2097,6 +2215,7 @@ const TicketView = () => {
               <ReusableTable
                 data={historyData}
                 columns={historyColumns}
+                containerClassName={"border"}
               />
             </ScrollArea>
           </div>

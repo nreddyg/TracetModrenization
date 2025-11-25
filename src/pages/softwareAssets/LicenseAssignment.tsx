@@ -411,15 +411,13 @@ const LicenseAssignment = () => {
     return (
         <ScrollArea>
             <div className="h-full">
-                <header className="px-6 py-4">
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-                            <h1 className="text-lg sm:text-2xl font-bold text-gray-900">
-                                License Assignment
-                            </h1>
-                        </div>
-                        <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                  <div className="p-4 space-y-4">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                                
+                                  <h1 className="text-2xl font-bold">License Assignment</h1>
+                                  {/* <p className="text-sm text-gray-600 mt-0.5">Manage user groups and permissions</p> */}
+                                
+                                  <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
                             <ReusableButton
                                 // size="small"
                                 // variant="primary"
@@ -438,17 +436,17 @@ const LicenseAssignment = () => {
                                 </span>
                             </ReusableButton>
                         </div>
-                    </div>
-                </header>
-                <div className="p-4 pt-0">
+                              </div>
+             
+              
                     {isOpenLicenseCard &&
-                        <div className='p-0 rounded-lg'>
-                            <div className=" bg-white rounded-lg p-4">
-                                <Card>
-                                    <CardContent className="pt-6">
-                                        <div className="">
+                        // <div className='p-2 rounded-lg'>
+                            
+                                <Card className='border-0 bg-card rounded-lg border border-border p-5 mb-6'>
+                                 
+                                                   <h2 className="text-lg font-semibold mb-4 ">Assign License To Employee</h2>
                                             <div className="space-y-4">
-                                                <span className='text-2xl'>Assign License To Employee</span>
+
                                                 <div className={`grid xxs:grid-cols-1 xs2:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-6`}>
                                                     {getFieldsByNames(['EmployeeId', 'DepartmentId', 'SoftwareId', 'LicenseKeyId', 'AssignmentDate', 'AssignmentExpiryDate']).map((field) => {
                                                         return (renderField(field))
@@ -463,7 +461,7 @@ const LicenseAssignment = () => {
                                                     })}
                                                 </div>
                                             </div>
-                                        </div>
+                                        
                                         <div className="flex gap-2 mt-6">
                                             <ReusableButton
                                                 htmlType="button"
@@ -489,12 +487,13 @@ const LicenseAssignment = () => {
                                                 Cancel
                                             </ReusableButton>
                                         </div>
-                                    </CardContent>
+                                   
                                 </Card>
-                            </div>
-                        </div>
+                           
+                        // </div>
                     }
-                    <div className="bg-white p-6 rounded-lg">
+                     {/* <div className=" p-4 pt-0 rounded-lg"> */}
+                    <div className="border bg-white rounded-lg pb-5 pt-2">
                         <ScrollArea className=" w-full ">
                             <ReusableTable
                                 data={dataSource}
@@ -518,6 +517,7 @@ const LicenseAssignment = () => {
                             />
                         </ScrollArea>
                     </div>
+                    {/* </div> */}
                     <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>
                         <DialogContent className="sm:max-w-[450px]">
                             <DialogHeader>
@@ -549,7 +549,7 @@ const LicenseAssignment = () => {
                         </DialogContent>
                     </Dialog>
                 </div>
-            </div>
+           </div>
         </ScrollArea>
     );
 }

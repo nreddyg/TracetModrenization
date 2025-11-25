@@ -208,7 +208,8 @@ export const CREATE_TICKET_DB: BaseField[] = [
     name: "FileUploadURLs",
     isRequired: false,
     filelist: [],
-    maxCount: Infinity,
+    maxCount: 100,
+    showMaxText: false,
     check: [
       ".doc", ".docx", ".odt", ".pdf", ".tex", ".txt", ".xls", ".xlsx",
       ".jpg", ".jpeg", ".png", ".pptx", ".rtf", ".wpd", "._zip"

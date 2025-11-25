@@ -8,7 +8,8 @@
 
 @layer base {
   :root {
-    --background: 238 73% 97%;
+    /* --background: 238 73% 97%; */
+    --background: 0, 0%, 98%;
     --foreground: 222.2 84% 4.9%;
 
     --card: 0 0% 100%;
@@ -18,6 +19,7 @@
     --popover-foreground: 222.2 84% 4.9%;
 
     --primary: 225 44% 47%;
+    --additional: 229 44% 44%;
     --primary-foreground: 210 40% 98%;
 
     --secondary: 210 40% 96.1%;
@@ -29,17 +31,23 @@
     --accent: 22 91% 55%;
     --accent-foreground: 210 40% 98%;
 
+    --button-orange:20 100% 61%;
+    --button-gray:0 0% 98%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
+    
+   
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
+    /* --border: 214.3 31.8% 91.4%; */
+    --border: 240 6% 90%;
+    /* --input: 214.3 31.8% 91.4%; */
+    --input: 240 6% 90%;
     --ring: 225 44% 47%;
 
     --radius: 0.5rem;
 
     --sidebar-background: 225 44% 47%;
-    --sidebar-foreground: 0 0% 98%;
+    --sidebar-foreground: 0 0% 100%;
     --sidebar-primary: 22 91% 55%;
     --sidebar-primary-foreground: 0 0% 98%;
     --sidebar-accent: 225 44% 57%;
@@ -95,7 +103,7 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: "Poppins", sans-serif;
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   }
 }
 
@@ -139,10 +147,9 @@
 }
 
   .btn-submit-style{
-  background-color: #f47e27;
+  background-color:hsl(var(--button-orange));
   color: hsl(210 40% 98%);
   font-size: 0.875rem;
-  font-weight: 500; 
   border-color: hsl(214.3 31.8% 91.4%);
   padding-left: 0.75rem !important;
   padding-right: 0.75rem !important;
@@ -150,24 +157,64 @@
   border: 0 !important;
   }
   .btn-submit-style:hover{
-    background-color: #f47e27 !important;
+    background-color: hsl(var(--button-orange)) !important;
     color: hsl(210 40% 98%) !important
   }
+ .btn-additional-style{
+  background-color: hsl(var(--additional)) !important;
+ }
+ /* .btn-delete-style{
+    background-color:hsl(var(--destructive));
+  color: hsl(210 40% 98%);
+  font-size: 0.875rem;
+  padding-left: 0.75rem !important;
+  padding-right: 0.75rem !important;
+  transition: background-color 0.2s ease-in-out;
+  border: 0 !important;
+ }
 
+   .btn-delete-style:hover{
+    background-color:hsl(var(--destructive)) !important;
+    color: white !important;
+  } */
   .btn-reset-clear-style{
-    background-color: hsl(238 73% 97%) !important;
+    background-color: hsl(var(--button-gray)) !important;
     color: #000;
     font-size: 0.875rem;
-    border-color: hsl(214.3 31.8% 91.4%);
-    padding-left: 0.75rem !important;
-    padding-right: 0.75rem !important;
-    border: hsl(214.3 31.8% 91.4%) !important;
+    border-color: hsl(var(--input));
+    padding: 0.75rem !important;
+    /* padding-right: 0.75rem !important; */
+    /* border: hsl(214.3 31.8% 91.4%) !important; */
   }
+    .btn-style-adj span{
+    padding-bottom:  0.1875rem  !important;
+    }
   .btn-reset-clear-style:hover{
-    background-color: hsl(238 73% 97%) !important;
-    color: #000 !important;
-    border: hsl(214.3 31.8% 91.4%) !important;
+    background-color:hsl(var(--button-orange)) !important;
+    color: white !important;
   }
+
+
+  .custom-scroll::-webkit-scrollbar
+ {
+  width: 5px;
+  height: 2px;
+  background-color: #aab4ca;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  -webkit-box-shadow: none;
+  background-color: #aab4ca;
+  -moz-transition: all ease 0.5s;
+  transition: all ease 0.5s;
+}
+
+.custom-scroll::-webkit-scrollbar-track {
+  -webkit-box-shadow: none;
+  border-radius: 10px;
+  background-color: #fff;
+}
 
   /* Tabs container styling */
 .tabs .TabsList {

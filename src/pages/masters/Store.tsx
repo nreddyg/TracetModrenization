@@ -139,7 +139,7 @@ const Store = () => {
             accessorKey: 'actions',
             header: 'Actions',
             cell: ({ row }: any) => (
-                <div className="flex gap-2" title='Actions'>
+                <div className="flex gap-2 bg-red" title='Actions'>
                     <ReusableButton
                         variant="text"
                         size="small"
@@ -281,34 +281,55 @@ const Store = () => {
         setIsAddDialogOpen(true)
     };
     return (
-        <div className="h-full overflow-y-auto bg-gray-50 flex flex-col ">
-            <div className="flex flex-1 overflow-hidden">
-                <div className="flex-1 flex flex-col min-w-0 ">
-                    <header className="px-6 py-3">
-                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-
-                            <div className="flex items-center gap-2 text-sm text-gray-600">
-                                <span>Masters</span>
+        <>
+       
+           <ScrollArea>
+      <div className="h-full">
+        <div className="p-4 sm:p-4 space-y-4 sm:space-y-4">
+          {/* Header Section */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+           
+            
+            <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <span>Masters</span>
                                 <FaAngleRight />
                                 <span>Consumables</span>
                                 <FaAngleRight />
                                 <span className="text-gray-900 font-medium">Store</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-                                <DialogTrigger asChild>
+              </div>
+            </div>
+            
                                     {branch!=='All' && 
                                     <ReusableButton
                                         variant="primary"
                                         // size='small'
                                         icon={<Plus className="h-4 w-4" />}
-                                        onClick={() => { setRecordToEditId(null); reset({ StoreName: "", Branch: "", StoreDescription: "" }) }}
+                                        onClick={() => { setIsAddDialogOpen(true);setRecordToEditId(null); reset({ StoreName: "", Branch: "", StoreDescription: "" }) }}
                                          className='btn-submit-style'
                                     >
                                         Add
                                     </ReusableButton>
                                     }
-                                </DialogTrigger>
+                             
+          </div>
+         
+          <div className=" border bg-white rounded-lg pb-5 pt-2">
+
+               <ReusableTable
+                                                            // title='Store'
+                                                            data={dataSource}
+                                                            title='Store'
+                                                            columns={columns}
+                                                            enableExport={false}
+                                                        />
+        </div>
+      </div>
+      </div>
+    </ScrollArea>
+
+            
+                            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                                 <DialogContent className="max-w-2xl">
                                     <DialogHeader>
                                         <DialogTitle>{recordToEditId ? "Update Store" : "Add Store"}</DialogTitle>
@@ -329,15 +350,16 @@ const Store = () => {
                                     </div> */}
                                     <div className="flex justify-end gap-2">
                                         <ReusableButton
-                                            variant="default"
+                                            variant="text"
+                                            className='btn-reset-clear-style'
                                             onClick={() => setIsAddDialogOpen(false)}
                                         >
                                             Cancel
                                         </ReusableButton>
                                         <ReusableButton
                                             htmlType="submit"
-                                            variant="primary"
-                                            className="bg-orange-500 hover:bg-orange-600 border-orange-500"
+                                            variant="text"
+                                            className="btn-submit-style"
                                             onClick={() => submit()}
                                         >
                                             {recordToEditId ? "Update" : "Save"}
@@ -345,19 +367,8 @@ const Store = () => {
                                     </div>
                                 </DialogContent>
                             </Dialog>
-                            </div>
-                        </div>
-                    </header>
-                    <div className="flex-1 p-3 pt-0 overflow-hidden min-h-0  ">
-                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-1 h-full">
-                            <div className="lg:col-span-12 flex flex-col  min-h-0 ">
-                                <ScrollArea className="flex-1">
-                                    <div className="space-y-2 pr-1">
-                                        <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-                                            <CardContent className="p-2">
-                                                <div className="p-2">
-                                                    <div className="flex justify-between items-center">
-                                                        <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>
+                       
+               <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>
                                                             <DialogContent className="sm:max-w-[425px]">
                                                                 <DialogHeader>
                                                                     <DialogTitle>Confirm the action</DialogTitle>
@@ -367,7 +378,8 @@ const Store = () => {
                                                                 </DialogHeader>
                                                                 <DialogFooter>
                                                                     <ReusableButton
-                                                                        variant="default"
+                                                                        variant="text"
+                                                                        className='btn-reset-clear-style'
                                                                         onClick={() => setIsDelModalOpen(false)}
                                                                     >
                                                                         Cancel
@@ -382,26 +394,9 @@ const Store = () => {
                                                                 </DialogFooter>
                                                             </DialogContent>
                                                         </Dialog>
-                                                    </div>
-                                                    <div className="bg-gray-50/30">
-                                                        <ReusableTable
-                                                            title='Store'
-                                                            data={dataSource}
-                                                            columns={columns}
-                                                            enableExport={false}
-                                                        />
-                                                    </div>
-                                                </div>
-                                            </CardContent>
-                                        </Card>
-                                    </div>
-                                </ScrollArea>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
+                                                        
+                                                        
+                                                         </>
+    )
 };
 export default Store;

@@ -702,23 +702,23 @@ setRec(null)
                 </div>}
 
                 {/* Main Content Area */}
-                <div className="flex-1 flex flex-col min-w-0 ">
+                <ScrollArea className='flex-1 flex flex-col min-w-0 '>
+                <div className="">
                     {/* Navigation and Action Bar */}
                     <div className="px-4 lg:px-6 py-3 flex flex-row xxs:flex-col xs2:flex-row lg:flex-row lg:items-center justify-between gap-4 shrink-0">
-                        <div className="flex items-center gap-4 lg:gap-6 flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                                <div className="flex items-center gap-2 text-sm text-gray-600">
-                                    <span>Masters</span>
-                                    <FaAngleRight />
-                                    <span>Fixed Assets</span>
-                                    <FaAngleRight />
-                                    <span className="text-gray-900 font-medium">User Attributes</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <ReusableButton
+                        <div className="flex items-start sm:items-center gap-4 lg:gap-6 flex-1 min-w-0">
+                             <div className="flex items-center gap-2 text-sm text-gray-600 flex-wrap">
+                                                              <span>Masters</span>
+                                                                <FaAngleRight />
+                                                                <span>Fixed Assets</span>
+                                                                <FaAngleRight />
+                                                                <span className="text-gray-900 font-medium">User Attributes</span>
+                                                                </div>
+                                                              </div>
+                                                    <div className="flex items-center gap-2 self-start sm:self-auto">
+                                                             <ReusableButton
                                 variant="text"
+                                  className='btn-reset-clear-style'
                                 // size="small"
                                 onClick={handleReset}
                                 icon={<X className="h-4 w-4" />}
@@ -735,7 +735,8 @@ setRec(null)
                             >
                                 {recordData ? 'Update' : 'Save'}
                             </ReusableButton>
-                        </div>
+                                                    </div>
+                       
                     </div>
 
                     {/* Content Grid with Individual Scroll Areas */}
@@ -743,13 +744,13 @@ setRec(null)
                     <div className="flex-1 p-3 pt-0 overflow-hidden min-h-0  ">
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-1 h-full">
                             {/* Left Column - Main Content */}
-                            <div className="lg:col-span-12 flex flex-col  min-h-0 ">
-                                <ScrollArea className="flex-1  ">
-                                    <div className="space-y-6 pr-1">
-                                        <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-                                            <CardContent className="pt-6">
-                                                <div className="space-y-6">
-                                                    <div className='grid md:grid-cols-2 sm:grid-cols-1 gap-x-3 gap-y-3 '>
+                            <div className="lg:col-span-12 flex flex-col  min-h-0 text-card-foreground bg-card rounded-lg border border-border overflow-hidden  pt-2 ">
+                                <ScrollArea scrollStyle={'flex-[0.8] '} className="flex-1  ">
+                                    <div className="space-y-6 ">
+                                        <Card className="pt-1 p-0 border-0">
+                                            <CardContent className="p-0">
+                                                <div className=" space-y-2">
+                                                    <div className=' px-6 pt-6 grid md:grid-cols-2 sm:grid-cols-1 gap-x-3 gap-y-3 '>
                                                         {getFieldsByNames(['GroupName', 'AttributeName', "AttributeType", "IsMandatory"]).map((field) => {
                                                             return <div className="flex items-center space-x-2">
                                                                 {renderField(field)}
@@ -762,7 +763,7 @@ setRec(null)
                                                         })
                                                         }
                                                     </div>
-                                                    <div className="flex gap-1 masterscroll row col-12 ps-3 field-option-block " style={{ maxHeight: "55px", overflowY: "auto" }}>
+                                                    <div className=" flex gap-1 masterscroll row col-12 ps-3 field-option-block " style={{ maxHeight: "55px", overflowY: "auto" }}>
                                                         {
                                                             (attributeType === "Dropdown" || attributeType === "CheckBox" || attributeType === "RadioButton") && attributeList.map((attr, AttrInd) => {
                                                                 return (
@@ -771,15 +772,16 @@ setRec(null)
                                                             })
                                                         }
                                                     </div>
-                                                    <div className='flex justify-end mb-0 mr-2'>
+                                                    <div className=' flex justify-end mb-0 mr-2'>
                                                         <ReusableButton
                                                             size="small"
                                                             variant="primary"
+                                                            className='bg-[#3F50A0] text-white hover:bg-[#3F50A0] hover:text-white'
                                                             onClick={() => { watch('GroupName') !== "" ? handleAdd() : displayMsg() }}>
                                                             Add
                                                         </ReusableButton>
                                                     </div>
-                                                    <div className='mt-0 p-2'>
+                                                    <div className='mt-0 '>
                                                         <ReusableTable
                                                             data={dataSource}
                                                             columns={columns}
@@ -810,6 +812,7 @@ setRec(null)
 
 
                 </div>
+                </ScrollArea >
                 {/* Delete Confirmation Modal */}
                 <Dialog open={isDelModalOpen} onOpenChange={setIsDelModalOpen}>
                     <DialogContent className="sm:max-w-[425px]">
@@ -821,8 +824,9 @@ setRec(null)
                         </DialogHeader>
                         <DialogFooter>
                             <ReusableButton
-                                variant="default"
-                                onClick={() => { }}
+                                   variant="text"
+                                className='btn-reset-clear-style'
+                                onClick={() => setIsDelModalOpen(false)}
                             >
                                 Cancel
                             </ReusableButton>

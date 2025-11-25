@@ -1988,6 +1988,7 @@ export interface DatePickerProps {
   wrapperClassName?: string;
   usePortal?: boolean;
   dropdownClassName?: string;
+  focusClass?:string
 }
 
 interface TooltipProps {
@@ -2307,7 +2308,7 @@ const CustomCalendar: React.FC<CalendarProps> = ({
             </button>
             
             {showMonthDropdown && (
-              <div className="absolute top-full left-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-50 overflow-y-auto"
+              <div className="absolute top-full left-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-50 custom-scroll overflow-y-auto"
                    style={{ maxHeight: '280px', minWidth: '120px' }}>
                 {monthNames.map((name, index) => (
                   <button
@@ -2400,6 +2401,7 @@ export const ReusableDatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
       defaultValue,
       backgroundColor,
       onChange,
+      focusClass,
       placeholder,
       disabled = false,
       isRequired = false,
@@ -2927,7 +2929,7 @@ const isDateDisabled = (date: Date): boolean => {
       <div
         ref={calendarRef}
         className={cn(
-          "bg-white border border-gray-300 rounded-md shadow-lg",
+          "bg-white border border-gray-300 rounded-md shadow-lg overflow-hidden",
           "transition-all duration-200 ease-out",
           dropdownClassName,
           disabled && "pointer-events-none opacity-50"
@@ -2942,7 +2944,7 @@ const isDateDisabled = (date: Date): boolean => {
         }}
       >
         <div
-          className="overflow-y-auto overflow-x-hidden"
+          className="overflow-y-auto overflow-x-hidden custom-scroll"
           style={{ 
             maxHeight: popupPosition.maxHeight ? `${popupPosition.maxHeight}px` : "380px"
           }}
@@ -2972,16 +2974,16 @@ const isDateDisabled = (date: Date): boolean => {
         <div className="relative">
           <div
             className={cn(
-              "flex items-center rounded-md border transition-colors relative overflow-hidden w-full ",
+              "flex items-center rounded-md border border-input transition-colors relative overflow-hidden w-full ",
               sizeClasses[size],
               disabled ? "opacity-50 bg-gray-100 cursor-not-allowed" : "bg-background",
-              actualOpen && !disabled && "ring-2 border-blue-500 bg-background",
+              actualOpen && !disabled && (focusClass? focusClass:"ring-2  ring-2 ring-ring ring-offset-2 ring-opacity-50 border-blue-500 bg-background"),
               getStatusClasses(),"bg-background",
               className
             )}
             style={{ 
-              backgroundColor: disabled ? '#f3f4f6' :(backgroundColor)?backgroundColor: 'hsl(240deg 73.33% 97.06%)', 
-              borderColor: disabled ? undefined : 'hsl(214.29deg 31.82% 91.37%)' 
+              backgroundColor: disabled ? '#f3f4f6' :(backgroundColor)?backgroundColor: 'hsl(var(--background)', 
+              borderColor: disabled ? undefined : '' 
             }}
             onClick={handleWrapperClick}
           >
@@ -3054,7 +3056,7 @@ const isDateDisabled = (date: Date): boolean => {
                     }}
                   >
                     <div
-                      className="overflow-y-auto overflow-x-hidden"
+                      className="overflow-y-auto overflow-x-hidden custom-scroll"
                       style={{ 
                         maxHeight: popupPosition.maxHeight ? `${popupPosition.maxHeight}px` : '380px'
                       }}

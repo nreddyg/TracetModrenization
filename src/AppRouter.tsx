@@ -1,5 +1,8 @@
 
 import WrapperLazyComponent from "./components/common/WrapperLazyComponent";
+import AssetSplit from "./pages/FixedAssetsModule/AssetSplit";
+import ChangeAssetCategory from "./pages/FixedAssetsModule/ChangeAssetCategory";
+import ManageAssets from "./pages/FixedAssetsModule/ManageAssets";
 import ManageUnitConversion from "./pages/masters/ManageUnitConvertion";
 
 // Lazy load all pages
@@ -45,7 +48,8 @@ const ProductMasters=WrapperLazyComponent(() => import("./pages/masters/ProductM
 const CostBreakupAttributes=WrapperLazyComponent(() => import("./pages/masters/fixedAssets/CostBreakupAttributes"));
 const Books=WrapperLazyComponent(()=>import("./pages/masters/depreciation/Books"));
 const AdditionalDepreciation=WrapperLazyComponent(()=>import("./pages/masters/depreciation/AdditionalDepreciation"));
-const AddBook=WrapperLazyComponent(()=>import("./pages/masters/depreciation/AddBook"))
+const AddBook=WrapperLazyComponent(()=>import("./pages/masters/depreciation/AddBook"));
+const SoftwareCategory=WrapperLazyComponent(()=>import('./pages/masters/softwareAssets/SoftwareCategory'));
 
 // CWIP
 const ProjectManagement = WrapperLazyComponent(() => import("./pages/cwip/ProjectManagement"));
@@ -61,10 +65,14 @@ const GoodsManagement = WrapperLazyComponent(() => import("./pages/procurement/G
 const ProcurementReports = WrapperLazyComponent(() => import("./pages/procurement/ProcurementReports"));
 
 // Fixed Assets
+const AssetAcquisition = WrapperLazyComponent(() => import("./pages/FixedAssetsModule/AssetAcquisition"));
 const AssetManagement = WrapperLazyComponent(() => import("./pages/fixedassets/AssetManagement"));
 const AssetOps = WrapperLazyComponent(() => import("./pages/fixedassets/AssetOps"));
 const AssetMaintenance = WrapperLazyComponent(() => import("./pages/fixedassets/AssetMaintenance"));
 const FixedAssetsReports = WrapperLazyComponent(() => import("./pages/fixedassets/FixedAssetsReports"));
+const AssetTransferTo= WrapperLazyComponent(() => import("./pages/FixedAssetsModule/AssetTransfer/AssetTransferTo"));
+const IntraTransfer=WrapperLazyComponent(() => import("./pages/FixedAssetsModule/AssetTransfer/IntraTransfer"));
+
 
 // Depreciation
 const DepreciationProcess = WrapperLazyComponent(() => import("./pages/depreciation/DepreciationProcess"));
@@ -235,6 +243,11 @@ export const appRoutesObj={
     component:<ServiceLocations />,
     index:false
   },
+   "masters-softwareassets-softwarecategory":  {
+    path:'masters/softwareassets/softwarecategory',
+    component:<SoftwareCategory />,
+    index:false
+  },
   
   'masters-masterreports':{
     path:'masters/reports',
@@ -248,255 +261,255 @@ export const appRoutesObj={
   },
 
 
-//   "fixedassets-assetacquisition": {
-//     path:'fixedassets/assetacquisition',
-//     component:<AssetAcquisition/>,
-//     index:false
-//   },
-//   "fixedassets-manageassets":{
-//     path:'fixedassets/manageassets',
-//     component:<ManageAssets/>,
-//     index:false,
-//     dependent:[
-//       {
-//         path:'fixedassets/assetacquisition',
-//     component:<AssetAcquisition/>,
-//     index:false
-//       },
-//       {
-//         path:'fixedassets/manageassets/editasset',
-//         component:<EditAssetLayout/>,
-//         index:false,
-//         children:[{
-//           path:'assetdetails',
-//           component:<AssetDetails/>,
-//           index:true,
-//         },
-//         {
-//           path:'shiftwise',
-//           component:<ShiftWise/>,
-//           index:false,
-//         },
-//         {
-//           path:'documents',
-//           component:<ManageAssetsDocument/>,
-//           index:false,
-//         },
-//         {
-//           path:'assign',
-//           component:<Assign/>,
-//           index:false,
-//         },
-//         {
-//           path:'transfer',
-//           component:<Transfer/>,
-//           index:false,
-//         },
-//         {
-//           path:'insurance',
-//           component:<Insurance/>,
-//           index:false,
-//         },
-//         {
-//           path:'maintenance',
-//           component:<Maintenance/>,
-//           index:false,
-//         },
-//         {
-//           path:'retire',
-//           component:<Retire/>,
-//           index:false,
-//         },
-//         {
-//           path:'serviceMaintenance',
-//           component:<ServiceMaintenance/>,
-//           index:false,
-//         },
-//         {
-//           path:'childassets',
-//           component:<ChildAsset/>,
-//           index:false,
-//         },
-//         {
-//           path:'physicalverification',
-//           component:<PhysicalVerification/>,
-//           index:false,
-//         },
-//         {
-//           path:'assethistory',
-//           component:<AssetHistory/>,
-//           index:false,
-//         },
-//         ]
-//       },
-//     ]
-//   },
-//   "fixedassets-assetsplit":{
-//     path:'fixedassets/assetsplit',
-//     component:<AssetSplit/>,
-//     index:false
-//   },
+  "fixedassets-assetacquisition": {
+    path:'fixedassets/assetacquisition',
+    component:<AssetAcquisition/>,
+    index:false
+  },
+  "fixedassets-manageassets":{
+    path:'fixedassets/manageassets',
+    component:<ManageAssets/>,
+    index:false,
+    dependent:[
+      {
+        path:'fixedassets/assetacquisition',
+    component:<AssetAcquisition/>,
+    index:false
+      },
+      {
+        path:'fixedassets/manageassets/editasset',
+        // component:<EditAssetLayout/>,
+        index:false,
+        children:[{
+          path:'assetdetails',
+          // component:<AssetDetails/>,
+          index:true,
+        },
+        {
+          path:'shiftwise',
+          // component:<ShiftWise/>,
+          index:false,
+        },
+        {
+          path:'documents',
+          // component:<ManageAssetsDocument/>,
+          index:false,
+        },
+        {
+          path:'assign',
+          // component:<Assign/>,
+          index:false,
+        },
+        {
+          path:'transfer',
+          // component:<Transfer/>,
+          index:false,
+        },
+        {
+          path:'insurance',
+          // component:<Insurance/>,
+          index:false,
+        },
+        {
+          path:'maintenance',
+          // component:<Maintenance/>,
+          index:false,
+        },
+        {
+          path:'retire',
+          // component:<Retire/>,
+          index:false,
+        },
+        {
+          path:'serviceMaintenance',
+          // component:<ServiceMaintenance/>,
+          index:false,
+        },
+        {
+          path:'childassets',
+          // component:<ChildAsset/>,
+          index:false,
+        },
+        {
+          path:'physicalverification',
+          // component:<PhysicalVerification/>,
+          index:false,
+        },
+        {
+          path:'assethistory',
+          // component:<AssetHistory/>,
+          index:false,
+        },
+        ]
+      },
+    ]
+  },
+  "fixedassets-assetsplit":{
+    path:'fixedassets/assetsplit',
+    component:<AssetSplit/>,
+    index:false
+  },
   'masters-fixedassets-costbreakupattributes': {
     path: 'masters/fixed-assets/costbreakup',
     component: <CostBreakupAttributes/>,
     index: false,
   },
-//   "fixedassets-assettransfer-intratransfer":{
-//     path:'fixedassets/intratransfer',
-//     component:<IntraTransfer/>,
-//     index:false,
-//     dependent:[  {
-//       path:'fixedassets/intratransfer/assettransferto',
-//       component:<AssetTransferTo/>,
-//       index:false
-//     },]
-//   },
-//   "fixedassets-changeinassetcategory":{
-//     path:'fixedassets/changeassetcategory',
-//     component:<ChangeAssetCategory/>,
-//     index:false
-//   },
-//   "fixedassets-unretireassets":{
-//     path:'fixedassets/unretireassets',
-//     component:<Unretire/>,
-//     index:false
-//     },
-// 'fixedassets-reports':{
-//   path:'fixedassets/fixedassetsreports',
-//   component:<FixedAssetsReportsMenu/>,
-//   index:false,
-// },
-// "fixedassets-reports-trackingreports-fixedassetsbymasters":{
-//   path:'fixedassets/fixedassetsreports/trackingreports/fixedassetsby',
-//   component:<FixedAssetsByMastersReports/>,
-//   index:false,
-// },
-// "fixedassets-reports-trackingreports-assethistory":{
-//   path:'fixedassets/fixedassetsreports/trackingreports/assethistory',
-//   component:<AssetHistoryReports/>,
-//   index:false,
-// },
-// "fixedassets-reports-trackingreports-assetcount":{
-//   path:'fixedassets/fixedassetsreports/trackingreports/assetcount',
-//   component:<AssetCountReport/>,
-//   index:false,
-// },
-// "fixedassets-reports-trackingreports-assetlocationhistory":{
-//   path:'fixedassets/fixedassetsreports/trackingreports/assetlocationhistory',
-//   component:<AssetLocationHistory/>,
-//   index:false,
-// },
-// "fixedassets-reports-trackingreports-fixedassetswithattributes":{
-//   path:'fixedassets/fixedassetsreports/trackingreports/fixedassetswithattributes',
-//   component:<FixedAssetsWithAttributes/>,
-//   index:false,
-// },
-// "fixedassets-reports-transfer&disposalreports-assettransferbetweencompanyhierarchy":{
-//   path:'fixedassets/fixedassetsreports/transferanddisposalreports/assettransferbetweencompanyhierarchy',
-//   component:<AssetTransferBetweenCompanyHierachy/>,
-//   index:false,
-// },
-// "fixedassets-reports-transfer&disposalreports-assettransfertaxinvoicereport":{
-//   path:'fixedassets/fixedassetsreports/transferanddisposalreports/assettransfertaxinvoicereport',
-//   component:<AssetTransferTaxInvoiceReport/>,
-//   index:false,
-// },
-// "fixedassets-reports-transfer&disposalreports-retiredassets":{
-//   path:'fixedassets/fixedassetsreports/transferanddisposalreports/retiredassets',
-//   component:<RetiredAssetsReports/>,
-//   index:false,
-// },
-// "fixedassets-reports-transfer&disposalreports-assetsaleinvoice":{
-//   path:'fixedassets/fixedassetsreports/transferanddisposalreports/assetsaleinvoice',
-//   component:<AssetSaleInvoiceReport/>,
-//   index:false,
-// },
-// "fixedassets-reports-letout(issue)/letin(return)reports-externalletout(issue)/letin(return)":{
-//   path:'fixedassets/fixedassetsreports/letoutorletinreports/externalletoutorletin',
-//   component:<ExternalLetOutOrLetInReport/>,
-//   index:false,
-// },
-// "fixedassets-reports-letout(issue)/letin(return)reports-internalletout(issue)/letin(return)":{
-//   path:'fixedassets/fixedassetsreports/letoutorletinreports/internalletoutorletin',
-//   component:<InternalLetOutOrLetInReport/>,
-//   index:false,
-// },
-// 'fixedassets-reports-letout(issue)/letin(return)reports-letout(issue)/letin(return)consolidatehistoryreport':{
-//   path:'fixedassets/fixedassetsreports/letoutorletinreports/letoutorletinconsolidateshistoryreport',
-//   component:<LetOutOrLetInConsolidateHistoryReport/>,
-//   index:false,
-// },
-// 'fixedassets-reports-letout(issue)/letin(return)reports-externalpendingitems':{
-//   path:'fixedassets/fixedassetsreports/letoutorletinreports/externalpendingitems',
-//   component:<ExternalPendingItemsReport/>,
-//   index:false,
-// },
-// 'fixedassets-reports-letout(issue)/letin(return)reports-internalpendingitems':{
-//   path:'fixedassets/fixedassetsreports/letoutorletinreports/internalpendingitems',
-//   component:<InternalPendingItemsReport/>,
-//   index:false,
-// },
-// "fixedassets-reports-trackingreports-fixedassetswithcostbreakup":{
-//   path:'fixedassets/fixedassetsreports/trackingreports/fixedassetswithcostbreakup',
-//   component:<FixedAssetsWithCostBreakupReport/>,
-//       index:false,
-// },
-// "fixedassets-reports-trackingreports-fixedassetsbygroupcompanies":{
-//   path:'fixedassets/fixedassetsreports/trackingreports/fixedassetsbygroupcompanies',
-//   component:<FixedAssetsByGroupCompanies/>,
-//       index:false,
-// },
-// 'fixedassets-reports-trackingreports-useracknowledgementreport':{
-//   path:'fixedassets/fixedassetsreports/trackingreports/useracknowledgementreport',
-//   component:<UserAcknowledgementReport/>,
-//   index:false,
-// },
-// 'fixedassets-reports-trackingreports-userwiseassethistory':{
-//   path:'fixedassets/fixedassetsreports/trackingreports/userwiseassethistory',
-//   component:<UserWiseAssetHistory/>,
-//   index:false,
-// },
-// 'fixedassets-reports-trackingreports-assetsummaryreport':{
-//   path:'fixedassets/fixedassetsreports/trackingreports/assetsummary',
-//   component:<AssetSummaryReports/>,
-//   index:false,
-// },
-// 'fixedassets-reports-maintenancereports-assetmaintenance':{
-//   path:'fixedassets/fixedassetsreports/maintenancereports/assetmaintenance',
-//   component:<AssetMaintenance/>,
-//   index:false,
-// },
-// 'fixedassets-reports-maintenancereports-assetinsurance':{
-//   path:'fixedassets/fixedassetsreports/maintenancereports/assetinsurance',
-//   component:<AssetInsurance/>,
-//   index:false,
-// },
-// 'fixedassets-reports-maintenancereports-assetwarranty':{
-//   path:'fixedassets/fixedassetsreports/maintenancereports/assetwarranty',
-//   component:<AssetWarranty/>,
-//   index:false,
-// },
-// "fixedassets-reports-maintenancereports-assetlease":{
-//   path:'fixedassets/fixedassetsreports/maintenancereports/assetlease',
-//   component:<AssetLease/>,
-//   index:false,
-// },
-// 'fixedassets-reports-maintenancereports-fixedassetsbyadditionalcostdetails':{
-//   path:'fixedassets/fixedassetsreports/maintenancereports/fixedassetsbyadditionalcostdetails',
-//   component:<FixedAssetsByAdditionalCostDetails/>,
-//   index:false,
-// },
-// 'fixedassets-reports-exceptionalreports-assetsassignedfree':{
-//   path:'fixedassets/fixedassetsreports/exceptionalreports/assetsassignedfree',
-//   component:<AssetsAssignedFree/>,
-//   index:false,
-// },
+  "fixedassets-assettransfer-intratransfer":{
+    path:'fixedassets/intratransfer',
+    component:<IntraTransfer/>,
+    index:false,
+    dependent:[  {
+      path:'fixedassets/intratransfer/assettransferto',
+      component:<AssetTransferTo/>,
+      index:false
+    },]
+  },
+  "fixedassets-changeinassetcategory":{
+    path:'fixedassets/changeassetcategory',
+    component:<ChangeAssetCategory/>,
+    index:false
+  },
+  "fixedassets-unretireassets":{
+    path:'fixedassets/unretireassets',
+    // component:<Unretire/>,
+    index:false
+    },
+'fixedassets-reports':{
+  path:'fixedassets/fixedassetsreports',
+  // component:<FixedAssetsReportsMenu/>,
+  index:false,
+},
+"fixedassets-reports-trackingreports-fixedassetsbymasters":{
+  path:'fixedassets/fixedassetsreports/trackingreports/fixedassetsby',
+  // component:<FixedAssetsByMastersReports/>,
+  index:false,
+},
+"fixedassets-reports-trackingreports-assethistory":{
+  path:'fixedassets/fixedassetsreports/trackingreports/assethistory',
+  // component:<AssetHistoryReports/>,
+  index:false,
+},
+"fixedassets-reports-trackingreports-assetcount":{
+  path:'fixedassets/fixedassetsreports/trackingreports/assetcount',
+  // component:<AssetCountReport/>,
+  index:false,
+},
+"fixedassets-reports-trackingreports-assetlocationhistory":{
+  path:'fixedassets/fixedassetsreports/trackingreports/assetlocationhistory',
+  // component:<AssetLocationHistory/>,
+  index:false,
+},
+"fixedassets-reports-trackingreports-fixedassetswithattributes":{
+  path:'fixedassets/fixedassetsreports/trackingreports/fixedassetswithattributes',
+  // component:<FixedAssetsWithAttributes/>,
+  index:false,
+},
+"fixedassets-reports-transfer&disposalreports-assettransferbetweencompanyhierarchy":{
+  path:'fixedassets/fixedassetsreports/transferanddisposalreports/assettransferbetweencompanyhierarchy',
+  // component:<AssetTransferBetweenCompanyHierachy/>,
+  index:false,
+},
+"fixedassets-reports-transfer&disposalreports-assettransfertaxinvoicereport":{
+  path:'fixedassets/fixedassetsreports/transferanddisposalreports/assettransfertaxinvoicereport',
+  // component:<AssetTransferTaxInvoiceReport/>,
+  index:false,
+},
+"fixedassets-reports-transfer&disposalreports-retiredassets":{
+  path:'fixedassets/fixedassetsreports/transferanddisposalreports/retiredassets',
+  // component:<RetiredAssetsReports/>,
+  index:false,
+},
+"fixedassets-reports-transfer&disposalreports-assetsaleinvoice":{
+  path:'fixedassets/fixedassetsreports/transferanddisposalreports/assetsaleinvoice',
+  // component:<AssetSaleInvoiceReport/>,
+  index:false,
+},
+"fixedassets-reports-letout(issue)/letin(return)reports-externalletout(issue)/letin(return)":{
+  path:'fixedassets/fixedassetsreports/letoutorletinreports/externalletoutorletin',
+  // component:<ExternalLetOutOrLetInReport/>,
+  index:false,
+},
+"fixedassets-reports-letout(issue)/letin(return)reports-internalletout(issue)/letin(return)":{
+  path:'fixedassets/fixedassetsreports/letoutorletinreports/internalletoutorletin',
+  // component:<InternalLetOutOrLetInReport/>,
+  index:false,
+},
+'fixedassets-reports-letout(issue)/letin(return)reports-letout(issue)/letin(return)consolidatehistoryreport':{
+  path:'fixedassets/fixedassetsreports/letoutorletinreports/letoutorletinconsolidateshistoryreport',
+  // component:<LetOutOrLetInConsolidateHistoryReport/>,
+  index:false,
+},
+'fixedassets-reports-letout(issue)/letin(return)reports-externalpendingitems':{
+  path:'fixedassets/fixedassetsreports/letoutorletinreports/externalpendingitems',
+  // component:<ExternalPendingItemsReport/>,
+  index:false,
+},
+'fixedassets-reports-letout(issue)/letin(return)reports-internalpendingitems':{
+  path:'fixedassets/fixedassetsreports/letoutorletinreports/internalpendingitems',
+  // component:<InternalPendingItemsReport/>,
+  index:false,
+},
+"fixedassets-reports-trackingreports-fixedassetswithcostbreakup":{
+  path:'fixedassets/fixedassetsreports/trackingreports/fixedassetswithcostbreakup',
+  // component:<FixedAssetsWithCostBreakupReport/>,
+      index:false,
+},
+"fixedassets-reports-trackingreports-fixedassetsbygroupcompanies":{
+  path:'fixedassets/fixedassetsreports/trackingreports/fixedassetsbygroupcompanies',
+  // component:<FixedAssetsByGroupCompanies/>,
+      index:false,
+},
+'fixedassets-reports-trackingreports-useracknowledgementreport':{
+  path:'fixedassets/fixedassetsreports/trackingreports/useracknowledgementreport',
+  // component:<UserAcknowledgementReport/>,
+  index:false,
+},
+'fixedassets-reports-trackingreports-userwiseassethistory':{
+  path:'fixedassets/fixedassetsreports/trackingreports/userwiseassethistory',
+  // component:<UserWiseAssetHistory/>,
+  index:false,
+},
+'fixedassets-reports-trackingreports-assetsummaryreport':{
+  path:'fixedassets/fixedassetsreports/trackingreports/assetsummary',
+  // component:<AssetSummaryReports/>,
+  index:false,
+},
+'fixedassets-reports-maintenancereports-assetmaintenance':{
+  path:'fixedassets/fixedassetsreports/maintenancereports/assetmaintenance',
+  component:<AssetMaintenance/>,
+  index:false,
+},
+'fixedassets-reports-maintenancereports-assetinsurance':{
+  path:'fixedassets/fixedassetsreports/maintenancereports/assetinsurance',
+  // component:<AssetInsurance/>,
+  index:false,
+},
+'fixedassets-reports-maintenancereports-assetwarranty':{
+  path:'fixedassets/fixedassetsreports/maintenancereports/assetwarranty',
+  // component:<AssetWarranty/>,
+  index:false,
+},
+"fixedassets-reports-maintenancereports-assetlease":{
+  path:'fixedassets/fixedassetsreports/maintenancereports/assetlease',
+  // component:<AssetLease/>,
+  index:false,
+},
+'fixedassets-reports-maintenancereports-fixedassetsbyadditionalcostdetails':{
+  path:'fixedassets/fixedassetsreports/maintenancereports/fixedassetsbyadditionalcostdetails',
+  // component:<FixedAssetsByAdditionalCostDetails/>,
+  index:false,
+},
+'fixedassets-reports-exceptionalreports-assetsassignedfree':{
+  path:'fixedassets/fixedassetsreports/exceptionalreports/assetsassignedfree',
+  // component:<AssetsAssignedFree/>,
+  index:false,
+},
 
-// 'fixedassets-reports-manageorderreports-grn/rgic/paymentclearanc':{
-//   path:'fixedassets/fixedassetsreports/manageorderreports/manageorderreports',
-//   component:<ManageOrderReports/>,
-//   index:false,
-// },
+'fixedassets-reports-manageorderreports-grn/rgic/paymentclearanc':{
+  path:'fixedassets/fixedassetsreports/manageorderreports/manageorderreports',
+  // component:<ManageOrderReports/>,
+  index:false,
+},
 
 // "depreciation-rundepreciation":{
 //   path:'depreciation/rundepreciation',

@@ -77,12 +77,10 @@ const ProductMasters = () => {
             if (res?.success && res.data?.status) {
                 message.success(res.data.message);
                 getProductMasterList(companyId)
-                setIsMainDialogOpen(false);
-                setEditingRec(null);
-                form.reset();
+                handleCancel();
 
             } else {
-                message.error(res.data.ErrorDetails[0]["Error Message"]);
+                message.error(res.data.message);
             }
         } catch (error) {
             // message.error("Failed to save user group");
@@ -138,6 +136,16 @@ const ProductMasters = () => {
         console.log(delRec, "delrec")
         setDeleteRec(delRec)
         setIsDelModalOpen(true);
+    }
+
+
+    const handleCancel = () => {
+        setIsMainDialogOpen(false);
+        setEditingRec(null);
+        form.reset({
+            ...form.getValues(),
+            ProductName: ''
+        });
     }
 
     // Define table actions
@@ -268,44 +276,40 @@ const ProductMasters = () => {
     return (
         <ScrollArea>
             <div className="h-full">
-                <header className="px-6 py-4">
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <div className="p-4 sm:p-4 space-y-4 sm:space-y-4">
 
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-                            <h1 className="text-lg sm:text-2xl font-bold text-gray-900">
-                                Product Master
-                            </h1>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <span>Masters</span>
+                          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                               
+                                
+                                <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                                  <span>Masters</span>
                             <FaAngleRight />
                             <span>Service Maintenance</span>
                             <FaAngleRight />
                             <span className="text-gray-900 font-medium">Product Master</span>
-                        </div>
-                    </div>
-                </header>
-                <div className="p-4 pt-0">
-                    <Card className="border-0 shadow-sm">
-                        <CardContent className="pb-2">
-                            <div className="flex flex-col sm:flex-row justify-end items-start sm:items-center gap-4 mb-6 pt-2">
-
-                                <ReusableButton
+                                  </div>
+                                </div>
+                                
+                                                          <ReusableButton
                                     variant="primary"
                                     icon={<Plus className="h-4 w-4" />}
                                     onClick={() => setIsMainDialogOpen(true)}
-                                     className='btn-submit-style  mt-2 me-2'
+                                    className='btn-submit-style  mt-2 me-2'
                                 >
                                     Add
                                 </ReusableButton>
-                            </div>
-                            <div className='mt-2 p-2'>
+                              </div>
+                 
+            
+              
+                    <div className='border bg-white rounded-lg pb-5 pt-2'>
                                 <ReusableTable
                                     data={productList}
                                     columns={columns}
                                     // actions={tableActions}
                                     permissions={tablePermissions}
-                                    title=""
+                                    title="Product Master"
                                     //    onRefresh={handleRefresh}
                                     enableSearch={false}
                                     enableSelection={false}
@@ -320,14 +324,17 @@ const ProductMasters = () => {
                                     storageKey="usergroups-table"
                                 />
                             </div>
-                        </CardContent>
-                    </Card>
 
                     {/* Main Location Dialog */}
-                    <Dialog open={isMainDialogOpen} onOpenChange={setIsMainDialogOpen}>
+                    <Dialog open={isMainDialogOpen} onOpenChange={(open) => {
+                        if (!open) {
+                            handleCancel();
+                        }
+                        setIsDelModalOpen(open);
+                    }}>
                         <DialogContent>
                             <DialogHeader>
-                                <DialogTitle>{editingRec === null ? 'Add' : 'Update'} New Product</DialogTitle>
+                                <DialogTitle>{editingRec ? 'Update' : 'Add New'} Product</DialogTitle>
                             </DialogHeader>
                             <Form {...form}>
                                 <form onSubmit={form.handleSubmit(handleSubmitForm)} className="space-y-4">
@@ -339,24 +346,27 @@ const ProductMasters = () => {
                                         ))}
                                     </div>
                                     <div className="flex gap-2 justify-end">
-                                        <ReusableButton
-                                            htmlType="submit"
-                                            variant="primary"
-                                            // icon={<Save className="h-3 w-3" />}
-                                            iconPosition="left"
-                                            size="middle"
-                                        >
-                                            {editingRec === null ? 'Save' : 'Update'}
-                                        </ReusableButton>
+                                       
                                         <ReusableButton
                                             htmlType="button"
-                                            variant="default"
+                                            variant="text"
+                                            className='btn-reset-clear-style'
                                             onClick={() => { setIsMainDialogOpen(false); form.reset() }}
                                             // icon={<X className="h-3 w-3" />}
                                             iconPosition="left"
                                             size="middle"
                                         >
                                             Cancel
+                                        </ReusableButton>
+                                         <ReusableButton
+                                            htmlType="submit"
+                                            variant="text"
+                                            className='btn-submit-style'
+                                            // icon={<Save className="h-3 w-3" />}
+                                            iconPosition="left"
+                                            size="middle"
+                                        >
+                                            {editingRec ? 'Save' : 'Update'}
                                         </ReusableButton>
                                     </div>
                                 </form>
@@ -371,12 +381,13 @@ const ProductMasters = () => {
                             <DialogHeader>
                                 <DialogTitle>Confirm the action</DialogTitle>
                                 <DialogDescription>
-                                    Are you sure you want to delete Service Locations
+                                    Are you sure you want to delete {deleteRec?.ProductName} ?
                                 </DialogDescription>
                             </DialogHeader>
                             <DialogFooter>
                                 <ReusableButton
-                                    variant="default"
+                                    variant="text"
+                                    className='btn-reset-clear-style'
                                     onClick={() => setIsDelModalOpen(false)}
                                 >
                                     Cancel

@@ -354,7 +354,7 @@ const TicketProgressDashboard = () => {
         <header className="px-6 py-4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-              <h1 className="text-lg sm:text-2xl font-bold text-gray-900">
+              <h1 className="text-2xl font-bold">
                 Ticket Progress Dashboard
               </h1>
             </div>
@@ -406,21 +406,22 @@ const TicketProgressDashboard = () => {
 
                     <div className="flex justify-end">
                       <div className="flex gap-3">
-                        <ReusableButton
-                          htmlType="submit"
-                          variant="default"
-                          className="btn-submit-style"
-                          iconPosition="left"
-                          onClick={() => handleSearch("FetchAll")}
-                        >
-                          Search
-                        </ReusableButton>
+                      
+                          <ReusableButton size={"small"} htmlType='submit'  onClick={() => handleSearch("FetchAll")} className='h-9  bg-button-save hover:bg-button-save hover:border-bg-button-save   group' >
+                                                {/* <Search size={18} color='#000'/> */}
+                                                <Search
+                                                  size={18}
+                                                  className="text-white transition-colors duration-200 cursor-pointer group-hover:text-blue-500"
+                                                />
+                        
+                        
+                                              </ReusableButton>
 
                         <ReusableButton
                           htmlType="button"
-                          variant="default"
+                             variant="text"
                           onClick={clearAllFilters}
-                          className="btn-reset-clear-style hover:border-[hsl(214.3 31.8% 91.4%)]"
+                          className="btn-reset-clear-style h-9"
                           icon={<X className="h-4 w-4" />}
                           iconPosition="left"
                         >
@@ -438,18 +439,7 @@ const TicketProgressDashboard = () => {
 
           {/* Main Content with Tabs */}
           <Card>
-            <CardHeader>
-              <Tabs value={activeView} onValueChange={setActiveView} className="w-full">
-                <TabsList className="grid w-full grid-cols-2 h-auto">
-
-                  <TabsTrigger value="graphs" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4 py-2">
-                    <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4" />
-                    <span className="hidden sm:inline">Analytics Dashboard</span>
-                    <span className="sm:hidden">Analytics</span>
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </CardHeader>
+           
             <CardContent>
               <Tabs value={activeView} className="w-full">
                 <TabsContent value="graphs">

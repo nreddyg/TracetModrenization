@@ -103,7 +103,7 @@ export interface ReusableMultiSelectProps {
   popupClassName?: string;
   placement?: 'bottomLeft' | 'bottomRight' | 'topLeft' | 'topRight';
   usePortal?: boolean;
-
+focusClass?:string
   // Virtual scrolling
   virtual?: boolean;
 
@@ -143,6 +143,7 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
     placeholder = "Select options",
     disabled = false,
     loading = false,
+    focusClass,
 
     // Display props
     allowClear = true,
@@ -859,7 +860,7 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
               )}
 
               {/* Scrollable content */}
-              <div className="flex-1 overflow-y-auto" style={{ maxHeight: `${listHeight}px` }}>
+              <div className="flex-1 overflow-y-auto custom-scroll" style={{ maxHeight: `${listHeight}px` }}>
                 {mode === 'tags' && searchTerm && !filteredOptions.some(opt => opt.value === searchTerm) && (
                   <div
                     className="flex items-center space-x-2 px-3 py-2 hover:bg-gray-50 cursor-pointer border-b border-gray-100"
@@ -938,7 +939,7 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
       }
 
       const maxAllowedHeight = listHeight + headerHeight + padding;
-      const minHeight = 80;
+      const minHeight = 150;
 
       const spaceBelow = window.innerHeight - inputRect.bottom - margin;
       const spaceAbove = inputRect.top - margin;
@@ -959,7 +960,7 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
         <div
           ref={dropdownRef}
           className={cn(
-            "bg-white border border-gray-300 rounded-md shadow-lg flex flex-col",
+            "bg-white border border-gray-300 rounded-md shadow-lg flex flex-col overflow-hidden",
             dropdownClassName,
             popupClassName,
             disabled && "pointer-events-none opacity-50"
@@ -1081,15 +1082,15 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
         <div className="relative">
           <div
             className={cn(
-              "flex items-center rounded-md w-full min-w-0 h-10 border transition-colors relative",
-              "focus-within:outline-none focus-within:ring-2",
-              disabled ? "bg-gray-100 cursor-not-allowed" : "bg-white hover:border-blue-400",
+              "flex items-center rounded-md w-full min-w-0 h-10 border transition-colors relative border border-input",
+             focusClass?focusClass: "focus-within:outline-none focus-within:ring-2 focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
+              disabled ? "bg-gray-100 cursor-not-allowed" : "bg-white ",
               getStatusClasses(),
               className
             )}
             style={{
-              backgroundColor: disabled ? '#f3f4f6' : 'hsl(240deg 73.33% 97.06%)',
-              borderColor: 'hsl(214.29deg 31.82% 91.37%)'
+              backgroundColor: disabled ? '#f3f4f6' : 'hsl(var(--background)',
+              // borderColor: '#fafafa'
             }}
             onClick={handleContainerClick}
             onFocus={onFocus}
@@ -1200,7 +1201,7 @@ export const ReusableMultiSelect = forwardRef<HTMLDivElement, ReusableMultiSelec
                     }}
                   >
                     <div
-                      className="flex-1 overflow-y-auto"
+                      className="flex-1 overflow-y-auto "
                       style={{ maxHeight: `${listHeight}px` }}
                     >
                       {renderDropdownContent()}

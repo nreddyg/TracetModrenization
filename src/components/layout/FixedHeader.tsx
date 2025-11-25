@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { ReusableDropdown } from '@/components/ui/reusable-dropdown';
-import { Home, User, Settings, LogOut, Bell, Menu } from 'lucide-react';
+import { Home, User, Settings, LogOut, Bell, Menu, Building, Building2, MapPin } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
@@ -16,10 +16,17 @@ import { getHierarchyLevelsData, getOrganizationDetailsByToken, getUserDetailsBy
 import { setAllLevelsData, setLastLevelsData, setBranch, setBranchCode, setBranchId, setCompanyId, setCompanyName,setLoading, setUserId, setBranchesList } from '@/store/slices/projectsSlice';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { RiMenuFoldFill } from "react-icons/ri";
+import { ReusableButton } from '../ui/reusable-button';
+interface FixedHeaderProps {
+  showCreateBtn: boolean;
+}
+
  
-const FixedHeader: React.FC = () => {
+const FixedHeader: React.FC <FixedHeaderProps> = ({showCreateBtn}) => {
   const navigate = useNavigate();
   const breadcrumbs = useAppSelector((state) => state.ui.currentBreadcrumb);
+  const settingsMenu=useAppSelector((state) => state.projects.settingsMenu);
+  const [settingsMenuList,setSettingsMenuList]=useState([])
   const dispatch = useAppDispatch();
   const storeData = useAppSelector((state) => state.projects);
   const userId = storeData.userId || JSON.parse(localStorage.getItem("LoggedInUser") || "{}")?.UserId;
@@ -37,12 +44,22 @@ const FixedHeader: React.FC = () => {
       apiCalls()
     }
   }, [userId])
+  useEffect(()=>{
+      if(settingsMenu && settingsMenu.length>0){
+        setSettingsMenuList(settingsMenu)
+      }
+  },[settingsMenu])
   useEffect(() => {
     if (selectedCompany) {
       getHierarchyLevels();
       fetchBranchList(selectedCompany)
     }
   }, [selectedCompany])
+
+
+  const settingsNavigationHandle=(path)=>{
+navigate(`/layout/${path}`)
+  }
   const fetchUserDetailsByUserName = async () => {
     dispatch(setLoading(true));
     await getUserDetailsByUserName(JSON.parse(localStorage.getItem('UserName'))).then(res => {
@@ -222,10 +239,13 @@ const FixedHeader: React.FC = () => {
     localStorage.clear();
     window.location.href = "/login";
   };
+  const handleCreateClick=()=>{
+    navigate("/layout/service-desk/create-ticket")
+  }
   const getInitial = (name?: string) => name && name.length > 0 ? name.charAt(0).toUpperCase() : '';
   return (
-    <header className="sticky top-0 right-0  bg-white border-b border-gray-200 shadow-[0_2px_8px_0_rgba(0,0,0,0.05)]">
-      <div className="flex items-center justify-between gap-2 px-4 lg:px-6 py-4">
+    <header className="sticky top-0 right-0  bg-white border-b border-gray-200 ">
+      <div className="flex  h-16 items-center justify-between gap-2 px-4 lg:px-6 py-4">
         {/* Left Section - Sidebar Trigger + Company Logo + Breadcrumbs */}
         <div className="flex items-center gap-2 lg:gap-4 flex-1 min-w-0">
           <SidebarTrigger />
@@ -242,42 +262,39 @@ const FixedHeader: React.FC = () => {
           </div> */}
  
           {/* Breadcrumbs - Hidden on mobile */}
-          <div className="hidden lg:block flex-1 min-w-0">
-            <Breadcrumb>
-              <BreadcrumbList>
-                <BreadcrumbItem>
-                  <BreadcrumbLink asChild>
-                    <div className="flex items-center gap-1 hover:text-blue-600 transition-colors">
-                      <Home className="h-3 w-3 lg:h-4 lg:w-4" />
-                      <span className="text-xs lg:text-sm">Dashboard</span>
-                    </div>
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
+        
+              <div className="hidden lg:flex items-center  gap-3">
+            <ReusableDropdown
+              options={companyList}
+                hoverColor='#FF7A33'  
+               focusClass="focus-within:outline-none"
+              addonBefore={<Building2 size={16}  className='text-sm !text-black'/>}
+              value={selectedCompany}
+              onChange={(value, ...args) => handleChange('CompanyId', value)}
+              placeholder="Select company"
+              arrowClass="!text-black font-medium"
+              size="small"
+              disabled={!(LoggedInUser.RoleName === "Root Admin")}
+              className="w-auto h-10 font-medium group-hover:bg-grey-900"
+              containerClassName='max-w-[40%]  group !hover:bg-grey-900'
+            />
  
-                {breadcrumbs.map((breadcrumb, index) => (
-                  <React.Fragment key={index}>
-                    <BreadcrumbSeparator />
-                    <BreadcrumbItem>
-                      {breadcrumb.href ? (
-                        <BreadcrumbLink asChild>
-                          <Link to={breadcrumb.href} className="flex items-center gap-1 hover:text-blue-600 transition-colors">
-                            {breadcrumb.icon}
-                            <span className="text-xs lg:text-sm">{breadcrumb.label}</span>
-                          </Link>
-                        </BreadcrumbLink>
-                      ) : (
-                        <BreadcrumbPage className="flex items-center gap-1">
-                          {breadcrumb.icon}
-                          <span className="text-xs lg:text-sm">{breadcrumb.label}</span>
-                        </BreadcrumbPage>
-                      )}
-                    </BreadcrumbItem>
-                  </React.Fragment>
-                ))}
-              </BreadcrumbList>
-            </Breadcrumb>
+            <ReusableDropdown
+              hoverColor='#FF7A33'  
+              options={branchList}
+              value={selectedBranch}
+                focusClass="focus-within:outline-none"
+                addonBefore={<MapPin size={16} className='text-sm !text-black'/>}
+              onChange={(value) => handleChange('Branch', value)}
+              placeholder="Select location"
+                arrowClass="!text-black !font-medium"
+              size="small"
+              className="w-auto h-10  font-medium  "
+              containerClassName='max-w-[40%]  '
+            />
           </div>
-        </div>
+          </div>
+       
  
         {/* Right Section - Company + Location + Notifications + Profile */}
         <div className="flex items-center gap-1 lg:gap-3 shrink-0">
@@ -381,36 +398,40 @@ const FixedHeader: React.FC = () => {
           </div>
  
           {/* Desktop Dropdowns */}
-          <div className="hidden lg:flex items-center justify-end gap-3">
-            <ReusableDropdown
-              options={companyList}
-              value={selectedCompany}
-              onChange={(value, ...args) => handleChange('CompanyId', value)}
-              placeholder="Select company"
-              size="small"
-              disabled={!(LoggedInUser.RoleName === "Root Admin")}
-              className="w-auto h-9"
-              containerClassName='max-w-[35%]'
-            />
- 
-            <ReusableDropdown
-              options={branchList}
-              value={selectedBranch}
-              onChange={(value) => handleChange('Branch', value)}
-              placeholder="Select location"
-              size="small"
-              className="w-auto h-9"
-              containerClassName='max-w-[35%]'
-            />
-          </div>
+       
  
           {/* Notifications */}
-          <Button variant="outline" size="sm" className="relative h-8 w-8 lg:h-9 lg:w-9 p-0">
-            <Bell className="h-3 w-3 lg:h-4 lg:w-4" />
-            <Badge variant="destructive" className="absolute -top-1 -right-1 h-4 w-4 lg:h-5 lg:w-5 text-xs p-0 flex items-center justify-center">
+         {showCreateBtn && <ReusableButton variant='text' onClick={handleCreateClick}  className="bg-[#3F50A0] h-9 text-white hover:bg-[#3F50A0] hover:text-white whitespace-nowrap pb-[1px]">
+            + Create
+          </ReusableButton>}
+          <Button size="sm" className="relative bg-transparent h-8 w-8 lg:h-9 lg:w-9 p-0 hover:bg-button-save group">
+            <Bell className="h-5 w-5 text-[#22222a] group-hover:text-white" />
+            </Button>
+            {/* <Button size="sm" className="relative bg-transparent h-8 w-8 lg:h-9 lg:w-9 p-0  hover:bg-button-save group">
+             <Settings className="h-5 w-5 text-[#22222a] group-hover:text-white"/>
+            </Button> */}
+             <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+             <Button size="sm" className="relative bg-transparent h-8 w-8 lg:h-9 lg:w-9 p-0  hover:bg-button-save group">
+             <Settings className="h-5 w-5 text-[#22222a] group-hover:text-white"/>
+            </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56" align="end" forceMount>
+             {settingsMenuList.map(
+              (obj)=>{
+                 return <DropdownMenuItem key={obj.link} className="cursor-pointer" onClick={()=>settingsNavigationHandle(obj.link)}>
+                <span>{obj.label}</span>
+              </DropdownMenuItem>
+              }
+             )}
+            
+            </DropdownMenuContent>
+          </DropdownMenu>
+          
+            {/* <Badge variant="destructive" className="absolute -top-1 -right-1 h-4 w-4 lg:h-5 lg:w-5 text-xs p-0 flex items-center justify-center">
               3
             </Badge>
-          </Button>
+          
  
           {/* Profile Dropdown */}
           <DropdownMenu>

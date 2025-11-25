@@ -27,7 +27,8 @@ interface ProjectsState {
   lastLevelsData?:any;
   branchCode?:string;
   branchList?:any[];
-reportsMenu:any
+  reportsMenu:any;
+  settingsMenu:any;
   
 }
 
@@ -45,6 +46,8 @@ const initialState: ProjectsState = {
     Branch: "",BranchId:"",AssetLocation: "",AssetLocationId:"",
     CostCenter: "",CostCenterId:"",Department: "",DepartmentId:""
   },
+  settingsMenu:[],
+
   branchCode:'',
   branchList:[],
   reportsMenu:{
@@ -112,10 +115,13 @@ const projectsSlice = createSlice({
     setReportsMenu: (state, action: PayloadAction<any | null>) => {
       state.reportsMenu = {...state.reportsMenu,...action.payload};
     },
+      setSettingsMenu: (state, action: PayloadAction<any | null>) => {
+      state.settingsMenu = action.payload;
+    },
    
   },
 });
 
 export const { setProjects, addProject, updateProject, deleteProject, setLoading,
-  setCompanyId,setCompanyName,setBranch,setBranchId,setUserId,setLastLevelsData,setAllLevelsData,setBranchCode,setError,setBranchesList,setReportsMenu } = projectsSlice.actions;
+  setCompanyId,setCompanyName,setBranch,setBranchId,setUserId,setLastLevelsData,setAllLevelsData,setBranchCode,setError,setBranchesList,setReportsMenu ,setSettingsMenu} = projectsSlice.actions;
 export default projectsSlice.reducer;

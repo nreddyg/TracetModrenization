@@ -168,7 +168,7 @@ export const ReusableButton = forwardRef<HTMLButtonElement, ReusableButtonProps>
 
     const baseClasses = cn(
       // Base styles
-      'inline-flex items-center justify-center font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-auto border',
+      'inline-flex items-center justify-center font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-auto cursor-pointer  border',
 
       // Size classes
       getSizeClasses(size, effectiveShape),

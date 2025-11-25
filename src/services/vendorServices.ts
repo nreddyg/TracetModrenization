@@ -1,4 +1,4 @@
-import { URL_GET_COUNTRY_LIST, URL_GET_VENDOR_DETAILS, URL_GET_VENDOR_LIST, URL_POST_DELETE_VENDOR, URL_POST_UPDATE_VENDOR_DETAILS, URL_POST_VENDOR_DETAILS} from "@/config/apiUrls";
+import { URL_GET_COUNTRY_LIST, URL_GET_VENDOR_DETAILS_BY_COMPID, URL_POST_DELETE_VENDOR, URL_POST_UPDATE_VENDOR_DETAILS, URL_POST_VENDOR_DETAILS} from "@/config/apiUrls";
 import api from "./api";
 
 interface APIResponse<T> {
@@ -11,7 +11,7 @@ interface APIResponse<T> {
 //All Company List Based on UserId
 export const GetVendorList= async (compId:string): Promise<APIResponse<any>> => {
     try {
-        const response = await api.get(URL_GET_VENDOR_LIST, { params: { CompId: compId } })
+        const response = await api.get(URL_GET_VENDOR_DETAILS_BY_COMPID, { params: { CompId: compId } })
         return {success: true,data: response.data,}
     } catch (err: any) {
         return { success: false,message: err.response?.data?.message || err.message,status: err.response?.status};
@@ -38,7 +38,7 @@ export const postNewVendor = async (CompId: string,Data:string): Promise<APIResp
 };
 export const getEditVendorListByCompanyId= async (compId:string,VendorID:string): Promise<APIResponse<any>> => {
     try {
-        const response = await api.get(URL_GET_VENDOR_DETAILS, { params: { CompId: compId,VendorID:VendorID } })
+        const response = await api.get(URL_GET_VENDOR_DETAILS_BY_COMPID, { params: { CompId: compId,VendorID:VendorID } })
         return {success: true,data: response.data,}
     } catch (err: any) {
         return { success: false,message: err.response?.data?.message || err.message,status: err.response?.status};

@@ -1,5 +1,5 @@
 // services/customerService.ts
-import { URL_ASSET_LOCATION_BY_LOC_ID, URL_ASSET_LOCATION_DETAILS, URL_DELETE_LOC, URL_POST_ASSET_LOC_DATA,} from '@/config/apiUrls';
+import { URL_ASSET_LOCATION_DETAILS, URL_DELETE_LOC, URL_POST_ASSET_LOC_DATA,} from '@/config/apiUrls';
 import api from './api';
 
 interface APIResponse<T> {
@@ -21,7 +21,7 @@ export const getAssetLocationDetals = async (CompId: string, branchName: string)
 
 export const getAssetLocationDataByLocID = async (branchName: string, locationid: number, CompId: string): Promise<APIResponse<any>> => {
     try {
-        const response = await api.get(URL_ASSET_LOCATION_BY_LOC_ID, { params: { branchName: branchName, locationid: locationid, CompId: CompId } })
+        const response = await api.get(URL_ASSET_LOCATION_DETAILS, { params: { branchName: branchName, locationid: locationid, CompId: CompId } })
         return { success: true, data: response.data, }
     } catch (err: any) {
         return { success: false, message: err.response?.data?.message || err.message, status: err.response?.status };

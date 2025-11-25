@@ -83,11 +83,7 @@ export const modulesOverride = {
          return;
        }
      },
-    //  "software assets": {
-    //    "action": (module) => {  // Hide this module
-    //      return;
-    //    }
-    //  },
+    
      "mis reports": {
        "action": (module) => {  // Hide this module
          return;
@@ -108,9 +104,9 @@ export const modulesOverride = {
          return;
        }
      },
-     "fixed assets": {
+     "software assets": {
         "action": (module,isParent) => {
-        if(isParent)return(module)
+        if(!isParent ||isParent=="masters")return(module)
         return;
           }
      },
@@ -121,6 +117,12 @@ export const modulesOverride = {
      }
      },
       "consumables": {
+       "action": (module,isParent) => {
+        if(isParent)return(module)
+        return;
+          } 
+     },
+       "fixed assets": {
        "action": (module,isParent) => {
         if(isParent)return(module)
         return;
@@ -149,27 +151,39 @@ export const modulesOverride = {
        }
      },
 
-     "service desk": {
-       "action": (module) => {  // Add few childrren
-        let data=  module.Children 
-        // data.forEach(element => {
-        // element.ModuleName
-        // });
- 
-        const index = data.findIndex(obj => obj.ModuleName === "All Service Requests"); // find the index of target object
+  "service desk": {
+    "action": (module) => {  // Add few childrren
+      let data = module.Children
+      const index = data.findIndex(obj => obj.ModuleName === "All Service Requests"); // find the index of target object
+      if (index !== -1) {
+        data.splice(index + 1, 0, {
+          "ModuleId": 2,
+          "ModuleName": "Ticket Progress Dashboard"
+        }); // insert newObj after it
+      }
+      return module;
+    },
+  },
 
-if (index !== -1) {
-  data.splice(index + 1, 0,    {
-             "ModuleId": 2,
-             "ModuleName": "Ticket Progress Dashboard"
-           }); // insert newObj after it
-}
-  
-         return module;
-       },
-     },
-   
-
+  "masters": {
+    "action": (module) => {  // Add few childrren
+      let data = module.Children
+      const index = data.length - 2; // find the index of target object
+      if (index !== -1) {
+        data.splice(index + 1, 0, {
+          "ModuleId": 2,
+          "ModuleName": "Software Assets",
+          "Children": [
+            {
+              "ModuleId": 2,
+              "ModuleName": "Software Category"
+            },
+          ]
+        }); // insert newObj after it
+      }
+      return module;
+    },
+  },
      "reports": {
        "action": (module) => {  // Remove children
          delete module.Children;

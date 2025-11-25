@@ -1765,12 +1765,12 @@ export const TracetTreeSelect: React.FC<TracetTreeSelectProps> = ({
                     className={`
                         flex items-center rounded-md w-full p-0 min-w-0 h-10 border transition-colors relative overflow-hidden cursor-pointer
                         ${disabled ? 'bg-gray-100 cursor-not-allowed' : 'bg-[hsl(238_73%_97%)] hover:border-gray-300'}
-                        ${isOpen ? 'border-blue-500 ring-1 ring-blue-500' : ''}
+                        ${isOpen ? 'ring-2 ring-ring ring-offset-2 ring-opacity-50' : ''}
                         ${multiSelectConfig.className || className || ''}
                     `}
                     style={{ 
-                        backgroundColor: disabled ? '#f3f4f6' : 'hsl(240deg 73.33% 97.06%)', 
-                        borderColor: 'hsl(214.29deg 31.82% 91.37%)' 
+                        backgroundColor: disabled ? '#f3f4f6' : 'hsl(var(--background)', 
+                        // borderColor: 'hsl(214.29deg 31.82% 91.37%)' 
                     }}
                     onClick={handleContainerClick}
                 >

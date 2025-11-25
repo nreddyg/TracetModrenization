@@ -116,24 +116,33 @@ const AssetCodeTable = () => {
  
     return (
         <>
-            <div className='bg-white p-5 h-[85vh]'>
-                <div className='px-2' style={{display:'flex',justifyContent:"space-between",}}>
-                    <h1 className='text-lg font-semibold'>Assets Data</h1>
-                    <div>
-                        <ReusableButton
+         <ScrollArea className=' w-full'>
+            <div className='p-4 sm:p-4 space-y-4 sm:space-y-4'>
+             
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+           
+            
+            <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                           <h1 className='text-lg font-semibold'>Assets Data</h1>
+              </div>
+            </div>
+            
+                                 <ReusableButton
                             htmlType="button"
                             variant="default"
                             onClick={()=>navigateBacktoMain()}
                             iconPosition="left"
                             size="middle"
-                            className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+                            className=" btn-submit-style "
                         >
                             Submit
                         </ReusableButton>
-                    </div>
-                </div>
-                <div className='mt-4'>
-                    <ScrollArea className='h-[70vh] w-full'>
+                             
+          </div>
+                   
+                       <div className=' border bg-white rounded-lg pb-5 pt-2'>
+
                         <ReusableTable
                             data={dataSource}
                             columns={columns}
@@ -153,6 +162,7 @@ const AssetCodeTable = () => {
                                     // Handle archiving
                                 }
                             }}
+                            
                             // Custom actions in header
                             // customActions={
                             //     <div className="flex gap-2">
@@ -189,9 +199,11 @@ const AssetCodeTable = () => {
                             //     </div>
                             // }
                         />
-                    </ScrollArea>
-                </div>
+                        </div>
+                   
+                
             </div>
+             </ScrollArea>
         </>
     )
 }

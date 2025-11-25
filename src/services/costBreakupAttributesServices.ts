@@ -1,6 +1,6 @@
 
 
-import { URL_DELETE_COSTBREAKUP, URL_EDIT_COSTBREAKUP, URL_GET_COSTBREAKUP_LIST, URL_POST_COSTBREAKUP, URL_UPDATE_COSTBREAKUP } from '@/config/apiUrls';
+import { URL_DELETE_COSTBREAKUP, URL_GET_COSTBREAKUP_LIST, URL_POST_COSTBREAKUP, URL_UPDATE_COSTBREAKUP } from '@/config/apiUrls';
 import api from './api';
 
 interface APIResponse<T> {
@@ -39,7 +39,7 @@ export const UpdateCostBreakup = async (id:number,data:any,CompId: string): Prom
 
 export const editCostBreakup = async (id:number,CompId: string): Promise<APIResponse<any>> => {
     try {
-        const response = await api.get(URL_EDIT_COSTBREAKUP, { params: { GroupId:id,CompId: CompId } })
+        const response = await api.get(URL_GET_COSTBREAKUP_LIST, { params: { GroupId:id,CompId: CompId } })
         return {success: true,data: response.data,}
     } catch (err: any) {
         return {success: false,message: err.response?.data?.message || err.message,status: err.response?.status};

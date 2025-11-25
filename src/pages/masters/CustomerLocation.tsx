@@ -20,6 +20,7 @@ import { FaAngleRight, FaSearch } from 'react-icons/fa';
 import { deleteCustomerLocation, getCustomerLocations, postNewCustomerLocation, updateCustomerLocation } from '@/services/CustomerLocationsServices';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Customer_Location_DB } from '@/Local_DB/Form_JSON_Data/CustomerLocationDB';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface MainCategory {
     Name: string
@@ -479,27 +480,29 @@ const CustomerLocation = () => {
 
     }
     return (
-        <div className="h-full overflow-y-auto bg-gray-50/30">
-            <header className="px-6 py-4">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-                        <h1 className="text-lg sm:text-2xl font-bold text-gray-900">
-                           Customer Location
-                        </h1>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
+        <ScrollArea>
+        <div className="h-full ">
+             <div className="p-4 sm:p-4 space-y-4 sm:space-y-4">
+               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+           
+              <h1 className="text-2xl font-bold ">Customer Location</h1>
+            
+            <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                <div className="flex items-center gap-2 text-sm text-gray-600">
                         <span>Masters</span>
                         <FaAngleRight />
                         <span>Company</span>
                         <FaAngleRight />
                         <span className="text-gray-900 font-medium">Customer Location</span>
                     </div>
-                </div>
-            </header>
-            <div className="p-4 pt-0 ">
-                <Card className="border-0 shadow-sm mt-2">
-                    <CardHeader className="pb-2 pt-2">
-                        <div className='mt-2 p-2'>
+            </div>
+          </div>
+          <div></div>
+        
+      
+                <Card className="bg-card rounded-lg border border-border p-5 mb-6">
+                    <CardHeader className="p-0">
+                        <div className='p-1'>
                             <Tabs value={activeTab} onValueChange={setActiveTab}>
                                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                                     <TabsList>
@@ -509,12 +512,14 @@ const CustomerLocation = () => {
                                     <div className='flex items-center gap-2'>
                                         <ReusableButton
                                             variant="text"
+                                            className='bg-[#3F50A0] text-white hover:bg-[#3F50A0] hover:text-white'
                                             onClick={() => { navigate("/layout/masters/company/customer") }}
                                             icon={""}
                                         >
                                             Back
                                         </ReusableButton>
                                         <ReusableButton
+                                            className='btn-submit-style'
                                             variant="primary"
                                             icon={<Plus className="h-4 w-4" />}
                                             onClick={() => activeTab === 'main' ? handleModalOpen(true) : handleModalOpen(false)}
@@ -524,6 +529,7 @@ const CustomerLocation = () => {
                                     </div>
                                 </div>
                                 <TabsContent value="main" className="space-y-4">
+                                     <div className=" border bg-white rounded-lg pb-5 pt-2">
                                     <ReusableTable
                                         data={getMainCategoryData}
                                         columns={mainCategoryColumns}
@@ -540,13 +546,14 @@ const CustomerLocation = () => {
                                         rowHeight="normal"
                                         storageKey="usergroups-table"
                                     />
+                                    </div>
                                 </TabsContent>
                                 <TabsContent value="sub" className="space-y-4">
                                     <div className='flex items-center gap-6 mb-3'>
                                         <div>
-                                            <h2 className='text-lg mb-2'>Select Main Location</h2>
+                                            <h2 className='text-md font-semibold '>Select Main Location</h2>
                                         </div>
-                                        <div className="mb-4">
+                                        <div className="    ">
                                             {getFieldsByNames(['mainLocationDropdown']).map((field) => {
                                                 return <div className=" space-x-2">
                                                     {renderField(field)}
@@ -554,6 +561,7 @@ const CustomerLocation = () => {
                                             })}
                                         </div>
                                     </div>
+                                      <div className=" border bg-white rounded-lg pb-5 pt-2">
                                     <ReusableTable
                                         data={subDataToShow}
                                         columns={subLocationColumns}
@@ -570,6 +578,7 @@ const CustomerLocation = () => {
                                         rowHeight="normal"
                                         storageKey="usergroups-table"
                                     />
+                                     </div>
                                 </TabsContent>
                             </Tabs>
                         </div>
@@ -602,15 +611,16 @@ const CustomerLocation = () => {
                                 </div>
                                 <div className="flex justify-end gap-2">
                                     <ReusableButton
-                                        variant="default"
+                                        variant="text"
+                                            className='btn-reset-clear-style'
                                         onClick={() => { setIsSubDialogOpen(false); setSubRecID(null), handleCancel() }}
                                     >
                                         Cancel
                                     </ReusableButton>
                                     <ReusableButton
                                         htmlType="submit"
-                                        variant="primary"
-                                        className="bg-orange-500 hover:bg-orange-600 border-orange-500"
+                                       variant="primary"
+                                            className=" btn-submit-style "
                                         onClick={(e) => { handleSubmit((data) => submit(e, true, data))(e) }}
                                     >
                                         {recordToEditId ? "Update" : "Save"}
@@ -627,10 +637,11 @@ const CustomerLocation = () => {
                             <div className="space-y-4">
                                 <h4>{`Are you sure want to delete ${mainDelRec?.LocationName} Location`}</h4>
                                 <div className="flex justify-end gap-2">
-                                    <ReusableButton onClick={() => { setIsMainDelOpen(false); handleCancel() }}>
+                                    <ReusableButton    variant="text"
+                                            className='btn-reset-clear-style' onClick={() => { setIsMainDelOpen(false); handleCancel() }}>
                                         Cancel
                                     </ReusableButton>
-                                    <ReusableButton variant="primary" onClick={() => { (recordToEditId) ? handleMainDelete(companyId, recordToEditId) : handleMainDelete(companyId, subRecID) }}>
+                                    <ReusableButton variant="primary"  danger={true} onClick={() => { (recordToEditId) ? handleMainDelete(companyId, recordToEditId) : handleMainDelete(companyId, subRecID) }}>
                                         Delete
                                     </ReusableButton>
                                 </div>
@@ -652,18 +663,23 @@ const CustomerLocation = () => {
                                 })}
                             </div>
                             <div className="flex justify-end gap-2">
-                                <ReusableButton onClick={() => { setIsSubDialogOpen(false); handleCancel() }}>
+                                <ReusableButton    variant="text"
+                                            className='btn-reset-clear-style' onClick={() => { setIsSubDialogOpen(false); handleCancel() }}>
                                     Cancel
                                 </ReusableButton>
-                                <ReusableButton variant="primary" onClick={(e) => { handleSubmit((data) => submit(e, false, data))(e) }}>
+                                <ReusableButton    variant="text"
+                                                                                  
+                                            className=" btn-submit-style " onClick={(e) => { handleSubmit((data) => submit(e, false, data))(e) }}>
                                     {subRecID ? "Update" : "Save"}
                                 </ReusableButton>
                             </div>
                         </DialogContent>
                     </Dialog>
                 </div>
+           
             </div>
         </div>
+        </ScrollArea>
     );
 };
 export default CustomerLocation;

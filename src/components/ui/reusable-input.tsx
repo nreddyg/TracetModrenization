@@ -50,7 +50,7 @@ export interface ReusableInputProps extends Omit<React.InputHTMLAttributes<HTMLI
   // Advanced
   bordered?: boolean;
   autoSize?: boolean | { minRows?: number; maxRows?: number };
-  
+  focusClass?:string
   // NEW FEATURES
   ellipsisPlaceholder?: boolean; // Enable ellipsis for placeholder text
   enterToTab?: boolean; // Enable Enter key to focus next field
@@ -123,7 +123,7 @@ export const ReusableInput = forwardRef<ReusableInputRef, ReusableInputProps>(
     // NEW FEATURES
     ellipsisPlaceholder = false,
     enterToTab = false,
-    
+    focusClass,
     // REGEX VALIDATION
     validationPattern,
     patternErrorMessage = 'Invalid input format',
@@ -538,7 +538,7 @@ export const ReusableInput = forwardRef<ReusableInputRef, ReusableInputProps>(
                 ellipsisPlaceholder && "overflow-hidden  text-ellipsis whitespace-nowrap",
                 prefixIcon && "pl-10",
                 (suffixIcon || showPasswordToggle || visibilityToggle || allowClear || loading) && "pr-10",
-                focused && "ring-2 ring-opacity-50",
+                focused && (focusClass? focusClass : "ring-2 ring-ring  ring-opacity-50 ring-offset-2"),
                 hasAddon && "border-0",
                 addonBefore && "rounded-l-none border-l-0",
               

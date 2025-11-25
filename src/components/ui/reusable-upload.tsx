@@ -4,21 +4,22 @@ import { Label } from './label';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './tooltip';
 import { Progress } from './progress';
 import { cn } from '@/lib/utils';
-import { 
-  Upload, 
-  X, 
-  File, 
-  Image, 
-  FileText, 
-  Video, 
-  Music, 
-  Eye, 
-  Download, 
+import {
+  Upload,
+  X,
+  File,
+  Image,
+  FileText,
+  Video,
+  Music,
+  Eye,
+  Download,
   RotateCcw,
   CheckCircle,
   XCircle,
   Clock
 } from 'lucide-react';
+import { useMessage } from './reusable-message';
 
 export type UploadStatus = 'uploading' | 'done' | 'error' | 'removed';
 
@@ -40,13 +41,14 @@ export interface UploadProps {
   label?: string;
   tooltip?: string;
   error?: string;
-  isRequired?:boolean;
+  isRequired?: boolean;
   multiple?: boolean;
   accept?: string;
   maxSize?: number; // in MB
   maxFiles?: number;
-  fieldClassName?:string;
-  fieldInfo?:string;
+  showMaxText?: boolean;
+  fieldClassName?: string;
+  fieldInfo?: string;
   value?: UploadFile[];
   disabled?: boolean;
   showPreview?: boolean; // Shows preview thumbnails for images
@@ -83,16 +85,17 @@ export interface UploadProps {
 }
 
 export const ReusableUpload = forwardRef<HTMLInputElement, UploadProps>(
-  ({ 
-    label, 
-    tooltip, 
-    error, 
+  ({
+    label,
+    tooltip,
+    error,
     multiple = true,
     accept = "*/*",
     maxSize = 10,
     maxFiles = 5,
+    showMaxText,
     value = [],
-    fieldInfo='',
+    fieldInfo = '',
     disabled = false,
     showPreview = true,
     showUploadList = true,
@@ -102,8 +105,8 @@ export const ReusableUpload = forwardRef<HTMLInputElement, UploadProps>(
     dragAndDrop = true,
     directory = false,
     listType = 'text',
-    isRequired=false,
-    fieldClassName='',
+    isRequired = false,
+    fieldClassName = '',
     action,
     method = 'POST',
     headers,
@@ -121,16 +124,17 @@ export const ReusableUpload = forwardRef<HTMLInputElement, UploadProps>(
     onPreview,
     onDownload,
     onDrop,
-    ...props 
+    ...props
   }, ref) => {
     const [isDragOver, setIsDragOver] = useState(false);
     const [previewUrls, setPreviewUrls] = useState<Record<string, string>>({});
     const inputRef = useRef<HTMLInputElement>(null);
+    const msg = useMessage()
 
     const renderLabel = () => {
       if (!label) return null;
 
-      const labelElement = <Label className="text-sm font-medium">{label}{isRequired ?<span className='text-red-500'> *</span>:''}</Label>;
+      const labelElement = <Label className="text-sm font-medium">{label}{isRequired ? <span className='text-red-500'> *</span> : ''}</Label>;
 
       if (tooltip) {
         return (
@@ -172,16 +176,16 @@ export const ReusableUpload = forwardRef<HTMLInputElement, UploadProps>(
             updateFileStatus(fileItem.id, { percent: event.percent });
           },
           onSuccess: (response) => {
-            updateFileStatus(fileItem.id, { 
-              status: 'done', 
-              percent: 100, 
-              response 
+            updateFileStatus(fileItem.id, {
+              status: 'done',
+              percent: 100,
+              response
             });
           },
           onError: (error) => {
-            updateFileStatus(fileItem.id, { 
-              status: 'error', 
-              error 
+            updateFileStatus(fileItem.id, {
+              status: 'error',
+              error
             });
           }
         });
@@ -189,7 +193,7 @@ export const ReusableUpload = forwardRef<HTMLInputElement, UploadProps>(
         try {
           const formData = new FormData();
           formData.append('file', file);
-          
+
           if (data) {
             const extraData = typeof data === 'function' ? data(file) : data;
             Object.entries(extraData).forEach(([key, value]) => {
@@ -212,18 +216,18 @@ export const ReusableUpload = forwardRef<HTMLInputElement, UploadProps>(
 
           if (response.ok) {
             const result = await response.json();
-            updateFileStatus(fileItem.id, { 
-              status: 'done', 
-              percent: 100, 
-              response: result 
+            updateFileStatus(fileItem.id, {
+              status: 'done',
+              percent: 100,
+              response: result
             });
           } else {
             throw new Error(`Upload failed: ${response.statusText}`);
           }
         } catch (error) {
-          updateFileStatus(fileItem.id, { 
-            status: 'error', 
-            error 
+          updateFileStatus(fileItem.id, {
+            status: 'error',
+            error
           });
         }
       } else {
@@ -234,9 +238,9 @@ export const ReusableUpload = forwardRef<HTMLInputElement, UploadProps>(
 
     const validateFileType = (file: File, acceptPattern: string): boolean => {
       if (acceptPattern === "*/*") return true;
-      
+
       const acceptTypes = acceptPattern.split(',').map(type => type.trim());
-      
+
       for (const acceptType of acceptTypes) {
         // Handle specific extensions like .pdf, .doc, etc.
         if (acceptType.startsWith('.')) {
@@ -262,13 +266,13 @@ export const ReusableUpload = forwardRef<HTMLInputElement, UploadProps>(
           }
         }
       }
-      
+
       return false;
     };
 
     const updateFileStatus = (fileId: string, updates: Partial<UploadFile>) => {
       if (onChange) {
-        const updatedFiles = value.map(file => 
+        const updatedFiles = value.map(file =>
           file.id === fileId ? { ...file, ...updates } : file
         );
         onChange(updatedFiles);
@@ -286,12 +290,12 @@ export const ReusableUpload = forwardRef<HTMLInputElement, UploadProps>(
     //     if (currentCount + i >= maxFiles) break;
 
     //     const file = fileArray[i];
-        
+
     //     // Validate file type
     //     if (!validateFileType(file, accept)) {
     //       continue;
     //     }
-        
+
     //     // Check file size
     //     if (file.size > maxSize * 1024 * 1024) {
     //       continue;
@@ -336,77 +340,81 @@ export const ReusableUpload = forwardRef<HTMLInputElement, UploadProps>(
     //   }
     // };
 
-    
-    
+
+
     const handleFileSelect = async (files: FileList | null) => {
-  if (!files || !onChange) return;
+      if (!files || !onChange) return;
 
-  const fileArray = Array.from(files);
-  const currentCount = value.length;
-  const newFiles: UploadFile[] = []; // Collect all new files first
+      const fileArray = Array.from(files);
+      const currentCount = value.length;
+      const newFiles: UploadFile[] = []; // Collect all new files first
 
-  for (let i = 0; i < fileArray.length; i++) {
-    if (!multiple && i > 0) break;
-    if (currentCount + newFiles.length >= maxFiles) break;
+      for (let i = 0; i < fileArray.length; i++) {
+        if (!multiple && i > 0) break;
+        if (currentCount + newFiles.length >= maxFiles) break;
 
-    const file = fileArray[i];
-    
-    // Validate file type
-    if (!validateFileType(file, accept)) {
-      continue;
-    }
-    
-    // Check file size
-    if (file.size > maxSize * 1024 * 1024) {
-      continue;
-    }
+        const file = fileArray[i];
 
-    // Run beforeUpload check
-    if (beforeUpload) {
-      try {
-        const shouldUpload = await beforeUpload(file, fileArray);
-        if (!shouldUpload) continue;
-      } catch (error) {
-        continue;
-      }
-    }
-
-    const processedFile = file;
-
-    const uploadFileItem: UploadFile = {
-      id: Date.now().toString() + i + Math.random().toString(36).substr(2, 9), // More unique ID
-      name: file.name,
-      size: file.size,
-      type: file.type,
-      file: processedFile,
-      url: URL.createObjectURL(processedFile),
-      status: action || customRequest ? 'uploading' : 'done',
-      percent: action || customRequest ? 0 : 100
-    };
-
-    // Generate preview
-    if (showPreview) {
-      generatePreview(processedFile, uploadFileItem.id);
-    }
-
-    newFiles.push(uploadFileItem);
-  }
-
-  // Update the file list with all new files at once
-  if (newFiles.length > 0) {
-    const updatedFiles = multiple ? [...value, ...newFiles] : newFiles;
-    onChange(updatedFiles);
-
-    // Start uploads for all new files if needed
-    if (action || customRequest) {
-      newFiles.forEach(uploadFileItem => {
-        if (uploadFileItem.file) {
-          performUpload(uploadFileItem.file, uploadFileItem);
+        // Validate file type
+        if (!validateFileType(file, accept)) {
+          msg.warning(`File "${file.name}" is not an accepted format.`)
+          continue;
         }
-      });
-    }
-  }
-};
+
+        // Check file size
+        if (file.size > maxSize * 1024 * 1024) {
+          const fileSize = (file.size / 1024 / 1024).toFixed(1);
+          console.log(fileSize);
+          msg.warning(`File of ${fileSize} MB is not accepted.`)
+          continue;
+        }
+
+        // Run beforeUpload check
+        if (beforeUpload) {
+          try {
+            const shouldUpload = await beforeUpload(file, fileArray);
+            if (!shouldUpload) continue;
+          } catch (error) {
+            continue;
+          }
+        }
+
+        const processedFile = file;
+
+        const uploadFileItem: UploadFile = {
+          id: Date.now().toString() + i + Math.random().toString(36).substr(2, 9), // More unique ID
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          file: processedFile,
+          url: URL.createObjectURL(processedFile),
+          status: action || customRequest ? 'uploading' : 'done',
+          percent: action || customRequest ? 0 : 100
+        };
+
+        // Generate preview
+        if (showPreview) {
+          generatePreview(processedFile, uploadFileItem.id);
+        }
+
+        newFiles.push(uploadFileItem);
+      }
+
+      // Update the file list with all new files at once
+      if (newFiles.length > 0) {
+        const updatedFiles = multiple ? [...value, ...newFiles] : newFiles;
+        onChange(updatedFiles);
+
+        // Start uploads for all new files if needed
+        if (action || customRequest) {
+          newFiles.forEach(uploadFileItem => {
+            if (uploadFileItem.file) {
+              performUpload(uploadFileItem.file, uploadFileItem);
+            }
+          });
+        }
+      }
+    };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       handleFileSelect(e.target.files);
@@ -501,7 +509,7 @@ export const ReusableUpload = forwardRef<HTMLInputElement, UploadProps>(
 
     const formatFileSize = (bytes: number) => {
       if (bytes === 0) return '0 Bytes';
-      if(!bytes) return '';
+      if (!bytes) return '';
       const k = 1024;
       const sizes = ['Bytes', 'KB', 'MB', 'GB'];
       const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -521,9 +529,9 @@ export const ReusableUpload = forwardRef<HTMLInputElement, UploadProps>(
         return (
           <div key={file.id} className="relative w-24 h-24 border rounded-lg overflow-hidden group bg-gray-50">
             {isImage && previewUrl && showPreview ? (
-              <img 
-                src={previewUrl} 
-                alt={file.name} 
+              <img
+                src={previewUrl}
+                alt={file.name}
                 className="w-full h-full object-cover"
               />
             ) : (
@@ -531,7 +539,7 @@ export const ReusableUpload = forwardRef<HTMLInputElement, UploadProps>(
                 {getFileIcon(file.type)}
               </div>
             )}
-            
+
             {file.status === 'uploading' && (
               <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
                 <div className="text-white text-xs">{file.percent || 0}%</div>
@@ -597,7 +605,7 @@ export const ReusableUpload = forwardRef<HTMLInputElement, UploadProps>(
       }
 
       const isPicture = listType === 'picture';
-      
+
       // Text list type - simple list without card styling
       if (listType === 'text') {
         const defaultNode = (
@@ -615,11 +623,11 @@ export const ReusableUpload = forwardRef<HTMLInputElement, UploadProps>(
                     <span>{file.percent}%</span>
                   )}
                 </div>
-                
+
                 {file.status === 'uploading' && file.percent !== undefined && (
                   <Progress value={file.percent} className="mt-1 h-1" />
                 )}
-                
+
                 {file.status === 'error' && file.error && (
                   <p className="text-xs text-red-500 mt-1">{file.error.toString()}</p>
                 )}
@@ -637,7 +645,7 @@ export const ReusableUpload = forwardRef<HTMLInputElement, UploadProps>(
                   <Eye className="h-4 w-4" />
                 </Button>
               )}
-              
+
               {showDownloadIcon && (
                 <Button
                   type="button"
@@ -682,9 +690,9 @@ export const ReusableUpload = forwardRef<HTMLInputElement, UploadProps>(
       const defaultNode = (
         <div key={file.id} className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
           {isPicture && isImage && previewUrl && showPreview ? (
-            <img 
-              src={previewUrl} 
-              alt={file.name} 
+            <img
+              src={previewUrl}
+              alt={file.name}
               className="w-12 h-12 object-cover rounded"
             />
           ) : (
@@ -692,18 +700,18 @@ export const ReusableUpload = forwardRef<HTMLInputElement, UploadProps>(
               {getFileIcon(file.type)}
             </div>
           )}
-          
+
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <p className="text-sm font-medium truncate">{file.name}</p>
               {getStatusIcon(file.status)}
             </div>
             <p className="text-xs text-gray-500">{formatFileSize(file.size)}</p>
-            
+
             {file.status === 'uploading' && file.percent !== undefined && (
               <Progress value={file.percent} className="mt-1 h-1" />
             )}
-            
+
             {file.status === 'error' && file.error && (
               <p className="text-xs text-red-500 mt-1">{file.error.toString()}</p>
             )}
@@ -720,7 +728,7 @@ export const ReusableUpload = forwardRef<HTMLInputElement, UploadProps>(
                 <Eye className="h-4 w-4" />
               </Button>
             )}
-            
+
             {showDownloadIcon && (
               <Button
                 type="button"
@@ -796,7 +804,7 @@ export const ReusableUpload = forwardRef<HTMLInputElement, UploadProps>(
               <Upload className="h-4 w-4" />
               {multiple ? 'Select Files' : 'Select File'}
             </Button>
-              {fieldInfo ?<p className="text-xs text-gray-500">{fieldInfo}</p>: <p className="text-xs text-gray-500">Max {maxSize}MB per file{multiple ? `, up to ${maxFiles} files` : ''}</p>}
+            {fieldInfo ? <p className="text-xs text-gray-500">{fieldInfo}</p> : <p className="text-xs text-gray-500">Max {maxSize}MB per file {showMaxText === true && multiple ? `, up to ${maxFiles} files` : ''}</p>}
           </div>
         );
       }
@@ -804,8 +812,8 @@ export const ReusableUpload = forwardRef<HTMLInputElement, UploadProps>(
       return (
         <div
           className={cn(
-            "relative border-2 border-dashed rounded-lg transition-colors",
-            isDragOver && !disabled ? "border-primary bg-primary/5" : "border-gray-300",
+            "relative border-2 border-dashed rounded-lg transition-colors cursor-pointer",
+            isDragOver && !disabled ? "border-primary bg-primary/5" : "border-gray-300 cursor-pointer",
             disabled && "opacity-50 cursor-not-allowed",
             error && "border-red-500",
             className
@@ -813,6 +821,7 @@ export const ReusableUpload = forwardRef<HTMLInputElement, UploadProps>(
           onDragOver={dragAndDrop ? handleDragOver : undefined}
           onDragLeave={dragAndDrop ? handleDragLeave : undefined}
           onDrop={dragAndDrop ? handleDrop : undefined}
+          onClick={() => inputRef.current?.click()}
         >
           <div className="p-6 text-center">
             <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
@@ -829,7 +838,8 @@ export const ReusableUpload = forwardRef<HTMLInputElement, UploadProps>(
               </Button>
             </div>
             <p className="text-xs text-gray-500">
-              Max {maxSize}MB per file, up to {maxFiles} files
+              {/* Max {maxSize}MB per file, `${showMaxText === true && `up to ${maxFiles} files`}` */}
+              Max {maxSize}MB per file {showMaxText && `, up to ${maxFiles} files`}
             </p>
           </div>
         </div>
@@ -839,7 +849,7 @@ export const ReusableUpload = forwardRef<HTMLInputElement, UploadProps>(
     return (
       <div className={cn("space-y-1", containerClassName)}>
         {renderLabel()}
-        
+
         <input
           ref={ref || inputRef}
           type="file"

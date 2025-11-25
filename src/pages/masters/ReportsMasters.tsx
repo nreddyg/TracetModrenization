@@ -30,7 +30,7 @@ import { useMessage } from '@/components/ui/reusable-message';
 import { ColumnDef, FilterFn, VisibilityState } from '@tanstack/react-table';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { FaAngleRight } from 'react-icons/fa';
-interface MultiSelectConfig {
+export interface MultiSelectConfig {
   isHierarchy?: boolean;
   labelClassName?: string;
   className?: string;
@@ -602,7 +602,7 @@ const ReportsMasters = () => {
       <header className="px-6 py-4">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-            <h1 className="text-lg sm:text-2xl font-bold text-gray-900">
+            <h1 className="text-2xl font-bold">
               Master Reports
             </h1>
           </div>
@@ -616,9 +616,9 @@ const ReportsMasters = () => {
       <div className="px-3 pb-3 pt-0 space-y-3 ">
         <div className="grid grid-cols-1 xl:grid-cols-4 gap-3 ">
           <div className="xl:col-span-1">
-            <Card className="sticky top-6 pb-3">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center gap-2">
+            <Card className="sticky top-6 p-5">
+              <CardHeader className="p-0 pb-3">
+                <CardTitle className="text-lg mb-1 flex items-center gap-2">
                   <Settings2 className="h-5 w-5 text-blue-600" />
                   Report Types
                 </CardTitle>
@@ -627,8 +627,8 @@ const ReportsMasters = () => {
                   <Input placeholder="Search reports..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10"/>
                 </div>
               </CardHeader>
-              <ScrollArea>
-              <CardContent className="space-y-2 max-h-80">
+              <ScrollArea hideScrollbar={true} >
+              <CardContent className="space-y-2 p-0 max-h-80">
                 {filteredReportTabs.map((tab) => (
                   <button key={tab} onClick={() => { setActiveTab(tab); form.reset() }}
                     className={cn(
@@ -669,8 +669,10 @@ const ReportsMasters = () => {
             >
               <div className="space-y-2 h-full overflow-y-hidden">
                 <div className='px-1'>
-                  <h4 className="text-sm font-semibold text-gray-900 mb-3">Primary Filters</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-2">
+                         <h2 className="text-lg font-semibold mb-2">
+                {"Primary Filters"}
+              </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2  pb-1 lg:grid-cols-2 gap-2">
                     {fields.map(renderField)}
                   </div>
                 </div>
@@ -688,7 +690,7 @@ const ReportsMasters = () => {
               </Card>
             )}
             {showReport && !isGeneratingReport && (activeTab !== "Service Request Detail History") && (
-              <Card>
+              <Card className='p-0'>
                 <CardHeader>
                   <CardTitle className="text-lg">Report Results - {activeTab}</CardTitle>
                   <div>
@@ -700,7 +702,7 @@ const ReportsMasters = () => {
                     </ReusableButton>
                   </div>
                 </CardHeader>
-                <CardContent>
+                <CardContent className='p-0'>
                   <ReusableTable
                     data={dataSource}
                     columns={columns}

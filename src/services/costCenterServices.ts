@@ -1,6 +1,6 @@
 
 
-import { URL_DELETE_COSTCENTER, URL_GET_COSTCENTER_BY_ID, URL_GET_COSTCENTER_DATA, URL_POST_COSTCENTER } from '@/config/apiUrls';
+import { URL_DELETE_COSTCENTER, URL_GET_COSTCENTER_DATA, URL_POST_COSTCENTER } from '@/config/apiUrls';
 import api from './api';
 
 interface APIResponse<T> {
@@ -31,7 +31,7 @@ export const postCostCenter = async (CompId: string,costcenterId:number,data:any
 
 export const getCostcenterById=async (CompId: string,id:number): Promise<APIResponse<any>> => {
     try {
-        const response = await api.get(URL_GET_COSTCENTER_BY_ID, { params: {costcentid:id,CompId:CompId} })
+        const response = await api.get(URL_GET_COSTCENTER_DATA, { params: {costcentid:id,CompId:CompId} })
         return {success: true,data: response.data,}
     } catch (err: any) {
         return {success: false,message: err.response?.data?.message || err.message,status: err.response?.status};

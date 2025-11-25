@@ -217,9 +217,9 @@ const ReusableRangePicker: React.FC<DateRangePickerProps> = ({
       {/* <Popover open={open} onOpenChange={setOpen}> */}
       <Popover open={!disabled && open} onOpenChange={(val) => !disabled && setOpen(val)}>
         <PopoverTrigger asChild>
-          <div className={cn("relative w-full focus-within:ring-2 rounded-md ",!disabled && open && "ring-2" )}>
+          <div className={cn("relative w-full focus-within:ring-2   focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-opacity-50 rounded-md ",!disabled && open && "ring-2  ring-2 ring-ring ring-offset-2 ring-opacity-50" )}>
             <div
-              className={cn(
+              className={cn(  
                 "flex items-center justify-between gap-2 border border-input rounded-md px-3  h-10 text-sm",
                 "bg-background",              // Set background like the first field
                 "w-full",    className,                 // Make it full width of the container

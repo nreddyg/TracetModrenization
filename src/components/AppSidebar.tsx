@@ -247,7 +247,7 @@ const AppSidebar: React.FC<MyComponentProps> = ({navigation}) => {
         onMouseEnter={() => setHoveredLabel(child.label)}
         onMouseLeave={() => setHoveredLabel(null)}
       >
-        <SidebarMenuSubButton asChild isActive={isChildActive} >
+        <SidebarMenuSubButton className='ps-2' asChild isActive={isChildActive} >
           <Link
             to={`/layout/${child.link}`}
             className={cn(

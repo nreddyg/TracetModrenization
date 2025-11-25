@@ -122,6 +122,12 @@ export const modulesOverride = {
         return;
           } 
      },
+       "fixed assets": {
+       "action": (module,isParent) => {
+        if(isParent)return(module)
+        return;
+          } 
+     },
       "depreciation": {
       "action": (module) => {
       

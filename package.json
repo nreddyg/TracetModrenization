@@ -4,16 +4,15 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-  "dev": "vite",                
-  "build": "vite build",                     
-  "build:dev": "vite build --mode development",      
-  "build:newdev": "vite build --mode newdev",
-  "build:qa": "vite build --mode qa",
-  "build:prod": "vite build --mode production",
-  "lint": "eslint .",
-  "preview": "vite preview"
-},
-
+    "dev": "vite",
+    "build": "vite build",
+    "build:dev": "vite build --mode development",
+    "build:newdev": "vite build --mode newdev",
+    "build:qa": "vite build --mode qa",
+    "build:prod": "vite build --mode production",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
@@ -66,6 +65,7 @@
     "jspdf-autotable": "^5.0.2",
     "lucide-react": "^0.462.0",
     "next-themes": "^0.3.0",
+    "num-words": "^1.2.3",
     "quill": "^2.0.3",
     "react": "^18.3.1",
     "react-day-picker": "^8.10.1",

@@ -241,7 +241,7 @@
 
 //         const inputRect = containerRef.current.getBoundingClientRect();
 //         const viewportHeight = window.innerHeight;
-        
+
 //         const dropdownWidth = inputRect.width;
 //         const dropdownMaxHeight = listHeight + 100; // Account for header/padding
 //         const inputSpacing = 2; // Minimal gap between input and dropdown
@@ -251,7 +251,7 @@
 //         const spaceAbove = inputRect.top;
 
 //         let top: number;
-        
+
 //         // Smart vertical positioning logic
 //         if (spaceBelow >= 100) {
 //             // Enough space below - position below the input
@@ -279,12 +279,12 @@
 //         if (isOpen && containerRef.current) {
 //             // Calculate position immediately
 //             setPopupPosition(calculatePopupPosition());
-            
+
 //             // Also recalculate after a tiny delay to handle any layout shifts
 //             const timer = setTimeout(() => {
 //                 setPopupPosition(calculatePopupPosition());
 //             }, 1);
-            
+
 //             return () => clearTimeout(timer);
 //         }
 //     }, [isOpen]);
@@ -294,7 +294,7 @@
 //         if (!isOpen) return;
 
 //         let rafId: number;
-        
+
 //         const updatePosition = () => {
 //             // Use requestAnimationFrame for smooth updates
 //             if (rafId) cancelAnimationFrame(rafId);
@@ -660,7 +660,7 @@
 //             const target = event.target as Node;
 //             const isOutsideContainer = containerRef.current && !containerRef.current.contains(target);
 //             const isOutsideDropdown = dropdownRef.current && !dropdownRef.current.contains(target);
-            
+
 //             if (isOutsideContainer && isOutsideDropdown) {
 //                 setIsOpen(false);
 //                 setIsSearching(false);
@@ -735,24 +735,24 @@
 //     const renderPopup = () => {
 //         const inputRect = containerRef.current?.getBoundingClientRect();
 //         if (!inputRect) return null;
-   
+
 //         const margin = 8;            
 //         const idealHeight = listHeight + 100;
 //         const minHeight = 100;
-   
+
 //         const spaceBelow = window.innerHeight - inputRect.bottom - margin;
 //         const spaceAbove = inputRect.top - margin;
-   
+
 //         // Decide whether to place popup above or below
 //         const openAbove = spaceBelow < minHeight && spaceAbove > spaceBelow;
-   
+
 //         // Use the space available in chosen direction to compute maxHeight
 //         const availableSpace = openAbove ? Math.max(0, spaceAbove) : Math.max(0, spaceBelow);
 //         const maxHeight = Math.max(minHeight, Math.min(idealHeight, availableSpace));
-   
+
 //         const top = openAbove ? inputRect.top : inputRect.bottom;
 //         const transform = openAbove ? "translateY(-100%)" : "translateY(0)";
-   
+
 //         return (
 //             <div
 //                 ref={dropdownRef}
@@ -1149,7 +1149,7 @@ export const TracetTreeSelect: React.FC<TracetTreeSelectProps> = ({
 
         const inputRect = containerRef.current.getBoundingClientRect();
         const viewportHeight = window.innerHeight;
-        
+
         const dropdownWidth = inputRect.width;
         const dropdownMaxHeight = listHeight + 100; // Account for header/padding
         const inputSpacing = 2; // Minimal gap between input and dropdown
@@ -1159,7 +1159,7 @@ export const TracetTreeSelect: React.FC<TracetTreeSelectProps> = ({
         const spaceAbove = inputRect.top;
 
         let top: number;
-        
+
         // Smart vertical positioning logic
         if (spaceBelow >= 100) {
             // Enough space below - position below the input
@@ -1175,10 +1175,10 @@ export const TracetTreeSelect: React.FC<TracetTreeSelectProps> = ({
         const left = inputRect.left;
         const width = dropdownWidth;
 
-        return { 
-            top, 
-            left, 
-            width 
+        return {
+            top,
+            left,
+            width
         };
     };
 
@@ -1187,12 +1187,12 @@ export const TracetTreeSelect: React.FC<TracetTreeSelectProps> = ({
         if (isOpen && containerRef.current) {
             // Calculate position immediately
             setPopupPosition(calculatePopupPosition());
-            
+
             // Also recalculate after a tiny delay to handle any layout shifts
             const timer = setTimeout(() => {
                 setPopupPosition(calculatePopupPosition());
             }, 1);
-            
+
             return () => clearTimeout(timer);
         }
     }, [isOpen]);
@@ -1202,7 +1202,7 @@ export const TracetTreeSelect: React.FC<TracetTreeSelectProps> = ({
         if (!isOpen) return;
 
         let rafId: number;
-        
+
         const updatePosition = () => {
             // Use requestAnimationFrame for smooth updates
             if (rafId) cancelAnimationFrame(rafId);
@@ -1513,7 +1513,7 @@ export const TracetTreeSelect: React.FC<TracetTreeSelectProps> = ({
             } else {
                 const displayTags = selectedValues.slice(0, maxTags);
                 const remainingCount = selectedValues.length - maxTags;
-                
+
                 return (
                     <div className="flex flex-wrap items-center">
                         {displayTags.map(val => {
@@ -1547,7 +1547,7 @@ export const TracetTreeSelect: React.FC<TracetTreeSelectProps> = ({
 
             const remainingCount = selectedValues.length - maxTags;
             const displayText = displayTexts.join(', ');
-            
+
             return (
                 <div className="flex items-center">
                     <span className="truncate text-gray-900">{displayText}</span>
@@ -1609,7 +1609,7 @@ export const TracetTreeSelect: React.FC<TracetTreeSelectProps> = ({
             const target = event.target as Node;
             const isOutsideContainer = containerRef.current && !containerRef.current.contains(target);
             const isOutsideDropdown = dropdownRef.current && !dropdownRef.current.contains(target);
-            
+
             if (isOutsideContainer && isOutsideDropdown) {
                 setIsOpen(false);
                 setIsSearching(false);
@@ -1702,30 +1702,30 @@ export const TracetTreeSelect: React.FC<TracetTreeSelectProps> = ({
     const renderPopup = () => {
         const inputRect = containerRef.current?.getBoundingClientRect();
         if (!inputRect) return null;
-   
-        const margin = 8;            
+
+        const margin = 8;
         const idealHeight = listHeight + 100;
         const minHeight = 100;
-   
+
         const spaceBelow = window.innerHeight - inputRect.bottom - margin;
         const spaceAbove = inputRect.top - margin;
-   
+
         // Decide whether to place popup above or below
         const openAbove = spaceBelow < minHeight && spaceAbove > spaceBelow;
-   
+
         // Use the space available in chosen direction to compute maxHeight
         const availableSpace = openAbove ? Math.max(0, spaceAbove) : Math.max(0, spaceBelow);
         const maxHeight = Math.max(minHeight, Math.min(idealHeight, availableSpace));
-   
+
         const top = openAbove ? inputRect.top : inputRect.bottom;
         const transform = openAbove ? "translateY(-100%)" : "translateY(0)";
-   
+
         return (
             <div
                 ref={dropdownRef}
                 className="bg-white border border-gray-300 rounded-md shadow-lg"
                 style={{
-                    position: "fixed",         
+                    position: "fixed",
                     top,
                     left: inputRect.left,
                     zIndex: 9999,
@@ -1768,9 +1768,9 @@ export const TracetTreeSelect: React.FC<TracetTreeSelectProps> = ({
                         ${isOpen ? 'border-blue-500 ring-1 ring-blue-500' : ''}
                         ${multiSelectConfig.className || className || ''}
                     `}
-                    style={{ 
-                        backgroundColor: disabled ? '#f3f4f6' : 'hsl(240deg 73.33% 97.06%)', 
-                        borderColor: 'hsl(214.29deg 31.82% 91.37%)' 
+                    style={{
+                        backgroundColor: disabled ? '#f3f4f6' : 'hsl(240deg 73.33% 97.06%)',
+                        borderColor: 'hsl(214.29deg 31.82% 91.37%)'
                     }}
                     onClick={handleContainerClick}
                 >
@@ -1846,11 +1846,12 @@ export const TracetTreeSelect: React.FC<TracetTreeSelectProps> = ({
             </div>
 
             {/* Error Message */}
-            <div className={multiSelectConfig.errorMsgClass || 'mt-1'}>
-                {(showError && selectedValues.length === 0 && type !== 'password') && (
-                    <span className="text-red-500 text-xs" role="alert">
+            <div className={multiSelectConfig.errorMsgClass || 'mt-0'}>
+
+                {(errorMessage) && (
+                    <p className="text-xs text-red-500 mt-1" role="alert">
                         {errorMessage || `${label} is Required`}
-                    </span>
+                    </p>
                 )}
             </div>
         </div>

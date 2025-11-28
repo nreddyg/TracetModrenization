@@ -1944,11 +1944,6 @@
 //   );
 // }
 
-
-
-
-
-
 import React, { useId, useState, useEffect, useRef, forwardRef, useCallback } from "react";
 import { createPortal } from 'react-dom';
 import { Calendar, X, Info, ChevronLeft, ChevronRight } from "lucide-react";
@@ -2923,34 +2918,57 @@ const isDateDisabled = (date: Date): boolean => {
       />
     );
 
+    // const renderPopup = () => (
+    //   <div
+    //     ref={calendarRef}
+    //     className={cn(
+    //       "bg-white border border-gray-300 rounded-md shadow-lg",
+    //       "transition-all duration-200 ease-out",
+    //       dropdownClassName,
+    //       disabled && "pointer-events-none opacity-50"
+    //     )}
+    //     style={{
+    //       position: "fixed",
+    //       top: popupPosition.top,
+    //       left: popupPosition.left,
+    //       zIndex: 9999,
+    //       width: popupPosition.width,
+    //       maxHeight: popupPosition.maxHeight ? `${popupPosition.maxHeight}px` : "380px",
+    //     }}
+    //   >
+    //     <div
+    //       className=""
+    //       style={{ 
+    //         maxHeight: popupPosition.maxHeight ? `${popupPosition.maxHeight}px` : "380px"
+    //       }}
+    //     >
+    //       {renderCalendarContent()}
+    //     </div>
+    //   </div>
+    // );
+
     const renderPopup = () => (
-      <div
-        ref={calendarRef}
-        className={cn(
-          "bg-white border border-gray-300 rounded-md shadow-lg",
-          "transition-all duration-200 ease-out",
-          dropdownClassName,
-          disabled && "pointer-events-none opacity-50"
-        )}
-        style={{
-          position: "fixed",
-          top: popupPosition.top,
-          left: popupPosition.left,
-          zIndex: 9999,
-          width: popupPosition.width,
-          maxHeight: popupPosition.maxHeight ? `${popupPosition.maxHeight}px` : "380px",
-        }}
-      >
-        <div
-          className="overflow-y-auto overflow-x-hidden"
-          style={{ 
-            maxHeight: popupPosition.maxHeight ? `${popupPosition.maxHeight}px` : "380px"
-          }}
-        >
-          {renderCalendarContent()}
-        </div>
-      </div>
-    );
+  <div
+    ref={calendarRef}
+    className={cn(
+      "bg-white border border-gray-300 rounded-md shadow-lg overflow-y-auto",
+      "transition-all duration-200 ease-out",
+      dropdownClassName,
+      disabled && "pointer-events-none opacity-50"
+    )}
+    style={{
+      position: "fixed",
+      top: popupPosition.top,
+      left: popupPosition.left,
+      zIndex: 9999,
+      width: popupPosition.width,
+      maxHeight: popupPosition.maxHeight ? `${popupPosition.maxHeight}px` : "380px",
+    }}
+  >
+    {renderCalendarContent()}
+  </div>
+);
+
 
     return (
       <div className={cn("", wrapperClassName)} ref={datePickerRef}>
@@ -3053,14 +3071,14 @@ const isDateDisabled = (date: Date): boolean => {
                       width: '100%'
                     }}
                   >
-                    <div
+                    {/* <div
                       className="overflow-y-auto overflow-x-hidden"
                       style={{ 
                         maxHeight: popupPosition.maxHeight ? `${popupPosition.maxHeight}px` : '380px'
                       }}
-                    >
+                    > */}
                       {renderCalendarContent()}
-                    </div>
+                    {/* </div> */}
                   </div>
                 </div>
               )}

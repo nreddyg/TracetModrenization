@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { ReusableButton } from '@/components/ui/reusable-button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ReusableTable, { TablePermissions } from '@/components/ui/reusable-table';
-import { getAssetTansferColumns, getAssetTransferAssets } from '@/services/assetTransferAssetServices';
+import { getAssetTansferColumns, getAssetTransferAssets, postAssetTransferColumns } from '@/services/assetTransferAssetServices';
 import { setLoading } from '@/store/slices/projectsSlice';
 import { ColumnDef, FilterFn, VisibilityState } from '@tanstack/react-table';
 import { useNavigate } from 'react-router-dom';
@@ -49,7 +49,11 @@ interface HistoryColumn {
 const IntraTransfer = () => {
     const [activeTab, setActiveTab] = useState('assets');
     const companyId = useAppSelector(state => state.projects.companyId);
-    console.log("compny", companyId);
+            const companyName = useAppSelector(state => state.projects.companyName);
+            console.log(companyName,"53")
+    
+    const [columnVisibility, setColumnVisibility] = useState({});
+    console.log(columnVisibility,"53")
     const branch = useAppSelector(state => state.projects.branch) || '';
     const [dataSource, setDataSource] = useState([]);
     const [histDataSource, setHistDataSource] = useState([]);
@@ -57,7 +61,7 @@ const IntraTransfer = () => {
     // const [historyColumns, setHistoryColumns] = useState<ColumnDef<HistoryColumn>[]>(histColumns);
     const [selectedAssetIds, setSelectedAssetIds] = useState([]);
     const [selectedRecord, setSelectedRecord] = useState([])
-    console.log(selectedRecord,"31")
+    console.log(selectedRecord, "31")
     const navigate = useNavigate();
     console.log(selectedAssetIds, "29")
     const msg = useMessage()
@@ -72,6 +76,16 @@ const IntraTransfer = () => {
         canAdd: true,
         canManageColumns: true,
     };
+
+     //for download 
+  const newTab = (id) => {
+    if(id !== null){
+        console.log(id,"id")
+     window.open(`/assetTransReportPreview?transferId=${JSON.stringify(id)}`, "_blank",
+    'popup,width=850,height=500,left=300,top=500,resizable,scrollbars=yes,_blank'
+  );
+}
+}
 
     const histColumns = [
         { id: 'TransferInvoiceDeliveryChallanNo', accessorKey: "TransferInvoiceDeliveryChallanNo", header: "Transfer Invoice DeliveryChallanNo", },
@@ -104,11 +118,11 @@ const IntraTransfer = () => {
                         variant="text"
                         size="small"
                         title='download'
-                        onClick={null}
+                        onClick={()=>{newTab(row?.original?.AssetTransferId)}}
                     >
                         <Download className="h-4 w-4 text-blue-600" />
                     </ReusableButton>
-                     <ReusableButton
+                    <ReusableButton
                         variant="text"
                         size="small"
                         title='Edit'
@@ -291,9 +305,9 @@ const IntraTransfer = () => {
         dispatch(setLoading(true))
         await getAssetTansferColumns(branchname, compid).then(res => {
             if (res.success && res.data) {
+                console.log(res.data,"295")
                 const tempCols = buildColumnsFromApi(res.data)
-                console.log(tempCols, "tempCols")
-                // setColumnVisibility(tempCols.initialVisibility)
+                setColumnVisibility(tempCols.initialVisibility)
                 setColumns(tempCols.columns)
             } else {
                 // msg.warning(`${res.data.message}`)
@@ -322,14 +336,115 @@ const IntraTransfer = () => {
     }, []);
 
     const handleTransferClick = () => {
-        if (branch !== "All" && selectedRecord.length>0) {
+        if (branch !== "All" && selectedRecord.length > 0) {
             navigate('/layout/fixedassets/intratransfer/assettransferto', { state: { selectedRecord: selectedRecord, BranchName: branch } });
         } else if (branch === "All") {
             msg.warning("Please select branch in switch branch")
-        } else if (selectedRecord?.length===0) {
+        } else if (selectedRecord?.length === 0) {
             msg.warning("Please Select atleast one asset Record")
 
         }
+    }
+
+    const handlePostColumns =async () => {
+        let payload = {
+            "GridColumnsDetails": [
+                {
+                    "AssetCode": columnVisibility["Asset code"]?.toString(),
+                    "AssetName": columnVisibility["Asset Name"]?.toString(),
+                    "InternalAssetNo": columnVisibility["Customer Asset No"]?.toString(),
+                    "AssetBarCode": columnVisibility["Barcode No"]?.toString(),
+                    "AcquisitionTypeName": columnVisibility["Acquisition Type"]?.toString(),
+                    "DependencyTypeName": columnVisibility["Dependency Type"]?.toString(),
+                    "Category": columnVisibility["Main Category"]?.toString(),
+                    "SubCategory": columnVisibility['Sub Category']?.toString(),
+                    "ParentAssetCode": columnVisibility['Parent Asset Code']?.toString(),
+                    "WorkingStatus": columnVisibility['Working Status']?.toString(),
+                    "BarcodeOption": columnVisibility['Barcode Option']?.toString(),
+                    "AssetDescription": columnVisibility['Description']?.toString(),
+                    "PurchasedPrice": columnVisibility['Purchased Price (₹)']?.toString(),
+                    "PurchasedDate": columnVisibility['Purchased Date']?.toString(),
+                    "PlacedInService": columnVisibility['Placed In Service Date']?.toString(),
+                    "CapitalizationDate": columnVisibility['Capitalization Date']?.toString(),
+                    "ReceivedDate": columnVisibility['Received Date']?.toString(),
+                    "WarrentyUpto": columnVisibility['Warranty Upto']?.toString(),
+                    "BillNo": columnVisibility['Bill No']?.toString(),
+                    "BillDate": columnVisibility['Bill Date']?.toString(),
+                    "PONumber": columnVisibility['PO Number']?.toString(),
+                    "PODate": columnVisibility['PO Date']?.toString(),
+                    "Seller": columnVisibility['Seller']?.toString(),
+                    "Manufacture": columnVisibility['Manufacturer']?.toString(),
+                    "ModelNumber": columnVisibility['Model Number']?.toString(),
+                    "YearofManufacturer": columnVisibility['Year Of Manufacturer']?.toString(),
+                    "Capacity": columnVisibility['Capacity']?.toString(),
+                    "SerialNumber": columnVisibility['Serial Number']?.toString(),
+                    "AssetField1": columnVisibility['GL Account']?.toString(),
+                    "AssetField8": columnVisibility['HSN Code']?.toString(),
+                    // "BranchName": allLastLevelsDetailsFromStore ? columnVisibility[allLastLevelsDetailsFromStore["Branch"].toLowerCase().replaceAll(" ", "")]?.toString() : "",
+                    // "LocName_100": hierarchyLevels.length !=ocName_1
+                    // "LocName_102": hierarchyLevels.length !== 0 ? hierarchyLevels[1]["LevelName"][2] ? columnVisibility[hierarchyLevels[1]["LevelName"][2].LevelName.toLowerCase().replaceAll(" ", "")]?.toString() : "false" : '',
+                    // "LocName_103": hierarchyLevels.length !== 0 ? hierarchyLevels[1]["LevelName"][3] ? columnVisibility[hierarchyLevels[1]["LevelName"][3].LevelName.toLowerCase().replaceAll(" ", "")]?.toString() : "false" : '',
+                    // "LocName_104": hierarchyLevels.length !== 0 ? hierarchyLevels[1]["LevelName"][4] ? columnVisibility[hierarchyLevels[1]["LevelName"][4].LevelName.toLowerCase().replaceAll(" ", "")]?.toString() : "false" : '',
+                    // "DepName_100": hierarchyLevels.length !== 0 ? hierarchyLevels[3]["LevelName"][0] ? columnVisibility[hierarchyLevels[3]["LevelName"][0].LevelName.toLowerCase().replaceAll(" ", "")]?.toString() : "false" : '',
+                    // "DepName_101": hierarchyLevels.length !== 0 ? hierarchyLevels[3]["LevelName"][1] ? columnVisibility[hierarchyLevels[3]["LevelName"][1].LevelName.toLowerCase().replaceAll(" ", "")]?.toString() : "false" : '',
+                    // "DepName_102": hierarchyLevels.length !== 0 ? hierarchyLevels[3]["LevelName"][2] ? columnVisibility[hierarchyLevels[3]["LevelName"][2].LevelName.toLowerCase().replaceAll(" ", "")]?.toString() : "false" : '',
+                    // "DepName_103": hierarchyLevels.length !== 0 ? hierarchyLevels[3]["LevelName"][3] ? columnVisibility[hierarchyLevels[3]["LevelName"][3].LevelName.toLowerCase().replaceAll(" ", "")]?.toString() : "false" : '',
+                    // "DepName_104": hierarchyLevels.length !== 0 ? hierarchyLevels[3]["LevelName"][4] ? columnVisibility[hierarchyLevels[3]["LevelName"][4].LevelName.toLowerCase().replaceAll(" ", "")]?.toString() : "false" : '',
+                    // "CostName_100": hierarchyLevels.length !== 0 ? hierarchyLevels[2]["LevelName"][0] ? columnVisibility[hierarchyLevels[2]["LevelName"][0].LevelName.toLowerCase().replaceAll(" ", "")]?.toString() : "false" : '',
+                    // "CostName_101": hierarchyLevels.length !== 0 ? hierarchyLevels[2]["LevelName"][1] ? columnVisibility[hierarchyLevels[2]["LevelName"][1].LevelName.toLowerCase().replaceAll(" ", "")]?.toString() : "false" : '',
+                    // "CostName_102": hierarchyLevels.length !== 0 ? hierarchyLevels[2]["LevelName"][2] ? columnVisibility[hierarchyLevels[2]["LevelName"][2].LevelName.toLowerCase().replaceAll(" ", "")]?.toString() : "false" : '',
+                    // "CostName_103": hierarchyLevels.length !== 0 ? hierarchyLevels[2]["LevelName"][3] ? columnVisibility[hierarchyLevels[2]["LevelName"][3].LevelName.toLowerCase().replaceAll(" ", "")]?.toString() : "false" : '',
+                    // "CostName_104": hierarchyLevels.length !== 0 ? hierarchyLevels[2]["LevelName"][4] ? columnVisibility[hierarchyLevels[2]["LevelName"][4].LevelName.toLowerCase().replaceAll(" ", "")]?.toString() : "false" : '',
+                    "BranchName": 'false',
+                    "LocName_100": 'false',
+                    "LocName_101": "false",
+                    "LocName_102": "false",
+                    "LocName_103": "false",
+                    "LocName_104": "false",
+                    "DepName_100": "false",
+                    "DepName_101": "false",
+                    "DepName_102": "false",
+                    "DepName_103": "false",
+                    "DepName_104": "false",
+                    "CostName_100": "false",
+                    "CostName_101": "false",
+                    "CostName_102": "false",
+                    "CostName_103": "false",
+                    "CostName_104": "false",
+
+                    "AssetOwnerName": columnVisibility['Asset Owner']?.toString(),
+                    "IsDepriciationApplicable": columnVisibility["Depreciation Applicable"]?.toString(),
+                    "AssetLifeSpan": columnVisibility['"Asset Useful Life "']?.toString(),
+                    // "AssetLifeSpan":true,
+                    "SalvageValue": columnVisibility['Salvage Value (₹)']?.toString(),
+                    "IsForexApplicable": columnVisibility['Forex Applicable']?.toString(),
+                    "ExpLifeEndDate": columnVisibility['Expected Life EndDate']?.toString(),
+                    "LeasedVendorName": columnVisibility['Leased Vendor Name']?.toString(),
+                    "LeaseExpiryDate": columnVisibility['Lease Expiry Date']?.toString(),
+                    "PartyName": columnVisibility['Party Name']?.toString(),
+                    "ProposalNumber": columnVisibility['Proposal Number']?.toString(),
+                    "CreatedDate": columnVisibility['Created Date']?.toString(),
+                    "AssetOwner": columnVisibility['Asset Owner']?.toString(),
+                    "IsAssetTagable": columnVisibility['Is Asset Tagable']?.toString(),
+                }
+            ]
+
+          
+        }
+           dispatch(setLoading(true))
+          await postAssetTransferColumns(branch,companyId,payload).then((res)=>{
+            if(res.data && res.success){
+                console.log(res.data,"423")
+               if(res.data.status===true){
+                msg.success(res.data.message)
+               }
+               else{
+                msg.warning(res.data.mesage)
+               }
+            }
+          }).catch(err => { }).finally(() => {
+            dispatch(setLoading(false))
+        })
     }
     return (
         <ScrollArea className='h-full'>
@@ -368,6 +483,15 @@ const IntraTransfer = () => {
                                     </div>
 
                                     <TabsContent value="assets" className="">
+                                        <div className='mb-2'>
+                                        <ReusableButton variant="primary"
+                                            // icon={<Plus className="h-4 w-4" />}
+                                            onClick={handlePostColumns}
+                                            className='btn-submit-style'
+                                        >
+                                            Apply As Default grid Columns
+                                        </ReusableButton>
+                                        </div>
                                         <ReusableTable
                                             data={dataSource}
                                             columns={columns}
@@ -381,7 +505,10 @@ const IntraTransfer = () => {
                                             title=""
                                             // onRefresh={handleRefresh}
                                             enableSearch={false}
-                                            enableColumnVisibility={true}
+                                            // enableColumnVisibility={true}
+                                            enableColumnVisibility
+                                            columnVisibility={columnVisibility} // 👈 pass down
+                                            onColumnVisibilityChange={setColumnVisibility}
                                             enablePagination={true}
                                             enableSorting={true}
                                             enableFiltering={true}

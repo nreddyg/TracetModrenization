@@ -280,6 +280,8 @@ export const URL_ASSET_TRANSFER_LIST="/api/FixedAssetAPI/GetAssetsTransferList";
 export const URL_BASIC_SEARCH = `/api/FixedAssetAPI/GetAssetTransferDetailsListByBasicSearch`;
 export const URL_FILTER_SEARCH = `/api/FixedAssetAPI/GetManageAssetTransferListByFilter`;
 export const URL_GRID_COLS = `/api/FixedAssetAPI/GetAllGridColumnsList`;
+export const URL_POST_ASSET_TRANSFER_COLUMNS=`/api/FixedAssetAPI/SaveAllGridColumnsList`;
+export const URL_GET_REPORT_LIST=`/api/FixedAssetAPI/GetAssetsTransferHistoryDownload`;
 
 //Fixed Assets Module
 //Lookups
@@ -305,6 +307,11 @@ export const URL_POST_UPDATE_ASSET_DETAILS_WITH_ATTRIBUTES='/api/FixedAssetAPI/U
 export const URL_POST_UPDATE_ASSET_DETAILS='/api/FixedAssetAPI/UpdateAssetDetails';
 export const URL_POST_ADD_ASSET_DETAILS='/api/FixedAssetAPI/AddAssetDetails';
 export const URL_POST_ADD_ASSET_DETAILS_WITH_ATTRIBUTES='/api/FixedAssetAPI/AddAssetDetailsWithAttribute';
+
+// Change Asset Category
+export const URL_GET_CHANGE_ASSET_CATEGORY='/api/FixedAssetAPI/GetChangeInAssetCategoryList';
+export const URL_GET_COLUMNS_FOR_CHANGE_ASSET_CATEGORY='/api/FixedAssetAPI/GetChangeInAssetCategoryGridColumnsList';
+
 
 // Asset Transfer to
 export const URL_GET_ASSET_TRANSFER_HIST_LIST = `/api/FixedAssetAPI/GetAssetsTransferHistoryList`;

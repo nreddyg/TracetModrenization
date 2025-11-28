@@ -74,8 +74,8 @@ const MyWorkbench = () => {
         </Badge>
       ),
     },
-    { accessorKey: "AssignedTo", header: "Assigned To" },
-    { accessorKey: "ServiceRequestType", header: "Service Request Type" },
+    { accessorKey: "AssignedTo", header: "Assigned To"},
+    { accessorKey: "ServiceRequestType", header: "Service Request Type"},
     { accessorKey: "RequestedBy", header: "Requested By" },
     {
       accessorKey: "Priority", header: "Priority",
